@@ -1667,10 +1667,14 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                           <span className="text-[10px] text-slate-400 block font-medium">Phạm vi địa lý</span>
                           <span className="font-extrabold text-slate-900 block truncate">{project.coverageScope || 'Toàn quốc'}</span>
                         </div>
-                        {project.monthlyTripsOrVolume ? (
+                        {project.tripCount || project.monthlyTripsOrVolume ? (
                           <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
-                            <span className="text-[10px] text-slate-400 block font-medium">Sản lượng dự kiến</span>
-                            <span className="font-extrabold text-slate-900 block truncate">{project.monthlyTripsOrVolume}</span>
+                            <span className="text-[10px] text-slate-400 block font-medium">Sản lượng chuyến</span>
+                            <span className="font-extrabold text-slate-900 block truncate">
+                              {project.tripCount
+                                ? `${project.tripCount} ${project.frequencyUnit || 'Chuyến / Tháng'}`
+                                : project.monthlyTripsOrVolume}
+                            </span>
                           </div>
                         ) : null}
                       </>

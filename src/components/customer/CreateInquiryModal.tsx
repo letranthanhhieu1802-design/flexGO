@@ -2143,6 +2143,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                 setOrigin={setOrigin}
                 destination={destination}
                 setDestination={setDestination}
+                cargoClassification={cargoClassification}
               />
             )}
           </div>

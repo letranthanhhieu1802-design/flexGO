@@ -67,7 +67,28 @@ interface ProjectInquiryFormProps {
   setOrigin: (val: string) => void;
   destination: string;
   setDestination: (val: string) => void;
+  cargoClassification?: 'General' | 'Reefer' | 'Hazmat';
 }
+
+const GENERAL_FLEET_ITEMS = [
+  { id: 'fleet-light', label: '🚚 Xe tải nhẹ 1.0T – 2.5T (Thùng kín/bạt - Giao nội đô, phố cấm giờ)' },
+  { id: 'fleet-medium', label: '🚚 Xe tải trung 3.5T – 8.0T (Thùng kín/bạt - Giao vệ tinh liên tỉnh)' },
+  { id: 'fleet-heavy', label: '🚛 Xe tải nặng 15.0T (3 chân) – 18.0T (4 chân) (Tuyến trục chính Linehaul)' },
+  { id: 'fleet-cont', label: '🚛 Đầu kéo Sơ-mi Rơ-moóc Container 40ft (Đường dài liên miền)' },
+];
+
+const REEFER_FLEET_ITEMS = [
+  { id: 'fleet-reefer-light', label: '❄️ Xe tải lạnh nhỏ 1.0T – 2.5T (Nhiệt độ kiểm soát - Giao siêu thị nội đô)' },
+  { id: 'fleet-reefer-medium', label: '❄️ Xe tải lạnh trung 3.5T – 8.0T (Nhiệt độ kiểm soát - Giao kho/đại lý tỉnh)' },
+  { id: 'fleet-reefer-heavy', label: '❄️ Xe tải lạnh nặng 14.0T – 15.0T (3 chân lạnh - Tuyến trục chính)' },
+  { id: 'fleet-reefer-cont', label: '❄️ Đầu kéo Container Lạnh 40RF / 20RF (Kèm máy phát điện Genset liên tục)' },
+];
+
+const HAZMAT_FLEET_ITEMS = [
+  { id: 'fleet-hazmat-truck', label: '⚠️ Xe tải chuyên dụng chở hóa chất DG (Có giấy phép PCCC & phù hiệu DG)' },
+  { id: 'fleet-hazmat-heavy', label: '⚠️ Xe tải nặng / Đầu kéo cont chở hóa chất (Kèm xích tiếp địa chống tĩnh điện)' },
+  { id: 'fleet-hazmat-tanker', label: '⚠️ Xe bồn xitéc chuyên dụng chở hóa chất lỏng (Chemical Tanker)' },
+];
 
 export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
   specs,
@@ -76,6 +97,7 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
   setOrigin,
   destination,
   setDestination,
+  cargoClassification = 'General',
 }) => {
   const updateSpec = <K extends keyof ProjectInquirySpecs>(key: K, value: ProjectInquirySpecs[K]) => {
     onChange({
@@ -85,6 +107,13 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
   };
 
   const projectCategory = specs.projectCategory || 'DISTRIBUTION';
+
+  // Determine available fleet items based on Cargo Classification
+  const activeFleetItems = useMemo(() => {
+    if (cargoClassification === 'Reefer') return REEFER_FLEET_ITEMS;
+    if (cargoClassification === 'Hazmat') return HAZMAT_FLEET_ITEMS;
+    return GENERAL_FLEET_ITEMS;
+  }, [cargoClassification]);
 
   // Origins for Distribution
   const originWarehouses = useMemo(() => {
@@ -237,8 +266,8 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
               <Store className="w-4 h-4 text-indigo-600" />
               <span>Thông Số Dự Án Phân Phối Mạng Lưới (Distribution Specs)</span>
             </span>
-            <span className="text-[10px] text-slate-500 font-bold bg-white px-2 py-0.5 rounded border border-indigo-200">
-              Dedicated Distribution
+            <span className="text-[10px] text-indigo-700 font-bold bg-indigo-100/70 px-2 py-0.5 rounded border border-indigo-200">
+              Nhóm hàng: {cargoClassification === 'Reefer' ? '❄️ Hàng Lạnh' : cargoClassification === 'Hazmat' ? '⚠️ Hàng Nguy Hiểm' : '📦 Hàng Thường'}
             </span>
           </div>
 
@@ -331,25 +360,25 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
             )}
           </div>
 
-          {/* Fleet Structure Requirements */}
+          {/* Fleet Structure Requirements (Bound to Cargo Classification) */}
           <div className="space-y-2 pt-1 border-t border-indigo-100/60">
-            <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
-              <Truck className="w-3.5 h-3.5 text-indigo-600" />
-              <span>Cơ Cấu Đội Xe Vận Tải Yêu Cầu Cho Dự Án (Chọn các loại xe cần thiết) *</span>
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                <Truck className="w-3.5 h-3.5 text-indigo-600" />
+                <span>Cơ Cấu Đội Xe Vận Tải Yêu Cầu Cho Dự Án (Chọn các loại xe cần thiết) *</span>
+              </label>
+              <span className="text-[10px] text-slate-500 font-normal">
+                Theo nhóm: {cargoClassification === 'Reefer' ? 'Xe đông lạnh' : cargoClassification === 'Hazmat' ? 'Xe hóa chất DG' : 'Xe tải bách hóa'}
+              </span>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {[
-                { id: 'fleet-light', label: '🚚 Xe tải nhỏ 1.25T - 2.5T (Giao nội đô / Phố cấm giờ)' },
-                { id: 'fleet-medium', label: '🚚 Xe tải trung 5.0T - 8.0T (Tuyến vệ tinh liên tỉnh)' },
-                { id: 'fleet-heavy', label: '🚛 Xe tải nặng 15T / Đầu kéo Cont (Tuyến trục chính Linehaul)' },
-                { id: 'fleet-reefer', label: '❄️ Xe tải lạnh / Cont lạnh (Bảo quản nhiệt độ kiểm soát)' },
-              ].map((fleet) => {
+              {activeFleetItems.map((fleet) => {
                 const isChecked = ((specs.fleetRequirements || []) as string[]).includes(fleet.label);
                 return (
                   <div
                     key={fleet.id}
                     onClick={() => toggleArrayItem('fleetRequirements', fleet.label)}
-                    className={`p-2 rounded-xl border text-xs cursor-pointer flex items-center gap-2 transition-all ${
+                    className={`p-2.5 rounded-xl border text-xs cursor-pointer flex items-center gap-2 transition-all ${
                       isChecked
                         ? 'border-indigo-500 bg-white ring-1 ring-indigo-500/30 font-bold text-indigo-950 shadow-2xs'
                         : 'border-slate-200 bg-white/70 text-slate-600 hover:border-slate-300'
@@ -361,39 +390,53 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
                       readOnly
                       className="rounded border-slate-300 text-indigo-600 focus:ring-0 cursor-pointer"
                     />
-                    <span>{fleet.label}</span>
+                    <span className="leading-snug">{fleet.label}</span>
                   </div>
                 );
               })}
             </div>
           </div>
 
-          {/* Monthly Trips / Volume */}
+          {/* Structured Volume & Frequency (Aligned with Road Trucking Pattern) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 border-t border-indigo-100/60">
             <div>
               <label className="block text-xs font-bold text-slate-800 mb-1">
-                Sản Lượng Vận Tải Dự Kiến (Estimated Monthly Volume) *
+                1. Số Lượng Chuyến Cần Thuê *
               </label>
               <input
-                type="text"
-                value={specs.monthlyTripsOrVolume || ''}
-                onChange={(e) => updateSpec('monthlyTripsOrVolume', e.target.value)}
-                placeholder="VD: 150 - 200 chuyến / tháng (hoặc 500 Tấn / tháng)"
-                className="w-full px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-bold text-slate-900 shadow-2xs"
+                type="number"
+                min={1}
+                required
+                value={specs.tripCount ?? (specs.monthlyTripsOrVolume ? parseInt(specs.monthlyTripsOrVolume, 10) || 150 : 150)}
+                onChange={(e) => {
+                  const val = e.target.value ? parseInt(e.target.value, 10) : undefined;
+                  updateSpec('tripCount', val);
+                  updateSpec('monthlyTripsOrVolume', val ? `${val} ${specs.frequencyUnit || 'Tháng (Chuyến / Tháng)'}` : '');
+                }}
+                placeholder="VD: 150"
+                className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-bold text-slate-900 shadow-2xs"
               />
             </div>
 
             <div>
               <label className="block text-xs font-bold text-slate-800 mb-1">
-                Kế Hoạch Thời Gian Triển Khai (Expected Start Date)
+                2. Đơn Vị (Tần Suất Vận Chuyển) *
               </label>
-              <input
-                type="text"
-                value={specs.expectedStartDate || ''}
-                onChange={(e) => updateSpec('expectedStartDate', e.target.value)}
-                placeholder="VD: Bắt đầu từ đầu Quý tới / 01/10/2026..."
-                className="w-full px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-medium text-slate-900 shadow-2xs"
-              />
+              <select
+                value={specs.frequencyUnit || 'Tháng (Chuyến / Tháng)'}
+                onChange={(e) => {
+                  updateSpec('frequencyUnit', e.target.value);
+                  const count = specs.tripCount ?? 150;
+                  updateSpec('monthlyTripsOrVolume', `${count} ${e.target.value}`);
+                }}
+                className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-bold text-slate-900 cursor-pointer shadow-2xs"
+              >
+                <option value="Tháng (Chuyến / Tháng)">📅 Tháng (Chuyến / Tháng)</option>
+                <option value="Tuần (Chuyến / Tuần)">📅 Tuần (Chuyến / Tuần)</option>
+                <option value="Ngày (Chuyến / Ngày)">📅 Ngày (Chuyến / Ngày)</option>
+                <option value="Quý (Chuyến / Quý)">📅 Quý (Chuyến / Quý)</option>
+                <option value="Năm (Chuyến / Năm)">📅 Năm (Chuyến / Năm)</option>
+              </select>
             </div>
           </div>
         </div>

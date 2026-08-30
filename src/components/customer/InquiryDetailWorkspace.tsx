@@ -1126,8 +1126,12 @@ export const InquiryDetailWorkspace: React.FC<InquiryDetailWorkspaceProps> = ({
                             <span className="font-bold text-slate-800">{inquiry.serviceSpecs.project.coverageScope || 'Toàn quốc'}</span>
                           </div>
                           <div>
-                            <span className="text-slate-400 block font-semibold">Sản lượng dự kiến</span>
-                            <span className="font-bold text-slate-800">{inquiry.serviceSpecs.project.monthlyTripsOrVolume || '150 chuyến / tháng'}</span>
+                            <span className="text-slate-400 block font-semibold">Sản lượng chuyến</span>
+                            <span className="font-bold text-slate-800">
+                              {inquiry.serviceSpecs.project.tripCount
+                                ? `${inquiry.serviceSpecs.project.tripCount} ${inquiry.serviceSpecs.project.frequencyUnit || 'Chuyến / Tháng'}`
+                                : inquiry.serviceSpecs.project.monthlyTripsOrVolume || '150 Chuyến / Tháng'}
+                            </span>
                           </div>
                         </>
                       )}

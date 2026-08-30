@@ -390,6 +390,8 @@ export interface ProjectInquirySpecs {
   originWarehouses?: string[];
   coverageScope?: 'Toàn quốc (Bắc - Trung - Nam)' | 'Miền Nam & ĐBSCL' | 'Miền Bắc & Vệ tinh' | 'Miền Trung & Tây Nguyên';
   fleetRequirements?: string[];
+  tripCount?: number;
+  frequencyUnit?: string;
   monthlyTripsOrVolume?: string;
   keyKPIRequirements?: string[];
 
