@@ -31,7 +31,10 @@ import {
   ShieldCheck,
   Scale,
   Box,
-  Tag
+  Tag,
+  Droplets,
+  Flame,
+  CheckCircle2
 } from 'lucide-react';
 import { 
   ServiceType, 
@@ -1371,8 +1374,17 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5 text-xs font-bold text-cyan-950">
                     <ThermometerSnowflake className="w-4 h-4 text-cyan-700" />
-                    <span>Yêu Cầu Kiểm Soát Nhiệt Độ & Bảo Quản Lạnh *</span>
+                    <span>
+                      {serviceType === 'Warehousing'
+                        ? 'Yêu Cầu Kiểm Soát Nhiệt Độ, Độ Ẩm & Bảo Quản Kho Lạnh *'
+                        : 'Yêu Cầu Kiểm Soát Nhiệt Độ & Bảo Quản Lạnh *'}
+                    </span>
                   </div>
+                  {serviceType === 'Warehousing' && (
+                    <span className="text-[10px] font-bold text-cyan-800 bg-cyan-100/80 px-2 py-0.5 rounded-md border border-cyan-200">
+                      Cold Storage Product Specs
+                    </span>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
@@ -1391,7 +1403,6 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                         if (opt && opt.id !== 'custom') {
                           setTemperatureRequirement(opt.value);
                         } else {
-                          // keep current text or empty for user to type
                           if (!temperatureRequirement) setTemperatureRequirement('');
                         }
                       }}
@@ -1420,6 +1431,102 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                     />
                   </div>
                 </div>
+
+                {/* Additional Cold Storage Product Parameters (Humidity & Inbound State) */}
+                {serviceType === 'Warehousing' && (
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 pt-1 border-t border-cyan-200/60">
+                    {/* 1. Humidity Control */}
+                    <div className="lg:col-span-6">
+                      <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1">
+                        <Droplets className="w-3.5 h-3.5 text-cyan-600" />
+                        <span>Yêu Cầu Kiểm Soát Độ Ẩm (Relative Humidity - % RH)</span>
+                      </label>
+                      <select
+                        value={warehousingSpecs.humidityRequirement || 'Không yêu cầu kiểm soát độ ẩm đặc biệt (Chuẩn kho lạnh/mát)'}
+                        onChange={(e) => setWarehousingSpecs({ ...warehousingSpecs, humidityRequirement: e.target.value })}
+                        className="w-full px-3.5 py-2.5 text-xs bg-white border border-cyan-300 rounded-xl font-bold text-cyan-950 focus:border-cyan-500 shadow-2xs cursor-pointer"
+                      >
+                        <option value="Không yêu cầu kiểm soát độ ẩm đặc biệt (Chuẩn kho lạnh/mát)">
+                          ❄️ Không yêu cầu độ ẩm đặc biệt (Chuẩn kho đông/mát thông thường)
+                        </option>
+                        <option value="Độ ẩm cao 85% - 95% RH (Chống héo/mất nước rau củ quả tươi)">
+                          🥬 Độ ẩm cao 85% - 95% RH (Rau củ quả tươi, trái cây, hoa tươi)
+                        </option>
+                        <option value="Khống chế độ ẩm khô < 60% RH (Hạt giống, socola, bánh kẹo, Dược phẩm GDP)">
+                          💊 Khống chế độ ẩm khô &lt; 60% RH (Hạt giống, socola, Dược phẩm GDP)
+                        </option>
+                        <option value="Tùy chỉnh riêng (% RH)">
+                          ⚙️ Tùy chỉnh mức độ ẩm riêng...
+                        </option>
+                      </select>
+
+                      {warehousingSpecs.humidityRequirement === 'Tùy chỉnh riêng (% RH)' && (
+                        <div className="mt-2">
+                          <input
+                            type="text"
+                            value={warehousingSpecs.customHumidity || ''}
+                            onChange={(e) => setWarehousingSpecs({ ...warehousingSpecs, customHumidity: e.target.value })}
+                            placeholder="VD: Duy trì ổn định 50% - 60% RH"
+                            className="w-full px-3.5 py-2 text-xs bg-white border border-cyan-300 rounded-xl focus:border-cyan-500 font-semibold text-slate-800"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* 2. Inbound Cargo Temperature State */}
+                    <div className="lg:col-span-6">
+                      <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1">
+                        <Flame className="w-3.5 h-3.5 text-amber-500" />
+                        <span>Trạng Thái Nhiệt Độ Hàng Khi Đưa Vào Kho *</span>
+                      </label>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setWarehousingSpecs({ ...warehousingSpecs, inboundTemperatureState: 'PRE_COOLED' })}
+                          className={`p-2.5 rounded-xl border text-left cursor-pointer transition-all ${
+                            warehousingSpecs.inboundTemperatureState !== 'NEED_COOLING'
+                              ? 'border-cyan-600 bg-white ring-2 ring-cyan-500/20 text-cyan-950 font-bold shadow-2xs'
+                              : 'border-slate-200 bg-white/70 text-slate-600 hover:border-slate-300'
+                          }`}
+                        >
+                          <div className="flex items-center gap-1.5">
+                            <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center border ${
+                              warehousingSpecs.inboundTemperatureState !== 'NEED_COOLING' ? 'border-cyan-600 bg-cyan-600 text-white' : 'border-slate-300'
+                            }`}>
+                              {warehousingSpecs.inboundTemperatureState !== 'NEED_COOLING' && <CheckCircle2 className="w-2.5 h-2.5" />}
+                            </span>
+                            <span className="text-xs font-bold">Hàng đã đạt chuẩn</span>
+                          </div>
+                          <p className="text-[10px] text-slate-500 mt-1 pl-5 font-normal">
+                            Đã hạ nhiệt/cấp đông trước (Pre-cooled).
+                          </p>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setWarehousingSpecs({ ...warehousingSpecs, inboundTemperatureState: 'NEED_COOLING' })}
+                          className={`p-2.5 rounded-xl border text-left cursor-pointer transition-all ${
+                            warehousingSpecs.inboundTemperatureState === 'NEED_COOLING'
+                              ? 'border-amber-600 bg-amber-50/80 ring-2 ring-amber-500/20 text-amber-950 font-bold shadow-2xs'
+                              : 'border-slate-200 bg-white/70 text-slate-600 hover:border-slate-300'
+                          }`}
+                        >
+                          <div className="flex items-center gap-1.5">
+                            <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center border ${
+                              warehousingSpecs.inboundTemperatureState === 'NEED_COOLING' ? 'border-amber-600 bg-amber-600 text-white' : 'border-slate-300'
+                            }`}>
+                              {warehousingSpecs.inboundTemperatureState === 'NEED_COOLING' && <CheckCircle2 className="w-2.5 h-2.5" />}
+                            </span>
+                            <span className="text-xs font-bold">Cần cấp đông tại kho</span>
+                          </div>
+                          <p className="text-[10px] text-slate-500 mt-1 pl-5 font-normal">
+                            Hàng tươi mới cần cấp đông gió.
+                          </p>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Continuous Genset Checkbox - Only for transport services */}
                 {serviceType !== 'Warehousing' && (
