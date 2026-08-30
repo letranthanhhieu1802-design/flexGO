@@ -961,6 +961,26 @@ export const InquiryDetailWorkspace: React.FC<InquiryDetailWorkspaceProps> = ({
                           : `${inquiry.serviceSpecs.crossBorder.vehicleCount || 1} ${inquiry.serviceSpecs.crossBorder.frequencyUnit || 'Chuyến'}`}
                       </span>
                     </div>
+                    {inquiry.serviceSpecs.crossBorder.pickupLocations && inquiry.serviceSpecs.crossBorder.pickupLocations.length > 1 ? (
+                      <div className="col-span-2 sm:col-span-3 pt-1 border-t border-orange-100/80">
+                        <span className="text-slate-400 block font-semibold">Lộ trình lấy hàng ({inquiry.serviceSpecs.crossBorder.pickupLocations.length} Điểm lấy)</span>
+                        <ul className="text-xs text-slate-800 list-disc list-inside mt-0.5 space-y-0.5 font-medium">
+                          {inquiry.serviceSpecs.crossBorder.pickupLocations.map((p, i) => (
+                            <li key={i}>{p}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null}
+                    {inquiry.serviceSpecs.crossBorder.deliveryLocations && inquiry.serviceSpecs.crossBorder.deliveryLocations.length > 1 ? (
+                      <div className="col-span-2 sm:col-span-3 pt-1 border-t border-orange-100/80">
+                        <span className="text-slate-400 block font-semibold">Lộ trình giao hàng ({inquiry.serviceSpecs.crossBorder.deliveryLocations.length} Điểm giao / Multi-drop)</span>
+                        <ul className="text-xs text-slate-800 list-disc list-inside mt-0.5 space-y-0.5 font-medium">
+                          {inquiry.serviceSpecs.crossBorder.deliveryLocations.map((d, i) => (
+                            <li key={i}>{d}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null}
                     {inquiry.serviceSpecs.crossBorder.leadtimeSLA ? (
                       <div className="col-span-2 sm:col-span-3 pt-1 border-t border-orange-100/80">
                         <span className="text-slate-400 block font-semibold">Thời gian giao hàng (Leadtime SLA)</span>

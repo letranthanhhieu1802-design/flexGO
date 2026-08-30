@@ -1478,6 +1478,26 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       </div>
                     ) : null
                   )}
+                  {crossBorder.pickupLocations && crossBorder.pickupLocations.length > 1 ? (
+                    <div className="bg-white p-2.5 rounded-xl border border-orange-100 shadow-2xs col-span-2 sm:col-span-4">
+                      <span className="text-[10px] text-slate-400 block font-medium">Lộ trình lấy hàng đa điểm ({crossBorder.pickupLocations.length} Điểm lấy)</span>
+                      <ul className="text-xs text-slate-800 list-disc list-inside mt-0.5 space-y-0.5 font-semibold">
+                        {crossBorder.pickupLocations.map((p, i) => (
+                          <li key={i}>{p}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                  {crossBorder.deliveryLocations && crossBorder.deliveryLocations.length > 1 ? (
+                    <div className="bg-white p-2.5 rounded-xl border border-rose-100 shadow-2xs col-span-2 sm:col-span-4">
+                      <span className="text-[10px] text-slate-400 block font-medium">Lộ trình giao hàng đa điểm ({crossBorder.deliveryLocations.length} Điểm giao / Multi-drop)</span>
+                      <ul className="text-xs text-slate-800 list-disc list-inside mt-0.5 space-y-0.5 font-semibold">
+                        {crossBorder.deliveryLocations.map((d, i) => (
+                          <li key={i}>{d}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
                   {crossBorder.leadtimeSLA ? (
                     <div className="bg-orange-50/80 p-2.5 rounded-xl border border-orange-200 shadow-2xs col-span-2 sm:col-span-4">
                       <span className="text-[10px] text-orange-700 block font-bold">⏱️ Thời gian giao hàng (Leadtime SLA)</span>

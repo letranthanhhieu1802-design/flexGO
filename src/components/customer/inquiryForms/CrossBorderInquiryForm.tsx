@@ -1,5 +1,5 @@
-import React from 'react';
-import { Globe, MapPin, Flag, ArrowLeftRight, Truck, Package, ShieldCheck, Clock, FileText, Anchor, Sparkles } from 'lucide-react';
+import React, { useMemo } from 'react';
+import { Globe, MapPin, Flag, ArrowLeftRight, Truck, Package, ShieldCheck, Clock, FileText, Anchor, Sparkles, Plus, Trash2 } from 'lucide-react';
 import { CrossBorderInquirySpecs } from '../../../types';
 import { VASItemDef } from './VASSection';
 
@@ -116,6 +116,96 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
   };
 
   const isFTL = specs.loadType !== 'LTL (Ghép hàng lẻ)';
+  const isLTL = specs.loadType === 'LTL (Ghép hàng lẻ)';
+
+  const pickupLocations = useMemo(() => {
+    if (specs.pickupLocations && specs.pickupLocations.length > 0) {
+      return isLTL ? [specs.pickupLocations[0]] : specs.pickupLocations;
+    }
+    return [origin || ''];
+  }, [specs.pickupLocations, origin, isLTL]);
+
+  const deliveryLocations = useMemo(() => {
+    if (specs.deliveryLocations && specs.deliveryLocations.length > 0) {
+      return isLTL ? [specs.deliveryLocations[0]] : specs.deliveryLocations;
+    }
+    return [destination || ''];
+  }, [specs.deliveryLocations, destination, isLTL]);
+
+  const handlePickupLocationChange = (index: number, val: string) => {
+    const newLocations = [...pickupLocations];
+    newLocations[index] = val;
+    onChange({
+      ...specs,
+      pickupLocations: newLocations,
+      pickupPointsCount: newLocations.length,
+    });
+    if (index === 0) {
+      setOrigin(val);
+    }
+  };
+
+  const addPickupLocation = () => {
+    if (isLTL || pickupLocations.length >= 5) return;
+    const newLocations = [...pickupLocations, ''];
+    onChange({
+      ...specs,
+      pickupLocations: newLocations,
+      pickupPointsCount: newLocations.length,
+    });
+  };
+
+  const removePickupLocation = (index: number) => {
+    if (isLTL || pickupLocations.length <= 1) return;
+    const newLocations = pickupLocations.filter((_, i) => i !== index);
+    onChange({
+      ...specs,
+      pickupLocations: newLocations,
+      pickupPointsCount: newLocations.length,
+    });
+    if (newLocations[0] !== undefined) {
+      setOrigin(newLocations[0]);
+    }
+  };
+
+  const handleDeliveryLocationChange = (index: number, val: string) => {
+    const newLocations = [...deliveryLocations];
+    newLocations[index] = val;
+    onChange({
+      ...specs,
+      deliveryLocations: newLocations,
+      deliveryPointsCount: newLocations.length,
+      multiDropPoints: newLocations.length,
+    });
+    if (index === 0) {
+      setDestination(val);
+    }
+  };
+
+  const addDeliveryLocation = () => {
+    if (isLTL || deliveryLocations.length >= 5) return;
+    const newLocations = [...deliveryLocations, ''];
+    onChange({
+      ...specs,
+      deliveryLocations: newLocations,
+      deliveryPointsCount: newLocations.length,
+      multiDropPoints: newLocations.length,
+    });
+  };
+
+  const removeDeliveryLocation = (index: number) => {
+    if (isLTL || deliveryLocations.length <= 1) return;
+    const newLocations = deliveryLocations.filter((_, i) => i !== index);
+    onChange({
+      ...specs,
+      deliveryLocations: newLocations,
+      deliveryPointsCount: newLocations.length,
+      multiDropPoints: newLocations.length,
+    });
+    if (newLocations[0] !== undefined) {
+      setDestination(newLocations[0]);
+    }
+  };
 
   return (
     <div className="space-y-4 animate-in fade-in duration-200">
@@ -150,12 +240,12 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
             {
               type: 'FTL (Nguyên chuyến / Nguyên cont)',
               title: '🚚 FTL - Bao Nguyên Xe / Nguyên Cont (Full Truckload)',
-              desc: 'Thuê trọn cont/xe, bốc dỡ linh hoạt, giao thẳng không sang xe hoặc sang tải cả xe.',
+              desc: 'Thuê trọn cont/xe, bốc dỡ linh hoạt, giao thẳng không sang xe hoặc sang tải cả xe. Hỗ trợ đa điểm lấy/giao.',
             },
             {
               type: 'LTL (Ghép hàng lẻ)',
               title: '📦 LTL - Ghép Hàng Lẻ Xuyên Biên Giới (Less-Than-Truckload)',
-              desc: 'Tính cước theo CBM/Kg quy đổi. Gom hàng lẻ qua kho phân phối biên giới.',
+              desc: 'Tính cước theo CBM/Kg quy đổi. Cố định 1 điểm lấy - 1 điểm giao qua kho phân phối.',
             },
           ].map((item) => {
             const isSelected = (specs.loadType || 'FTL (Nguyên chuyến / Nguyên cont)') === item.type;
@@ -163,7 +253,20 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
               <button
                 type="button"
                 key={item.type}
-                onClick={() => updateSpec('loadType', item.type as any)}
+                onClick={() => {
+                  updateSpec('loadType', item.type as any);
+                  if (item.type === 'LTL (Ghép hàng lẻ)') {
+                    onChange({
+                      ...specs,
+                      loadType: item.type as any,
+                      pickupPointsCount: 1,
+                      pickupLocations: [pickupLocations[0] || origin || ''],
+                      deliveryPointsCount: 1,
+                      deliveryLocations: [deliveryLocations[0] || destination || ''],
+                      multiDropPoints: 1,
+                    });
+                  }
+                }}
                 className={`p-3 rounded-2xl border text-left cursor-pointer transition-all ${
                   isSelected
                     ? 'border-orange-600 bg-orange-50/80 ring-2 ring-orange-500/25 font-bold text-orange-950 shadow-2xs'
@@ -298,62 +401,144 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
         </select>
       </div>
 
-      {/* 4. Origin & Destination Terms & Addresses */}
+      {/* 4. Origin & Destination Terms & Multi-stop Addresses */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-        <div className="p-3 bg-slate-50/70 border border-slate-200/80 rounded-2xl space-y-2">
+        {/* Origin / Pickup Points */}
+        <div className="p-3 bg-slate-50/70 border border-slate-200/80 rounded-2xl space-y-2.5">
           <div className="flex items-center justify-between">
             <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
               <MapPin className="w-3.5 h-3.5 text-orange-600" />
-              <span>5. Điểm Lấy Hàng (Origin) *</span>
+              <span>5. Điểm Lấy Hàng (Pickup) *</span>
             </label>
-            <select
-              value={specs.originTerm || 'Door (Lấy tận nơi)'}
-              onChange={(e) => updateSpec('originTerm', e.target.value as any)}
-              className="text-[11px] px-2 py-0.5 bg-white border border-slate-300 rounded-md font-bold text-orange-950 cursor-pointer"
-            >
-              <option value="Door (Lấy tận nơi)">🏠 Door (Lấy tận nơi)</option>
-              <option value="Border (Giao tại bãi cửa khẩu)">🚩 Border (Tại bãi cửa khẩu)</option>
-            </select>
+            <div className="flex items-center gap-1.5">
+              <select
+                value={specs.originTerm || 'Door (Lấy tận nơi)'}
+                onChange={(e) => updateSpec('originTerm', e.target.value as any)}
+                className="text-[11px] px-2 py-0.5 bg-white border border-slate-300 rounded-md font-bold text-orange-950 cursor-pointer"
+              >
+                <option value="Door (Lấy tận nơi)">🏠 Door (Lấy tận nơi)</option>
+                <option value="Border (Giao tại bãi cửa khẩu)">🚩 Border (Tại bãi cửa khẩu)</option>
+              </select>
+              {isFTL && (
+                <span className="text-[10px] text-slate-500 font-bold bg-slate-200/80 px-1.5 py-0.5 rounded">
+                  {pickupLocations.length} Điểm
+                </span>
+              )}
+            </div>
           </div>
-          <input
-            type="text"
-            required
-            value={origin}
-            onChange={(e) => {
-              setOrigin(e.target.value);
-              updateSpec('originCity', e.target.value);
-            }}
-            placeholder="VD: Kho VSIP 1, TP. Thuận An, Bình Dương, Việt Nam"
-            className="w-full px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-medium shadow-2xs"
-          />
+
+          <div className="space-y-2">
+            {pickupLocations.map((loc, idx) => (
+              <div key={idx} className="space-y-1">
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="font-semibold text-slate-600 flex items-center gap-1">
+                    <span className="w-4 h-4 rounded-full bg-orange-100 text-orange-800 text-[10px] font-bold flex items-center justify-center">
+                      {idx + 1}
+                    </span>
+                    <span>{idx === 0 ? 'Điểm lấy 1 (Kho xuất hàng chính) *' : `Điểm lấy ${idx + 1} (Kho phụ / Gom hàng)`}</span>
+                  </span>
+                  {isFTL && idx > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => removePickupLocation(idx)}
+                      className="text-rose-600 hover:text-rose-700 flex items-center gap-0.5 text-[10px] font-semibold cursor-pointer"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                      <span>Xóa</span>
+                    </button>
+                  )}
+                </div>
+                <input
+                  type="text"
+                  required={idx === 0}
+                  value={loc}
+                  onChange={(e) => handlePickupLocationChange(idx, e.target.value)}
+                  placeholder={idx === 0 ? "VD: Kho VSIP 1, TP. Thuận An, Bình Dương, Việt Nam" : "VD: KCN Amata, TP. Biên Hòa, Đồng Nai (Điểm gom thêm)"}
+                  className="w-full px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-medium shadow-2xs"
+                />
+              </div>
+            ))}
+          </div>
+
+          {isFTL && pickupLocations.length < 5 && (
+            <button
+              type="button"
+              onClick={addPickupLocation}
+              className="w-full py-1.5 text-[11px] font-bold text-orange-700 bg-orange-100/60 hover:bg-orange-100 border border-orange-200/80 border-dashed rounded-xl flex items-center justify-center gap-1 cursor-pointer transition-all"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>+ Thêm Điểm Lấy Hàng (Gom phụ)</span>
+            </button>
+          )}
         </div>
 
-        <div className="p-3 bg-slate-50/70 border border-slate-200/80 rounded-2xl space-y-2">
+        {/* Destination / Delivery Points */}
+        <div className="p-3 bg-slate-50/70 border border-slate-200/80 rounded-2xl space-y-2.5">
           <div className="flex items-center justify-between">
             <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
               <MapPin className="w-3.5 h-3.5 text-rose-600" />
-              <span>6. Điểm Giao Hàng (Destination) *</span>
+              <span>6. Điểm Giao Hàng (Delivery) *</span>
             </label>
-            <select
-              value={specs.destinationTerm || 'Door (Giao tận nơi)'}
-              onChange={(e) => updateSpec('destinationTerm', e.target.value as any)}
-              className="text-[11px] px-2 py-0.5 bg-white border border-slate-300 rounded-md font-bold text-rose-950 cursor-pointer"
-            >
-              <option value="Door (Giao tận nơi)">🏠 Door (Giao tận nơi)</option>
-              <option value="Border (Nhận tại bãi cửa khẩu)">🚩 Border (Tại bãi cửa khẩu)</option>
-            </select>
+            <div className="flex items-center gap-1.5">
+              <select
+                value={specs.destinationTerm || 'Door (Giao tận nơi)'}
+                onChange={(e) => updateSpec('destinationTerm', e.target.value as any)}
+                className="text-[11px] px-2 py-0.5 bg-white border border-slate-300 rounded-md font-bold text-rose-950 cursor-pointer"
+              >
+                <option value="Door (Giao tận nơi)">🏠 Door (Giao tận nơi)</option>
+                <option value="Border (Nhận tại bãi cửa khẩu)">🚩 Border (Tại bãi cửa khẩu)</option>
+              </select>
+              {isFTL && (
+                <span className="text-[10px] text-slate-500 font-bold bg-slate-200/80 px-1.5 py-0.5 rounded">
+                  {deliveryLocations.length} Điểm
+                </span>
+              )}
+            </div>
           </div>
-          <input
-            type="text"
-            required
-            value={destination}
-            onChange={(e) => {
-              setDestination(e.target.value);
-              updateSpec('destinationCity', e.target.value);
-            }}
-            placeholder="VD: Phnom Penh SEZ, Sangkat Phleung Chheh Roteh, Phnom Penh, Campuchia"
-            className="w-full px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-medium shadow-2xs"
-          />
+
+          <div className="space-y-2">
+            {deliveryLocations.map((loc, idx) => (
+              <div key={idx} className="space-y-1">
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="font-semibold text-slate-600 flex items-center gap-1">
+                    <span className="w-4 h-4 rounded-full bg-rose-100 text-rose-800 text-[10px] font-bold flex items-center justify-center">
+                      {idx + 1}
+                    </span>
+                    <span>{idx === 0 ? 'Điểm giao 1 (Kho đích chính) *' : `Điểm giao ${idx + 1} (Ghé hạ hàng / Multi-drop)`}</span>
+                  </span>
+                  {isFTL && idx > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => removeDeliveryLocation(idx)}
+                      className="text-rose-600 hover:text-rose-700 flex items-center gap-0.5 text-[10px] font-semibold cursor-pointer"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                      <span>Xóa</span>
+                    </button>
+                  )}
+                </div>
+                <input
+                  type="text"
+                  required={idx === 0}
+                  value={loc}
+                  onChange={(e) => handleDeliveryLocationChange(idx, e.target.value)}
+                  placeholder={idx === 0 ? "VD: Phnom Penh SEZ, Phnom Penh, Campuchia" : "VD: Kho Chroy Changvar, Phnom Penh (Giao bổ sung)"}
+                  className="w-full px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-medium shadow-2xs"
+                />
+              </div>
+            ))}
+          </div>
+
+          {isFTL && deliveryLocations.length < 5 && (
+            <button
+              type="button"
+              onClick={addDeliveryLocation}
+              className="w-full py-1.5 text-[11px] font-bold text-rose-700 bg-rose-100/60 hover:bg-rose-100 border border-rose-200/80 border-dashed rounded-xl flex items-center justify-center gap-1 cursor-pointer transition-all"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>+ Thêm Điểm Giao Hàng (Multi-drop)</span>
+            </button>
+          )}
         </div>
       </div>
 

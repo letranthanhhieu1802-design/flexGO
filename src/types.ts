@@ -315,6 +315,11 @@ export interface CrossBorderInquirySpecs {
   borderGate: string;
   originCity: string;
   destinationCity: string;
+  pickupPointsCount?: number;
+  pickupLocations?: string[];
+  deliveryPointsCount?: number;
+  deliveryLocations?: string[];
+  multiDropPoints?: number;
   cargoMode: 'Xe liên vận chạy thẳng (Direct GMS)' | 'Sang tải / Đổi đầu kéo tại cửa khẩu (Transshipment)';
   customsScope?: 'Chỉ cước vận chuyển (Chủ hàng tự làm HQ)' | 'Thông quan Hải quan đầu VN' | 'Thông quan Trọn gói 2 đầu (VN + Nước bạn)';
   vehicleType?: string;
