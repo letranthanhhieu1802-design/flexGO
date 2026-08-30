@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Layers, MapPin, Building2, Zap, Globe, Truck, CheckSquare, Clock, ShieldCheck, FileText, ArrowRight, Plus, Trash2, Sparkles, Store, Boxes, Split } from 'lucide-react';
+import { Layers, MapPin, Building2, Zap, Globe, Truck, CheckSquare, Clock, ShieldCheck, FileText, ArrowRight, Plus, Trash2, Sparkles, Store, Boxes, Split, Calendar } from 'lucide-react';
 import { ProjectInquirySpecs } from '../../../types';
 import { VASItemDef } from './VASSection';
 
@@ -473,15 +473,16 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-800 mb-1">
-                Kế Hoạch Thời Gian Triển Khai (Expected Start Date)
+              <label className="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1">
+                <Calendar className="w-3.5 h-3.5 text-indigo-600" />
+                <span>Kế Hoạch Thời Gian Triển Khai (Expected Start Date)</span>
               </label>
               <input
-                type="text"
+                type="date"
+                min={new Date().toISOString().split('T')[0]}
                 value={specs.expectedStartDate || ''}
                 onChange={(e) => updateSpec('expectedStartDate', e.target.value)}
-                placeholder="VD: Bắt đầu từ đầu Quý tới / 01/10/2026..."
-                className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-medium text-slate-900 shadow-2xs"
+                className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-bold text-slate-900 shadow-2xs cursor-pointer"
               />
             </div>
           </div>
@@ -666,15 +667,16 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-800 mb-1">
-                Kế Hoạch Thời Gian Triển Khai (Expected Start Date)
+              <label className="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1">
+                <Calendar className="w-3.5 h-3.5 text-purple-600" />
+                <span>Kế Hoạch Thời Gian Triển Khai (Expected Start Date)</span>
               </label>
               <input
-                type="text"
+                type="date"
+                min={new Date().toISOString().split('T')[0]}
                 value={specs.expectedStartDate || ''}
                 onChange={(e) => updateSpec('expectedStartDate', e.target.value)}
-                placeholder="VD: Bắt đầu từ đầu Quý tới / 01/10/2026..."
-                className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-medium text-slate-900 shadow-2xs"
+                className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-bold text-slate-900 shadow-2xs cursor-pointer"
               />
             </div>
           </div>
@@ -842,15 +844,16 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-800 mb-1">
-                Kế Hoạch Thời Gian Triển Khai (Expected Start Date)
+              <label className="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1">
+                <Calendar className="w-3.5 h-3.5 text-teal-600" />
+                <span>Kế Hoạch Thời Gian Triển Khai (Expected Start Date)</span>
               </label>
               <input
-                type="text"
+                type="date"
+                min={new Date().toISOString().split('T')[0]}
                 value={specs.expectedStartDate || ''}
                 onChange={(e) => updateSpec('expectedStartDate', e.target.value)}
-                placeholder="VD: Bắt đầu từ đầu Quý tới / 01/10/2026..."
-                className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-teal-500 font-medium text-slate-900 shadow-2xs"
+                className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-teal-500 font-bold text-slate-900 shadow-2xs cursor-pointer"
               />
             </div>
           </div>
