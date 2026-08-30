@@ -1,47 +1,61 @@
 import React from 'react';
-import { Train, MapPin, Info } from 'lucide-react';
+import { Train, MapPin, ArrowLeftRight, Box, Scale, Info, Layers, Package, CheckCircle2, ShieldCheck } from 'lucide-react';
 import { RailInquirySpecs } from '../../../types';
 import { VASItemDef } from './VASSection';
 
 export const RAIL_VAS_ITEMS: VASItemDef[] = [
   {
     id: 'r-vas-1',
-    name: 'Kéo xe đầu cuối (First Mile / Last Mile drayage)',
-    desc: 'Đầu kéo lấy cont tại kho khách và giao cont từ ga đến kho đích.',
+    name: 'Kéo xe container đầu cuối (First Mile / Last Mile Drayage)',
+    desc: 'Xe đầu kéo chuyên dụng lấy cont tại kho nhà máy và giao cont từ ga đến tận kho đích.',
     tag: 'Kéo đầu cuối',
     popular: true,
   },
   {
     id: 'r-vas-2',
-    name: 'Cẩu nâng hạ gắp cont tại bãi ga (Rail Terminal Handling)',
-    desc: 'Bốc dỡ sang toa và cẩu hạ container tại bãi hàng ga đường sắt.',
+    name: 'Cẩu nâng hạ gắp cont tại bãi ga (Rail Terminal Handling - LoLo)',
+    desc: 'Bốc dỡ sang toa và cẩu hạ container tại bãi hàng ga Giáp Bát, Sóng Thần, Yên Viên.',
     tag: 'Cẩu nâng hạ ga',
     popular: true,
   },
   {
     id: 'r-vas-3',
-    name: 'Kẹp chì niêm phong Seal an ninh đường sắt',
-    desc: 'Niêm chì bảo mật hàng hóa chống thất thoát trong hành trình xuyên Việt / liên vận.',
-    tag: 'Kẹp chì Seal',
+    name: 'Kẹp chì Seal an ninh & Định vị GPS theo dõi hành trình đoàn tàu',
+    desc: 'Niêm phong bảo mật chống thất thoát trong suốt hành trình xuyên Việt / liên vận quốc tế.',
+    tag: 'Kẹp chì & GPS',
     popular: true,
   },
   {
     id: 'r-vas-4',
-    name: 'Máy phát điện duy trì cont lạnh trên toa (Rail Genset Power)',
-    desc: 'Cắm điện liên tục cho cont 20RF/40RF trên suốt hành trình Bắc - Nam.',
+    name: 'Máy phát điện Genset duy trì cont lạnh trên toa (Rail Genset Power)',
+    desc: 'Cắm điện liên tục cho cont 20RF/40RF trên suốt hành trình Bắc - Nam hoặc liên vận TQ.',
     tag: 'Điện cont lạnh',
+    popular: true,
   },
   {
     id: 'r-vas-5',
-    name: 'Bảo hiểm hàng hóa vận tải đường sắt',
-    desc: 'Bảo hiểm trọn gói giá trị hàng hóa theo hợp đồng vận chuyển đường sắt.',
-    tag: 'Bảo hiểm đường sắt',
+    name: 'Khai báo hải quan liên vận quốc tế tại cửa khẩu ga đường sắt',
+    desc: 'Thông quan xuất nhập khẩu chính ngạch tại Ga đường sắt quốc tế Đồng Đăng, Lào Cai.',
+    tag: 'Hải quan ga',
+    popular: true,
   },
   {
     id: 'r-vas-6',
-    name: 'Kiểm đếm và bốc dỡ hàng tại bãi hàng Ga Giáp Bát / Sóng Thần',
-    desc: 'Nhân công bốc dỡ ghép hàng cho lô hàng lẻ LCL tại kho hàng ga.',
-    tag: 'Bốc dỡ tại Ga',
+    name: 'Chằng buộc chèn lót gia cố toa xe (Lashing & Dunnage chuyên dụng)',
+    desc: 'Đai cáp, gỗ chèn và túi khí chống xô lệch hàng hóa trên toa bạt / toa xe thùng kín.',
+    tag: 'Chằng buộc toa xe',
+  },
+  {
+    id: 'r-vas-7',
+    name: 'Bảo hiểm hàng hóa vận tải đường sắt toàn diện (Rail All-Risks)',
+    desc: 'Bảo hiểm 100% giá trị hàng hóa theo hợp đồng vận chuyển đường sắt.',
+    tag: 'Bảo hiểm đường sắt',
+  },
+  {
+    id: 'r-vas-8',
+    name: 'Nhân công bốc xếp, kiểm đếm tại bãi hàng Ga Giáp Bát / Sóng Thần',
+    desc: 'Bốc dỡ, kiểm đếm và phân loại kiện hàng cho lô hàng lẻ LCL tại kho ga.',
+    tag: 'Bốc xếp kho ga',
   },
 ];
 
@@ -68,7 +82,7 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
 
   // Auto fallback to FCL if currently LCL but cargo category is Reefer or Hazmat
   React.useEffect(() => {
-    if (isLclDisabled && specs.mode === 'LCL (Hàng lẻ ghép toa)') {
+    if (isLclDisabled && specs.mode === 'LCL (Hàng lẻ đóng ghép kho ga)') {
       onChange({
         ...specs,
         mode: 'FCL (Nguyên container ga - ga)',
@@ -84,6 +98,68 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
     });
   };
 
+  const isFCL = specs.mode === 'FCL (Nguyên container ga - ga)';
+
+  // Helper for LCL auto calculation
+  const handleLclDimChange = (dimKey: 'lengthCm' | 'widthCm' | 'heightCm', val: number) => {
+    const currentDims = specs.lclDimensions || { lengthCm: 120, widthCm: 100, heightCm: 150 };
+    const newDims = { ...currentDims, [dimKey]: val };
+    const pieces = specs.lclPieces || 1;
+    
+    // Calculate total CBM: (L * W * H / 1,000,000) * pieces
+    const singleCbm = (newDims.lengthCm * newDims.widthCm * newDims.heightCm) / 1000000;
+    const totalCbm = parseFloat((singleCbm * pieces).toFixed(2));
+    
+    // Standard Rail Freight LCL Chargeable Ratio W/M: 1 CBM = 1000 kg (1 RT - Revenue Ton)
+    const volumetricWeight = Math.round(totalCbm * 1000);
+    const grossWeight = specs.lclGrossWeightKg || 0;
+    const chargeableWeight = Math.max(grossWeight, volumetricWeight);
+    const revenueTon = parseFloat((chargeableWeight / 1000).toFixed(2));
+
+    onChange({
+      ...specs,
+      lclDimensions: newDims,
+      lclCbm: totalCbm,
+      lclChargeableWeightKg: chargeableWeight,
+      lclRevenueTon: revenueTon,
+      cbmVolume: totalCbm,
+    });
+  };
+
+  const handleLclPiecesChange = (pieces: number) => {
+    const dims = specs.lclDimensions || { lengthCm: 120, widthCm: 100, heightCm: 150 };
+    const singleCbm = (dims.lengthCm * dims.widthCm * dims.heightCm) / 1000000;
+    const totalCbm = parseFloat((singleCbm * pieces).toFixed(2));
+    const volumetricWeight = Math.round(totalCbm * 1000);
+    const grossWeight = specs.lclGrossWeightKg || 0;
+    const chargeableWeight = Math.max(grossWeight, volumetricWeight);
+    const revenueTon = parseFloat((chargeableWeight / 1000).toFixed(2));
+
+    onChange({
+      ...specs,
+      lclPieces: pieces,
+      lclCbm: totalCbm,
+      lclChargeableWeightKg: chargeableWeight,
+      lclRevenueTon: revenueTon,
+      cbmVolume: totalCbm,
+    });
+  };
+
+  const handleLclGrossWeightChange = (gwKg: number) => {
+    const cbm = specs.lclCbm || 0;
+    const volumetricWeight = Math.round(cbm * 1000);
+    const chargeableWeight = Math.max(gwKg, volumetricWeight);
+    const revenueTon = parseFloat((chargeableWeight / 1000).toFixed(2));
+
+    onChange({
+      ...specs,
+      lclGrossWeightKg: gwKg,
+      lclChargeableWeightKg: chargeableWeight,
+      lclRevenueTon: revenueTon,
+      grossWeightKgs: gwKg,
+    });
+  };
+
   return (
     <div className="space-y-4 animate-in fade-in duration-200">
       {/* Service Header Info */}
@@ -93,28 +169,96 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
         </div>
         <div className="text-xs text-blue-950 flex-1">
           <span className="font-bold block text-sm text-blue-900">
-            Dịch Vụ Vận Tải Đường Sắt (Rail Container & Bulk Freight)
+            Dịch Vụ Vận Tải Đường Sắt (Rail Container & Intermodal Freight)
           </span>
           <p className="text-blue-800/80 mt-0.5">
-            Tuyến Bắc - Nam và liên vận quốc tế Trung Quốc - Châu Âu qua ga Giáp Bát, Yên Viên, Sóng Thần.
+            Tuyến trục Bắc - Nam (Yên Viên, Giáp Bát ↔ Sóng Thần, Trảng Bom) & Liên vận quốc tế Trung Quốc - Châu Á - Châu Âu.
           </p>
         </div>
       </div>
 
-      {/* Mode Selector */}
+      {/* 1. Trade Role Selection */}
+      <div>
+        <div className="flex items-center justify-between mb-1.5">
+          <label className="block text-xs font-bold text-slate-700 flex items-center gap-1.5">
+            <ArrowLeftRight className="w-3.5 h-3.5 text-blue-700" />
+            <span>Vai Trò Của Doanh Nghiệp Trong Lô Hàng (Trade Role) *</span>
+          </label>
+          <span className="text-[10px] font-semibold text-blue-800 bg-blue-100/70 px-2 py-0.5 rounded-md">
+            {specs.tradeRole === 'Liên vận xuất khẩu (Export Rail)'
+              ? '🇨🇳 Liên vận xuất khẩu đi TQ / Châu Âu'
+              : specs.tradeRole === 'Liên vận nhập khẩu (Import Rail)'
+              ? '🇻🇳 Liên vận nhập khẩu về VN'
+              : '🚆 Tuyến đường sắt nội địa Bắc - Nam'}
+          </span>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+          {[
+            {
+              role: 'Nội địa Bắc - Nam (Domestic Rail)',
+              title: '🚆 Nội Địa Bắc - Nam',
+              sub: 'Tuyến Giáp Bát / Yên Viên ↔ Sóng Thần',
+            },
+            {
+              role: 'Liên vận xuất khẩu (Export Rail)',
+              title: '🇨🇳 Liên Vận Xuất Khẩu',
+              sub: 'Hàng xuất đi TQ / Trung Á / Châu Âu',
+            },
+            {
+              role: 'Liên vận nhập khẩu (Import Rail)',
+              title: '🇻🇳 Liên Vận Nhập Khẩu',
+              sub: 'Hàng nhập khẩu từ ga quốc tế về VN',
+            },
+          ].map((item) => {
+            const isSelected = (specs.tradeRole || 'Nội địa Bắc - Nam (Domestic Rail)') === item.role;
+            return (
+              <button
+                type="button"
+                key={item.role}
+                onClick={() => updateSpec('tradeRole', item.role as any)}
+                className={`p-2.5 rounded-2xl border text-left cursor-pointer transition-all ${
+                  isSelected
+                    ? 'border-blue-600 bg-blue-50/80 ring-2 ring-blue-500/25 font-bold text-blue-950 shadow-2xs'
+                    : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold">{item.title}</span>
+                  {isSelected && (
+                    <span className="w-2 h-2 rounded-full bg-blue-600 shrink-0"></span>
+                  )}
+                </div>
+                <p className="text-[10px] text-slate-500 mt-0.5 font-normal truncate">
+                  {item.sub}
+                </p>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 2. Mode Selector: FCL vs LCL */}
       <div className="space-y-2">
+        <label className="block text-xs font-bold text-slate-700">
+          Phương Thức Vận Chuyển Đường Sắt (Mode of Rail Transport) *
+        </label>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <button
             type="button"
             onClick={() => updateSpec('mode', 'FCL (Nguyên container ga - ga)')}
-            className={`p-3 rounded-xl border text-left cursor-pointer transition-all ${
-              specs.mode === 'FCL (Nguyên container ga - ga)'
-                ? 'border-blue-600 bg-blue-50/80 ring-2 ring-blue-500/20'
-                : 'border-slate-200 bg-white hover:border-slate-300'
+            className={`p-3 rounded-2xl border text-left cursor-pointer transition-all ${
+              isFCL
+                ? 'border-blue-600 bg-blue-50/80 ring-2 ring-blue-500/20 font-bold text-blue-950 shadow-2xs'
+                : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
             }`}
           >
-            <span className="text-xs font-bold text-slate-900 block">🚆 FCL (Nguyên Container Ga - Ga)</span>
-            <span className="text-[11px] text-slate-500 mt-0.5 block">Vận chuyển nguyên cont 20ft/40ft/Cont lạnh</span>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold">🚆 FCL (Nguyên Container / Toa Xe)</span>
+              {isFCL && <span className="text-[10px] bg-blue-600 text-white px-2 py-0.5 rounded-md font-bold">Đang chọn</span>}
+            </div>
+            <p className="text-[11px] text-slate-500 mt-1 font-normal">
+              Cont 20ft / 40HC / Cont Lạnh / Toa bạt kín nguyên toa
+            </p>
           </button>
 
           <button
@@ -122,35 +266,39 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
             disabled={isLclDisabled}
             onClick={() => {
               if (!isLclDisabled) {
-                updateSpec('mode', 'LCL (Hàng lẻ ghép toa)');
+                updateSpec('mode', 'LCL (Hàng lẻ đóng ghép kho ga)');
               }
             }}
             title={
               isLclDisabled
-                ? `Hàng ${cargoClassification === 'Reefer' ? 'Lạnh' : 'Nguy Hiểm'} bắt buộc đi nguyên container/toa FCL`
-                : 'Ghép hàng theo kiện/CBM/Tấn toa hàng kín'
+                ? `Hàng ${cargoClassification === 'Reefer' ? 'Lạnh' : 'Nguy Hiểm'} bắt buộc đi nguyên container FCL`
+                : 'Gom ghép hàng lẻ tại kho bãi ga tính theo CBM / Tấn'
             }
-            className={`p-3 rounded-xl border text-left transition-all ${
+            className={`p-3 rounded-2xl border text-left transition-all ${
               isLclDisabled
                 ? 'border-slate-200 bg-slate-100/80 opacity-60 cursor-not-allowed text-slate-400'
-                : specs.mode === 'LCL (Hàng lẻ ghép toa)'
-                ? 'border-blue-600 bg-blue-50/80 ring-2 ring-blue-500/20 cursor-pointer'
-                : 'border-slate-200 bg-white hover:border-slate-300 cursor-pointer'
+                : !isFCL
+                ? 'border-blue-600 bg-blue-50/70 ring-2 ring-blue-500/20 font-bold text-blue-950 cursor-pointer shadow-2xs'
+                : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 cursor-pointer'
             }`}
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold block">📦 LCL (Hàng Lẻ Ghép Toa)</span>
-              {isLclDisabled && (
-                <span className="text-[10px] bg-rose-100 text-rose-700 px-2 py-0.5 rounded font-bold border border-rose-200">
+              <span className="text-xs font-bold">📦 LCL (Hàng Lẻ Ghép Kho Ga)</span>
+              {isLclDisabled ? (
+                <span className="text-[10px] bg-rose-100 text-rose-700 px-2 py-0.5 rounded-md font-bold border border-rose-200">
                   🚫 Không hỗ trợ
                 </span>
-              )}
+              ) : !isFCL ? (
+                <span className="text-[10px] bg-blue-600 text-white px-2 py-0.5 rounded-md font-bold">
+                  Đang chọn
+                </span>
+              ) : null}
             </div>
-            <span className={`text-[11px] mt-0.5 block ${isLclDisabled ? 'text-rose-600/90 font-medium' : 'text-slate-500'}`}>
+            <p className={`text-[11px] mt-1 font-normal ${isLclDisabled ? 'text-rose-600/90 font-medium' : 'text-slate-500'}`}>
               {isLclDisabled
-                ? `Hàng ${cargoClassification === 'Reefer' ? 'Lạnh' : 'Nguy Hiểm'} bắt buộc đi FCL nguyên toa/cont`
-                : 'Ghép hàng theo kiện/CBM/Tấn toa hàng kín'}
-            </span>
+                ? `Hàng ${cargoClassification === 'Reefer' ? 'Lạnh' : 'Nguy Hiểm'} bắt buộc đi nguyên cont FCL`
+                : 'Gom hàng lẻ tại kho bãi ga tính theo CBM / Tấn'}
+            </p>
           </button>
         </div>
 
@@ -158,18 +306,94 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
           <div className="p-2.5 bg-amber-50/80 border border-amber-200/90 rounded-xl flex items-center gap-2 text-xs text-amber-900 animate-in fade-in duration-150">
             <Info className="w-4 h-4 text-amber-700 shrink-0" />
             <p className="text-[11px]">
-              <span className="font-bold">Quy định kỹ thuật đường sắt:</span> Hàng <strong>{cargoClassification === 'Reefer' ? 'Lạnh (Reefer)' : 'Nguy Hiểm (DG)'}</strong> bắt buộc vận chuyển bằng toa/container riêng biệt (FCL) để bảo lưu nguồn điện Genset / an toàn vận hành, không hỗ trợ đóng ghép lẻ (LCL).
+              <span className="font-bold">Quy định kỹ thuật đường sắt:</span> Hàng <strong>{cargoClassification === 'Reefer' ? 'Lạnh (Reefer)' : 'Nguy Hiểm (Hazmat)'}</strong> bắt buộc vận chuyển bằng phương thức <strong>FCL (Nguyên Container / Toa riêng)</strong> để cắm điện máy phát Genset / đảm bảo an toàn chạy tàu.
             </p>
           </div>
         )}
       </div>
 
-      {/* Route / Stations */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+      {/* 3. Movement Terms: Receiving & Delivery Terms */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
         <div>
-          <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1">
+          <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
+            <span className="flex items-center gap-1.5">
+              <ArrowLeftRight className="w-3.5 h-3.5 text-blue-600" />
+              <span>Điều Kiện Nhận Hàng (Origin Term) *</span>
+            </span>
+            <span className="text-[10.5px] font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+              Điểm lấy
+            </span>
+          </label>
+          <select
+            value={specs.originServiceTerm || (isFCL ? 'CY' : 'CFS')}
+            onChange={(e) => updateSpec('originServiceTerm', e.target.value as any)}
+            className="w-full px-3.5 py-2.5 text-xs bg-white border border-blue-300 rounded-xl focus:border-blue-500 font-bold text-slate-900 shadow-2xs cursor-pointer"
+          >
+            <option value="Door">🚪 Door (Lấy tận kho người gửi / Shipper)</option>
+            <option value="CY">⚓ CY (Nhận tại bãi container ga xuất phát)</option>
+            <option value="CFS">📦 CFS (Nhận tại kho hàng lẻ ga xuất phát)</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
+            <span className="flex items-center gap-1.5">
+              <ArrowLeftRight className="w-3.5 h-3.5 text-indigo-600" />
+              <span>Điều Kiện Giao Hàng (Destination Term) *</span>
+            </span>
+            <span className="text-[10.5px] font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200">
+              Điểm giao
+            </span>
+          </label>
+          <select
+            value={specs.destinationServiceTerm || (isFCL ? 'CY' : 'CFS')}
+            onChange={(e) => updateSpec('destinationServiceTerm', e.target.value as any)}
+            className="w-full px-3.5 py-2.5 text-xs bg-white border border-indigo-300 rounded-xl focus:border-indigo-500 font-bold text-slate-900 shadow-2xs cursor-pointer"
+          >
+            <option value="Door">🚪 Door (Giao tận kho người nhận / Consignee)</option>
+            <option value="CY">⚓ CY (Giao tại bãi container ga đích đến)</option>
+            <option value="CFS">📦 CFS (Giao tại kho hàng lẻ ga đích đến)</option>
+          </select>
+        </div>
+      </div>
+
+      {/* 4. Warehouse Addresses: Shipper & Consignee */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+        <div>
+          <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1.5">
             <MapPin className="w-3.5 h-3.5 text-blue-600" />
-            <span>Ga Xuất Phát / Kho Gửi *</span>
+            <span>Địa Chỉ Kho Lấy Hàng (Shipper Warehouse / Pickup Address)</span>
+          </label>
+          <input
+            type="text"
+            value={specs.pickupAddress || ''}
+            onChange={(e) => updateSpec('pickupAddress', e.target.value)}
+            placeholder="VD: Nhà máy KCN Quang Minh, Mê Linh, Hà Nội..."
+            className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-medium text-slate-800"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+            <MapPin className="w-3.5 h-3.5 text-indigo-600" />
+            <span>Địa Chỉ Giao Hàng (Consignee Warehouse / Delivery Address)</span>
+          </label>
+          <input
+            type="text"
+            value={specs.deliveryAddress || ''}
+            onChange={(e) => updateSpec('deliveryAddress', e.target.value)}
+            placeholder="VD: Kho KCN VSIP 1, Thuận An, Bình Dương..."
+            className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-medium text-slate-800"
+          />
+        </div>
+      </div>
+
+      {/* 5. Rail Stations (Ga Xếp Hàng & Ga Dỡ Hàng) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+        <div>
+          <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+            <Train className="w-3.5 h-3.5 text-blue-600" />
+            <span>{isFCL ? 'Ga Xếp Hàng (Origin Rail Station / POL Ga) *' : 'Địa Chỉ Kho Ga Nhận Hàng (Origin CFS Rail Station) *'}</span>
           </label>
           <input
             type="text"
@@ -179,15 +403,15 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
               setOrigin(e.target.value);
               updateSpec('originStation', e.target.value);
             }}
-            placeholder="VD: Ga Giáp Bát / Ga Yên Viên (Hà Nội)"
-            className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500"
+            placeholder="VD: Ga Yên Viên / Ga Giáp Bát (Hà Nội) hoặc Ga Đồng Đăng"
+            className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 focus:outline-hidden font-medium text-slate-800"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1">
-            <MapPin className="w-3.5 h-3.5 text-rose-600" />
-            <span>Ga Đến / Kho Nhận *</span>
+          <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+            <Train className="w-3.5 h-3.5 text-rose-600" />
+            <span>{isFCL ? 'Ga Dỡ Hàng (Destination Rail Station / POD Ga) *' : 'Địa Chỉ Kho Ga Trả Hàng (Destination CFS Rail Station) *'}</span>
           </label>
           <input
             type="text"
@@ -197,34 +421,63 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
               setDestination(e.target.value);
               updateSpec('destinationStation', e.target.value);
             }}
-            placeholder="VD: Ga Sóng Thần (Bình Dương) / Ga Đà Nẵng"
-            className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500"
+            placeholder="VD: Ga Sóng Thần (Bình Dương) / Ga Trảng Bom (Đồng Nai)"
+            className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 focus:outline-hidden font-medium text-slate-800"
           />
         </div>
       </div>
 
-      {/* Container / Wagon Type & Quantity/Frequency */}
-      {specs.mode === 'FCL (Nguyên container ga - ga)' && (
+      {/* 6. FCL SPECIFIC CONFIGURATION */}
+      {isFCL && (
         <div className="p-4 bg-blue-50/60 border border-blue-200/80 rounded-2xl space-y-3.5">
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Loại Container / Toa Xe *</label>
-            <select
-              value={specs.containerType || 'Cont 40ft HC'}
-              onChange={(e) => updateSpec('containerType', e.target.value as any)}
-              className="w-full px-3.5 py-2.5 text-xs bg-white border border-blue-300 rounded-xl focus:border-blue-500 font-bold text-blue-950 shadow-2xs"
-            >
-              <option value="Cont 40ft HC">Cont 40ft High Cube (40HC)</option>
-              <option value="Cont 20ft">Cont 20ft Thường (20DC)</option>
-              <option value="Cont Lạnh (Reefer Rail)">Container Lạnh (Reefer Rail có máy phát)</option>
-              <option value="Toa xe thùng kín / bạt">Toa xe thùng kín / Toa bạt chuyên dụng</option>
-            </select>
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-extrabold text-blue-950 uppercase tracking-wider flex items-center gap-1.5">
+              <Layers className="w-4 h-4 text-blue-700" />
+              <span>Cấu Hình Container / Toa Xe & Tần Suất Đường Sắt</span>
+            </span>
+            <span className="text-[11px] text-blue-800 font-bold bg-blue-100 px-2 py-0.5 rounded-md">
+              FCL / Nguyên Toa Xe
+            </span>
           </div>
 
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">Loại Container / Toa Xe *</label>
+              <select
+                value={specs.containerType || 'Cont 40ft HC'}
+                onChange={(e) => updateSpec('containerType', e.target.value as any)}
+                className="w-full px-3.5 py-2.5 text-xs bg-white border border-blue-300 rounded-xl focus:border-blue-500 font-bold text-blue-950 shadow-2xs cursor-pointer"
+              >
+                <option value="Cont 40ft HC">Cont 40ft High Cube (40HC - Phổ biến nhất)</option>
+                <option value="Cont 20ft">Cont 20ft Thường (20DC)</option>
+                <option value="Cont Lạnh (Reefer Rail)">Container Lạnh 40RF (Có máy phát điện Genset)</option>
+                <option value="Toa xe thùng kín / bạt">Toa xe thùng kín / Toa bạt chuyên dụng (Covered Wagon)</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">Điều Khoản Thương Mại (Incoterms)</label>
+              <select
+                value={specs.incoterm || 'DAP'}
+                onChange={(e) => updateSpec('incoterm', e.target.value)}
+                className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-medium text-slate-800 cursor-pointer"
+              >
+                <option value="DAP">DAP (Delivered at Place - Giao tại ga đích)</option>
+                <option value="FCA">FCA (Free Carrier - Giao cho bên vận chuyển ga đi)</option>
+                <option value="CPT">CPT (Carriage Paid To - Cước trả tới ga đến)</option>
+                <option value="CIP">CIP (Carriage and Insurance Paid To)</option>
+                <option value="DDP">DDP (Delivered Duty Paid - Giao trọn gói gồm thuế)</option>
+                <option value="EXW">EXW (Ex Works - Nhận tại xưởng)</option>
+              </select>
+            </div>
+          </div>
+
+          {/* FCL Quantity & Frequency */}
           <div className="pt-2 border-t border-blue-200/70">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  1. Số Lượng Container Cần Thuê *
+                  1. Số Lượng Container / Toa *
                 </label>
                 <input
                   type="text"
@@ -258,6 +511,206 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
                   <option value="Container / Tháng">🗓️ Tháng (Container / Tháng)</option>
                   <option value="Container / Năm">📈 Năm (Container / Năm)</option>
                   <option value="Container (Một lần)">⚡ Container (Một lần / Spot)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  3. Miễn Phí Lưu Bãi Ga (Free Dem/Det)
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    min="1"
+                    max="60"
+                    value={specs.freeDemDetDaysRequested || 7}
+                    onChange={(e) => updateSpec('freeDemDetDaysRequested', parseInt(e.target.value, 10) || 7)}
+                    className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-bold text-slate-800 pr-12"
+                  />
+                  <span className="absolute right-3 top-2.5 text-xs font-semibold text-slate-400">Ngày</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 7. LCL SPECIFIC CONFIGURATION (Dimensions, Weight, CBM, Chargeable Weight & Stackable) */}
+      {!isFCL && (
+        <div className="p-4 bg-blue-50/60 border border-blue-200 rounded-2xl space-y-3.5 animate-in fade-in duration-150">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="text-xs font-extrabold text-blue-950 uppercase tracking-wider flex items-center gap-1.5">
+              <Box className="w-4 h-4 text-blue-700" />
+              <span>Khai Báo Kích Thước & Trọng Lượng Gom Hàng Lẻ Ga (CFS)</span>
+            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] text-blue-900 bg-blue-100 font-bold px-2 py-0.5 rounded-md">
+                1 CBM = 1.000 Kg (Chuẩn W/M Đường Sắt)
+              </span>
+              <span className="text-[11px] text-slate-600 bg-white border border-blue-200 font-semibold px-2 py-0.5 rounded-md flex items-center gap-1">
+                <Info className="w-3 h-3 text-blue-700" />
+                Tính theo RT (Revenue Ton)
+              </span>
+            </div>
+          </div>
+
+          {/* LCL Package Details: Number of pieces */}
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">
+              Số Lượng Kiện / Pallet Cần Gom Ghép *
+            </label>
+            <input
+              type="text"
+              value={specs.lclPieces ? specs.lclPieces.toLocaleString('vi-VN') : ''}
+              onChange={(e) => {
+                const val = e.target.value.replace(/\D/g, '');
+                handleLclPiecesChange(val ? parseInt(val, 10) : 1);
+              }}
+              placeholder="VD: 4"
+              className="w-full px-3.5 py-2 text-xs bg-white border border-blue-300 rounded-xl focus:border-blue-500 font-bold text-slate-900"
+            />
+          </div>
+
+          {/* Dimension Inputs (L x W x H cm) */}
+          <div className="p-3 bg-white border border-blue-200 rounded-xl space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-blue-950">Kích Thước 1 Kiện (Dài x Rộng x Cao cm)</span>
+              <span className="text-[11px] font-normal text-slate-500">Tự động tính Tổng Thể Tích CBM</span>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <div>
+                <span className="text-[10px] text-slate-500 block mb-0.5">Dài (L) cm</span>
+                <input
+                  type="text"
+                  value={specs.lclDimensions?.lengthCm ? specs.lclDimensions.lengthCm.toLocaleString('vi-VN') : ''}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '');
+                    handleLclDimChange('lengthCm', val ? parseInt(val, 10) : 0);
+                  }}
+                  placeholder="120"
+                  className="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-center font-bold text-slate-800"
+                />
+              </div>
+              <div>
+                <span className="text-[10px] text-slate-500 block mb-0.5">Rộng (W) cm</span>
+                <input
+                  type="text"
+                  value={specs.lclDimensions?.widthCm ? specs.lclDimensions.widthCm.toLocaleString('vi-VN') : ''}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '');
+                    handleLclDimChange('widthCm', val ? parseInt(val, 10) : 0);
+                  }}
+                  placeholder="100"
+                  className="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-center font-bold text-slate-800"
+                />
+              </div>
+              <div>
+                <span className="text-[10px] text-slate-500 block mb-0.5">Cao (H) cm</span>
+                <input
+                  type="text"
+                  value={specs.lclDimensions?.heightCm ? specs.lclDimensions.heightCm.toLocaleString('vi-VN') : ''}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '');
+                    handleLclDimChange('heightCm', val ? parseInt(val, 10) : 0);
+                  }}
+                  placeholder="150"
+                  className="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-center font-bold text-slate-800"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Weight & Computed CBM, Chargeable Weight */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Tổng Trọng Lượng Thực (Gross Kg) *
+              </label>
+              <input
+                type="text"
+                value={specs.lclGrossWeightKg ? specs.lclGrossWeightKg.toLocaleString('vi-VN') : ''}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, '');
+                  handleLclGrossWeightChange(val ? parseInt(val, 10) : 0);
+                }}
+                placeholder="VD: 1.000"
+                className="w-full px-3 py-2 text-xs bg-white border border-blue-300 rounded-xl focus:border-blue-500 font-bold text-slate-900"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Tổng Thể Tích Tính Toán (CBM)
+              </label>
+              <div className="px-3 py-2 text-xs bg-blue-100/60 border border-blue-200 rounded-xl font-extrabold text-blue-900">
+                {specs.lclCbm || 1.8} CBM
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Trọng Lượng Tính Cước (Chargeable W/M)
+              </label>
+              <div className="px-3 py-2 text-xs bg-indigo-100/60 border border-indigo-200 rounded-xl font-extrabold text-indigo-900 flex items-center justify-between">
+                <span>{specs.lclChargeableWeightKg ? specs.lclChargeableWeightKg.toLocaleString('vi-VN') : '1.800'} Kg</span>
+                <span className="text-[10px] text-indigo-700 font-medium">({specs.lclRevenueTon || 1.8} RT W/M)</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Stackable Toggle */}
+          <div className="flex items-center gap-2 p-2.5 bg-white border border-blue-200 rounded-xl shadow-2xs">
+            <input
+              type="checkbox"
+              id="railLclStackableCheck"
+              checked={specs.lclStackable ?? true}
+              onChange={(e) => updateSpec('lclStackable', e.target.checked)}
+              className="rounded-sm text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer"
+            />
+            <label htmlFor="railLclStackableCheck" className="text-xs font-semibold text-slate-800 cursor-pointer">
+              Hàng có thể chồng tầng (Stackable) <span className="text-slate-500 font-normal">(Nếu không thể chồng tầng, cước ghép kho ga có thể tính thêm hệ số sàn toa xe)</span>
+            </label>
+          </div>
+
+          {/* LCL Shipment Count & Frequency */}
+          <div className="pt-2 border-t border-blue-200/70">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  1. Số Lượng Chuyến Ghép *
+                </label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={specs.lclShipmentCount !== undefined && specs.lclShipmentCount !== null ? (specs.lclShipmentCount === 0 ? '' : specs.lclShipmentCount) : 1}
+                  onChange={(e) => {
+                    const raw = e.target.value.replace(/\D/g, '');
+                    updateSpec('lclShipmentCount', raw === '' ? 0 : parseInt(raw, 10));
+                  }}
+                  onBlur={() => {
+                    if (!specs.lclShipmentCount || specs.lclShipmentCount < 1) {
+                      updateSpec('lclShipmentCount', 1);
+                    }
+                  }}
+                  placeholder="VD: 1, 2, 5, 10..."
+                  className="w-full px-3.5 py-2.5 text-xs bg-white border border-blue-300 rounded-xl focus:border-blue-500 font-bold text-slate-900 shadow-2xs"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  2. Đơn Vị (Tần Suất Vận Chuyển) *
+                </label>
+                <select
+                  value={specs.lclFrequencyUnit || 'Chuyến / Tháng'}
+                  onChange={(e) => updateSpec('lclFrequencyUnit', e.target.value)}
+                  className="w-full px-3.5 py-2.5 text-xs bg-white border border-blue-300 rounded-xl focus:border-blue-500 font-bold text-slate-900 shadow-2xs cursor-pointer"
+                >
+                  <option value="Chuyến / Ngày">📅 Ngày (Chuyến / Ngày)</option>
+                  <option value="Chuyến / Tuần">📆 Tuần (Chuyến / Tuần)</option>
+                  <option value="Chuyến / Tháng">🗓️ Tháng (Chuyến / Tháng)</option>
+                  <option value="Chuyến / Năm">📈 Năm (Chuyến / Năm)</option>
+                  <option value="Chuyến (Một lần)">⚡ Chuyến (Một lần / Spot)</option>
                 </select>
               </div>
             </div>

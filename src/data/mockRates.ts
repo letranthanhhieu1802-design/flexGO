@@ -136,6 +136,7 @@ export const initialCustomerRates: CustomerRateItem[] = [
       { id: 'sc-10', name: 'Phí phát hành AWB (Air Waybill)', amount: 750000, currency: 'VND', unit: 'Bộ', includedInBaseRate: false, isMandatory: true },
     ],
     airSpecs: {
+      airServiceType: 'Air Freight / Cargo',
       serviceLevel: 'Standard Air Freight (3-4 days)',
       originAirport: 'SGN (Sân bay Quốc tế Tân Sơn Nhất, TP.HCM)',
       destinationAirport: 'NRT (Sân bay Narita Tokyo, Nhật Bản)',

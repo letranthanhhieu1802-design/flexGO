@@ -25,7 +25,8 @@ import {
   Paperclip,
   FileSpreadsheet,
   Image as ImageIcon,
-  FileArchive
+  FileArchive,
+  Receipt
 } from 'lucide-react';
 import { InquiryItem, QuotationItem, SupplierCompany, CurrentView } from '../../types';
 
@@ -471,7 +472,11 @@ export const InquiryDetailWorkspace: React.FC<InquiryDetailWorkspaceProps> = ({
 
                     {/* LTL Specific Details if available */}
                     {inquiry.serviceSpecs.trucking.loadType === 'LTL (Ghép hàng lẻ)' && (
-                      <div className="p-3 bg-white/80 rounded-lg border border-blue-200/60 grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs">
+                      <div className="p-3 bg-white/80 rounded-lg border border-blue-200/60 grid grid-cols-2 sm:grid-cols-6 gap-2 text-xs">
+                        <div>
+                          <span className="text-[10px] text-slate-400 block">Tần suất chuyến:</span>
+                          <span className="font-bold text-slate-900">{inquiry.serviceSpecs.trucking.ltlShipmentCount || 1} {inquiry.serviceSpecs.trucking.ltlFrequencyUnit || 'Chuyến / Tháng'}</span>
+                        </div>
                         <div>
                           <span className="text-[10px] text-slate-400 block">Số kiện & Quy cách:</span>
                           <span className="font-bold text-slate-800">{inquiry.serviceSpecs.trucking.ltlPieces || 1} Kiện ({inquiry.serviceSpecs.trucking.ltlPackaging || 'Pallet'})</span>
@@ -504,23 +509,43 @@ export const InquiryDetailWorkspace: React.FC<InquiryDetailWorkspaceProps> = ({
                 {/* Ocean Specs */}
                 {inquiry.serviceSpecs.ocean && (
                   <div className="space-y-3 bg-cyan-50/40 p-4 rounded-xl border border-cyan-100">
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3.5 text-xs">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 text-xs">
                       <div>
                         <span className="text-slate-400 block font-semibold">Mode</span>
                         <span className="font-bold text-cyan-900">{inquiry.serviceSpecs.ocean.mode}</span>
                       </div>
                       <div>
-                        <span className="text-slate-400 block font-semibold">Cảng Bốc (POL)</span>
-                        <span className="font-bold text-slate-800">{inquiry.serviceSpecs.ocean.polPort}</span>
+                        <span className="text-slate-400 block font-semibold">Điều kiện Nhận / Giao</span>
+                        <span className="font-bold text-cyan-950">
+                          {inquiry.serviceSpecs.ocean.originServiceTerm || 'CY'} ➔ {inquiry.serviceSpecs.ocean.destinationServiceTerm || 'CY'}
+                        </span>
                       </div>
                       <div>
-                        <span className="text-slate-400 block font-semibold">Cảng Dỡ (POD)</span>
-                        <span className="font-bold text-slate-800">{inquiry.serviceSpecs.ocean.podPort}</span>
+                        <span className="text-slate-400 block font-semibold">
+                          {inquiry.serviceSpecs.ocean.mode?.includes('LCL') || inquiry.serviceType === 'Sea Freight (LCL)'
+                            ? 'Địa Chỉ Lấy Kho CFS'
+                            : 'Cảng Bốc (POL)'}
+                        </span>
+                        <span className="font-bold text-slate-800">{inquiry.serviceSpecs.ocean.polPort || inquiry.origin}</span>
                       </div>
                       <div>
-                        <span className="text-slate-400 block font-semibold">Loại Cont / Số lượng</span>
+                        <span className="text-slate-400 block font-semibold">
+                          {inquiry.serviceSpecs.ocean.mode?.includes('LCL') || inquiry.serviceType === 'Sea Freight (LCL)'
+                            ? 'Địa Chỉ Giao Kho CFS'
+                            : 'Cảng Dỡ (POD)'}
+                        </span>
+                        <span className="font-bold text-slate-800">{inquiry.serviceSpecs.ocean.podPort || inquiry.destination}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block font-semibold">
+                          {inquiry.serviceSpecs.ocean.mode?.includes('LCL') || inquiry.serviceType === 'Sea Freight (LCL)'
+                            ? 'Số lượng chuyến LCL'
+                            : 'Loại Cont / Số lượng'}
+                        </span>
                         <span className="font-bold text-indigo-700">
-                          {inquiry.serviceSpecs.ocean.containerCount || 1} {inquiry.serviceSpecs.ocean.containerCountUnit ? (inquiry.serviceSpecs.ocean.containerCountUnit.startsWith('Container') ? inquiry.serviceSpecs.ocean.containerCountUnit : `Cont (${inquiry.serviceSpecs.ocean.containerCountUnit})`) : 'Cont'} x {inquiry.serviceSpecs.ocean.containerType || '40HC'}
+                          {inquiry.serviceSpecs.ocean.mode?.includes('LCL') || inquiry.serviceType === 'Sea Freight (LCL)'
+                            ? `${inquiry.serviceSpecs.ocean.lclShipmentCount || 1} ${inquiry.serviceSpecs.ocean.lclFrequencyUnit || 'Chuyến / Tháng'}`
+                            : `${inquiry.serviceSpecs.ocean.containerCount || 1} ${inquiry.serviceSpecs.ocean.containerCountUnit ? (inquiry.serviceSpecs.ocean.containerCountUnit.startsWith('Container') ? inquiry.serviceSpecs.ocean.containerCountUnit : `Cont (${inquiry.serviceSpecs.ocean.containerCountUnit})`) : 'Cont'} x ${inquiry.serviceSpecs.ocean.containerType || '40HC'}`}
                         </span>
                       </div>
                       <div>
@@ -598,31 +623,111 @@ export const InquiryDetailWorkspace: React.FC<InquiryDetailWorkspaceProps> = ({
 
                 {/* Air Specs */}
                 {inquiry.serviceSpecs.air && (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3.5 text-xs bg-sky-50/40 p-4 rounded-xl border border-sky-100">
-                    <div>
-                      <span className="text-slate-400 block font-semibold">Air Service Level</span>
-                      <span className="font-bold text-sky-900">{inquiry.serviceSpecs.air.serviceLevel}</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 block font-semibold">Sân bay AOD → AOA</span>
-                      <span className="font-bold text-slate-800">{inquiry.serviceSpecs.air.originAirport} → {inquiry.serviceSpecs.air.destinationAirport}</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 block font-semibold">Chargeable Weight (CW)</span>
-                      <span className="font-bold text-indigo-700">{inquiry.serviceSpecs.air.chargeableWeightKgs} Kg CW</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 block font-semibold">Số kiện & Kích thước</span>
-                      <span className="font-bold text-slate-800">{inquiry.serviceSpecs.air.packageCount} kiện ({inquiry.serviceSpecs.air.dimensionsCm} cm)</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 block font-semibold">Hàng nguy hiểm IATA</span>
-                      <span className="font-bold text-slate-800">{inquiry.serviceSpecs.air.isDangerousGoods ? 'Có (DG)' : 'Không (Non-DG)'}</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 block font-semibold">Thông quan sân bay</span>
-                      <span className="font-bold text-slate-800">{inquiry.serviceSpecs.air.customsAtAirport ? 'Yêu cầu hỗ trợ' : 'Tự túc'}</span>
-                    </div>
+                  <div className={`space-y-3 p-4 rounded-xl border ${
+                    inquiry.serviceSpecs.air.airServiceType === 'Express / Courier'
+                      ? 'bg-amber-50/40 border-amber-200'
+                      : 'bg-sky-50/40 border-sky-100'
+                  }`}>
+                    {inquiry.serviceSpecs.air.airServiceType === 'Express / Courier' ? (
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 text-xs">
+                        <div>
+                          <span className="text-slate-400 block font-semibold">Phân loại dịch vụ</span>
+                          <span className="font-bold text-amber-950">⚡ Express / Courier</span>
+                        </div>
+                        <div>
+                          <span className="text-slate-400 block font-semibold">Loại bưu kiện</span>
+                          <span className="font-bold text-slate-800">
+                            {inquiry.serviceSpecs.air.expressPackageType?.includes('Document') ? '📄 Tài liệu' : '📦 Hàng mẫu / Bưu phẩm'}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-slate-400 block font-semibold">Số chuyến & Tần suất</span>
+                          <span className="font-bold text-indigo-700">
+                            {inquiry.serviceSpecs.air.shipmentCount || 1} {inquiry.serviceSpecs.air.frequencyUnit || 'Chuyến / Tháng'}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-slate-400 block font-semibold">Chargeable Weight (CW)</span>
+                          <span className="font-bold text-indigo-700">{inquiry.serviceSpecs.air.chargeableWeightKgs} Kg (chia 5.000)</span>
+                        </div>
+                        <div>
+                          <span className="text-slate-400 block font-semibold">Số gói / hộp</span>
+                          <span className="font-bold text-slate-800">{inquiry.serviceSpecs.air.packageCount} hộp ({inquiry.serviceSpecs.air.dimensionsCm || '--'} cm)</span>
+                        </div>
+                        <div>
+                          <span className="text-slate-400 block font-semibold">Xếp chồng (Stackable)</span>
+                          <span className={`font-bold ${inquiry.serviceSpecs.air.stackable ? 'text-emerald-700' : 'text-amber-700'}`}>
+                            {inquiry.serviceSpecs.air.stackable ? '✓ Cho phép chồng' : '⚠️ Không chồng'}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-slate-400 block font-semibold">Ký nhận (POD)</span>
+                          <span className="font-bold text-emerald-700">{inquiry.serviceSpecs.air.signatureRequired ? 'Yêu cầu chữ ký' : 'Không bắt buộc'}</span>
+                        </div>
+                        <div>
+                          <span className="text-slate-400 block font-semibold">Hải quan Express</span>
+                          <span className="font-bold text-slate-800">{inquiry.serviceSpecs.air.expressCustomsSupport ? 'Bao gồm trọn gói' : 'Tự túc'}</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 text-xs">
+                        <div>
+                          <span className="text-slate-400 block font-semibold">Phân loại dịch vụ</span>
+                          <span className="font-bold text-sky-900">✈️ Air Freight / Cargo</span>
+                        </div>
+                        <div>
+                          <span className="text-slate-400 block font-semibold">Điều kiện Nhận / Giao</span>
+                          <span className="font-bold text-sky-950">
+                            {inquiry.serviceSpecs.air.originServiceTerm || 'Airport'} ➔ {inquiry.serviceSpecs.air.destinationServiceTerm || 'Airport'}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-slate-400 block font-semibold">Sân bay AOD → AOA</span>
+                          <span className="font-bold text-slate-800">{inquiry.serviceSpecs.air.originAirport} → {inquiry.serviceSpecs.air.destinationAirport}</span>
+                        </div>
+                        <div>
+                          <span className="text-slate-400 block font-semibold">Số chuyến & Tần suất</span>
+                          <span className="font-bold text-indigo-700">
+                            {inquiry.serviceSpecs.air.shipmentCount || 1} {inquiry.serviceSpecs.air.frequencyUnit || 'Chuyến / Tháng'}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-slate-400 block font-semibold">Số kiện & Kích thước</span>
+                          <span className="font-bold text-slate-800">{inquiry.serviceSpecs.air.packageCount} kiện ({inquiry.serviceSpecs.air.dimensionsCm} cm)</span>
+                        </div>
+                        <div>
+                          <span className="text-slate-400 block font-semibold">Chargeable Weight (CW)</span>
+                          <span className="font-bold text-indigo-700">{inquiry.serviceSpecs.air.chargeableWeightKgs} Kg CW (chia 6.000)</span>
+                        </div>
+                        <div>
+                          <span className="text-slate-400 block font-semibold">Xếp chồng (Stackable)</span>
+                          <span className={`font-bold ${inquiry.serviceSpecs.air.stackable ? 'text-emerald-700' : 'text-amber-700'}`}>
+                            {inquiry.serviceSpecs.air.stackable ? '✓ Cho phép chồng' : '⚠️ Không chồng'}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-slate-400 block font-semibold">Hàng nguy hiểm IATA</span>
+                          <span className="font-bold text-slate-800">{inquiry.serviceSpecs.air.isDangerousGoods ? 'Có (DG)' : 'Không (Non-DG)'}</span>
+                        </div>
+                      </div>
+                    )}
+
+                    {(inquiry.serviceSpecs.air.pickupAddress || inquiry.serviceSpecs.air.deliveryAddress) && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-slate-200/80 text-xs">
+                        {inquiry.serviceSpecs.air.pickupAddress && (
+                          <div className="bg-white/90 p-2.5 rounded-lg border border-slate-200 shadow-2xs">
+                            <span className="text-[10px] text-slate-500 font-bold block">📍 Nơi lấy hàng (Pickup):</span>
+                            <span className="font-medium text-slate-800 block mt-0.5">{inquiry.serviceSpecs.air.pickupAddress}</span>
+                          </div>
+                        )}
+                        {inquiry.serviceSpecs.air.deliveryAddress && (
+                          <div className="bg-white/90 p-2.5 rounded-lg border border-rose-200/80 shadow-2xs">
+                            <span className="text-[10px] text-rose-800 font-bold block">📍 Nơi giao hàng (Delivery):</span>
+                            <span className="font-medium text-slate-800 block mt-0.5">{inquiry.serviceSpecs.air.deliveryAddress}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -658,27 +763,64 @@ export const InquiryDetailWorkspace: React.FC<InquiryDetailWorkspaceProps> = ({
 
                 {/* Warehousing Specs */}
                 {inquiry.serviceSpecs.warehousing && (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3.5 text-xs bg-purple-50/40 p-4 rounded-xl border border-purple-100">
-                    <div>
-                      <span className="text-slate-400 block font-semibold">Mô hình kho</span>
-                      <span className="font-bold text-purple-900">{inquiry.serviceSpecs.warehousing.warehouseType}</span>
+                  <div className="space-y-3 bg-purple-50/40 p-4 rounded-xl border border-purple-100">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 text-xs">
+                      <div>
+                        <span className="text-slate-400 block font-semibold">Mô hình thuê kho</span>
+                        <span className="font-bold text-purple-900">
+                          {inquiry.serviceSpecs.warehousing.warehousingLeaseModel === 'OVERFLOW' || inquiry.pricingType === 'SPOT' || (inquiry.serviceSpecs.warehousing.rentalDurationMonths || 12) < 12
+                            ? '🌊 Kho Tràn / Mùa Vụ (Overflow)'
+                            : '🏢 Kho Dài Hạn (Dedicated Hub)'}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block font-semibold">Loại hình kho bãi</span>
+                        <span className="font-bold text-slate-800 truncate block">{inquiry.serviceSpecs.warehousing.warehouseType}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block font-semibold">Đơn vị tính cước</span>
+                        <span className="font-bold text-indigo-700">{inquiry.serviceSpecs.warehousing.billingUnitPreference || 'm² (Diện tích sàn)'}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block font-semibold">Thời hạn thuê</span>
+                        <span className="font-bold text-slate-800">{inquiry.contractTerm || `${inquiry.serviceSpecs.warehousing.rentalDurationMonths || 12} Tháng`}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block font-semibold">Quy mô lưu trữ</span>
+                        <span className="font-bold text-slate-800">
+                          {inquiry.serviceSpecs.warehousing.dailyOrderCount ? `${inquiry.serviceSpecs.warehousing.dailyOrderCount} Đơn/ngày` : ''}
+                          {inquiry.serviceSpecs.warehousing.bufferStorageQty ? ` • Đệm ${inquiry.serviceSpecs.warehousing.bufferStorageQty} ${inquiry.serviceSpecs.warehousing.bufferStorageUnit || 'Pallets'}` : (inquiry.serviceSpecs.warehousing.bufferPalletPositions ? ` • Đệm ${inquiry.serviceSpecs.warehousing.bufferPalletPositions} Pallets` : '')}
+                          {inquiry.serviceSpecs.warehousing.storageAreaSqm ? `${inquiry.serviceSpecs.warehousing.storageAreaSqm} m²` : ''} 
+                          {inquiry.serviceSpecs.warehousing.palletPositions ? ` • ${inquiry.serviceSpecs.warehousing.palletPositions} Pallets` : ''}
+                          {inquiry.serviceSpecs.warehousing.cbmVolume ? ` • ${inquiry.serviceSpecs.warehousing.cbmVolume} CBM` : ''}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block font-semibold">Số lượng SKU</span>
+                        <span className="font-bold text-slate-800">{inquiry.serviceSpecs.warehousing.skuCount ? `${inquiry.serviceSpecs.warehousing.skuCount} SKUs` : 'Tiêu chuẩn'}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block font-semibold">Quản lý hạn dùng</span>
+                        <span className="font-bold text-indigo-700">{inquiry.serviceSpecs.warehousing.inventoryMethod || 'FIFO'}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block font-semibold">Kết nối API WMS</span>
+                        <span className="font-bold text-emerald-700">{inquiry.serviceSpecs.warehousing.wmsIntegrationNeeded ? 'Realtime API' : 'Không bắt buộc'}</span>
+                      </div>
                     </div>
-                    <div>
-                      <span className="text-slate-400 block font-semibold">Diện tích & Vị trí Pallet</span>
-                      <span className="font-bold text-slate-800">{inquiry.serviceSpecs.warehousing.storageAreaSqm} m² / {inquiry.serviceSpecs.warehousing.palletPositions} Pallets</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 block font-semibold">Thời hạn thuê</span>
-                      <span className="font-bold text-indigo-700">{inquiry.serviceSpecs.warehousing.rentalDurationMonths} Tháng</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 block font-semibold">Nhập / Xuất ngày</span>
-                      <span className="font-bold text-slate-800">{inquiry.serviceSpecs.warehousing.dailyInboundVolume} • {inquiry.serviceSpecs.warehousing.dailyOutboundVolume}</span>
-                    </div>
-                    <div className="col-span-2">
-                      <span className="text-slate-400 block font-semibold">Dịch vụ VAS</span>
-                      <span className="font-bold text-slate-800">{(inquiry.serviceSpecs.warehousing.requiredVAS || []).join(', ') || 'Tiêu chuẩn'}</span>
-                    </div>
+
+                    {(inquiry.serviceSpecs.warehousing.dailyInboundVolume || inquiry.serviceSpecs.warehousing.dailyOutboundVolume) && (
+                      <div className="p-3 bg-white/90 rounded-lg border border-purple-200/80 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                        <div>
+                          <span className="text-[10px] text-purple-800 block font-semibold">Lưu lượng Nhập kho (Inbound):</span>
+                          <span className="font-bold text-slate-800">{inquiry.serviceSpecs.warehousing.dailyInboundVolume}</span>
+                        </div>
+                        <div>
+                          <span className="text-[10px] text-purple-800 block font-semibold">Lưu lượng Xuất kho (Outbound):</span>
+                          <span className="font-bold text-slate-800">{inquiry.serviceSpecs.warehousing.dailyOutboundVolume}</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -737,8 +879,170 @@ export const InquiryDetailWorkspace: React.FC<InquiryDetailWorkspaceProps> = ({
                     </div>
                   </div>
                 )}
+
+                {/* Rail Specs */}
+                {inquiry.serviceSpecs.rail && (
+                  <div className="space-y-3 bg-blue-50/40 p-4 rounded-xl border border-blue-100">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 text-xs">
+                      <div>
+                        <span className="text-slate-400 block font-semibold">Mode</span>
+                        <span className="font-bold text-blue-900">{inquiry.serviceSpecs.rail.mode}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block font-semibold">Điều kiện Nhận / Giao</span>
+                        <span className="font-bold text-blue-950">
+                          {inquiry.serviceSpecs.rail.originServiceTerm || 'CY'} ➔ {inquiry.serviceSpecs.rail.destinationServiceTerm || 'CY'}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block font-semibold">
+                          {inquiry.serviceSpecs.rail.mode?.includes('LCL') ? 'Kho Ga Lấy Hàng' : 'Ga Xếp Hàng'}
+                        </span>
+                        <span className="font-bold text-slate-800">{inquiry.serviceSpecs.rail.originStation || inquiry.origin}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block font-semibold">
+                          {inquiry.serviceSpecs.rail.mode?.includes('LCL') ? 'Kho Ga Trả Hàng' : 'Ga Dỡ Hàng'}
+                        </span>
+                        <span className="font-bold text-slate-800">{inquiry.serviceSpecs.rail.destinationStation || inquiry.destination}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block font-semibold">
+                          {inquiry.serviceSpecs.rail.mode?.includes('LCL') ? 'Số lượng chuyến LCL' : 'Loại Cont / Số lượng'}
+                        </span>
+                        <span className="font-bold text-indigo-700">
+                          {inquiry.serviceSpecs.rail.mode?.includes('LCL')
+                            ? `${inquiry.serviceSpecs.rail.lclShipmentCount || 1} ${inquiry.serviceSpecs.rail.lclFrequencyUnit || 'Chuyến / Tháng'}`
+                            : `${inquiry.serviceSpecs.rail.containerCount || 1} ${inquiry.serviceSpecs.rail.containerCountUnit || 'Container / Tháng'} x ${inquiry.serviceSpecs.rail.containerType || '40HC'}`}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block font-semibold">Incoterms</span>
+                        <span className="font-bold text-slate-800">{inquiry.serviceSpecs.rail.incoterm || 'DAP'}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block font-semibold">Free Lưu Bãi Ga</span>
+                        <span className="font-bold text-emerald-700">{inquiry.serviceSpecs.rail.freeDemDetDaysRequested || 7} Ngày</span>
+                      </div>
+                    </div>
+
+                    {/* LCL Rail Specific Details */}
+                    {(inquiry.serviceSpecs.rail.mode?.includes('LCL') || inquiry.serviceSpecs.rail.lclCbm || inquiry.serviceSpecs.rail.lclPieces) && (
+                      <div className="p-3 bg-white/90 rounded-lg border border-blue-200/80 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 text-xs">
+                        <div>
+                          <span className="text-[10px] text-blue-800 block font-semibold">Số kiện & Quy cách:</span>
+                          <span className="font-bold text-slate-800">
+                            {inquiry.serviceSpecs.rail.lclPieces || 1} Kiện
+                          </span>
+                        </div>
+                        {inquiry.serviceSpecs.rail.lclDimensions && (
+                          <div>
+                            <span className="text-[10px] text-blue-800 block font-semibold">Kích thước (DxRxC):</span>
+                            <span className="font-bold text-slate-800">
+                              {inquiry.serviceSpecs.rail.lclDimensions.lengthCm}x{inquiry.serviceSpecs.rail.lclDimensions.widthCm}x{inquiry.serviceSpecs.rail.lclDimensions.heightCm} cm
+                            </span>
+                          </div>
+                        )}
+                        <div>
+                          <span className="text-[10px] text-blue-800 block font-semibold">Tổng CBM:</span>
+                          <span className="font-bold text-blue-900">{inquiry.serviceSpecs.rail.lclCbm || 0} m³</span>
+                        </div>
+                        {inquiry.serviceSpecs.rail.lclGrossWeightKg !== undefined && inquiry.serviceSpecs.rail.lclGrossWeightKg !== null ? (
+                          <div>
+                            <span className="text-[10px] text-blue-800 block font-semibold">Trọng lượng thực (Gross):</span>
+                            <span className="font-bold text-slate-900">{Number(inquiry.serviceSpecs.rail.lclGrossWeightKg).toLocaleString('vi-VN')} kg</span>
+                          </div>
+                        ) : null}
+                        <div>
+                          <span className="text-[10px] text-blue-800 block font-semibold">Trọng lượng tính cước:</span>
+                          <span className="font-bold text-indigo-700">
+                            {Number(inquiry.serviceSpecs.rail.lclChargeableWeightKg || 0).toLocaleString('vi-VN')} kg ({inquiry.serviceSpecs.rail.lclRevenueTon || ((inquiry.serviceSpecs.rail.lclChargeableWeightKg || 0) / 1000).toFixed(2)} RT)
+                          </span>
+                        </div>
+                        {typeof inquiry.serviceSpecs.rail.lclStackable === 'boolean' && (
+                          <div>
+                            <span className="text-[10px] text-blue-800 block font-semibold">Xếp chồng (Stackable):</span>
+                            <span className={`font-bold ${inquiry.serviceSpecs.rail.lclStackable ? 'text-emerald-700' : 'text-amber-700'}`}>
+                              {inquiry.serviceSpecs.rail.lclStackable ? '✓ Cho phép' : '⚠️ Không chồng'}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {(inquiry.serviceSpecs.rail.pickupAddress || inquiry.serviceSpecs.rail.deliveryAddress) && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-blue-100/80 text-xs">
+                        {inquiry.serviceSpecs.rail.pickupAddress && (
+                          <div className="bg-white/90 p-2.5 rounded-lg border border-blue-200/80 shadow-2xs">
+                            <span className="text-[10px] text-blue-800 font-bold block">📍 Kho lấy hàng (Shipper Warehouse):</span>
+                            <span className="font-medium text-slate-800 block mt-0.5">{inquiry.serviceSpecs.rail.pickupAddress}</span>
+                          </div>
+                        )}
+                        {inquiry.serviceSpecs.rail.deliveryAddress && (
+                          <div className="bg-white/90 p-2.5 rounded-lg border border-rose-200/80 shadow-2xs">
+                            <span className="text-[10px] text-rose-800 font-bold block">📍 Kho giao hàng (Consignee Warehouse):</span>
+                            <span className="font-medium text-slate-800 block mt-0.5">{inquiry.serviceSpecs.rail.deliveryAddress}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
+
+            {/* Requested Surcharges & Quotation Scope */}
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center space-x-2">
+                  <Receipt className="w-4 h-4 text-indigo-600" />
+                  <span>Quotation Scope & Requested Surcharges</span>
+                </h3>
+                <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold border ${
+                  inquiry.quotationScope === 'ALL_IN' || !inquiry.quotationScope
+                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                    : 'bg-blue-50 text-blue-800 border-blue-200'
+                }`}>
+                  {inquiry.quotationScope === 'ALL_IN' || !inquiry.quotationScope ? '✓ All-in Quotation' : '📋 Itemized Surcharges'}
+                </span>
+              </div>
+
+              <div className="space-y-3">
+                <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs">
+                  <span className="font-bold text-slate-900">
+                    Pricing Mode: <span className="text-indigo-700">{inquiry.quotationScope === 'ALL_IN' || !inquiry.quotationScope ? 'All-in Rate (No hidden surcharges)' : 'Itemized (Breakdown per line item)'}</span>
+                  </span>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    {inquiry.quotationScope === 'ALL_IN' || !inquiry.quotationScope
+                      ? 'Suppliers must quote a comprehensive all-inclusive rate covering base freight and all specified local charges.'
+                      : 'Suppliers should quote base freight separately and itemize each applicable local surcharge.'}
+                  </p>
+                </div>
+
+                {inquiry.requestedSurcharges && inquiry.requestedSurcharges.length > 0 ? (
+                  <div>
+                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-2">
+                      Specified Surcharges ({inquiry.requestedSurcharges.length} items):
+                    </span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {inquiry.requestedSurcharges.map((sc, idx) => (
+                        <div key={idx} className="flex items-center space-x-2 p-2.5 rounded-xl bg-indigo-50/40 border border-indigo-100 text-xs">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                          <span className="font-semibold text-slate-800">{sc}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+
+                {inquiry.surchargesNotes && (
+                  <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900">
+                    <span className="font-bold block mb-0.5">Surcharge Specific Notes:</span>
+                    <p>{inquiry.surchargesNotes}</p>
+                  </div>
+                )}
+              </div>
+            </div>
 
             {/* Special requirements */}
             <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">

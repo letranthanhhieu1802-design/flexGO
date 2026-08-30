@@ -296,6 +296,51 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
         )}
       </div>
 
+      {/* Movement Terms: Receiving & Delivery Terms */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+        <div>
+          <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
+            <span className="flex items-center gap-1.5">
+              <ArrowLeftRight className="w-3.5 h-3.5 text-cyan-600" />
+              <span>Điều Kiện Nhận Hàng (Origin Term) *</span>
+            </span>
+            <span className="text-[10.5px] font-semibold text-cyan-700 bg-cyan-50 px-2 py-0.5 rounded border border-cyan-200">
+              Điểm lấy
+            </span>
+          </label>
+          <select
+            value={specs.originServiceTerm || (isFCL ? 'CY' : 'CFS')}
+            onChange={(e) => updateSpec('originServiceTerm', e.target.value as any)}
+            className="w-full px-3.5 py-2.5 text-xs bg-white border border-cyan-300 rounded-xl focus:border-cyan-500 font-bold text-slate-900 shadow-2xs cursor-pointer"
+          >
+            <option value="Door">🚪 Door (Nhận tại kho người gửi / Shipper)</option>
+            <option value="CY">⚓ CY (Nhận tại bãi container cảng bốc / CY)</option>
+            <option value="CFS">📦 CFS (Nhận tại kho gom hàng lẻ / CFS)</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
+            <span className="flex items-center gap-1.5">
+              <ArrowLeftRight className="w-3.5 h-3.5 text-rose-600" />
+              <span>Điều Kiện Giao Hàng (Destination Term) *</span>
+            </span>
+            <span className="text-[10.5px] font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
+              Điểm giao
+            </span>
+          </label>
+          <select
+            value={specs.destinationServiceTerm || (isFCL ? 'CY' : 'CFS')}
+            onChange={(e) => updateSpec('destinationServiceTerm', e.target.value as any)}
+            className="w-full px-3.5 py-2.5 text-xs bg-white border border-rose-300 rounded-xl focus:border-rose-500 font-bold text-slate-900 shadow-2xs cursor-pointer"
+          >
+            <option value="Door">🚪 Door (Giao tại kho người nhận / Consignee)</option>
+            <option value="CY">⚓ CY (Giao tại bãi container cảng dỡ / CY)</option>
+            <option value="CFS">📦 CFS (Giao tại kho dỡ hàng lẻ / CFS)</option>
+          </select>
+        </div>
+      </div>
+
       {/* Warehouse Addresses: Pickup & Delivery */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
         <div>
@@ -607,6 +652,50 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
             <label htmlFor="lclStackableCheck" className="text-xs font-semibold text-slate-800 cursor-pointer">
               Hàng có thể chồng tầng (Stackable) <span className="text-slate-500 font-normal">(Nếu không thể chồng tầng, cước gom CFS có thể tính thêm hệ số sàn cont)</span>
             </label>
+          </div>
+
+          {/* LCL Shipment Count & Frequency */}
+          <div className="pt-2 border-t border-cyan-200/70">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  1. Số Lượng Chuyến Ghép *
+                </label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={specs.lclShipmentCount !== undefined && specs.lclShipmentCount !== null ? (specs.lclShipmentCount === 0 ? '' : specs.lclShipmentCount) : 1}
+                  onChange={(e) => {
+                    const raw = e.target.value.replace(/\D/g, '');
+                    updateSpec('lclShipmentCount', raw === '' ? 0 : parseInt(raw, 10));
+                  }}
+                  onBlur={() => {
+                    if (!specs.lclShipmentCount || specs.lclShipmentCount < 1) {
+                      updateSpec('lclShipmentCount', 1);
+                    }
+                  }}
+                  placeholder="VD: 1, 2, 5, 10..."
+                  className="w-full px-3.5 py-2.5 text-xs bg-white border border-cyan-300 rounded-xl focus:border-cyan-500 font-bold text-slate-900 shadow-2xs"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  2. Đơn Vị (Tần Suất Vận Chuyển) *
+                </label>
+                <select
+                  value={specs.lclFrequencyUnit || 'Chuyến / Tháng'}
+                  onChange={(e) => updateSpec('lclFrequencyUnit', e.target.value)}
+                  className="w-full px-3.5 py-2.5 text-xs bg-white border border-cyan-300 rounded-xl focus:border-cyan-500 font-bold text-slate-900 shadow-2xs cursor-pointer"
+                >
+                  <option value="Chuyến / Ngày">📅 Ngày (Chuyến / Ngày)</option>
+                  <option value="Chuyến / Tuần">📆 Tuần (Chuyến / Tuần)</option>
+                  <option value="Chuyến / Tháng">🗓️ Tháng (Chuyến / Tháng)</option>
+                  <option value="Chuyến / Năm">📈 Năm (Chuyến / Năm)</option>
+                  <option value="Chuyến (Một lần)">⚡ Chuyến (Một lần / Spot)</option>
+                </select>
+              </div>
+            </div>
           </div>
         </div>
       )}

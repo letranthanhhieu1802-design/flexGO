@@ -74,6 +74,18 @@ export type ServiceType =
   | 'Project Cargo'
   | 'Cold Chain';
 
+export type QuotationScope = 'ALL_IN' | 'ITEMIZED';
+
+export interface SurchargeItemDef {
+  id: string;
+  code: string;
+  name: string;
+  desc: string;
+  category: 'POL' | 'POD' | 'FREIGHT' | 'INLAND' | 'GENERAL';
+  categoryLabel: string;
+  isPopularDefault?: boolean;
+}
+
 export type CargoClassification = 'General' | 'Reefer' | 'Hazmat';
 
 export type InquiryStatus = 
@@ -106,6 +118,8 @@ export interface TruckingInquirySpecs {
   ltlGrossWeightKg?: number;
   ltlChargeableWeightKg?: number;
   ltlStackable?: boolean;
+  ltlShipmentCount?: number;
+  ltlFrequencyUnit?: string;
   // Reefer specific specifications
   reeferTempRange?: string;
   reeferSetPoint?: string;
@@ -141,6 +155,8 @@ export interface OceanInquirySpecs {
   cargoValue?: number | string;
   cargoValueCurrency?: string;
   mode: 'FCL (Full Container)' | 'LCL (Hàng lẻ đóng ghép CFS)';
+  originServiceTerm?: 'DOOR' | 'CY' | 'CFS';
+  destinationServiceTerm?: 'DOOR' | 'CY' | 'CFS';
   pickupAddress?: string;
   deliveryAddress?: string;
   containerType?: '20ft General (20DC)' | '40ft General (40DC)' | '40ft High Cube (40HC)' | '20ft Reefer (20RF)' | '40ft Reefer (40RF)' | 'Open Top / Flat Rack' | 'ISO Tank';
@@ -161,6 +177,8 @@ export interface OceanInquirySpecs {
   lclChargeableWeightKg?: number;
   lclRevenueTon?: number;
   lclStackable?: boolean;
+  lclShipmentCount?: number;
+  lclFrequencyUnit?: string;
   polPort: string; // Port of Loading
   podPort: string; // Port of Discharge
   incoterm: 'FOB' | 'CIF' | 'CFR' | 'EXW' | 'DAP' | 'DDP' | 'FCA';
@@ -177,12 +195,26 @@ export interface AirInquirySpecs {
   pricingType?: PricingType;
   contractTerm?: string;
   committedFrequency?: string;
+  airServiceType: 'Air Freight / Cargo' | 'Express / Courier';
   tradeRole?: 'Xuất khẩu (Export)' | 'Nhập khẩu (Import)' | 'Nội địa (Domestic)';
   cargoValue?: number | string;
   cargoValueCurrency?: string;
-  serviceLevel: 'Express Courier (1-2 days)' | 'Standard Air Freight (3-4 days)' | 'Economy Air Cargo (5-7 days)' | 'Air Charter Priority';
-  originAirport: string; // SGN, HAN, DAD, HPH, etc.
-  destinationAirport: string; // NRT, ICN, FRA, LAX, SIN, etc.
+  // Air Freight specific
+  serviceLevel?: 'Standard Air Freight (3-4 days)' | 'Economy Air Cargo (5-7 days)' | 'Priority Direct Flight (1-2 days)';
+  originServiceTerm?: 'DOOR' | 'AIRPORT';
+  destinationServiceTerm?: 'DOOR' | 'AIRPORT';
+  originAirport?: string; // SGN, HAN, DAD, HPH, etc.
+  destinationAirport?: string; // NRT, ICN, FRA, LAX, SIN, etc.
+  // Express / Courier specific
+  expressPackageType?: 'Document / Letter (Tài liệu / Thư tín)' | 'Parcel / Package (Bưu phẩm / Hàng mẫu đóng hộp)';
+  expressSpeedLevel?: 'Express Hỏa Tốc (1-2 ngày)' | 'Express Tiêu Chuẩn (2-3 ngày)' | 'Express Tiết Kiệm (4-5 ngày)';
+  originPostalCode?: string;
+  destinationPostalCode?: string;
+  signatureRequired?: boolean;
+  expressCustomsSupport?: boolean;
+  // Common locations & package details
+  pickupAddress?: string;
+  deliveryAddress?: string;
   packageCount: number;
   grossWeightKgs: number;
   volumetricWeightKgs: number;
@@ -194,6 +226,9 @@ export interface AirInquirySpecs {
   requiredTemperatureRange?: string;
   customsAtAirport: boolean;
   hsCode?: string;
+  stackable?: boolean;
+  shipmentCount?: number;
+  frequencyUnit?: string;
   selectedVAS?: string[];
 }
 
@@ -215,14 +250,30 @@ export interface WarehousingInquirySpecs {
   pricingType?: PricingType;
   contractTerm?: string;
   committedFrequency?: string;
+  warehousingLeaseModel?: 'OVERFLOW' | 'LONG_TERM'; // Kho tràn (Overflow / Seasonal) vs Kho dài hạn (Long-term / Dedicated)
   warehouseType: 'Kho thường (Grade A Dry)' | 'Kho ngoại quan (Bonded)' | 'Kho lạnh / Kho mát (Cold Storage)' | 'Kho hàng nguy hiểm (DG Warehouse)' | 'Kho TMĐT / Fulfillment' | 'Kho tự quản (Self-Storage)';
+  billingUnitPreference?: 'm² (Diện tích sàn)' | 'Pallet (Vị trí Pallet/tháng)' | 'CBM (Thể tích thực m³)' | 'Order (Hoàn tất đơn hàng TMĐT)';
   storageAreaSqm?: number;
   palletPositions?: number;
+  bufferPalletPositions?: number;
+  bufferStorageQty?: number;
+  bufferStorageUnit?: 'Pallet (Vị trí)' | 'Ngăn Kệ / Ô Kệ (Shelving Bins)' | 'Khay Nhựa / Thùng Tote (Totes)' | 'm² (Diện tích sàn)' | 'CBM (Thể tích thực m³)' | string;
+  palletSpecsDescription?: string;
+  cbmVolume?: number;
+  dailyOrderCount?: number;
   rentalDurationMonths: number;
+  skuCount?: number;
+  inboundQty?: number;
+  inboundUnit?: string;
+  inboundPeriod?: 'Ngày' | 'Tuần' | 'Tháng';
   dailyInboundVolume?: string;
+  outboundQty?: number;
+  outboundUnit?: string;
+  outboundPeriod?: 'Ngày' | 'Tuần' | 'Tháng';
   dailyOutboundVolume?: string;
-  requiredVAS?: string[];
+  inventoryMethod?: 'FIFO (Nhập trước xuất trước)' | 'FEFO (Hạn gần xuất trước)' | 'Serial / Lot Tracking' | 'Tiêu chuẩn';
   wmsIntegrationNeeded?: boolean;
+  requiredVAS?: string[];
   selectedVAS?: string[];
 }
 
@@ -266,16 +317,40 @@ export interface RailInquirySpecs {
   pricingType?: PricingType;
   contractTerm?: string;
   committedFrequency?: string;
-  mode: 'FCL (Nguyên container ga - ga)' | 'LCL (Hàng lẻ ghép toa)';
+  tradeRole?: 'Liên vận xuất khẩu (Export Rail)' | 'Liên vận nhập khẩu (Import Rail)' | 'Nội địa Bắc - Nam (Domestic Rail)';
+  cargoValue?: number | string;
+  cargoValueCurrency?: string;
+  mode: 'FCL (Nguyên container ga - ga)' | 'LCL (Hàng lẻ đóng ghép kho ga)';
+  originServiceTerm?: 'DOOR' | 'CY' | 'CFS';
+  destinationServiceTerm?: 'DOOR' | 'CY' | 'CFS';
+  pickupAddress?: string;
+  deliveryAddress?: string;
+  originStation: string;
+  destinationStation: string;
   containerType?: 'Cont 20ft' | 'Cont 40ft HC' | 'Cont Lạnh (Reefer Rail)' | 'Toa xe thùng kín / bạt';
   containerCount?: number;
   containerCountUnit?: string;
   grossWeightKgs?: number;
   cbmVolume?: number;
-  originStation: string;
-  destinationStation: string;
-  drayageFirstMile: boolean;
-  drayageLastMile: boolean;
+  incoterm?: string;
+  freeDemDetDaysRequested?: number;
+  // LCL specific specifications (dimensions, pieces, CBM, Chargeable Weight & Stackable)
+  lclPieces?: number;
+  lclPackaging?: string;
+  lclDimensions?: {
+    lengthCm: number;
+    widthCm: number;
+    heightCm: number;
+  };
+  lclCbm?: number;
+  lclGrossWeightKg?: number;
+  lclChargeableWeightKg?: number;
+  lclRevenueTon?: number;
+  lclStackable?: boolean;
+  lclShipmentCount?: number;
+  lclFrequencyUnit?: string;
+  drayageFirstMile?: boolean;
+  drayageLastMile?: boolean;
   selectedVAS?: string[];
 }
 
@@ -326,6 +401,9 @@ export interface InquiryItem {
   contractTerm?: string;
   committedVolume?: string;
   selectedVAS?: string[];
+  quotationScope?: QuotationScope;
+  requestedSurcharges?: string[];
+  surchargesNotes?: string;
   cargoClassification?: CargoClassification;
   temperatureRequirement?: string;
   preservationRequirement?: string;
@@ -335,6 +413,8 @@ export interface InquiryItem {
   origin: string;
   destination: string;
   route?: string;
+  originServiceTerm?: string;
+  destinationServiceTerm?: string;
   cargoType: string;
   industry?: string;
   hsCode?: string;

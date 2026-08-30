@@ -49,11 +49,19 @@ import {
   RailInquirySpecs,
   ProjectInquirySpecs,
   ServiceSpecificSpecs,
-  UserProfile
+  UserProfile,
+  QuotationScope
 } from '../../types';
 
 import { PricingTypeSection } from './inquiryForms/PricingTypeSection';
 import { VASSection, VASItemDef } from './inquiryForms/VASSection';
+import { 
+  SurchargesSection, 
+  OCEAN_SURCHARGES, 
+  TRUCKING_SURCHARGES, 
+  AIR_SURCHARGES, 
+  GENERAL_LOGISTICS_SURCHARGES 
+} from './inquiryForms/SurchargesSection';
 
 import { 
   TruckingInquiryForm, 
@@ -252,6 +260,8 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
     ltlGrossWeightKg: 1200,
     ltlChargeableWeightKg: 1800,
     ltlStackable: true,
+    ltlShipmentCount: 1,
+    ltlFrequencyUnit: 'Chuyến / Tháng',
     multiDropPoints: 1,
     loadingLaborRequired: false,
     unloadingLaborRequired: false,
@@ -296,9 +306,13 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
     pricingType: 'SPOT',
     tradeRole: 'Xuất khẩu (Export)',
     mode: 'FCL (Full Container)',
+    originServiceTerm: 'CY',
+    destinationServiceTerm: 'CY',
     containerType: '40ft High Cube (40HC)',
     containerCount: 1,
     containerCountUnit: 'Container / Tháng',
+    lclShipmentCount: 1,
+    lclFrequencyUnit: 'Chuyến / Tháng',
     cbmVolume: undefined,
     grossWeightKgs: undefined,
     polPort: '',
@@ -312,8 +326,13 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
 
   const [airSpecs, setAirSpecs] = useState<AirInquirySpecs>({
     pricingType: 'SPOT',
+    airServiceType: 'Air Freight / Cargo',
     tradeRole: 'Xuất khẩu (Export)',
     serviceLevel: 'Standard Air Freight (3-4 days)',
+    originServiceTerm: 'AIRPORT',
+    destinationServiceTerm: 'AIRPORT',
+    expressPackageType: 'Parcel / Package (Bưu phẩm / Hàng mẫu đóng hộp)',
+    expressSpeedLevel: 'Express Tiêu Chuẩn (2-3 ngày)',
     originAirport: '',
     destinationAirport: '',
     packageCount: undefined,
@@ -324,6 +343,9 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
     isDangerousGoods: false,
     isTemperatureSensitive: false,
     customsAtAirport: true,
+    stackable: true,
+    shipmentCount: 1,
+    frequencyUnit: 'Chuyến / Tháng',
     selectedVAS: [],
   });
 
@@ -340,10 +362,27 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
 
   const [warehousingSpecs, setWarehousingSpecs] = useState<WarehousingInquirySpecs>({
     pricingType: 'CONTRACT',
+    warehousingLeaseModel: 'LONG_TERM',
     warehouseType: 'Kho thường (Grade A Dry)',
+    billingUnitPreference: 'm² (Diện tích sàn)',
     storageAreaSqm: 500,
     palletPositions: 350,
+    cbmVolume: 800,
+    skuCount: 150,
+    bufferStorageQty: 20,
+    bufferStorageUnit: 'Pallet (Vị trí)',
+    bufferPalletPositions: 20,
     rentalDurationMonths: 12,
+    inboundQty: 2,
+    inboundUnit: 'Container 40ft (FEU)',
+    inboundPeriod: 'Tuần',
+    dailyInboundVolume: '2 Container 40ft (FEU) / Tuần',
+    outboundQty: 40,
+    outboundUnit: 'Pallet',
+    outboundPeriod: 'Ngày',
+    dailyOutboundVolume: '40 Pallet / Ngày',
+    inventoryMethod: 'FIFO (Nhập trước xuất trước)',
+    wmsIntegrationNeeded: true,
     selectedVAS: [],
   });
 
@@ -375,12 +414,26 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
 
   const [railSpecs, setRailSpecs] = useState<RailInquirySpecs>({
     pricingType: 'SPOT',
+    tradeRole: 'Nội địa Bắc - Nam (Domestic Rail)',
     mode: 'FCL (Nguyên container ga - ga)',
+    originServiceTerm: 'CY',
+    destinationServiceTerm: 'CY',
     containerType: 'Cont 40ft HC',
     containerCount: 1,
     containerCountUnit: 'Container / Tháng',
     originStation: '',
     destinationStation: '',
+    incoterm: 'DAP',
+    freeDemDetDaysRequested: 7,
+    lclPieces: 1,
+    lclDimensions: { lengthCm: 120, widthCm: 100, heightCm: 150 },
+    lclCbm: 1.8,
+    lclGrossWeightKg: 1000,
+    lclChargeableWeightKg: 1800,
+    lclRevenueTon: 1.8,
+    lclStackable: true,
+    lclShipmentCount: 1,
+    lclFrequencyUnit: 'Chuyến / Tháng',
     drayageFirstMile: true,
     drayageLastMile: true,
     selectedVAS: [],
@@ -398,10 +451,24 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
     selectedVAS: [],
   });
 
-  // SECTION 5: VAS Selection State per Service
+  // SECTION 5: Surcharges & Local Charges State
+  const [quotationScope, setQuotationScope] = useState<QuotationScope>('ALL_IN');
+  const [requestedSurcharges, setRequestedSurcharges] = useState<string[]>([
+    'Phí xếp dỡ tại cảng bốc (Terminal Handling Charge - POL)',
+    'Phí chứng từ & Vận đơn đường biển (Bill of Lading / Documentation Fee)',
+    'Phí kẹp chì niêm phong (Container Seal Fee)',
+    'Phí khai báo tải trọng xác thực (Verified Gross Mass - VGM)',
+    'Lệnh giao hàng đầu dỡ (Delivery Order - D/O Fee)',
+    'Phí xếp dỡ tại cảng dỡ (Terminal Handling Charge - POD)',
+    'Phí vệ sinh container (Container Cleaning / Washing Fee)',
+    'Phụ phí biến động nhiên liệu xanh (Bunker Adjustment / Low Sulphur)',
+  ]);
+  const [surchargesNotes, setSurchargesNotes] = useState<string>('');
+
+  // SECTION 6: VAS Selection State per Service
   const [selectedVASList, setSelectedVASList] = useState<string[]>([]);
 
-  // SECTION 6: Budget, Currency, Exchange Rate, Dates & Notes
+  // SECTION 7: Budget, Currency, Exchange Rate, Dates & Notes
   const [currency, setCurrency] = useState<'VND' | 'USD' | 'EUR' | 'CNY' | 'JPY'>('VND');
   const [exchangeRate, setExchangeRate] = useState<number>(25450);
   const [targetBudget, setTargetBudget] = useState('');
@@ -706,12 +773,27 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
     }
   };
 
+  const getDefaultSurchargesForService = (service: ServiceType): string[] => {
+    switch (service) {
+      case 'Sea Freight (FCL)':
+      case 'Sea Freight (LCL)':
+        return OCEAN_SURCHARGES.filter((s) => s.isPopularDefault).map((s) => s.name);
+      case 'Trucking':
+        return TRUCKING_SURCHARGES.filter((s) => s.isPopularDefault).map((s) => s.name);
+      case 'Air Freight':
+        return AIR_SURCHARGES.filter((s) => s.isPopularDefault).map((s) => s.name);
+      default:
+        return GENERAL_LOGISTICS_SURCHARGES.filter((s) => s.isPopularDefault).map((s) => s.name);
+    }
+  };
+
   // Handle service type change & update appropriate defaults
   const handleSelectService = (newService: ServiceType) => {
     setServiceType(newService);
     if (newService === 'Cold Chain') {
       setCargoClassification('Reefer');
     }
+    setRequestedSurcharges(getDefaultSurchargesForService(newService));
   };
 
   const validateInquiryForm = (): string[] => {
@@ -845,7 +927,25 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
     } else if (serviceType === 'Cold Chain') {
       serviceSpecs.coldChain = { ...coldChainSpecs, pricingType, contractTerm, committedFrequency, selectedVAS: selectedVASList };
     } else if (serviceType === 'Warehousing') {
-      serviceSpecs.warehousing = { ...warehousingSpecs, pricingType, contractTerm, committedFrequency, selectedVAS: selectedVASList };
+      const leaseModel = pricingType === 'SPOT' ? 'OVERFLOW' : 'LONG_TERM';
+      let durationMonths = 12;
+      if (contractTerm?.includes('1 Tháng')) durationMonths = 1;
+      else if (contractTerm?.includes('2 Tháng')) durationMonths = 2;
+      else if (contractTerm?.includes('3 Tháng')) durationMonths = 3;
+      else if (contractTerm?.includes('6 Tháng')) durationMonths = 6;
+      else if (contractTerm?.includes('24 tháng') || contractTerm?.includes('2 năm')) durationMonths = 24;
+      else if (contractTerm?.includes('36 tháng') || contractTerm?.includes('3 năm')) durationMonths = 36;
+      else if (contractTerm?.includes('60 tháng') || contractTerm?.includes('5 năm')) durationMonths = 60;
+
+      serviceSpecs.warehousing = { 
+        ...warehousingSpecs, 
+        warehousingLeaseModel: leaseModel,
+        rentalDurationMonths: durationMonths,
+        pricingType, 
+        contractTerm, 
+        committedFrequency, 
+        selectedVAS: selectedVASList 
+      };
     } else if (serviceType === 'Customs Clearance') {
       serviceSpecs.customs = { 
         ...customsSpecs, 
@@ -882,10 +982,23 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
       ? cargoType.trim() 
       : (industry ? industry.split('(')[0].trim() : 'Hàng hóa tổng hợp');
 
-    const parts: string[] = [];
-    if (weightKg.trim()) parts.push(`${weightKg.trim()} kg`);
-    if (volumeCbm.trim()) parts.push(`${volumeCbm.trim()} CBM`);
-    const finalWeightVolume = parts.length > 0 ? parts.join(' / ') : 'Theo thỏa thuận';
+    let finalWeightVolume = 'Theo thỏa thuận';
+    if (serviceType === 'Warehousing') {
+      if (warehousingSpecs.billingUnitPreference?.includes('Pallet')) {
+        finalWeightVolume = `${warehousingSpecs.palletPositions || 0} Pallet slots`;
+      } else if (warehousingSpecs.billingUnitPreference?.includes('CBM')) {
+        finalWeightVolume = `${warehousingSpecs.cbmVolume || 0} CBM`;
+      } else if (warehousingSpecs.billingUnitPreference?.includes('Order')) {
+        finalWeightVolume = `${warehousingSpecs.dailyOrderCount || 0} Đơn/ngày`;
+      } else {
+        finalWeightVolume = `${warehousingSpecs.storageAreaSqm || 0} m² sàn`;
+      }
+    } else {
+      const parts: string[] = [];
+      if (weightKg.trim()) parts.push(`${weightKg.trim()} kg`);
+      if (volumeCbm.trim()) parts.push(`${volumeCbm.trim()} CBM`);
+      finalWeightVolume = parts.length > 0 ? parts.join(' / ') : 'Theo thỏa thuận';
+    }
 
     const formattedTargetBudget = targetBudget.trim() 
       ? (targetBudget.toLowerCase().includes(currency.toLowerCase()) ? targetBudget : `${targetBudget} ${currency}`)
@@ -905,6 +1018,9 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
       ? (serviceSpecs.ocean?.tradeRole || serviceSpecs.air?.tradeRole || serviceSpecs.customs?.tradeRole || serviceSpecs.crossBorder?.tradeRole)
       : undefined;
 
+    const activeOriginServiceTerm = serviceSpecs.ocean?.originServiceTerm || serviceSpecs.air?.originServiceTerm;
+    const activeDestinationServiceTerm = serviceSpecs.ocean?.destinationServiceTerm || serviceSpecs.air?.destinationServiceTerm;
+
     const newInquiry: InquiryItem = {
       id: `draft-${Date.now()}`,
       code: '',
@@ -914,6 +1030,9 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
       contractTerm: pricingType === 'CONTRACT' ? contractTerm : undefined,
       committedVolume: pricingType === 'CONTRACT' ? committedFrequency : undefined,
       selectedVAS: selectedVASList,
+      quotationScope,
+      requestedSurcharges: requestedSurcharges.length > 0 ? requestedSurcharges : undefined,
+      surchargesNotes: surchargesNotes.trim() ? surchargesNotes.trim() : undefined,
       cargoClassification,
       temperatureRequirement: cargoClassification === 'Reefer' ? temperatureRequirement : undefined,
       preservationRequirement: preservationRequirement.trim() ? preservationRequirement.trim() : undefined,
@@ -923,6 +1042,8 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
       origin: origin || (cleanedTruckingSpecs.pickupLocations?.[0] ?? 'Điểm đi'),
       destination: destination || (cleanedTruckingSpecs.deliveryLocations?.[0] ?? 'Điểm đến'),
       route: calculatedRoute,
+      originServiceTerm: activeOriginServiceTerm,
+      destinationServiceTerm: activeDestinationServiceTerm,
       industry: industry.trim() ? industry : undefined,
       hsCode: isImportExportService ? (hsCode.trim() || undefined) : undefined,
       tradeRole: activeTradeRole,
@@ -1002,7 +1123,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
               <span className="px-2.5 py-0.5 text-[10px] font-extrabold bg-indigo-500/30 text-indigo-200 border border-indigo-400/40 rounded-full uppercase tracking-wider">
                 RFQ DISPATCHER
               </span>
-              <span className="text-xs text-slate-300">Tạo Yêu Cầu Báo Giá Logistics Chuẩn Hóa 6 Bước</span>
+              <span className="text-xs text-slate-300">Tạo Yêu Cầu Báo Giá Logistics Chuẩn Hóa 7 Bước</span>
             </div>
             <h3 className="text-lg font-bold text-white mt-1 flex items-center gap-2">
               <span>Đăng Yêu Cầu Báo Giá Mới (Send RFQ)</span>
@@ -1115,6 +1236,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
               onChangeContractTerm={setContractTerm}
               committedFrequency={committedFrequency}
               onChangeCommittedFrequency={setCommittedFrequency}
+              serviceType={serviceType}
               serviceLabel={currentServiceDef.label}
               themeColor={currentServiceDef.themeColor}
             />
@@ -1372,7 +1494,13 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
 
             {/* General Cargo Info, Weight & Preservation Requirements */}
             <div className="space-y-3">
-              <div className={`grid grid-cols-1 ${isImportExportService ? 'sm:grid-cols-2 lg:grid-cols-4' : 'sm:grid-cols-2'} gap-3`}>
+              <div className={`grid grid-cols-1 ${
+                serviceType === 'Warehousing'
+                  ? 'sm:grid-cols-3'
+                  : isImportExportService
+                  ? 'sm:grid-cols-2 lg:grid-cols-4'
+                  : 'sm:grid-cols-2'
+              } gap-3`}>
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <label className="block text-xs font-semibold text-slate-700 flex items-center gap-1">
@@ -1409,6 +1537,49 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                     className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 font-medium text-slate-900"
                   />
                 </div>
+
+                {serviceType === 'Warehousing' && (
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-xs font-semibold text-slate-700">
+                        Quy Cách Đóng Gói (Packaging) *
+                      </label>
+                    </div>
+                    <select
+                      value={packagePackaging}
+                      onChange={(e) => {
+                        setPackagePackaging(e.target.value);
+                        if (e.target.value !== 'Khác') {
+                          setCustomPackaging('');
+                        }
+                      }}
+                      className="w-full px-3.5 py-2.5 text-xs bg-purple-50/50 border border-purple-200 rounded-xl focus:bg-white focus:border-purple-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
+                    >
+                      <option value="Đóng Pallet gỗ / nhựa tiêu chuẩn">🪵 Đóng Pallet gỗ / nhựa tiêu chuẩn (Palletized)</option>
+                      <option value="Thùng carton rời / Chưa lên pallet">📦 Thùng carton rời / Chưa lên pallet (Loose Cartons)</option>
+                      <option value="Kiện gỗ / Khung gỗ / Thùng gỗ kín">🪵 Kiện gỗ / Khung gỗ / Thùng gỗ kín (Wooden Crates)</option>
+                      <option value="Bao tải dệt / Bao Jumbo (FIBC)">🌾 Bao tải dệt / Bao Jumbo (FIBC Big Bags)</option>
+                      <option value="Thùng phi / Can nhựa / Bồn IBC">🛢️ Thùng phi / Can nhựa / Bồn IBC (Drums & IBCs)</option>
+                      <option value="Hàng cuộn / Ống / Bó thanh dài">🛞 Hàng cuộn / Ống / Bó thanh dài (Coils & Pipes)</option>
+                      <option value="Thiết bị / Máy móc nguyên chiếc">🚗 Thiết bị / Máy móc nguyên chiếc (Machinery & CBU)</option>
+                      <option value="Hàng rời không đóng gói">🛍️ Hàng rời không đóng gói (Bulk / Loose Cargo)</option>
+                      <option value="Khác">✏️ Khác (Tự nhập quy cách đóng gói...)</option>
+                    </select>
+
+                    {packagePackaging === 'Khác' && (
+                      <div className="mt-2 animate-in fade-in slide-in-from-top-1 duration-150">
+                        <input
+                          type="text"
+                          required
+                          value={customPackaging}
+                          onChange={(e) => setCustomPackaging(e.target.value)}
+                          placeholder="Nhập quy cách đóng gói cụ thể (VD: Thùng mút xốp, Màng co PE, Cuộn Reel...)"
+                          className="w-full px-3 py-2 text-xs bg-amber-50/50 border border-amber-300 rounded-xl focus:bg-white focus:border-amber-500 font-medium text-slate-900 placeholder:text-slate-400"
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {isImportExportService && (
                   <div className="animate-in fade-in slide-in-from-top-1 duration-150">
@@ -1514,6 +1685,8 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                 )}
               </div>
 
+              {/* Row 2 for non-warehousing services: Packaging, Weight, Volume */}
+              {serviceType !== 'Warehousing' && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   <div>
                     <div className="flex items-center justify-between mb-1">
@@ -1531,13 +1704,14 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                       }}
                       className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 font-semibold text-slate-800"
                     >
-                      <option value="Đóng Pallet gỗ tiêu chuẩn">Đóng Pallet gỗ tiêu chuẩn</option>
-                      <option value="Thùng carton 5-7 lớp">Thùng carton 5-7 lớp</option>
-                      <option value="Kiện gỗ / Khung gỗ đóng kín">Kiện gỗ / Khung gỗ đóng kín</option>
-                      <option value="Bao tải dệt / Bao Jumbo">Bao tải dệt / Bao Jumbo</option>
-                      <option value="Thùng phi / Can nhựa IBC">Thùng phi / Can nhựa IBC</option>
-                      <option value="Màng co PE / Quấn bọc bảo vệ">Màng co PE / Quấn bọc bảo vệ</option>
-                      <option value="Hàng rời không đóng gói">Hàng rời không đóng gói</option>
+                      <option value="Đóng Pallet gỗ / nhựa tiêu chuẩn">🪵 Đóng Pallet gỗ / nhựa tiêu chuẩn (Palletized)</option>
+                      <option value="Thùng carton rời / Chưa lên pallet">📦 Thùng carton rời / Chưa lên pallet (Loose Cartons)</option>
+                      <option value="Kiện gỗ / Khung gỗ / Thùng gỗ kín">🪵 Kiện gỗ / Khung gỗ / Thùng gỗ kín (Wooden Crates)</option>
+                      <option value="Bao tải dệt / Bao Jumbo (FIBC)">🌾 Bao tải dệt / Bao Jumbo (FIBC Big Bags)</option>
+                      <option value="Thùng phi / Can nhựa / Bồn IBC">🛢️ Thùng phi / Can nhựa / Bồn IBC (Drums & IBCs)</option>
+                      <option value="Hàng cuộn / Ống / Bó thanh dài">🛞 Hàng cuộn / Ống / Bó thanh dài (Coils & Pipes)</option>
+                      <option value="Thiết bị / Máy móc nguyên chiếc">🚗 Thiết bị / Máy móc nguyên chiếc (Machinery & CBU)</option>
+                      <option value="Hàng rời không đóng gói">🛍️ Hàng rời không đóng gói (Bulk / Loose Cargo)</option>
                       <option value="Khác">✏️ Khác (Tự nhập quy cách đóng gói...)</option>
                     </select>
 
@@ -1605,6 +1779,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                     </div>
                   </div>
                 </div>
+              )}
 
               {/* Trường Yêu Cầu Bảo Quản (Customer input) */}
               <div>
@@ -1631,7 +1806,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
             <div className="flex items-center justify-between mb-3">
               <label className="block text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                 <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-bold flex items-center justify-center">4</span>
-                <span>Thông Tin Chi Tiết Yêu Cầu ({serviceType})</span>
+                <span>Thông Tin Chi Tiết Yêu Cầu ({serviceType.startsWith('Sea Freight') ? 'Sea Freight' : serviceType})</span>
               </label>
             </div>
 
@@ -1715,6 +1890,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                 setOrigin={setOrigin}
                 destination={destination}
                 setDestination={setDestination}
+                cargoClassification={cargoClassification}
               />
             )}
 
@@ -1752,11 +1928,36 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
             )}
           </div>
 
-          {/* SECTION 5: VAS (Dịch Vụ Giá Trị Gia Tăng) */}
+          {/* SECTION 5: Yêu Cầu Phụ Phí & Điều Khoản Báo Giá (Local Charges & Surcharges) */}
           <div className="pt-2 border-t border-slate-100">
             <div className="flex items-center justify-between mb-3">
               <label className="block text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                 <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-bold flex items-center justify-center">5</span>
+                <span>Yêu Cầu Phụ Phí & Điều Khoản Báo Giá (Local Charges & Surcharges)</span>
+              </label>
+              <span className="text-[11px] font-semibold text-indigo-600">
+                {quotationScope === 'ALL_IN' ? 'Gói Trọn Gói (All-in)' : 'Tách Mục (Itemized)'} • {requestedSurcharges.length} Phụ phí đã chọn
+              </span>
+            </div>
+
+            <SurchargesSection
+              serviceType={serviceType}
+              warehouseType={serviceType === 'Warehousing' ? warehousingSpecs.warehouseType : undefined}
+              quotationScope={quotationScope}
+              onChangeQuotationScope={setQuotationScope}
+              selectedSurcharges={requestedSurcharges}
+              onChangeSelectedSurcharges={setRequestedSurcharges}
+              surchargesNotes={surchargesNotes}
+              onChangeSurchargesNotes={setSurchargesNotes}
+              themeColor={currentServiceDef.themeColor}
+            />
+          </div>
+
+          {/* SECTION 6: VAS (Dịch Vụ Giá Trị Gia Tăng) */}
+          <div className="pt-2 border-t border-slate-100">
+            <div className="flex items-center justify-between mb-3">
+              <label className="block text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-bold flex items-center justify-center">6</span>
                 <span>Dịch Vụ Giá Trị Gia Tăng (VAS)</span>
               </label>
               <span className="text-[11px] font-semibold text-indigo-600">
@@ -1773,11 +1974,11 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
             />
           </div>
 
-          {/* SECTION 6: Ngân Sách, Tiền Tệ, Tỉ Giá Và Thời Hạn Báo Giá */}
+          {/* SECTION 7: Ngân Sách, Tiền Tệ, Tỉ Giá Và Thời Hạn Báo Giá */}
           <div className="pt-2 border-t border-slate-100 space-y-3.5">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <label className="block text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-bold flex items-center justify-center">6</span>
+                <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-bold flex items-center justify-center">7</span>
                 <span>{currency === 'VND' ? 'Đơn Giá Kỳ Vọng & Thời Hạn Báo Giá' : 'Đơn Giá Kỳ Vọng, Tiền Tệ & Thời Hạn Báo Giá'}</span>
               </label>
               {currency !== 'VND' && (

@@ -1386,6 +1386,50 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
               <span className="text-[11px] font-normal text-slate-500">(Nếu không thể chồng tầng, nhà xe sẽ tính hệ số cước sàn xe)</span>
             </label>
           </div>
+
+          {/* LTL Shipment Count & Frequency */}
+          <div className="pt-2 border-t border-emerald-200/70">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  1. Số Lượng Chuyến Ghép *
+                </label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={specs.ltlShipmentCount !== undefined && specs.ltlShipmentCount !== null ? (specs.ltlShipmentCount === 0 ? '' : specs.ltlShipmentCount) : 1}
+                  onChange={(e) => {
+                    const raw = e.target.value.replace(/\D/g, '');
+                    updateSpec('ltlShipmentCount', raw === '' ? 0 : parseInt(raw, 10));
+                  }}
+                  onBlur={() => {
+                    if (!specs.ltlShipmentCount || specs.ltlShipmentCount < 1) {
+                      updateSpec('ltlShipmentCount', 1);
+                    }
+                  }}
+                  placeholder="VD: 1, 2, 5, 10..."
+                  className="w-full px-3.5 py-2.5 text-xs bg-white border border-emerald-300 rounded-xl focus:border-emerald-500 font-bold text-slate-900 shadow-2xs"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  2. Đơn Vị (Tần Suất Vận Chuyển) *
+                </label>
+                <select
+                  value={specs.ltlFrequencyUnit || 'Chuyến / Tháng'}
+                  onChange={(e) => updateSpec('ltlFrequencyUnit', e.target.value)}
+                  className="w-full px-3.5 py-2.5 text-xs bg-white border border-emerald-300 rounded-xl focus:border-emerald-500 font-bold text-slate-900 shadow-2xs cursor-pointer"
+                >
+                  <option value="Chuyến / Ngày">📅 Ngày (Chuyến / Ngày)</option>
+                  <option value="Chuyến / Tuần">📆 Tuần (Chuyến / Tuần)</option>
+                  <option value="Chuyến / Tháng">🗓️ Tháng (Chuyến / Tháng)</option>
+                  <option value="Chuyến / Năm">📈 Năm (Chuyến / Năm)</option>
+                  <option value="Chuyến (Một lần)">⚡ Chuyến (Một lần / Spot)</option>
+                </select>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
