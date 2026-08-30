@@ -1,5 +1,5 @@
 import React from 'react';
-import { Building2, MapPin, Layers, Box, Cpu, FileText, CheckCircle2, ShieldCheck, ArrowRight, RefreshCw, BarChart2, ThermometerSnowflake, Droplets, Flame } from 'lucide-react';
+import { Building2, MapPin, Layers, Box, Cpu, FileText, CheckCircle2, ShieldCheck, ArrowRight, RefreshCw, BarChart2, ThermometerSnowflake, Droplets, Flame, Tag, DollarSign } from 'lucide-react';
 import { WarehousingInquirySpecs } from '../../../types';
 import { VASItemDef } from './VASSection';
 
@@ -482,60 +482,109 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
 
       {/* 1.5 Thông Tin Hải Quan & Luồng Hàng Kho Ngoại Quan (Chỉ hiển thị khi chọn Kho Ngoại Quan) */}
       {(specs.warehouseType === 'Kho ngoại quan (Bonded)' || specs.warehouseType === 'Kho ngoại quan (Bonded Warehouse)') && (
-        <div className="p-4 bg-indigo-50/70 border border-indigo-200/90 rounded-2xl space-y-3 shadow-2xs animate-in fade-in duration-150">
+        <div className="p-4 bg-indigo-50/70 border border-indigo-200/90 rounded-2xl space-y-3.5 shadow-2xs animate-in fade-in duration-150">
           <div className="flex items-center justify-between">
             <span className="text-xs font-extrabold text-indigo-950 uppercase tracking-wider flex items-center gap-1.5">
               <ShieldCheck className="w-4 h-4 text-indigo-600" />
               <span>Thông Tin Hải Quan & Luồng Hàng Kho Ngoại Quan (Bonded Specs)</span>
             </span>
             <span className="text-[10px] font-bold text-indigo-800 bg-indigo-100 px-2 py-0.5 rounded-md border border-indigo-200">
-              Fast Quotation Specs
+              Customs Compliance & Fast Quotation
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5">
-            {/* 1. Bonded Flow Purpose */}
-            <div className="md:col-span-7">
-              <label className="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1">
-                <span>1. Mục Đích / Luồng Hàng Gửi Kho Ngoại Quan *</span>
-              </label>
-              <select
-                value={specs.bondedPurpose || 'Hàng nhập khẩu chờ hoàn tất thủ tục thông quan vào nội địa'}
-                onChange={(e) => updateSpec('bondedPurpose', e.target.value)}
-                className="w-full px-3 py-2.5 text-xs bg-white border border-indigo-300 rounded-xl focus:border-indigo-500 font-bold text-indigo-950 shadow-2xs cursor-pointer"
-              >
-                <option value="Hàng nhập khẩu chờ hoàn tất thủ tục thông quan vào nội địa">
-                  📥 Hàng nhập khẩu chờ hoàn tất thủ tục thông quan vào nội địa (Giải tỏa dần)
-                </option>
-                <option value="Hàng chuyển khẩu, quá cảnh hoặc tái xuất sang nước thứ ba">
-                  🔄 Hàng chuyển khẩu, quá cảnh hoặc tái xuất sang nước thứ ba
-                </option>
-                <option value="Hàng sản xuất trong nước đã làm xong thủ tục HQ xuất khẩu">
-                  📤 Hàng sản xuất trong nước đã xong thủ tục HQ xuất khẩu chờ xuất
-                </option>
-                <option value="Cung ứng nguyên vật liệu/linh kiện cho doanh nghiệp EPE / SXXK (VMI)">
-                  🏭 Cung ứng nguyên liệu cho DN chế xuất EPE / SXXK (VMI - JIT Delivery)
-                </option>
-              </select>
-            </div>
+          {/* Row 1: Bonded Flow Purpose */}
+          <div>
+            <label className="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1">
+              <span>1. Mục Đích / Luồng Hàng Gửi Kho Ngoại Quan *</span>
+            </label>
+            <select
+              value={specs.bondedPurpose || 'Hàng nhập khẩu chờ hoàn tất thủ tục thông quan vào nội địa'}
+              onChange={(e) => updateSpec('bondedPurpose', e.target.value)}
+              className="w-full px-3 py-2.5 text-xs bg-white border border-indigo-300 rounded-xl focus:border-indigo-500 font-bold text-indigo-950 shadow-2xs cursor-pointer"
+            >
+              <option value="Hàng nhập khẩu chờ hoàn tất thủ tục thông quan vào nội địa">
+                📥 Hàng nhập khẩu chờ hoàn tất thủ tục thông quan vào nội địa (Giải tỏa dần)
+              </option>
+              <option value="Hàng chuyển khẩu, quá cảnh hoặc tái xuất sang nước thứ ba">
+                🔄 Hàng chuyển khẩu, quá cảnh hoặc tái xuất sang nước thứ ba
+              </option>
+              <option value="Hàng sản xuất trong nước đã làm xong thủ tục HQ xuất khẩu">
+                📤 Hàng sản xuất trong nước đã xong thủ tục HQ xuất khẩu chờ xuất
+              </option>
+              <option value="Cung ứng nguyên vật liệu/linh kiện cho doanh nghiệp EPE / SXXK (VMI)">
+                🏭 Cung ứng nguyên liệu cho DN chế xuất EPE / SXXK (VMI - JIT Delivery)
+              </option>
+            </select>
+          </div>
 
-            {/* 2. Estimated Cargo Value in USD */}
-            <div className="md:col-span-5">
-              <label className="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1">
-                <span>2. Tổng Trị Giá Lô Hàng Ước Tính (USD) *</span>
-              </label>
+          {/* Row 2: HS Code & Cargo Value with Currency selector */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-1 border-t border-indigo-200/60">
+            {/* 2. HS Code */}
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-bold text-slate-800 flex items-center gap-1">
+                  <Tag className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                  <span>2. Mã HS Code Đại Diện (HS Code)</span>
+                </label>
+                <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
+                  4 - 8 chữ số
+                </span>
+              </div>
               <input
                 type="text"
-                value={specs.bondedEstimatedValueUSD !== undefined ? (typeof specs.bondedEstimatedValueUSD === 'number' ? specs.bondedEstimatedValueUSD.toLocaleString('en-US') : specs.bondedEstimatedValueUSD) : ''}
-                onChange={(e) => {
-                  const val = e.target.value.replace(/\D/g, '');
-                  updateSpec('bondedEstimatedValueUSD', val ? parseInt(val, 10) : undefined);
-                }}
-                placeholder="VD: 250,000"
-                className="w-full px-3.5 py-2.5 text-xs bg-white border border-indigo-300 rounded-xl focus:border-indigo-500 font-bold text-indigo-950 shadow-2xs"
+                value={specs.bondedHsCode || ''}
+                onChange={(e) => updateSpec('bondedHsCode', e.target.value)}
+                placeholder="VD: 8471.30.20, 8504.40..."
+                className="w-full px-3.5 py-2.5 text-xs bg-white border border-indigo-300 rounded-xl focus:border-indigo-500 font-mono font-bold text-slate-900 shadow-2xs placeholder:font-sans placeholder:font-normal"
               />
               <p className="text-[10px] text-indigo-700/80 mt-1 font-medium">
-                💡 Để nhà kho ngoại quan tính phí bảo hiểm lưu kho & hạn mức bảo lãnh thuế.
+                💡 Đối chiếu danh mục cấm gửi kho ngoại quan & kiểm tra chuyên ngành.
+              </p>
+            </div>
+
+            {/* 3. Estimated Cargo Value with Currency */}
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-bold text-slate-800 flex items-center gap-1">
+                  <DollarSign className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  <span>3. Tổng Giá Trị Hàng Hóa Lưu Kho (Cargo Value) *</span>
+                </label>
+                <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                  Bảo hiểm / Bảo lãnh
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="flex-1">
+                  <input
+                    type="text"
+                    required
+                    value={specs.bondedEstimatedValue !== undefined ? (typeof specs.bondedEstimatedValue === 'number' ? specs.bondedEstimatedValue.toLocaleString('vi-VN') : specs.bondedEstimatedValue) : ''}
+                    onChange={(e) => {
+                      const clean = e.target.value.replace(/\./g, '').replace(/,/g, '').replace(/\D/g, '');
+                      const num = clean ? parseInt(clean, 10) : undefined;
+                      updateSpec('bondedEstimatedValue', num);
+                    }}
+                    placeholder="VD: 250.000 hoặc 5.000.000.000"
+                    className="w-full px-3.5 py-2.5 text-xs bg-white border border-indigo-300 rounded-xl focus:border-indigo-500 font-bold text-slate-900 shadow-2xs"
+                  />
+                </div>
+                <div className="w-24 shrink-0">
+                  <select
+                    value={specs.bondedEstimatedValueCurrency || 'USD'}
+                    onChange={(e) => updateSpec('bondedEstimatedValueCurrency', e.target.value)}
+                    className="w-full px-2 py-2.5 text-xs bg-white border border-indigo-300 rounded-xl focus:border-indigo-500 font-bold text-indigo-950 shadow-2xs cursor-pointer"
+                  >
+                    <option value="USD">USD ($)</option>
+                    <option value="VND">VND (₫)</option>
+                    <option value="EUR">EUR (€)</option>
+                    <option value="CNY">CNY (¥)</option>
+                    <option value="JPY">JPY (¥)</option>
+                  </select>
+                </div>
+              </div>
+              <p className="text-[10px] text-indigo-700/80 mt-1 font-medium">
+                💡 Để tính phí bảo hiểm rủi ro lưu kho & hạn mức bảo lãnh thuế hải quan.
               </p>
             </div>
           </div>

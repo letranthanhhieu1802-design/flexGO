@@ -277,7 +277,9 @@ export interface WarehousingInquirySpecs {
   customHumidity?: string;
   inboundTemperatureState?: 'PRE_COOLED' | 'NEED_COOLING';
   bondedPurpose?: string;
-  bondedEstimatedValueUSD?: number | string;
+  bondedHsCode?: string;
+  bondedEstimatedValue?: number | string;
+  bondedEstimatedValueCurrency?: 'USD' | 'VND' | 'EUR' | 'CNY' | 'JPY' | string;
   requiredVAS?: string[];
   selectedVAS?: string[];
 }

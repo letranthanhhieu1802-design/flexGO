@@ -1357,19 +1357,25 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                     </div>
                   )}
 
-                  {(warehousing.bondedPurpose || warehousing.bondedEstimatedValueUSD) && (
-                    <div className="p-3 bg-indigo-50/70 rounded-xl border border-indigo-200/80 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs shadow-2xs">
+                  {(warehousing.bondedPurpose || warehousing.bondedHsCode || warehousing.bondedEstimatedValue) && (
+                    <div className="p-3 bg-indigo-50/70 rounded-xl border border-indigo-200/80 grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs shadow-2xs">
                       {warehousing.bondedPurpose ? (
-                        <div>
-                          <span className="text-[10px] text-indigo-800 font-bold block">Mục đích luồng hàng ngoại quan:</span>
+                        <div className="sm:col-span-1">
+                          <span className="text-[10px] text-indigo-800 font-bold block">Luồng hàng ngoại quan:</span>
                           <span className="font-extrabold text-indigo-950">{warehousing.bondedPurpose}</span>
                         </div>
                       ) : null}
-                      {warehousing.bondedEstimatedValueUSD ? (
+                      {warehousing.bondedHsCode ? (
                         <div>
-                          <span className="text-[10px] text-indigo-800 font-bold block">Trị giá hàng lưu kho ước tính:</span>
+                          <span className="text-[10px] text-indigo-800 font-bold block">Mã HS Code đại diện:</span>
+                          <span className="font-mono font-bold text-amber-900">{warehousing.bondedHsCode}</span>
+                        </div>
+                      ) : null}
+                      {warehousing.bondedEstimatedValue ? (
+                        <div>
+                          <span className="text-[10px] text-indigo-800 font-bold block">Trị giá hàng ước tính:</span>
                           <span className="font-extrabold text-emerald-800">
-                            ${typeof warehousing.bondedEstimatedValueUSD === 'number' ? warehousing.bondedEstimatedValueUSD.toLocaleString('en-US') : warehousing.bondedEstimatedValueUSD} USD
+                            {typeof warehousing.bondedEstimatedValue === 'number' ? warehousing.bondedEstimatedValue.toLocaleString('vi-VN') : warehousing.bondedEstimatedValue} {warehousing.bondedEstimatedValueCurrency || 'USD'}
                           </span>
                         </div>
                       ) : null}
