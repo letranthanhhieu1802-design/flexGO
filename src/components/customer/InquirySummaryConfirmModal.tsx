@@ -524,7 +524,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                     <p className="font-extrabold text-indigo-900 mt-0.5 truncate">{trucking.ltlCbm ? `${trucking.ltlCbm} CBM` : 'Theo kiện'}</p>
                   </div>
                 </>
-              ) : (
+              ) : inquiry.serviceType === 'Project Cargo' ? null : (
                 <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
                   <span className="text-[10px] font-bold text-slate-400 uppercase block">Khối Lượng / Thể Tích</span>
                   <p className="font-extrabold text-indigo-900 mt-0.5 truncate">{inquiry.weightVolume || 'Theo thỏa thuận'}</p>

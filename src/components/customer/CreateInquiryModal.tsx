@@ -1903,8 +1903,8 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                 )}
               </div>
 
-              {/* Row 2 for non-warehousing services: Packaging, Weight, Volume */}
-              {serviceType !== 'Warehousing' && (
+              {/* Row 2 for standard freight services: Packaging, Weight, Volume */}
+              {serviceType !== 'Warehousing' && serviceType !== 'Project Cargo' && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   <div>
                     <div className="flex items-center justify-between mb-1">
@@ -1996,6 +1996,50 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                       </span>
                     </div>
                   </div>
+                </div>
+              )}
+
+              {/* Row 2 for Project Cargo: Packaging only (Full width, no Gross Weight / Volume) */}
+              {serviceType === 'Project Cargo' && (
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-semibold text-slate-700">
+                      Quy Cách Đóng Gói Hàng Hóa Dự Án (Packaging)
+                    </label>
+                  </div>
+                  <select
+                    value={packagePackaging}
+                    onChange={(e) => {
+                      setPackagePackaging(e.target.value);
+                      if (e.target.value !== 'Khác') {
+                        setCustomPackaging('');
+                      }
+                    }}
+                    className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 font-semibold text-slate-800 cursor-pointer"
+                  >
+                    <option value="Đóng Pallet gỗ / nhựa tiêu chuẩn">🪵 Đóng Pallet gỗ / nhựa tiêu chuẩn (Palletized)</option>
+                    <option value="Thùng carton rời / Chưa lên pallet">📦 Thùng carton rời / Chưa lên pallet (Loose Cartons)</option>
+                    <option value="Kiện gỗ / Khung gỗ / Thùng gỗ kín">🪵 Kiện gỗ / Khung gỗ / Thùng gỗ kín (Wooden Crates)</option>
+                    <option value="Bao tải dệt / Bao Jumbo (FIBC)">🌾 Bao tải dệt / Bao Jumbo (FIBC Big Bags)</option>
+                    <option value="Thùng phi / Can nhựa / Bồn IBC">🛢️ Thùng phi / Can nhựa / Bồn IBC (Drums & IBCs)</option>
+                    <option value="Hàng cuộn / Ống / Bó thanh dài">🛞 Hàng cuộn / Ống / Bó thanh dài (Coils & Pipes)</option>
+                    <option value="Thiết bị / Máy móc nguyên chiếc">🚗 Thiết bị / Máy móc nguyên chiếc (Machinery & CBU)</option>
+                    <option value="Hàng rời không đóng gói">🛍️ Hàng rời không đóng gói (Bulk / Loose Cargo)</option>
+                    <option value="Khác">✏️ Khác (Tự nhập quy cách đóng gói...)</option>
+                  </select>
+
+                  {packagePackaging === 'Khác' && (
+                    <div className="mt-2 animate-in fade-in slide-in-from-top-1 duration-150">
+                      <input
+                        type="text"
+                        required
+                        value={customPackaging}
+                        onChange={(e) => setCustomPackaging(e.target.value)}
+                        placeholder="Nhập quy cách đóng gói cụ thể (VD: Thùng mút xốp, Màng co PE, Cuộn Reel...)"
+                        className="w-full px-3 py-2 text-xs bg-amber-50/50 border border-amber-300 rounded-xl focus:bg-white focus:border-amber-500 font-medium text-slate-900 placeholder:text-slate-400"
+                      />
+                    </div>
+                  )}
                 </div>
               )}
 
