@@ -659,11 +659,17 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
     }
     if (serviceType === 'Project Cargo') {
       return {
-        label: 'Đơn Giá Dự Toán Ngân Sách Trọn Gói',
-        placeholder: 'VD: 120.000.000 VND',
-        badge: 'VND Trọn gói',
-        hint: `Dự án: ${projectSpecs.projectType || 'OOG'}`,
-        defaultVal: '120.000.000 VND',
+        label: 'Giá Trị Dự Kiến (Ngân Sách Gói Thầu Dự Án)',
+        placeholder: 'VD: 500.000.000 VND / 2.500.000.000 VND...',
+        badge: 'Ngân Sách Gói Thầu',
+        hint: `Mô hình: ${
+          projectSpecs.projectCategory === 'DISTRIBUTION'
+            ? 'Phân phối chuỗi'
+            : projectSpecs.projectCategory === 'CROSS_DOCK'
+            ? 'Trạm Cross-Dock'
+            : 'Đa phương thức'
+        }`,
+        defaultVal: '500.000.000 VND',
       };
     }
     return {
@@ -2250,7 +2256,11 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
             <div className="flex flex-wrap items-center justify-between gap-2">
               <label className="block text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                 <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-bold flex items-center justify-center">7</span>
-                <span>{currency === 'VND' ? 'Đơn Giá Kỳ Vọng & Thời Hạn Báo Giá' : 'Đơn Giá Kỳ Vọng, Tiền Tệ & Thời Hạn Báo Giá'}</span>
+                <span>
+                  {serviceType === 'Project Cargo'
+                    ? (currency === 'VND' ? 'Giá Trị Dự Kiến & Thời Hạn Báo Giá' : 'Giá Trị Dự Kiến, Tiền Tệ & Thời Hạn Báo Giá')
+                    : (currency === 'VND' ? 'Đơn Giá Kỳ Vọng & Thời Hạn Báo Giá' : 'Đơn Giá Kỳ Vọng, Tiền Tệ & Thời Hạn Báo Giá')}
+                </span>
               </label>
               {currency !== 'VND' && (
                 <div className="flex items-center gap-2 animate-in fade-in duration-200">
@@ -2380,7 +2390,11 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1">
                   <Calendar className="w-3.5 h-3.5 text-indigo-600" />
-                  <span>Ngày Lấy Hàng Dự Kiến *</span>
+                  <span>
+                    {serviceType === 'Project Cargo'
+                      ? 'Ngày Bắt Đầu Triển Khai *'
+                      : 'Ngày Lấy Hàng Dự Kiến *'}
+                  </span>
                 </label>
                 <input
                   type="date"
@@ -2394,7 +2408,11 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1">
                   <Calendar className="w-3.5 h-3.5 text-rose-600" />
-                  <span>Hạn Chót Giao Hàng *</span>
+                  <span>
+                    {serviceType === 'Project Cargo'
+                      ? 'Thời Hạn Dự Án / Hạn Chót Vận Hành *'
+                      : 'Hạn Chót Giao Hàng *'}
+                  </span>
                 </label>
                 <input
                   type="date"

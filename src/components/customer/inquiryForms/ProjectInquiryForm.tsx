@@ -442,52 +442,6 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
             </div>
           </div>
 
-          {/* Estimated Tender Budget & Start Date */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 border-t border-indigo-100/60">
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="block text-xs font-bold text-slate-800">
-                  Giá Trị Gói Thầu Dự Kiến (Estimated Tender Budget)
-                </label>
-                <span className="text-[10px] text-slate-400 font-normal">Tùy chọn</span>
-              </div>
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <input
-                    type="text"
-                    value={specs.estimatedBudget || ''}
-                    onChange={(e) => updateSpec('estimatedBudget', e.target.value)}
-                    placeholder="VD: 500.000.000 / 2,500,000,000..."
-                    className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-mono font-bold text-slate-900 shadow-2xs placeholder:font-sans placeholder:font-normal placeholder:text-slate-400"
-                  />
-                </div>
-                <select
-                  value={specs.budgetCurrency || 'VND'}
-                  onChange={(e) => updateSpec('budgetCurrency', e.target.value as any)}
-                  className="w-24 px-2 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 focus:bg-white focus:border-indigo-500 cursor-pointer shadow-2xs"
-                >
-                  <option value="VND">VND</option>
-                  <option value="USD">USD</option>
-                  <option value="EUR">EUR</option>
-                  <option value="CNY">CNY</option>
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5 text-indigo-600" />
-                <span>Kế Hoạch Thời Gian Triển Khai (Expected Start Date)</span>
-              </label>
-              <input
-                type="date"
-                min={new Date().toISOString().split('T')[0]}
-                value={specs.expectedStartDate || ''}
-                onChange={(e) => updateSpec('expectedStartDate', e.target.value)}
-                className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-bold text-slate-900 shadow-2xs cursor-pointer"
-              />
-            </div>
-          </div>
         </div>
       )}
 
@@ -636,52 +590,6 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
             </div>
           </div>
 
-          {/* Cross-Dock Budget & Start Date */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 border-t border-purple-100/60">
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="block text-xs font-bold text-slate-800">
-                  Giá Trị Gói Thầu Dự Kiến (Estimated Tender Budget)
-                </label>
-                <span className="text-[10px] text-slate-400 font-normal">Tùy chọn</span>
-              </div>
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <input
-                    type="text"
-                    value={specs.estimatedBudget || ''}
-                    onChange={(e) => updateSpec('estimatedBudget', e.target.value)}
-                    placeholder="VD: 300.000.000 / 1,500,000,000..."
-                    className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-mono font-bold text-slate-900 shadow-2xs placeholder:font-sans placeholder:font-normal placeholder:text-slate-400"
-                  />
-                </div>
-                <select
-                  value={specs.budgetCurrency || 'VND'}
-                  onChange={(e) => updateSpec('budgetCurrency', e.target.value as any)}
-                  className="w-24 px-2 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 focus:bg-white focus:border-purple-500 cursor-pointer shadow-2xs"
-                >
-                  <option value="VND">VND</option>
-                  <option value="USD">USD</option>
-                  <option value="EUR">EUR</option>
-                  <option value="CNY">CNY</option>
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5 text-purple-600" />
-                <span>Kế Hoạch Thời Gian Triển Khai (Expected Start Date)</span>
-              </label>
-              <input
-                type="date"
-                min={new Date().toISOString().split('T')[0]}
-                value={specs.expectedStartDate || ''}
-                onChange={(e) => updateSpec('expectedStartDate', e.target.value)}
-                className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-bold text-slate-900 shadow-2xs cursor-pointer"
-              />
-            </div>
-          </div>
         </div>
       )}
 
@@ -813,52 +721,6 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
             </div>
           </div>
 
-          {/* Multimodal Budget & Start Date */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 border-t border-teal-100/60">
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="block text-xs font-bold text-slate-800">
-                  Giá Trị Gói Thầu Dự Kiến (Estimated Tender Budget)
-                </label>
-                <span className="text-[10px] text-slate-400 font-normal">Tùy chọn</span>
-              </div>
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <input
-                    type="text"
-                    value={specs.estimatedBudget || ''}
-                    onChange={(e) => updateSpec('estimatedBudget', e.target.value)}
-                    placeholder="VD: 800.000.000 / 3,000,000,000..."
-                    className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-teal-500 font-mono font-bold text-slate-900 shadow-2xs placeholder:font-sans placeholder:font-normal placeholder:text-slate-400"
-                  />
-                </div>
-                <select
-                  value={specs.budgetCurrency || 'VND'}
-                  onChange={(e) => updateSpec('budgetCurrency', e.target.value as any)}
-                  className="w-24 px-2 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 focus:bg-white focus:border-teal-500 cursor-pointer shadow-2xs"
-                >
-                  <option value="VND">VND</option>
-                  <option value="USD">USD</option>
-                  <option value="EUR">EUR</option>
-                  <option value="CNY">CNY</option>
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5 text-teal-600" />
-                <span>Kế Hoạch Thời Gian Triển Khai (Expected Start Date)</span>
-              </label>
-              <input
-                type="date"
-                min={new Date().toISOString().split('T')[0]}
-                value={specs.expectedStartDate || ''}
-                onChange={(e) => updateSpec('expectedStartDate', e.target.value)}
-                className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-teal-500 font-bold text-slate-900 shadow-2xs cursor-pointer"
-              />
-            </div>
-          </div>
         </div>
       )}
     </div>
