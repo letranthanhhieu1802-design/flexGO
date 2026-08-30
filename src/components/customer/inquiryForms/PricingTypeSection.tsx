@@ -7,6 +7,8 @@ interface PricingTypeSectionProps {
   onChangePricingType: (val: PricingType) => void;
   contractTerm?: string;
   onChangeContractTerm: (val: string) => void;
+  committedVolume?: number;
+  onChangeCommittedVolume?: (val: number | undefined) => void;
   committedFrequency?: string;
   onChangeCommittedFrequency?: (val: string) => void;
   serviceType?: ServiceType;
@@ -19,11 +21,16 @@ export const PricingTypeSection: React.FC<PricingTypeSectionProps> = ({
   onChangePricingType,
   contractTerm,
   onChangeContractTerm,
+  committedVolume,
+  onChangeCommittedVolume,
+  committedFrequency,
+  onChangeCommittedFrequency,
   serviceType,
   serviceLabel = 'dịch vụ',
   themeColor = 'indigo',
 }) => {
   const isWarehousing = serviceType === 'Warehousing';
+  const isCustoms = serviceType === 'Customs Clearance';
   const isContract = pricingType === 'CONTRACT';
 
   // Ensure default contract term is appropriate for the selected mode
@@ -104,27 +111,10 @@ export const PricingTypeSection: React.FC<PricingTypeSectionProps> = ({
   }[themeColor];
 
   return (
-    <div className="p-4 bg-slate-50/90 rounded-2xl border border-slate-200/90 space-y-3.5">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
-        <div>
-          <label className="block text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-            <span>
-              {isWarehousing
-                ? 'Nhu Cầu & Thời Hạn Thuê Kho (Lease Model & Term) *'
-                : 'Loại Hình Hợp Đồng / Hình Thức Báo Giá *'}
-            </span>
-            <span className="px-2 py-0.5 text-[10px] bg-slate-200 text-slate-700 font-bold rounded-full normal-case">
-              {isWarehousing
-                ? (!isContract ? '🌊 Kho Tràn (Overflow 1-6 Tháng)' : '🏢 Kho Dài Hạn (Dedicated)')
-                : (pricingType === 'SPOT' ? 'Theo Lô / Chuyến Lẻ' : 'Hợp Đồng Định Kỳ')}
-            </span>
-          </label>
-        </div>
-      </div>
-
-      {/* 2 Main Card Options */}
+    <div className="space-y-3">
+      {/* 2 Options Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {/* Option 1: SPOT / KHO TRÀN MÙA VỤ */}
+        {/* Option 1: SPOT / THEO LÔ */}
         <div
           onClick={() => onChangePricingType('SPOT')}
           className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-start gap-3 relative ${
@@ -145,6 +135,8 @@ export const PricingTypeSection: React.FC<PricingTypeSectionProps> = ({
               <span className="text-xs font-bold text-slate-900">
                 {isWarehousing
                   ? 'Kho Tràn / Mùa Vụ (Overflow / Seasonal)'
+                  : isCustoms
+                  ? 'Theo Lô / Tờ Khai Đơn Lẻ (Spot Rate)'
                   : 'Theo Lô / Chuyến Lẻ (Spot Rate)'}
               </span>
               {!isContract && (
@@ -156,6 +148,8 @@ export const PricingTypeSection: React.FC<PricingTypeSectionProps> = ({
             <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
               {isWarehousing
                 ? 'Đã có kho chính nhưng chuẩn bị đến mùa cao điểm sản xuất / nhập khẩu dồn dập, cần thuê kho đệm ngắn hạn (1-6 tháng) giải tỏa quá tải.'
+                : isCustoms
+                ? 'Nhu cầu mở tờ khai phát sinh theo từng lô hàng đơn lẻ. Đại lý hải quan báo giá dịch vụ thông quan trọn gói ngay theo thời điểm.'
                 : 'Nhu cầu phát sinh theo từng đợt đơn lẻ, ngày lấy hàng cố định. Nhà xe báo giá chốt ngay theo thời điểm.'}
             </p>
             <div className="mt-2 flex flex-wrap items-center gap-1.5">
@@ -169,6 +163,15 @@ export const PricingTypeSection: React.FC<PricingTypeSectionProps> = ({
                   </span>
                   <span className="px-2 py-0.5 text-[10px] font-semibold bg-slate-100 text-slate-600 rounded-md border border-slate-200">
                     🚀 Không ràng buộc dài hạn
+                  </span>
+                </>
+              ) : isCustoms ? (
+                <>
+                  <span className="px-2 py-0.5 text-[10px] font-semibold bg-slate-100 text-slate-600 rounded-md border border-slate-200">
+                    ⚡ Báo giá tức thì
+                  </span>
+                  <span className="px-2 py-0.5 text-[10px] font-semibold bg-slate-100 text-slate-600 rounded-md border border-slate-200">
+                    📑 Không cam kết sản lượng
                   </span>
                 </>
               ) : (
@@ -206,6 +209,8 @@ export const PricingTypeSection: React.FC<PricingTypeSectionProps> = ({
               <span className="text-xs font-bold text-slate-900">
                 {isWarehousing
                   ? 'Kho Dài Hạn (Long-Term / Dedicated Hub)'
+                  : isCustoms
+                  ? 'Hợp Đồng Khung Định Kỳ (Customs Contract / Tender)'
                   : 'Hợp Đồng Định Kỳ / Dài Hạn (Contract / Tender)'}
               </span>
               {isContract && (
@@ -217,6 +222,8 @@ export const PricingTypeSection: React.FC<PricingTypeSectionProps> = ({
             <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
               {isWarehousing
                 ? 'Thuê làm trung tâm phân phối chính (DC) hoặc kho tổng chiến lược tính bằng năm. Đơn giá ưu đãi cố định và hỗ trợ tích hợp WMS chuyên sâu.'
+                : isCustoms
+                ? 'Ký hợp đồng dịch vụ hải quan trọn gói theo tháng/năm, cam kết sản lượng tờ khai đều đặn. Nhận bảng đơn giá thầu ưu đãi và giữ giá cố định.'
                 : 'Ký hợp đồng khung/thầu theo tháng/năm, cam kết sản lượng đều đặn. Nhận đơn giá ưu đãi và giữ giá cố định.'}
             </p>
             <div className="mt-2 flex flex-wrap items-center gap-1.5">
@@ -230,6 +237,18 @@ export const PricingTypeSection: React.FC<PricingTypeSectionProps> = ({
                   </span>
                   <span className="px-2 py-0.5 text-[10px] font-semibold bg-purple-50 text-purple-700 rounded-md border border-purple-200">
                     💻 Tích hợp WMS/ERP
+                  </span>
+                </>
+              ) : isCustoms ? (
+                <>
+                  <span className="px-2 py-0.5 text-[10px] font-semibold bg-amber-50 text-amber-800 rounded-md border border-amber-200">
+                    🔒 Đơn giá tờ khai ưu đãi
+                  </span>
+                  <span className="px-2 py-0.5 text-[10px] font-semibold bg-blue-50 text-blue-800 rounded-md border border-blue-200">
+                    👨‍💼 Đội ngũ OPS chuyên trách tại cảng
+                  </span>
+                  <span className="px-2 py-0.5 text-[10px] font-semibold bg-emerald-50 text-emerald-800 rounded-md border border-emerald-200">
+                    ⚡ Cam kết SLA thông quan
                   </span>
                 </>
               ) : (
@@ -255,44 +274,72 @@ export const PricingTypeSection: React.FC<PricingTypeSectionProps> = ({
             <span>
               {isWarehousing
                 ? (!isContract ? 'Thời Hạn Thuê Kho Tràn Mùa Vụ (Overflow Term)' : 'Thời Hạn Hợp Đồng Thuê Kho Dài Hạn (Contract Term)')
-                : `Thông Số Thời Hạn Hợp Đồng (${serviceLabel})`}
+                : `Thông Số Hợp Đồng Định Kỳ (${serviceLabel})`}
             </span>
           </div>
 
-          <div>
-            <label className="block text-[11px] font-bold text-slate-700 mb-1">
-              {isWarehousing
-                ? (!isContract ? 'Chọn Thời Gian Thuê Kho Tràn Mùa Vụ *' : 'Chọn Thời Hạn Ký Kết Hợp Đồng Kho Dài Hạn *')
-                : 'Thời Hạn Hợp Đồng Ký Kết (Contract Term) *'}
-            </label>
-            {isWarehousing ? (
-              !isContract ? (
-                // Kho tràn: 1 - 6 tháng
-                <select
-                  value={contractTerm || '3 Tháng (Quý cao điểm / Vụ mùa)'}
-                  onChange={(e) => onChangeContractTerm(e.target.value)}
-                  className={`w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white ${colorStyles.focusRing} font-bold text-slate-900 cursor-pointer`}
-                >
-                  <option value="1 Tháng (Lưu đệm đột xuất / Thời vụ ngắn)">
-                    🗓️ 1 Tháng (Lưu đệm đột xuất / Thời vụ ngắn)
-                  </option>
-                  <option value="2 Tháng (Mùa cao điểm ngắn)">
-                    🗓️ 2 Tháng (Mùa cao điểm ngắn)
-                  </option>
-                  <option value="3 Tháng (Quý cao điểm / Vụ mùa)">
-                    🗓️ 3 Tháng (Quý cao điểm / Hàng vụ mùa)
-                  </option>
-                  <option value="6 Tháng (Bán niên vụ / Nửa năm)">
-                    🗓️ 6 Tháng (Bán niên vụ / Nửa năm)
-                  </option>
-                </select>
+          <div className="space-y-3">
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                {isWarehousing
+                  ? (!isContract ? 'Chọn Thời Gian Thuê Kho Tràn Mùa Vụ *' : 'Chọn Thời Hạn Ký Kết Hợp Đồng Kho Dài Hạn *')
+                  : '1. Thời Hạn Hợp Đồng Ký Kết (Contract Term) *'}
+              </label>
+              {isWarehousing ? (
+                !isContract ? (
+                  // Kho tràn: 1 - 6 tháng
+                  <select
+                    value={contractTerm || '3 Tháng (Quý cao điểm / Vụ mùa)'}
+                    onChange={(e) => onChangeContractTerm(e.target.value)}
+                    className={`w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white ${colorStyles.focusRing} font-bold text-slate-900 cursor-pointer`}
+                  >
+                    <option value="1 Tháng (Lưu đệm đột xuất / Thời vụ ngắn)">
+                      🗓️ 1 Tháng (Lưu đệm đột xuất / Thời vụ ngắn)
+                    </option>
+                    <option value="2 Tháng (Mùa cao điểm ngắn)">
+                      🗓️ 2 Tháng (Mùa cao điểm ngắn)
+                    </option>
+                    <option value="3 Tháng (Quý cao điểm / Vụ mùa)">
+                      🗓️ 3 Tháng (Quý cao điểm / Hàng vụ mùa)
+                    </option>
+                    <option value="6 Tháng (Bán niên vụ / Nửa năm)">
+                      🗓️ 6 Tháng (Bán niên vụ / Nửa năm)
+                    </option>
+                  </select>
+                ) : (
+                  // Kho dài hạn: 1 - 5 năm
+                  <select
+                    value={contractTerm || 'Hợp đồng 12 tháng (1 năm tiêu chuẩn)'}
+                    onChange={(e) => onChangeContractTerm(e.target.value)}
+                    className={`w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white ${colorStyles.focusRing} font-bold text-slate-900 cursor-pointer`}
+                  >
+                    <option value="Hợp đồng 12 tháng (1 năm tiêu chuẩn)">
+                      📅 Hợp đồng 12 tháng (1 năm tiêu chuẩn doanh nghiệp)
+                    </option>
+                    <option value="Hợp đồng 24 tháng (2 năm dài hạn)">
+                      📅 Hợp đồng 24 tháng (2 năm đối tác chiến lược)
+                    </option>
+                    <option value="Hợp đồng 36 tháng (3 năm tổng thể)">
+                      📅 Hợp đồng 36 tháng (3 năm tổng thể chuỗi cung ứng)
+                    </option>
+                    <option value="Hợp đồng 60 tháng (5 năm chiến lược)">
+                      📅 Hợp đồng 60 tháng (5 năm hợp tác chiến lược lâu dài)
+                    </option>
+                  </select>
+                )
               ) : (
-                // Kho dài hạn: 1 - 5 năm
+                // Các dịch vụ khác
                 <select
                   value={contractTerm || 'Hợp đồng 12 tháng (1 năm tiêu chuẩn)'}
                   onChange={(e) => onChangeContractTerm(e.target.value)}
                   className={`w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white ${colorStyles.focusRing} font-bold text-slate-900 cursor-pointer`}
                 >
+                  <option value="Hợp đồng 3 tháng (Ngắn hạn / Thử nghiệm)">
+                    📅 Hợp đồng 3 tháng (Ngắn hạn / Thử nghiệm)
+                  </option>
+                  <option value="Hợp đồng 6 tháng (Nửa năm)">
+                    📅 Hợp đồng 6 tháng (Nửa năm định kỳ)
+                  </option>
                   <option value="Hợp đồng 12 tháng (1 năm tiêu chuẩn)">
                     📅 Hợp đồng 12 tháng (1 năm tiêu chuẩn doanh nghiệp)
                   </option>
@@ -302,34 +349,54 @@ export const PricingTypeSection: React.FC<PricingTypeSectionProps> = ({
                   <option value="Hợp đồng 36 tháng (3 năm tổng thể)">
                     📅 Hợp đồng 36 tháng (3 năm tổng thể chuỗi cung ứng)
                   </option>
-                  <option value="Hợp đồng 60 tháng (5 năm chiến lược)">
-                    📅 Hợp đồng 60 tháng (5 năm hợp tác chiến lược lâu dài)
-                  </option>
                 </select>
-              )
-            ) : (
-              // Các dịch vụ khác
-              <select
-                value={contractTerm}
-                onChange={(e) => onChangeContractTerm(e.target.value)}
-                className={`w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white ${colorStyles.focusRing} font-bold text-slate-900 cursor-pointer`}
-              >
-                <option value="Hợp đồng 3 tháng (Ngắn hạn / Thử nghiệm)">
-                  📅 Hợp đồng 3 tháng (Ngắn hạn / Thử nghiệm)
-                </option>
-                <option value="Hợp đồng 6 tháng (Nửa năm)">
-                  📅 Hợp đồng 6 tháng (Nửa năm định kỳ)
-                </option>
-                <option value="Hợp đồng 12 tháng (1 năm chuẩn)">
-                  📅 Hợp đồng 12 tháng (1 năm tiêu chuẩn doanh nghiệp)
-                </option>
-                <option value="Hợp đồng 24 tháng (2 năm dài hạn)">
-                  📅 Hợp đồng 24 tháng (2 năm đối tác chiến lược)
-                </option>
-                <option value="Hợp đồng 36 tháng (3 năm tổng thể)">
-                  📅 Hợp đồng 36 tháng (3 năm tổng thể chuỗi cung ứng)
-                </option>
-              </select>
+              )}
+            </div>
+
+            {/* Specialized Committed Volume & Frequency for Customs Clearance */}
+            {isCustoms && isContract && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-100">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                    2. Số Lượng Tờ Khai Ước Tính *
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    value={committedVolume || ''}
+                    onChange={(e) => {
+                      const val = e.target.value ? parseInt(e.target.value, 10) : undefined;
+                      onChangeCommittedVolume?.(val);
+                    }}
+                    placeholder="VD: 50"
+                    className={`w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white ${colorStyles.focusRing} font-bold text-slate-900`}
+                  />
+                  <p className="text-[10px] text-slate-400 mt-1">
+                    💡 Sản lượng dự kiến để nhận đơn giá thầu ưu đãi.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                    3. Đơn Vị Tần Suất Khai Báo (Committed Frequency) *
+                  </label>
+                  <select
+                    value={committedFrequency || 'Tờ khai / Tháng'}
+                    onChange={(e) => onChangeCommittedFrequency?.(e.target.value)}
+                    className={`w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white ${colorStyles.focusRing} font-bold text-slate-900 cursor-pointer`}
+                  >
+                    <option value="Tờ khai / Tháng">📑 Tờ khai / Tháng (Phổ biến nhất)</option>
+                    <option value="Tờ khai / Tuần">📑 Tờ khai / Tuần</option>
+                    <option value="Tờ khai / Quý">📑 Tờ khai / Quý</option>
+                    <option value="Tờ khai / Năm">📑 Tờ khai / Năm</option>
+                    <option value="Container / Tháng">📦 Container (TEU) / Tháng</option>
+                    <option value="Lô hàng / Tháng">🚢 Lô hàng / Tháng</option>
+                  </select>
+                  <p className="text-[10px] text-slate-400 mt-1">
+                    💡 Chu kỳ tổng kết và đối soát sản lượng định kỳ.
+                  </p>
+                </div>
+              </div>
             )}
           </div>
         </div>

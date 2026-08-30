@@ -1244,11 +1244,20 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                   pricingType: newType,
                   warehousingLeaseModel: newType === 'CONTRACT' ? 'LONG_TERM' : 'OVERFLOW',
                 }));
+                setCustomsSpecs((prev) => ({
+                  ...prev,
+                  pricingType: newType,
+                }));
               }}
               contractTerm={contractTerm}
               onChangeContractTerm={setContractTerm}
-              committedFrequency={committedFrequency}
-              onChangeCommittedFrequency={setCommittedFrequency}
+              committedVolume={customsSpecs.committedVolume}
+              onChangeCommittedVolume={(val) => setCustomsSpecs((prev) => ({ ...prev, committedVolume: val }))}
+              committedFrequency={customsSpecs.committedFrequency || committedFrequency}
+              onChangeCommittedFrequency={(val) => {
+                setCommittedFrequency(val);
+                setCustomsSpecs((prev) => ({ ...prev, committedFrequency: val }));
+              }}
               serviceType={serviceType}
               serviceLabel={currentServiceDef.label}
               themeColor={currentServiceDef.themeColor}

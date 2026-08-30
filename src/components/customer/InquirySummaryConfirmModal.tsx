@@ -1401,6 +1401,12 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       <span className="font-extrabold text-slate-900 truncate block">{customs.customsSubDepartment}</span>
                     </div>
                   ) : null}
+                  {customs.committedVolume ? (
+                    <div className="bg-white p-2.5 rounded-xl border border-amber-100 shadow-2xs">
+                      <span className="text-[10px] text-slate-400 block font-medium">Sản lượng cam kết</span>
+                      <span className="font-extrabold text-amber-900">{customs.committedVolume} {customs.committedFrequency || 'Tờ khai / Tháng'}</span>
+                    </div>
+                  ) : null}
                   {customs.coFormRequested && customs.coFormRequested !== 'Không yêu cầu' ? (
                     <div className="bg-white p-2.5 rounded-xl border border-amber-100 shadow-2xs">
                       <span className="text-[10px] text-slate-400 block font-medium">Chứng nhận xuất xứ C/O</span>

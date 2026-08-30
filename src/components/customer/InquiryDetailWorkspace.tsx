@@ -913,6 +913,12 @@ export const InquiryDetailWorkspace: React.FC<InquiryDetailWorkspaceProps> = ({
                       <span className="text-slate-400 block font-semibold">Kiểm tra chuyên ngành</span>
                       <span className="font-bold text-slate-800">{inquiry.serviceSpecs.customs.specializedInspectionType || 'Không'}</span>
                     </div>
+                    {inquiry.serviceSpecs.customs.committedVolume ? (
+                      <div>
+                        <span className="text-slate-400 block font-semibold">Sản lượng cam kết</span>
+                        <span className="font-bold text-amber-900">{inquiry.serviceSpecs.customs.committedVolume} {inquiry.serviceSpecs.customs.committedFrequency || 'Tờ khai / Tháng'}</span>
+                      </div>
+                    ) : null}
                     <div>
                       <span className="text-slate-400 block font-semibold">Hỗ trợ luồng đỏ</span>
                       <span className={`font-bold ${inquiry.serviceSpecs.customs.redChannelInspectionSupport ? 'text-rose-700' : 'text-slate-800'}`}>

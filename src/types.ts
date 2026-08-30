@@ -287,6 +287,7 @@ export interface WarehousingInquirySpecs {
 export interface CustomsInquirySpecs {
   pricingType?: PricingType;
   contractTerm?: string;
+  committedVolume?: number;
   committedFrequency?: string;
   tradeRole?: 'Xuất khẩu (Export)' | 'Nhập khẩu (Import)';
   cargoValue?: number | string;
