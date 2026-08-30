@@ -1356,6 +1356,25 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       ) : null}
                     </div>
                   )}
+
+                  {(warehousing.bondedPurpose || warehousing.bondedEstimatedValueUSD) && (
+                    <div className="p-3 bg-indigo-50/70 rounded-xl border border-indigo-200/80 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs shadow-2xs">
+                      {warehousing.bondedPurpose ? (
+                        <div>
+                          <span className="text-[10px] text-indigo-800 font-bold block">Mục đích luồng hàng ngoại quan:</span>
+                          <span className="font-extrabold text-indigo-950">{warehousing.bondedPurpose}</span>
+                        </div>
+                      ) : null}
+                      {warehousing.bondedEstimatedValueUSD ? (
+                        <div>
+                          <span className="text-[10px] text-indigo-800 font-bold block">Trị giá hàng lưu kho ước tính:</span>
+                          <span className="font-extrabold text-emerald-800">
+                            ${typeof warehousing.bondedEstimatedValueUSD === 'number' ? warehousing.bondedEstimatedValueUSD.toLocaleString('en-US') : warehousing.bondedEstimatedValueUSD} USD
+                          </span>
+                        </div>
+                      ) : null}
+                    </div>
+                  )}
                 </div>
               )}
 

@@ -862,6 +862,25 @@ export const InquiryDetailWorkspace: React.FC<InquiryDetailWorkspaceProps> = ({
                         ) : null}
                       </div>
                     )}
+
+                    {(inquiry.serviceSpecs.warehousing.bondedPurpose || inquiry.serviceSpecs.warehousing.bondedEstimatedValueUSD) && (
+                      <div className="p-3 bg-indigo-50/70 rounded-lg border border-indigo-200/80 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                        {inquiry.serviceSpecs.warehousing.bondedPurpose ? (
+                          <div>
+                            <span className="text-[10px] text-indigo-800 block font-bold">Mục đích luồng hàng ngoại quan:</span>
+                            <span className="font-bold text-indigo-950">{inquiry.serviceSpecs.warehousing.bondedPurpose}</span>
+                          </div>
+                        ) : null}
+                        {inquiry.serviceSpecs.warehousing.bondedEstimatedValueUSD ? (
+                          <div>
+                            <span className="text-[10px] text-indigo-800 block font-bold">Trị giá hàng lưu kho ước tính:</span>
+                            <span className="font-bold text-emerald-800">
+                              ${typeof inquiry.serviceSpecs.warehousing.bondedEstimatedValueUSD === 'number' ? inquiry.serviceSpecs.warehousing.bondedEstimatedValueUSD.toLocaleString('en-US') : inquiry.serviceSpecs.warehousing.bondedEstimatedValueUSD} USD
+                            </span>
+                          </div>
+                        ) : null}
+                      </div>
+                    )}
                   </div>
                 )}
 

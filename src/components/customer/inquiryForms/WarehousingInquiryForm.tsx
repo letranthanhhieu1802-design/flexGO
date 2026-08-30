@@ -231,6 +231,13 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
 }) => {
   // Logic kiểm tra loại hình kho có bị vô hiệu hóa tương ứng với phân nhóm hàng hóa không
   const isTypeDisabled = (type: string): boolean => {
+    // Ràng buộc 1: Kho ngoại quan không áp dụng thuê dài hạn (Dedicated Hub / CONTRACT)
+    if (type === 'Kho ngoại quan (Bonded)' || type === 'Kho ngoại quan (Bonded Warehouse)') {
+      if (specs.pricingType === 'CONTRACT' || specs.warehousingLeaseModel === 'LONG_TERM') {
+        return true;
+      }
+    }
+
     if (cargoClassification === 'General') {
       return type === 'Kho lạnh / Kho mát (Cold Storage)' || type === 'Kho hàng nguy hiểm (DG Warehouse)';
     }
@@ -244,6 +251,11 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
   };
 
   const getDisabledReason = (type: string): string => {
+    if (type === 'Kho ngoại quan (Bonded)' || type === 'Kho ngoại quan (Bonded Warehouse)') {
+      if (specs.pricingType === 'CONTRACT' || specs.warehousingLeaseModel === 'LONG_TERM') {
+        return '🚫 Kho ngoại quan chỉ áp dụng thuê theo lô/mùa vụ (SPOT, tối đa 12 tháng)';
+      }
+    }
     if (cargoClassification === 'General') {
       if (type === 'Kho lạnh / Kho mát (Cold Storage)') return '🚫 Hàng thường không lưu kho lạnh';
       if (type === 'Kho hàng nguy hiểm (DG Warehouse)') return '🚫 Hàng thường không lưu kho DG';
@@ -259,6 +271,15 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
 
   // Tự động chuyển đổi fallback khi user đổi nhóm hàng hóa ở Mục 3 hoặc đổi loại hình kho
   React.useEffect(() => {
+    // 0. Fallback nếu đang là Kho Ngoại Quan nhưng hình thức báo giá là CONTRACT / Dài Hạn
+    if ((specs.pricingType === 'CONTRACT' || specs.warehousingLeaseModel === 'LONG_TERM') && (specs.warehouseType === 'Kho ngoại quan (Bonded)' || specs.warehouseType === 'Kho ngoại quan (Bonded Warehouse)')) {
+      onChange({
+        ...specs,
+        warehouseType: 'Kho thường (Grade A Dry)',
+      });
+      return;
+    }
+
     // 1. Fallback theo nhóm hàng hóa
     if (cargoClassification === 'General') {
       if (specs.warehouseType === 'Kho lạnh / Kho mát (Cold Storage)' || specs.warehouseType === 'Kho hàng nguy hiểm (DG Warehouse)') {
@@ -452,6 +473,68 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
           })}
         </div>
       </div>
+
+      {/* 1.5 Thông Tin Hải Quan & Luồng Hàng Kho Ngoại Quan (Chỉ hiển thị khi chọn Kho Ngoại Quan) */}
+      {(specs.warehouseType === 'Kho ngoại quan (Bonded)' || specs.warehouseType === 'Kho ngoại quan (Bonded Warehouse)') && (
+        <div className="p-4 bg-indigo-50/70 border border-indigo-200/90 rounded-2xl space-y-3 shadow-2xs animate-in fade-in duration-150">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-extrabold text-indigo-950 uppercase tracking-wider flex items-center gap-1.5">
+              <ShieldCheck className="w-4 h-4 text-indigo-600" />
+              <span>Thông Tin Hải Quan & Luồng Hàng Kho Ngoại Quan (Bonded Specs)</span>
+            </span>
+            <span className="text-[10px] font-bold text-indigo-800 bg-indigo-100 px-2 py-0.5 rounded-md border border-indigo-200">
+              Fast Quotation Specs
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5">
+            {/* 1. Bonded Flow Purpose */}
+            <div className="md:col-span-7">
+              <label className="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1">
+                <span>1. Mục Đích / Luồng Hàng Gửi Kho Ngoại Quan *</span>
+              </label>
+              <select
+                value={specs.bondedPurpose || 'Hàng nhập khẩu chờ hoàn tất thủ tục thông quan vào nội địa'}
+                onChange={(e) => updateSpec('bondedPurpose', e.target.value)}
+                className="w-full px-3 py-2.5 text-xs bg-white border border-indigo-300 rounded-xl focus:border-indigo-500 font-bold text-indigo-950 shadow-2xs cursor-pointer"
+              >
+                <option value="Hàng nhập khẩu chờ hoàn tất thủ tục thông quan vào nội địa">
+                  📥 Hàng nhập khẩu chờ hoàn tất thủ tục thông quan vào nội địa (Giải tỏa dần)
+                </option>
+                <option value="Hàng chuyển khẩu, quá cảnh hoặc tái xuất sang nước thứ ba">
+                  🔄 Hàng chuyển khẩu, quá cảnh hoặc tái xuất sang nước thứ ba
+                </option>
+                <option value="Hàng sản xuất trong nước đã làm xong thủ tục HQ xuất khẩu">
+                  📤 Hàng sản xuất trong nước đã xong thủ tục HQ xuất khẩu chờ xuất
+                </option>
+                <option value="Cung ứng nguyên vật liệu/linh kiện cho doanh nghiệp EPE / SXXK (VMI)">
+                  🏭 Cung ứng nguyên liệu cho DN chế xuất EPE / SXXK (VMI - JIT Delivery)
+                </option>
+              </select>
+            </div>
+
+            {/* 2. Estimated Cargo Value in USD */}
+            <div className="md:col-span-5">
+              <label className="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1">
+                <span>2. Tổng Trị Giá Lô Hàng Ước Tính (USD) *</span>
+              </label>
+              <input
+                type="text"
+                value={specs.bondedEstimatedValueUSD !== undefined ? (typeof specs.bondedEstimatedValueUSD === 'number' ? specs.bondedEstimatedValueUSD.toLocaleString('en-US') : specs.bondedEstimatedValueUSD) : ''}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, '');
+                  updateSpec('bondedEstimatedValueUSD', val ? parseInt(val, 10) : undefined);
+                }}
+                placeholder="VD: 250,000"
+                className="w-full px-3.5 py-2.5 text-xs bg-white border border-indigo-300 rounded-xl focus:border-indigo-500 font-bold text-indigo-950 shadow-2xs"
+              />
+              <p className="text-[10px] text-indigo-700/80 mt-1 font-medium">
+                💡 Để nhà kho ngoại quan tính phí bảo hiểm lưu kho & hạn mức bảo lãnh thuế.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 2. Billing Unit Preference */}
       <div>
