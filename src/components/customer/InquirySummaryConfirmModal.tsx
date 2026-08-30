@@ -558,7 +558,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                   )}
                   {inquiry.dgClassIMO && (
                     <div className="bg-white p-2 rounded-lg border border-amber-200">
-                      <span className="text-[10px] text-slate-400 block font-semibold">Phân loại hàng nguy hiểm (DG Class):</span>
+                      <span className="text-[10px] text-slate-400 block font-semibold">Phân loại nguy hiểm (DG Class):</span>
                       <span className="font-bold text-rose-800">{inquiry.dgClassIMO}</span>
                     </div>
                   )}
@@ -566,6 +566,18 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                     <div className="bg-white p-2 rounded-lg border border-amber-200">
                       <span className="text-[10px] text-slate-400 block font-semibold">Mã số UN:</span>
                       <span className="font-bold text-slate-900">{inquiry.unNumber}</span>
+                    </div>
+                  )}
+                  {inquiry.packingGroup && (
+                    <div className="bg-white p-2 rounded-lg border border-amber-200">
+                      <span className="text-[10px] text-slate-400 block font-semibold">Nhóm đóng gói (Packing Group):</span>
+                      <span className="font-bold text-amber-900">{inquiry.packingGroup}</span>
+                    </div>
+                  )}
+                  {inquiry.flashPoint && (
+                    <div className="bg-white p-2 rounded-lg border border-amber-200">
+                      <span className="text-[10px] text-slate-400 block font-semibold">Điểm chớp cháy (Flash Point):</span>
+                      <span className="font-bold text-rose-900">{inquiry.flashPoint}</span>
                     </div>
                   )}
                   {inquiry.msdsFileName && (

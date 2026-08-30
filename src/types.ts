@@ -412,6 +412,8 @@ export interface InquiryItem {
   preservationRequirement?: string;
   dgClassIMO?: string;
   unNumber?: string;
+  packingGroup?: string;
+  flashPoint?: string;
   msdsFileName?: string;
   origin: string;
   destination: string;

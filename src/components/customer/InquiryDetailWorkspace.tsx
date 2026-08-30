@@ -254,6 +254,26 @@ export const InquiryDetailWorkspace: React.FC<InquiryDetailWorkspaceProps> = ({
                         📦 {inquiry.packaging}
                       </span>
                     )}
+                    {inquiry.dgClassIMO && (
+                      <span className="inline-block text-[10px] font-bold text-rose-800 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200">
+                        ⚠️ {inquiry.dgClassIMO}
+                      </span>
+                    )}
+                    {inquiry.unNumber && (
+                      <span className="inline-block text-[10px] font-mono font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
+                        🏷️ {inquiry.unNumber}
+                      </span>
+                    )}
+                    {inquiry.packingGroup && (
+                      <span className="inline-block text-[10px] font-bold text-amber-900 bg-amber-100/70 px-2 py-0.5 rounded-md border border-amber-300">
+                        🛢️ {inquiry.packingGroup}
+                      </span>
+                    )}
+                    {inquiry.flashPoint && (
+                      <span className="inline-block text-[10px] font-bold text-rose-900 bg-rose-100/70 px-2 py-0.5 rounded-md border border-rose-300">
+                        🔥 Flash Point: {inquiry.flashPoint}
+                      </span>
+                    )}
                     {inquiry.preservationRequirement && (
                       <span className="inline-block text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
                         🛡️ {inquiry.preservationRequirement}

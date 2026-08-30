@@ -237,8 +237,9 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
   // Hazmat / DG Specific Specs
   const [dgClassIMO, setDgClassIMO] = useState('Class 3 - Chất lỏng dễ cháy (Flammable Liquids)');
   const [unNumber, setUnNumber] = useState('');
-  const [packingGroup, setPackingGroup] = useState('Group II (Mức độ nguy hiểm trung bình)');
-  const [msdsFileName, setMsdsFileName] = useState<string>('');
+  const [packingGroup, setPackingGroup] = useState('PG II (Mức độ nguy hiểm trung bình)');
+  const [flashPoint, setFlashPoint] = useState<string>('');
+  const [msdsFileName, setMsdsFileName] = useState<string>('MSDS_Safety_Data_Sheet.pdf');
 
   // SECTION 4: Service Specific Routes & Technical Specs
   const [origin, setOrigin] = useState('');
@@ -1041,7 +1042,9 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
       preservationRequirement: preservationRequirement.trim() ? preservationRequirement.trim() : undefined,
       dgClassIMO: cargoClassification === 'Hazmat' ? dgClassIMO : undefined,
       unNumber: cargoClassification === 'Hazmat' ? unNumber : undefined,
-      msdsFileName: cargoClassification === 'Hazmat' ? msdsFileName : undefined,
+      packingGroup: cargoClassification === 'Hazmat' ? packingGroup : undefined,
+      flashPoint: cargoClassification === 'Hazmat' && flashPoint.trim() ? flashPoint.trim() : undefined,
+      msdsFileName: cargoClassification === 'Hazmat' ? (msdsFileName || 'MSDS_Safety_Data_Sheet.pdf') : undefined,
       origin: origin || (cleanedTruckingSpecs.pickupLocations?.[0] ?? 'Điểm đi'),
       destination: destination || (cleanedTruckingSpecs.deliveryLocations?.[0] ?? 'Điểm đến'),
       route: calculatedRoute,
@@ -1547,13 +1550,20 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
 
             {/* Dynamic Specific Inputs for Hazmat / DG Cargo */}
             {cargoClassification === 'Hazmat' && (
-              <div className="p-3.5 bg-amber-50/70 border border-amber-200 rounded-2xl space-y-3 animate-in fade-in duration-150">
+              <div className="p-4 bg-amber-50/70 border border-amber-200 rounded-2xl space-y-3.5 animate-in fade-in duration-150">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5 text-xs font-bold text-amber-950">
                     <AlertTriangle className="w-4 h-4 text-amber-700" />
-                    <span>Khai Báo Thông Số Hàng Nguy Hiểm (IMO / IATA DG Class) *</span>
+                    <span>Khai Báo Thông Số Hàng Nguy Hiểm & Hóa Chất (IMO / GHS DG Class) *</span>
                   </div>
+                  {serviceType === 'Warehousing' && (
+                    <span className="text-[10px] font-bold text-amber-800 bg-amber-100/80 px-2 py-0.5 rounded-md border border-amber-200">
+                      DG Warehouse Specs
+                    </span>
+                  )}
                 </div>
+
+                {/* Row 1: IMO Class, UN Number, Packing Group */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1">
@@ -1562,12 +1572,16 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                     <select
                       value={dgClassIMO}
                       onChange={(e) => setDgClassIMO(e.target.value)}
-                      className="w-full px-3 py-2 text-xs bg-white border border-amber-200 rounded-xl font-bold text-amber-950 focus:border-amber-500"
+                      className="w-full px-3 py-2.5 text-xs bg-white border border-amber-200 rounded-xl font-bold text-amber-950 focus:border-amber-500 shadow-2xs cursor-pointer"
                     >
                       <option value="Class 2.1 - Khí dễ cháy (Flammable Gas)">Class 2.1 - Khí dễ cháy</option>
+                      <option value="Class 2.2 - Khí không cháy, không độc">Class 2.2 - Khí không độc hại</option>
                       <option value="Class 3 - Chất lỏng dễ cháy (Flammable Liquids)">Class 3 - Chất lỏng dễ cháy</option>
                       <option value="Class 4.1 - Chất rắn dễ cháy">Class 4.1 - Chất rắn dễ cháy</option>
+                      <option value="Class 4.2 - Chất tự bốc cháy">Class 4.2 - Chất tự bốc cháy</option>
+                      <option value="Class 4.3 - Chất nguy hiểm khi tiếp xúc nước">Class 4.3 - Nguy hiểm khi gặp nước</option>
                       <option value="Class 5.1 - Chất oxy hóa (Oxidizing)">Class 5.1 - Chất oxy hóa</option>
+                      <option value="Class 5.2 - Peroxit hữu cơ">Class 5.2 - Peroxit hữu cơ</option>
                       <option value="Class 6.1 - Chất độc hại (Toxic)">Class 6.1 - Chất độc hại</option>
                       <option value="Class 8 - Chất ăn mòn (Corrosive)">Class 8 - Chất ăn mòn</option>
                       <option value="Class 9 - Nguy hiểm khác (Pin Lithium / Khác)">Class 9 - Pin Lithium & Nguy hiểm khác</option>
@@ -1584,17 +1598,74 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                       value={unNumber}
                       onChange={(e) => setUnNumber(e.target.value)}
                       placeholder="VD: UN 1263, UN 1993, UN 3480"
-                      className="w-full px-3 py-2 text-xs bg-white border border-amber-200 rounded-xl font-bold text-amber-900 focus:border-amber-500"
+                      className="w-full px-3 py-2.5 text-xs bg-white border border-amber-200 rounded-xl font-bold text-amber-900 focus:border-amber-500 shadow-2xs"
                     />
                   </div>
 
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Đính Kèm Bảng An Toàn MSDS / SDS
+                      Nhóm Đóng Gói (Packing Group) *
                     </label>
-                    <div className="flex items-center gap-1.5 px-3 py-2 bg-white border border-amber-200 rounded-xl text-xs text-slate-700 truncate">
-                      <Paperclip className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                      <span className="truncate font-semibold">{msdsFileName}</span>
+                    <select
+                      value={packingGroup}
+                      onChange={(e) => setPackingGroup(e.target.value)}
+                      className="w-full px-3 py-2.5 text-xs bg-white border border-amber-200 rounded-xl font-bold text-amber-950 focus:border-amber-500 shadow-2xs cursor-pointer"
+                    >
+                      <option value="PG I (Mức độ nguy hiểm cao)">PG I - Mức độ nguy hiểm cao</option>
+                      <option value="PG II (Mức độ nguy hiểm trung bình)">PG II - Mức độ nguy hiểm trung bình</option>
+                      <option value="PG III (Mức độ nguy hiểm thấp)">PG III - Mức độ nguy hiểm thấp</option>
+                      <option value="Không áp dụng (Non-applicable / Pin Lithium / Khí nén)">Không áp dụng (Pin Lithium / Khí nén)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Row 2: Flash Point & MSDS File Upload */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 border-t border-amber-200/60">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1">
+                      <Flame className="w-3.5 h-3.5 text-amber-600" />
+                      <span>Điểm Chớp Cháy (Flash Point - °C)</span>
+                      {dgClassIMO.includes('Class 3') && (
+                        <span className="text-[10px] text-rose-600 font-bold ml-1">* Quan trọng cho PCCC Class 3</span>
+                      )}
+                    </label>
+                    <input
+                      type="text"
+                      value={flashPoint}
+                      onChange={(e) => setFlashPoint(e.target.value)}
+                      placeholder={dgClassIMO.includes('Class 3') ? "VD: 18°C hoặc 23°C (Bắt buộc kiểm tra PCCC)" : "VD: 24°C, > 60°C hoặc Không áp dụng"}
+                      className="w-full px-3.5 py-2.5 text-xs bg-white border border-amber-200 rounded-xl font-bold text-amber-900 focus:border-amber-500 shadow-2xs"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center justify-between">
+                      <span className="flex items-center gap-1">
+                        <Paperclip className="w-3.5 h-3.5 text-amber-600" />
+                        <span>Đính Kèm Bảng An Toàn Hóa Chất (MSDS / SDS)</span>
+                      </span>
+                      <span className="text-[10px] text-amber-700 font-normal">PDF, DOC</span>
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 flex items-center gap-1.5 px-3 py-2 bg-white border border-amber-200 rounded-xl text-xs text-slate-700 truncate shadow-2xs">
+                        <Paperclip className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                        <span className="truncate font-semibold text-slate-800">
+                          {msdsFileName || 'MSDS_Chemical_Safety_Sheet.pdf'}
+                        </span>
+                      </div>
+                      <label className="px-3 py-2 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl text-xs font-bold border border-amber-300 cursor-pointer shrink-0 transition-colors shadow-2xs">
+                        <span>Đổi File</span>
+                        <input
+                          type="file"
+                          accept=".pdf,.doc,.docx"
+                          className="hidden"
+                          onChange={(e) => {
+                            if (e.target.files && e.target.files[0]) {
+                              setMsdsFileName(e.target.files[0].name);
+                            }
+                          }}
+                        />
+                      </label>
                     </div>
                   </div>
                 </div>
