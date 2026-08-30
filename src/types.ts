@@ -384,6 +384,8 @@ export interface ProjectInquirySpecs {
   projectCategory: 'DISTRIBUTION' | 'CROSS_DOCK' | 'MULTIMODAL';
   projectName?: string;
   expectedStartDate?: string;
+  estimatedBudget?: string | number;
+  budgetCurrency?: 'VND' | 'USD' | 'EUR' | 'CNY';
   
   // 1. DISTRIBUTION NETWORK TENDER SPECS
   distributionChannel?: 'B2B / Siêu thị (Modern Trade)' | 'Đại lý truyền thống (General Trade)' | 'Chuỗi bán lẻ (Retail Chain)' | 'Phân phối Hỗn hợp Toàn diện';

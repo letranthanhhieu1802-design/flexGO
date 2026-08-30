@@ -439,6 +439,52 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
               </select>
             </div>
           </div>
+
+          {/* Estimated Tender Budget & Start Date */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 border-t border-indigo-100/60">
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-bold text-slate-800">
+                  Giá Trị Gói Thầu Dự Kiến (Estimated Tender Budget)
+                </label>
+                <span className="text-[10px] text-slate-400 font-normal">Tùy chọn</span>
+              </div>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    value={specs.estimatedBudget || ''}
+                    onChange={(e) => updateSpec('estimatedBudget', e.target.value)}
+                    placeholder="VD: 500.000.000 / 2,500,000,000..."
+                    className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-mono font-bold text-slate-900 shadow-2xs placeholder:font-sans placeholder:font-normal placeholder:text-slate-400"
+                  />
+                </div>
+                <select
+                  value={specs.budgetCurrency || 'VND'}
+                  onChange={(e) => updateSpec('budgetCurrency', e.target.value as any)}
+                  className="w-24 px-2 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 focus:bg-white focus:border-indigo-500 cursor-pointer shadow-2xs"
+                >
+                  <option value="VND">VND</option>
+                  <option value="USD">USD</option>
+                  <option value="EUR">EUR</option>
+                  <option value="CNY">CNY</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-800 mb-1">
+                Kế Hoạch Thời Gian Triển Khai (Expected Start Date)
+              </label>
+              <input
+                type="text"
+                value={specs.expectedStartDate || ''}
+                onChange={(e) => updateSpec('expectedStartDate', e.target.value)}
+                placeholder="VD: Bắt đầu từ đầu Quý tới / 01/10/2026..."
+                className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-medium text-slate-900 shadow-2xs"
+              />
+            </div>
+          </div>
         </div>
       )}
 
@@ -578,12 +624,58 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
               <select
                 value={specs.outboundMaxTurnaroundTime || 'Trong vòng 4 - 8 Giờ'}
                 onChange={(e) => updateSpec('outboundMaxTurnaroundTime', e.target.value)}
-                className="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-bold text-slate-900 cursor-pointer shadow-2xs"
+                className="w-full px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-bold text-slate-900 cursor-pointer shadow-2xs"
               >
                 <option value="Dưới 4 Giờ (Hỏa tốc liên tục)">⚡ Dưới 4 Giờ (Hỏa tốc liên tục / Không lưu sàn)</option>
                 <option value="Trong vòng 4 - 8 Giờ">⏱️ Trong vòng 4 - 8 Giờ (Tiêu chuẩn ca làm việc)</option>
                 <option value="Trong ngày (Same-day Delivery)">🚚 Trong ngày (Same-day Delivery - Giao trước 17:00)</option>
               </select>
+            </div>
+          </div>
+
+          {/* Cross-Dock Budget & Start Date */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 border-t border-purple-100/60">
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-bold text-slate-800">
+                  Giá Trị Gói Thầu Dự Kiến (Estimated Tender Budget)
+                </label>
+                <span className="text-[10px] text-slate-400 font-normal">Tùy chọn</span>
+              </div>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    value={specs.estimatedBudget || ''}
+                    onChange={(e) => updateSpec('estimatedBudget', e.target.value)}
+                    placeholder="VD: 300.000.000 / 1,500,000,000..."
+                    className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-mono font-bold text-slate-900 shadow-2xs placeholder:font-sans placeholder:font-normal placeholder:text-slate-400"
+                  />
+                </div>
+                <select
+                  value={specs.budgetCurrency || 'VND'}
+                  onChange={(e) => updateSpec('budgetCurrency', e.target.value as any)}
+                  className="w-24 px-2 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 focus:bg-white focus:border-purple-500 cursor-pointer shadow-2xs"
+                >
+                  <option value="VND">VND</option>
+                  <option value="USD">USD</option>
+                  <option value="EUR">EUR</option>
+                  <option value="CNY">CNY</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-800 mb-1">
+                Kế Hoạch Thời Gian Triển Khai (Expected Start Date)
+              </label>
+              <input
+                type="text"
+                value={specs.expectedStartDate || ''}
+                onChange={(e) => updateSpec('expectedStartDate', e.target.value)}
+                placeholder="VD: Bắt đầu từ đầu Quý tới / 01/10/2026..."
+                className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-medium text-slate-900 shadow-2xs"
+              />
             </div>
           </div>
         </div>
@@ -713,6 +805,52 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
                 onChange={(e) => updateSpec('multimodalMonthlyTeuOrVolume', e.target.value)}
                 placeholder="VD: 30 - 50 TEU / Tháng (hoặc 800 Tấn / Tháng)"
                 className="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-teal-500 font-bold text-slate-900 shadow-2xs"
+              />
+            </div>
+          </div>
+
+          {/* Multimodal Budget & Start Date */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 border-t border-teal-100/60">
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-bold text-slate-800">
+                  Giá Trị Gói Thầu Dự Kiến (Estimated Tender Budget)
+                </label>
+                <span className="text-[10px] text-slate-400 font-normal">Tùy chọn</span>
+              </div>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    value={specs.estimatedBudget || ''}
+                    onChange={(e) => updateSpec('estimatedBudget', e.target.value)}
+                    placeholder="VD: 800.000.000 / 3,000,000,000..."
+                    className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-teal-500 font-mono font-bold text-slate-900 shadow-2xs placeholder:font-sans placeholder:font-normal placeholder:text-slate-400"
+                  />
+                </div>
+                <select
+                  value={specs.budgetCurrency || 'VND'}
+                  onChange={(e) => updateSpec('budgetCurrency', e.target.value as any)}
+                  className="w-24 px-2 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 focus:bg-white focus:border-teal-500 cursor-pointer shadow-2xs"
+                >
+                  <option value="VND">VND</option>
+                  <option value="USD">USD</option>
+                  <option value="EUR">EUR</option>
+                  <option value="CNY">CNY</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-800 mb-1">
+                Kế Hoạch Thời Gian Triển Khai (Expected Start Date)
+              </label>
+              <input
+                type="text"
+                value={specs.expectedStartDate || ''}
+                onChange={(e) => updateSpec('expectedStartDate', e.target.value)}
+                placeholder="VD: Bắt đầu từ đầu Quý tới / 01/10/2026..."
+                className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-teal-500 font-medium text-slate-900 shadow-2xs"
               />
             </div>
           </div>

@@ -1171,6 +1171,29 @@ export const InquiryDetailWorkspace: React.FC<InquiryDetailWorkspaceProps> = ({
                       )}
                     </div>
 
+                    {/* Budget & Timeline */}
+                    {(inquiry.serviceSpecs.project.estimatedBudget || inquiry.serviceSpecs.project.expectedStartDate) && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-indigo-100/80 text-xs">
+                        {inquiry.serviceSpecs.project.estimatedBudget ? (
+                          <div className="bg-emerald-50/70 p-2.5 rounded-lg border border-emerald-200/80 shadow-2xs">
+                            <span className="text-[10px] text-emerald-800 font-bold block">💰 Giá trị gói thầu dự kiến (Budget):</span>
+                            <span className="font-extrabold text-sm text-emerald-950 font-mono block mt-0.5">
+                              {typeof inquiry.serviceSpecs.project.estimatedBudget === 'number'
+                                ? inquiry.serviceSpecs.project.estimatedBudget.toLocaleString('vi-VN')
+                                : inquiry.serviceSpecs.project.estimatedBudget}{' '}
+                              {inquiry.serviceSpecs.project.budgetCurrency || 'VND'}
+                            </span>
+                          </div>
+                        ) : null}
+                        {inquiry.serviceSpecs.project.expectedStartDate ? (
+                          <div className="bg-white/90 p-2.5 rounded-lg border border-indigo-200/80 shadow-2xs">
+                            <span className="text-[10px] text-slate-500 font-bold block">🗓️ Kế hoạch triển khai (Start Date):</span>
+                            <span className="font-bold text-xs text-slate-900 block mt-0.5">{inquiry.serviceSpecs.project.expectedStartDate}</span>
+                          </div>
+                        ) : null}
+                      </div>
+                    )}
+
                     {inquiry.serviceSpecs.project.originWarehouses && inquiry.serviceSpecs.project.originWarehouses.length > 1 && (
                       <div className="p-2.5 bg-white/90 rounded-lg border border-indigo-200/80 text-xs">
                         <span className="text-indigo-800 font-bold block">Danh sách kho tổng xuất hàng:</span>

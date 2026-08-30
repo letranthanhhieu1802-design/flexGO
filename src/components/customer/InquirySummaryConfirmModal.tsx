@@ -1727,6 +1727,26 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                     )}
                   </div>
 
+                  {/* Budget & Timeline */}
+                  {(project.estimatedBudget || project.expectedStartDate) && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                      {project.estimatedBudget ? (
+                        <div className="bg-emerald-50/70 p-2.5 rounded-xl border border-emerald-200/80 shadow-2xs">
+                          <span className="text-[10px] text-emerald-800 font-bold block">💰 Giá trị gói thầu dự kiến (Budget):</span>
+                          <span className="font-extrabold text-sm text-emerald-950 font-mono block mt-0.5">
+                            {typeof project.estimatedBudget === 'number' ? project.estimatedBudget.toLocaleString('vi-VN') : project.estimatedBudget} {project.budgetCurrency || 'VND'}
+                          </span>
+                        </div>
+                      ) : null}
+                      {project.expectedStartDate ? (
+                        <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
+                          <span className="text-[10px] text-slate-400 font-medium block">🗓️ Kế hoạch triển khai (Start Date):</span>
+                          <span className="font-bold text-xs text-slate-900 block mt-0.5">{project.expectedStartDate}</span>
+                        </div>
+                      ) : null}
+                    </div>
+                  )}
+
                   {project.originWarehouses && project.originWarehouses.length > 1 && (
                     <div className="bg-indigo-50/60 p-2.5 rounded-xl border border-indigo-200/80 shadow-2xs">
                       <span className="text-[10px] text-indigo-800 font-bold block">Danh sách kho tổng xuất hàng ({project.originWarehouses.length} Kho):</span>
