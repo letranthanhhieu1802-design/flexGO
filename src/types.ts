@@ -35,9 +35,9 @@ export type WorkspaceView =
   | 'company-settings'
   | 'account-settings';
 
-export type CurrentView = 
-  | { type: 'public'; tab: PublicNavTab; params?: { subTab?: 'about' | 'pricing' | 'resources' | 'trust' | 'contact'; [key: string]: any } }
-  | { type: 'workspace'; view: WorkspaceView; contextId?: string; params?: { inquiryCode?: string; [key: string]: any } };
+export type CurrentView =
+  | { type: 'public'; tab: PublicNavTab; params?: { subTab?: 'about' | 'pricing' | 'resources' | 'trust' | 'contact';[key: string]: any } }
+  | { type: 'workspace'; view: WorkspaceView; contextId?: string; params?: { inquiryCode?: string;[key: string]: any } };
 
 export interface UserProfile {
   id: string;
@@ -62,15 +62,15 @@ export interface UserProfile {
 
 export type UserPersona = UserProfile;
 
-export type ServiceType = 
-  | 'Trucking' 
-  | 'Sea Freight (FCL)' 
-  | 'Sea Freight (LCL)' 
-  | 'Air Freight' 
+export type ServiceType =
+  | 'Trucking'
+  | 'Sea Freight (FCL)'
+  | 'Sea Freight (LCL)'
+  | 'Air Freight'
   | 'Rail Freight'
-  | 'Warehousing' 
-  | 'Customs Clearance' 
-  | 'Cross-border' 
+  | 'Warehousing'
+  | 'Customs Clearance'
+  | 'Cross-border'
   | 'Project Cargo'
   | 'Cold Chain';
 
@@ -88,10 +88,10 @@ export interface SurchargeItemDef {
 
 export type CargoClassification = 'General' | 'Reefer' | 'Hazmat';
 
-export type InquiryStatus = 
-  | 'Open' 
-  | 'Quoted' 
-  | 'Awarded' 
+export type InquiryStatus =
+  | 'Open'
+  | 'Quoted'
+  | 'Awarded'
   | 'Closed';
 
 export interface TruckingInquirySpecs {
@@ -386,7 +386,7 @@ export interface ProjectInquirySpecs {
   expectedStartDate?: string;
   estimatedBudget?: string | number;
   budgetCurrency?: 'VND' | 'USD' | 'EUR' | 'CNY';
-  
+
   // 1. DISTRIBUTION NETWORK TENDER SPECS
   distributionChannel?: 'B2B / Siêu thị (Modern Trade)' | 'Đại lý truyền thống (General Trade)' | 'Chuỗi bán lẻ (Retail Chain)' | 'Phân phối Hỗn hợp Toàn diện';
   originWarehouses?: string[];
@@ -553,14 +553,14 @@ export interface ServiceCostBreakdown {
   };
 }
 
-export type QuotationStatus = 
-  | 'Draft' 
-  | 'Sent' 
-  | 'Viewed' 
-  | 'Under Review' 
-  | 'Negotiating' 
-  | 'Accepted' 
-  | 'Rejected' 
+export type QuotationStatus =
+  | 'Draft'
+  | 'Sent'
+  | 'Viewed'
+  | 'Under Review'
+  | 'Negotiating'
+  | 'Accepted'
+  | 'Rejected'
   | 'Expired';
 
 export interface QuotationItem {
@@ -575,7 +575,7 @@ export interface QuotationItem {
   supplierRating: number;
   serviceType: ServiceType;
   route: string;
-  
+
   // Itemized breakdown
   currency: 'VND' | 'USD';
   unitPrice?: number;
@@ -614,7 +614,7 @@ export interface QuotationItem {
 
 export type SupplierCategory = 'All' | 'Preferred' | 'Active' | 'Potential' | 'Inactive' | 'Current Supplier';
 
-export type CustomerSupplierSourceType = 
+export type CustomerSupplierSourceType =
   | 'AWARDED_QUOTE'            // 1. Awarded from customer inquiries
   | 'DIRECT_PROFILE_REQUEST'   // 2. Direct RFQ requested from supplier profile
   | 'CURRENT_SUPPLIER';        // 3. Current operational supplier declared by customer (offline/not yet registered on flexGO)
@@ -658,7 +658,7 @@ export interface SupplierCompany {
   monthlyViews?: number;
   todayViews?: number;
   viewGrowth?: string;
-  
+
   // Specific properties for Customer's My Suppliers (mirroring MiniCRM)
   source?: CustomerSupplierSourceType;
   sourceDetails?: SupplierSourceDetails;
@@ -673,16 +673,16 @@ export interface SupplierCompany {
   operatingStatus?: 'Active' | 'PendingLink' | 'Reviewing' | 'Archived';
 }
 
-export type LeadStatus = 
-  | 'Open' 
-  | 'Quoted' 
-  | 'Won' 
-  | 'Lost' 
+export type LeadStatus =
+  | 'Open'
+  | 'Quoted'
+  | 'Won'
+  | 'Lost'
   | 'Closed';
 
 export type PricingType = 'SPOT' | 'CONTRACT';
 
-export type SupplierLeadSourceType = 
+export type SupplierLeadSourceType =
   | 'SAVED'        // 1. Inquiries mà supplier lưu khi lướt trên bảng leadboard hoặc trong my customer (tab inquiries)
   | 'QUOTED'       // 2. Inquiries mà supplier báo giá trên lead board
   | 'UNLOCKED'     // 3. Inquiries mà supplier dùng flexcredit để mở khóa
@@ -726,11 +726,11 @@ export interface SupplierLeadItem {
   isDirectRfq?: boolean; // Yêu cầu báo giá trực tiếp từ trang hồ sơ Supplier
 }
 
-export type OpportunityStage = 
-  | 'Open' 
-  | 'Quoted' 
-  | 'Won' 
-  | 'Lost' 
+export type OpportunityStage =
+  | 'Open'
+  | 'Quoted'
+  | 'Won'
+  | 'Lost'
   | 'Closed'
   | 'NEW'
   | 'QUALIFIED'
@@ -766,7 +766,7 @@ export interface OpportunityItem {
   lastUpdated: string;
 }
 
-export type CustomerSourceType = 
+export type CustomerSourceType =
   | 'FLEXCREDIT_UNLOCKED'     // 1. Mở khóa thông tin từ bảng Lead Board bằng FlexCredit
   | 'DIRECT_PROFILE_REQUEST'  // 2. Inbound RFQ trực tiếp từ Supplier Profile / Landing Page (Miễn phí mở khóa 0 Credit)
   | 'AWARDED_QUOTE';          // 3. Khách hàng đã trao thầu (Awarded) báo giá của Supplier
@@ -866,11 +866,11 @@ export interface NotificationItem {
 // ----------------------------------------------------
 // CONTRACT MANAGEMENT TYPES
 // ----------------------------------------------------
-export type ContractStatus = 
-  | 'Draft' 
-  | 'Pending Signature' 
-  | 'Active' 
-  | 'Completed' 
+export type ContractStatus =
+  | 'Draft'
+  | 'Pending Signature'
+  | 'Active'
+  | 'Completed'
   | 'Terminated';
 
 export interface ContractMilestone {
@@ -951,13 +951,13 @@ export interface CreditPackage {
   ratePerCredit: number;
 }
 
-export type TransactionType = 
-  | 'TOP_UP' 
-  | 'LEAD_UNLOCK' 
-  | 'INQUIRY_BOOST' 
-  | 'QUOTATION_FEE' 
-  | 'CONTRACT_ESCROW' 
-  | 'REFUND' 
+export type TransactionType =
+  | 'TOP_UP'
+  | 'LEAD_UNLOCK'
+  | 'INQUIRY_BOOST'
+  | 'QUOTATION_FEE'
+  | 'CONTRACT_ESCROW'
+  | 'REFUND'
   | 'PROMO_BONUS';
 
 export interface CreditTransaction {
@@ -976,7 +976,7 @@ export interface CreditTransaction {
   invoiceNumber?: string;
 }
 
-export type InternationalTradeLaneRegion = 
+export type InternationalTradeLaneRegion =
   | 'NorthAmerica'    // Bắc Mỹ (2,692)
   | 'Asia'            // Châu Á (4,011)
   | 'Europe'          // Châu Âu (3,037)
@@ -1104,7 +1104,7 @@ export interface SalesSpecialistProfile {
   certifications: string[];
 }
 
-export type RatePricingUnit = 
+export type RatePricingUnit =
   | 'VND / Chuyến'
   | 'VND / Tấn'
   | 'VND / Kg'
@@ -1145,7 +1145,7 @@ export interface CustomerRateItem {
   cargoType: string;
   equipmentOrVehicleType?: string;
   loadType?: string;
-  
+
   // Rate details
   baseRateAmount: number;
   baseRateCurrency: 'VND' | 'USD';
@@ -1154,7 +1154,7 @@ export interface CustomerRateItem {
   allInclusive: boolean;
   vatPercent?: number;
   surcharges?: RateSurchargeItem[];
-  
+
   // Service Specs corresponding with Customer Inquiries
   specs?: ServiceSpecificSpecs;
   truckingSpecs?: TruckingInquirySpecs;
@@ -1164,7 +1164,7 @@ export interface CustomerRateItem {
   warehousingSpecs?: WarehousingInquirySpecs;
   customsSpecs?: CustomsInquirySpecs;
   crossBorderSpecs?: CrossBorderInquirySpecs;
-  
+
   // Supplier & Contract
   supplierId?: string;
   supplierName: string;
@@ -1176,7 +1176,7 @@ export interface CustomerRateItem {
   sourceType: RateSourceType;
   linkedInquiryCode?: string;
   linkedQuoteId?: string;
-  
+
   // SLA & Terms
   paymentTerms: string;
   transitTime?: string;
@@ -1184,7 +1184,7 @@ export interface CustomerRateItem {
   validFrom: string;
   validTo: string;
   status: RateStatus;
-  
+
   // Extra
   notes?: string;
   createdDate: string;
@@ -1192,21 +1192,21 @@ export interface CustomerRateItem {
   documentCount?: number;
 }
 
-export type PromotionCategory = 
-  | 'Trucking' 
-  | 'Sea Freight' 
-  | 'Cold Chain' 
-  | 'Air Freight' 
-  | 'Customs' 
-  | 'Warehousing' 
+export type PromotionCategory =
+  | 'Trucking'
+  | 'Sea Freight'
+  | 'Cold Chain'
+  | 'Air Freight'
+  | 'Customs'
+  | 'Warehousing'
   | 'Cross-border';
 
-export type PromotionBadgeType = 
-  | 'FLASH_SALE' 
-  | 'BACKHAUL_DEAL' 
-  | 'HOT_ROUTE' 
-  | 'VOLUME_DISCOUNT' 
-  | 'LIMITED_CAPACITY' 
+export type PromotionBadgeType =
+  | 'FLASH_SALE'
+  | 'BACKHAUL_DEAL'
+  | 'HOT_ROUTE'
+  | 'VOLUME_DISCOUNT'
+  | 'LIMITED_CAPACITY'
   | 'EXCLUSIVE_FLEXGO';
 
 export interface HotPromotionItem {
@@ -1221,7 +1221,7 @@ export interface HotPromotionItem {
   promotionalPriceVND: number;
   promotionalPriceDisplay: string;
   pricingUnit: string;
-  
+
   // Route / Location
   serviceType: ServiceType;
   category: PromotionCategory;
@@ -1229,12 +1229,12 @@ export interface HotPromotionItem {
   destination: string;
   routeDisplay: string;
   transitTime: string;
-  
+
   // Vehicle / Equipment / Scope
   vehicleOrUnit: string;
   cargoSuitability: string;
   availableCapacity: string;
-  
+
   // Supplier & Salesman (PIC) Info
   specialistId: string;
   specialistName: string;
@@ -1247,7 +1247,7 @@ export interface HotPromotionItem {
   companyId: string;
   companyName: string;
   companyLogo: string;
-  
+
   // Validity & Conditions
   validFrom: string;
   validUntil: string;
@@ -1256,12 +1256,12 @@ export interface HotPromotionItem {
   totalSlots: number;
   minOrderQuantity?: string;
   paymentTerms: string;
-  
+
   // Highlights & Perks
   highlights: string[];
   includedPerks: string[];
   notes?: string;
-  
+
   // Stats
   viewsCount: number;
   interestedCount: number;
