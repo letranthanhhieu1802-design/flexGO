@@ -1165,6 +1165,27 @@ export const InquiryDetailWorkspace: React.FC<InquiryDetailWorkspaceProps> = ({
                         </>
                       )}
 
+                      {inquiry.serviceSpecs.project.projectCategory === 'PORT_ICD' && (
+                        <>
+                          <div className="col-span-2">
+                            <span className="text-slate-400 block font-semibold">Hình thức luân chuyển</span>
+                            <span className="font-bold text-sky-950">{inquiry.serviceSpecs.project.portIcdShuttleMode || 'Đầu kéo chuyên tuyến'}</span>
+                          </div>
+                          <div>
+                            <span className="text-slate-400 block font-semibold">Cảng biển gốc (Origin Port)</span>
+                            <span className="font-bold text-slate-800">{inquiry.serviceSpecs.project.portIcdOriginPort || inquiry.origin}</span>
+                          </div>
+                          <div>
+                            <span className="text-slate-400 block font-semibold">Cảng cạn đích (Destination ICD)</span>
+                            <span className="font-bold text-slate-800">{inquiry.serviceSpecs.project.portIcdDestinationIcd || inquiry.destination}</span>
+                          </div>
+                          <div className="col-span-2">
+                            <span className="text-slate-400 block font-semibold">Sản lượng Container cam kết</span>
+                            <span className="font-bold text-sky-900">{inquiry.serviceSpecs.project.portIcdMonthlyTeuOrVolume || '500 - 1.000 TEU / Tháng'}</span>
+                          </div>
+                        </>
+                      )}
+
                       {inquiry.serviceSpecs.project.projectCategory === 'MULTIMODAL' && (
                         <>
                           <div className="col-span-2">
@@ -1212,6 +1233,31 @@ export const InquiryDetailWorkspace: React.FC<InquiryDetailWorkspaceProps> = ({
                         <div className="flex flex-wrap gap-1.5 mt-1">
                           {inquiry.serviceSpecs.project.targetRetailChains.map((c, i) => (
                             <span key={i} className="px-2 py-0.5 text-[10px] font-bold bg-white text-purple-900 rounded border border-purple-200 shadow-2xs">
+                              {c}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {inquiry.serviceSpecs.project.portIcdOperations && inquiry.serviceSpecs.project.portIcdOperations.length > 0 && (
+                      <div className="p-2.5 bg-sky-50/70 rounded-lg border border-sky-200/80 text-xs">
+                        <span className="text-sky-900 font-bold block">Gói Nghiệp Vụ Bãi Cảng & ICD ({inquiry.serviceSpecs.project.portIcdOperations.length} Dịch vụ):</span>
+                        <div className="flex flex-wrap gap-1.5 mt-1">
+                          {inquiry.serviceSpecs.project.portIcdOperations.map((op, i) => (
+                            <span key={i} className="px-2 py-0.5 text-[10px] font-bold bg-white text-sky-900 rounded border border-sky-200 shadow-2xs">
+                              {op}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {inquiry.serviceSpecs.project.portIcdContainerTypes && inquiry.serviceSpecs.project.portIcdContainerTypes.length > 0 && (
+                      <div className="p-2.5 bg-white rounded-lg border border-sky-200 text-xs">
+                        <span className="text-slate-500 font-bold block">Chủng loại Container khai thác:</span>
+                        <div className="flex flex-wrap gap-1.5 mt-1">
+                          {inquiry.serviceSpecs.project.portIcdContainerTypes.map((c, i) => (
+                            <span key={i} className="px-2 py-0.5 text-[10px] font-bold bg-sky-50 text-sky-800 rounded border border-sky-200">
                               {c}
                             </span>
                           ))}

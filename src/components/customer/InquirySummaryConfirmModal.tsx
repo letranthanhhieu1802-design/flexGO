@@ -1711,6 +1711,29 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       </>
                     )}
 
+                    {project.projectCategory === 'PORT_ICD' && (
+                      <>
+                        <div className="bg-sky-50/80 p-2.5 rounded-xl border border-sky-200 shadow-2xs col-span-2">
+                          <span className="text-[10px] text-sky-800 block font-bold">Hình thức luân chuyển Cảng ↔ ICD</span>
+                          <span className="font-extrabold text-sky-950 block truncate">{project.portIcdShuttleMode || 'Đầu kéo chuyên tuyến'}</span>
+                        </div>
+                        <div className="bg-white p-2.5 rounded-xl border border-sky-100 shadow-2xs">
+                          <span className="text-[10px] text-slate-400 block font-medium">Cảng biển gốc (Origin Port)</span>
+                          <span className="font-extrabold text-slate-900 block truncate">{project.portIcdOriginPort || inquiry.origin || 'Cảng biển'}</span>
+                        </div>
+                        <div className="bg-white p-2.5 rounded-xl border border-sky-100 shadow-2xs">
+                          <span className="text-[10px] text-slate-400 block font-medium">Cảng cạn đích (Destination ICD)</span>
+                          <span className="font-extrabold text-slate-900 block truncate">{project.portIcdDestinationIcd || inquiry.destination || 'ICD'}</span>
+                        </div>
+                        {project.portIcdMonthlyTeuOrVolume ? (
+                          <div className="bg-white p-2.5 rounded-xl border border-sky-100 shadow-2xs col-span-2">
+                            <span className="text-[10px] text-slate-400 block font-medium">Sản lượng Container cam kết</span>
+                            <span className="font-extrabold text-sky-900 block truncate">{project.portIcdMonthlyTeuOrVolume}</span>
+                          </div>
+                        ) : null}
+                      </>
+                    )}
+
                     {project.projectCategory === 'MULTIMODAL' && (
                       <>
                         <div className="bg-white p-2.5 rounded-xl border border-teal-100 shadow-2xs col-span-2">
@@ -1783,6 +1806,32 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       <div className="flex flex-wrap gap-1.5 mt-1">
                         {project.targetRetailChains.map((c, i) => (
                           <span key={i} className="px-2 py-0.5 text-[10px] font-bold bg-white text-purple-900 rounded-md border border-purple-200 shadow-2xs">
+                            {c}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {project.portIcdOperations && project.portIcdOperations.length > 0 && (
+                    <div className="bg-sky-50/60 p-2.5 rounded-xl border border-sky-200/80 shadow-2xs">
+                      <span className="text-[10px] text-sky-800 font-bold block">Gói Nghiệp Vụ Bãi Cảng & ICD ({project.portIcdOperations.length} Dịch vụ):</span>
+                      <div className="flex flex-wrap gap-1.5 mt-1">
+                        {project.portIcdOperations.map((op, i) => (
+                          <span key={i} className="px-2 py-0.5 text-[10px] font-bold bg-white text-sky-900 rounded-md border border-sky-200 shadow-2xs">
+                            {op}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {project.portIcdContainerTypes && project.portIcdContainerTypes.length > 0 && (
+                    <div className="bg-white p-2.5 rounded-xl border border-sky-200 shadow-2xs">
+                      <span className="text-[10px] text-slate-500 font-bold block">Chủng loại Container khai thác:</span>
+                      <div className="flex flex-wrap gap-1.5 mt-1">
+                        {project.portIcdContainerTypes.map((c, i) => (
+                          <span key={i} className="px-2 py-0.5 text-[10px] font-bold bg-sky-50 text-sky-800 rounded-md border border-sky-200">
                             {c}
                           </span>
                         ))}

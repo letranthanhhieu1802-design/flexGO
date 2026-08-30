@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Layers, MapPin, Building2, Zap, Globe, Truck, CheckSquare, Clock, ShieldCheck, FileText, ArrowRight, Plus, Trash2, Sparkles, Store, Boxes, Split, Calendar } from 'lucide-react';
+import { Layers, MapPin, Building2, Zap, Globe, Truck, CheckSquare, Clock, ShieldCheck, FileText, ArrowRight, Plus, Trash2, Sparkles, Store, Boxes, Split, Calendar, Anchor, Ship } from 'lucide-react';
 import { ProjectInquirySpecs } from '../../../types';
 import { VASItemDef } from './VASSection';
 
@@ -159,7 +159,10 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
   };
 
   // Helper toggle for array fields
-  const toggleArrayItem = (field: 'fleetRequirements' | 'keyKPIRequirements' | 'inboundVehicleTypes' | 'sortingRequirements' | 'targetRetailChains', item: string) => {
+  const toggleArrayItem = (
+    field: 'fleetRequirements' | 'keyKPIRequirements' | 'inboundVehicleTypes' | 'sortingRequirements' | 'targetRetailChains' | 'portIcdContainerTypes' | 'portIcdOperations',
+    item: string
+  ) => {
     const list = (specs[field] as string[]) || [];
     const exists = list.includes(item);
     const updated = exists ? list.filter((i) => i !== item) : [...list, item];
@@ -183,7 +186,7 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
         </div>
       </div>
 
-      {/* 1. Project Category Selection (3 Core Types) */}
+      {/* 1. Project Category Selection (4 Core Types) */}
       <div>
         <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center justify-between">
           <span>1. Phân Loại Mô Hình Dự Án Logistics (Project Category) *</span>
@@ -192,7 +195,7 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
           </span>
         </label>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
           {/* Option 1: Distribution */}
           <div
             onClick={() => updateSpec('projectCategory', 'DISTRIBUTION')}
@@ -205,7 +208,7 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold flex items-center gap-1.5">
                 <Store className="w-4 h-4 text-indigo-600" />
-                <span>Phân Phối Tổng Thể (Distribution)</span>
+                <span>Phân Phối (Distribution)</span>
               </span>
               {projectCategory === 'DISTRIBUTION' && <span className="w-2 h-2 rounded-full bg-indigo-600 shrink-0"></span>}
             </div>
@@ -226,30 +229,51 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold flex items-center gap-1.5">
                 <Split className="w-4 h-4 text-indigo-600" />
-                <span>Trạm Cross-Docking (X-Dock)</span>
+                <span>Trạm Cross-Dock (X-Dock)</span>
               </span>
               {projectCategory === 'CROSS_DOCK' && <span className="w-2 h-2 rounded-full bg-indigo-600 shrink-0"></span>}
             </div>
             <p className="text-[11px] text-slate-500 mt-1 font-normal leading-relaxed">
-              Hàng tập kết về trạm X-Dock, chia chọn phân loại theo đơn và giao ngay trong ngày. Không lưu kho (Zero-Storage).
+              Gom hàng lẻ, chia chọn theo Store Code và giao ngay siêu thị trong ngày. Không lưu kho (Zero-Storage).
             </p>
           </div>
 
-          {/* Option 3: Multimodal */}
+          {/* Option 3: Port & ICD Project */}
           <div
-            onClick={() => updateSpec('projectCategory', 'MULTIMODAL')}
+            onClick={() => updateSpec('projectCategory', 'PORT_ICD')}
             className={`p-3 rounded-2xl border text-left cursor-pointer transition-all ${
-              projectCategory === 'MULTIMODAL'
-                ? 'border-indigo-600 bg-indigo-50/80 ring-2 ring-indigo-500/25 font-bold text-indigo-950 shadow-2xs'
+              projectCategory === 'PORT_ICD'
+                ? 'border-sky-600 bg-sky-50/80 ring-2 ring-sky-500/25 font-bold text-sky-950 shadow-2xs'
                 : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
             }`}
           >
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold flex items-center gap-1.5">
-                <Globe className="w-4 h-4 text-indigo-600" />
-                <span>Đa Phương Thức (Multimodal)</span>
+                <Anchor className="w-4 h-4 text-sky-600" />
+                <span>Cảng / Cảng Cạn ICD</span>
               </span>
-              {projectCategory === 'MULTIMODAL' && <span className="w-2 h-2 rounded-full bg-indigo-600 shrink-0"></span>}
+              {projectCategory === 'PORT_ICD' && <span className="w-2 h-2 rounded-full bg-sky-600 shrink-0"></span>}
+            </div>
+            <p className="text-[11px] text-slate-500 mt-1 font-normal leading-relaxed">
+              Luân chuyển Cont Cảng ↔ ICD, vận chuyển sà lan, đóng/rút ruột cont bãi và quản lý bãi vỏ rỗng Depot.
+            </p>
+          </div>
+
+          {/* Option 4: Multimodal */}
+          <div
+            onClick={() => updateSpec('projectCategory', 'MULTIMODAL')}
+            className={`p-3 rounded-2xl border text-left cursor-pointer transition-all ${
+              projectCategory === 'MULTIMODAL'
+                ? 'border-teal-600 bg-teal-50/80 ring-2 ring-teal-500/25 font-bold text-teal-950 shadow-2xs'
+                : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold flex items-center gap-1.5">
+                <Globe className="w-4 h-4 text-teal-600" />
+                <span>Đa Phương Thức</span>
+              </span>
+              {projectCategory === 'MULTIMODAL' && <span className="w-2 h-2 rounded-full bg-teal-600 shrink-0"></span>}
             </div>
             <p className="text-[11px] text-slate-500 mt-1 font-normal leading-relaxed">
               Kết hợp 2 hoặc nhiều phương thức (Đường Biển + Bộ, Đường Sắt + Bộ, Sà Lan + Sắt, Air + Road).
@@ -725,7 +749,166 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
       )}
 
       {/* ========================================================================= */}
-      {/* 2C. SPECIFIC SECTION: MULTIMODAL LOGISTICS PROJECT */}
+      {/* 2C. SPECIFIC SECTION: PORT & ICD LOGISTICS PROJECT */}
+      {/* ========================================================================= */}
+      {projectCategory === 'PORT_ICD' && (
+        <div className="space-y-3.5 p-4 bg-sky-50/40 border border-sky-100 rounded-2xl animate-in fade-in duration-150">
+          <div className="flex items-center justify-between border-b border-sky-100 pb-2">
+            <span className="text-xs font-extrabold text-sky-950 uppercase tracking-wider flex items-center gap-1.5">
+              <Anchor className="w-4 h-4 text-sky-600" />
+              <span>Dự Án Khai Thác Cảng / Cảng Cạn ICD & Luân Chuyển Container (Port / ICD Shuttling)</span>
+            </span>
+            <span className="text-[10px] text-sky-700 font-bold bg-white px-2 py-0.5 rounded border border-sky-200 shadow-2xs">
+              ⚓ Port & Depot Logistics
+            </span>
+          </div>
+
+          {/* 1. Origin Port & Destination ICD */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Cảng Biển / Cảng Gốc (Origin Seaport / Terminal) *
+              </label>
+              <input
+                type="text"
+                required
+                value={specs.portIcdOriginPort || origin || ''}
+                onChange={(e) => {
+                  updateSpec('portIcdOriginPort', e.target.value);
+                  setOrigin(e.target.value);
+                }}
+                placeholder="VD: Cảng Quốc Tế Cái Mép (CMIT / TCIT) / Cát Lái / Lạch Huyện..."
+                className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-sky-500 font-bold text-slate-900 shadow-2xs"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Cảng Cạn ICD / Depot Vệ Tinh Đích (Destination ICD / Depot) *
+              </label>
+              <input
+                type="text"
+                required
+                value={specs.portIcdDestinationIcd || destination || ''}
+                onChange={(e) => {
+                  updateSpec('portIcdDestinationIcd', e.target.value);
+                  setDestination(e.target.value);
+                }}
+                placeholder="VD: ICD Sóng Thần / Tân Cảng Long Bình / ICD Tiên Sơn / ICD Đình Vũ..."
+                className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-sky-500 font-bold text-slate-900 shadow-2xs"
+              />
+            </div>
+          </div>
+
+          {/* 2. Shuttle Mode & Monthly Tender Volume */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1 border-t border-sky-100/60">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Hình Thức Luân Chuyển Shuttling Cảng ↔ ICD *
+              </label>
+              <select
+                value={specs.portIcdShuttleMode || 'Đầu kéo Sơ-mi Rơ-moóc chuyên tuyến (Dedicated Drayage)'}
+                onChange={(e) => updateSpec('portIcdShuttleMode', e.target.value as any)}
+                className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-sky-500 font-bold text-slate-900 cursor-pointer shadow-2xs"
+              >
+                <option value="Đầu kéo Sơ-mi Rơ-moóc chuyên tuyến (Dedicated Drayage)">🚛 Đầu kéo Sơ-mi Rơ-moóc chuyên tuyến (Dedicated Drayage Fleet)</option>
+                <option value="Sà lan sông kết nối Cảng - ICD (Inland Barge)">🚢 Sà lan sông kết nối Cảng - ICD (Inland Barge 72 - 128 TEU)</option>
+                <option value="Kết hợp Sà Lan + Đầu kéo (Barge - Road Hybrid)">🔄 Kết hợp Sà Lan + Đầu kéo (Barge - Road Hybrid Shuttle)</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Sản Lượng Container Cam Kết Trong Gói Thầu *
+              </label>
+              <input
+                type="text"
+                value={specs.portIcdMonthlyTeuOrVolume || ''}
+                onChange={(e) => updateSpec('portIcdMonthlyTeuOrVolume', e.target.value)}
+                placeholder="VD: 500 - 1.000 TEU / Tháng (hoặc 30 - 50 Cont / Ngày)"
+                className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-sky-500 font-bold text-slate-900 shadow-2xs"
+              />
+            </div>
+          </div>
+
+          {/* 3. Container Types */}
+          <div className="space-y-2 pt-1 border-t border-sky-100/60">
+            <label className="block text-xs font-bold text-slate-800">
+              Quy Cách & Chủng Loại Container Cần Khai Thác (Chọn các loại) *
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {[
+                { id: 'cont-20gp', label: '📦 Container 20ft GP (Thường)' },
+                { id: 'cont-40hc', label: '📦 Container 40ft GP / 40HC' },
+                { id: 'cont-reefer', label: '❄️ Container Lạnh 40RF / 20RF' },
+                { id: 'cont-oog', label: '🏗️ Flatrack / Open Top / ISO Tank' },
+              ].map((cType) => {
+                const isChecked = ((specs.portIcdContainerTypes || []) as string[]).includes(cType.label);
+                return (
+                  <div
+                    key={cType.id}
+                    onClick={() => toggleArrayItem('portIcdContainerTypes', cType.label)}
+                    className={`p-2.5 rounded-xl border text-xs cursor-pointer flex items-center gap-2 transition-all ${
+                      isChecked
+                        ? 'border-sky-600 bg-white ring-1 ring-sky-500/30 font-bold text-sky-950 shadow-2xs'
+                        : 'border-slate-200 bg-white/70 text-slate-600 hover:border-slate-300'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      readOnly
+                      className="rounded border-slate-300 text-sky-600 focus:ring-0 cursor-pointer"
+                    />
+                    <span className="truncate">{cType.label}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 4. Yard & Terminal Operations / Scope */}
+          <div className="space-y-2 pt-1 border-t border-sky-100/60">
+            <label className="block text-xs font-bold text-slate-800">
+              Gói Nghiệp Vụ Bãi & Khai Thác Tại Cảng / ICD (Chọn các khâu thực hiện) *
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {[
+                { id: 'op-lolo', label: '🏗️ Dịch vụ Nâng hạ Container tại Cảng & ICD (LoLo Lift On / Lift Off)' },
+                { id: 'op-stuffing', label: '📦 Đóng hàng (Stuffing) / Rút ruột container (Unstuffing) tại bãi ICD' },
+                { id: 'op-empty', label: '🔄 Quản lý bãi vỏ rỗng & Cấp phát vỏ theo lệnh Hãng tàu (Empty Depot)' },
+                { id: 'op-mr', label: '🛠️ Giám định, Vệ sinh & Sửa chữa vỏ container (M&R Survey & Repair)' },
+                { id: 'op-reefer', label: '❄️ Bãi cắm điện & Giám sát nhiệt độ Cont lạnh 24/7 (PTI & Reefer Monitoring)' },
+                { id: 'op-olt', label: '📑 Thủ tục chuyển cửa khẩu OLT & Vận chuyển độc lập giữa Cảng - ICD' },
+              ].map((op) => {
+                const isChecked = ((specs.portIcdOperations || []) as string[]).includes(op.label);
+                return (
+                  <div
+                    key={op.id}
+                    onClick={() => toggleArrayItem('portIcdOperations', op.label)}
+                    className={`p-2.5 rounded-xl border text-xs cursor-pointer flex items-center gap-2 transition-all ${
+                      isChecked
+                        ? 'border-sky-600 bg-white ring-1 ring-sky-500/30 font-bold text-sky-950 shadow-2xs'
+                        : 'border-slate-200 bg-white/70 text-slate-600 hover:border-slate-300'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      readOnly
+                      className="rounded border-slate-300 text-sky-600 focus:ring-0 cursor-pointer"
+                    />
+                    <span>{op.label}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 2D. SPECIFIC SECTION: MULTIMODAL LOGISTICS PROJECT */}
       {/* ========================================================================= */}
       {projectCategory === 'MULTIMODAL' && (
         <div className="space-y-3.5 p-4 bg-teal-50/40 border border-teal-100 rounded-2xl animate-in fade-in duration-150">

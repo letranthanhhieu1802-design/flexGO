@@ -667,6 +667,8 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
             ? 'Phân phối chuỗi'
             : projectSpecs.projectCategory === 'CROSS_DOCK'
             ? 'Trạm Cross-Dock'
+            : projectSpecs.projectCategory === 'PORT_ICD'
+            ? 'Cảng / Cảng cạn ICD'
             : 'Đa phương thức'
         }`,
         defaultVal: '500.000.000 VND',

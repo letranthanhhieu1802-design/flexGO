@@ -381,7 +381,7 @@ export interface ProjectInquirySpecs {
   pricingType?: PricingType;
   contractTerm?: string;
   committedFrequency?: string;
-  projectCategory: 'DISTRIBUTION' | 'CROSS_DOCK' | 'MULTIMODAL';
+  projectCategory: 'DISTRIBUTION' | 'CROSS_DOCK' | 'PORT_ICD' | 'MULTIMODAL';
   projectName?: string;
   expectedStartDate?: string;
   estimatedBudget?: string | number;
@@ -414,7 +414,16 @@ export interface ProjectInquirySpecs {
   outboundStoreCount?: number;
   outboundMaxTurnaroundTime?: string;
 
-  // 3. MULTIMODAL LOGISTICS PROJECT SPECS
+  // 3. PORT & ICD LOGISTICS PROJECT SPECS
+  portIcdHubName?: string;
+  portIcdOriginPort?: string;
+  portIcdDestinationIcd?: string;
+  portIcdShuttleMode?: 'Đầu kéo Sơ-mi Rơ-moóc chuyên tuyến (Dedicated Drayage)' | 'Sà lan sông kết nối Cảng - ICD (Inland Barge)' | 'Kết hợp Sà Lan + Đầu kéo (Barge - Road Hybrid)';
+  portIcdMonthlyTeuOrVolume?: string;
+  portIcdContainerTypes?: string[];
+  portIcdOperations?: string[];
+
+  // 4. MULTIMODAL LOGISTICS PROJECT SPECS
   multimodalCombination?: 'Đường Biển + Đường Bộ (Sea - Road Freight)' | 'Đường Sắt + Đường Bộ (Rail - Road Freight)' | 'Sà Lan Sông + Đường Sắt (Inland Barge - Rail)' | 'Hàng Không + Đường Bộ (Air - Road Express)' | 'Đa phương thức Tùy chỉnh (Custom Multimodal)';
   multimodalFirstMile?: string;
   multimodalMainHaul?: string;
