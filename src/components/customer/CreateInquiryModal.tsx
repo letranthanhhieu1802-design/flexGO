@@ -1397,50 +1397,62 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
-                  {/* Select LOV standard range */}
-                  <div className="lg:col-span-6">
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Dải Nhiệt Độ Chuẩn *
-                    </label>
-                    <select
-                      value={
-                        REEFER_TEMPERATURE_RANGES_LOV.find((opt) => opt.value === temperatureRequirement)?.id ||
-                        (temperatureRequirement ? 'custom' : 'frozen-deep')
-                      }
-                      onChange={(e) => {
-                        const opt = REEFER_TEMPERATURE_RANGES_LOV.find((o) => o.id === e.target.value);
-                        if (opt && opt.id !== 'custom') {
-                          setTemperatureRequirement(opt.value);
-                        } else {
-                          if (!temperatureRequirement) setTemperatureRequirement('');
+                {serviceType === 'Customs Clearance' ? (
+                  <div className="p-3 bg-cyan-100/70 border border-cyan-300 rounded-xl text-xs text-cyan-950 flex items-start gap-2.5">
+                    <span className="text-base">🌿</span>
+                    <div>
+                      <span className="font-bold block">Nghiệp vụ hải quan hàng thực phẩm / bảo quản lạnh:</span>
+                      <p className="text-cyan-900 mt-0.5">
+                        Hàng nông sản, thủy sản, thực phẩm đông lạnh/tươi sống thường thuộc diện <strong>Kiểm dịch thực vật / động vật</strong> và <strong>Kiểm tra An toàn thực phẩm (ATTP)</strong>. Vui lòng khai báo các loại chứng nhận và kiểm tra chuyên ngành ở Mục 4.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
+                    {/* Select LOV standard range */}
+                    <div className="lg:col-span-6">
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        Dải Nhiệt Độ Chuẩn *
+                      </label>
+                      <select
+                        value={
+                          REEFER_TEMPERATURE_RANGES_LOV.find((opt) => opt.value === temperatureRequirement)?.id ||
+                          (temperatureRequirement ? 'custom' : 'frozen-deep')
                         }
-                      }}
-                      className="w-full px-3.5 py-2.5 text-xs bg-white border border-cyan-300 rounded-xl font-bold text-cyan-950 focus:border-cyan-500 shadow-2xs"
-                    >
-                      {REEFER_TEMPERATURE_RANGES_LOV.map((opt) => (
-                        <option key={opt.id} value={opt.id}>
-                          {opt.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                        onChange={(e) => {
+                          const opt = REEFER_TEMPERATURE_RANGES_LOV.find((o) => o.id === e.target.value);
+                          if (opt && opt.id !== 'custom') {
+                            setTemperatureRequirement(opt.value);
+                          } else {
+                            if (!temperatureRequirement) setTemperatureRequirement('');
+                          }
+                        }}
+                        className="w-full px-3.5 py-2.5 text-xs bg-white border border-cyan-300 rounded-xl font-bold text-cyan-950 focus:border-cyan-500 shadow-2xs"
+                      >
+                        {REEFER_TEMPERATURE_RANGES_LOV.map((opt) => (
+                          <option key={opt.id} value={opt.id}>
+                            {opt.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
 
-                  {/* Refine / Custom manual input */}
-                  <div className="lg:col-span-6">
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Chi Tiết Dải Cài Đặt Thực Tế (°C) *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={temperatureRequirement}
-                      onChange={(e) => setTemperatureRequirement(e.target.value)}
-                      placeholder="VD: -18°C đến -22°C hoặc +2°C đến +8°C"
-                      className="w-full px-3.5 py-2.5 text-xs bg-white border border-cyan-300 rounded-xl font-bold text-cyan-900 focus:border-cyan-500 shadow-2xs"
-                    />
+                    {/* Refine / Custom manual input */}
+                    <div className="lg:col-span-6">
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        Chi Tiết Dải Cài Đặt Thực Tế (°C) *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={temperatureRequirement}
+                        onChange={(e) => setTemperatureRequirement(e.target.value)}
+                        placeholder="VD: -18°C đến -22°C hoặc +2°C đến +8°C"
+                        className="w-full px-3.5 py-2.5 text-xs bg-white border border-cyan-300 rounded-xl font-bold text-cyan-900 focus:border-cyan-500 shadow-2xs"
+                      />
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Additional Cold Storage Product Parameters (Humidity & Inbound State) */}
                 {serviceType === 'Warehousing' && (
@@ -1459,25 +1471,29 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                         <option value="Không yêu cầu kiểm soát độ ẩm đặc biệt (Chuẩn kho lạnh/mát)">
                           ❄️ Không yêu cầu độ ẩm đặc biệt (Chuẩn kho đông/mát thông thường)
                         </option>
-                        <option value="Độ ẩm cao 85% - 95% RH (Chống héo/mất nước rau củ quả tươi)">
-                          🥬 Độ ẩm cao 85% - 95% RH (Rau củ quả tươi, trái cây, hoa tươi)
+                        <option value="Độ ẩm tiêu chuẩn (50% - 65% RH)">
+                          💧 Độ ẩm tiêu chuẩn (50% - 65% RH) - Hàng nông sản, trái cây
                         </option>
-                        <option value="Khống chế độ ẩm khô < 60% RH (Hạt giống, socola, bánh kẹo, Dược phẩm GDP)">
-                          💊 Khống chế độ ẩm khô &lt; 60% RH (Hạt giống, socola, Dược phẩm GDP)
+                        <option value="Kiểm soát độ ẩm khô khắt khe (< 45% RH)">
+                          🏜️ Kiểm soát độ ẩm khô khắt khe (&lt; 45% RH) - Dược phẩm, chip điện tử
+                        </option>
+                        <option value="Độ ẩm cao giữ ẩm (> 85% RH)">
+                          🌧️ Độ ẩm cao giữ ẩm (&gt; 85% RH) - Hoa tươi, rau củ quả lá
                         </option>
                         <option value="Tùy chỉnh riêng (% RH)">
-                          ⚙️ Tùy chỉnh mức độ ẩm riêng...
+                          ✏️ Tùy chỉnh riêng (% RH)
                         </option>
                       </select>
 
                       {warehousingSpecs.humidityRequirement === 'Tùy chỉnh riêng (% RH)' && (
-                        <div className="mt-2">
+                        <div className="mt-2 animate-in fade-in slide-in-from-top-1 duration-150">
                           <input
                             type="text"
+                            required
                             value={warehousingSpecs.customHumidity || ''}
                             onChange={(e) => setWarehousingSpecs({ ...warehousingSpecs, customHumidity: e.target.value })}
-                            placeholder="VD: Duy trì ổn định 50% - 60% RH"
-                            className="w-full px-3.5 py-2 text-xs bg-white border border-cyan-300 rounded-xl focus:border-cyan-500 font-semibold text-slate-800"
+                            placeholder="Nhập dải độ ẩm yêu cầu (VD: 40% - 50% RH)..."
+                            className="w-full px-3 py-2 text-xs bg-white border border-cyan-400 rounded-xl focus:border-cyan-600 font-bold text-cyan-950 shadow-2xs placeholder:font-normal"
                           />
                         </div>
                       )}
@@ -1538,8 +1554,8 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                   </div>
                 )}
 
-                {/* Continuous Genset Checkbox - Only for transport services */}
-                {serviceType !== 'Warehousing' && (
+                {/* Continuous Genset Checkbox - Only for transport services (hidden for Warehousing and Customs) */}
+                {serviceType !== 'Warehousing' && serviceType !== 'Customs Clearance' && (
                   <div className="pt-1">
                     <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer bg-white p-2.5 rounded-xl border border-cyan-200 w-full hover:border-cyan-300 transition-colors">
                       <input

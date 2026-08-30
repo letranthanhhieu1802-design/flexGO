@@ -1386,31 +1386,36 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
 
               {/* 6. CUSTOMS CLEARANCE SPECS */}
               {inquiry.serviceType === 'Customs Clearance' && customs && (
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
-                  <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  <div className="bg-white p-2.5 rounded-xl border border-amber-100 shadow-2xs">
                     <span className="text-[10px] text-slate-400 block font-medium">Vai trò doanh nghiệp</span>
                     <span className="font-extrabold text-blue-700">{customs.tradeRole || inquiry.tradeRole || 'Nhập khẩu (Import)'}</span>
                   </div>
-                  <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
+                  <div className="bg-white p-2.5 rounded-xl border border-amber-100 shadow-2xs">
                     <span className="text-[10px] text-slate-400 block font-medium">Loại hình tờ khai HQ</span>
                     <span className="font-extrabold text-slate-900 truncate block">{customs.declarationType}</span>
                   </div>
                   {customs.customsSubDepartment ? (
-                    <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
+                    <div className="bg-white p-2.5 rounded-xl border border-amber-100 shadow-2xs">
                       <span className="text-[10px] text-slate-400 block font-medium">Chi cục Hải quan</span>
                       <span className="font-extrabold text-slate-900 truncate block">{customs.customsSubDepartment}</span>
                     </div>
                   ) : null}
-                  {customs.hsCodePrimary ? (
-                    <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
-                      <span className="text-[10px] text-slate-400 block font-medium">Mã HS Code</span>
-                      <span className="font-extrabold text-slate-900">{customs.hsCodePrimary}</span>
-                    </div>
-                  ) : null}
                   {customs.coFormRequested && customs.coFormRequested !== 'Không yêu cầu' ? (
-                    <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
+                    <div className="bg-white p-2.5 rounded-xl border border-amber-100 shadow-2xs">
                       <span className="text-[10px] text-slate-400 block font-medium">Chứng nhận xuất xứ C/O</span>
                       <span className="font-extrabold text-indigo-700">{customs.coFormRequested}</span>
+                    </div>
+                  ) : null}
+                  {customs.specializedInspectionType && customs.specializedInspectionType !== 'Không có' ? (
+                    <div className="bg-white p-2.5 rounded-xl border border-amber-100 shadow-2xs col-span-2">
+                      <span className="text-[10px] text-slate-400 block font-medium">Kiểm tra chuyên ngành</span>
+                      <span className="font-extrabold text-blue-800">{customs.specializedInspectionType}</span>
+                    </div>
+                  ) : null}
+                  {customs.redChannelInspectionSupport ? (
+                    <div className="bg-rose-50/70 p-2.5 rounded-xl border border-rose-200 shadow-2xs col-span-2 flex items-center gap-1.5">
+                      <span className="text-rose-700 font-bold text-xs">🔴 Có yêu cầu hỗ trợ kiểm hóa thực tế Luồng Đỏ tại cảng</span>
                     </div>
                   ) : null}
                 </div>

@@ -894,6 +894,10 @@ export const InquiryDetailWorkspace: React.FC<InquiryDetailWorkspaceProps> = ({
                 {inquiry.serviceSpecs.customs && (
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3.5 text-xs bg-amber-50/40 p-4 rounded-xl border border-amber-100">
                     <div>
+                      <span className="text-slate-400 block font-semibold">Vai trò doanh nghiệp</span>
+                      <span className="font-bold text-blue-700">{inquiry.serviceSpecs.customs.tradeRole || inquiry.tradeRole || 'Nhập khẩu (Import)'}</span>
+                    </div>
+                    <div>
                       <span className="text-slate-400 block font-semibold">Loại hình tờ khai</span>
                       <span className="font-bold text-amber-900">{inquiry.serviceSpecs.customs.declarationType}</span>
                     </div>
@@ -902,12 +906,8 @@ export const InquiryDetailWorkspace: React.FC<InquiryDetailWorkspaceProps> = ({
                       <span className="font-bold text-slate-800">{inquiry.serviceSpecs.customs.customsSubDepartment}</span>
                     </div>
                     <div>
-                      <span className="text-slate-400 block font-semibold">Mã HS Code & Trị giá</span>
-                      <span className="font-bold text-indigo-700">{inquiry.serviceSpecs.customs.hsCodePrimary} (${inquiry.serviceSpecs.customs.invoiceValueUSD?.toLocaleString()})</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 block font-semibold">Mẫu C/O yêu cầu</span>
-                      <span className="font-bold text-slate-800">{inquiry.serviceSpecs.customs.coFormRequested || 'Không'}</span>
+                      <span className="text-slate-400 block font-semibold">Mẫu C/O ưu đãi</span>
+                      <span className="font-bold text-indigo-700">{inquiry.serviceSpecs.customs.coFormRequested || 'Không yêu cầu'}</span>
                     </div>
                     <div>
                       <span className="text-slate-400 block font-semibold">Kiểm tra chuyên ngành</span>
@@ -915,7 +915,9 @@ export const InquiryDetailWorkspace: React.FC<InquiryDetailWorkspaceProps> = ({
                     </div>
                     <div>
                       <span className="text-slate-400 block font-semibold">Hỗ trợ luồng đỏ</span>
-                      <span className="font-bold text-slate-800">{inquiry.serviceSpecs.customs.redChannelInspectionSupport ? 'Có kiểm hóa' : 'Không'}</span>
+                      <span className={`font-bold ${inquiry.serviceSpecs.customs.redChannelInspectionSupport ? 'text-rose-700' : 'text-slate-800'}`}>
+                        {inquiry.serviceSpecs.customs.redChannelInspectionSupport ? '🔴 Có kiểm hóa thực tế' : 'Không'}
+                      </span>
                     </div>
                   </div>
                 )}
