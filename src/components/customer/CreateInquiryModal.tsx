@@ -1933,7 +1933,13 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
             <div className="flex items-center justify-between mb-3">
               <label className="block text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                 <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-bold flex items-center justify-center">5</span>
-                <span>Yêu Cầu Phụ Phí & Điều Khoản Báo Giá (Local Charges & Surcharges)</span>
+                <span>
+                  {serviceType === 'Warehousing'
+                    ? 'Yêu Cầu Phụ Phí & Điều Khoản Báo Giá Kho Bãi (Operational Surcharges)'
+                    : serviceType.startsWith('Sea Freight') || serviceType === 'Air Freight'
+                    ? 'Yêu Cầu Phụ Phí & Điều Khoản Báo Giá (Local Charges & Surcharges)'
+                    : 'Yêu Cầu Phụ Phí & Điều Khoản Báo Giá (Surcharges & Terms)'}
+                </span>
               </label>
               <span className="text-[11px] font-semibold text-indigo-600">
                 {quotationScope === 'ALL_IN' ? 'Gói Trọn Gói (All-in)' : 'Tách Mục (Itemized)'} • {requestedSurcharges.length} Phụ phí đã chọn

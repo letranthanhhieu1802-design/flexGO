@@ -1013,9 +1013,15 @@ export const InquiryDetailWorkspace: React.FC<InquiryDetailWorkspaceProps> = ({
                     Pricing Mode: <span className="text-indigo-700">{inquiry.quotationScope === 'ALL_IN' || !inquiry.quotationScope ? 'All-in Rate (No hidden surcharges)' : 'Itemized (Breakdown per line item)'}</span>
                   </span>
                   <p className="text-[11px] text-slate-500 mt-0.5">
-                    {inquiry.quotationScope === 'ALL_IN' || !inquiry.quotationScope
-                      ? 'Suppliers must quote a comprehensive all-inclusive rate covering base freight and all specified local charges.'
-                      : 'Suppliers should quote base freight separately and itemize each applicable local surcharge.'}
+                    {inquiry.serviceType === 'Warehousing' ? (
+                      inquiry.quotationScope === 'ALL_IN' || !inquiry.quotationScope
+                        ? 'Warehouse suppliers must quote an all-inclusive rate covering base storage and all specified operational surcharges.'
+                        : 'Warehouse suppliers should quote base storage separately and itemize each handling, WMS, and operational surcharge.'
+                    ) : (
+                      inquiry.quotationScope === 'ALL_IN' || !inquiry.quotationScope
+                        ? 'Suppliers must quote a comprehensive all-inclusive rate covering base freight and all specified local charges.'
+                        : 'Suppliers should quote base freight separately and itemize each applicable local surcharge.'
+                    )}
                   </p>
                 </div>
 

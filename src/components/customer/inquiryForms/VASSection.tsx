@@ -105,7 +105,7 @@ export const VASSection: React.FC<VASSectionProps> = ({
             </span>
           </div>
           <p className="text-[11px] text-slate-500 mt-0.5">
-            Tích chọn các tiện ích bổ sung tương ứng để nhà vận tải bóc tách biểu phí phụ phí minh bạch
+            Tích chọn các tiện ích bổ sung tương ứng để đơn vị cung cấp dịch vụ bóc tách biểu phí minh bạch
           </p>
         </div>
       </div>

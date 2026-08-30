@@ -1557,7 +1557,13 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
             <div className="flex items-center justify-between mb-3.5 pb-2.5 border-b border-slate-100">
               <span className="text-xs font-black text-indigo-950 uppercase tracking-wider flex items-center gap-2">
                 <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-black flex items-center justify-center">5</span>
-                <span>Yêu Cầu Phụ Phí & Điều Khoản Báo Giá (Local Charges & Surcharges)</span>
+                <span>
+                  {inquiry.serviceType === 'Warehousing'
+                    ? 'Yêu Cầu Phụ Phí & Điều Khoản Báo Giá Kho Bãi (Operational Surcharges)'
+                    : inquiry.serviceType.startsWith('Sea Freight') || inquiry.serviceType === 'Air Freight'
+                    ? 'Yêu Cầu Phụ Phí & Điều Khoản Báo Giá (Local Charges & Surcharges)'
+                    : 'Yêu Cầu Phụ Phí & Điều Khoản Báo Giá (Surcharges & Terms)'}
+                </span>
               </span>
               <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-md border ${
                 inquiry.quotationScope === 'ALL_IN' || !inquiry.quotationScope
@@ -1583,9 +1589,15 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                     </span>
                   </div>
                   <p className="text-[11px] text-slate-600 mt-1 leading-relaxed">
-                    {inquiry.quotationScope === 'ALL_IN' || !inquiry.quotationScope
-                      ? 'Nhà vận tải phải chào giá tổng bao gồm cước vận chuyển chính và đầy đủ các phụ phí được liệt kê dưới đây.'
-                      : 'Nhà vận tải tách riêng cước vận chuyển chính và liệt kê chi tiết đơn giá từng loại phụ phí.'}
+                    {inquiry.serviceType === 'Warehousing' ? (
+                      inquiry.quotationScope === 'ALL_IN' || !inquiry.quotationScope
+                        ? 'Đơn vị vận hành kho bãi phải chào giá tổng bao gồm phí lưu kho chính và đầy đủ các phụ phí vận hành được liệt kê dưới đây.'
+                        : 'Đơn vị vận hành kho bãi tách riêng phí lưu kho chính và liệt kê chi tiết đơn giá từng loại phụ phí bốc xếp, nâng hạ, WMS.'
+                    ) : (
+                      inquiry.quotationScope === 'ALL_IN' || !inquiry.quotationScope
+                        ? 'Nhà vận tải phải chào giá tổng bao gồm cước vận chuyển chính và đầy đủ các phụ phí được liệt kê dưới đây.'
+                        : 'Nhà vận tải tách riêng cước vận chuyển chính và liệt kê chi tiết đơn giá từng loại phụ phí.'
+                    )}
                   </p>
                 </div>
               </div>

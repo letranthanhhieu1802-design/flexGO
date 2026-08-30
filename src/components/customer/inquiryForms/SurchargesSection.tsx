@@ -846,7 +846,9 @@ export const SurchargesSection: React.FC<SurchargesSectionProps> = ({
               <span>Yêu Cầu Hình Thức Báo Giá (Quotation Scope)</span>
             </span>
             <p className="text-[11px] text-slate-500 mt-0.5">
-              Quy định cách nhà vận tải chào giá nhằm đảm bảo tính minh bạch và dễ so sánh đối chiếu.
+              {serviceType === 'Warehousing'
+                ? 'Quy định cách nhà cung cấp kho bãi / 3PL chào giá nhằm đảm bảo tính minh bạch và dễ so sánh đối chiếu.'
+                : 'Quy định cách nhà vận tải chào giá nhằm đảm bảo tính minh bạch và dễ so sánh đối chiếu.'}
             </p>
           </div>
           <span className={`text-xs px-2.5 py-1 rounded-lg font-bold border shrink-0 ${
@@ -886,7 +888,11 @@ export const SurchargesSection: React.FC<SurchargesSectionProps> = ({
               </span>
             </div>
             <p className="text-[11px] text-slate-600 mt-2 leading-relaxed pl-6">
-              Bao gồm Cước vận chuyển chính + Đầy đủ phụ phí được tích chọn bên dưới. <strong>Không phát sinh chi phí ẩn</strong> ngoài thỏa thuận.
+              {serviceType === 'Warehousing' ? (
+                <>Bao gồm <strong>Phí lưu kho chính</strong> + Đầy đủ phụ phí bốc xếp, quản lý được tích chọn bên dưới. <strong>Không phát sinh chi phí ẩn</strong> ngoài thỏa thuận.</>
+              ) : (
+                <>Bao gồm <strong>Cước vận chuyển chính</strong> + Đầy đủ phụ phí được tích chọn bên dưới. <strong>Không phát sinh chi phí ẩn</strong> ngoài thỏa thuận.</>
+              )}
             </p>
           </button>
 
@@ -913,7 +919,11 @@ export const SurchargesSection: React.FC<SurchargesSectionProps> = ({
               </div>
             </div>
             <p className="text-[11px] text-slate-600 mt-2 leading-relaxed pl-6">
-              Nhà cung cấp tách riêng cước chính và liệt kê biểu phí phụ phí chi tiết từng đầu mục theo hóa đơn cảng/hãng tàu.
+              {serviceType === 'Warehousing'
+                ? 'Nhà cung cấp tách riêng phí lưu kho và liệt kê biểu phí bốc xếp nâng hạ, quản lý WMS, phụ phí vận hành chi tiết từng đầu mục.'
+                : serviceType.startsWith('Sea')
+                ? 'Nhà cung cấp tách riêng cước chính và liệt kê biểu phí phụ phí chi tiết từng đầu mục theo hóa đơn cảng/hãng tàu.'
+                : 'Nhà cung cấp tách riêng cước chính và liệt kê biểu phí phụ phí chi tiết từng đầu mục theo hóa đơn vận hành thực tế.'}
             </p>
           </button>
         </div>
@@ -928,7 +938,9 @@ export const SurchargesSection: React.FC<SurchargesSectionProps> = ({
               <span>Danh Mục Phụ Phí Yêu Cầu Báo Giá ({selectedSurcharges.length}/{surchargesList.length})</span>
             </span>
             <span className="text-[11px] text-slate-500 block mt-0.5">
-              Tích chọn các loại phụ phí mà bạn muốn nhà vận tải phải bao gồm hoặc làm rõ trong bảng báo giá.
+              {serviceType === 'Warehousing'
+                ? 'Tích chọn các loại phụ phí mà bạn muốn đơn vị vận hành kho bãi phải bao gồm hoặc làm rõ trong bảng báo giá.'
+                : 'Tích chọn các loại phụ phí mà bạn muốn nhà vận tải phải bao gồm hoặc làm rõ trong bảng báo giá.'}
             </span>
           </div>
 
