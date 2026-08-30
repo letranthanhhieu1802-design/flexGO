@@ -1429,33 +1429,60 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
 
               {/* 7. CROSS-BORDER SPECS */}
               {inquiry.serviceType === 'Cross-border' && crossBorder && (
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
-                  <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
-                    <span className="text-[10px] text-slate-400 block font-medium">Vai trò doanh nghiệp</span>
-                    <span className="font-extrabold text-blue-700">{crossBorder.tradeRole || inquiry.tradeRole || 'Xuất khẩu (Export)'}</span>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  <div className="bg-white p-2.5 rounded-xl border border-orange-100 shadow-2xs">
+                    <span className="text-[10px] text-slate-400 block font-medium">Vai trò & Incoterms</span>
+                    <span className="font-extrabold text-blue-700 block truncate">{crossBorder.tradeRole || inquiry.tradeRole || 'Xuất khẩu (Export)'}</span>
+                    {crossBorder.incoterms ? <span className="text-[10px] text-slate-600 block truncate">{crossBorder.incoterms.split('-')[0]}</span> : null}
+                  </div>
+                  <div className="bg-white p-2.5 rounded-xl border border-orange-100 shadow-2xs">
+                    <span className="text-[10px] text-slate-400 block font-medium">Hình thức vận chuyển</span>
+                    <span className="font-extrabold text-orange-900 block truncate">{crossBorder.loadType || 'FTL (Nguyên chuyến)'}</span>
                   </div>
                   {crossBorder.borderGate ? (
-                    <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
+                    <div className="bg-white p-2.5 rounded-xl border border-orange-100 shadow-2xs col-span-2">
                       <span className="text-[10px] text-slate-400 block font-medium">Cửa khẩu thông quan</span>
                       <span className="font-extrabold text-slate-900 truncate block">{crossBorder.borderGate}</span>
                     </div>
                   ) : null}
                   {crossBorder.cargoMode ? (
-                    <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
-                      <span className="text-[10px] text-slate-400 block font-medium">Phương thức xe vận tải</span>
+                    <div className="bg-white p-2.5 rounded-xl border border-orange-100 shadow-2xs col-span-2">
+                      <span className="text-[10px] text-slate-400 block font-medium">Phương thức qua biên giới</span>
                       <span className="font-extrabold text-slate-900 truncate block">{crossBorder.cargoMode}</span>
                     </div>
                   ) : null}
-                  {crossBorder.vehicleCount ? (
-                    <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
-                      <span className="text-[10px] text-slate-400 block font-medium">Số lượng xe dự kiến</span>
-                      <span className="font-extrabold text-slate-900">{crossBorder.vehicleCount} xe</span>
+                  {crossBorder.customsScope ? (
+                    <div className="bg-white p-2.5 rounded-xl border border-orange-100 shadow-2xs col-span-2">
+                      <span className="text-[10px] text-slate-400 block font-medium">Phạm vi hải quan cửa khẩu</span>
+                      <span className="font-extrabold text-indigo-700 truncate block">{crossBorder.customsScope}</span>
                     </div>
                   ) : null}
-                  {typeof crossBorder.transitPermitGMSNeeded === 'boolean' ? (
-                    <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
-                      <span className="text-[10px] text-slate-400 block font-medium">Giấy phép liên vận GMS</span>
-                      <span className="font-extrabold text-emerald-700">{crossBorder.transitPermitGMSNeeded ? 'Có yêu cầu' : 'Không yêu cầu'}</span>
+                  {crossBorder.vehicleType ? (
+                    <div className="bg-white p-2.5 rounded-xl border border-orange-100 shadow-2xs col-span-2">
+                      <span className="text-[10px] text-slate-400 block font-medium">Loại xe / Container</span>
+                      <span className="font-extrabold text-slate-900 truncate block">{crossBorder.vehicleType}</span>
+                    </div>
+                  ) : null}
+                  {crossBorder.loadType === 'LTL (Ghép hàng lẻ)' ? (
+                    crossBorder.shipmentCount ? (
+                      <div className="bg-white p-2.5 rounded-xl border border-orange-100 shadow-2xs col-span-2">
+                        <span className="text-[10px] text-slate-400 block font-medium">Sản lượng ghép hàng</span>
+                        <span className="font-extrabold text-slate-900">{crossBorder.shipmentCount} {crossBorder.frequencyUnit || 'Lô hàng'}</span>
+                      </div>
+                    ) : null
+                  ) : (
+                    crossBorder.vehicleCount ? (
+                      <div className="bg-white p-2.5 rounded-xl border border-orange-100 shadow-2xs col-span-2">
+                        <span className="text-[10px] text-slate-400 block font-medium">Sản lượng chuyến xe</span>
+                        <span className="font-extrabold text-slate-900">{crossBorder.vehicleCount} {crossBorder.frequencyUnit || 'Chuyến'}</span>
+                      </div>
+                    ) : null
+                  )}
+                  {crossBorder.leadtimeSLA ? (
+                    <div className="bg-orange-50/80 p-2.5 rounded-xl border border-orange-200 shadow-2xs col-span-2 sm:col-span-4">
+                      <span className="text-[10px] text-orange-700 block font-bold">⏱️ Thời gian giao hàng (Leadtime SLA)</span>
+                      <span className="font-extrabold text-orange-950 text-xs block">{crossBorder.leadtimeSLA}</span>
+                      {crossBorder.leadtimeNote ? <span className="text-[11px] text-slate-600 block mt-0.5">Ghi chú: {crossBorder.leadtimeNote}</span> : null}
                     </div>
                   ) : null}
                 </div>

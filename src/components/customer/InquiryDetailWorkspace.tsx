@@ -932,25 +932,42 @@ export const InquiryDetailWorkspace: React.FC<InquiryDetailWorkspaceProps> = ({
                 {inquiry.serviceSpecs.crossBorder && (
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3.5 text-xs bg-orange-50/40 p-4 rounded-xl border border-orange-100">
                     <div>
-                      <span className="text-slate-400 block font-semibold">Cửa khẩu biên giới</span>
-                      <span className="font-bold text-orange-950">{inquiry.serviceSpecs.crossBorder.borderGate}</span>
+                      <span className="text-slate-400 block font-semibold">Vai trò & Incoterms</span>
+                      <span className="font-bold text-blue-700">{inquiry.serviceSpecs.crossBorder.tradeRole || inquiry.tradeRole || 'Xuất khẩu (Export)'}</span>
+                      {inquiry.serviceSpecs.crossBorder.incoterms ? <span className="text-slate-600 block text-[11px]">{inquiry.serviceSpecs.crossBorder.incoterms.split('-')[0]}</span> : null}
                     </div>
                     <div>
-                      <span className="text-slate-400 block font-semibold">Phương thức xe</span>
+                      <span className="text-slate-400 block font-semibold">Hình thức & Xe</span>
+                      <span className="font-bold text-orange-950">{inquiry.serviceSpecs.crossBorder.loadType || 'FTL (Nguyên chuyến)'}</span>
+                      {inquiry.serviceSpecs.crossBorder.vehicleType ? <span className="text-slate-600 block text-[11px] truncate">{inquiry.serviceSpecs.crossBorder.vehicleType}</span> : null}
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block font-semibold">Cửa khẩu biên giới</span>
+                      <span className="font-bold text-slate-800">{inquiry.serviceSpecs.crossBorder.borderGate}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block font-semibold">Phương thức qua biên giới</span>
                       <span className="font-bold text-slate-800">{inquiry.serviceSpecs.crossBorder.cargoMode}</span>
                     </div>
                     <div>
-                      <span className="text-slate-400 block font-semibold">Số lượng xe</span>
-                      <span className="font-bold text-indigo-700">{inquiry.serviceSpecs.crossBorder.vehicleCount} Xe</span>
+                      <span className="text-slate-400 block font-semibold">Phạm vi hải quan</span>
+                      <span className="font-bold text-indigo-700">{inquiry.serviceSpecs.crossBorder.customsScope || 'Trọn gói 2 đầu'}</span>
                     </div>
                     <div>
-                      <span className="text-slate-400 block font-semibold">Thông quan 2 đầu</span>
-                      <span className="font-bold text-slate-800">{inquiry.serviceSpecs.crossBorder.customsAtBorderIncluded ? 'Trọn gói' : 'Tự túc'}</span>
+                      <span className="text-slate-400 block font-semibold">Sản lượng chuyến</span>
+                      <span className="font-bold text-slate-800">
+                        {inquiry.serviceSpecs.crossBorder.loadType === 'LTL (Ghép hàng lẻ)'
+                          ? `${inquiry.serviceSpecs.crossBorder.shipmentCount || 1} ${inquiry.serviceSpecs.crossBorder.frequencyUnit || 'Lô hàng'}`
+                          : `${inquiry.serviceSpecs.crossBorder.vehicleCount || 1} ${inquiry.serviceSpecs.crossBorder.frequencyUnit || 'Chuyến'}`}
+                      </span>
                     </div>
-                    <div>
-                      <span className="text-slate-400 block font-semibold">Giấy phép liên vận GMS</span>
-                      <span className="font-bold text-slate-800">{inquiry.serviceSpecs.crossBorder.transitPermitGMSNeeded ? 'Yêu cầu' : 'Không'}</span>
-                    </div>
+                    {inquiry.serviceSpecs.crossBorder.leadtimeSLA ? (
+                      <div className="col-span-2 sm:col-span-3 pt-1 border-t border-orange-100/80">
+                        <span className="text-slate-400 block font-semibold">Thời gian giao hàng (Leadtime SLA)</span>
+                        <span className="font-bold text-orange-950">{inquiry.serviceSpecs.crossBorder.leadtimeSLA}</span>
+                        {inquiry.serviceSpecs.crossBorder.leadtimeNote ? <span className="text-slate-600 block text-[11px]">Ghi chú: {inquiry.serviceSpecs.crossBorder.leadtimeNote}</span> : null}
+                      </div>
+                    ) : null}
                   </div>
                 )}
 

@@ -308,16 +308,26 @@ export interface CrossBorderInquirySpecs {
   contractTerm?: string;
   committedFrequency?: string;
   tradeRole?: 'Xuất khẩu (Export)' | 'Nhập khẩu (Import)';
-  cargoValue?: number | string;
-  cargoValueCurrency?: string;
-  borderGate: 'Mộc Bài / Xa Mát (VN ↔ Campuchia)' | 'Hữu Nghị / Tân Thanh (VN ↔ Trung Quốc)' | 'Lao Bảo / Cha Lo (VN ↔ Lào ↔ Thái Lan)' | 'Móng Cái (VN ↔ Quảng Tây)';
+  incoterms?: string;
+  originTerm?: 'Door (Lấy tận nơi)' | 'Border (Giao tại bãi cửa khẩu)';
+  destinationTerm?: 'Door (Giao tận nơi)' | 'Border (Nhận tại bãi cửa khẩu)';
+  loadType?: 'FTL (Nguyên chuyến / Nguyên cont)' | 'LTL (Ghép hàng lẻ)';
+  borderGate: string;
   originCity: string;
   destinationCity: string;
   cargoMode: 'Xe liên vận chạy thẳng (Direct GMS)' | 'Sang tải / Đổi đầu kéo tại cửa khẩu (Transshipment)';
-  vehicleCount: number;
-  customsAtBorderIncluded: boolean;
-  transitPermitGMSNeeded: boolean;
+  customsScope?: 'Chỉ cước vận chuyển (Chủ hàng tự làm HQ)' | 'Thông quan Hải quan đầu VN' | 'Thông quan Trọn gói 2 đầu (VN + Nước bạn)';
+  vehicleType?: string;
+  vehicleCount?: number;
+  shipmentCount?: number;
+  frequencyUnit?: string;
+  leadtimeSLA?: string;
+  leadtimeNote?: string;
+  customsAtBorderIncluded?: boolean;
+  transitPermitGMSNeeded?: boolean;
   hsCode?: string;
+  cargoValue?: number | string;
+  cargoValueCurrency?: string;
   selectedVAS?: string[];
 }
 
