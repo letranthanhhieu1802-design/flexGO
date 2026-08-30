@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+/* Completely hide horizontal and full scrollbars for table viewport */
+.hide-horizontal-scrollbar {
+  -ms-overflow-style: none !important; /* IE and Edge */
+  scrollbar-width: none !important; /* Firefox */
+}
+
+.hide-horizontal-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+}
+
+.hide-horizontal-scrollbar::-webkit-scrollbar-thumb {
+  display: none !important;
+}
+
+.hide-horizontal-scrollbar::-webkit-scrollbar-track {
+  display: none !important;
+}

@@ -1,0 +1,900 @@
+import React, { useState, useMemo } from 'react';
+import { 
+  Plus, 
+  Search, 
+  Truck, 
+  Ship, 
+  Plane, 
+  Building2, 
+  FileText, 
+  ThermometerSnowflake, 
+  Globe, 
+  Clock, 
+  Calendar,
+  ChevronRight,
+  ChevronDown,
+  ChevronUp,
+  Sparkles,
+  Layers,
+  Eye,
+  FileSpreadsheet,
+  Download,
+  Filter,
+  CheckCircle2,
+  AlertTriangle,
+  XCircle,
+  Tag,
+  DollarSign,
+  TrendingDown,
+  ArrowUpRight,
+  Edit3,
+  Trash2,
+  ExternalLink,
+  ShieldCheck,
+  Package,
+  MapPin,
+  FileCheck,
+  RefreshCw
+} from 'lucide-react';
+import { 
+  CustomerRateItem, 
+  ServiceType, 
+  RateStatus, 
+  RateSourceType,
+  CurrentView,
+  SupplierCompany,
+  InquiryItem
+} from '../../types';
+import { CreateOrEditRateModal } from './CreateOrEditRateModal';
+
+interface CustomerRatesPageProps {
+  rates: CustomerRateItem[];
+  suppliers?: SupplierCompany[];
+  inquiries?: InquiryItem[];
+  onSaveRate: (rate: CustomerRateItem) => void;
+  onDeleteRate: (rateId: string) => void;
+  onNavigate: (view: CurrentView) => void;
+  onOpenCreateInquiryWithBenchmark?: (benchmarkData: any) => void;
+}
+
+export const CustomerRatesPage: React.FC<CustomerRatesPageProps> = ({
+  rates,
+  suppliers = [],
+  inquiries = [],
+  onSaveRate,
+  onDeleteRate,
+  onNavigate,
+  onOpenCreateInquiryWithBenchmark,
+}) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [serviceFilter, setServiceFilter] = useState<string>('ALL');
+  const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [sourceFilter, setSourceFilter] = useState<string>('ALL');
+  const [expandedRateIds, setExpandedRateIds] = useState<Record<string, boolean>>({});
+  
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingRate, setEditingRate] = useState<CustomerRateItem | null>(null);
+
+  const toggleExpandRate = (rateId: string) => {
+    setExpandedRateIds((prev) => ({
+      ...prev,
+      [rateId]: !prev[rateId],
+    }));
+  };
+
+  const handleOpenCreateModal = () => {
+    setEditingRate(null);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEditModal = (rate: CustomerRateItem) => {
+    setEditingRate(rate);
+    setIsModalOpen(true);
+  };
+
+  // KPI Calculations
+  const stats = useMemo(() => {
+    const total = rates.length;
+    const active = rates.filter((r) => r.status === 'Active').length;
+    const expiringSoon = rates.filter((r) => r.status === 'ExpiringSoon').length;
+    const expired = rates.filter((r) => r.status === 'Expired').length;
+    const awardedCount = rates.filter((r) => r.sourceType === 'AWARDED_INQUIRY').length;
+    const manualCount = rates.filter((r) => r.sourceType === 'MANUAL_ENTRY').length;
+
+    return {
+      total,
+      active,
+      expiringSoon,
+      expired,
+      awardedCount,
+      manualCount,
+    };
+  }, [rates]);
+
+  // Filtering
+  const filteredRates = useMemo(() => {
+    return rates.filter((rate) => {
+      const matchesSearch =
+        rate.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        rate.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        rate.origin.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        rate.destination.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        rate.supplierName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (rate.contractCode && rate.contractCode.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (rate.linkedInquiryCode && rate.linkedInquiryCode.toLowerCase().includes(searchTerm.toLowerCase()));
+
+      const matchesService = serviceFilter === 'ALL' || rate.serviceType === serviceFilter;
+      const matchesStatus = statusFilter === 'ALL' || rate.status === statusFilter;
+      const matchesSource = sourceFilter === 'ALL' || rate.sourceType === sourceFilter;
+
+      return matchesSearch && matchesService && matchesStatus && matchesSource;
+    });
+  }, [rates, searchTerm, serviceFilter, statusFilter, sourceFilter]);
+
+  // Helpers
+  const getServiceIcon = (type: ServiceType) => {
+    switch (type) {
+      case 'Trucking':
+        return <Truck className="w-4 h-4 text-blue-600" />;
+      case 'Sea Freight (FCL)':
+      case 'Sea Freight (LCL)':
+        return <Ship className="w-4 h-4 text-cyan-600" />;
+      case 'Air Freight':
+        return <Plane className="w-4 h-4 text-sky-600" />;
+      case 'Cold Chain':
+        return <ThermometerSnowflake className="w-4 h-4 text-emerald-600" />;
+      case 'Warehousing':
+        return <Building2 className="w-4 h-4 text-amber-600" />;
+      case 'Customs Clearance':
+        return <FileText className="w-4 h-4 text-purple-600" />;
+      case 'Cross-border':
+        return <Globe className="w-4 h-4 text-orange-600" />;
+      default:
+        return <Layers className="w-4 h-4 text-slate-600" />;
+    }
+  };
+
+  const getStatusBadge = (status: RateStatus) => {
+    switch (status) {
+      case 'Active':
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+            <span>Đang Áp Dụng</span>
+          </span>
+        );
+      case 'ExpiringSoon':
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200 animate-pulse">
+            <AlertTriangle className="w-3 h-3 text-amber-600" />
+            <span>Sắp Hết Hạn</span>
+          </span>
+        );
+      case 'Expired':
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+            <XCircle className="w-3 h-3 text-rose-600" />
+            <span>Hết Hiệu Lực</span>
+          </span>
+        );
+      default:
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+            <span>Bản Nháp</span>
+          </span>
+        );
+    }
+  };
+
+  // Export mock CSV
+  const handleExportCSV = () => {
+    const headers = 'Mã Biểu Giá,Dịch Vụ,Tuyến Đường,Nhà Cung Cấp,Mức Cước,Đơn Vị Tính,All-in,Mã HĐ,Thời Hạn,Trạng Thái\n';
+    const rows = filteredRates
+      .map(
+        (r) =>
+          `"${r.code}","${r.serviceType}","${r.origin.split(',')[0]} → ${r.destination.split(',')[0]}","${r.supplierName}","${r.baseRateAmount}","${r.pricingUnit}","${r.allInclusive ? 'Có' : 'Không'}","${r.contractCode || ''}","${r.validFrom} - ${r.validTo}","${r.status}"`
+      )
+      .join('\n');
+    const blob = new Blob([headers + rows], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `FlexGO_Customer_Rates_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  return (
+    <div className="space-y-6 animate-in fade-in duration-200">
+      {/* ========================================================= */}
+      {/* 1. PAGE HEADER & ACTIONS */}
+      {/* ========================================================= */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-xs">
+        <div>
+          <div className="flex items-center gap-2 mb-1 text-xs font-semibold text-indigo-600">
+            <span>CUSTOMER WORKSPACE</span>
+            <span>•</span>
+            <span className="text-slate-400">LOGISTICS RATE CARD & PRICE MASTER</span>
+          </div>
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-xs">
+              <FileSpreadsheet className="w-4 h-4" />
+            </div>
+            <span>My Rates (Bảng Quản Lý Biểu Giá Dịch Vụ)</span>
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
+            Quản lý tập trung toàn bộ biểu giá cước logistics doanh nghiệp đang sử dụng. Lưu trữ giá hợp đồng nội bộ và đồng bộ tự động giá từ các gói trao thầu (Awarded RFQ).
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <button
+            id="export-rates-csv-btn"
+            onClick={handleExportCSV}
+            className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 rounded-xl transition-all shadow-2xs cursor-pointer"
+            title="Tải bảng giá định dạng Excel/CSV"
+          >
+            <Download className="w-3.5 h-3.5 text-slate-500" />
+            <span>Xuất Excel/CSV</span>
+          </button>
+
+          <button
+            id="create-new-rate-btn"
+            onClick={handleOpenCreateModal}
+            className="inline-flex items-center gap-2 px-4 py-2 text-xs font-black text-white bg-indigo-600 hover:bg-indigo-700 active:scale-98 rounded-xl transition-all shadow-md hover:shadow-lg cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>+ Khai Báo Biểu Giá Mới</span>
+          </button>
+        </div>
+      </div>
+
+      {/* ========================================================= */}
+      {/* 2. STATS KPI TILES */}
+      {/* ========================================================= */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+        {/* Total Rates */}
+        <div className="p-4 sm:p-5 bg-white rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
+          <div>
+            <span className="text-xs font-semibold text-slate-500 block">Tổng Tuyến / Biểu Giá</span>
+            <div className="text-2xl font-black text-slate-900 mt-1">{stats.total}</div>
+            <span className="text-[11px] text-slate-400 mt-0.5 block">Đã số hóa trên hệ thống</span>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+            <Layers className="w-5 h-5" />
+          </div>
+        </div>
+
+        {/* Active Rates */}
+        <div className="p-4 sm:p-5 bg-white rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
+          <div>
+            <span className="text-xs font-semibold text-emerald-700 block">Đang Có Hiệu Lực</span>
+            <div className="text-2xl font-black text-emerald-600 mt-1">{stats.active}</div>
+            <span className="text-[11px] text-emerald-600/80 mt-0.5 block">Sẵn sàng vận hành</span>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+            <CheckCircle2 className="w-5 h-5" />
+          </div>
+        </div>
+
+        {/* Expiring Soon */}
+        <div className="p-4 sm:p-5 bg-white rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
+          <div>
+            <span className="text-xs font-semibold text-amber-700 block">Sắp Hết Hạn / Hết Hạn</span>
+            <div className="text-2xl font-black text-amber-600 mt-1">{stats.expiringSoon + stats.expired}</div>
+            <span className="text-[11px] text-amber-600/80 mt-0.5 block">Cần đàm phán lại biểu giá</span>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+            <AlertTriangle className="w-5 h-5" />
+          </div>
+        </div>
+
+        {/* Awarded from RFQ */}
+        <div className="p-4 sm:p-5 bg-white rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
+          <div>
+            <span className="text-xs font-semibold text-purple-700 block">Đồng Bộ Trao Thầu (Awarded)</span>
+            <div className="text-2xl font-black text-purple-700 mt-1">{stats.awardedCount}</div>
+            <span className="text-[11px] text-purple-600/80 mt-0.5 block">Từ các gói Inquiry trên sàn</span>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold">
+            <Sparkles className="w-5 h-5" />
+          </div>
+        </div>
+      </div>
+
+      {/* ========================================================= */}
+      {/* 3. FILTERS & SEARCH */}
+      {/* ========================================================= */}
+      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          {/* Search bar */}
+          <div className="relative flex-1">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Tìm theo tuyến đường, nhà xe (supplier), hàng hóa, mã hợp đồng, mã inquiry..."
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-hidden focus:border-indigo-500 focus:bg-white transition-all"
+            />
+          </div>
+
+          {/* Quick Filter Dropdowns */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:outline-hidden focus:border-indigo-500"
+            >
+              <option value="ALL">Tất Cả Trạng Thái</option>
+              <option value="Active">Đang Áp Dụng (Active)</option>
+              <option value="ExpiringSoon">Sắp Hết Hạn (Expiring Soon)</option>
+              <option value="Expired">Đã Hết Hạn (Expired)</option>
+            </select>
+
+            <select
+              value={sourceFilter}
+              onChange={(e) => setSourceFilter(e.target.value)}
+              className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:outline-hidden focus:border-indigo-500"
+            >
+              <option value="ALL">Tất Cả Nguồn Giá</option>
+              <option value="AWARDED_INQUIRY">Đồng bộ từ Trao thầu (Awarded)</option>
+              <option value="MANUAL_ENTRY">Khai báo nội bộ (Manual)</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Service Type Filter Chips */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+          <button
+            onClick={() => setServiceFilter('ALL')}
+            className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer whitespace-nowrap ${
+              serviceFilter === 'ALL'
+                ? 'bg-indigo-600 text-white shadow-2xs'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            }`}
+          >
+            Tất Cả Dịch Vụ ({rates.length})
+          </button>
+          
+          <button
+            onClick={() => setServiceFilter('Trucking')}
+            className={`px-3 py-1.5 rounded-xl font-medium transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
+              serviceFilter === 'Trucking'
+                ? 'bg-blue-600 text-white font-bold shadow-2xs'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            }`}
+          >
+            <Truck className="w-3.5 h-3.5" />
+            <span>Trucking</span>
+          </button>
+
+          <button
+            onClick={() => setServiceFilter('Sea Freight (FCL)')}
+            className={`px-3 py-1.5 rounded-xl font-medium transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
+              serviceFilter === 'Sea Freight (FCL)'
+                ? 'bg-cyan-600 text-white font-bold shadow-2xs'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            }`}
+          >
+            <Ship className="w-3.5 h-3.5" />
+            <span>Cước Biển FCL</span>
+          </button>
+
+          <button
+            onClick={() => setServiceFilter('Sea Freight (LCL)')}
+            className={`px-3 py-1.5 rounded-xl font-medium transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
+              serviceFilter === 'Sea Freight (LCL)'
+                ? 'bg-teal-600 text-white font-bold shadow-2xs'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            }`}
+          >
+            <Ship className="w-3.5 h-3.5" />
+            <span>Cước Biển LCL</span>
+          </button>
+
+          <button
+            onClick={() => setServiceFilter('Air Freight')}
+            className={`px-3 py-1.5 rounded-xl font-medium transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
+              serviceFilter === 'Air Freight'
+                ? 'bg-sky-600 text-white font-bold shadow-2xs'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            }`}
+          >
+            <Plane className="w-3.5 h-3.5" />
+            <span>Hàng Không (Air)</span>
+          </button>
+
+          <button
+            onClick={() => setServiceFilter('Cold Chain')}
+            className={`px-3 py-1.5 rounded-xl font-medium transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
+              serviceFilter === 'Cold Chain'
+                ? 'bg-emerald-600 text-white font-bold shadow-2xs'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            }`}
+          >
+            <ThermometerSnowflake className="w-3.5 h-3.5" />
+            <span>Chuỗi Lạnh</span>
+          </button>
+
+          <button
+            onClick={() => setServiceFilter('Warehousing')}
+            className={`px-3 py-1.5 rounded-xl font-medium transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
+              serviceFilter === 'Warehousing'
+                ? 'bg-amber-600 text-white font-bold shadow-2xs'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            }`}
+          >
+            <Building2 className="w-3.5 h-3.5" />
+            <span>Kho Bãi</span>
+          </button>
+
+          <button
+            onClick={() => setServiceFilter('Customs Clearance')}
+            className={`px-3 py-1.5 rounded-xl font-medium transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
+              serviceFilter === 'Customs Clearance'
+                ? 'bg-purple-600 text-white font-bold shadow-2xs'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            }`}
+          >
+            <FileText className="w-3.5 h-3.5" />
+            <span>Hải Quan</span>
+          </button>
+
+          <button
+            onClick={() => setServiceFilter('Cross-border')}
+            className={`px-3 py-1.5 rounded-xl font-medium transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
+              serviceFilter === 'Cross-border'
+                ? 'bg-orange-600 text-white font-bold shadow-2xs'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            }`}
+          >
+            <Globe className="w-3.5 h-3.5" />
+            <span>Xuyên Biên Giới</span>
+          </button>
+        </div>
+      </div>
+
+      {/* ========================================================= */}
+      {/* 4. MASTER RATES TABLE WITH EXPANDABLE BENTO DETAILS */}
+      {/* ========================================================= */}
+      <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                <th className="p-4">Mã & Tuyến Đường</th>
+                <th className="p-4">Phương Thức & Quy Cách</th>
+                <th className="p-4">Nhà Cung Cấp (Supplier)</th>
+                <th className="p-4">Đơn Giá Cước Chuẩn</th>
+                <th className="p-4">Nguồn Gốc Giá</th>
+                <th className="p-4">Hiệu Lực & Thời Hạn</th>
+                <th className="p-4">Trạng Thái</th>
+                <th className="p-4 text-right">Thao Tác</th>
+              </tr>
+            </thead>
+
+            <tbody className="divide-y divide-slate-100 text-xs">
+              {filteredRates.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="p-12 text-center text-slate-500">
+                    <FileSpreadsheet className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                    <p className="font-bold text-slate-700">Không tìm thấy biểu giá nào phù hợp</p>
+                    <p className="text-xs text-slate-400 mt-1">
+                      Thử thay đổi từ khóa tìm kiếm hoặc bấm nút "+ Khai Báo Biểu Giá Mới" để thêm bảng giá dịch vụ.
+                    </p>
+                  </td>
+                </tr>
+              ) : (
+                filteredRates.map((rate) => {
+                  const isExpanded = Boolean(expandedRateIds[rate.id]);
+
+                  return (
+                    <React.Fragment key={rate.id}>
+                      {/* MAIN MASTER ROW */}
+                      <tr
+                        id={`rate-row-${rate.code}`}
+                        onClick={() => toggleExpandRate(rate.id)}
+                        className={`cursor-pointer transition-colors ${
+                          isExpanded
+                            ? 'bg-indigo-50/40 hover:bg-indigo-50/60 font-medium'
+                            : 'hover:bg-slate-50/80'
+                        }`}
+                      >
+                        {/* Code & Route */}
+                        <td className="p-4">
+                          <div className="flex items-center gap-2">
+                            <span className="text-slate-400">
+                              {isExpanded ? (
+                                <ChevronUp className="w-4 h-4 text-indigo-600 shrink-0" />
+                              ) : (
+                                <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
+                              )}
+                            </span>
+                            <div>
+                              <span className="font-mono text-indigo-700 font-bold block text-xs">
+                                {rate.code}
+                              </span>
+                              <div className="font-semibold text-slate-900 mt-0.5 max-w-xs truncate" title={rate.title}>
+                                {rate.title}
+                              </div>
+                              <div className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
+                                <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
+                                <span>{rate.routeDisplay || `${rate.origin.split(',')[0]} → ${rate.destination.split(',')[0]}`}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Service & Equipment */}
+                        <td className="p-4">
+                          <div className="space-y-1">
+                            <span className="inline-flex items-center gap-1.5 bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md text-xs font-semibold whitespace-nowrap">
+                              {getServiceIcon(rate.serviceType)}
+                              <span>{rate.serviceType}</span>
+                            </span>
+                            <div className="text-[11px] text-slate-500">
+                              {rate.equipmentOrVehicleType || rate.loadType || 'Tiêu chuẩn'}
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Supplier */}
+                        <td className="p-4">
+                          <div className="font-bold text-slate-900">
+                            {rate.supplierName}
+                          </div>
+                          {rate.supplierTaxId && (
+                            <div className="text-[10.5px] text-slate-400 font-mono">
+                              MST: {rate.supplierTaxId}
+                            </div>
+                          )}
+                        </td>
+
+                        {/* Rate & Pricing Unit */}
+                        <td className="p-4 whitespace-nowrap">
+                          <div className="font-black text-indigo-700 text-sm">
+                            {rate.rateDisplay}
+                          </div>
+                          <div className="flex items-center gap-1 mt-0.5">
+                            {rate.allInclusive ? (
+                              <span className="px-1.5 py-0.2 text-[9.5px] font-bold bg-emerald-100 text-emerald-800 rounded">
+                                Trọn gói All-in
+                              </span>
+                            ) : (
+                              <span className="px-1.5 py-0.2 text-[9.5px] font-medium bg-slate-100 text-slate-600 rounded">
+                                + Phụ phí ngoài
+                              </span>
+                            )}
+                            {rate.vatPercent !== undefined && (
+                              <span className="text-[10px] text-slate-400">
+                                VAT {rate.vatPercent}%
+                              </span>
+                            )}
+                          </div>
+                        </td>
+
+                        {/* Source Type */}
+                        <td className="p-4 whitespace-nowrap">
+                          {rate.sourceType === 'AWARDED_INQUIRY' ? (
+                            <div className="space-y-0.5">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                                <Sparkles className="w-3 h-3 text-purple-600" />
+                                <span>Trao Thầu RFQ</span>
+                              </span>
+                              {rate.linkedInquiryCode && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onNavigate({
+                                      type: 'workspace',
+                                      view: 'customer-inquiry-detail',
+                                      params: { inquiryCode: rate.linkedInquiryCode },
+                                    });
+                                  }}
+                                  className="text-[10px] text-indigo-600 hover:underline flex items-center gap-0.5 block font-mono"
+                                >
+                                  <span>{rate.linkedInquiryCode}</span>
+                                  <ExternalLink className="w-2.5 h-2.5" />
+                                </button>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="space-y-0.5">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                                <FileText className="w-3 h-3 text-slate-500" />
+                                <span>HĐ Nội Bộ</span>
+                              </span>
+                              {rate.contractCode && (
+                                <div className="text-[10px] text-slate-400 font-mono">
+                                  {rate.contractCode}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </td>
+
+                        {/* Validity Dates */}
+                        <td className="p-4 whitespace-nowrap">
+                          <div className="flex items-center gap-1 text-[11px] text-slate-700 font-medium">
+                            <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                            <span>{rate.validFrom} → {rate.validTo}</span>
+                          </div>
+                          {rate.transitTime && (
+                            <div className="flex items-center gap-1 text-[10.5px] text-slate-400 mt-0.5">
+                              <Clock className="w-3 h-3 text-slate-400 shrink-0" />
+                              <span>SLA: {rate.transitTime}</span>
+                            </div>
+                          )}
+                        </td>
+
+                        {/* Status */}
+                        <td className="p-4 whitespace-nowrap">
+                          {getStatusBadge(rate.status)}
+                        </td>
+
+                        {/* Action Buttons */}
+                        <td className="p-4 text-right whitespace-nowrap">
+                          <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
+                            {/* Create Inquiry with this Benchmark */}
+                            <button
+                              type="button"
+                              id={`create-inquiry-from-rate-${rate.code}`}
+                              onClick={() => {
+                                if (onOpenCreateInquiryWithBenchmark) {
+                                  onOpenCreateInquiryWithBenchmark(rate);
+                                }
+                              }}
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl transition-all shadow-2xs cursor-pointer"
+                              title="Sử dụng thông số và giá này làm Target Budget để đăng RFQ mới"
+                            >
+                              <Sparkles className="w-3 h-3 text-indigo-600" />
+                              <span className="hidden xl:inline">Tạo RFQ</span>
+                            </button>
+
+                            {/* Edit */}
+                            <button
+                              type="button"
+                              onClick={() => handleOpenEditModal(rate)}
+                              className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 transition-colors cursor-pointer"
+                              title="Chỉnh sửa biểu giá"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                            </button>
+
+                            {/* Delete */}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (window.confirm(`Bạn có chắc chắn muốn xóa biểu giá ${rate.code} không?`)) {
+                                  onDeleteRate(rate.id);
+                                }
+                              }}
+                              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-200 transition-colors cursor-pointer"
+                              title="Xóa biểu giá"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+
+                      {/* ========================================================= */}
+                      {/* EXPANDED BENTO DETAIL FOR RATE ITEM */}
+                      {/* ========================================================= */}
+                      {isExpanded && (
+                        <tr className="bg-indigo-50/20 border-b border-indigo-100 animate-in fade-in duration-150">
+                          <td colSpan={8} className="p-4 sm:p-6">
+                            <div className="space-y-4">
+                              {/* Top Banner with Full Route & Title */}
+                              <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs font-mono font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded">
+                                      {rate.code}
+                                    </span>
+                                    <h3 className="text-sm font-bold text-slate-900">{rate.title}</h3>
+                                  </div>
+                                  <div className="text-xs text-slate-500 mt-1 flex flex-wrap items-center gap-3">
+                                    <span><strong>Điểm nhận:</strong> {rate.origin}</span>
+                                    <span>•</span>
+                                    <span><strong>Điểm giao:</strong> {rate.destination}</span>
+                                    <span>•</span>
+                                    <span><strong>Hàng hóa:</strong> {rate.cargoType}</span>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-2 shrink-0">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      if (onOpenCreateInquiryWithBenchmark) {
+                                        onOpenCreateInquiryWithBenchmark(rate);
+                                      }
+                                    }}
+                                    className="px-3.5 py-2 text-xs font-black text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-xs cursor-pointer flex items-center gap-1.5"
+                                  >
+                                    <Sparkles className="w-3.5 h-3.5" />
+                                    <span>Đăng RFQ Mới Từ Giá Này</span>
+                                  </button>
+                                </div>
+                              </div>
+
+                              {/* Bento Grid 4 Cards */}
+                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5">
+                                
+                                {/* Bento 1: Bóc Tách Đơn Giá & Phụ Phí */}
+                                <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs space-y-2.5">
+                                  <div className="flex items-center gap-2 text-xs font-bold text-slate-900 border-b border-slate-100 pb-2">
+                                    <DollarSign className="w-4 h-4 text-emerald-600" />
+                                    <span>Bóc Tách Cước & Phụ Phí</span>
+                                  </div>
+
+                                  <div className="space-y-1.5 text-xs">
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-slate-500">Cước cơ sở (Base):</span>
+                                      <span className="font-extrabold text-slate-900">{rate.rateDisplay}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-slate-500">Điều khoản cước:</span>
+                                      <span className="font-semibold text-indigo-700">
+                                        {rate.allInclusive ? 'Trọn gói All-in' : 'Bóc tách phụ phí'}
+                                      </span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-slate-500">Thuế suất VAT:</span>
+                                      <span className="font-semibold text-slate-700">{rate.vatPercent ?? 8}%</span>
+                                    </div>
+                                  </div>
+
+                                  {rate.surcharges && rate.surcharges.length > 0 && (
+                                    <div className="pt-2 border-t border-slate-100 space-y-1.5">
+                                      <span className="text-[10.5px] font-bold text-slate-400 uppercase tracking-wider block">
+                                        Danh mục phụ phí:
+                                      </span>
+                                      {rate.surcharges.map((sc) => (
+                                        <div key={sc.id} className="flex justify-between items-start text-[11px]">
+                                          <span className="text-slate-600 leading-tight">
+                                            {sc.name} ({sc.includedInBaseRate ? 'Đã gồm' : 'Ngoài cước'}):
+                                          </span>
+                                          <span className="font-semibold text-slate-900 shrink-0 ml-2">
+                                            {sc.amount > 0 ? `${sc.amount.toLocaleString('vi-VN')} ${sc.currency}` : 'Miễn phí'}
+                                          </span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Bento 2: Thông Số Kỹ Thuật & SLA */}
+                                <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs space-y-2.5">
+                                  <div className="flex items-center gap-2 text-xs font-bold text-slate-900 border-b border-slate-100 pb-2">
+                                    <Layers className="w-4 h-4 text-blue-600" />
+                                    <span>Thông Số Kỹ Thuật (Specs)</span>
+                                  </div>
+
+                                  <div className="space-y-1.5 text-xs">
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-slate-500">Phương tiện:</span>
+                                      <span className="font-bold text-slate-900">{rate.equipmentOrVehicleType || 'Chuẩn'}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                      <span className="text-slate-500">Quy cách tải:</span>
+                                      <span className="font-semibold text-slate-800">{rate.loadType || 'FTL'}</span>
+                                    </div>
+                                    {rate.freeDemDetDays && (
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-slate-500">Free Dem/Det:</span>
+                                        <span className="font-bold text-indigo-600">{rate.freeDemDetDays} ngày</span>
+                                      </div>
+                                    )}
+                                    {rate.truckingSpecs?.palletQuantity && (
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-slate-500">Số lượng Pallet:</span>
+                                        <span className="font-semibold text-slate-800">{rate.truckingSpecs.palletQuantity} Pallets</span>
+                                      </div>
+                                    )}
+                                    {rate.coldChainSpecs?.temperatureCategory && (
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-slate-500">Dải nhiệt độ:</span>
+                                        <span className="font-semibold text-emerald-700">{rate.coldChainSpecs.temperatureCategory.split(':')[0]}</span>
+                                      </div>
+                                    )}
+                                    {rate.warehousingSpecs?.storageAreaSqm && (
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-slate-500">Diện tích thuê:</span>
+                                        <span className="font-semibold text-amber-700">{rate.warehousingSpecs.storageAreaSqm} m²</span>
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  <div className="pt-2 border-t border-slate-100">
+                                    <div className="flex items-center gap-1 text-[11px] text-slate-600 font-medium">
+                                      <Clock className="w-3 h-3 text-slate-400" />
+                                      <span>Thời gian vận chuyển: <strong>{rate.transitTime || 'Thỏa thuận'}</strong></span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Bento 3: Đối Tác Vận Tải & Hợp Đồng */}
+                                <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs space-y-2.5">
+                                  <div className="flex items-center gap-2 text-xs font-bold text-slate-900 border-b border-slate-100 pb-2">
+                                    <Building2 className="w-4 h-4 text-purple-600" />
+                                    <span>Đối Tác & Pháp Lý</span>
+                                  </div>
+
+                                  <div className="space-y-1.5 text-xs">
+                                    <div>
+                                      <span className="text-slate-400 text-[10.5px] block">Doanh nghiệp phụ trách:</span>
+                                      <span className="font-extrabold text-slate-900 block">{rate.supplierName}</span>
+                                    </div>
+                                    {rate.supplierTaxId && (
+                                      <div className="text-[11px] text-slate-500">
+                                        MST: <strong>{rate.supplierTaxId}</strong>
+                                      </div>
+                                    )}
+                                    {rate.supplierContact && (
+                                      <div className="text-[11px] text-slate-500">
+                                        Liên hệ: <strong>{rate.supplierContact}</strong> ({rate.supplierPhone})
+                                      </div>
+                                    )}
+                                    {rate.contractCode && (
+                                      <div className="pt-1.5 border-t border-slate-100 text-[11px] text-slate-600">
+                                        Hợp đồng / Phụ lục: <strong className="font-mono text-indigo-700">{rate.contractCode}</strong>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Bento 4: Điều Khoản Công Nợ & Ghi Chú */}
+                                <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs space-y-2.5">
+                                  <div className="flex items-center gap-2 text-xs font-bold text-slate-900 border-b border-slate-100 pb-2">
+                                    <ShieldCheck className="w-4 h-4 text-orange-600" />
+                                    <span>Điều Khoản & Cam Kết</span>
+                                  </div>
+
+                                  <div className="space-y-1.5 text-xs">
+                                    <div>
+                                      <span className="text-slate-400 text-[10.5px] block">Điều khoản thanh toán:</span>
+                                      <span className="font-semibold text-slate-800 block leading-snug">{rate.paymentTerms}</span>
+                                    </div>
+
+                                    {rate.notes && (
+                                      <div className="pt-1.5 border-t border-slate-100">
+                                        <span className="text-slate-400 text-[10.5px] block">Ghi chú vận hành:</span>
+                                        <p className="text-[11px] text-slate-600 line-clamp-3 italic">
+                                          "{rate.notes}"
+                                        </p>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* CREATE / EDIT MODAL */}
+      <CreateOrEditRateModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSaveRate={onSaveRate}
+        editingRate={editingRate}
+        suppliers={suppliers}
+      />
+    </div>
+  );
+};

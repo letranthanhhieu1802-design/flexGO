@@ -1,0 +1,6 @@
+{
+  "name": "FlexGO Logistics Workspace",
+  "description": "Unified logistics business network and private workspace platform for Customers, Suppliers, and dual-role enterprises.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
