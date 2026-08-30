@@ -1099,6 +1099,86 @@ export const InquiryDetailWorkspace: React.FC<InquiryDetailWorkspaceProps> = ({
                     )}
                   </div>
                 )}
+
+                {/* Project Specs */}
+                {inquiry.serviceSpecs?.project && (
+                  <div className="space-y-3 bg-indigo-50/40 p-4 rounded-xl border border-indigo-100">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 text-xs">
+                      <div>
+                        <span className="text-slate-400 block font-semibold">Mô hình dự án</span>
+                        <span className="font-bold text-indigo-900">
+                          {inquiry.serviceSpecs.project.projectCategory === 'DISTRIBUTION'
+                            ? '🏬 Phân Phối Tổng Thể (Distribution)'
+                            : inquiry.serviceSpecs.project.projectCategory === 'CROSS_DOCK'
+                            ? '⚡ Trạm Cross-Docking (X-Dock)'
+                            : '🌐 Đa Phương Thức (Multimodal)'}
+                        </span>
+                      </div>
+
+                      {inquiry.serviceSpecs.project.projectCategory === 'DISTRIBUTION' && (
+                        <>
+                          <div>
+                            <span className="text-slate-400 block font-semibold">Kênh phân phối</span>
+                            <span className="font-bold text-slate-800">{inquiry.serviceSpecs.project.distributionChannel || 'B2B / Siêu thị'}</span>
+                          </div>
+                          <div>
+                            <span className="text-slate-400 block font-semibold">Phạm vi địa lý</span>
+                            <span className="font-bold text-slate-800">{inquiry.serviceSpecs.project.coverageScope || 'Toàn quốc'}</span>
+                          </div>
+                          <div>
+                            <span className="text-slate-400 block font-semibold">Sản lượng dự kiến</span>
+                            <span className="font-bold text-slate-800">{inquiry.serviceSpecs.project.monthlyTripsOrVolume || '150 chuyến / tháng'}</span>
+                          </div>
+                        </>
+                      )}
+
+                      {inquiry.serviceSpecs.project.projectCategory === 'CROSS_DOCK' && (
+                        <>
+                          <div>
+                            <span className="text-slate-400 block font-semibold">Trạm trung chuyển</span>
+                            <span className="font-bold text-slate-800">{inquiry.serviceSpecs.project.xDockHubLocation || inquiry.origin}</span>
+                          </div>
+                          <div>
+                            <span className="text-slate-400 block font-semibold">Nhiệt độ sàn</span>
+                            <span className="font-bold text-purple-900">{inquiry.serviceSpecs.project.xDockTemperature || 'Thường'}</span>
+                          </div>
+                          <div>
+                            <span className="text-slate-400 block font-semibold">Inbound hàng ngày</span>
+                            <span className="font-bold text-slate-800">{inquiry.serviceSpecs.project.inboundDailyVolume || '5 - 10 cont/ngày'}</span>
+                          </div>
+                        </>
+                      )}
+
+                      {inquiry.serviceSpecs.project.projectCategory === 'MULTIMODAL' && (
+                        <>
+                          <div className="col-span-2">
+                            <span className="text-slate-400 block font-semibold">Mô hình kết hợp</span>
+                            <span className="font-bold text-teal-950">{inquiry.serviceSpecs.project.multimodalCombination}</span>
+                          </div>
+                          <div>
+                            <span className="text-slate-400 block font-semibold">Loại Cont / Xe</span>
+                            <span className="font-bold text-slate-800">{inquiry.serviceSpecs.project.multimodalContainerType}</span>
+                          </div>
+                          <div>
+                            <span className="text-slate-400 block font-semibold">Sản lượng cam kết</span>
+                            <span className="font-bold text-slate-800">{inquiry.serviceSpecs.project.multimodalMonthlyTeuOrVolume}</span>
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    {inquiry.serviceSpecs.project.originWarehouses && inquiry.serviceSpecs.project.originWarehouses.length > 1 && (
+                      <div className="p-2.5 bg-white/90 rounded-lg border border-indigo-200/80 text-xs">
+                        <span className="text-indigo-800 font-bold block">Danh sách kho tổng xuất hàng:</span>
+                        <ul className="text-slate-800 list-disc list-inside mt-0.5 space-y-0.5 font-medium">
+                          {inquiry.serviceSpecs.project.originWarehouses.map((w, i) => (
+                            <li key={i}>{w}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 

@@ -1642,27 +1642,110 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                 </div>
               )}
 
-              {/* 9. PROJECT CARGO SPECS */}
+              {/* 9. PROJECT / LOGISTICS SOLUTIONS SPECS */}
               {inquiry.serviceType === 'Project Cargo' && project && (
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                  {project.projectType ? (
+                <div className="space-y-2.5">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                     <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
-                      <span className="text-[10px] text-slate-400 block font-medium">Phân loại hàng dự án</span>
-                      <span className="font-extrabold text-slate-900 truncate block">{project.projectType}</span>
+                      <span className="text-[10px] text-slate-400 block font-medium">Mô hình dự án</span>
+                      <span className="font-extrabold text-indigo-900 block truncate">
+                        {project.projectCategory === 'DISTRIBUTION'
+                          ? '🏬 Phân Phối Tổng Thể'
+                          : project.projectCategory === 'CROSS_DOCK'
+                          ? '⚡ Trạm Cross-Dock'
+                          : '🌐 Đa Phương Thức'}
+                      </span>
                     </div>
-                  ) : null}
-                  {project.maxUnitWeightTons ? (
+
+                    {project.projectCategory === 'DISTRIBUTION' && (
+                      <>
+                        <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
+                          <span className="text-[10px] text-slate-400 block font-medium">Kênh phân phối</span>
+                          <span className="font-extrabold text-slate-900 block truncate">{project.distributionChannel || 'B2B / Siêu thị'}</span>
+                        </div>
+                        <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
+                          <span className="text-[10px] text-slate-400 block font-medium">Phạm vi địa lý</span>
+                          <span className="font-extrabold text-slate-900 block truncate">{project.coverageScope || 'Toàn quốc'}</span>
+                        </div>
+                        {project.monthlyTripsOrVolume ? (
+                          <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
+                            <span className="text-[10px] text-slate-400 block font-medium">Sản lượng dự kiến</span>
+                            <span className="font-extrabold text-slate-900 block truncate">{project.monthlyTripsOrVolume}</span>
+                          </div>
+                        ) : null}
+                      </>
+                    )}
+
+                    {project.projectCategory === 'CROSS_DOCK' && (
+                      <>
+                        <div className="bg-white p-2.5 rounded-xl border border-purple-100 shadow-2xs">
+                          <span className="text-[10px] text-slate-400 block font-medium">Trạm trung chuyển</span>
+                          <span className="font-extrabold text-slate-900 block truncate">{project.xDockHubLocation || inquiry.origin || 'Trung tâm'}</span>
+                        </div>
+                        <div className="bg-white p-2.5 rounded-xl border border-purple-100 shadow-2xs">
+                          <span className="text-[10px] text-slate-400 block font-medium">Nhiệt độ sàn</span>
+                          <span className="font-extrabold text-purple-900 block truncate">{project.xDockTemperature || 'Thường'}</span>
+                        </div>
+                        {project.inboundDailyVolume ? (
+                          <div className="bg-white p-2.5 rounded-xl border border-purple-100 shadow-2xs">
+                            <span className="text-[10px] text-slate-400 block font-medium">Inbound hàng ngày</span>
+                            <span className="font-extrabold text-slate-900 block truncate">{project.inboundDailyVolume}</span>
+                          </div>
+                        ) : null}
+                        {project.outboundStoreCount ? (
+                          <div className="bg-white p-2.5 rounded-xl border border-purple-100 shadow-2xs">
+                            <span className="text-[10px] text-slate-400 block font-medium">Số điểm giao Outbound</span>
+                            <span className="font-extrabold text-slate-900 block">{project.outboundStoreCount} Điểm</span>
+                          </div>
+                        ) : null}
+                      </>
+                    )}
+
+                    {project.projectCategory === 'MULTIMODAL' && (
+                      <>
+                        <div className="bg-white p-2.5 rounded-xl border border-teal-100 shadow-2xs col-span-2">
+                          <span className="text-[10px] text-slate-400 block font-medium">Mô hình kết hợp</span>
+                          <span className="font-extrabold text-teal-950 block truncate">{project.multimodalCombination}</span>
+                        </div>
+                        {project.multimodalContainerType ? (
+                          <div className="bg-white p-2.5 rounded-xl border border-teal-100 shadow-2xs">
+                            <span className="text-[10px] text-slate-400 block font-medium">Loại Container / Xe</span>
+                            <span className="font-extrabold text-slate-900 block truncate">{project.multimodalContainerType}</span>
+                          </div>
+                        ) : null}
+                        {project.multimodalMonthlyTeuOrVolume ? (
+                          <div className="bg-white p-2.5 rounded-xl border border-teal-100 shadow-2xs">
+                            <span className="text-[10px] text-slate-400 block font-medium">Sản lượng cam kết</span>
+                            <span className="font-extrabold text-slate-900 block truncate">{project.multimodalMonthlyTeuOrVolume}</span>
+                          </div>
+                        ) : null}
+                      </>
+                    )}
+                  </div>
+
+                  {project.originWarehouses && project.originWarehouses.length > 1 && (
+                    <div className="bg-indigo-50/60 p-2.5 rounded-xl border border-indigo-200/80 shadow-2xs">
+                      <span className="text-[10px] text-indigo-800 font-bold block">Danh sách kho tổng xuất hàng ({project.originWarehouses.length} Kho):</span>
+                      <ul className="text-xs text-slate-900 list-disc list-inside mt-0.5 space-y-0.5 font-medium">
+                        {project.originWarehouses.map((w, i) => (
+                          <li key={i}>{w}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {project.fleetRequirements && project.fleetRequirements.length > 0 && (
                     <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
-                      <span className="text-[10px] text-slate-400 block font-medium">Trọng lượng đơn chiếc lớn nhất</span>
-                      <span className="font-extrabold text-slate-900">{project.maxUnitWeightTons} tấn</span>
+                      <span className="text-[10px] text-slate-400 block font-medium">Cơ cấu đội xe yêu cầu:</span>
+                      <div className="flex flex-wrap gap-1.5 mt-1">
+                        {project.fleetRequirements.map((f, i) => (
+                          <span key={i} className="px-2 py-0.5 text-[10px] font-semibold bg-indigo-50 text-indigo-800 rounded border border-indigo-200">
+                            {f}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                  ) : null}
-                  {project.cargoDimensions ? (
-                    <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
-                      <span className="text-[10px] text-slate-400 block font-medium">Kích thước DxRxC</span>
-                      <span className="font-extrabold text-slate-900">{project.cargoDimensions}</span>
-                    </div>
-                  ) : null}
+                  )}
                 </div>
               )}
             </div>

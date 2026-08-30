@@ -31,10 +31,14 @@ export const PricingTypeSection: React.FC<PricingTypeSectionProps> = ({
 }) => {
   const isWarehousing = serviceType === 'Warehousing';
   const isCustoms = serviceType === 'Customs Clearance';
-  const isContract = pricingType === 'CONTRACT';
+  const isProject = serviceType === 'Project Cargo';
+  const isContract = isProject ? true : pricingType === 'CONTRACT';
 
   // Ensure default contract term is appropriate for the selected mode
   React.useEffect(() => {
+    if (isProject && pricingType !== 'CONTRACT') {
+      onChangePricingType('CONTRACT');
+    }
     if (isWarehousing) {
       if (!isContract && (!contractTerm || contractTerm.includes('năm') || contractTerm.includes('12 tháng') || contractTerm.includes('24 tháng'))) {
         onChangeContractTerm('3 Tháng (Quý cao điểm / Vụ mùa)');
@@ -42,7 +46,7 @@ export const PricingTypeSection: React.FC<PricingTypeSectionProps> = ({
         onChangeContractTerm('Hợp đồng 12 tháng (1 năm tiêu chuẩn)');
       }
     }
-  }, [isWarehousing, isContract, contractTerm, onChangeContractTerm]);
+  }, [isProject, isWarehousing, isContract, pricingType, contractTerm, onChangeContractTerm, onChangePricingType]);
 
   const colorStyles = {
     blue: {
@@ -112,159 +116,192 @@ export const PricingTypeSection: React.FC<PricingTypeSectionProps> = ({
 
   return (
     <div className="space-y-3">
-      {/* 2 Options Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {/* Option 1: SPOT / THEO LÔ */}
-        <div
-          onClick={() => onChangePricingType('SPOT')}
-          className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-start gap-3 relative ${
-            !isContract
-              ? `${colorStyles.activeBorder} shadow-xs`
-              : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/80 text-slate-700'
-          }`}
-        >
-          <div
-            className={`p-2 rounded-xl shrink-0 ${
-              !isContract ? colorStyles.badgeActive : 'bg-slate-100 text-slate-500'
-            }`}
-          >
-            {isWarehousing ? <Layers className="w-4 h-4" /> : <Zap className="w-4 h-4" />}
+      {/* If Project Cargo: Single Dedicated Contract Card */}
+      {isProject ? (
+        <div className={`p-4 rounded-2xl border ${colorStyles.activeBorder} shadow-xs flex items-start gap-3.5 relative`}>
+          <div className={`p-2.5 rounded-xl shrink-0 ${colorStyles.badgeActive}`}>
+            <Building2 className="w-5 h-5" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-1">
-              <span className="text-xs font-bold text-slate-900">
-                {isWarehousing
-                  ? 'Kho Tràn / Mùa Vụ (Overflow / Seasonal)'
-                  : isCustoms
-                  ? 'Theo Lô / Tờ Khai Đơn Lẻ (Spot Rate)'
-                  : 'Theo Lô / Chuyến Lẻ (Spot Rate)'}
+              <span className="text-xs sm:text-sm font-bold text-slate-900">
+                Hợp Đồng Dự Án & Đấu Thầu Logistics (Project Contract / Tender)
               </span>
-              {!isContract && (
-                <span className="p-0.5 rounded-full bg-emerald-500 text-white text-[10px]">
-                  <Check className="w-3 h-3" />
-                </span>
-              )}
+              <span className="p-0.5 rounded-full bg-emerald-500 text-white text-[10px]">
+                <Check className="w-3.5 h-3.5" />
+              </span>
             </div>
-            <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
-              {isWarehousing
-                ? 'Đã có kho chính nhưng chuẩn bị đến mùa cao điểm sản xuất / nhập khẩu dồn dập, cần thuê kho đệm ngắn hạn (1-6 tháng) giải tỏa quá tải.'
-                : isCustoms
-                ? 'Nhu cầu mở tờ khai phát sinh theo từng lô hàng đơn lẻ. Đại lý hải quan báo giá dịch vụ thông quan trọn gói ngay theo thời điểm.'
-                : 'Nhu cầu phát sinh theo từng đợt đơn lẻ, ngày lấy hàng cố định. Nhà xe báo giá chốt ngay theo thời điểm.'}
+            <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
+              Dành riêng cho các gói thầu Phân phối mạng lưới (Distribution), Trạm trung chuyển (Cross-Dock) và Vận tải Đa phương thức (Multimodal). Báo giá cấu trúc thầu và giữ đơn giá ưu đãi cố định theo cam kết hợp đồng.
             </p>
-            <div className="mt-2 flex flex-wrap items-center gap-1.5">
-              {isWarehousing ? (
-                <>
-                  <span className="px-2 py-0.5 text-[10px] font-semibold bg-purple-50 text-purple-700 rounded-md border border-purple-200">
-                    ⚡ Linh hoạt 1 - 6 tháng
-                  </span>
-                  <span className="px-2 py-0.5 text-[10px] font-semibold bg-slate-100 text-slate-600 rounded-md border border-slate-200">
-                    📦 Theo lượng hàng thực tế
-                  </span>
-                  <span className="px-2 py-0.5 text-[10px] font-semibold bg-slate-100 text-slate-600 rounded-md border border-slate-200">
-                    🚀 Không ràng buộc dài hạn
-                  </span>
-                </>
-              ) : isCustoms ? (
-                <>
-                  <span className="px-2 py-0.5 text-[10px] font-semibold bg-slate-100 text-slate-600 rounded-md border border-slate-200">
-                    ⚡ Báo giá tức thì
-                  </span>
-                  <span className="px-2 py-0.5 text-[10px] font-semibold bg-slate-100 text-slate-600 rounded-md border border-slate-200">
-                    📑 Không cam kết sản lượng
-                  </span>
-                </>
-              ) : (
-                <>
-                  <span className="px-2 py-0.5 text-[10px] font-semibold bg-slate-100 text-slate-600 rounded-md border border-slate-200">
-                    ⚡ Báo giá tức thì
-                  </span>
-                  <span className="px-2 py-0.5 text-[10px] font-semibold bg-slate-100 text-slate-600 rounded-md border border-slate-200">
-                    📦 Không ràng buộc sản lượng
-                  </span>
-                </>
-              )}
+            <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+              <span className="px-2 py-0.5 text-[10px] font-semibold bg-amber-50 text-amber-800 rounded-md border border-amber-200">
+                🔒 Đơn giá thầu trọn gói cố định
+              </span>
+              <span className="px-2 py-0.5 text-[10px] font-semibold bg-emerald-50 text-emerald-800 rounded-md border border-emerald-200">
+                🤝 Cam kết SLA & KPI vận hành (&gt; 98%)
+              </span>
+              <span className="px-2 py-0.5 text-[10px] font-semibold bg-purple-50 text-purple-700 rounded-md border border-purple-200">
+                💻 Tích hợp hệ sinh thái WMS/TMS
+              </span>
             </div>
           </div>
         </div>
+      ) : (
+        /* 2 Options Grid for other services */
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {/* Option 1: SPOT / THEO LÔ */}
+          <div
+            onClick={() => onChangePricingType('SPOT')}
+            className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-start gap-3 relative ${
+              !isContract
+                ? `${colorStyles.activeBorder} shadow-xs`
+                : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/80 text-slate-700'
+            }`}
+          >
+            <div
+              className={`p-2 rounded-xl shrink-0 ${
+                !isContract ? colorStyles.badgeActive : 'bg-slate-100 text-slate-500'
+              }`}
+            >
+              {isWarehousing ? <Layers className="w-4 h-4" /> : <Zap className="w-4 h-4" />}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between gap-1">
+                <span className="text-xs font-bold text-slate-900">
+                  {isWarehousing
+                    ? 'Kho Tràn / Mùa Vụ (Overflow / Seasonal)'
+                    : isCustoms
+                    ? 'Theo Lô / Tờ Khai Đơn Lẻ (Spot Rate)'
+                    : 'Theo Lô / Chuyến Lẻ (Spot Rate)'}
+                </span>
+                {!isContract && (
+                  <span className="p-0.5 rounded-full bg-emerald-500 text-white text-[10px]">
+                    <Check className="w-3 h-3" />
+                  </span>
+                )}
+              </div>
+              <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
+                {isWarehousing
+                  ? 'Đã có kho chính nhưng chuẩn bị đến mùa cao điểm sản xuất / nhập khẩu dồn dập, cần thuê kho đệm ngắn hạn (1-6 tháng) giải tỏa quá tải.'
+                  : isCustoms
+                  ? 'Nhu cầu mở tờ khai phát sinh theo từng lô hàng đơn lẻ. Đại lý hải quan báo giá dịch vụ thông quan trọn gói ngay theo thời điểm.'
+                  : 'Nhu cầu phát sinh theo từng đợt đơn lẻ, ngày lấy hàng cố định. Nhà xe báo giá chốt ngay theo thời điểm.'}
+              </p>
+              <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                {isWarehousing ? (
+                  <>
+                    <span className="px-2 py-0.5 text-[10px] font-semibold bg-purple-50 text-purple-700 rounded-md border border-purple-200">
+                      ⚡ Linh hoạt 1 - 6 tháng
+                    </span>
+                    <span className="px-2 py-0.5 text-[10px] font-semibold bg-slate-100 text-slate-600 rounded-md border border-slate-200">
+                      📦 Theo lượng hàng thực tế
+                    </span>
+                    <span className="px-2 py-0.5 text-[10px] font-semibold bg-slate-100 text-slate-600 rounded-md border border-slate-200">
+                      🚀 Không ràng buộc dài hạn
+                    </span>
+                  </>
+                ) : isCustoms ? (
+                  <>
+                    <span className="px-2 py-0.5 text-[10px] font-semibold bg-slate-100 text-slate-600 rounded-md border border-slate-200">
+                      ⚡ Báo giá tức thì
+                    </span>
+                    <span className="px-2 py-0.5 text-[10px] font-semibold bg-slate-100 text-slate-600 rounded-md border border-slate-200">
+                      📑 Không cam kết sản lượng
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="px-2 py-0.5 text-[10px] font-semibold bg-slate-100 text-slate-600 rounded-md border border-slate-200">
+                      ⚡ Báo giá tức thì
+                    </span>
+                    <span className="px-2 py-0.5 text-[10px] font-semibold bg-slate-100 text-slate-600 rounded-md border border-slate-200">
+                      📦 Không ràng buộc sản lượng
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
 
-        {/* Option 2: CONTRACT / KHO DÀI HẠN */}
-        <div
-          onClick={() => onChangePricingType('CONTRACT')}
-          className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-start gap-3 relative ${
-            isContract
-              ? `${colorStyles.activeBorder} shadow-xs`
-              : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/80 text-slate-700'
-          }`}
-        >
+          {/* Option 2: CONTRACT / KHO DÀI HẠN */}
           <div
-            className={`p-2 rounded-xl shrink-0 ${
-              isContract ? colorStyles.badgeActive : 'bg-slate-100 text-slate-500'
+            onClick={() => onChangePricingType('CONTRACT')}
+            className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-start gap-3 relative ${
+              isContract
+                ? `${colorStyles.activeBorder} shadow-xs`
+                : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/80 text-slate-700'
             }`}
           >
-            {isWarehousing ? <Building2 className="w-4 h-4" /> : <FileCheck className="w-4 h-4" />}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between gap-1">
-              <span className="text-xs font-bold text-slate-900">
-                {isWarehousing
-                  ? 'Kho Dài Hạn (Long-Term / Dedicated Hub)'
-                  : isCustoms
-                  ? 'Hợp Đồng Khung Định Kỳ (Customs Contract / Tender)'
-                  : 'Hợp Đồng Định Kỳ / Dài Hạn (Contract / Tender)'}
-              </span>
-              {isContract && (
-                <span className="p-0.5 rounded-full bg-emerald-500 text-white text-[10px]">
-                  <Check className="w-3 h-3" />
-                </span>
-              )}
+            <div
+              className={`p-2 rounded-xl shrink-0 ${
+                isContract ? colorStyles.badgeActive : 'bg-slate-100 text-slate-500'
+              }`}
+            >
+              {isWarehousing ? <Building2 className="w-4 h-4" /> : <FileCheck className="w-4 h-4" />}
             </div>
-            <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
-              {isWarehousing
-                ? 'Thuê làm trung tâm phân phối chính (DC) hoặc kho tổng chiến lược tính bằng năm. Đơn giá ưu đãi cố định và hỗ trợ tích hợp WMS chuyên sâu.'
-                : isCustoms
-                ? 'Ký hợp đồng dịch vụ hải quan trọn gói theo tháng/năm, cam kết sản lượng tờ khai đều đặn. Nhận bảng đơn giá thầu ưu đãi và giữ giá cố định.'
-                : 'Ký hợp đồng khung/thầu theo tháng/năm, cam kết sản lượng đều đặn. Nhận đơn giá ưu đãi và giữ giá cố định.'}
-            </p>
-            <div className="mt-2 flex flex-wrap items-center gap-1.5">
-              {isWarehousing ? (
-                <>
-                  <span className="px-2 py-0.5 text-[10px] font-semibold bg-amber-50 text-amber-800 rounded-md border border-amber-200">
-                    🔒 Đơn giá ưu đãi cố định
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between gap-1">
+                <span className="text-xs font-bold text-slate-900">
+                  {isWarehousing
+                    ? 'Kho Dài Hạn (Long-Term / Dedicated Hub)'
+                    : isCustoms
+                    ? 'Hợp Đồng Khung Định Kỳ (Customs Contract / Tender)'
+                    : 'Hợp Đồng Định Kỳ / Dài Hạn (Contract / Tender)'}
+                </span>
+                {isContract && (
+                  <span className="p-0.5 rounded-full bg-emerald-500 text-white text-[10px]">
+                    <Check className="w-3 h-3" />
                   </span>
-                  <span className="px-2 py-0.5 text-[10px] font-semibold bg-emerald-50 text-emerald-800 rounded-md border border-emerald-200">
-                    📐 Cố định diện tích & Racking
-                  </span>
-                  <span className="px-2 py-0.5 text-[10px] font-semibold bg-purple-50 text-purple-700 rounded-md border border-purple-200">
-                    💻 Tích hợp WMS/ERP
-                  </span>
-                </>
-              ) : isCustoms ? (
-                <>
-                  <span className="px-2 py-0.5 text-[10px] font-semibold bg-amber-50 text-amber-800 rounded-md border border-amber-200">
-                    🔒 Đơn giá tờ khai ưu đãi
-                  </span>
-                  <span className="px-2 py-0.5 text-[10px] font-semibold bg-blue-50 text-blue-800 rounded-md border border-blue-200">
-                    👨‍💼 Đội ngũ OPS chuyên trách tại cảng
-                  </span>
-                  <span className="px-2 py-0.5 text-[10px] font-semibold bg-emerald-50 text-emerald-800 rounded-md border border-emerald-200">
-                    ⚡ Cam kết SLA thông quan
-                  </span>
-                </>
-              ) : (
-                <>
-                  <span className="px-2 py-0.5 text-[10px] font-semibold bg-amber-50 text-amber-800 rounded-md border border-amber-200">
-                    🔒 Đơn giá ưu đãi cố định
-                  </span>
-                  <span className="px-2 py-0.5 text-[10px] font-semibold bg-emerald-50 text-emerald-800 rounded-md border border-emerald-200">
-                    🤝 Ưu tiên bố trí phương tiện
-                  </span>
-                </>
-              )}
+                )}
+              </div>
+              <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
+                {isWarehousing
+                  ? 'Thuê làm trung tâm phân phối chính (DC) hoặc kho tổng chiến lược tính bằng năm. Đơn giá ưu đãi cố định và hỗ trợ tích hợp WMS chuyên sâu.'
+                  : isCustoms
+                  ? 'Ký hợp đồng dịch vụ hải quan trọn gói theo tháng/năm, cam kết sản lượng tờ khai đều đặn. Nhận bảng đơn giá thầu ưu đãi và giữ giá cố định.'
+                  : 'Ký hợp đồng khung/thầu theo tháng/năm, cam kết sản lượng đều đặn. Nhận đơn giá ưu đãi và giữ giá cố định.'}
+              </p>
+              <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                {isWarehousing ? (
+                  <>
+                    <span className="px-2 py-0.5 text-[10px] font-semibold bg-amber-50 text-amber-800 rounded-md border border-amber-200">
+                      🔒 Đơn giá ưu đãi cố định
+                    </span>
+                    <span className="px-2 py-0.5 text-[10px] font-semibold bg-emerald-50 text-emerald-800 rounded-md border border-emerald-200">
+                      📐 Cố định diện tích & Racking
+                    </span>
+                    <span className="px-2 py-0.5 text-[10px] font-semibold bg-purple-50 text-purple-700 rounded-md border border-purple-200">
+                      💻 Tích hợp WMS/ERP
+                    </span>
+                  </>
+                ) : isCustoms ? (
+                  <>
+                    <span className="px-2 py-0.5 text-[10px] font-semibold bg-amber-50 text-amber-800 rounded-md border border-amber-200">
+                      🔒 Đơn giá tờ khai ưu đãi
+                    </span>
+                    <span className="px-2 py-0.5 text-[10px] font-semibold bg-blue-50 text-blue-800 rounded-md border border-blue-200">
+                      👨‍💼 Đội ngũ OPS chuyên trách tại cảng
+                    </span>
+                    <span className="px-2 py-0.5 text-[10px] font-semibold bg-emerald-50 text-emerald-800 rounded-md border border-emerald-200">
+                      ⚡ Cam kết SLA thông quan
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="px-2 py-0.5 text-[10px] font-semibold bg-amber-50 text-amber-800 rounded-md border border-amber-200">
+                      🔒 Đơn giá ưu đãi cố định
+                    </span>
+                    <span className="px-2 py-0.5 text-[10px] font-semibold bg-emerald-50 text-emerald-800 rounded-md border border-emerald-200">
+                      🤝 Ưu tiên bố trí phương tiện
+                    </span>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Contract & Term Specific Detail Inputs */}
       {(isContract || isWarehousing) && (
@@ -274,6 +311,8 @@ export const PricingTypeSection: React.FC<PricingTypeSectionProps> = ({
             <span>
               {isWarehousing
                 ? (!isContract ? 'Thời Hạn Thuê Kho Tràn Mùa Vụ (Overflow Term)' : 'Thời Hạn Hợp Đồng Thuê Kho Dài Hạn (Contract Term)')
+                : isProject
+                ? 'Thông Số Thời Hạn Hợp Đồng Dự Án (Project Contract Term)'
                 : `Thông Số Hợp Đồng Định Kỳ (${serviceLabel})`}
             </span>
           </div>
@@ -283,9 +322,33 @@ export const PricingTypeSection: React.FC<PricingTypeSectionProps> = ({
               <label className="block text-[11px] font-bold text-slate-700 mb-1">
                 {isWarehousing
                   ? (!isContract ? 'Chọn Thời Gian Thuê Kho Tràn Mùa Vụ *' : 'Chọn Thời Hạn Ký Kết Hợp Đồng Kho Dài Hạn *')
+                  : isProject
+                  ? 'Thời Hạn Hợp Đồng Dự Án (Project Term) *'
                   : '1. Thời Hạn Hợp Đồng Ký Kết (Contract Term) *'}
               </label>
-              {isWarehousing ? (
+              {isProject ? (
+                <select
+                  value={contractTerm || 'Hợp đồng 12 tháng (1 năm tiêu chuẩn đấu thầu)'}
+                  onChange={(e) => onChangeContractTerm(e.target.value)}
+                  className={`w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white ${colorStyles.focusRing} font-bold text-slate-900 cursor-pointer`}
+                >
+                  <option value="Hợp đồng 12 tháng (1 năm tiêu chuẩn đấu thầu)">
+                    📅 Hợp đồng 12 tháng (1 năm tiêu chuẩn đấu thầu dự án)
+                  </option>
+                  <option value="Hợp đồng 24 tháng (2 năm đối tác chiến lược)">
+                    📅 Hợp đồng 24 tháng (2 năm đối tác chiến lược)
+                  </option>
+                  <option value="Hợp đồng 36 tháng (3 năm chuỗi cung ứng dài hạn)">
+                    📅 Hợp đồng 36 tháng (3 năm chuỗi cung ứng dài hạn)
+                  </option>
+                  <option value="Hợp đồng 6 tháng (Ngắn hạn / Giai đoạn thử nghiệm)">
+                    📅 Hợp đồng 6 tháng (Ngắn hạn / Giai đoạn thử nghiệm)
+                  </option>
+                  <option value="Theo tiến độ dự án (Project Milestone Based)">
+                    📅 Theo tiến độ dự án (Project Milestone Based)
+                  </option>
+                </select>
+              ) : isWarehousing ? (
                 !isContract ? (
                   // Kho tràn: 1 - 6 tháng
                   <select

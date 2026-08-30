@@ -444,14 +444,20 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
   });
 
   const [projectSpecs, setProjectSpecs] = useState<ProjectInquirySpecs>({
-    pricingType: 'SPOT',
-    projectType: 'Hàng siêu trường siêu trọng (OOG)',
-    cargoDimensions: '',
-    maxUnitWeightTons: undefined,
-    routeSurveyRequired: true,
-    heavyLashingRequired: true,
-    siteEngineerRequired: true,
-    specialPermitRequired: true,
+    pricingType: 'CONTRACT',
+    contractTerm: 'Hợp đồng 12 tháng (1 năm tiêu chuẩn đấu thầu)',
+    projectCategory: 'DISTRIBUTION',
+    distributionChannel: 'B2B / Siêu thị (Modern Trade)',
+    originWarehouses: [''],
+    coverageScope: 'Toàn quốc (Bắc - Trung - Nam)',
+    fleetRequirements: ['🚚 Xe tải nhỏ 1.25T - 2.5T (Giao nội đô / Phố cấm giờ)', '🚚 Xe tải trung 5.0T - 8.0T (Tuyến vệ tinh liên tỉnh)'],
+    monthlyTripsOrVolume: '150 chuyến / tháng',
+    xDockHubLocation: '',
+    xDockTemperature: 'Nhiệt độ thường (Ambient)',
+    inboundDailyVolume: '5 - 10 xe cont 40ft/ngày',
+    outboundMaxTurnaroundTime: 'Trong vòng 4 - 8 Giờ',
+    multimodalCombination: 'Đường Biển + Đường Bộ (Sea - Road Freight)',
+    multimodalContainerType: 'Container 40ft High Cube (40HC)',
     selectedVAS: [],
   });
 

@@ -381,13 +381,36 @@ export interface ProjectInquirySpecs {
   pricingType?: PricingType;
   contractTerm?: string;
   committedFrequency?: string;
-  projectType: 'Hàng siêu trường siêu trọng (OOG)' | 'Vận chuyển thiết bị toàn bộ nhà máy' | 'Đa phương thức kết hợp (Multimodal)';
-  cargoDimensions?: string;
-  maxUnitWeightTons?: number;
-  routeSurveyRequired: boolean;
-  heavyLashingRequired: boolean;
-  siteEngineerRequired: boolean;
-  specialPermitRequired: boolean;
+  projectCategory: 'DISTRIBUTION' | 'CROSS_DOCK' | 'MULTIMODAL';
+  projectName?: string;
+  expectedStartDate?: string;
+  
+  // 1. DISTRIBUTION NETWORK TENDER SPECS
+  distributionChannel?: 'B2B / Siêu thị (Modern Trade)' | 'Đại lý truyền thống (General Trade)' | 'Chuỗi bán lẻ (Retail Chain)' | 'Phân phối Hỗn hợp Toàn diện';
+  originWarehouses?: string[];
+  coverageScope?: 'Toàn quốc (Bắc - Trung - Nam)' | 'Miền Nam & ĐBSCL' | 'Miền Bắc & Vệ tinh' | 'Miền Trung & Tây Nguyên';
+  fleetRequirements?: string[];
+  monthlyTripsOrVolume?: string;
+  keyKPIRequirements?: string[];
+
+  // 2. CROSS-DOCK & SORTING PROJECT SPECS
+  xDockHubLocation?: string;
+  inboundVehicleTypes?: string[];
+  inboundDailyVolume?: string;
+  inboundOperatingHours?: string;
+  sortingRequirements?: string[];
+  xDockTemperature?: 'Nhiệt độ thường (Ambient)' | 'Kiểm soát mát (Chilled 15°C - 25°C)' | 'Lạnh sâu (Cold 2°C - 8°C)';
+  outboundStoreCount?: number;
+  outboundMaxTurnaroundTime?: string;
+
+  // 3. MULTIMODAL LOGISTICS PROJECT SPECS
+  multimodalCombination?: 'Đường Biển + Đường Bộ (Sea - Road Freight)' | 'Đường Sắt + Đường Bộ (Rail - Road Freight)' | 'Sà Lan Sông + Đường Sắt (Inland Barge - Rail)' | 'Hàng Không + Đường Bộ (Air - Road Express)' | 'Đa phương thức Tùy chỉnh (Custom Multimodal)';
+  multimodalFirstMile?: string;
+  multimodalMainHaul?: string;
+  multimodalLastMile?: string;
+  multimodalContainerType?: string;
+  multimodalMonthlyTeuOrVolume?: string;
+
   selectedVAS?: string[];
 }
 
