@@ -1323,6 +1323,27 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       ) : null}
                     </div>
                   )}
+
+                  {(warehousing.humidityRequirement || warehousing.inboundTemperatureState) && (
+                    <div className="p-3 bg-cyan-50/60 rounded-xl border border-cyan-200/80 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs shadow-2xs">
+                      {warehousing.humidityRequirement ? (
+                        <div>
+                          <span className="text-[10px] text-cyan-800 font-bold block">Kiểm soát độ ẩm (% RH):</span>
+                          <span className="font-extrabold text-cyan-950">
+                            {warehousing.humidityRequirement === 'Tùy chỉnh riêng (% RH)' ? (warehousing.customHumidity || 'Tùy chỉnh riêng') : warehousing.humidityRequirement}
+                          </span>
+                        </div>
+                      ) : null}
+                      {warehousing.inboundTemperatureState ? (
+                        <div>
+                          <span className="text-[10px] text-cyan-800 font-bold block">Trạng thái nhiệt độ hàng nhập:</span>
+                          <span className="font-extrabold text-slate-900">
+                            {warehousing.inboundTemperatureState === 'NEED_COOLING' ? '⚡ Cần hạ nhiệt / cấp đông tại kho' : '❄️ Đã hạ nhiệt/cấp đông từ trước (Pre-cooled)'}
+                          </span>
+                        </div>
+                      ) : null}
+                    </div>
+                  )}
                 </div>
               )}
 

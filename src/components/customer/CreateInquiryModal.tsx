@@ -1421,18 +1421,20 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                   </div>
                 </div>
 
-                {/* Continuous Genset Checkbox */}
-                <div className="pt-1">
-                  <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer bg-white p-2.5 rounded-xl border border-cyan-200 w-full hover:border-cyan-300 transition-colors">
-                    <input
-                      type="checkbox"
-                      checked={needContinuousGenset}
-                      onChange={(e) => setNeedContinuousGenset(e.target.checked)}
-                      className="rounded text-cyan-600 focus:ring-cyan-500"
-                    />
-                    <span className="font-bold text-cyan-950 text-xs">Bảo lưu điện liên tục máy phát Genset / Plug-in (Continuous Power)</span>
-                  </label>
-                </div>
+                {/* Continuous Genset Checkbox - Only for transport services */}
+                {serviceType !== 'Warehousing' && (
+                  <div className="pt-1">
+                    <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer bg-white p-2.5 rounded-xl border border-cyan-200 w-full hover:border-cyan-300 transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={needContinuousGenset}
+                        onChange={(e) => setNeedContinuousGenset(e.target.checked)}
+                        className="rounded text-cyan-600 focus:ring-cyan-500"
+                      />
+                      <span className="font-bold text-cyan-950 text-xs">Bảo lưu điện liên tục máy phát Genset / Plug-in (Continuous Power)</span>
+                    </label>
+                  </div>
+                )}
               </div>
             )}
 

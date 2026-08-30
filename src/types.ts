@@ -273,6 +273,9 @@ export interface WarehousingInquirySpecs {
   dailyOutboundVolume?: string;
   inventoryMethod?: 'FIFO (Nhập trước xuất trước)' | 'FEFO (Hạn gần xuất trước)' | 'Serial / Lot Tracking' | 'Tiêu chuẩn';
   wmsIntegrationNeeded?: boolean;
+  humidityRequirement?: string;
+  customHumidity?: string;
+  inboundTemperatureState?: 'PRE_COOLED' | 'NEED_COOLING';
   requiredVAS?: string[];
   selectedVAS?: string[];
 }

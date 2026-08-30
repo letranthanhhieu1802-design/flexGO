@@ -821,6 +821,27 @@ export const InquiryDetailWorkspace: React.FC<InquiryDetailWorkspaceProps> = ({
                         </div>
                       </div>
                     )}
+
+                    {(inquiry.serviceSpecs.warehousing.humidityRequirement || inquiry.serviceSpecs.warehousing.inboundTemperatureState) && (
+                      <div className="p-3 bg-cyan-50/70 rounded-lg border border-cyan-200/80 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                        {inquiry.serviceSpecs.warehousing.humidityRequirement ? (
+                          <div>
+                            <span className="text-[10px] text-cyan-800 block font-bold">Kiểm soát độ ẩm (% RH):</span>
+                            <span className="font-bold text-cyan-950">
+                              {inquiry.serviceSpecs.warehousing.humidityRequirement === 'Tùy chỉnh riêng (% RH)' ? (inquiry.serviceSpecs.warehousing.customHumidity || 'Tùy chỉnh') : inquiry.serviceSpecs.warehousing.humidityRequirement}
+                            </span>
+                          </div>
+                        ) : null}
+                        {inquiry.serviceSpecs.warehousing.inboundTemperatureState ? (
+                          <div>
+                            <span className="text-[10px] text-cyan-800 block font-bold">Trạng thái nhiệt độ hàng nhập:</span>
+                            <span className="font-bold text-slate-800">
+                              {inquiry.serviceSpecs.warehousing.inboundTemperatureState === 'NEED_COOLING' ? '⚡ Cần cấp đông tại kho (Blast Freezing)' : '❄️ Đã hạ nhiệt/cấp đông (Pre-cooled)'}
+                            </span>
+                          </div>
+                        ) : null}
+                      </div>
+                    )}
                   </div>
                 )}
 
