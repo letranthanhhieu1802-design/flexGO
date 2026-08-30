@@ -462,93 +462,257 @@ export const RAIL_SURCHARGES: SurchargeItemDef[] = [
   },
 ];
 
-// Warehousing Surcharges LOV
-export const WAREHOUSING_SURCHARGES: SurchargeItemDef[] = [
-  // I. Phí Nâng Hạ & Vận Hành Bốc Xếp
+// 1. Kho Thường Grade A (Dry Warehouse) - 5 mục
+export const DRY_WAREHOUSE_SURCHARGES: SurchargeItemDef[] = [
   {
     id: 'sc-wh-inbound-handling',
     code: 'INBOUND HANDLING',
-    name: 'Phí nâng hạ bốc xếp nhập kho (Inbound Handling Fee)',
-    desc: 'Phí xe nâng và nhân công tiếp nhận, kiểm đếm và đưa hàng lên kệ Racking.',
+    name: 'Phí nâng hạ & dỡ hàng nhập kho (Inbound Handling Fee)',
+    desc: 'Phí xe nâng và nhân công tiếp nhận, kiểm đếm mã vạch và xếp hàng lên kệ Racking.',
     category: 'POL',
-    categoryLabel: 'Phí Vận Hành & Bốc Xếp',
+    categoryLabel: 'Phí Vận Hành Bốc Xếp',
     isPopularDefault: true,
   },
   {
     id: 'sc-wh-outbound-handling',
     code: 'OUTBOUND HANDLING',
-    name: 'Phí nâng hạ bốc xếp xuất kho (Outbound Handling Fee)',
-    desc: 'Phí hạ hàng từ kệ Racking, kiểm soát mã vạch và bốc xếp lên phương tiện vận chuyển.',
+    name: 'Phí lấy hàng & bốc xếp xuất kho (Outbound Handling Fee)',
+    desc: 'Phí hạ hàng từ giá kệ, đối soát phiếu xuất và bốc xếp lên xe tải/container.',
     category: 'POL',
-    categoryLabel: 'Phí Vận Hành & Bốc Xếp',
+    categoryLabel: 'Phí Vận Hành Bốc Xếp',
     isPopularDefault: true,
   },
   {
     id: 'sc-wh-devanning',
     code: 'CONTAINER DEVANNING',
-    name: 'Phí rút ruột container & dỡ hàng thủ công (Devanning Fee)',
-    desc: 'Phí dỡ hàng rời trong container 20ft/40ft không đi theo pallet và xếp lên pallet chuẩn.',
+    name: 'Phí rút ruột container thủ công & lên Pallet (Devanning Fee)',
+    desc: 'Phí bốc dỡ hàng rời trong container 20ft/40ft, phân loại và xếp lên pallet tiêu chuẩn quấn màng PE.',
     category: 'POL',
-    categoryLabel: 'Phí Vận Hành & Bốc Xếp',
+    categoryLabel: 'Phí Vận Hành Bốc Xếp',
     isPopularDefault: false,
   },
-  {
-    id: 'sc-wh-pick-pack',
-    code: 'PICK & PACK FULFILLMENT',
-    name: 'Phí chia chọn & đóng gói đơn hàng TMĐT (Pick & Pack Fee)',
-    desc: 'Phí xử lý nhặt hàng theo từng đơn hàng B2C, đóng hộp carton và dán phiếu gửi hàng.',
-    category: 'POL',
-    categoryLabel: 'Phí Vận Hành & Bốc Xếp',
-    isPopularDefault: false,
-  },
-
-  // II. Phí Quản Lý & Dịch Vụ Kho
   {
     id: 'sc-wh-wms-mgmt',
-    code: 'WMS & INVENTORY MGMT',
-    name: 'Phí quản lý hệ thống WMS & Báo cáo tồn kho thời gian thực',
-    desc: 'Phí duy trì tài khoản portal quản lý tồn kho online, đối soát số liệu nhập-xuất-tồn.',
+    code: 'WMS & REALTIME API',
+    name: 'Phí phần mềm WMS & Báo cáo tồn kho thời gian thực (WMS API Portal)',
+    desc: 'Phí cấp tài khoản portal quản lý xuất-nhập-tồn trực tuyến, kết nối API đồng bộ với ERP/SAP của khách.',
     category: 'GENERAL',
     categoryLabel: 'Quản Lý & Tiện Ích Kho',
     isPopularDefault: true,
   },
   {
-    id: 'sc-wh-cycle-count',
-    code: 'STOCK CYCLE COUNT',
-    name: 'Phí kiểm kê định kỳ & đối soát tồn kho thực tế (Cycle Count Fee)',
-    desc: 'Chi phí kiểm kê toàn diện hoặc định kỳ hàng quý theo yêu cầu của kiểm toán doanh nghiệp.',
-    category: 'GENERAL',
-    categoryLabel: 'Quản Lý & Tiện Ích Kho',
-    isPopularDefault: false,
-  },
-  {
     id: 'sc-wh-overtime',
-    code: 'OVERTIME & WEEKEND',
+    code: 'OVERTIME & HOLIDAY',
     name: 'Phụ phí xuất nhập ngoài giờ / Chủ Nhật & Ngày Lễ (Overtime Surcharge)',
-    desc: 'Phụ phí bố trí thủ kho và tài xế xe nâng làm việc ngoài giờ hành chính hoặc ngày nghỉ lễ.',
+    desc: 'Phụ phí bố trí thủ kho và tài xế xe nâng làm việc ca đêm, ngoài giờ hành chính hoặc ngày nghỉ lễ.',
     category: 'GENERAL',
     categoryLabel: 'Quản Lý & Tiện Ích Kho',
-    isPopularDefault: false,
-  },
-  {
-    id: 'sc-wh-plugin-power',
-    code: 'REEFER PLUG-IN & POWER',
-    name: 'Phí cắm điện container lạnh / sạc xe nâng tại bãi kho (Plug-in Fee)',
-    desc: 'Chi phí điện duy trì nhiệt độ cho cont 20RF/40RF lưu bãi chờ rút hàng.',
-    category: 'GENERAL',
-    categoryLabel: 'Quản Lý & Tiện Ích Kho',
-    isPopularDefault: false,
-  },
-  {
-    id: 'sc-wh-empty-storage',
-    code: 'EMPTY CONTAINER STORAGE',
-    name: 'Phí lưu bãi vỏ container rỗng tại depot kho',
-    desc: 'Phí lưu giữ vỏ cont rỗng tại bãi đệm sau khi rút ruột chờ lệnh trả vỏ về hãng tàu.',
-    category: 'INLAND',
-    categoryLabel: 'Bãi Đệm & Lưu Container',
     isPopularDefault: false,
   },
 ];
+
+// 2. Kho Lạnh / Mát (Cold Storage) - 5 mục
+export const COLD_WAREHOUSE_SURCHARGES: SurchargeItemDef[] = [
+  {
+    id: 'sc-wh-cold-inbound',
+    code: 'COLD INBOUND HANDLING',
+    name: 'Phí bốc xếp & nâng hạ phòng đệm kho lạnh (Cold Inbound Handling)',
+    desc: 'Phí bốc dỡ qua phòng đệm nhiệt độ (Antechamber) và đưa hàng vào buồng đông sâu/kho mát.',
+    category: 'POL',
+    categoryLabel: 'Phí Vận Hành Kho Lạnh',
+    isPopularDefault: true,
+  },
+  {
+    id: 'sc-wh-cold-outbound',
+    code: 'COLD OUTBOUND HANDLING',
+    name: 'Phí soạn hàng & bốc xếp xe đông lạnh (Cold Outbound Handling)',
+    desc: 'Phí xuất hàng nhanh qua cửa Dock cách nhiệt chuyên dụng lên thùng xe tải lạnh.',
+    category: 'POL',
+    categoryLabel: 'Phí Vận Hành Kho Lạnh',
+    isPopularDefault: true,
+  },
+  {
+    id: 'sc-wh-plugin-power',
+    code: 'REEFER PLUG-IN POWER',
+    name: 'Phí cắm điện container lạnh tại bãi kho (Reefer Plug-in Fee)',
+    desc: 'Chi phí duy trì nguồn điện 3 pha cho container lạnh 20RF/40RF lưu bãi chờ rút ruột bảo quản nhiệt độ.',
+    category: 'POL',
+    categoryLabel: 'Phụ Phí Nhiệt Độ Chuyên Biệt',
+    isPopularDefault: true,
+  },
+  {
+    id: 'sc-wh-cold-wms',
+    code: 'WMS & TEMP LOGGING 24/7',
+    name: 'Phí phần mềm WMS & Giám sát nhiệt độ tự động 24/7 (Temp Datalogger)',
+    desc: 'Báo cáo biểu đồ dải nhiệt độ lưu kho liên tục theo tiêu chuẩn HACCP / GDP Dược phẩm.',
+    category: 'GENERAL',
+    categoryLabel: 'Quản Lý & Tiện Ích Kho',
+    isPopularDefault: true,
+  },
+  {
+    id: 'sc-wh-overtime',
+    code: 'COLD OVERTIME HANDLING',
+    name: 'Phụ phí vận hành kho lạnh ca đêm & Ngày Lễ (Cold Overtime Surcharge)',
+    desc: 'Phụ phí bố trí nhân sự và thiết bị bảo hộ kho lạnh làm việc ngoài khung giờ tiêu chuẩn.',
+    category: 'GENERAL',
+    categoryLabel: 'Quản Lý & Tiện Ích Kho',
+    isPopularDefault: false,
+  },
+];
+
+// 3. Kho Hàng Nguy Hiểm (DG Warehouse) - 5 mục
+export const DG_WAREHOUSE_SURCHARGES: SurchargeItemDef[] = [
+  {
+    id: 'sc-wh-dg-safety',
+    code: 'DG SAFETY & COMPLIANCE',
+    name: 'Phụ phí an toàn & giám sát PCCC kho hóa chất (DG Safety Surcharge)',
+    desc: 'Chi phí duy trì hệ thống PCCC bọt foam chuyên dụng, cảm biến khí độc và đội ngũ ứng phó tràn đổ hóa chất.',
+    category: 'POL',
+    categoryLabel: 'An Toàn & Giám Sát DG',
+    isPopularDefault: true,
+  },
+  {
+    id: 'sc-wh-dg-inbound',
+    code: 'DG INBOUND HANDLING',
+    name: 'Phí nâng hạ & dỡ hàng nguy hiểm nhập kho (DG Inbound Handling)',
+    desc: 'Phí xe nâng đạt chuẩn chống cháy nổ tiếp nhận và kiểm soát bảng mã UN / MSDS.',
+    category: 'POL',
+    categoryLabel: 'Vận Hành Bốc Xếp DG',
+    isPopularDefault: true,
+  },
+  {
+    id: 'sc-wh-dg-outbound',
+    code: 'DG OUTBOUND HANDLING',
+    name: 'Phí soạn hàng & bốc xếp xuất kho hàng nguy hiểm (DG Outbound Handling)',
+    desc: 'Phí lấy hàng, kiểm tra tem nhãn IMO 9 nhóm và bốc xếp an toàn lên phương tiện chuyên dụng.',
+    category: 'POL',
+    categoryLabel: 'Vận Hành Bốc Xếp DG',
+    isPopularDefault: true,
+  },
+  {
+    id: 'sc-wh-dg-wms',
+    code: 'WMS DG & MSDS TRACKING',
+    name: 'Phí phần mềm WMS quản lý hồ sơ MSDS & Phân khu cách ly hóa chất',
+    desc: 'Quản lý cách ly hóa chất kỵ nhau, đối soát bảng dữ liệu an toàn hóa chất MSDS.',
+    category: 'GENERAL',
+    categoryLabel: 'Quản Lý & Tiện Ích Kho',
+    isPopularDefault: true,
+  },
+  {
+    id: 'sc-wh-empty-storage',
+    code: 'EMPTY DG CONTAINER STORAGE',
+    name: 'Phí lưu bãi vỏ container chuyên dụng chứa hàng DG tại depot kho',
+    desc: 'Phí lưu giữ vỏ container rỗng tại bãi đệm sau khi rút ruột chờ lệnh trả vỏ.',
+    category: 'GENERAL',
+    categoryLabel: 'Quản Lý & Tiện Ích Kho',
+    isPopularDefault: false,
+  },
+];
+
+// 4. Kho Ngoại Quan (Bonded Warehouse) - 5 mục
+export const BONDED_WAREHOUSE_SURCHARGES: SurchargeItemDef[] = [
+  {
+    id: 'sc-wh-bonded-ledger',
+    code: 'BONDED CUSTOMS LEDGER',
+    name: 'Phí mở sổ hải quan & báo cáo quyết toán kho ngoại quan (Bonded Ledger Fee)',
+    desc: 'Phí lập hồ sơ theo dõi hải quan, quản lý chứng từ XNK và báo cáo thanh khoản định kỳ theo quy định hải quan.',
+    category: 'POL',
+    categoryLabel: 'Thủ Tục Hải Quan Ngoại Quan',
+    isPopularDefault: true,
+  },
+  {
+    id: 'sc-wh-bonded-inbound',
+    code: 'BONDED INBOUND HANDLING',
+    name: 'Phí tiếp nhận & kiểm tra chì niêm phong hải quan (Bonded Inbound Handling)',
+    desc: 'Phí dỡ hàng nhập kho dưới sự giám sát niêm phong và đối chiếu số Seal hải quan.',
+    category: 'POL',
+    categoryLabel: 'Vận Hành Kho Ngoại Quan',
+    isPopularDefault: true,
+  },
+  {
+    id: 'sc-wh-bonded-outbound',
+    code: 'BONDED OUTBOUND HANDLING',
+    name: 'Phí bốc xếp xuất hàng theo tờ khai hải quan (Bonded Outbound Handling)',
+    desc: 'Phí hạ hàng và xuất kho theo đúng số tờ khai thông quan chuyển khẩu hoặc nhập nội địa.',
+    category: 'POL',
+    categoryLabel: 'Vận Hành Kho Ngoại Quan',
+    isPopularDefault: true,
+  },
+  {
+    id: 'sc-wh-devanning',
+    code: 'CONTAINER DEVANNING / VANNING',
+    name: 'Phí rút ruột / đóng ghép container hàng ngoại quan',
+    desc: 'Phí bốc dỡ, phân loại và đóng ghép hàng hóa giữa các container trung chuyển.',
+    category: 'POL',
+    categoryLabel: 'Vận Hành Kho Ngoại Quan',
+    isPopularDefault: false,
+  },
+  {
+    id: 'sc-wh-wms-mgmt',
+    code: 'WMS BONDED CUSTOMS API',
+    name: 'Phí phần mềm WMS kết nối dữ liệu hải quan kho ngoại quan',
+    desc: 'Hệ thống WMS quản lý xuất nhập tồn theo định dạng chuẩn của Tổng Cục Hải Quan.',
+    category: 'GENERAL',
+    categoryLabel: 'Quản Lý & Tiện Ích Kho',
+    isPopularDefault: true,
+  },
+];
+
+// 5. Kho TMĐT / Fulfillment (E-Commerce B2C) - 4 mục
+export const ECOMMERCE_WAREHOUSE_SURCHARGES: SurchargeItemDef[] = [
+  {
+    id: 'sc-wh-pick-pack',
+    code: 'PICK & PACK FULFILLMENT',
+    name: 'Phí chia chọn & đóng gói đơn hàng TMĐT (Pick & Pack Fee)',
+    desc: 'Phí nhặt hàng từng SKU theo đơn B2C, đóng gói hộp carton và dán phiếu gửi hàng đa sàn.',
+    category: 'POL',
+    categoryLabel: 'Xử Lý Đơn Hàng B2C',
+    isPopularDefault: true,
+  },
+  {
+    id: 'sc-wh-wms-ecom',
+    code: 'WMS & OMNICHANNEL OMS API',
+    name: 'Phí phần mềm WMS & API đồng bộ đa sàn (Shopee/TikTok/Lazada/Haravan)',
+    desc: 'Tự động kéo đơn hàng, đẩy mã vận đơn và đồng bộ tồn kho thời gian thực giữa các gian hàng.',
+    category: 'GENERAL',
+    categoryLabel: 'Hệ Thống Đa Sàn',
+    isPopularDefault: true,
+  },
+  {
+    id: 'sc-wh-cycle-count',
+    code: 'STOCK CYCLE COUNT',
+    name: 'Phí kiểm kê định kỳ & đối soát tồn kho từng SKU (Cycle Count Fee)',
+    desc: 'Kiểm kê định kỳ hàng tháng theo từng mã hàng SKU nhằm giảm thiểu tỷ lệ thất thoát.',
+    category: 'GENERAL',
+    categoryLabel: 'Quản Lý & Tiện Ích Kho',
+    isPopularDefault: false,
+  },
+  {
+    id: 'sc-wh-overtime-peak',
+    code: 'PEAK SEASON OVERTIME',
+    name: 'Phụ phí tăng ca xử lý đơn Mega Sale (11.11, 12.12, Giáp Tết)',
+    desc: 'Phụ phí bố trí nhân sự làm việc 24/7 để hoàn tất đơn hỏa tốc trong các ngày siêu sale lớn.',
+    category: 'GENERAL',
+    categoryLabel: 'Quản Lý & Tiện Ích Kho',
+    isPopularDefault: false,
+  },
+];
+
+// 6. Kho Tự Quản (Self-Storage) - 1 mục
+export const SELF_STORAGE_SURCHARGES: SurchargeItemDef[] = [
+  {
+    id: 'sc-wh-access-card',
+    code: '24/7 ACCESS KEY & CARD',
+    name: 'Phí cấp thẻ từ / Chìa khóa phụ truy cập khoang tự quản 24/7',
+    desc: 'Phí cấp mã định danh thẻ từ hoặc chìa khóa phụ cho nhân sự khách hàng ra vào khoang riêng.',
+    category: 'GENERAL',
+    categoryLabel: 'Tiện Ích Khoang Tự Quản',
+    isPopularDefault: false,
+  },
+];
+
+// Default list for fallback / generic reuse
+export const WAREHOUSING_SURCHARGES: SurchargeItemDef[] = DRY_WAREHOUSE_SURCHARGES;
 
 // Other Generic Logistics Surcharges LOV
 export const GENERAL_LOGISTICS_SURCHARGES: SurchargeItemDef[] = [
@@ -584,6 +748,7 @@ export const GENERAL_LOGISTICS_SURCHARGES: SurchargeItemDef[] = [
 interface SurchargesSectionProps {
   serviceType: ServiceType;
   warehouseType?: string;
+  cargoClassification?: string;
   quotationScope: QuotationScope;
   onChangeQuotationScope: (scope: QuotationScope) => void;
   selectedSurcharges: string[];
@@ -596,6 +761,7 @@ interface SurchargesSectionProps {
 export const SurchargesSection: React.FC<SurchargesSectionProps> = ({
   serviceType,
   warehouseType,
+  cargoClassification,
   quotationScope = 'ALL_IN',
   onChangeQuotationScope,
   selectedSurcharges = [],
@@ -617,24 +783,22 @@ export const SurchargesSection: React.FC<SurchargesSectionProps> = ({
       case 'Rail Freight':
         return RAIL_SURCHARGES;
       case 'Warehousing': {
-        // Kho Tự Quản: Khách tự quản lý -> Không có phí Handling bốc xếp
         if (warehouseType === 'Kho tự quản (Self-Storage)') {
-          return WAREHOUSING_SURCHARGES.filter(
-            (sc) =>
-              sc.id !== 'sc-wh-inbound-handling' &&
-              sc.id !== 'sc-wh-outbound-handling' &&
-              sc.id !== 'sc-wh-devanning' &&
-              sc.id !== 'sc-wh-pick-pack'
-          );
+          return SELF_STORAGE_SURCHARGES;
         }
-        // Kho TMĐT / Fulfillment: Sử dụng phí Pick & Pack thay cho nâng hạ
         if (warehouseType === 'Kho TMĐT / Fulfillment') {
-          return WAREHOUSING_SURCHARGES
-            .filter((sc) => sc.id !== 'sc-wh-inbound-handling' && sc.id !== 'sc-wh-outbound-handling' && sc.id !== 'sc-wh-devanning')
-            .map((sc) => (sc.id === 'sc-wh-pick-pack' ? { ...sc, isPopularDefault: true } : sc));
+          return ECOMMERCE_WAREHOUSE_SURCHARGES;
         }
-        // Các loại kho B2B tiêu chuẩn: Bốc xếp nâng hạ in/out là mặc định, ẩn pick & pack TMĐT
-        return WAREHOUSING_SURCHARGES.filter((sc) => sc.id !== 'sc-wh-pick-pack');
+        if (warehouseType === 'Kho lạnh / Kho mát (Cold Storage)' || cargoClassification === 'Reefer') {
+          return COLD_WAREHOUSE_SURCHARGES;
+        }
+        if (warehouseType === 'Kho hàng nguy hiểm (DG Warehouse)' || cargoClassification === 'Hazmat') {
+          return DG_WAREHOUSE_SURCHARGES;
+        }
+        if (warehouseType === 'Kho ngoại quan (Bonded)') {
+          return BONDED_WAREHOUSE_SURCHARGES;
+        }
+        return DRY_WAREHOUSE_SURCHARGES;
       }
       default:
         return [

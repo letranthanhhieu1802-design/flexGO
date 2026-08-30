@@ -74,7 +74,7 @@ import {
 import { OceanInquiryForm, OCEAN_VAS_ITEMS } from './inquiryForms/OceanInquiryForm';
 import { AirInquiryForm, AIR_VAS_ITEMS } from './inquiryForms/AirInquiryForm';
 import { ColdChainInquiryForm, COLD_CHAIN_VAS_ITEMS } from './inquiryForms/ColdChainInquiryForm';
-import { WarehousingInquiryForm, WAREHOUSING_VAS_ITEMS } from './inquiryForms/WarehousingInquiryForm';
+import { WarehousingInquiryForm, getWarehousingVASItems } from './inquiryForms/WarehousingInquiryForm';
 import { CustomsInquiryForm, CUSTOMS_VAS_ITEMS } from './inquiryForms/CustomsInquiryForm';
 import { CrossBorderInquiryForm, CROSS_BORDER_VAS_ITEMS } from './inquiryForms/CrossBorderInquiryForm';
 import { RailInquiryForm, RAIL_VAS_ITEMS } from './inquiryForms/RailInquiryForm';
@@ -753,7 +753,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
       case 'Cold Chain':
         return COLD_CHAIN_VAS_ITEMS;
       case 'Warehousing':
-        return WAREHOUSING_VAS_ITEMS;
+        return getWarehousingVASItems(warehousingSpecs.warehouseType, cargoClassification);
       case 'Customs Clearance':
         return CUSTOMS_VAS_ITEMS;
       case 'Cross-border':
@@ -1943,6 +1943,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
             <SurchargesSection
               serviceType={serviceType}
               warehouseType={serviceType === 'Warehousing' ? warehousingSpecs.warehouseType : undefined}
+              cargoClassification={cargoClassification}
               quotationScope={quotationScope}
               onChangeQuotationScope={setQuotationScope}
               selectedSurcharges={requestedSurcharges}

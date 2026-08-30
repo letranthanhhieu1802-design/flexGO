@@ -3,62 +3,212 @@ import { Building2, MapPin, Layers, Box, Cpu, FileText, CheckCircle2, ShieldChec
 import { WarehousingInquirySpecs } from '../../../types';
 import { VASItemDef } from './VASSection';
 
-export const WAREHOUSING_VAS_ITEMS: VASItemDef[] = [
+// 1. Kho Thường Grade A (5 mục)
+export const DRY_WH_VAS_ITEMS: VASItemDef[] = [
   {
-    id: 'w-vas-1',
-    name: 'Dán nhãn phụ tiếng Việt & In mã vạch Barcode/QR SKU (Sub-labeling)',
-    desc: 'Dán tem nhãn phụ hợp quy, nhãn cảnh báo và in dán tem Barcode kiểm soát vị trí.',
+    id: 'w-vas-dry-1',
+    name: 'Dán tem phụ tiếng Việt & In mã vạch Barcode/QR SKU (Sub-labeling)',
+    desc: 'Dán tem nhãn phụ hợp quy theo NĐ 43/2017/NĐ-CP, dán tem mã vạch định danh từng sản phẩm.',
     tag: 'Dán tem phụ',
     popular: true,
   },
   {
-    id: 'w-vas-2',
-    name: 'Đóng gói Kitting, chia chọn combo & Đóng màng co nhiệt (Kitting)',
-    desc: 'Tập hợp nhiều SKU thành bộ quà tặng, bọc màng co và dán băng keo thương hiệu.',
+    id: 'w-vas-dry-2',
+    name: 'Quấn màng co PE & Đai nẹp pallet xuất khẩu (Stretch Wrapping & Strapping)',
+    desc: 'Quấn màng PE nhiều lớp chống bụi ẩm, gia cố dây đai nẹp góc bảo vệ an toàn pallet.',
+    tag: 'Quấn màng PE',
+    popular: true,
+  },
+  {
+    id: 'w-vas-dry-3',
+    name: 'Đóng gói Kitting, chia chọn combo & Co màng nhiệt (Kitting & Bundling)',
+    desc: 'Gom nhiều mã SKU thành bộ quà tặng, bọc màng co nhiệt và dán băng keo thương hiệu.',
     tag: 'Đóng gói Kitting',
-    popular: true,
   },
   {
-    id: 'w-vas-3',
-    name: 'Hoàn tất đơn hàng TMĐT Pick & Pack đa sàn Shopee/Lazada/Tiktok',
-    desc: 'Xử lý đơn hàng B2C tự động, in phiếu giao hàng và bàn giao cho các đơn vị vận chuyển 3PL.',
-    tag: 'Pick & Pack TMĐT',
-    popular: true,
+    id: 'w-vas-dry-4',
+    name: 'Đóng kiện gỗ / Khung gỗ chịu lực cho máy móc (Wooden Crating)',
+    desc: 'Đóng khung gỗ chống va đập cho máy móc công nghiệp, thiết bị dễ vỡ và cấp chứng thư hun trùng.',
+    tag: 'Đóng kiện gỗ',
   },
   {
-    id: 'w-vas-4',
-    name: 'Tích hợp cổng API / EDI kết nối hệ thống WMS thời gian thực',
-    desc: 'Đồng bộ tự động dữ liệu tồn kho, trạng thái đơn hàng giữa phần mềm ERP/SAP của khách và WMS.',
-    tag: 'API WMS Real-time',
-    popular: true,
-  },
-  {
-    id: 'w-vas-5',
-    name: 'Kiểm đếm Barcode Serial & Quản lý hạn sử dụng FIFO/FEFO',
-    desc: 'Xuất hàng ưu tiên theo ngày hết hạn (FEFO) hoặc ngày nhập kho (FIFO) chống quá đát.',
-    tag: 'Quản lý FIFO/FEFO',
-    popular: true,
-  },
-  {
-    id: 'w-vas-6',
-    name: 'Đóng thùng Carton phân phối B2B và Pallet hóa quấn màng PE',
-    desc: 'Phân loại hàng hóa đóng thùng carton theo tiêu chuẩn chuỗi siêu thị/đại lý cấp 1.',
-    tag: 'Pallet hóa B2B',
-  },
-  {
-    id: 'w-vas-7',
-    name: 'Bảo hiểm cháy nổ & Rủi ro tài sản kho bãi toàn diện 100%',
-    desc: 'Bảo hiểm rủi ro tài sản hàng hóa lưu kho theo giá trị thực tế khai báo hàng tháng.',
+    id: 'w-vas-dry-5',
+    name: 'Bảo hiểm cháy nổ & Rủi ro tài sản hàng hóa kho bãi 100%',
+    desc: 'Bảo hiểm rủi ro tài sản hàng hóa lưu kho theo giá trị thực tế khai báo đối soát hàng tháng.',
     tag: 'Bảo hiểm kho 100%',
     popular: true,
   },
+];
+
+// 2. Kho Lạnh / Mát (4 mục)
+export const COLD_WH_VAS_ITEMS: VASItemDef[] = [
   {
-    id: 'w-vas-8',
-    name: 'Dịch vụ xử lý trả hàng hoàn (Reverse Logistics & Return Management)',
-    desc: 'Tiếp nhận hàng đổi trả, kiểm tra tình trạng phẩm cấp và nhập kho tái phân phối.',
-    tag: 'Xử lý hoàn hàng',
+    id: 'w-vas-cold-1',
+    name: 'Cấp đông nhanh & Hạ nhiệt tiền lưu kho (Pre-cooling / Blast Freezing)',
+    desc: 'Hạ nhiệt cấp tốc cho nông thủy sản tươi sống trước khi đưa vào phòng đông sâu -20°C.',
+    tag: 'Cấp đông lạnh',
+    popular: true,
+  },
+  {
+    id: 'w-vas-cold-2',
+    name: 'Quấn màng PE cách nhiệt & Đai nẹp pallet lạnh xuất khẩu',
+    desc: 'Bọc màng PE chuyên dụng chịu âm độ và gia cố đai nẹp chống xô lệch hàng đông lạnh.',
+    tag: 'Pallet kho lạnh',
+    popular: true,
+  },
+  {
+    id: 'w-vas-cold-3',
+    name: 'Kiểm tra chất lượng (KCS) & Phân loại phẩm cấp nông thủy sản',
+    desc: 'Kiểm tra độ tươi, màu sắc, phân size và loại bỏ sản phẩm dập nát trước khi cấp đông.',
+    tag: 'Kiểm định KCS',
+  },
+  {
+    id: 'w-vas-cold-4',
+    name: 'Bảo hiểm rủi ro mất nhiệt & Cháy nổ kho lạnh toàn diện 100%',
+    desc: 'Bảo hiểm bồi thường rủi ro sự cố gián đoạn nhiệt độ lạnh làm hư hỏng hàng hóa.',
+    tag: 'Bảo hiểm kho lạnh',
+    popular: true,
   },
 ];
+
+// 3. Kho Hàng Nguy Hiểm DG (4 mục)
+export const DG_WH_VAS_ITEMS: VASItemDef[] = [
+  {
+    id: 'w-vas-dg-1',
+    name: 'Đóng gói bao bì thứ cấp chống tràn & Khay hứng tràn (DG Overpack)',
+    desc: 'Đóng thùng overpack tiêu chuẩn UN, đệm vật liệu hấp thụ chống rò rỉ hóa chất ra môi trường.',
+    tag: 'Bao bì DG Overpack',
+    popular: true,
+  },
+  {
+    id: 'w-vas-dg-2',
+    name: 'Dán nhãn cảnh báo nguy hiểm GHS / IMO 9 nhóm tiêu chuẩn quốc tế',
+    desc: 'In và dán nhãn kim cương cảnh báo nguy hiểm độc hại, ăn mòn, dễ cháy theo chuẩn IMO.',
+    tag: 'Nhãn cảnh báo GHS',
+    popular: true,
+  },
+  {
+    id: 'w-vas-dg-3',
+    name: 'Đóng kiện gỗ đặc chủng chống tĩnh điện & Chống tia lửa',
+    desc: 'Đóng pallet/thùng gỗ phủ lớp chống tĩnh điện cho pin Lithium và hóa chất dễ bắt lửa.',
+    tag: 'Kiện gỗ an toàn',
+  },
+  {
+    id: 'w-vas-dg-4',
+    name: 'Bảo hiểm rủi ro sự cố hóa chất, cháy nổ & Môi trường kho 100%',
+    desc: 'Gói bảo hiểm trách nhiệm pháp lý môi trường và bồi thường tài sản hóa chất đặc thù.',
+    tag: 'Bảo hiểm DG 100%',
+    popular: true,
+  },
+];
+
+// 4. Kho Ngoại Quan Bonded (4 mục)
+export const BONDED_WH_VAS_ITEMS: VASItemDef[] = [
+  {
+    id: 'w-vas-bon-1',
+    name: 'Dán tem nhãn phụ hàng hóa nhập khẩu theo NĐ 43/2017/NĐ-CP',
+    desc: 'In dán tem phụ tiếng Việt đầy đủ thông tin xuất xứ, thành phần, đơn vị nhập khẩu.',
+    tag: 'Tem phụ XNK',
+    popular: true,
+  },
+  {
+    id: 'w-vas-bon-2',
+    name: 'Phân loại, chia lô, dán nhãn mã hàng & Đóng gói lại bao bì xuất khẩu',
+    desc: 'Chia nhỏ kiện hàng, thay bao bì thương hiệu hoặc ghép lô hàng chuyển khẩu quốc tế.',
+    tag: 'Đóng gói XNK',
+    popular: true,
+  },
+  {
+    id: 'w-vas-bon-3',
+    name: 'Hun trùng kiểm dịch thực vật & Cấp chứng thư ISPM 15',
+    desc: 'Xử lý hun trùng pallet gỗ xuất khẩu theo tiêu chuẩn kiểm dịch thực vật quốc tế.',
+    tag: 'Hun trùng ISPM 15',
+  },
+  {
+    id: 'w-vas-bon-4',
+    name: 'Bảo hiểm tài sản hàng hóa kho ngoại quan toàn diện 100%',
+    desc: 'Bảo hiểm rủi ro mất mát, hư hỏng hàng hóa trong suốt thời gian lưu giữ ngoại quan.',
+    tag: 'Bảo hiểm ngoại quan',
+    popular: true,
+  },
+];
+
+// 5. Kho TMĐT / Fulfillment (4 mục)
+export const ECOMMERCE_WH_VAS_ITEMS: VASItemDef[] = [
+  {
+    id: 'w-vas-ecom-1',
+    name: 'Xử lý hàng đổi trả & Quản lý hàng hoàn TMĐT (Reverse Logistics)',
+    desc: 'Tiếp nhận hàng hoàn từ đơn vị vận chuyển, kiểm tra tình trạng, tân trang đóng gói lại để tái nhập kho.',
+    tag: 'Xử lý hàng hoàn',
+    popular: true,
+  },
+  {
+    id: 'w-vas-ecom-2',
+    name: 'Chèn thiệp cảm ơn, Voucher khuyến mãi & Quà tặng kèm đơn hàng (Inserts)',
+    desc: 'Chèn thiệp cảm ơn, thẻ bảo hành, voucher giảm giá hoặc quà tặng mẫu thử theo chiến dịch bán lẻ.',
+    tag: 'Thiệp & Quà tặng',
+    popular: true,
+  },
+  {
+    id: 'w-vas-ecom-3',
+    name: 'Đóng gói Kitting combo quà tặng / Co màng lốc sản phẩm',
+    desc: 'Ghép nối nhiều SKU thành combo ưu đãi cho các chiến dịch Mega Sale trên sàn TMĐT.',
+    tag: 'Combo Kitting',
+  },
+  {
+    id: 'w-vas-ecom-4',
+    name: 'Dán tem Barcode mã vạch từng sản phẩm lẻ (Item-level Tagging)',
+    desc: 'In dán mã vạch định danh từng sản phẩm giúp nhặt hàng không bị sai sót mã hàng.',
+    tag: 'Dán tem SKU lẻ',
+    popular: true,
+  },
+];
+
+// 6. Kho Tự Quản Self-Storage (3 mục)
+export const SELF_STORAGE_WH_VAS_ITEMS: VASItemDef[] = [
+  {
+    id: 'w-vas-self-1',
+    name: 'Bảo hiểm cháy nổ tài sản khoang tự quản toàn diện 100%',
+    desc: 'Bảo hiểm rủi ro tài sản hàng hóa được lưu giữ trong khoang cá nhân tự quản.',
+    tag: 'Bảo hiểm khoang 100%',
+    popular: true,
+  },
+  {
+    id: 'w-vas-self-2',
+    name: 'Cung cấp vật tư đóng gói tại chỗ (Thùng carton, màng PE, băng keo)',
+    desc: 'Cung cấp bộ kit vật tư đóng gói tiện lợi ngay tại quầy lễ tân nhà kho.',
+    tag: 'Vật tư đóng gói',
+    popular: true,
+  },
+  {
+    id: 'w-vas-self-3',
+    name: 'Cho thuê xe nâng tay & Xe đẩy hàng nội bộ tại khoang',
+    desc: 'Hỗ trợ xe đẩy hàng 4 bánh và xe nâng tay cơ khí di chuyển hàng hóa thuận tiện.',
+    tag: 'Xe đẩy nội bộ',
+  },
+];
+
+export const getWarehousingVASItems = (warehouseType?: string, cargoClassification?: string): VASItemDef[] => {
+  if (warehouseType === 'Kho tự quản (Self-Storage)') {
+    return SELF_STORAGE_WH_VAS_ITEMS;
+  }
+  if (warehouseType === 'Kho TMĐT / Fulfillment') {
+    return ECOMMERCE_WH_VAS_ITEMS;
+  }
+  if (warehouseType === 'Kho lạnh / Kho mát (Cold Storage)' || cargoClassification === 'Reefer') {
+    return COLD_WH_VAS_ITEMS;
+  }
+  if (warehouseType === 'Kho hàng nguy hiểm (DG Warehouse)' || cargoClassification === 'Hazmat') {
+    return DG_WH_VAS_ITEMS;
+  }
+  if (warehouseType === 'Kho ngoại quan (Bonded)') {
+    return BONDED_WH_VAS_ITEMS;
+  }
+  return DRY_WH_VAS_ITEMS;
+};
+
+// Default fallback list
+export const WAREHOUSING_VAS_ITEMS: VASItemDef[] = DRY_WH_VAS_ITEMS;
 
 interface WarehousingInquiryFormProps {
   specs: WarehousingInquirySpecs;
