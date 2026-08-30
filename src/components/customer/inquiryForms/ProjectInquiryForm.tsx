@@ -85,9 +85,11 @@ const REEFER_FLEET_ITEMS = [
 ];
 
 const HAZMAT_FLEET_ITEMS = [
-  { id: 'fleet-hazmat-truck', label: '⚠️ Xe tải chuyên dụng chở hóa chất DG (Có giấy phép PCCC & phù hiệu DG)' },
-  { id: 'fleet-hazmat-heavy', label: '⚠️ Xe tải nặng / Đầu kéo cont chở hóa chất (Kèm xích tiếp địa chống tĩnh điện)' },
-  { id: 'fleet-hazmat-tanker', label: '⚠️ Xe bồn xitéc chuyên dụng chở hóa chất lỏng (Chemical Tanker)' },
+  { id: 'fleet-hazmat-light', label: '⚠️ Xe tải nhẹ DG 1.0T – 2.5T (Giao xưởng nội đô / Có giấy phép DG & PCCC)' },
+  { id: 'fleet-hazmat-medium', label: '⚠️ Xe tải trung DG 3.5T – 8.0T (Tuyến vệ tinh liên tỉnh / KCN)' },
+  { id: 'fleet-hazmat-heavy', label: '⚠️ Xe tải nặng DG 15.0T (3 chân) (Vận chuyển số lượng lớn giữa các tổng kho)' },
+  { id: 'fleet-hazmat-cont', label: '⚠️ Đầu kéo Cont DG 20ft/40ft & Vận chuyển ISO Tank (Tiếp địa chống tĩnh điện)' },
+  { id: 'fleet-hazmat-tanker', label: '⚠️ Xe bồn Xitéc chuyên dụng chở hóa chất lỏng (Chemical Tanker)' },
 ];
 
 export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
