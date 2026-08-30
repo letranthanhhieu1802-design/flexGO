@@ -365,8 +365,8 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
   });
 
   const [warehousingSpecs, setWarehousingSpecs] = useState<WarehousingInquirySpecs>({
-    pricingType: 'CONTRACT',
-    warehousingLeaseModel: 'LONG_TERM',
+    pricingType: 'SPOT',
+    warehousingLeaseModel: 'OVERFLOW',
     warehouseType: 'Kho thường (Grade A Dry)',
     billingUnitPreference: 'm² (Diện tích sàn)',
     storageAreaSqm: 500,
@@ -1237,7 +1237,14 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
 
             <PricingTypeSection
               pricingType={pricingType}
-              onChangePricingType={setPricingType}
+              onChangePricingType={(newType) => {
+                setPricingType(newType);
+                setWarehousingSpecs((prev) => ({
+                  ...prev,
+                  pricingType: newType,
+                  warehousingLeaseModel: newType === 'CONTRACT' ? 'LONG_TERM' : 'OVERFLOW',
+                }));
+              }}
               contractTerm={contractTerm}
               onChangeContractTerm={setContractTerm}
               committedFrequency={committedFrequency}
@@ -2071,6 +2078,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                 destination={destination}
                 setDestination={setDestination}
                 cargoClassification={cargoClassification}
+                pricingType={pricingType}
               />
             )}
 

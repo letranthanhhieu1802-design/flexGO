@@ -218,6 +218,7 @@ interface WarehousingInquiryFormProps {
   destination: string;
   setDestination: (val: string) => void;
   cargoClassification?: 'General' | 'Reefer' | 'Hazmat';
+  pricingType?: 'SPOT' | 'CONTRACT';
 }
 
 export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
@@ -228,12 +229,17 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
   destination,
   setDestination,
   cargoClassification = 'General',
+  pricingType = 'SPOT',
 }) => {
+  // Chỉ coi là thuê dài hạn khi pricingType là CONTRACT VÀ mô hình là LONG_TERM
+  const effectivePricingType = pricingType || specs.pricingType || 'SPOT';
+  const isContractLease = effectivePricingType === 'CONTRACT' && specs.warehousingLeaseModel !== 'OVERFLOW';
+
   // Logic kiểm tra loại hình kho có bị vô hiệu hóa tương ứng với phân nhóm hàng hóa không
   const isTypeDisabled = (type: string): boolean => {
-    // Ràng buộc 1: Kho ngoại quan không áp dụng thuê dài hạn (Dedicated Hub / CONTRACT)
+    // Ràng buộc 1: Kho ngoại quan chỉ bị khóa khi khách hàng chọn Hợp đồng dài hạn (CONTRACT / Dedicated Hub)
     if (type === 'Kho ngoại quan (Bonded)' || type === 'Kho ngoại quan (Bonded Warehouse)') {
-      if (specs.pricingType === 'CONTRACT' || specs.warehousingLeaseModel === 'LONG_TERM') {
+      if (isContractLease) {
         return true;
       }
     }
@@ -252,7 +258,7 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
 
   const getDisabledReason = (type: string): string => {
     if (type === 'Kho ngoại quan (Bonded)' || type === 'Kho ngoại quan (Bonded Warehouse)') {
-      if (specs.pricingType === 'CONTRACT' || specs.warehousingLeaseModel === 'LONG_TERM') {
+      if (isContractLease) {
         return '🚫 Kho ngoại quan chỉ áp dụng thuê theo lô/mùa vụ (SPOT, tối đa 12 tháng)';
       }
     }
@@ -272,7 +278,7 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
   // Tự động chuyển đổi fallback khi user đổi nhóm hàng hóa ở Mục 3 hoặc đổi loại hình kho
   React.useEffect(() => {
     // 0. Fallback nếu đang là Kho Ngoại Quan nhưng hình thức báo giá là CONTRACT / Dài Hạn
-    if ((specs.pricingType === 'CONTRACT' || specs.warehousingLeaseModel === 'LONG_TERM') && (specs.warehouseType === 'Kho ngoại quan (Bonded)' || specs.warehouseType === 'Kho ngoại quan (Bonded Warehouse)')) {
+    if (isContractLease && (specs.warehouseType === 'Kho ngoại quan (Bonded)' || specs.warehouseType === 'Kho ngoại quan (Bonded Warehouse)')) {
       onChange({
         ...specs,
         warehouseType: 'Kho thường (Grade A Dry)',
