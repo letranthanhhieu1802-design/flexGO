@@ -1138,17 +1138,29 @@ export const InquiryDetailWorkspace: React.FC<InquiryDetailWorkspaceProps> = ({
 
                       {inquiry.serviceSpecs.project.projectCategory === 'CROSS_DOCK' && (
                         <>
+                          <div className="col-span-2">
+                            <span className="text-slate-400 block font-semibold">Phạm vi luân chuyển</span>
+                            <span className="font-bold text-purple-950">{inquiry.serviceSpecs.project.xDockScope || 'Nội Vùng (Intra-region)'}</span>
+                          </div>
                           <div>
-                            <span className="text-slate-400 block font-semibold">Trạm trung chuyển</span>
+                            <span className="text-slate-400 block font-semibold">Trạm gom nguồn (Origin Hub)</span>
                             <span className="font-bold text-slate-800">{inquiry.serviceSpecs.project.xDockHubLocation || inquiry.origin}</span>
                           </div>
+                          {inquiry.serviceSpecs.project.xDockDestinationHub && (
+                            <div>
+                              <span className="text-slate-400 block font-semibold">Trạm phân phối đích</span>
+                              <span className="font-bold text-purple-900">{inquiry.serviceSpecs.project.xDockDestinationHub}</span>
+                            </div>
+                          )}
                           <div>
                             <span className="text-slate-400 block font-semibold">Nhiệt độ sàn</span>
                             <span className="font-bold text-purple-900">{inquiry.serviceSpecs.project.xDockTemperature || 'Thường'}</span>
                           </div>
                           <div>
-                            <span className="text-slate-400 block font-semibold">Inbound hàng ngày</span>
-                            <span className="font-bold text-slate-800">{inquiry.serviceSpecs.project.inboundDailyVolume || '5 - 10 cont/ngày'}</span>
+                            <span className="text-slate-400 block font-semibold">Sản lượng Inbound</span>
+                            <span className="font-bold text-slate-800">
+                              {inquiry.serviceSpecs.project.xDockInboundVolume || inquiry.serviceSpecs.project.inboundDailyVolume || '5.000'} ({inquiry.serviceSpecs.project.xDockPricingMetric || 'VND/kg'}) - {inquiry.serviceSpecs.project.xDockInboundFrequencyUnit || 'Hàng ngày'}
+                            </span>
                           </div>
                         </>
                       )}
@@ -1194,14 +1206,16 @@ export const InquiryDetailWorkspace: React.FC<InquiryDetailWorkspaceProps> = ({
                       </div>
                     )}
 
-                    {inquiry.serviceSpecs.project.originWarehouses && inquiry.serviceSpecs.project.originWarehouses.length > 1 && (
-                      <div className="p-2.5 bg-white/90 rounded-lg border border-indigo-200/80 text-xs">
-                        <span className="text-indigo-800 font-bold block">Danh sách kho tổng xuất hàng:</span>
-                        <ul className="text-slate-800 list-disc list-inside mt-0.5 space-y-0.5 font-medium">
-                          {inquiry.serviceSpecs.project.originWarehouses.map((w, i) => (
-                            <li key={i}>{w}</li>
+                    {inquiry.serviceSpecs.project.targetRetailChains && inquiry.serviceSpecs.project.targetRetailChains.length > 0 && (
+                      <div className="p-2.5 bg-purple-50/70 rounded-lg border border-purple-200/80 text-xs">
+                        <span className="text-purple-900 font-bold block">Chuỗi Siêu Thị / Kênh Giao Hàng Outbound ({inquiry.serviceSpecs.project.targetRetailChains.length} Kênh):</span>
+                        <div className="flex flex-wrap gap-1.5 mt-1">
+                          {inquiry.serviceSpecs.project.targetRetailChains.map((c, i) => (
+                            <span key={i} className="px-2 py-0.5 text-[10px] font-bold bg-white text-purple-900 rounded border border-purple-200 shadow-2xs">
+                              {c}
+                            </span>
                           ))}
-                        </ul>
+                        </div>
                       </div>
                     )}
                   </div>

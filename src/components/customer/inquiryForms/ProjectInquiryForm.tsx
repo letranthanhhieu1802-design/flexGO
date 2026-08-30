@@ -159,7 +159,7 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
   };
 
   // Helper toggle for array fields
-  const toggleArrayItem = (field: 'fleetRequirements' | 'keyKPIRequirements' | 'inboundVehicleTypes' | 'sortingRequirements', item: string) => {
+  const toggleArrayItem = (field: 'fleetRequirements' | 'keyKPIRequirements' | 'inboundVehicleTypes' | 'sortingRequirements' | 'targetRetailChains', item: string) => {
     const list = (specs[field] as string[]) || [];
     const exists = list.includes(item);
     const updated = exists ? list.filter((i) => i !== item) : [...list, item];
@@ -446,24 +446,70 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
       )}
 
       {/* ========================================================================= */}
-      {/* 2B. SPECIFIC SECTION: CROSS-DOCKING (X-DOCK) PROJECT */}
+      {/* 2B. SPECIFIC SECTION: CROSS-DOCKING (X-DOCK) & RETAIL LCL CONSOLIDATION */}
       {/* ========================================================================= */}
       {projectCategory === 'CROSS_DOCK' && (
         <div className="space-y-3.5 p-4 bg-purple-50/40 border border-purple-100 rounded-2xl animate-in fade-in duration-150">
           <div className="flex items-center justify-between border-b border-purple-100 pb-2">
             <span className="text-xs font-extrabold text-purple-950 uppercase tracking-wider flex items-center gap-1.5">
               <Split className="w-4 h-4 text-purple-600" />
-              <span>Thông Số Trạm Cross-Docking (Zero-Storage Specs)</span>
+              <span>Giải Pháp Cross-Docking & Gom Hàng Lẻ Giao Siêu Thị (LCL Retail Cross-Dock)</span>
             </span>
-            <span className="text-[10px] text-slate-500 font-bold bg-white px-2 py-0.5 rounded border border-purple-200">
-              Cross-Dock Operations
+            <span className="text-[10px] text-purple-700 font-bold bg-white px-2 py-0.5 rounded border border-purple-200 shadow-2xs">
+              ⚡ Zero-Storage Model
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {/* 1. Cross-Dock Scope (Nội Vùng vs Liên Vùng Tuyến Trục) */}
+          <div>
+            <label className="block text-xs font-bold text-slate-800 mb-1.5 flex items-center gap-1">
+              <span>Phạm Vi Luân Chuyển Mạng Lưới X-Dock (Cross-Dock Scope) *</span>
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {[
+                {
+                  value: 'Nội Vùng (Intra-region X-Dock)',
+                  label: '🚚 X-Dock Nội Vùng (Intra-Region)',
+                  desc: 'Gom hàng lẻ & giao ngay các chuỗi siêu thị/điểm bán trong cùng 1 miền/khu vực đô thị.',
+                },
+                {
+                  value: 'Liên Vùng Tuyến Trục (Inter-region Linehaul)',
+                  label: '🚢 X-Dock Liên Vùng (Hub-to-Hub Linehaul)',
+                  desc: 'Gom tại Hub nguồn (Bình Dương/Hà Nội) ➔ Linehaul Biển/Bộ ➔ Chia chọn & Giao tại Hub đích (Đà Nẵng/Hải Phòng).',
+                },
+              ].map((scope) => {
+                const isSelected = (specs.xDockScope || 'Nội Vùng (Intra-region X-Dock)') === scope.value;
+                return (
+                  <div
+                    key={scope.value}
+                    onClick={() => updateSpec('xDockScope', scope.value as any)}
+                    className={`p-3 rounded-xl border text-xs cursor-pointer transition-all ${
+                      isSelected
+                        ? 'border-purple-600 bg-purple-50/80 ring-1 ring-purple-600/30 text-purple-950 font-medium shadow-2xs'
+                        : 'border-slate-200 bg-white hover:border-slate-300 text-slate-700'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <input
+                        type="radio"
+                        checked={isSelected}
+                        readOnly
+                        className="text-purple-600 focus:ring-0 cursor-pointer"
+                      />
+                      <span className="font-extrabold text-xs">{scope.label}</span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 pl-5 leading-relaxed">{scope.desc}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 2. Hub Location(s) & Temperature */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1 border-t border-purple-100/60">
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">
-                Khu Vực Đặt Trạm Trung Chuyển (X-Dock Hub Location) *
+                Trạm Gom Hàng Nguồn (Inbound Consolidation Hub) *
               </label>
               <input
                 type="text"
@@ -473,76 +519,161 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
                   updateSpec('xDockHubLocation', e.target.value);
                   setOrigin(e.target.value);
                 }}
-                placeholder="VD: Khu vực TP.HCM / Bình Dương (hoặc Hà Nội / Bắc Ninh)"
-                className="w-full px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-bold text-slate-900 shadow-2xs"
+                placeholder="VD: Điểm gom Bình Dương / TP.HCM / Bắc Ninh..."
+                className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-bold text-slate-900 shadow-2xs"
               />
             </div>
 
-            <div>
+            {specs.xDockScope === 'Liên Vùng Tuyến Trục (Inter-region Linehaul)' && (
+              <div className="animate-in fade-in duration-150">
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Trạm Phân Phối Đích (Destination X-Dock Hub) *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={specs.xDockDestinationHub || destination || ''}
+                  onChange={(e) => {
+                    updateSpec('xDockDestinationHub', e.target.value);
+                    setDestination(e.target.value);
+                  }}
+                  placeholder="VD: Hub Đà Nẵng / Hub Hà Nội / Hải Phòng..."
+                  className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-bold text-slate-900 shadow-2xs"
+                />
+              </div>
+            )}
+
+            <div className={specs.xDockScope === 'Liên Vùng Tuyến Trục (Inter-region Linehaul)' ? '' : 'md:col-span-2'}>
               <label className="block text-xs font-bold text-slate-700 mb-1">
                 Nhiệt Độ Sàn Xử Lý Tại Trạm Cross-Dock *
               </label>
               <select
                 value={specs.xDockTemperature || 'Nhiệt độ thường (Ambient)'}
                 onChange={(e) => updateSpec('xDockTemperature', e.target.value as any)}
-                className="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-bold text-slate-900 cursor-pointer shadow-2xs"
+                className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-bold text-slate-900 cursor-pointer shadow-2xs"
               >
-                <option value="Nhiệt độ thường (Ambient)">📦 Nhiệt độ thường (Ambient - Hàng khô tiêu dùng / Gia dụng)</option>
-                <option value="Kiểm soát mát (Chilled 15°C - 25°C)">❄️ Kiểm soát mát (Chilled 15°C - 25°C - Bánh kẹo, Mỹ phẩm, Thuốc)</option>
-                <option value="Lạnh sâu (Cold 2°C - 8°C)">🧊 Sàn lạnh chuyên dụng (Cold 2°C - 8°C - Thực phẩm tươi sống / Sữa)</option>
+                <option value="Nhiệt độ thường (Ambient)">📦 Nhiệt độ thường (Ambient - Hàng tiêu dùng FMCG / Đồ gia dụng)</option>
+                <option value="Kiểm soát mát (Chilled 15°C - 25°C)">❄️ Kiểm soát mát (Chilled 15°C - 25°C - Bánh kẹo, Socola, Mỹ phẩm, Dược phẩm)</option>
+                <option value="Lạnh sâu (Cold 2°C - 8°C)">🧊 Sàn lạnh chuyên dụng (Cold 2°C - 8°C - Thực phẩm tươi sống, Sữa chua, Trái cây)</option>
               </select>
             </div>
           </div>
 
-          {/* Inbound & Outbound Specs */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1 border-t border-purple-100/60">
+          {/* 3. Inbound Volume & Pricing Metric Unit */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1 border-t border-purple-100/60">
             <div>
               <label className="block text-xs font-bold text-slate-800 mb-1">
-                Sản Lượng Inbound Tập Kết Về X-Dock Hàng Ngày *
+                1. Sản Lượng Gom Inbound Dự Kiến *
               </label>
               <input
                 type="text"
-                value={specs.inboundDailyVolume || ''}
-                onChange={(e) => updateSpec('inboundDailyVolume', e.target.value)}
-                placeholder="VD: 5 - 10 xe tải 15T / Container 40ft mỗi ngày"
-                className="w-full px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-medium text-slate-900 shadow-2xs"
+                value={specs.xDockInboundVolume || specs.inboundDailyVolume || ''}
+                onChange={(e) => {
+                  updateSpec('xDockInboundVolume', e.target.value);
+                  updateSpec('inboundDailyVolume', e.target.value);
+                }}
+                placeholder="VD: 5.000, 120, 80..."
+                className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-bold text-slate-900 shadow-2xs"
               />
             </div>
 
             <div>
               <label className="block text-xs font-bold text-slate-800 mb-1">
-                Khung Giờ Xe Inbound Cập Sàn X-Dock
+                2. Đơn Vị Tính Cước Kỳ Vọng (Pricing Metric) *
               </label>
-              <input
-                type="text"
-                value={specs.inboundOperatingHours || ''}
-                onChange={(e) => updateSpec('inboundOperatingHours', e.target.value)}
-                placeholder="VD: 04:00 - 08:00 Sáng hoặc 19:00 - 23:00 Tối"
-                className="w-full px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-medium text-slate-900 shadow-2xs"
-              />
+              <select
+                value={specs.xDockPricingMetric || 'VND / kg'}
+                onChange={(e) => updateSpec('xDockPricingMetric', e.target.value as any)}
+                className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-bold text-slate-900 cursor-pointer shadow-2xs"
+              >
+                <option value="VND / kg">⚖️ VND / kg (Theo khối lượng hàng nặng)</option>
+                <option value="VND / CBM (m³)">📦 VND / CBM m³ (Theo thể tích cồng kềnh)</option>
+                <option value="VND / Pallet">🪵 VND / Pallet (Theo vị trí Pallet chuẩn)</option>
+                <option value="VND / Kiện (Carton)">🛍️ VND / Kiện (Carton - Thùng chia lẻ)</option>
+                <option value="VND / Chuyến xe Inbound">🚚 VND / Chuyến xe Inbound (Nguyên xe gom)</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-800 mb-1">
+                3. Tần Suất Gom Hàng Inbound *
+              </label>
+              <select
+                value={specs.xDockInboundFrequencyUnit || 'Ngày (Hàng ngày)'}
+                onChange={(e) => updateSpec('xDockInboundFrequencyUnit', e.target.value)}
+                className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-bold text-slate-900 cursor-pointer shadow-2xs"
+              >
+                <option value="Ngày (Hàng ngày)">📅 Hàng ngày (Daily Inbound)</option>
+                <option value="Tuần (Hàng tuần)">📅 Hàng tuần (Weekly Inbound)</option>
+                <option value="Tháng (Hàng tháng)">📅 Hàng tháng (Monthly Inbound)</option>
+              </select>
             </div>
           </div>
 
-          {/* Sorting & Outbound Delivery Flow */}
+          {/* 4. Target Retail Chains / Outbound Scope */}
+          <div className="space-y-2 pt-1 border-t border-purple-100/60">
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-bold text-slate-800">
+                Chuỗi Siêu Thị / Tổng Kho DC Đích Phân Phối Outbound *
+              </label>
+              <span className="text-[11px] text-purple-700 font-semibold">Chọn các kênh phân phối của bạn</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              {[
+                { id: 'chain-go', label: '🔴 GO! / Big C (Central Retail)' },
+                { id: 'chain-winmart', label: '🔴 WinMart / WinMart+ (Masan Group)' },
+                { id: 'chain-aeon', label: '🟣 AEON Mall / AEON Citimart' },
+                { id: 'chain-coop', label: '🔴 Saigon Co.op (Co.opmart / Co.op Food)' },
+                { id: 'chain-bhx', label: '🟢 Bách Hóa Xanh (MWG)' },
+                { id: 'chain-lotte-mm', label: '🔵 Lotte Mart / MM Mega Market' },
+                { id: 'chain-custom', label: '🏪 Danh Sách Cửa Hàng / Đại Lý Riêng Của Nhãn Hàng' },
+              ].map((chain) => {
+                const isChecked = ((specs.targetRetailChains || []) as string[]).includes(chain.label);
+                return (
+                  <div
+                    key={chain.id}
+                    onClick={() => toggleArrayItem('targetRetailChains', chain.label)}
+                    className={`p-2.5 rounded-xl border text-xs cursor-pointer flex items-center gap-2 transition-all ${
+                      isChecked
+                        ? 'border-purple-600 bg-white ring-1 ring-purple-500/30 font-bold text-purple-950 shadow-2xs'
+                        : 'border-slate-200 bg-white/70 text-slate-600 hover:border-slate-300'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      readOnly
+                      className="rounded border-slate-300 text-purple-600 focus:ring-0 cursor-pointer"
+                    />
+                    <span className="truncate">{chain.label}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 5. Sorting & Value-Added Services at X-Dock */}
           <div className="space-y-2 pt-1 border-t border-purple-100/60">
             <label className="block text-xs font-bold text-slate-800">
-              Yêu Cầu Thao Tác Chia Chọn Tại Sàn X-Dock (Chọn các khâu xử lý) *
+              Yêu Cầu Thao Tác Chia Chọn & Nghiệp Vụ Siêu Thị Tại Sàn X-Dock (Chọn các khâu) *
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {[
-                { id: 'sort-store', label: '🏷️ Phân loại chi tiết theo Mã Cửa Hàng / Mã Siêu Thị (Store Code)' },
+                { id: 'sort-store', label: '🏷️ Phân loại chi tiết theo Mã Siêu Thị / Mã Cửa Hàng (Store Code)' },
                 { id: 'sort-barcode', label: '📲 Quét mã vạch Barcode / QR Code từng kiện hàng' },
                 { id: 'sort-label', label: '📝 Dán nhãn phụ / In tem phân tuyến vận chuyển' },
-                { id: 'sort-pallet', label: '🪵 Đóng gộp Pallet / Thùng theo từng đơn hàng Outbound' },
+                { id: 'sort-pallet', label: '🪵 Đóng gộp Pallet & Quấn màng PE theo từng đơn hàng Outbound' },
+                { id: 'sort-slot', label: '⏱️ Đặt lịch hẹn giao Booking Slot theo quy chuẩn từng siêu thị' },
+                { id: 'sort-pod', label: '📑 Thu hồi biên bản giao nhận POD gốc & Hóa đơn GTGT có mộc siêu thị' },
               ].map((sort) => {
                 const isChecked = ((specs.sortingRequirements || []) as string[]).includes(sort.label);
                 return (
                   <div
                     key={sort.id}
                     onClick={() => toggleArrayItem('sortingRequirements', sort.label)}
-                    className={`p-2 rounded-xl border text-xs cursor-pointer flex items-center gap-2 transition-all ${
+                    className={`p-2.5 rounded-xl border text-xs cursor-pointer flex items-center gap-2 transition-all ${
                       isChecked
-                        ? 'border-purple-500 bg-white ring-1 ring-purple-500/30 font-bold text-purple-950 shadow-2xs'
+                        ? 'border-purple-600 bg-white ring-1 ring-purple-500/30 font-bold text-purple-950 shadow-2xs'
                         : 'border-slate-200 bg-white/70 text-slate-600 hover:border-slate-300'
                     }`}
                   >
@@ -559,21 +690,8 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
             </div>
           </div>
 
+          {/* 6. Turnaround Time & Operating Hours */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 border-t border-purple-100/60">
-            <div>
-              <label className="block text-xs font-bold text-slate-800 mb-1">
-                Số Lượng Điểm Giao Hàng Outbound Từ X-Dock *
-              </label>
-              <input
-                type="number"
-                min={1}
-                value={specs.outboundStoreCount ?? ''}
-                onChange={(e) => updateSpec('outboundStoreCount', e.target.value ? parseInt(e.target.value, 10) : undefined)}
-                placeholder="VD: 50, 100, 200 điểm..."
-                className="w-full px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-bold text-slate-900 shadow-2xs"
-              />
-            </div>
-
             <div>
               <label className="block text-xs font-bold text-slate-800 mb-1">
                 Thời Gian Giải Tỏa Khỏi Sàn (Max Turnaround Time) *
@@ -587,6 +705,19 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
                 <option value="Trong vòng 4 - 8 Giờ">⏱️ Trong vòng 4 - 8 Giờ (Tiêu chuẩn ca làm việc)</option>
                 <option value="Trong ngày (Same-day Delivery)">🚚 Trong ngày (Same-day Delivery - Giao trước 17:00)</option>
               </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-800 mb-1">
+                Khung Giờ Xe Inbound Cập Sàn X-Dock
+              </label>
+              <input
+                type="text"
+                value={specs.inboundOperatingHours || ''}
+                onChange={(e) => updateSpec('inboundOperatingHours', e.target.value)}
+                placeholder="VD: 04:00 - 08:00 Sáng hoặc 19:00 - 23:00 Tối"
+                className="w-full px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-medium text-slate-900 shadow-2xs"
+              />
             </div>
           </div>
 

@@ -397,11 +397,18 @@ export interface ProjectInquirySpecs {
   monthlyTripsOrVolume?: string;
   keyKPIRequirements?: string[];
 
-  // 2. CROSS-DOCK & SORTING PROJECT SPECS
+  // 2. CROSS-DOCK & SORTING PROJECT SPECS (RETAIL LCL CONSOLIDATION)
+  xDockScope?: 'Nội Vùng (Intra-region X-Dock)' | 'Liên Vùng Tuyến Trục (Inter-region Linehaul)';
   xDockHubLocation?: string;
+  xDockDestinationHub?: string;
+  xDockPricingMetric?: 'VND / kg' | 'VND / CBM (m³)' | 'VND / Pallet' | 'VND / Kiện (Carton)' | 'VND / Chuyến xe Inbound';
+  xDockInboundVolume?: string | number;
+  xDockInboundFrequencyUnit?: string;
   inboundVehicleTypes?: string[];
   inboundDailyVolume?: string;
   inboundOperatingHours?: string;
+  targetRetailChains?: string[];
+  customRetailChainNote?: string;
   sortingRequirements?: string[];
   xDockTemperature?: 'Nhiệt độ thường (Ambient)' | 'Kiểm soát mát (Chilled 15°C - 25°C)' | 'Lạnh sâu (Cold 2°C - 8°C)';
   outboundStoreCount?: number;

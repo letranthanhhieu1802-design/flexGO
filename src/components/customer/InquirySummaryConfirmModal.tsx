@@ -1682,24 +1682,30 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
 
                     {project.projectCategory === 'CROSS_DOCK' && (
                       <>
+                        <div className="bg-purple-50/80 p-2.5 rounded-xl border border-purple-200 shadow-2xs col-span-2">
+                          <span className="text-[10px] text-purple-800 block font-bold">Phạm vi luân chuyển X-Dock</span>
+                          <span className="font-extrabold text-purple-950 block truncate">{project.xDockScope || 'Nội Vùng (Intra-region)'}</span>
+                        </div>
                         <div className="bg-white p-2.5 rounded-xl border border-purple-100 shadow-2xs">
-                          <span className="text-[10px] text-slate-400 block font-medium">Trạm trung chuyển</span>
+                          <span className="text-[10px] text-slate-400 block font-medium">Trạm gom nguồn (Origin Hub)</span>
                           <span className="font-extrabold text-slate-900 block truncate">{project.xDockHubLocation || inquiry.origin || 'Trung tâm'}</span>
                         </div>
+                        {project.xDockDestinationHub && (
+                          <div className="bg-white p-2.5 rounded-xl border border-purple-100 shadow-2xs">
+                            <span className="text-[10px] text-slate-400 block font-medium">Trạm phân phối đích</span>
+                            <span className="font-extrabold text-slate-900 block truncate">{project.xDockDestinationHub}</span>
+                          </div>
+                        )}
                         <div className="bg-white p-2.5 rounded-xl border border-purple-100 shadow-2xs">
                           <span className="text-[10px] text-slate-400 block font-medium">Nhiệt độ sàn</span>
                           <span className="font-extrabold text-purple-900 block truncate">{project.xDockTemperature || 'Thường'}</span>
                         </div>
-                        {project.inboundDailyVolume ? (
-                          <div className="bg-white p-2.5 rounded-xl border border-purple-100 shadow-2xs">
-                            <span className="text-[10px] text-slate-400 block font-medium">Inbound hàng ngày</span>
-                            <span className="font-extrabold text-slate-900 block truncate">{project.inboundDailyVolume}</span>
-                          </div>
-                        ) : null}
-                        {project.outboundStoreCount ? (
-                          <div className="bg-white p-2.5 rounded-xl border border-purple-100 shadow-2xs">
-                            <span className="text-[10px] text-slate-400 block font-medium">Số điểm giao Outbound</span>
-                            <span className="font-extrabold text-slate-900 block">{project.outboundStoreCount} Điểm</span>
+                        {(project.xDockInboundVolume || project.inboundDailyVolume) ? (
+                          <div className="bg-white p-2.5 rounded-xl border border-purple-100 shadow-2xs col-span-2 sm:col-span-3">
+                            <span className="text-[10px] text-slate-400 block font-medium">Sản lượng Inbound & Đơn vị cước</span>
+                            <span className="font-extrabold text-slate-900 block truncate">
+                              {project.xDockInboundVolume || project.inboundDailyVolume} ({project.xDockPricingMetric || 'VND/kg'}) - {project.xDockInboundFrequencyUnit || 'Hàng ngày'}
+                            </span>
                           </div>
                         ) : null}
                       </>
@@ -1765,6 +1771,19 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                         {project.fleetRequirements.map((f, i) => (
                           <span key={i} className="px-2 py-0.5 text-[10px] font-semibold bg-indigo-50 text-indigo-800 rounded border border-indigo-200">
                             {f}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {project.targetRetailChains && project.targetRetailChains.length > 0 && (
+                    <div className="bg-purple-50/60 p-2.5 rounded-xl border border-purple-200/80 shadow-2xs">
+                      <span className="text-[10px] text-purple-800 font-bold block">Chuỗi Siêu Thị / Kênh Giao Hàng Outbound ({project.targetRetailChains.length} Kênh):</span>
+                      <div className="flex flex-wrap gap-1.5 mt-1">
+                        {project.targetRetailChains.map((c, i) => (
+                          <span key={i} className="px-2 py-0.5 text-[10px] font-bold bg-white text-purple-900 rounded-md border border-purple-200 shadow-2xs">
+                            {c}
                           </span>
                         ))}
                       </div>
