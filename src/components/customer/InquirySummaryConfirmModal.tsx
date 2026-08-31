@@ -39,7 +39,8 @@ import {
   Scale,
   Box,
   Receipt,
-  Zap
+  Zap,
+  FileCheck2
 } from 'lucide-react';
 import { InquiryItem, ServiceType, UserProfile } from '../../types';
 
@@ -744,26 +745,34 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                 </div>
               </div>
             ) : inquiry.serviceType === 'Customs Clearance' ? (
-              /* 4.1. THỦ TỤC HẢI QUAN (CHI CỤC HQ & CẢNG / CỬA KHẨU THÔNG QUAN) */
+              /* 4.1. THỦ TỤC HẢI QUAN (CHI CỤC HQ MỞ TỜ KHAI) */
               <div className="mb-4">
                 <span className="text-[10.5px] font-black text-slate-700 uppercase tracking-wider block mb-2.5">
-                  4.1. Địa Điểm Mở Tờ Khai & Cảng / Cửa Khẩu Thông Quan:
+                  4.1. Địa Điểm Mở Tờ Khai Hải Quan:
                 </span>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                  <div className="p-3.5 rounded-2xl bg-amber-50/50 border border-amber-200/80">
-                    <span className="text-[10px] font-bold text-amber-800 uppercase block mb-1.5">
-                      Chi Cục Hải Quan Mở Tờ Khai (Customs Sub-Department)
-                    </span>
-                    <div className="p-3 rounded-xl bg-white border border-amber-200/90 shadow-2xs font-extrabold text-slate-900 text-sm">
-                      {customs?.customsSubDepartment || inquiry.origin || 'Theo thỏa thuận / Toàn quốc'}
+                <div className="p-3.5 rounded-2xl bg-amber-50/50 border border-amber-200/80">
+                  <div className="flex items-center justify-between font-bold text-amber-950 mb-2 pb-2 border-b border-amber-200/60">
+                    <div className="flex items-center gap-2">
+                      <span className="w-3 h-3 rounded-full bg-amber-600 shrink-0 ring-2 ring-amber-300" />
+                      <span className="uppercase text-[11px] font-black tracking-wider">
+                        Chi Cục Hải Quan Mở Tờ Khai (Customs Sub-Department)
+                      </span>
                     </div>
-                  </div>
-                  <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
-                    <span className="text-[10px] font-bold text-slate-500 uppercase block mb-1.5">
-                      Cảng / Cửa Khẩu / Sân Bay Tiếp Nhận Hàng (Port / Border Gate)
+                    <span className="px-2.5 py-0.5 text-[10px] font-black bg-amber-100 text-amber-800 rounded-full border border-amber-300">
+                      Địa Điểm Mở Tờ Khai
                     </span>
-                    <div className="p-3 rounded-xl bg-white border border-slate-200 shadow-2xs font-extrabold text-slate-900 text-sm">
-                      {inquiry.destination || inquiry.origin || 'Khu vực cảng / cửa khẩu chỉ định'}
+                  </div>
+                  <div className="p-3 rounded-xl bg-white border border-amber-200/90 shadow-2xs flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-amber-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                      <FileCheck2 className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold text-amber-800 uppercase tracking-wide">
+                        Chi cục Hải quan & Đơn vị quản lý:
+                      </span>
+                      <p className="font-extrabold text-slate-900 text-sm mt-0.5">
+                        {customs?.customsSubDepartment || inquiry.origin || 'Theo thỏa thuận / Toàn quốc'}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -1091,7 +1100,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                   </div>
                 </div>
               </div>
-            ) : inquiry.serviceType === 'Cross-Border' ? (
+            ) : (inquiry.serviceType === 'Cross-border' || inquiry.serviceType === 'Cross-Border') ? (
               /* 4.1. XUYÊN BIÊN GIỚI (HÀNH LANG VẬN TẢI BỘ XUYÊN BIÊN GIỚI) */
               <div className="mb-4">
                 <span className="text-[10.5px] font-black text-slate-700 uppercase tracking-wider block mb-2.5">
@@ -1695,12 +1704,6 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                     <span className="text-[10px] text-slate-400 block font-medium">Loại hình tờ khai HQ</span>
                     <span className="font-extrabold text-slate-900 truncate block">{customs.declarationType}</span>
                   </div>
-                  {customs.customsSubDepartment ? (
-                    <div className="bg-white p-2.5 rounded-xl border border-amber-100 shadow-2xs">
-                      <span className="text-[10px] text-slate-400 block font-medium">Chi cục Hải quan</span>
-                      <span className="font-extrabold text-slate-900 truncate block">{customs.customsSubDepartment}</span>
-                    </div>
-                  ) : null}
                   {customs.committedVolume ? (
                     <div className="bg-white p-2.5 rounded-xl border border-amber-100 shadow-2xs">
                       <span className="text-[10px] text-slate-400 block font-medium">Sản lượng cam kết</span>
@@ -1712,13 +1715,23 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       <span className="text-[10px] text-slate-400 block font-medium">Chứng nhận xuất xứ C/O</span>
                       <span className="font-extrabold text-indigo-700">{customs.coFormRequested}</span>
                     </div>
-                  ) : null}
+                  ) : (
+                    <div className="bg-white p-2.5 rounded-xl border border-amber-100 shadow-2xs">
+                      <span className="text-[10px] text-slate-400 block font-medium">Chứng nhận xuất xứ C/O</span>
+                      <span className="font-extrabold text-slate-600">Không yêu cầu</span>
+                    </div>
+                  )}
                   {customs.specializedInspectionType && customs.specializedInspectionType !== 'Không có' ? (
                     <div className="bg-white p-2.5 rounded-xl border border-amber-100 shadow-2xs col-span-2">
                       <span className="text-[10px] text-slate-400 block font-medium">Kiểm tra chuyên ngành</span>
                       <span className="font-extrabold text-blue-800">{customs.specializedInspectionType}</span>
                     </div>
-                  ) : null}
+                  ) : (
+                    <div className="bg-white p-2.5 rounded-xl border border-amber-100 shadow-2xs">
+                      <span className="text-[10px] text-slate-400 block font-medium">Kiểm tra chuyên ngành</span>
+                      <span className="font-extrabold text-slate-600">Không yêu cầu</span>
+                    </div>
+                  )}
                   {customs.redChannelInspectionSupport ? (
                     <div className="bg-rose-50/70 p-2.5 rounded-xl border border-rose-200 shadow-2xs col-span-2 flex items-center gap-1.5">
                       <span className="text-rose-700 font-bold text-xs">🔴 Có yêu cầu hỗ trợ kiểm hóa thực tế Luồng Đỏ tại cảng</span>

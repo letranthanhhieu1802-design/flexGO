@@ -761,15 +761,96 @@ export const LeadInquiryDetailCard: React.FC<LeadInquiryDetailCardProps> = ({
           ) : sType === 'Warehousing' ? (
             /* C. KHO BÃI (WAREHOUSING) */
             <div className="p-3.5 rounded-2xl bg-purple-50/50 border border-purple-200/80 text-xs">
-              <span className="text-[10px] text-purple-800 font-bold uppercase block mb-1">
-                KHU VỰC & ĐỊA BÀN KHO BÃI MỤC TIÊU:
-              </span>
-              <p className="font-extrabold text-slate-900 text-xs sm:text-sm">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-purple-500 ring-2 ring-purple-300" />
+                <span className="text-[10px] text-purple-800 font-black uppercase tracking-wide">KHU VỰC & ĐỊA BÀN KHO BÃI MỤC TIÊU:</span>
+              </div>
+              <p className="font-extrabold text-slate-900 text-xs sm:text-sm pl-4">
                 {warehousing?.targetLocation || lead.origin}
               </p>
             </div>
+          ) : sType === 'Customs Clearance' ? (
+            /* D. THỦ TỤC HẢI QUAN - 1 banner duy nhất, không có destination */
+            <div className="p-3.5 rounded-2xl bg-amber-50/50 border border-amber-200/80 text-xs">
+              <div className="flex items-center justify-between mb-2 pb-2 border-b border-amber-200/60">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500 ring-2 ring-amber-300" />
+                  <span className="text-[10px] text-amber-900 font-black uppercase tracking-wide">Chi Cục Hải Quan Mở Tờ Khai (Customs Sub-Department)</span>
+                </div>
+                <span className="px-2 py-0.5 text-[9.5px] font-black bg-amber-100 text-amber-800 rounded-full border border-amber-300 uppercase">Địa Điểm Mở TK</span>
+              </div>
+              <p className="font-extrabold text-slate-900 text-xs sm:text-sm pl-4">
+                {customs?.customsSubDepartment || lead.origin}
+              </p>
+            </div>
+          ) : sType === 'Rail Freight' ? (
+            /* E. ĐƯỜNG SẮT (GA - GA) */
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+              <div className="p-3.5 rounded-2xl bg-amber-50/50 border border-amber-200/80">
+                <div className="flex items-center justify-between font-bold text-amber-900 mb-2 pb-1.5 border-b border-amber-200/60">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500 ring-2 ring-amber-300" />
+                    <span className="uppercase text-[11px] font-black">Ga Đi (Origin Railway Station)</span>
+                  </div>
+                  <span className="px-2 py-0.5 text-[9.5px] font-black bg-amber-100 text-amber-800 rounded-full border border-amber-300">Ga Xuất Phát</span>
+                </div>
+                <p className="font-extrabold text-slate-900 text-xs sm:text-sm">
+                  {rail?.originStation || lead.origin}
+                </p>
+              </div>
+              <div className="p-3.5 rounded-2xl bg-orange-50/50 border border-orange-200/80">
+                <div className="flex items-center justify-between font-bold text-orange-900 mb-2 pb-1.5 border-b border-orange-200/60">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-orange-500 ring-2 ring-orange-300" />
+                    <span className="uppercase text-[11px] font-black">Ga Đến (Destination Railway Station)</span>
+                  </div>
+                  <span className="px-2 py-0.5 text-[9.5px] font-black bg-orange-100 text-orange-800 rounded-full border border-orange-300">Ga Đích</span>
+                </div>
+                <p className="font-extrabold text-slate-900 text-xs sm:text-sm">
+                  {rail?.destinationStation || lead.destination}
+                </p>
+              </div>
+            </div>
+          ) : sType === 'Cross-border' ? (
+            /* F. XUYÊN BIÊN GIỚI (3 CHẶNG: XUẤT PHÁT - CỬA KHẨU - ĐÍCH) */
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+              <div className="p-3.5 rounded-2xl bg-emerald-50/50 border border-emerald-200/80">
+                <span className="text-[10px] text-emerald-800 font-bold uppercase block mb-1">📍 Tỉnh / Thành Xuất Phát:</span>
+                <p className="font-extrabold text-slate-900 text-xs sm:text-sm">
+                  {crossBorder?.originCity || lead.origin}
+                </p>
+              </div>
+              <div className="p-3.5 rounded-2xl bg-amber-50/50 border border-amber-200/80">
+                <span className="text-[10px] text-amber-800 font-bold uppercase block mb-1">🚧 Cửa Khẩu Thông Quan:</span>
+                <p className="font-extrabold text-amber-950 text-xs sm:text-sm">
+                  {crossBorder?.borderGate || 'Cửa khẩu thông quan'}
+                </p>
+              </div>
+              <div className="p-3.5 rounded-2xl bg-rose-50/50 border border-rose-200/80">
+                <span className="text-[10px] text-rose-800 font-bold uppercase block mb-1">🏁 Quốc Gia / Tỉnh Đích:</span>
+                <p className="font-extrabold text-slate-900 text-xs sm:text-sm">
+                  {crossBorder?.destinationCity || lead.destination}
+                </p>
+              </div>
+            </div>
+          ) : sType === 'Project Cargo' ? (
+            /* G. HÀNG DỰ ÁN (PROJECT CARGO) */
+            <div className="p-3.5 rounded-2xl bg-indigo-50/50 border border-indigo-200/80 text-xs">
+              <div className="flex items-center justify-between mb-2 pb-2 border-b border-indigo-200/60">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 ring-2 ring-indigo-300" />
+                  <span className="text-[10px] text-indigo-900 font-black uppercase tracking-wide">Phạm Vi Mạng Lưới & Địa Bàn Dự Án:</span>
+                </div>
+                <span className="px-2 py-0.5 text-[9.5px] font-black bg-indigo-100 text-indigo-800 rounded-full border border-indigo-300 uppercase">
+                  {project?.projectCategory || 'DISTRIBUTION'}
+                </span>
+              </div>
+              <p className="font-extrabold text-slate-900 text-xs sm:text-sm pl-4">
+                {project?.coverageScope || project?.projectName || lead.origin}
+              </p>
+            </div>
           ) : (
-            /* D. ĐƯỜNG BỘ, CHUỖI LẠNH & CÁC DỊCH VỤ KHÁC */
+            /* H. ĐƯỜNG BỘ, CHUỖI LẠNH & CÁC DỊCH VỤ KHÁC */
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
               <div className="p-3.5 rounded-2xl bg-emerald-50/50 border border-emerald-200/80">
                 <div className="flex items-center justify-between font-bold text-emerald-900 mb-2 pb-1.5 border-b border-emerald-200/60">
@@ -777,7 +858,7 @@ export const LeadInquiryDetailCard: React.FC<LeadInquiryDetailCardProps> = ({
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-emerald-300" />
                     <span className="uppercase text-[11px] font-black">Điểm Lấy Hàng / Nơi Đi (Origin)</span>
                   </div>
-                  <span className="px-2 py-0.5 text-[9.5px] font-black bg-emerald-100 text-emerald-800 rounded-full border border-emerald-300">
+                  <span className="px-2.5 py-0.5 text-[9.5px] font-black bg-emerald-100 text-emerald-800 rounded-full border border-emerald-300">
                     {pickupList.length} Điểm Lấy
                   </span>
                 </div>
@@ -952,6 +1033,77 @@ export const LeadInquiryDetailCard: React.FC<LeadInquiryDetailCardProps> = ({
               <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
                 <span className="text-[10px] text-slate-400 block font-medium">PCCC Sprinkler</span>
                 <span className="font-extrabold text-slate-900">{warehousing.fireSafetyStandard || 'Tự động NFPA'}</span>
+              </div>
+            </div>
+          )}
+
+          {/* CUSTOMS CLEARANCE */}
+          {sType === 'Customs Clearance' && customs && (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              <div className="bg-white p-2.5 rounded-xl border border-amber-100 shadow-2xs">
+                <span className="text-[10px] text-slate-400 block font-medium">Vai trò doanh nghiệp</span>
+                <span className="font-extrabold text-blue-700">{customs.tradeRole || inq?.tradeRole || 'Nhập khẩu (Import)'}</span>
+              </div>
+              <div className="bg-white p-2.5 rounded-xl border border-amber-100 shadow-2xs">
+                <span className="text-[10px] text-slate-400 block font-medium">Loại hình tờ khai HQ</span>
+                <span className="font-extrabold text-slate-900 truncate block">{customs.declarationType || 'A11 - Nhập kinh doanh'}</span>
+              </div>
+              <div className="bg-white p-2.5 rounded-xl border border-amber-100 shadow-2xs">
+                <span className="text-[10px] text-slate-400 block font-medium">Chứng nhận C/O</span>
+                <span className="font-extrabold text-indigo-700">{customs.coFormRequested || 'Không yêu cầu'}</span>
+              </div>
+              <div className="bg-white p-2.5 rounded-xl border border-amber-100 shadow-2xs">
+                <span className="text-[10px] text-slate-400 block font-medium">Kiểm tra chuyên ngành</span>
+                <span className="font-extrabold text-blue-800">{customs.specializedInspectionType || 'Không yêu cầu'}</span>
+              </div>
+              {customs.redChannelInspectionSupport && (
+                <div className="bg-rose-50/70 p-2.5 rounded-xl border border-rose-200 shadow-2xs col-span-2 flex items-center gap-1.5">
+                  <span className="text-rose-700 font-bold text-xs">🔴 Yêu cầu hỗ trợ kiểm hóa thực tế Luồng Đỏ tại cảng</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* RAIL FREIGHT */}
+          {sType === 'Rail Freight' && rail && (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
+                <span className="text-[10px] text-slate-400 block font-medium">Loại toa / Container</span>
+                <span className="font-extrabold text-amber-900">{rail.wagonType || 'Toa kín có khóa'}</span>
+              </div>
+              <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
+                <span className="text-[10px] text-slate-400 block font-medium">Dịch vụ kéo cont 2 đầu</span>
+                <span className="font-extrabold text-emerald-700">{rail.drayageServiceRequired ? '✓ Trọn gói Door-to-Door' : 'Ga - Ga'}</span>
+              </div>
+              <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
+                <span className="text-[10px] text-slate-400 block font-medium">Số chuyến & Tần suất</span>
+                <span className="font-extrabold text-indigo-900">{rail.tripCount || 1} {rail.frequencyUnit || 'Chuyến / Tuần'}</span>
+              </div>
+              <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
+                <span className="text-[10px] text-slate-400 block font-medium">Điều kiện Incoterms</span>
+                <span className="font-extrabold text-slate-900">{rail.incoterms || 'FCA Ga đi'}</span>
+              </div>
+            </div>
+          )}
+
+          {/* CROSS-BORDER */}
+          {sType === 'Cross-border' && crossBorder && (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
+                <span className="text-[10px] text-slate-400 block font-medium">Vai trò doanh nghiệp</span>
+                <span className="font-extrabold text-blue-700">{crossBorder.tradeRole || inq?.tradeRole || 'Xuất khẩu (Export)'}</span>
+              </div>
+              <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
+                <span className="text-[10px] text-slate-400 block font-medium">Phương thức vận tải</span>
+                <span className="font-extrabold text-orange-950">{crossBorder.transitMode || 'Xe đi thẳng GMS'}</span>
+              </div>
+              <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
+                <span className="text-[10px] text-slate-400 block font-medium">Loại xe & Tải trọng</span>
+                <span className="font-extrabold text-slate-900">{crossBorder.vehicleType || 'Đầu kéo cont'}</span>
+              </div>
+              <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
+                <span className="text-[10px] text-slate-400 block font-medium">Giấy phép liên vận</span>
+                <span className="font-extrabold text-emerald-700">{crossBorder.bilateralPermitRequired ? '✓ Giấy phép GMS' : 'Tiêu chuẩn'}</span>
               </div>
             </div>
           )}
