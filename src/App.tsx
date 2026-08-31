@@ -870,14 +870,25 @@ export function App() {
     );
   };
 
-  const handleIncrementLeadViews = (leadId: string) => {
-    handleMarkInquiryAsViewed(leadId);
+  const handleIncrementLeadViews = (leadIdOrCode: string) => {
+    if (!leadIdOrCode) return;
+    handleMarkInquiryAsViewed(leadIdOrCode);
+
     setLeads((prevLeads) =>
       prevLeads.map((l) => {
-        if (l.id === leadId) {
+        if (l.id === leadIdOrCode || l.code === leadIdOrCode || l.inquiryCode === leadIdOrCode) {
           return { ...l, viewsCount: (l.viewsCount || 0) + 1 };
         }
         return l;
+      })
+    );
+
+    setInquiries((prevInqs) =>
+      prevInqs.map((i) => {
+        if (i.id === leadIdOrCode || i.code === leadIdOrCode) {
+          return { ...i, viewsCount: (i.viewsCount || 0) + 1 };
+        }
+        return i;
       })
     );
   };
@@ -1124,6 +1135,7 @@ export function App() {
                 onUnlockLead={handleUnlockLead}
                 onToggleSaveLead={handleToggleSaveLead}
                 onSubmitQuotation={handleCreateQuotationSubmit}
+                onIncrementLeadViews={handleIncrementLeadViews}
               />
             );
           }

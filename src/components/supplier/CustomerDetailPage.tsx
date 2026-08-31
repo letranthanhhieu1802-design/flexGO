@@ -75,6 +75,7 @@ interface CustomerDetailPageProps {
   initialTab?: 'overview' | 'inquiries';
   viewedInquiryCodes?: string[];
   onMarkInquiryAsViewed?: (inquiryCode: string) => void;
+  onIncrementLeadViews?: (leadIdOrCode: string) => void;
   onBack: () => void;
   onOpenCreateQuotation?: (leadOrCustomer?: any) => void;
   onNavigate: (view: CurrentView) => void;
@@ -93,6 +94,7 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({
   initialTab = 'overview',
   viewedInquiryCodes = [],
   onMarkInquiryAsViewed,
+  onIncrementLeadViews,
   onBack,
   onOpenCreateQuotation,
   onNavigate,
@@ -118,12 +120,26 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [selectedLeadForCompare, setSelectedLeadForCompare] = useState<SupplierLeadItem | null>(null);
   const [expandedLeadIds, setExpandedLeadIds] = useState<Set<string>>(new Set());
+  const [localExtraViews, setLocalExtraViews] = useState<Record<string, number>>({});
 
   const toggleExpandLead = (leadId: string) => {
-    // When supplier expands to see details, mark this inquiry as viewed globally!
+    const isExpanding = !expandedLeadIds.has(leadId);
     const target = (leads || []).find((l) => l.id === leadId || l.code === leadId || l.inquiryCode === leadId);
-    if (onMarkInquiryAsViewed) {
-      onMarkInquiryAsViewed(target ? (target.code || target.inquiryCode || leadId) : leadId);
+    const identifier = target ? (target.code || target.inquiryCode || target.id) : leadId;
+
+    // When supplier expands to see details, mark as viewed and increment views count +1
+    if (isExpanding) {
+      if (onMarkInquiryAsViewed) {
+        onMarkInquiryAsViewed(identifier);
+      }
+      if (onIncrementLeadViews) {
+        onIncrementLeadViews(identifier);
+      }
+      setLocalExtraViews((prev) => ({
+        ...prev,
+        [identifier]: (prev[identifier] || 0) + 1,
+        [leadId]: (prev[leadId] || 0) + 1,
+      }));
     }
 
     setExpandedLeadIds((prev) => {
@@ -271,7 +287,7 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({
           urgency: 'High Value',
           matchScore: existingLead?.matchScore || 98,
           quotesCount: quotesCount,
-          viewsCount: inq.viewsCount || existingLead?.viewsCount || 15,
+          viewsCount: (existingLead?.viewsCount ?? inq.viewsCount ?? 15) + (localExtraViews[inq.code || ''] || localExtraViews[existingLead?.id || ''] || 0),
           isUnlocked: Boolean(existingLead?.isUnlocked || customer.source === 'FLEXCREDIT_UNLOCKED' || inq.code === 'FG-2608250001'),
           isSaved: true,
         };
@@ -293,6 +309,7 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({
           matchedMap.set(key, {
             ...lead,
             quotesCount: quotesCount,
+            viewsCount: (lead.viewsCount || 15) + (localExtraViews[lead.code] || localExtraViews[lead.id] || 0),
             status: myQuote ? 'Quoted' : lead.status,
             isUnlocked: Boolean(lead.isUnlocked || customer.source === 'FLEXCREDIT_UNLOCKED' || lead.inquiryCode === 'FG-2608250001'),
           });
@@ -304,10 +321,12 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({
 
     // 3. If no exact match found, provide tailored lead from customer's profile so leaderboard is never empty
     if (result.length === 0) {
+      const fallbackId = `lead-cust-${customer.id}-01`;
+      const fallbackCode = `FG-2608${String(10 + Math.abs(customer.companyName.length % 20)).padStart(2, '0')}0001`;
       const fallbackLead: SupplierLeadItem = {
-        id: `lead-cust-${customer.id}-01`,
-        code: `FG-2608${String(10 + Math.abs(customer.companyName.length % 20)).padStart(2, '0')}0001`,
-        inquiryCode: `FG-2608${String(10 + Math.abs(customer.companyName.length % 20)).padStart(2, '0')}0001`,
+        id: fallbackId,
+        code: fallbackCode,
+        inquiryCode: fallbackCode,
         customerCompany: customer.companyName,
         contactName: customer.contactPerson,
         contactRole: customer.contactRole,
@@ -331,7 +350,7 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({
         urgency: 'High Value',
         matchScore: 98,
         quotesCount: 3,
-        viewsCount: 142,
+        viewsCount: 142 + (localExtraViews[fallbackId] || localExtraViews[fallbackCode] || 0),
         isUnlocked: customer.source === 'FLEXCREDIT_UNLOCKED',
         isSaved: true,
       };
@@ -346,7 +365,7 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({
       if (!isANew && isBNew) return 1;
       return (b.id || '').localeCompare(a.id || '');
     });
-  }, [inquiries, leads, quotations, customer, currentUser.id]);
+  }, [inquiries, leads, quotations, customer, currentUser.id, localExtraViews]);
 
   // Filtered customer leads for leaderboard table
   const filteredCustomerLeads = useMemo(() => {
