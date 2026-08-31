@@ -1335,8 +1335,8 @@ export const SupplierLeadCompareModal: React.FC<SupplierLeadCompareModalProps> =
                                   Bạn
                                 </div>
                                 <div className="text-left">
-                                  <div className="font-black text-slate-900 text-xs flex items-center gap-1">
-                                    <span>{currentUser.companyName || 'Công Ty Của Bạn'}</span>
+                                  <div className="font-extrabold text-slate-900 text-xs flex items-center gap-1.5">
+                                    <span>{currentUser.name || 'Người Báo Giá (Bạn)'}</span>
                                     {isAlreadyQuoted ? (
                                       <span className="px-2 py-0.5 bg-emerald-700 text-white text-[9px] font-black rounded-md uppercase tracking-wider flex items-center gap-0.5 shadow-2xs">
                                         <CheckCircle2 className="w-2.5 h-2.5" /> Đã Báo Giá
@@ -1347,18 +1347,8 @@ export const SupplierLeadCompareModal: React.FC<SupplierLeadCompareModalProps> =
                                       </span>
                                     )}
                                   </div>
-                                  <div className="text-[11px] text-emerald-800 font-bold flex items-center gap-1">
-                                    {isAlreadyQuoted ? (
-                                      <>
-                                        <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                                        <span>Báo giá chính thức đã nộp</span>
-                                      </>
-                                    ) : (
-                                      <>
-                                        <Sparkles className="w-3 h-3 text-amber-500" />
-                                        <span>Báo giá trực tiếp sàn</span>
-                                      </>
-                                    )}
+                                  <div className="text-[11px] text-slate-500 font-medium">
+                                    {currentUser.companyName || 'Công Ty Của Bạn'}
                                   </div>
                                 </div>
                               </div>
@@ -1374,34 +1364,34 @@ export const SupplierLeadCompareModal: React.FC<SupplierLeadCompareModalProps> =
                         )}
 
                         {/* Competitor Columns */}
-                        {competitorQuotes.map((quote, idx) => (
-                          <th key={quote.id} className="py-4 px-5 text-center min-w-[250px] border-l border-slate-100">
-                            <div className="flex flex-col items-center">
-                              <div className="flex items-center gap-2 mb-1">
-                                <div className={`w-9 h-9 rounded-xl font-bold text-xs flex items-center justify-center shadow-xs ${
-                                  effectiveUnlocked ? 'bg-indigo-600 text-white' : 'bg-slate-300 text-slate-700'
-                                }`}>
-                                  {effectiveUnlocked ? quote.supplierName.slice(0, 2) : `#${idx + 1}`}
-                                </div>
-                                <div className="text-left">
-                                  <div className="font-extrabold text-slate-900 text-xs flex items-center gap-1">
-                                    <span>
-                                      {effectiveUnlocked ? quote.supplierName : `Nhà xe Đối thủ #${idx + 1}`}
-                                    </span>
-                                    {effectiveUnlocked && <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />}
+                        {competitorQuotes.map((quote, idx) => {
+                          const picName = quote.contactPerson || (idx === 0 ? 'Nguyễn Hoàng Nam' : idx === 1 ? 'Trần Minh Đức' : idx === 2 ? 'Lê Quốc Tuấn' : 'Vũ Đình Hải');
+                          const avatarText = effectiveUnlocked ? (picName.split(' ').pop() || quote.supplierName.slice(0, 2)) : `#${idx + 1}`;
+                          return (
+                            <th key={quote.id} className="py-4 px-5 text-center min-w-[250px] border-l border-slate-100">
+                              <div className="flex flex-col items-center">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <div className={`w-9 h-9 rounded-xl font-bold text-xs flex items-center justify-center shadow-xs ${
+                                    effectiveUnlocked ? 'bg-indigo-600 text-white' : 'bg-slate-300 text-slate-700'
+                                  }`}>
+                                    {avatarText}
                                   </div>
-                                  <div className="flex items-center gap-1 text-[11px] text-amber-600 font-bold">
-                                    <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                                    <span>{effectiveUnlocked ? quote.supplierRating : '★ •.•'}</span>
-                                    <span className="text-slate-400 font-normal">
-                                      ({effectiveUnlocked ? quote.code : 'Mã ẩn'})
-                                    </span>
+                                  <div className="text-left">
+                                    <div className="font-extrabold text-slate-900 text-xs flex items-center gap-1">
+                                      <span>
+                                        {effectiveUnlocked ? picName : `Nhà xe Đối thủ #${idx + 1}`}
+                                      </span>
+                                      {effectiveUnlocked && <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />}
+                                    </div>
+                                    <div className="text-[11px] text-slate-500 font-medium">
+                                      {effectiveUnlocked ? quote.supplierName : 'Đang tham gia chào giá'}
+                                    </div>
                                   </div>
                                 </div>
                               </div>
-                            </div>
-                          </th>
-                        ))}
+                            </th>
+                          );
+                        })}
                       </tr>
                     </thead>
 
@@ -1984,38 +1974,6 @@ export const SupplierLeadCompareModal: React.FC<SupplierLeadCompareModalProps> =
                     </tbody>
                   </table>
                 </div>
-              </div>
-
-              {/* Bottom Guidance Card */}
-              <div className="bg-gradient-to-r from-indigo-900 to-slate-900 text-white rounded-3xl p-5 shadow-md flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-amber-400" />
-                    <h4 className="text-sm font-black text-white">Gợi Ý Chiến Lược Báo Giá FlexGO AI</h4>
-                  </div>
-                  <p className="text-xs text-indigo-200 max-w-2xl leading-relaxed">
-                    {effectiveUnlocked ? (
-                      <>
-                        Để đánh bại đối thủ <strong className="text-white">dẫn đầu ({formatVND(marketAnalytics.minPrice)})</strong> và giành vị trí Top 1, bạn có thể nộp mức giá <strong className="text-amber-300 font-mono font-bold">{formatVND(marketAnalytics.recommendedWinPrice)}</strong> kèm cam kết thời gian giao hàng 36h và công nợ Net 30.
-                      </>
-                    ) : (
-                      <>
-                        Mở khóa bằng <strong>50 FlexCredit</strong> để kích hoạt phân tích biên độ giá đối thủ và hệ thống sẽ tự động điền mức giá tối ưu nhất giúp bạn chắc chắn giành vị trí Top 1 Best Price.
-                      </>
-                    )}
-                  </p>
-                </div>
-
-                {!effectiveUnlocked && (
-                  <button
-                    type="button"
-                    onClick={handleUnlockClick}
-                    className="px-5 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold rounded-2xl text-xs shadow-lg transition-all cursor-pointer shrink-0 flex items-center gap-1.5"
-                  >
-                    <Unlock className="w-3.5 h-3.5" />
-                    <span>Mở Khóa Ngay ({creditCost} FlexCredit)</span>
-                  </button>
-                )}
               </div>
             </div>
           )}
