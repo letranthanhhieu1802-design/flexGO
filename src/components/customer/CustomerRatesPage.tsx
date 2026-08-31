@@ -635,52 +635,25 @@ export const CustomerRatesPage: React.FC<CustomerRatesPageProps> = ({
                           {rate.validTo}
                         </td>
 
-                        {/* Cột 10: Thao Tác */}
+                        {/* Cột 10: Thao Tác - Chỉ 1 nút Xem chi tiết / Đóng */}
                         <td className="py-3 px-3 text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                          <div className="flex items-center justify-center gap-1.5">
-                            {/* Toggle Expand Details */}
-                            <button
-                              type="button"
-                              onClick={() => toggleExpandRate(rate.id)}
-                              className={`px-2.5 py-1 text-xs font-bold rounded-xl transition-all inline-flex items-center justify-center gap-1 cursor-pointer shadow-2xs ${
-                                isExpanded
-                                  ? 'bg-indigo-600 text-white shadow-xs'
-                                  : 'bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 hover:border-indigo-300'
-                              }`}
-                              title={isExpanded ? 'Thu gọn chi tiết' : 'Mở xem chi tiết biểu giá'}
-                            >
-                              <span>{isExpanded ? 'Đóng' : 'Xem chi tiết'}</span>
-                              {isExpanded ? (
-                                <ChevronUp className="w-3.5 h-3.5" />
-                              ) : (
-                                <ChevronDown className="w-3.5 h-3.5" />
-                              )}
-                            </button>
-
-                            {/* Edit */}
-                            <button
-                              type="button"
-                              onClick={() => handleOpenEditModal(rate)}
-                              className="p-1.5 rounded-lg text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 border border-slate-200 transition-colors cursor-pointer"
-                              title="Chỉnh sửa biểu giá"
-                            >
-                              <Edit3 className="w-3.5 h-3.5" />
-                            </button>
-
-                            {/* Delete */}
-                            <button
-                              type="button"
-                              onClick={() => {
-                                if (window.confirm(`Bạn có chắc chắn muốn xóa biểu giá ${rate.code} không?`)) {
-                                  onDeleteRate(rate.id);
-                                }
-                              }}
-                              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-200 transition-colors cursor-pointer"
-                              title="Xóa biểu giá"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
+                          <button
+                            type="button"
+                            onClick={() => toggleExpandRate(rate.id)}
+                            className={`px-2.5 py-1 text-xs font-bold rounded-xl transition-all inline-flex items-center justify-center gap-1 cursor-pointer shadow-2xs ${
+                              isExpanded
+                                ? 'bg-indigo-600 text-white shadow-xs'
+                                : 'bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 hover:border-indigo-300'
+                            }`}
+                            title={isExpanded ? 'Thu gọn chi tiết' : 'Mở xem chi tiết biểu giá'}
+                          >
+                            <span>{isExpanded ? 'Đóng' : 'Xem chi tiết'}</span>
+                            {isExpanded ? (
+                              <ChevronUp className="w-3.5 h-3.5" />
+                            ) : (
+                              <ChevronDown className="w-3.5 h-3.5" />
+                            )}
+                          </button>
                         </td>
                       </tr>
 
