@@ -740,6 +740,30 @@ export interface SupplierLeadItem {
   sourceOrigin?: 'LEAD_BOARD' | 'MY_CUSTOMER_INQUIRY' | 'DIRECT_RFQ'; // Gốc phát sinh lưu/mở khóa
   sourceNotes?: string; // Ghi chú nguồn
   isDirectRfq?: boolean; // Yêu cầu báo giá trực tiếp từ trang hồ sơ Supplier
+
+  // Optional Full Inquiry specifications & domain payload
+  inquiry?: InquiryItem;
+  serviceSpecs?: ServiceSpecificSpecs;
+  selectedVAS?: string[];
+  requestedSurcharges?: string[];
+  surchargesNotes?: string;
+  quotationScope?: QuotationScope;
+  cargoClassification?: CargoClassification;
+  temperatureRequirement?: string;
+  preservationRequirement?: string;
+  dgClassIMO?: string;
+  unNumber?: string;
+  packingGroup?: string;
+  flashPoint?: string;
+  packaging?: string;
+  attachments?: InquiryAttachment[];
+  specialRequirements?: string[];
+  description?: string;
+  incoterms?: string;
+  tradeRole?: string;
+  industry?: string;
+  cargoValue?: number | string;
+  cargoValueCurrency?: string;
 }
 
 export type OpportunityStage =

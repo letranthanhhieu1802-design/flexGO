@@ -311,6 +311,30 @@ export function App() {
       quotesCount: 0,
       viewsCount: 1,
       isUnlocked: false,
+
+      // Rich specifications payload
+      inquiry: finalInquiry,
+      serviceSpecs: finalInquiry.serviceSpecs,
+      selectedVAS: finalInquiry.selectedVAS,
+      requestedSurcharges: finalInquiry.requestedSurcharges,
+      surchargesNotes: finalInquiry.surchargesNotes,
+      quotationScope: finalInquiry.quotationScope,
+      cargoClassification: finalInquiry.cargoClassification,
+      temperatureRequirement: finalInquiry.temperatureRequirement,
+      preservationRequirement: finalInquiry.preservationRequirement,
+      dgClassIMO: finalInquiry.dgClassIMO,
+      unNumber: finalInquiry.unNumber,
+      packingGroup: finalInquiry.packingGroup,
+      flashPoint: finalInquiry.flashPoint,
+      packaging: finalInquiry.packaging,
+      attachments: finalInquiry.attachments,
+      specialRequirements: finalInquiry.specialRequirements,
+      description: finalInquiry.description,
+      incoterms: finalInquiry.incoterms,
+      tradeRole: finalInquiry.tradeRole,
+      industry: finalInquiry.industry,
+      cargoValue: finalInquiry.cargoValue,
+      cargoValueCurrency: finalInquiry.cargoValueCurrency,
     };
     setLeads([newLead, ...leads]);
 
