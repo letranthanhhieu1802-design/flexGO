@@ -662,6 +662,7 @@ export interface SupplierCompany {
   warehouseArea: string;
   establishedYear: number;
   contactPerson: string;
+  contactRole?: string;
   contactEmail: string;
   contactPhone: string;
   totalQuotesSubmitted: number;

@@ -1011,6 +1011,8 @@ export function App() {
           return (
             <MySuppliersPage
               suppliers={suppliers}
+              inquiries={inquiries}
+              quotations={quotations}
               onNavigate={setCurrentView}
               onOpenCreateInquiry={(supplierId) => {
                 setIsCreateInquiryOpen(true);
