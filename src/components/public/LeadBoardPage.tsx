@@ -1277,11 +1277,11 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
                         {/* Cột 8: Tổng Giá Trị */}
                         <td className="py-3 px-2.5 text-right whitespace-nowrap">
                           <div className="space-y-0.5">
-                            <span className="text-xs font-black text-emerald-700 block">
-                              {lead.estimatedValueDisplay}
+                            <span className="text-xs sm:text-[13px] font-black text-emerald-700 block tracking-tight">
+                              {(lead.estimatedValueVND || (lead.estimatedValueDisplay ? parseInt(lead.estimatedValueDisplay.replace(/\D/g, ''), 10) : 0) || 0).toLocaleString('vi-VN')}
                             </span>
-                            <span className="text-[9.5px] font-medium text-slate-400 block">
-                              {isContract ? 'Ngân sách / tháng' : 'Tổng dự toán lô'}
+                            <span className="text-[10px] font-semibold text-slate-500 block">
+                              {isContract ? 'VNĐ / tháng' : 'VNĐ / lô'}
                             </span>
                           </div>
                         </td>
