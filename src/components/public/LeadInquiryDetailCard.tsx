@@ -207,7 +207,21 @@ export const LeadInquiryDetailCard: React.FC<LeadInquiryDetailCardProps> = ({
 
         {/* CỤM THAO TÁC HÀNH ĐỘNG */}
         <div className="flex flex-wrap items-center gap-2 shrink-0">
-          {/* Nút Chia sẻ link lead */}
+          {/* Nút Compare Matrix cho Customer View */}
+          {isCustomerView && onCompareClick && (
+            <button
+              type="button"
+              id={`detail-customer-compare-btn-${lead.code}`}
+              onClick={() => onCompareClick(lead)}
+              className="px-4 py-2 text-xs font-bold text-white bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 hover:from-indigo-700 hover:to-purple-800 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs hover:shadow-sm"
+              title="So sánh ma trận báo giá của các nhà cung cấp và tiến hành trao thầu (Award)"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-indigo-200" />
+              <span>Compare Matrix (So sánh báo giá)</span>
+            </button>
+          )}
+
+          {/* Nút Chia sẻ link lead / inquiry */}
           <button
             type="button"
             id={`detail-share-link-btn-${lead.code}`}
@@ -217,17 +231,17 @@ export const LeadInquiryDetailCard: React.FC<LeadInquiryDetailCardProps> = ({
                 ? 'bg-emerald-600 text-white ring-2 ring-emerald-400'
                 : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 hover:border-slate-300'
             }`}
-            title={`Sao chép link trực tiếp Lead Board lọc theo mã ${lead.code}`}
+            title={`Sao chép link trực tiếp lọc theo mã ID ${lead.code}`}
           >
             {copiedShareLead ? (
               <>
                 <Check className="w-3.5 h-3.5 text-white" />
-                <span>Đã Chép Link Lead!</span>
+                <span>Đã Chép Link!</span>
               </>
             ) : (
               <>
                 <Share2 className="w-3.5 h-3.5 text-slate-500" />
-                <span>Chia Sẻ Lead ({lead.code})</span>
+                <span>Chia Sẻ ({lead.code})</span>
               </>
             )}
           </button>

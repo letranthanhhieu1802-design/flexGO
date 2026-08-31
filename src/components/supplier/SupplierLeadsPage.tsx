@@ -430,7 +430,7 @@ export const SupplierLeadsPage: React.FC<SupplierLeadsPageProps> = ({
             <thead>
               <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-semibold uppercase tracking-wider">
                 <th className="py-3.5 px-4 w-10 text-center">Lưu</th>
-                <th className="py-3.5 px-4">Lead ID</th>
+                <th className="py-3.5 px-4">Mã ID</th>
                 <th className="py-3.5 px-4">Customer & Contact</th>
                 <th className="py-3.5 px-4">Service</th>
                 <th className="py-3.5 px-4">Route</th>

@@ -1130,13 +1130,13 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
                   </div>
                 </th>
 
-                {/* 3. Mã Lead */}
+                {/* 3. Mã ID */}
                 <th 
                   className="py-3 px-2.5 cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
                   onClick={() => handleSort('code')}
                 >
                   <div className="flex items-center gap-1">
-                    <span>Mã Lead</span>
+                    <span>Mã ID</span>
                     <ArrowUpDown className="w-3 h-3 text-slate-400" />
                   </div>
                 </th>
