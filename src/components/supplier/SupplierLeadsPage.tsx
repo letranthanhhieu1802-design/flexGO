@@ -541,10 +541,15 @@ export const SupplierLeadsPage: React.FC<SupplierLeadsPageProps> = ({
                           {lead.route}
                         </td>
 
-                        <td className="py-4 px-4">
-                          <span className="font-bold text-emerald-700 text-sm">
-                            {lead.estimatedValueDisplay}
-                          </span>
+                        <td className="py-4 px-4 whitespace-nowrap">
+                          <div className="space-y-0.5">
+                            <span className="font-black text-emerald-700 text-sm block">
+                              {(lead.estimatedValueVND || (lead.estimatedValueDisplay ? parseInt(lead.estimatedValueDisplay.replace(/\D/g, ''), 10) : 0) || 0).toLocaleString('vi-VN')}
+                            </span>
+                            <span className="text-[10px] font-semibold text-slate-500 block">
+                              {lead.pricingType === 'CONTRACT' ? 'VNĐ / tháng' : 'VNĐ / lô'}
+                            </span>
+                          </div>
                         </td>
 
                         <td className="py-4 px-4 text-slate-500 whitespace-nowrap">

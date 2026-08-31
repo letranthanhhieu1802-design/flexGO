@@ -164,7 +164,14 @@ export const DualHubPage: React.FC<DualHubPageProps> = ({
                 >
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-mono font-bold text-emerald-700">{ld.code}</span>
-                    <span className="font-bold text-emerald-700">{ld.estimatedValueDisplay}</span>
+                    <div className="text-right">
+                      <span className="font-bold text-emerald-700 block text-xs">
+                        {(ld.estimatedValueVND || (ld.estimatedValueDisplay ? parseInt(ld.estimatedValueDisplay.replace(/\D/g, ''), 10) : 0) || 0).toLocaleString('vi-VN')}
+                      </span>
+                      <span className="text-[9.5px] font-semibold text-slate-500 block">
+                        {ld.pricingType === 'CONTRACT' ? 'VNĐ / tháng' : 'VNĐ / lô'}
+                      </span>
+                    </div>
                   </div>
                   <h4 className="text-xs font-bold text-slate-900 mt-1 truncate">{ld.customerCompany}</h4>
                   <p className="text-[11px] text-slate-500 mt-0.5">{ld.route}</p>
