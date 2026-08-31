@@ -39,8 +39,7 @@ import {
   Scale,
   Box,
   Receipt,
-  Zap,
-  FileCheck2
+  Zap
 } from 'lucide-react';
 import { InquiryItem, ServiceType, UserProfile } from '../../types';
 
@@ -764,7 +763,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                   </div>
                   <div className="p-3 rounded-xl bg-white border border-amber-200/90 shadow-2xs flex items-center gap-3">
                     <div className="w-9 h-9 rounded-xl bg-amber-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-                      <FileCheck2 className="w-5 h-5" />
+                      <FileText className="w-5 h-5" />
                     </div>
                     <div>
                       <span className="text-[10px] font-bold text-amber-800 uppercase tracking-wide">

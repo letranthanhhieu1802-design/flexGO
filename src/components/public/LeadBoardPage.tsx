@@ -177,20 +177,8 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
     setTimeout(() => setCopiedLeadLinkId(null), 2500);
   };
 
-  // 8 Core Logistics Services + All Modes Filter Navigator
+  // 8 Core Logistics Services Filter Navigator (2 hàng x 4 loại hình)
   const serviceTabs: ServiceTabItem[] = [
-    {
-      id: 'ALL',
-      name: 'All Modes',
-      nameVi: 'Tất cả dịch vụ',
-      badge: 'All Modes',
-      subtext: 'Toàn bộ cơ hội báo giá',
-      serviceType: 'ALL',
-      icon: Layers,
-      colorClass: 'text-indigo-600',
-      bgLightClass: 'bg-indigo-50',
-      activeClass: 'bg-indigo-600 text-white shadow-sm ring-1 ring-indigo-600',
-    },
     {
       id: 'Trucking',
       name: 'Trucking',
@@ -848,19 +836,32 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
         </div>
       </div>
 
-      {/* 1. SERVICE TABS NAVIGATOR (8 Nhóm Dịch Vụ Cốt Lõi + Tất Cả Dịch Vụ) */}
+      {/* 1. SERVICE TABS NAVIGATOR (8 Nhóm Dịch Vụ Cốt Lõi - 2 hàng x 4 cột) */}
       <div className="space-y-2.5">
         <div className="flex items-center justify-between">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-            <SlidersHorizontal className="w-3.5 h-3.5 text-indigo-600" />
-            <span>Phân Loại Theo 8 Nhóm Dịch Vụ Logistics & Vận Tải</span>
-          </h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+              <SlidersHorizontal className="w-3.5 h-3.5 text-indigo-600" />
+              <span>Phân Loại Theo 8 Nhóm Dịch Vụ Logistics & Vận Tải</span>
+            </h2>
+            {selectedService !== 'ALL' && (
+              <button
+                type="button"
+                onClick={() => setSelectedService('ALL')}
+                className="px-2.5 py-0.5 text-[10px] font-extrabold text-indigo-700 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 rounded-full border border-indigo-200 transition-all cursor-pointer flex items-center gap-1"
+                title="Bỏ lọc để xem toàn bộ danh sách lead"
+              >
+                <span>✕ Bỏ chọn</span>
+                <span className="text-slate-400">({leads.length})</span>
+              </button>
+            )}
+          </div>
           <span className="text-xs text-slate-400">
             Hiển thị <strong className="text-slate-800">{filteredAndSortedLeads.length}</strong> / {leads.length} cơ hội
           </span>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-9 gap-2 w-full">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 w-full">
           {serviceTabs.map((tab) => {
             const Icon = tab.icon;
             const isSelected = selectedService === tab.id;
@@ -870,15 +871,15 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
               <button
                 key={tab.id}
                 id={`leadboard-service-tab-${tab.id}`}
-                onClick={() => setSelectedService(tab.id)}
-                className={`group p-2.5 rounded-2xl text-xs font-bold transition-all flex flex-col justify-between cursor-pointer border text-left min-h-[92px] relative ${
+                onClick={() => setSelectedService(prev => prev === tab.id ? 'ALL' : tab.id)}
+                className={`group p-3 rounded-2xl text-xs font-bold transition-all flex flex-col justify-between cursor-pointer border text-left min-h-[96px] relative ${
                   isSelected
                     ? tab.activeClass
                     : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200 shadow-2xs hover:border-slate-300'
                 }`}
               >
                 {/* Top line: Icon + Badge + Lead Count */}
-                <div className="flex items-center justify-between gap-1 w-full mb-1">
+                <div className="flex items-center justify-between gap-1 w-full mb-1.5">
                   <div
                     className={`p-1.5 rounded-xl transition-colors shrink-0 ${
                       isSelected ? 'bg-white/20 text-white' : `${tab.bgLightClass} ${tab.colorClass}`
@@ -886,10 +887,10 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
                   >
                     <Icon className="w-4 h-4" />
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1.5">
                     {tab.badge && (
                       <span
-                        className={`px-1.5 py-0.5 text-[8.5px] font-black rounded-md tracking-tight ${
+                        className={`px-1.5 py-0.5 text-[9px] font-black rounded-md tracking-tight ${
                           isSelected
                             ? 'bg-white/20 text-white'
                             : 'bg-slate-100 text-slate-600 border border-slate-200/80'
@@ -899,7 +900,7 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
                       </span>
                     )}
                     <span
-                      className={`px-1.5 py-0.5 text-[10px] font-black rounded-full shrink-0 ${
+                      className={`px-2 py-0.5 text-[10.5px] font-black rounded-full shrink-0 ${
                         isSelected
                           ? 'bg-white text-slate-900 shadow-2xs'
                           : 'bg-slate-100 text-slate-700 group-hover:bg-slate-200'
@@ -914,7 +915,7 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
                 <div className="min-w-0 mt-auto">
                   <div className="leading-tight truncate text-xs font-black">{tab.nameVi}</div>
                   <div
-                    className={`text-[9.5px] font-medium leading-tight mt-0.5 truncate ${
+                    className={`text-[10px] font-medium leading-tight mt-0.5 truncate ${
                       isSelected ? 'text-white/80' : 'text-slate-400'
                     }`}
                     title={tab.subtext}
