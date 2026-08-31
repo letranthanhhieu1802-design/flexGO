@@ -1261,16 +1261,17 @@ export const LeadInquiryDetailCard: React.FC<LeadInquiryDetailCardProps> = ({
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {/* Đơn giá kỳ vọng */}
+          {/* Đơn giá & Ngân sách dự toán */}
           <div className="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200/90">
             <span className="text-[10px] text-emerald-800 font-bold uppercase block mb-1">
-              ĐƠN GIÁ KỲ VỌNG (TARGET BUDGET)
+              {lead.pricingType === 'CONTRACT' ? 'ĐƠN GIÁ KỲ VỌNG / CHUYẾN' : 'ĐƠN GIÁ KỲ VỌNG (TARGET BUDGET)'}
             </span>
             <span className="text-base sm:text-lg font-black text-emerald-950 font-mono block">
               {lead.unitPriceDisplay}
             </span>
             <span className="text-[10.5px] text-emerald-700 mt-1 block">
-              Tổng dự toán: <strong>{lead.estimatedValueDisplay}</strong>
+              {lead.pricingType === 'CONTRACT' ? 'Tổng ngân sách: ' : 'Tổng dự toán lô: '}
+              <strong className="font-extrabold">{lead.estimatedValueDisplay}</strong>
             </span>
           </div>
 

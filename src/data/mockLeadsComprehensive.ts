@@ -354,7 +354,7 @@ export const comprehensiveInquiries: InquiryItem[] = [
     status: 'Open',
     responsesCount: 5,
     viewsCount: 245,
-    targetBudget: '145,000,000 ₫ / Cont ($5,800)',
+    targetBudget: '1,450,000,000 ₫ / tháng',
     quotationScope: 'ITEMIZED',
     requestedSurcharges: [
       'Phụ phí nhiên liệu BAF / LSS',
@@ -370,7 +370,7 @@ export const comprehensiveInquiries: InquiryItem[] = [
       ocean: {
         mode: 'FCL (Full Container)',
         containerType: '40ft High Cube (40HC)',
-        containerCount: 2,
+        containerCount: 20,
         cbmVolume: 76,
         grossWeightKgs: 22000,
         polPort: 'Cảng Cát Lái (VNCLI), TP.HCM',
@@ -414,7 +414,7 @@ export const comprehensiveInquiries: InquiryItem[] = [
     status: 'Open',
     responsesCount: 3,
     viewsCount: 180,
-    targetBudget: '92,000,000 ₫ / Cont ($3,700)',
+    targetBudget: '92,000,000 ₫',
     quotationScope: 'ALL_IN',
     requestedSurcharges: [
       'Phí cắm điện container lạnh tại bãi cảng (Reefer Monitoring & Electricity)',
@@ -475,7 +475,7 @@ export const comprehensiveInquiries: InquiryItem[] = [
     status: 'Open',
     responsesCount: 2,
     viewsCount: 130,
-    targetBudget: '42,000,000 ₫ / Cont ($1,700)',
+    targetBudget: '42,000,000 ₫',
     quotationScope: 'ALL_IN',
     requestedSurcharges: [
       'Phụ phí hàng nguy hiểm Dangerous Goods Surcharge (DG Surcharge)',
@@ -534,7 +534,7 @@ export const comprehensiveInquiries: InquiryItem[] = [
     status: 'Open',
     responsesCount: 4,
     viewsCount: 156,
-    targetBudget: '12,500,000 ₫ (Toàn bộ lô)',
+    targetBudget: '12,500,000 ₫',
     quotationScope: 'ALL_IN',
     requestedSurcharges: [
       'Phí CFS xếp dỡ kho gom hàng 2 đầu',
@@ -595,7 +595,7 @@ export const comprehensiveInquiries: InquiryItem[] = [
     status: 'Open',
     responsesCount: 3,
     viewsCount: 140,
-    targetBudget: '48,000,000 ₫ / tháng ($1,950)',
+    targetBudget: '48,000,000 ₫ / tháng',
     quotationScope: 'ALL_IN',
     requestedSurcharges: [
       'Cước biển LCL theo CBM cố định theo quý',
@@ -658,7 +658,7 @@ export const comprehensiveInquiries: InquiryItem[] = [
     status: 'Open',
     responsesCount: 4,
     viewsCount: 215,
-    targetBudget: '48,000,000 ₫ ($1,950)',
+    targetBudget: '48,000,000 ₫',
     quotationScope: 'ALL_IN',
     requestedSurcharges: [
       'Phụ phí xăng dầu hàng không Fuel Surcharge (FSC)',
@@ -716,7 +716,7 @@ export const comprehensiveInquiries: InquiryItem[] = [
     status: 'Open',
     responsesCount: 3,
     viewsCount: 175,
-    targetBudget: '16,000,000 ₫ ($650)',
+    targetBudget: '16,000,000 ₫',
     quotationScope: 'ALL_IN',
     requestedSurcharges: [
       'Phí xử lý hỏa tốc ưu tiên lên máy bay Priority On-board',
@@ -777,7 +777,7 @@ export const comprehensiveInquiries: InquiryItem[] = [
     status: 'Open',
     responsesCount: 2,
     viewsCount: 140,
-    targetBudget: '65,000,000 ₫ / chuyến ($2,600)',
+    targetBudget: '260,000,000 ₫ / tháng',
     quotationScope: 'ALL_IN',
     requestedSurcharges: [
       'Phí xử lý kho lạnh sân bay (Cool Chain Handling Fee)',
@@ -837,7 +837,7 @@ export const comprehensiveInquiries: InquiryItem[] = [
     status: 'Open',
     responsesCount: 3,
     viewsCount: 190,
-    targetBudget: '72,000,000 ₫ ($2,900)',
+    targetBudget: '72,000,000 ₫',
     quotationScope: 'ALL_IN',
     requestedSurcharges: [
       'Phụ phí kiểm tra hàng nguy hiểm Dangerous Goods Inspection Fee',
@@ -901,7 +901,7 @@ export const comprehensiveInquiries: InquiryItem[] = [
     status: 'Open',
     responsesCount: 3,
     viewsCount: 165,
-    targetBudget: '32,000,000 ₫ / Cont (Door-to-Door)',
+    targetBudget: '1,280,000,000 ₫ / tháng',
     quotationScope: 'ALL_IN',
     requestedSurcharges: [
       'Cước kéo xe đầu kéo Drayage 2 đầu First-mile & Last-mile',
@@ -955,7 +955,7 @@ export const comprehensiveInquiries: InquiryItem[] = [
     status: 'Open',
     responsesCount: 4,
     viewsCount: 120,
-    targetBudget: '11,500,000 ₫ (Toàn bộ lô)',
+    targetBudget: '11,500,000 ₫',
     quotationScope: 'ALL_IN',
     requestedSurcharges: [
       'Phí bốc xếp dỡ hàng tại kho ga 2 đầu',
@@ -1013,7 +1013,7 @@ export const comprehensiveInquiries: InquiryItem[] = [
     status: 'Open',
     responsesCount: 2,
     viewsCount: 110,
-    targetBudget: '28,000,000 ₫ / Cont',
+    targetBudget: '420,000,000 ₫ / tháng',
     quotationScope: 'ALL_IN',
     requestedSurcharges: [
       'Phí máy phát điện toa xe duy trì nhiệt độ liên tục (Genset Power Fee)',
@@ -1067,7 +1067,7 @@ export const comprehensiveInquiries: InquiryItem[] = [
     status: 'Open',
     responsesCount: 2,
     viewsCount: 155,
-    targetBudget: '68,000,000 ₫ / Cont ($2,750)',
+    targetBudget: '136,000,000 ₫',
     quotationScope: 'ALL_IN',
     requestedSurcharges: [
       'Phí làm thủ tục hải quan liên vận tại Ga Đồng Đăng & Ga Bằng Tường',
@@ -1127,7 +1127,7 @@ export const comprehensiveInquiries: InquiryItem[] = [
     status: 'Open',
     responsesCount: 4,
     viewsCount: 280,
-    targetBudget: '165,000,000 ₫ / tháng (110,000 ₫/m²)',
+    targetBudget: '165,000,000 ₫ / tháng',
     quotationScope: 'ITEMIZED',
     requestedSurcharges: [
       'Phí quản lý kho & Bảo vệ camera an ninh 24/7',
@@ -1180,7 +1180,7 @@ export const comprehensiveInquiries: InquiryItem[] = [
     status: 'Open',
     responsesCount: 3,
     viewsCount: 195,
-    targetBudget: '140,000,000 ₫ / tháng (175,000 ₫/Pallet)',
+    targetBudget: '140,000,000 ₫ / tháng',
     quotationScope: 'ALL_IN',
     requestedSurcharges: [
       'Phí làm thủ tục hải quan giám sát kho ngoại quan điện tử',
@@ -1234,7 +1234,7 @@ export const comprehensiveInquiries: InquiryItem[] = [
     status: 'Open',
     responsesCount: 2,
     viewsCount: 160,
-    targetBudget: '185,000,000 ₫ / tháng (370,000 ₫/Pallet/Tháng)',
+    targetBudget: '185,000,000 ₫ / tháng',
     quotationScope: 'ALL_IN',
     requestedSurcharges: [
       'Phí tiền điện chạy dàn lạnh âm sâu 24/7',
@@ -1289,7 +1289,7 @@ export const comprehensiveInquiries: InquiryItem[] = [
     status: 'Open',
     responsesCount: 2,
     viewsCount: 145,
-    targetBudget: '110,000,000 ₫ / tháng (220,000 ₫/m²)',
+    targetBudget: '110,000,000 ₫ / tháng',
     quotationScope: 'ALL_IN',
     requestedSurcharges: [
       'Phí xử lý môi trường & Hệ thống thu gom nước thải tràn đổ',
@@ -1343,7 +1343,7 @@ export const comprehensiveInquiries: InquiryItem[] = [
     status: 'Open',
     responsesCount: 4,
     viewsCount: 230,
-    targetBudget: '85,000,000 ₫ / tháng (Phí lưu kho + Phí đóng gói 6,500 ₫/đơn)',
+    targetBudget: '85,000,000 ₫ / tháng',
     quotationScope: 'ALL_IN',
     requestedSurcharges: [
       'Phí Pick & Pack bốc hàng theo đơn Barcode',
@@ -1399,7 +1399,7 @@ export const comprehensiveInquiries: InquiryItem[] = [
     status: 'Open',
     responsesCount: 4,
     viewsCount: 165,
-    targetBudget: '8,500,000 ₫ (Bao gồm phí đại lý & hỗ trợ kiểm hóa)',
+    targetBudget: '8,500,000 ₫',
     quotationScope: 'ALL_IN',
     requestedSurcharges: [
       'Phí đại lý hải quan truyền tờ khai điện tử VNACCS',
@@ -1457,7 +1457,7 @@ export const comprehensiveInquiries: InquiryItem[] = [
     status: 'Open',
     responsesCount: 3,
     viewsCount: 180,
-    targetBudget: '95,000,000 ₫ / tháng (Trung bình 1,600,000 ₫ / tờ khai)',
+    targetBudget: '95,000,000 ₫ / tháng',
     quotationScope: 'ALL_IN',
     requestedSurcharges: [
       'Phí lập báo cáo quyết toán hải quan năm (Báo cáo mẫu số 15/BCQT-NVL/GSQL)',
@@ -1515,7 +1515,7 @@ export const comprehensiveInquiries: InquiryItem[] = [
     status: 'Open',
     responsesCount: 2,
     viewsCount: 135,
-    targetBudget: '12,000,000 ₫ (Bao gồm giấy phép khai báo hóa chất)',
+    targetBudget: '12,000,000 ₫',
     quotationScope: 'ALL_IN',
     requestedSurcharges: [
       'Phí xin giấy phép khai báo hóa chất trên Cổng thông tin một cửa Quốc gia',
@@ -1571,7 +1571,7 @@ export const comprehensiveInquiries: InquiryItem[] = [
     status: 'Open',
     responsesCount: 3,
     viewsCount: 140,
-    targetBudget: '4,500,000 ₫ (2 Tờ khai xuất khẩu)',
+    targetBudget: '4,500,000 ₫',
     quotationScope: 'ALL_IN',
     requestedSurcharges: [
       'Phí truyền tờ khai hải quan điện tử xuất khẩu',
@@ -1632,7 +1632,7 @@ export const comprehensiveInquiries: InquiryItem[] = [
     status: 'Open',
     responsesCount: 4,
     viewsCount: 260,
-    targetBudget: '38,000,000 ₫ / chuyến (Bao gồm thông quan 2 đầu)',
+    targetBudget: '1,140,000,000 ₫ / tháng',
     quotationScope: 'ALL_IN',
     requestedSurcharges: [
       'Phí giấy phép liên vận GMS song phương Việt - Trung',
@@ -1686,7 +1686,7 @@ export const comprehensiveInquiries: InquiryItem[] = [
     status: 'Open',
     responsesCount: 3,
     viewsCount: 220,
-    targetBudget: '85,000,000 ₫ / chuyến',
+    targetBudget: '85,000,000 ₫',
     quotationScope: 'ALL_IN',
     requestedSurcharges: [
       'Phí chạy máy phát điện lạnh container suốt 2,200 km hành trình',
@@ -1739,7 +1739,7 @@ export const comprehensiveInquiries: InquiryItem[] = [
     status: 'Open',
     responsesCount: 3,
     viewsCount: 142,
-    targetBudget: '42,000,000 ₫ / lô',
+    targetBudget: '42,000,000 ₫',
     quotationScope: 'ALL_IN',
     requestedSurcharges: [
       'Phí sang tải xe tại bãi chuyển hàng cửa khẩu Mộc Bài / Bavet',
@@ -1909,7 +1909,7 @@ export const comprehensiveInquiries: InquiryItem[] = [
     status: 'Open',
     responsesCount: 3,
     viewsCount: 280,
-    targetBudget: '950,000,000 ₫ / tháng (Trung bình 3,100,000 ₫ / TEU)',
+    targetBudget: '950,000,000 ₫ / tháng',
     quotationScope: 'ALL_IN',
     requestedSurcharges: [
       'Phí nâng hạ container tại bãi cảng Cái Mép & bãi ICD Sóng Thần',
@@ -1963,7 +1963,7 @@ export const comprehensiveInquiries: InquiryItem[] = [
     status: 'Open',
     responsesCount: 3,
     viewsCount: 255,
-    targetBudget: '720,000,000 ₫ / tháng (Trung bình 12,000,000 ₫ / Cont Door-to-Door)',
+    targetBudget: '720,000,000 ₫ / tháng',
     quotationScope: 'ALL_IN',
     requestedSurcharges: [
       'Phí kéo xe đầu chặng First-mile (Hải Dương → Cảng Hải Phòng)',
@@ -1993,6 +1993,15 @@ export const comprehensiveInquiries: InquiryItem[] = [
 
 export const comprehensiveSupplierLeads: SupplierLeadItem[] = comprehensiveInquiries.map((inq, idx) => {
   const leadStatus: LeadStatus = inq.status === 'Closed' ? 'Closed' : inq.status === 'Quoted' ? 'Quoted' : 'Open';
+  const isContract = inq.pricingType === 'CONTRACT';
+  
+  // Clean raw numeric value from budget
+  const rawNum = parseInt(inq.targetBudget?.replace(/\D/g, '') || '50000000', 10);
+  
+  // Format standard Vietnamese Currency: e.g. "48,000,000 ₫" or "125,000,000 ₫ / tháng"
+  const formattedVND = rawNum.toLocaleString('vi-VN') + ' ₫';
+  const displayTotal = isContract ? `${formattedVND} / tháng` : formattedVND;
+
   return {
     id: `lead-${String(idx + 1).padStart(2, '0')}`,
     code: inq.code,
@@ -2008,12 +2017,12 @@ export const comprehensiveSupplierLeads: SupplierLeadItem[] = comprehensiveInqui
     destination: inq.destination,
     route: inq.route || `${inq.origin} → ${inq.destination}`,
     pricingType: inq.pricingType || 'SPOT',
-    contractTerm: inq.contractTerm || (inq.pricingType === 'CONTRACT' ? 'Hợp đồng 12 tháng' : 'Theo lô / Chuyến lẻ'),
+    contractTerm: inq.contractTerm || (isContract ? 'Hợp đồng 12 tháng' : 'Theo lô / Chuyến lẻ'),
     volumeDisplay: inq.committedVolume || inq.weightVolume,
-    unitPriceVND: inq.pricingType === 'CONTRACT' ? Math.round((parseInt(inq.targetBudget?.replace(/\D/g, '') || '50000000') / 20)) : parseInt(inq.targetBudget?.replace(/\D/g, '') || '50000000'),
-    unitPriceDisplay: inq.targetBudget || 'Thỏa thuận',
-    estimatedValueVND: parseInt(inq.targetBudget?.replace(/\D/g, '') || '50000000'),
-    estimatedValueDisplay: inq.targetBudget || 'Thỏa thuận',
+    unitPriceVND: isContract ? Math.round(rawNum / 20) : rawNum,
+    unitPriceDisplay: isContract ? `${Math.round(rawNum / 20).toLocaleString('vi-VN')} ₫ / chuyến` : formattedVND,
+    estimatedValueVND: rawNum,
+    estimatedValueDisplay: displayTotal,
     createdDate: inq.createdDate,
     dueDate: inq.expiryDate,
     status: leadStatus,
