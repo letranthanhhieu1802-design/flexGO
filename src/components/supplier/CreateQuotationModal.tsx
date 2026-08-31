@@ -392,10 +392,10 @@ export const CreateQuotationModal: React.FC<CreateQuotationModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/75 backdrop-blur-xs overflow-y-auto animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-3 lg:p-4 bg-slate-950/80 backdrop-blur-xs overflow-y-auto animate-in fade-in duration-200">
       <div 
         id="supplier-create-quotation-modal"
-        className="w-full max-w-5xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden my-4 flex flex-col max-h-[94vh]"
+        className="w-full max-w-[1440px] xl:max-w-[96vw] bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden my-auto flex flex-col h-[94vh] max-h-[96vh]"
       >
         {/* Modal Header */}
         <div className="px-6 py-4 bg-gradient-to-r from-slate-900 via-emerald-950 to-slate-900 text-white flex items-center justify-between shrink-0 border-b border-emerald-900/50">
