@@ -83,6 +83,7 @@ import { CrossBorderInquiryForm, CROSS_BORDER_VAS_ITEMS } from './inquiryForms/C
 import { RailInquiryForm, RAIL_VAS_ITEMS } from './inquiryForms/RailInquiryForm';
 import { ProjectInquiryForm, PROJECT_VAS_ITEMS } from './inquiryForms/ProjectInquiryForm';
 import { InquirySummaryConfirmModal } from './InquirySummaryConfirmModal';
+import { generateFlexGOCode } from '../../utils/codeGenerator';
 
 export interface IndustryOption {
   id: string;
@@ -1175,7 +1176,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
 
   const handleConfirmFinalPublish = () => {
     if (draftInquiry) {
-      const generatedCode = `INQ-${Math.floor(10000 + Math.random() * 90000)}`;
+      const generatedCode = generateFlexGOCode(new Date(), Math.floor(1 + Math.random() * 50));
       const finalPublishedInquiry: InquiryItem = {
         ...draftInquiry,
         id: `inq-${Date.now()}`,

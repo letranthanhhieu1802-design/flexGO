@@ -132,11 +132,7 @@ export const InquiriesPage: React.FC<InquiriesPageProps> = ({
   // Convert or merge InquiryItem into a SupplierLeadItem representation for LeadInquiryDetailCard
   const convertInquiryToLead = (inq: InquiryItem): SupplierLeadItem => {
     const matchedLead = leads.find(
-      (l) =>
-        l.inquiryCode === inq.code ||
-        l.code === inq.code ||
-        l.code.replace('LG-', 'INQ-') === inq.code ||
-        (inq.code && l.code.includes(inq.code.replace('INQ-', '')))
+      (l) => l.code === inq.code || l.inquiryCode === inq.code || l.code === inq.leadCode
     );
 
     if (matchedLead) {

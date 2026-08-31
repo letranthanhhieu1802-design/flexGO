@@ -254,7 +254,7 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({
           matchScore: existingLead?.matchScore || 98,
           quotesCount: quotesCount,
           viewsCount: inq.viewsCount || existingLead?.viewsCount || 15,
-          isUnlocked: Boolean(existingLead?.isUnlocked || customer.source === 'FLEXCREDIT_UNLOCKED' || inq.code === 'INQ-00124'),
+          isUnlocked: Boolean(existingLead?.isUnlocked || customer.source === 'FLEXCREDIT_UNLOCKED' || inq.code === 'FG-2608250001'),
           isSaved: true,
         };
 
@@ -276,7 +276,7 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({
             ...lead,
             quotesCount: quotesCount,
             status: myQuote ? 'Quoted' : lead.status,
-            isUnlocked: Boolean(lead.isUnlocked || customer.source === 'FLEXCREDIT_UNLOCKED' || lead.inquiryCode === 'INQ-00124'),
+            isUnlocked: Boolean(lead.isUnlocked || customer.source === 'FLEXCREDIT_UNLOCKED' || lead.inquiryCode === 'FG-2608250001'),
           });
         }
       }
@@ -288,8 +288,8 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({
     if (result.length === 0) {
       const fallbackLead: SupplierLeadItem = {
         id: `lead-cust-${customer.id}-01`,
-        code: `LG-00${120 + Math.abs(customer.companyName.length % 80)}`,
-        inquiryCode: `INQ-00${120 + Math.abs(customer.companyName.length % 80)}`,
+        code: `FG-2608${String(10 + Math.abs(customer.companyName.length % 20)).padStart(2, '0')}0001`,
+        inquiryCode: `FG-2608${String(10 + Math.abs(customer.companyName.length % 20)).padStart(2, '0')}0001`,
         customerCompany: customer.companyName,
         contactName: customer.contactPerson,
         contactRole: customer.contactRole,
@@ -405,7 +405,7 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4 pt-3 border-t border-amber-200/60 text-xs">
               <div>
                 <span className="text-[10px] text-amber-700 uppercase font-semibold">Mã Lead Gốc:</span>
-                <p className="font-mono font-bold text-slate-900 mt-0.5">{details?.leadCode || 'LG-00124'}</p>
+                <p className="font-mono font-bold text-slate-900 mt-0.5">{details?.leadCode || 'FG-2608250001'}</p>
               </div>
               <div>
                 <span className="text-[10px] text-amber-700 uppercase font-semibold">Ngày Mở Khóa:</span>
@@ -449,7 +449,7 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4 pt-3 border-t border-indigo-200/60 text-xs">
               <div>
                 <span className="text-[10px] text-indigo-700 uppercase font-semibold">Mã Báo Giá / Gói Thầu:</span>
-                <p className="font-mono font-bold text-slate-900 mt-0.5">{details?.quoteCode || 'QUO-89201'} ({details?.inquiryCode || 'INQ-00124'})</p>
+                <p className="font-mono font-bold text-slate-900 mt-0.5">{details?.quoteCode || 'QUO-89201'} ({details?.inquiryCode || 'FG-2608250001'})</p>
               </div>
               <div>
                 <span className="text-[10px] text-indigo-700 uppercase font-semibold">Hợp Đồng Ký Kết:</span>

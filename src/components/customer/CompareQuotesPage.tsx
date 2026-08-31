@@ -46,7 +46,7 @@ export const CompareQuotesPage: React.FC<CompareQuotesPageProps> = ({
   onAwardQuote,
 }) => {
   const [selectedInquiryCode, setSelectedInquiryCode] = useState<string>(
-    initialInquiryCode || inquiries[0]?.code || 'INQ-00124'
+    initialInquiryCode || inquiries[0]?.code || 'FG-2608250001'
   );
   const [awardedQuoteCode, setAwardedQuoteCode] = useState<string | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState<QuotationItem | null>(null);

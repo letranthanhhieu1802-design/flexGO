@@ -191,7 +191,7 @@ export function App() {
 
       // Check corresponding quotation if any
       const relatedQuote = quotations.find((q) => q.inquiryCode === lead.inquiryCode || q.inquiryCode === lead.code);
-      const existingOpp = opportunities.find((o) => o.leadCode === lead.code || o.inquiryCode === lead.inquiryCode || o.code === `OPP-${lead.code.replace('LG-', '')}`);
+      const existingOpp = opportunities.find((o) => o.leadCode === lead.code || o.inquiryCode === lead.inquiryCode || o.code === `OPP-${lead.code.replace('FG-', '').replace('LG-', '')}`);
 
       const stage: PipelineStage = lead.status;
 
@@ -208,7 +208,7 @@ export function App() {
 
       return {
         id: existingOpp?.id || `opp-${lead.id}`,
-        code: existingOpp?.code || `OPP-${lead.code.replace('LG-', '')}`,
+        code: existingOpp?.code || `OPP-${lead.code.replace('FG-', '').replace('LG-', '')}`,
         leadCode: lead.code,
         inquiryCode: lead.inquiryCode,
         title: existingOpp?.title || `${lead.customerCompany} - ${lead.route}`,
@@ -375,7 +375,7 @@ export function App() {
     const newQuote: QuotationItem = {
       id: `quote-${Date.now()}`,
       code: quoteData.code || `QUO-${Math.floor(10000 + Math.random() * 90000)}`,
-      inquiryCode: quoteData.inquiryCode || 'INQ-00124',
+      inquiryCode: quoteData.inquiryCode || 'FG-2608250001',
       inquiryTitle: quoteData.inquiryTitle || 'HCMC → Hanoi Trucking Service',
       customerCompany: quoteData.customerCompany || 'ABC Manufacturing Co., Ltd.',
       supplierId: currentUser.id,
@@ -971,7 +971,7 @@ export function App() {
           );
 
         case 'customer-inquiry-detail': {
-          const inqCode = currentView.params?.inquiryCode || 'INQ-00124';
+          const inqCode = currentView.params?.inquiryCode || 'FG-2608250001';
           const inq = inquiries.find((i) => i.code === inqCode) || inquiries[0];
           return (
             <InquiryDetailWorkspace
@@ -1299,7 +1299,7 @@ export function App() {
           setActiveQuotingLead(null);
         }}
         onSubmit={handleCreateQuotationSubmit}
-        presetInquiryCode={activeQuotingLead?.code || 'INQ-00124'}
+        presetInquiryCode={activeQuotingLead?.code || 'FG-2608250001'}
         presetInquiryTitle={
           activeQuotingLead
             ? `${activeQuotingLead.route} (${activeQuotingLead.serviceType})`

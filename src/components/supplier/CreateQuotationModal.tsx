@@ -50,7 +50,7 @@ export const CreateQuotationModal: React.FC<CreateQuotationModalProps> = ({
   isOpen,
   onClose,
   onSubmit,
-  presetInquiryCode = 'INQ-00124',
+  presetInquiryCode = 'FG-2608250001',
   presetInquiryTitle = 'HCMC → Hanoi Trucking Service (FTL 15-Ton)',
   presetCustomerCompany = 'ABC Manufacturing Vietnam Co., Ltd.',
   presetRoute = 'HCMC → Hanoi (1,720 km via QL1A/Expressway)',

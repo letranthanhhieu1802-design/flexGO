@@ -457,8 +457,8 @@ export interface InquiryAttachment {
 
 export interface InquiryItem {
   id: string;
-  code: string; // e.g. INQ-00124
-  leadCode?: string; // e.g. LG-00124 on Lead Board
+  code: string; // e.g. FG-2608310001
+  leadCode?: string; // e.g. FG-2608310001 (Unified Single Source of Truth)
   title: string;
   customerCompany: string;
   contactPerson: string;
@@ -706,7 +706,7 @@ export type SupplierLeadSourceType =
 
 export interface SupplierLeadItem {
   id: string;
-  code: string; // e.g. LG-00124
+  code: string; // e.g. FG-2608310001
   customerCompany: string;
   contactName: string;
   contactRole: string;

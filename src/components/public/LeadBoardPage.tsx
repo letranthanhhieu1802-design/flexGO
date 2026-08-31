@@ -1011,7 +1011,7 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
           <input
             id="leadboard-search-input"
             type="text"
-            placeholder="Tìm kiếm theo Mã Lead (VD: LG-58992, LG-00124, LG-34569)..."
+            placeholder="Tìm kiếm theo Mã Lead (VD: FG-2608310001, FG-2608250001, FG-2608280002)..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-10 py-2.5 text-xs bg-slate-50 hover:bg-slate-50/80 focus:bg-white border border-slate-200 rounded-xl focus:border-indigo-500 focus:outline-hidden transition-all placeholder:text-slate-400 font-medium text-slate-900"
@@ -1168,7 +1168,7 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
                       </h3>
                       <p className="text-xs text-slate-500 leading-relaxed">
                         {searchTerm
-                          ? 'Vui lòng kiểm tra lại chính xác Mã Lead (VD: LG-58992, LG-00124, LG-34569) hoặc xóa tìm kiếm để xem toàn bộ sàn cơ hội.'
+                          ? 'Vui lòng kiểm tra lại chính xác Mã Lead (VD: FG-2608310001, FG-2608250001) hoặc xóa tìm kiếm để xem toàn bộ sàn cơ hội.'
                           : 'Thử điều chỉnh lại bộ lọc hoặc chọn danh mục dịch vụ khác để khám phá các cơ hội khả dụng.'}
                       </p>
                       <button
