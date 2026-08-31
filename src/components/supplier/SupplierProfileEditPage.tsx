@@ -59,6 +59,7 @@ import {
   POPULAR_POD_BY_REGION 
 } from '../../data/tradeLanesData';
 import { SupplierProfileDetailPage } from '../public/SupplierProfileDetailPage';
+import { SupplierServiceCapabilityModal } from './SupplierServiceCapabilityModal';
 
 interface SupplierProfileEditPageProps {
   currentSpecialistId?: string;
@@ -188,24 +189,23 @@ export const SupplierProfileEditPage: React.FC<SupplierProfileEditPageProps> = (
     setProfile({ ...profile, certifications: updated });
   };
 
+  // Capability Modal State
+  const [isCapabilityModalOpen, setIsCapabilityModalOpen] = useState<boolean>(false);
+
   // Service Portfolio Operations
   const handleAddNewService = () => {
-    const newService = {
-      id: `srv-custom-${Date.now()}`,
-      serviceType: 'Trucking' as ServiceType,
-      title: 'Dịch Vụ Vận Tải Mới',
-      highlight: 'Cam kết chất lượng cao & đội ngũ chuyên nghiệp',
-      description: 'Mô tả chi tiết giải pháp vận tải, quy trình vận hành và ưu thế nổi bật...',
-      keySpecs: ['Phương tiện đạt chuẩn', 'Bảo hiểm 100%', 'Theo dõi GPS 24/7'],
-      suitableFor: 'Hàng công nghiệp, tiêu dùng, thương mại',
-      slaCommitment: 'Giao hàng đúng hẹn 99.5%',
-      pricingSummary: 'Liên hệ báo giá chi tiết theo sản lượng',
-    };
-    setProfile({
-      ...profile,
-      services: [...profile.services, newService],
-    });
-    setEditingServiceIndex(profile.services.length);
+    setIsCapabilityModalOpen(true);
+  };
+
+  const handleSaveCapabilityServices = (declaredList: any[]) => {
+    if (declaredList && declaredList.length > 0) {
+      setProfile((prev) => ({
+        ...prev,
+        services: declaredList,
+      }));
+      setSaveToast(`Đã lưu ${declaredList.length} dịch vụ từ Cây Khai Báo Năng Lực!`);
+      setTimeout(() => setSaveToast(null), 4000);
+    }
   };
 
   const handleRemoveService = (index: number) => {
@@ -2192,6 +2192,14 @@ export const SupplierProfileEditPage: React.FC<SupplierProfileEditPageProps> = (
           </button>
         </div>
       </div>
+
+      {/* Service Capability Tree Modal */}
+      <SupplierServiceCapabilityModal
+        isOpen={isCapabilityModalOpen}
+        onClose={() => setIsCapabilityModalOpen(false)}
+        onSave={handleSaveCapabilityServices}
+        existingServices={profile.services}
+      />
     </div>
   );
 };
