@@ -60,6 +60,7 @@ import {
   CurrentView
 } from '../../types';
 import { QuoteConfirmationModal } from './QuoteConfirmationModal';
+import { LeadInquiryDetailCard } from '../public/LeadInquiryDetailCard';
 
 interface SupplierLeadCompareModalProps {
   isOpen: boolean;
@@ -97,6 +98,7 @@ export const SupplierLeadCompareModal: React.FC<SupplierLeadCompareModalProps> =
 
   // Local State & Immediate Unlock sync
   const [isLocallyUnlocked, setIsLocallyUnlocked] = useState(isUnlocked);
+  const [activeModalTab, setActiveModalTab] = useState<'matrix' | 'inquiry'>('matrix');
   const [activeTab, setActiveTab] = useState<'compare' | 'submit_quote'>('compare');
   const [copiedPhone, setCopiedPhone] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
@@ -879,10 +881,10 @@ export const SupplierLeadCompareModal: React.FC<SupplierLeadCompareModalProps> =
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-950/75 backdrop-blur-xs z-50 flex items-center justify-center p-2 sm:p-3 md:p-4 lg:p-5 overflow-y-auto animate-in fade-in duration-200">
+    <div className="fixed inset-0 bg-slate-950/75 backdrop-blur-xs z-50 flex items-center justify-center p-2 sm:p-3 md:p-4 overflow-y-auto animate-in fade-in duration-200">
       <div 
         id="supplier-lead-intelligence-modal"
-        className="bg-white rounded-3xl max-w-[98vw] sm:max-w-[96vw] xl:max-w-[94vw] 2xl:max-w-[1720px] w-full max-h-[96vh] md:max-h-[95vh] shadow-2xl border border-slate-200 flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 my-auto"
+        className="bg-white rounded-3xl max-w-[1440px] xl:max-w-[96vw] w-full max-h-[96vh] md:max-h-[95vh] h-[94vh] shadow-2xl border border-slate-200 flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 my-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* TOP MODAL HEADER */}
@@ -944,21 +946,53 @@ export const SupplierLeadCompareModal: React.FC<SupplierLeadCompareModalProps> =
             </div>
           </div>
 
-          {/* Sub Navigation Tabs */}
+          {/* Sub Navigation Tabs: Tab 1 Matrix & Tab 2 Inquiry */}
           <div className="flex items-center gap-2 mt-4 pt-3 border-t border-white/10">
-            <div className="px-4 py-2 rounded-xl text-xs font-bold bg-white text-slate-900 shadow-md flex items-center gap-2">
+            <button
+              type="button"
+              id="compare-modal-tab-matrix-btn"
+              onClick={() => setActiveModalTab('matrix')}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                activeModalTab === 'matrix'
+                  ? 'bg-white text-slate-900 shadow-md'
+                  : 'bg-white/10 text-white/80 hover:bg-white/20 hover:text-white'
+              }`}
+            >
               <BarChart3 className="w-3.5 h-3.5 text-indigo-600" />
-              <span>Ma Trận So Sánh Báo Giá Thị Trường ({competitorQuotes.length})</span>
+              <span>1. Ma Trận So Sánh Báo Giá Thị Trường ({competitorQuotes.length})</span>
               {isAlreadyQuoted && (
                 <span className="px-2 py-0.5 bg-emerald-500 text-white text-[10px] font-black rounded-full shadow-2xs">
                   ✓ Đã Báo Giá
                 </span>
               )}
-            </div>
+            </button>
+
+            <button
+              type="button"
+              id="compare-modal-tab-inquiry-btn"
+              onClick={() => setActiveModalTab('inquiry')}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                activeModalTab === 'inquiry'
+                  ? 'bg-white text-slate-900 shadow-md'
+                  : 'bg-white/10 text-white/80 hover:bg-white/20 hover:text-white'
+              }`}
+            >
+              <FileText className="w-3.5 h-3.5 text-indigo-600" />
+              <span>2. Chi Tiết Yêu Cầu Lead (Inquiry Info)</span>
+            </button>
           </div>
         </div>
 
         {/* MODAL MAIN CONTENT SCROLL AREA */}
+        {activeModalTab === 'inquiry' ? (
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-50/60 space-y-4 animate-in fade-in duration-150">
+            <LeadInquiryDetailCard
+              lead={lead}
+              isUnlocked={effectiveUnlocked}
+              isCustomerView={false}
+            />
+          </div>
+        ) : (
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
 
           {/* 1. CUSTOMER PROFILE INTELLIGENCE SECTION */}
@@ -1329,35 +1363,11 @@ export const SupplierLeadCompareModal: React.FC<SupplierLeadCompareModalProps> =
                                 </div>
                               </div>
 
-                              {/* Ranking Status Badge */}
-                              <div className="flex flex-wrap gap-1 justify-center mt-1">
-                                {myRankAnalytics.isTop1 ? (
-                                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-600 text-white flex items-center gap-1 shadow-xs animate-pulse">
-                                    🥇 TOP 1 BEST PRICE
-                                  </span>
-                                ) : (
-                                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500 text-white flex items-center gap-1 shadow-xs">
-                                    🥈 Top {myRankAnalytics.rank} / {myRankAnalytics.totalQuotes}
-                                  </span>
-                                )}
-                              </div>
-
-                              {/* Fast Winning Price AI Button / Status */}
-                              {isAlreadyQuoted ? (
+                              {isAlreadyQuoted && (
                                 <div className="mt-2 w-full py-1 px-2 bg-emerald-600/15 border border-emerald-300 text-emerald-900 font-bold rounded-xl text-[10px] flex items-center justify-center gap-1 select-none">
                                   <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                                   <span>Báo Giá Đã Được Ghi Nhận</span>
                                 </div>
-                              ) : (
-                                <button
-                                  type="button"
-                                  onClick={handleApplyWinningPrice}
-                                  className="mt-2 w-full py-1.5 px-2 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black rounded-xl text-[10px] shadow-xs flex items-center justify-center gap-1 cursor-pointer transition-all hover:scale-[1.02]"
-                                  title="Tự động bóc tách đơn giá để thấp hơn đối thủ #1 2%"
-                                >
-                                  <Zap className="w-3 h-3 text-amber-950 fill-amber-950" />
-                                  <span>⚡ Áp Dụng Giá Thắng Top 1 (-2%)</span>
-                                </button>
                               )}
                             </div>
                           </th>
@@ -1376,7 +1386,7 @@ export const SupplierLeadCompareModal: React.FC<SupplierLeadCompareModalProps> =
                                 <div className="text-left">
                                   <div className="font-extrabold text-slate-900 text-xs flex items-center gap-1">
                                     <span>
-                                      {effectiveUnlocked ? quote.supplierName : `Nhà xe Đối thủ #${idx + 1} (${idx === 0 ? 'Top 1 Price' : 'Đang đấu giá'})`}
+                                      {effectiveUnlocked ? quote.supplierName : `Nhà xe Đối thủ #${idx + 1}`}
                                     </span>
                                     {effectiveUnlocked && <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />}
                                   </div>
@@ -1388,25 +1398,6 @@ export const SupplierLeadCompareModal: React.FC<SupplierLeadCompareModalProps> =
                                     </span>
                                   </div>
                                 </div>
-                              </div>
-
-                              {/* Badges */}
-                              <div className="flex flex-wrap gap-1 justify-center mt-1">
-                                {quote.isBestPrice && (
-                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                    🏆 Giá Thấp Nhất
-                                  </span>
-                                )}
-                                {quote.isFastestTransit && (
-                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-cyan-100 text-cyan-800 border border-cyan-200">
-                                    ⚡ Nhanh Nhất
-                                  </span>
-                                )}
-                                {quote.isBestTerms && (
-                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-purple-100 text-purple-800 border border-purple-200">
-                                    💳 Công Nợ 45 Ngày
-                                  </span>
-                                )}
                               </div>
                             </div>
                           </th>
@@ -1438,64 +1429,21 @@ export const SupplierLeadCompareModal: React.FC<SupplierLeadCompareModalProps> =
                         {/* Interactive Unit Price (User) */}
                         {isBiddingActive && (
                           <td className="py-3 px-4 text-center border-x-2 border-emerald-500 bg-emerald-100/50 shadow-inner">
-                            <div className="space-y-1">
-                              <div className="text-lg font-black text-emerald-900 font-mono tracking-tight flex items-center justify-center gap-1">
-                                <span>{formatVND(myUnitPrice)}</span>
-                                <span className="text-xs font-semibold text-slate-700">/{leadVolumeParsed.unitName}</span>
-                              </div>
-                              <div>
-                                {myRankAnalytics.isTop1 ? (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-600 text-white shadow-2xs">
-                                    🥇 Thấp hơn Top 1 {formatVND(Math.abs(myRankAnalytics.diffFromTop1))}
-                                  </span>
-                                ) : (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
-                                    +{formatVND(myRankAnalytics.diffFromTop1)} vs Top 1
-                                  </span>
-                                )}
-                              </div>
-                              <div className="text-[10px] text-emerald-800 font-semibold">
-                                {myRankAnalytics.diffPercentVsTarget < 0
-                                  ? `Giảm ${Math.abs(myRankAnalytics.diffPercentVsTarget).toFixed(1)}% vs Mục tiêu`
-                                  : `+${myRankAnalytics.diffPercentVsTarget.toFixed(1)}% vs Mục tiêu`}
-                              </div>
-                              <span className="text-[9px] text-slate-500 block italic">
-                                (Tự động tính từ các mục bên dưới)
-                              </span>
+                            <div className="text-base font-black text-emerald-900 font-mono tracking-tight flex items-center justify-center gap-1">
+                              <span>{formatVND(myUnitPrice)}</span>
+                              <span className="text-xs font-semibold text-slate-700">/{leadVolumeParsed.unitName}</span>
                             </div>
                           </td>
                         )}
 
                         {competitorQuotes.map((q) => {
                           const uPrice = q.unitPrice ?? Math.round(q.totalPrice / leadVolumeParsed.quantity);
-                          const targetUnit = lead.unitPriceVND && lead.unitPriceVND > 0
-                            ? lead.unitPriceVND
-                            : Math.round((lead.estimatedValueVND || 50000000) / leadVolumeParsed.quantity);
-                          const diffU = uPrice - targetUnit;
-                          const pctU = targetUnit > 0 ? (diffU / targetUnit) * 100 : 0;
 
                           return (
                             <td key={q.id} className="py-3 px-5 text-center border-l border-slate-100">
                               {effectiveUnlocked ? (
-                                <div className="space-y-1">
-                                  <div className="text-base font-black text-emerald-700 font-mono">
-                                    {formatVND(uPrice)} <span className="text-[11px] font-semibold text-slate-600">/{leadVolumeParsed.unitName}</span>
-                                  </div>
-                                  <div>
-                                    {pctU < -0.5 ? (
-                                      <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
-                                        Giảm {Math.abs(pctU).toFixed(1)}% vs Mục tiêu
-                                      </span>
-                                    ) : pctU > 0.5 ? (
-                                      <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-800">
-                                        +{Math.abs(pctU).toFixed(1)}% vs Mục tiêu
-                                      </span>
-                                    ) : (
-                                      <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold bg-indigo-100 text-indigo-800">
-                                        Khớp 100% Mục tiêu
-                                      </span>
-                                    )}
-                                  </div>
+                                <div className="text-base font-black text-emerald-700 font-mono">
+                                  {formatVND(uPrice)} <span className="text-[11px] font-semibold text-slate-600">/{leadVolumeParsed.unitName}</span>
                                 </div>
                               ) : (
                                 <div className="space-y-1">
@@ -1526,21 +1474,16 @@ export const SupplierLeadCompareModal: React.FC<SupplierLeadCompareModalProps> =
                                 {formatVND(myUnitBase)} <span className="text-[10px] text-slate-500 font-normal">/{leadVolumeParsed.unitName}</span>
                               </div>
                             ) : (
-                              <div className="space-y-1">
-                                <div className="flex items-center gap-1">
-                                  <input
-                                    type="number"
-                                    step="10000"
-                                    min="0"
-                                    value={myUnitBase}
-                                    onChange={(e) => setMyUnitBase(Math.max(0, parseInt(e.target.value) || 0))}
-                                    className="w-full text-right font-mono font-bold text-xs px-2 py-1.5 rounded-lg border-2 border-emerald-400 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-2xs"
-                                  />
-                                  <span className="text-[10px] text-slate-500 font-medium shrink-0">₫/{leadVolumeParsed.unitName}</span>
-                                </div>
-                                <div className="text-[10px] text-emerald-700 font-mono font-semibold text-right">
-                                  ~ {formatVND(myUnitBase)}
-                                </div>
+                              <div className="flex items-center gap-1">
+                                <input
+                                  type="number"
+                                  step="10000"
+                                  min="0"
+                                  value={myUnitBase}
+                                  onChange={(e) => setMyUnitBase(Math.max(0, parseInt(e.target.value) || 0))}
+                                  className="w-full text-right font-mono font-bold text-xs px-2 py-1.5 rounded-lg border-2 border-emerald-400 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-2xs"
+                                />
+                                <span className="text-[10px] text-slate-500 font-medium shrink-0">₫/{leadVolumeParsed.unitName}</span>
                               </div>
                             )}
                           </td>
@@ -1570,21 +1513,16 @@ export const SupplierLeadCompareModal: React.FC<SupplierLeadCompareModalProps> =
                                 {formatVND(myUnitFuel)} <span className="text-[10px] text-slate-500 font-normal">/{leadVolumeParsed.unitName}</span>
                               </div>
                             ) : (
-                              <div className="space-y-1">
-                                <div className="flex items-center gap-1">
-                                  <input
-                                    type="number"
-                                    step="10000"
-                                    min="0"
-                                    value={myUnitFuel}
-                                    onChange={(e) => setMyUnitFuel(Math.max(0, parseInt(e.target.value) || 0))}
-                                    className="w-full text-right font-mono font-bold text-xs px-2 py-1.5 rounded-lg border-2 border-emerald-400 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-2xs"
-                                  />
-                                  <span className="text-[10px] text-slate-500 font-medium shrink-0">₫/{leadVolumeParsed.unitName}</span>
-                                </div>
-                                <div className="text-[10px] text-emerald-700 font-mono font-semibold text-right">
-                                  ~ {formatVND(myUnitFuel)}
-                                </div>
+                              <div className="flex items-center gap-1">
+                                <input
+                                  type="number"
+                                  step="10000"
+                                  min="0"
+                                  value={myUnitFuel}
+                                  onChange={(e) => setMyUnitFuel(Math.max(0, parseInt(e.target.value) || 0))}
+                                  className="w-full text-right font-mono font-bold text-xs px-2 py-1.5 rounded-lg border-2 border-emerald-400 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-2xs"
+                                />
+                                <span className="text-[10px] text-slate-500 font-medium shrink-0">₫/{leadVolumeParsed.unitName}</span>
                               </div>
                             )}
                           </td>
@@ -1614,21 +1552,16 @@ export const SupplierLeadCompareModal: React.FC<SupplierLeadCompareModalProps> =
                                 {formatVND(myUnitHandling)} <span className="text-[10px] text-slate-500 font-normal">/{leadVolumeParsed.unitName}</span>
                               </div>
                             ) : (
-                              <div className="space-y-1">
-                                <div className="flex items-center gap-1">
-                                  <input
-                                    type="number"
-                                    step="10000"
-                                    min="0"
-                                    value={myUnitHandling}
-                                    onChange={(e) => setMyUnitHandling(Math.max(0, parseInt(e.target.value) || 0))}
-                                    className="w-full text-right font-mono font-bold text-xs px-2 py-1.5 rounded-lg border-2 border-emerald-400 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-2xs"
-                                  />
-                                  <span className="text-[10px] text-slate-500 font-medium shrink-0">₫/{leadVolumeParsed.unitName}</span>
-                                </div>
-                                <div className="text-[10px] text-emerald-700 font-mono font-semibold text-right">
-                                  ~ {formatVND(myUnitHandling)}
-                                </div>
+                              <div className="flex items-center gap-1">
+                                <input
+                                  type="number"
+                                  step="10000"
+                                  min="0"
+                                  value={myUnitHandling}
+                                  onChange={(e) => setMyUnitHandling(Math.max(0, parseInt(e.target.value) || 0))}
+                                  className="w-full text-right font-mono font-bold text-xs px-2 py-1.5 rounded-lg border-2 border-emerald-400 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-2xs"
+                                />
+                                <span className="text-[10px] text-slate-500 font-medium shrink-0">₫/{leadVolumeParsed.unitName}</span>
                               </div>
                             )}
                           </td>
@@ -1658,21 +1591,16 @@ export const SupplierLeadCompareModal: React.FC<SupplierLeadCompareModalProps> =
                                 {formatVND(myUnitDoc)} <span className="text-[10px] text-slate-500 font-normal">/{leadVolumeParsed.unitName}</span>
                               </div>
                             ) : (
-                              <div className="space-y-1">
-                                <div className="flex items-center gap-1">
-                                  <input
-                                    type="number"
-                                    step="10000"
-                                    min="0"
-                                    value={myUnitDoc}
-                                    onChange={(e) => setMyUnitDoc(Math.max(0, parseInt(e.target.value) || 0))}
-                                    className="w-full text-right font-mono font-bold text-xs px-2 py-1.5 rounded-lg border-2 border-emerald-400 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-2xs"
-                                  />
-                                  <span className="text-[10px] text-slate-500 font-medium shrink-0">₫/{leadVolumeParsed.unitName}</span>
-                                </div>
-                                <div className="text-[10px] text-emerald-700 font-mono font-semibold text-right">
-                                  ~ {formatVND(myUnitDoc)}
-                                </div>
+                              <div className="flex items-center gap-1">
+                                <input
+                                  type="number"
+                                  step="10000"
+                                  min="0"
+                                  value={myUnitDoc}
+                                  onChange={(e) => setMyUnitDoc(Math.max(0, parseInt(e.target.value) || 0))}
+                                  className="w-full text-right font-mono font-bold text-xs px-2 py-1.5 rounded-lg border-2 border-emerald-400 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-2xs"
+                                />
+                                <span className="text-[10px] text-slate-500 font-medium shrink-0">₫/{leadVolumeParsed.unitName}</span>
                               </div>
                             )}
                           </td>
@@ -2914,6 +2842,7 @@ export const SupplierLeadCompareModal: React.FC<SupplierLeadCompareModalProps> =
           )}
 
         </div>
+        )}
 
         {/* MODAL FOOTER */}
         <div className="bg-slate-50 border-t border-slate-200 px-6 py-3.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs text-slate-500 shrink-0">
