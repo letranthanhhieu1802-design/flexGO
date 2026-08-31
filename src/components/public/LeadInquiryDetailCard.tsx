@@ -194,14 +194,9 @@ export const LeadInquiryDetailCard: React.FC<LeadInquiryDetailCardProps> = ({
             <Info className="w-5 h-5" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h3 className="text-sm sm:text-base font-black text-slate-900 tracking-tight">
-                Chi Tiết Yêu Cầu Báo Giá ({lead.code})
-              </h3>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-indigo-50 text-indigo-700 border border-indigo-200">
-                {lead.serviceType}
-              </span>
-            </div>
+            <h3 className="text-sm sm:text-base font-black text-slate-900 tracking-tight">
+              Chi tiết yêu cầu
+            </h3>
             <p className="text-[11px] text-slate-500 mt-0.5">
               {isCustomerView
                 ? 'Quy chuẩn kỹ thuật, phụ phí, chứng từ và yêu cầu dịch vụ đã khai báo'
@@ -454,20 +449,15 @@ export const LeadInquiryDetailCard: React.FC<LeadInquiryDetailCardProps> = ({
       )}
 
       {/* ──────────────────────────────────────────────────────────
-          MỤC 1: CHỌN LOẠI HÌNH DỊCH VỤ
+          MỤC 1: LOẠI HÌNH DỊCH VỤ
           ────────────────────────────────────────────────────────── */}
       <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-black flex items-center justify-center shrink-0">
-              1
-            </span>
-            <span className="text-xs font-black uppercase tracking-wider text-slate-800">
-              CHỌN LOẠI HÌNH DỊCH VỤ
-            </span>
-          </div>
-          <span className="text-[10.5px] font-extrabold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-200">
-            Dịch vụ: {lead.serviceType}
+        <div className="flex items-center gap-2">
+          <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-black flex items-center justify-center shrink-0">
+            1
+          </span>
+          <span className="text-xs font-black uppercase tracking-wider text-slate-800">
+            LOẠI HÌNH DỊCH VỤ
           </span>
         </div>
 
@@ -490,21 +480,12 @@ export const LeadInquiryDetailCard: React.FC<LeadInquiryDetailCardProps> = ({
           MỤC 2: HÌNH THỨC BÁO GIÁ / LOẠI HÌNH HỢP ĐỒNG
           ────────────────────────────────────────────────────────── */}
       <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-black flex items-center justify-center shrink-0">
-              2
-            </span>
-            <span className="text-xs font-black uppercase tracking-wider text-slate-800">
-              HÌNH THỨC BÁO GIÁ / LOẠI HÌNH HỢP ĐỒNG
-            </span>
-          </div>
-          <span className={`text-[10.5px] font-extrabold px-2.5 py-0.5 rounded-full border ${
-            lead.pricingType === 'CONTRACT'
-              ? 'bg-purple-50 text-purple-700 border-purple-200'
-              : 'bg-blue-50 text-blue-700 border-blue-200'
-          }`}>
-            {lead.pricingType === 'CONTRACT' ? 'Hợp Đồng Dài Hạn (CONTRACT)' : 'Theo Lô / Chuyến Lẻ (SPOT)'}
+        <div className="flex items-center gap-2">
+          <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-black flex items-center justify-center shrink-0">
+            2
+          </span>
+          <span className="text-xs font-black uppercase tracking-wider text-slate-800">
+            HÌNH THỨC BÁO GIÁ / LOẠI HÌNH HỢP ĐỒNG
           </span>
         </div>
 
@@ -540,21 +521,30 @@ export const LeadInquiryDetailCard: React.FC<LeadInquiryDetailCardProps> = ({
           MỤC 3: PHÂN NHÓM HÀNG HÓA & QUY CÁCH ĐÓNG GÓI
           ────────────────────────────────────────────────────────── */}
       <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-black flex items-center justify-center shrink-0">
-              3
-            </span>
-            <span className="text-xs font-black uppercase tracking-wider text-slate-800">
-              PHÂN NHÓM HÀNG HÓA & QUY CÁCH ĐÓNG GÓI
-            </span>
-          </div>
-          <span className="text-[10.5px] font-extrabold text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
-            Phân nhóm: {lead.urgency === 'High Value' ? 'Hàng giá trị cao' : (lead.urgency === 'Urgent' ? 'Hàng gấp / Hỏa tốc' : 'Hàng tiêu chuẩn')}
+        <div className="flex items-center gap-2">
+          <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-black flex items-center justify-center shrink-0">
+            3
+          </span>
+          <span className="text-xs font-black uppercase tracking-wider text-slate-800">
+            PHÂN NHÓM HÀNG HÓA & QUY CÁCH ĐÓNG GÓI
           </span>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5">
+          <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80">
+            <span className="text-[10px] text-slate-400 font-bold uppercase block mb-0.5">NGÀNH HÀNG</span>
+            <span className="text-xs font-black text-slate-900 truncate block" title={inq?.industry || lead.industry || 'Dệt may & Hàng tiêu dùng'}>
+              {inq?.industry || lead.industry || 'Dệt may & Hàng tiêu dùng'}
+            </span>
+          </div>
+
+          <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80">
+            <span className="text-[10px] text-slate-400 font-bold uppercase block mb-0.5">PHÂN NHÓM HÀNG</span>
+            <span className="text-xs font-black text-amber-900 truncate block">
+              {lead.cargoClassification || inq?.cargoClassification || (lead.urgency === 'High Value' ? 'Hàng giá trị cao' : (lead.urgency === 'Urgent' ? 'Hàng hỏa tốc / gấp' : 'Hàng thông thường'))}
+            </span>
+          </div>
+
           <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80">
             <span className="text-[10px] text-slate-400 font-bold uppercase block mb-0.5">TÊN HÀNG HÓA</span>
             <span className="text-xs font-black text-slate-900 truncate block" title={lead.cargoDetails}>
@@ -663,17 +653,12 @@ export const LeadInquiryDetailCard: React.FC<LeadInquiryDetailCardProps> = ({
           MỤC 4: THÔNG TIN CHI TIẾT YÊU CẦU ([SERVICE TYPE])
           ────────────────────────────────────────────────────────── */}
       <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-black flex items-center justify-center shrink-0">
-              4
-            </span>
-            <span className="text-xs font-black uppercase tracking-wider text-slate-800">
-              THÔNG TIN CHI TIẾT YÊU CẦU ({sType.toUpperCase()})
-            </span>
-          </div>
-          <span className="text-[10.5px] font-black text-slate-500">
-            Mã Lead: {lead.code}
+        <div className="flex items-center gap-2">
+          <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-black flex items-center justify-center shrink-0">
+            4
+          </span>
+          <span className="text-xs font-black uppercase tracking-wider text-slate-800">
+            THÔNG TIN CHI TIẾT YÊU CẦU ({sType.toUpperCase()})
           </span>
         </div>
 
@@ -1030,17 +1015,12 @@ export const LeadInquiryDetailCard: React.FC<LeadInquiryDetailCardProps> = ({
           MỤC 5: YÊU CẦU PHỤ PHÍ & ĐIỀU KHOẢN BÁO GIÁ (SURCHARGES & TERMS)
           ────────────────────────────────────────────────────────── */}
       <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-black flex items-center justify-center shrink-0">
-              5
-            </span>
-            <span className="text-xs font-black uppercase tracking-wider text-slate-800">
-              YÊU CẦU PHỤ PHÍ & ĐIỀU KHOẢN BÁO GIÁ (SURCHARGES & TERMS)
-            </span>
-          </div>
-          <span className="text-[10.5px] font-extrabold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-            {quotationScope.includes('All-in') ? '✓ Báo Giá Trọn Gói (All-in)' : 'Bóc Tách Chi Tiết'}
+        <div className="flex items-center gap-2">
+          <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-black flex items-center justify-center shrink-0">
+            5
+          </span>
+          <span className="text-xs font-black uppercase tracking-wider text-slate-800">
+            YÊU CẦU PHỤ PHÍ & ĐIỀU KHOẢN BÁO GIÁ (SURCHARGES & TERMS)
           </span>
         </div>
 
@@ -1085,17 +1065,12 @@ export const LeadInquiryDetailCard: React.FC<LeadInquiryDetailCardProps> = ({
           MỤC 6: DỊCH VỤ GIÁ TRỊ GIA TĂNG (VAS) KHÁCH HÀNG CHỌN
           ────────────────────────────────────────────────────────── */}
       <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-black flex items-center justify-center shrink-0">
-              6
-            </span>
-            <span className="text-xs font-black uppercase tracking-wider text-slate-800">
-              DỊCH VỤ GIÁ TRỊ GIA TĂNG (VAS) KHÁCH HÀNG CHỌN
-            </span>
-          </div>
-          <span className="text-[10.5px] font-extrabold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-            {selectedVAS.length} Dịch vụ VAS đã chọn
+        <div className="flex items-center gap-2">
+          <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-black flex items-center justify-center shrink-0">
+            6
+          </span>
+          <span className="text-xs font-black uppercase tracking-wider text-slate-800">
+            DỊCH VỤ GIÁ TRỊ GIA TĂNG (VAS) KHÁCH HÀNG CHỌN
           </span>
         </div>
 
@@ -1121,17 +1096,12 @@ export const LeadInquiryDetailCard: React.FC<LeadInquiryDetailCardProps> = ({
           MỤC 7: ĐƠN GIÁ KỲ VỌNG & THỜI HẠN BÁO GIÁ
           ────────────────────────────────────────────────────────── */}
       <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-black flex items-center justify-center shrink-0">
-              7
-            </span>
-            <span className="text-xs font-black uppercase tracking-wider text-slate-800">
-              ĐƠN GIÁ KỲ VỌNG & THỜI HẠN BÁO GIÁ
-            </span>
-          </div>
-          <span className="text-[10.5px] font-black text-slate-500">
-            Tiền tệ: {inq?.currency || 'VND'}
+        <div className="flex items-center gap-2">
+          <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-black flex items-center justify-center shrink-0">
+            7
+          </span>
+          <span className="text-xs font-black uppercase tracking-wider text-slate-800">
+            ĐƠN GIÁ KỲ VỌNG & THỜI HẠN BÁO GIÁ
           </span>
         </div>
 
