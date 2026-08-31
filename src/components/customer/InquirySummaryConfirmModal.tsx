@@ -501,7 +501,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                 </p>
               </div>
 
-              {/* Nếu là FTL và có trường riêng ftlWeightKg hoặc ftlVolumeCbm */}
+              {/* Khối lượng / Thể tích chung nếu có */}
               {inquiry.ftlWeightKg || inquiry.ftlVolumeCbm ? (
                 <>
                   <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
@@ -513,23 +513,12 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                     <p className="font-extrabold text-indigo-900 mt-0.5 truncate">{inquiry.ftlVolumeCbm ? `${inquiry.ftlVolumeCbm} CBM` : 'Theo xe'}</p>
                   </div>
                 </>
-              ) : trucking?.loadType?.includes('LTL') && (trucking.ltlGrossWeightKg || trucking.ltlCbm) ? (
-                <>
-                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Tổng Trọng Lượng Thực Tế</span>
-                    <p className="font-extrabold text-indigo-900 mt-0.5 truncate">{trucking.ltlGrossWeightKg ? `${Number(trucking.ltlGrossWeightKg).toLocaleString('vi-VN')} kg` : 'Theo kiện'}</p>
-                  </div>
-                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Tổng Thể Tích (CBM)</span>
-                    <p className="font-extrabold text-indigo-900 mt-0.5 truncate">{trucking.ltlCbm ? `${trucking.ltlCbm} CBM` : 'Theo kiện'}</p>
-                  </div>
-                </>
-              ) : inquiry.serviceType === 'Project Cargo' ? null : (
+              ) : (inquiry.serviceType !== 'Warehousing' && inquiry.serviceType !== 'Project Cargo' && inquiry.weightVolume) ? (
                 <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
                   <span className="text-[10px] font-bold text-slate-400 uppercase block">Khối Lượng / Thể Tích</span>
-                  <p className="font-extrabold text-indigo-900 mt-0.5 truncate">{inquiry.weightVolume || 'Theo thỏa thuận'}</p>
+                  <p className="font-extrabold text-indigo-900 mt-0.5 truncate">{inquiry.weightVolume}</p>
                 </div>
-              )}
+              ) : null}
 
               {/* Yêu cầu bảo quản */}
               {inquiry.preservationRequirement && (
@@ -541,6 +530,113 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                 </div>
               )}
             </div>
+
+            {/* Chi tiết quy cách kiện, kích thước, thể tích & trọng lượng tính cước (Gom chung vào Section 3 Hàng Hóa) */}
+            {inquiry.serviceType === 'Air Freight' && air ? (
+              <div className="p-3 rounded-xl bg-sky-50/70 border border-sky-200/80 mb-2 text-xs">
+                <div className="flex items-center gap-2 font-bold text-sky-950 mb-2">
+                  <span>✈️ Quy Cách Đóng Kiện & Trọng Lượng Tính Cước Hàng Không (CW/VW):</span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+                  <div className="bg-white p-2 rounded-lg border border-sky-200">
+                    <span className="text-[10px] text-sky-700 block font-semibold">Số kiện hàng:</span>
+                    <span className="font-extrabold text-slate-900">{air.packageCount || 1} kiện</span>
+                  </div>
+                  <div className="bg-white p-2 rounded-lg border border-sky-200">
+                    <span className="text-[10px] text-sky-700 block font-semibold">Kích thước (DxRxC):</span>
+                    <span className="font-extrabold text-slate-900">{air.dimensionsCm || 'Theo quy chuẩn'}</span>
+                  </div>
+                  <div className="bg-white p-2 rounded-lg border border-sky-200">
+                    <span className="text-[10px] text-sky-700 block font-semibold">Tổng Gross Weight:</span>
+                    <span className="font-extrabold text-slate-900">{air.grossWeightKgs ? `${Number(air.grossWeightKgs).toLocaleString('vi-VN')} kg` : 'Theo kiện'}</span>
+                  </div>
+                  <div className="bg-white p-2 rounded-lg border border-sky-200">
+                    <span className="text-[10px] text-sky-700 block font-semibold">Quy đổi VW (Thể tích):</span>
+                    <span className="font-extrabold text-indigo-900">{air.volumetricWeightKgs ? `${Number(air.volumetricWeightKgs).toLocaleString('vi-VN')} kg` : '—'}</span>
+                  </div>
+                  <div className="bg-white p-2 rounded-lg border border-sky-200">
+                    <span className="text-[10px] text-sky-700 block font-semibold">Trọng lượng tính cước (CW):</span>
+                    <span className="font-extrabold text-sky-950">{air.chargeableWeightKgs ? `${Number(air.chargeableWeightKgs).toLocaleString('vi-VN')} kg` : '—'}</span>
+                  </div>
+                  <div className="bg-white p-2 rounded-lg border border-sky-200">
+                    <span className="text-[10px] text-sky-700 block font-semibold">Xếp chồng (Stackable):</span>
+                    <span className={`font-extrabold ${air.stackable ? 'text-emerald-700' : 'text-amber-700'}`}>
+                      {air.stackable ? '✓ Cho phép chồng' : '⚠️ Không được chồng'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ) : (isLcl && ocean) ? (
+              <div className="p-3 rounded-xl bg-cyan-50/70 border border-cyan-200/80 mb-2 text-xs">
+                <div className="flex items-center gap-2 font-bold text-cyan-950 mb-2">
+                  <span>📦 Quy Cách Kiện & Khối Lượng Tính Cước Hàng Lẻ Đường Biển (LCL/CFS):</span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+                  <div className="bg-white p-2 rounded-lg border border-cyan-200">
+                    <span className="text-[10px] text-cyan-700 block font-semibold">Số lượng kiện:</span>
+                    <span className="font-extrabold text-slate-900">{ocean.lclPieces || 1} kiện</span>
+                  </div>
+                  <div className="bg-white p-2 rounded-lg border border-cyan-200">
+                    <span className="text-[10px] text-cyan-700 block font-semibold">Kích thước DxRxC:</span>
+                    <span className="font-extrabold text-slate-900">
+                      {ocean.lclDimensions ? `${ocean.lclDimensions.lengthCm}x${ocean.lclDimensions.widthCm}x${ocean.lclDimensions.heightCm} cm` : 'Tiêu chuẩn'}
+                    </span>
+                  </div>
+                  <div className="bg-white p-2 rounded-lg border border-cyan-200">
+                    <span className="text-[10px] text-cyan-700 block font-semibold">Tổng thể tích (CBM):</span>
+                    <span className="font-extrabold text-slate-900">{ocean.cbmVolume || ocean.lclCbm || 0} CBM</span>
+                  </div>
+                  <div className="bg-white p-2 rounded-lg border border-cyan-200">
+                    <span className="text-[10px] text-cyan-700 block font-semibold">Gross Weight:</span>
+                    <span className="font-extrabold text-slate-900">{Number(ocean.grossWeightKgs || ocean.lclGrossWeightKg || 0).toLocaleString('vi-VN')} kg</span>
+                  </div>
+                  <div className="bg-white p-2 rounded-lg border border-cyan-200">
+                    <span className="text-[10px] text-cyan-700 block font-semibold">Chargeable Weight (CW):</span>
+                    <span className="font-extrabold text-indigo-900">{Number(ocean.chargeableWeightKgs || ocean.lclChargeableWeightKg || 0).toLocaleString('vi-VN')} kg</span>
+                  </div>
+                  <div className="bg-white p-2 rounded-lg border border-cyan-200">
+                    <span className="text-[10px] text-cyan-700 block font-semibold">Revenue Ton (RT):</span>
+                    <span className="font-extrabold text-cyan-950">{ocean.revenueTon || ocean.lclRevenueTon || 0} RT</span>
+                  </div>
+                </div>
+              </div>
+            ) : (trucking?.loadType?.includes('LTL') && trucking) ? (
+              <div className="p-3 rounded-xl bg-indigo-50/70 border border-indigo-200/80 mb-2 text-xs">
+                <div className="flex items-center gap-2 font-bold text-indigo-950 mb-2">
+                  <span>🚛 Quy Cách Kiện & Khối Lượng Hàng Ghép LTL Đường Bộ:</span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+                  <div className="bg-white p-2 rounded-lg border border-indigo-200">
+                    <span className="text-[10px] text-indigo-700 block font-semibold">Số lượng kiện:</span>
+                    <span className="font-extrabold text-slate-900">{trucking.ltlPieces || 1} kiện</span>
+                  </div>
+                  <div className="bg-white p-2 rounded-lg border border-indigo-200">
+                    <span className="text-[10px] text-indigo-700 block font-semibold">Kích thước DxRxC:</span>
+                    <span className="font-extrabold text-slate-900">
+                      {trucking.ltlDimensions ? `${trucking.ltlDimensions.lengthCm}x${trucking.ltlDimensions.widthCm}x${trucking.ltlDimensions.heightCm} cm` : 'Tiêu chuẩn'}
+                    </span>
+                  </div>
+                  <div className="bg-white p-2 rounded-lg border border-indigo-200">
+                    <span className="text-[10px] text-indigo-700 block font-semibold">Tổng thể tích (CBM):</span>
+                    <span className="font-extrabold text-slate-900">{trucking.ltlCbm || 0} CBM</span>
+                  </div>
+                  <div className="bg-white p-2 rounded-lg border border-indigo-200">
+                    <span className="text-[10px] text-indigo-700 block font-semibold">Gross Weight:</span>
+                    <span className="font-extrabold text-slate-900">{Number(trucking.ltlGrossWeightKg || 0).toLocaleString('vi-VN')} kg</span>
+                  </div>
+                  <div className="bg-white p-2 rounded-lg border border-indigo-200">
+                    <span className="text-[10px] text-indigo-700 block font-semibold">Trọng lượng tính cước:</span>
+                    <span className="font-extrabold text-indigo-900">{Number(trucking.ltlChargeableWeightKg || 0).toLocaleString('vi-VN')} kg</span>
+                  </div>
+                  <div className="bg-white p-2 rounded-lg border border-indigo-200">
+                    <span className="text-[10px] text-indigo-700 block font-semibold">Xếp chồng (Stackable):</span>
+                    <span className={`font-extrabold ${trucking.ltlStackable ? 'text-emerald-700' : 'text-amber-700'}`}>
+                      {trucking.ltlStackable ? '✓ Cho phép chồng' : '⚠️ Không được chồng'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ) : null}
 
             {/* Dữ liệu hàng đông lạnh & hàng nguy hiểm */}
             {(inquiry.cargoClassification === 'Reefer' || inquiry.cargoClassification === 'Hazmat') && (
@@ -613,7 +709,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
               </span>
             </div>
 
-            {/* 4.1. LỘ TRÌNH / ĐỊA ĐIỂM CHUYÊN BIỆT THEO DỊCH VỤ */}
+            {/* 4.1. LỘ TRÌNH / ĐỊA ĐIỂM CHUYÊN BIỆT THEO TỪNG NHÓM DỊCH VỤ */}
             {inquiry.serviceType === 'Warehousing' ? (
               /* 4.1. DỊCH VỤ KHO BÃI (CHỈ 1 ĐỊA BÀN DUY NHẤT) */
               <div className="mb-4">
@@ -767,41 +863,290 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                   </div>
                 )}
               </div>
-            ) : (
-              /* 4.1. VẬN TẢI CHẶNG LẺ (TRUCKING, SEA, AIR, RAIL, CROSS-BORDER): TUYẾN GIAO NHẬN 2 ĐẦU */
+            ) : inquiry.serviceType === 'Air Freight' ? (
+              /* 4.1. HÀNG KHÔNG (AIR FREIGHT ROUTING & SÂN BAY) */
+              <div className="mb-4">
+                <span className="text-[10.5px] font-black text-slate-700 uppercase tracking-wider block mb-2.5">
+                  4.1. Hành Trình Vận Tải Hàng Không & Sân Bay (Air Routing & Flight Terminals):
+                </span>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                  {/* CỘT TRÁI: SÂN BAY ĐI (AOD) + DOOR PICKUP NẾU CÓ */}
+                  <div className="p-3.5 rounded-2xl bg-sky-50/60 border border-sky-200 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between font-bold text-sky-950 mb-2.5 pb-2 border-b border-sky-200/80">
+                        <div className="flex items-center gap-2">
+                          <span className="w-3 h-3 rounded-full bg-sky-600 shrink-0 ring-2 ring-sky-300" />
+                          <span className="uppercase text-[11px] font-black tracking-wider">
+                            Sân Bay Đi / Cất Cánh (Airport of Departure - AOD)
+                          </span>
+                        </div>
+                        <span className="px-2.5 py-0.5 text-[10px] font-black bg-sky-100 text-sky-800 rounded-full border border-sky-300">
+                          {air?.originServiceTerm ? `Term: ${air.originServiceTerm}` : 'AIRPORT'}
+                        </span>
+                      </div>
+
+                      <div className="p-3 rounded-xl bg-white border border-sky-200/90 shadow-2xs">
+                        <span className="text-[10px] font-extrabold text-sky-700 uppercase tracking-wide">
+                          🛫 Sân Bay Xuất Phát (AOD):
+                        </span>
+                        <p className="font-extrabold text-slate-900 text-sm mt-0.5">
+                          {air?.originAirport || inquiry.origin || 'Sân bay đi (AOD)'}
+                        </p>
+                      </div>
+
+                      {/* Địa chỉ kho lấy hàng Shipper nếu là Door pickup */}
+                      {(air?.originServiceTerm === 'Door' || air?.pickupAddress) && (
+                        <div className="mt-2.5 p-3 rounded-xl bg-sky-100/70 border border-sky-200">
+                          <span className="text-[10px] font-black text-sky-900 uppercase flex items-center gap-1.5">
+                            <span>🚪 Địa Chỉ Kho Lấy Hàng (Shipper Pickup Address):</span>
+                          </span>
+                          <p className="font-bold text-slate-900 text-xs mt-1">
+                            {air?.pickupAddress || inquiry.origin || 'Lấy tận kho người gửi'}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* CỘT PHẢI: SÂN BAY ĐẾN (AOA) + DOOR DELIVERY NẾU CÓ */}
+                  <div className="p-3.5 rounded-2xl bg-indigo-50/60 border border-indigo-200 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between font-bold text-indigo-950 mb-2.5 pb-2 border-b border-indigo-200/80">
+                        <div className="flex items-center gap-2">
+                          <span className="w-3 h-3 rounded-full bg-indigo-600 shrink-0 ring-2 ring-indigo-300" />
+                          <span className="uppercase text-[11px] font-black tracking-wider">
+                            Sân Bay Đến / Hạ Cánh (Airport of Arrival - AOA)
+                          </span>
+                        </div>
+                        <span className="px-2.5 py-0.5 text-[10px] font-black bg-indigo-100 text-indigo-800 rounded-full border border-indigo-300">
+                          {air?.destinationServiceTerm ? `Term: ${air.destinationServiceTerm}` : 'AIRPORT'}
+                        </span>
+                      </div>
+
+                      <div className="p-3 rounded-xl bg-white border border-indigo-200/90 shadow-2xs">
+                        <span className="text-[10px] font-extrabold text-indigo-700 uppercase tracking-wide">
+                          🛬 Sân Bay Đích (AOA):
+                        </span>
+                        <p className="font-extrabold text-slate-900 text-sm mt-0.5">
+                          {air?.destinationAirport || inquiry.destination || 'Sân bay đến (AOA)'}
+                        </p>
+                      </div>
+
+                      {/* Địa chỉ kho giao hàng Consignee nếu là Door delivery */}
+                      {(air?.destinationServiceTerm === 'Door' || air?.deliveryAddress) && (
+                        <div className="mt-2.5 p-3 rounded-xl bg-indigo-100/70 border border-indigo-200">
+                          <span className="text-[10px] font-black text-indigo-900 uppercase flex items-center gap-1.5">
+                            <span>🚪 Địa Chỉ Kho Giao Hàng (Consignee Delivery Address):</span>
+                          </span>
+                          <p className="font-bold text-slate-900 text-xs mt-1">
+                            {air?.deliveryAddress || inquiry.destination || 'Giao tận kho người nhận'}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : isOcean ? (
+              /* 4.1. ĐƯỜNG BIỂN (FCL CẢNG-CẢNG HOẶC LCL KHO CFS) */
               <div className="mb-4">
                 <span className="text-[10.5px] font-black text-slate-700 uppercase tracking-wider block mb-2.5">
                   {isLcl
-                    ? '4.1. Địa Chỉ Lấy Hàng Kho CFS (Origin CFS) & Giao Hàng Kho CFS (Destination CFS):'
-                    : isFcl
-                    ? '4.1. Cảng Bốc Hàng (POL) & Cảng Dỡ Hàng (POD):'
-                    : '4.1. Điểm Lấy Hàng & Điểm Giao Hàng:'}
+                    ? '4.1. Lộ Trình Hàng Lẻ CFS Đóng Ghép (Origin CFS ➔ Destination CFS):'
+                    : '4.1. Tuyến Vận Tải Đường Biển Quốc Tế & Cảng Biển (POL ➔ POD):'}
                 </span>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                  {/* CỘT TRÁI: CÁC ĐIỂM BỐC HÀNG / CẢNG BỐC / KHO CFS */}
+                  {/* CỘT TRÁI: POL / KHO CFS XUẤT PHÁT */}
+                  <div className="p-3.5 rounded-2xl bg-cyan-50/60 border border-cyan-200 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between font-bold text-cyan-950 mb-2.5 pb-2 border-b border-cyan-200/80">
+                        <div className="flex items-center gap-2">
+                          <span className="w-3 h-3 rounded-full bg-cyan-600 shrink-0 ring-2 ring-cyan-300" />
+                          <span className="uppercase text-[11px] font-black tracking-wider">
+                            {isLcl ? 'Kho CFS Xuất Phát (Origin CFS Warehouse)' : 'Cảng Bốc Hàng (Port of Loading - POL)'}
+                          </span>
+                        </div>
+                        <span className="px-2.5 py-0.5 text-[10px] font-black bg-cyan-100 text-cyan-800 rounded-full border border-cyan-300">
+                          {ocean?.originServiceTerm ? `Term: ${ocean.originServiceTerm}` : (isLcl ? 'CFS' : 'CY')}
+                        </span>
+                      </div>
+
+                      <div className="p-3 rounded-xl bg-white border border-cyan-200/90 shadow-2xs">
+                        <span className="text-[10px] font-extrabold text-cyan-700 uppercase tracking-wide">
+                          {isLcl ? '📦 Kho CFS Bốc Hàng:' : '⚓ Cảng Biển Bốc Hàng (POL):'}
+                        </span>
+                        <p className="font-extrabold text-slate-900 text-sm mt-0.5">
+                          {ocean?.polPort || inquiry.origin || 'Cảng bốc / Kho CFS'}
+                        </p>
+                      </div>
+
+                      {/* Địa chỉ kho lấy hàng Shipper nếu Door */}
+                      {(ocean?.originServiceTerm === 'Door' || ocean?.pickupAddress) && (
+                        <div className="mt-2.5 p-3 rounded-xl bg-cyan-100/70 border border-cyan-200">
+                          <span className="text-[10px] font-black text-cyan-900 uppercase flex items-center gap-1.5">
+                            <span>📍 Địa Chỉ Kho Đóng Hàng (Shipper Warehouse):</span>
+                          </span>
+                          <p className="font-bold text-slate-900 text-xs mt-1">
+                            {ocean?.pickupAddress || inquiry.origin || 'Kéo cont / Lấy tại kho người gửi'}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* CỘT PHẢI: POD / KHO CFS ĐÍCH */}
+                  <div className="p-3.5 rounded-2xl bg-teal-50/60 border border-teal-200 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between font-bold text-teal-950 mb-2.5 pb-2 border-b border-teal-200/80">
+                        <div className="flex items-center gap-2">
+                          <span className="w-3 h-3 rounded-full bg-teal-600 shrink-0 ring-2 ring-teal-300" />
+                          <span className="uppercase text-[11px] font-black tracking-wider">
+                            {isLcl ? 'Kho CFS Đích Đến (Destination CFS Warehouse)' : 'Cảng Dỡ Hàng (Port of Discharge - POD)'}
+                          </span>
+                        </div>
+                        <span className="px-2.5 py-0.5 text-[10px] font-black bg-teal-100 text-teal-800 rounded-full border border-teal-300">
+                          {ocean?.destinationServiceTerm ? `Term: ${ocean.destinationServiceTerm}` : (isLcl ? 'CFS' : 'CY')}
+                        </span>
+                      </div>
+
+                      <div className="p-3 rounded-xl bg-white border border-teal-200/90 shadow-2xs">
+                        <span className="text-[10px] font-extrabold text-teal-700 uppercase tracking-wide">
+                          {isLcl ? '📦 Kho CFS Giao Hàng:' : '⚓ Cảng Biển Dỡ Hàng (POD):'}
+                        </span>
+                        <p className="font-extrabold text-slate-900 text-sm mt-0.5">
+                          {ocean?.podPort || inquiry.destination || 'Cảng dỡ / Kho CFS'}
+                        </p>
+                      </div>
+
+                      {/* Địa chỉ kho giao hàng Consignee nếu Door */}
+                      {(ocean?.destinationServiceTerm === 'Door' || ocean?.deliveryAddress) && (
+                        <div className="mt-2.5 p-3 rounded-xl bg-teal-100/70 border border-teal-200">
+                          <span className="text-[10px] font-black text-teal-900 uppercase flex items-center gap-1.5">
+                            <span>📍 Địa Chỉ Kho Giao Hàng (Consignee Warehouse):</span>
+                          </span>
+                          <p className="font-bold text-slate-900 text-xs mt-1">
+                            {ocean?.deliveryAddress || inquiry.destination || 'Kéo cont / Giao tại kho người nhận'}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : inquiry.serviceType === 'Rail Freight' ? (
+              /* 4.1. ĐƯỜNG SẮT (RAIL FREIGHT ROUTING GA - GA) */
+              <div className="mb-4">
+                <span className="text-[10.5px] font-black text-slate-700 uppercase tracking-wider block mb-2.5">
+                  4.1. Hành Trình Đường Sắt Ga - Ga (Rail Freight Routing):
+                </span>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                  {/* GA ĐI */}
+                  <div className="p-3.5 rounded-2xl bg-amber-50/60 border border-amber-200 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between font-bold text-amber-950 mb-2.5 pb-2 border-b border-amber-200/80">
+                        <div className="flex items-center gap-2">
+                          <span className="w-3 h-3 rounded-full bg-amber-600 shrink-0 ring-2 ring-amber-300" />
+                          <span className="uppercase text-[11px] font-black tracking-wider">
+                            Ga Đi & Điểm Bốc Hàng (Origin Railway Station)
+                          </span>
+                        </div>
+                        <span className="px-2.5 py-0.5 text-[10px] font-black bg-amber-100 text-amber-800 rounded-full border border-amber-300">
+                          Ga Xuất Phát
+                        </span>
+                      </div>
+                      <div className="p-3 rounded-xl bg-white border border-amber-200/90 shadow-2xs">
+                        <span className="text-[10px] font-extrabold text-amber-700 uppercase tracking-wide">
+                          🚂 Ga Tàu Hỏa Đi:
+                        </span>
+                        <p className="font-extrabold text-slate-900 text-sm mt-0.5">
+                          {rail?.originStation || inquiry.origin || 'Ga bốc hàng'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* GA ĐẾN */}
+                  <div className="p-3.5 rounded-2xl bg-orange-50/60 border border-orange-200 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between font-bold text-orange-950 mb-2.5 pb-2 border-b border-orange-200/80">
+                        <div className="flex items-center gap-2">
+                          <span className="w-3 h-3 rounded-full bg-orange-600 shrink-0 ring-2 ring-orange-300" />
+                          <span className="uppercase text-[11px] font-black tracking-wider">
+                            Ga Đến & Điểm Dỡ Hàng (Destination Railway Station)
+                          </span>
+                        </div>
+                        <span className="px-2.5 py-0.5 text-[10px] font-black bg-orange-100 text-orange-800 rounded-full border border-orange-300">
+                          Ga Đích
+                        </span>
+                      </div>
+                      <div className="p-3 rounded-xl bg-white border border-orange-200/90 shadow-2xs">
+                        <span className="text-[10px] font-extrabold text-orange-700 uppercase tracking-wide">
+                          🚂 Ga Tàu Hỏa Đến:
+                        </span>
+                        <p className="font-extrabold text-slate-900 text-sm mt-0.5">
+                          {rail?.destinationStation || inquiry.destination || 'Ga dỡ hàng'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : inquiry.serviceType === 'Cross-Border' ? (
+              /* 4.1. XUYÊN BIÊN GIỚI (HÀNH LANG VẬN TẢI BỘ XUYÊN BIÊN GIỚI) */
+              <div className="mb-4">
+                <span className="text-[10.5px] font-black text-slate-700 uppercase tracking-wider block mb-2.5">
+                  4.1. Hành Lang Vận Tải Bộ Xuyên Biên Giới (Cross-Border Corridor):
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                  <div className="p-3.5 rounded-2xl bg-emerald-50/60 border border-emerald-200">
+                    <span className="text-[10px] font-extrabold text-emerald-800 uppercase block mb-1">
+                      📍 Tỉnh / Thành Phố Xuất Phát:
+                    </span>
+                    <div className="p-2.5 bg-white rounded-xl border border-emerald-200 font-extrabold text-slate-900 text-sm">
+                      {crossBorder?.originCity || inquiry.origin || 'Việt Nam'}
+                    </div>
+                  </div>
+                  <div className="p-3.5 rounded-2xl bg-amber-50/60 border border-amber-200">
+                    <span className="text-[10px] font-extrabold text-amber-800 uppercase block mb-1">
+                      🚧 Cửa Khẩu Thông Quan Quốc Tế:
+                    </span>
+                    <div className="p-2.5 bg-white rounded-xl border border-amber-200 font-extrabold text-amber-950 text-sm">
+                      {crossBorder?.borderGate || 'Cửa khẩu thông quan'}
+                    </div>
+                  </div>
+                  <div className="p-3.5 rounded-2xl bg-rose-50/60 border border-rose-200">
+                    <span className="text-[10px] font-extrabold text-rose-800 uppercase block mb-1">
+                      🏁 Tỉnh / Thành Phố Đích:
+                    </span>
+                    <div className="p-2.5 bg-white rounded-xl border border-rose-200 font-extrabold text-slate-900 text-sm">
+                      {crossBorder?.destinationCity || inquiry.destination || 'Nước đích'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              /* 4.1. VẬN TẢI ĐƯỜNG BỘ & CHUỖI LẠNH (TRUCKING / COLD CHAIN) */
+              <div className="mb-4">
+                <span className="text-[10.5px] font-black text-slate-700 uppercase tracking-wider block mb-2.5">
+                  4.1. Lộ Trình Tuyến Đường Bộ & Các Điểm Giao Nhận:
+                </span>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                  {/* CỘT TRÁI: CÁC ĐIỂM BỐC HÀNG */}
                   <div className="p-3.5 rounded-2xl bg-emerald-50/50 border border-emerald-200/80 flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between font-bold text-emerald-900 mb-2.5 pb-2 border-b border-emerald-200/60">
                         <div className="flex items-center gap-2">
                           <span className="w-3 h-3 rounded-full bg-emerald-500 shrink-0 ring-2 ring-emerald-300" />
                           <span className="uppercase text-[11px] font-black tracking-wider">
-                            {isLcl
-                              ? 'Địa Chỉ Lấy Hàng Kho CFS (Origin CFS Warehouse)'
-                              : isFcl
-                              ? 'Cảng Bốc Hàng (Port of Loading - POL)'
-                              : 'Điểm Lấy Hàng / Nơi Đi (Origin)'}
+                            Điểm Lấy Hàng / Nơi Đi (Origin)
                           </span>
                         </div>
                         <span className="px-2.5 py-0.5 text-[10px] font-black bg-emerald-100 text-emerald-800 rounded-full border border-emerald-300">
-                          {isLcl
-                            ? `${totalPickupCount} Kho CFS Lấy Hàng`
-                            : isFcl
-                            ? `${totalPickupCount} Cảng Bốc Hàng (POL)`
-                            : `${totalPickupCount} Điểm Lấy Hàng`}
+                          {totalPickupCount} Điểm Lấy Hàng
                         </span>
                       </div>
 
-                      {/* Danh sách các điểm bốc hàng / kho CFS thực tế */}
+                      {/* Danh sách các điểm bốc hàng thực tế */}
                       <div className="space-y-2">
                         {pickupList.map((loc, idx) => (
                           <div 
@@ -814,74 +1159,40 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between gap-2">
                                 <span className="text-[10px] font-extrabold text-emerald-700 uppercase tracking-wide">
-                                  {isLcl ? `Kho CFS Lấy #${idx + 1}` : isFcl ? `Cảng Bốc #${idx + 1} (POL)` : `Điểm Lấy #${idx + 1}`}
+                                  Điểm Lấy #{idx + 1}
                                 </span>
                                 {idx === 0 && (
                                   <span className="text-[9.5px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
-                                    {isLcl ? 'Kho CFS lấy chính' : isFcl ? 'Cảng bốc chính' : 'Điểm bốc chính'}
+                                    Điểm bốc chính
                                   </span>
                                 )}
                               </div>
                               <p className="font-extrabold text-slate-900 text-xs sm:text-sm leading-snug mt-0.5 break-words">
-                                {loc || (isLcl ? `Kho CFS lấy hàng #${idx + 1}` : isFcl ? `Cảng bốc hàng #${idx + 1}` : `Điểm bốc hàng #${idx + 1}`)}
+                                {loc || `Điểm bốc hàng #${idx + 1}`}
                               </p>
                             </div>
                           </div>
                         ))}
                       </div>
-
-                      {/* Cảng / Ga / Sân bay đi nếu có */}
-                      {ocean?.polPort && ocean.polPort !== inquiry.origin && (
-                        <div className="mt-2.5 p-2 rounded-xl bg-emerald-100/60 border border-emerald-200 text-emerald-900 text-[11px] font-bold flex items-center gap-1.5">
-                          <span>{isLcl ? '📦 Kho CFS lấy hàng:' : '⚓ Cảng bốc (POL):'}</span>
-                          <span className="font-black text-slate-900">{ocean.polPort}</span>
-                        </div>
-                      )}
-                      {air?.originAirport && (
-                        <div className="mt-2.5 p-2 rounded-xl bg-emerald-100/60 border border-emerald-200 text-emerald-900 text-[11px] font-bold flex items-center gap-1.5">
-                          <span>✈️ Sân bay đi (AOL):</span>
-                          <span className="font-black text-slate-900">{air.originAirport}</span>
-                        </div>
-                      )}
-                      {rail?.originStation && (
-                        <div className="mt-2.5 p-2 rounded-xl bg-emerald-100/60 border border-emerald-200 text-emerald-900 text-[11px] font-bold flex items-center gap-1.5">
-                          <span>🚂 Ga đi:</span>
-                          <span className="font-black text-slate-900">{rail.originStation}</span>
-                        </div>
-                      )}
-                      {crossBorder?.originCity && (
-                        <div className="mt-2.5 p-2 rounded-xl bg-emerald-100/60 border border-emerald-200 text-emerald-900 text-[11px] font-bold flex items-center gap-1.5">
-                          <span>📍 Thành phố xuất phát:</span>
-                          <span className="font-black text-slate-900">{crossBorder.originCity}</span>
-                        </div>
-                      )}
                     </div>
                   </div>
 
-                  {/* CỘT PHẢI: CÁC ĐIỂM DỠ HÀNG / CẢNG DỠ / KHO CFS */}
+                  {/* CỘT PHẢI: CÁC ĐIỂM DỠ HÀNG */}
                   <div className="p-3.5 rounded-2xl bg-rose-50/50 border border-rose-200/80 flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between font-bold text-rose-900 mb-2.5 pb-2 border-b border-rose-200/60">
                         <div className="flex items-center gap-2">
                           <span className="w-3 h-3 rounded-full bg-rose-500 shrink-0 ring-2 ring-rose-300" />
                           <span className="uppercase text-[11px] font-black tracking-wider">
-                            {isLcl
-                              ? 'Địa Chỉ Giao Hàng Kho CFS (Destination CFS Warehouse)'
-                              : isFcl
-                              ? 'Cảng Dỡ Hàng (Port of Discharge - POD)'
-                              : 'Điểm Giao Hàng / Nơi Đến (Destination)'}
+                            Điểm Giao Hàng / Nơi Đến (Destination)
                           </span>
                         </div>
                         <span className="px-2.5 py-0.5 text-[10px] font-black bg-rose-100 text-rose-800 rounded-full border border-rose-300">
-                          {isLcl
-                            ? `${totalDeliveryCount} Kho CFS Giao Hàng`
-                            : isFcl
-                            ? `${totalDeliveryCount} Cảng Dỡ Hàng (POD)`
-                            : `${totalDeliveryCount} Điểm Dỡ Hàng`}
+                          {totalDeliveryCount} Điểm Dỡ Hàng
                         </span>
                       </div>
 
-                      {/* Danh sách các điểm dỡ hàng / kho CFS thực tế */}
+                      {/* Danh sách các điểm dỡ hàng thực tế */}
                       <div className="space-y-2">
                         {deliveryList.map((loc, idx) => (
                           <div 
@@ -894,52 +1205,26 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between gap-2">
                                 <span className="text-[10px] font-extrabold text-rose-700 uppercase tracking-wide">
-                                  {isLcl ? `Kho CFS Giao #${idx + 1}` : isFcl ? `Cảng Dỡ #${idx + 1} (POD)` : `Điểm Giao #${idx + 1}`}
+                                  Điểm Giao #{idx + 1}
                                 </span>
                                 {idx === 0 && totalDeliveryCount > 1 && (
                                   <span className="text-[9.5px] font-bold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200">
-                                    {isLcl ? 'Kho CFS giao đầu tiên' : isFcl ? 'Cảng dỡ đầu tiên' : 'Điểm dỡ đầu tiên'}
+                                    Điểm dỡ đầu tiên
                                   </span>
                                 )}
                                 {idx === deliveryList.length - 1 && totalDeliveryCount > 1 && (
                                   <span className="text-[9.5px] font-bold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200">
-                                    {isLcl ? 'Kho CFS đích cuối' : isFcl ? 'Cảng dỡ cuối chặng' : 'Điểm cuối chặng'}
+                                    Điểm cuối chặng
                                   </span>
                                 )}
                               </div>
                               <p className="font-extrabold text-slate-900 text-xs sm:text-sm leading-snug mt-0.5 break-words">
-                                {loc || (isLcl ? `Kho CFS giao hàng #${idx + 1}` : isFcl ? `Cảng dỡ hàng #${idx + 1}` : `Điểm dỡ hàng #${idx + 1}`)}
+                                {loc || `Điểm dỡ hàng #${idx + 1}`}
                               </p>
                             </div>
                           </div>
                         ))}
                       </div>
-
-                      {/* Cảng / Ga / Sân bay đến nếu có */}
-                      {ocean?.podPort && ocean.podPort !== inquiry.destination && (
-                        <div className="mt-2.5 p-2 rounded-xl bg-rose-100/60 border border-rose-200 text-rose-900 text-[11px] font-bold flex items-center gap-1.5">
-                          <span>{isLcl ? '📦 Kho CFS giao hàng:' : '⚓ Cảng dỡ (POD):'}</span>
-                          <span className="font-black text-slate-900">{ocean.podPort}</span>
-                        </div>
-                      )}
-                      {air?.destinationAirport && (
-                        <div className="mt-2.5 p-2 rounded-xl bg-rose-100/60 border border-rose-200 text-rose-900 text-[11px] font-bold flex items-center gap-1.5">
-                          <span>✈️ Sân bay đến (AOD):</span>
-                          <span className="font-black text-slate-900">{air.destinationAirport}</span>
-                        </div>
-                      )}
-                      {rail?.destinationStation && (
-                        <div className="mt-2.5 p-2 rounded-xl bg-rose-100/60 border border-rose-200 text-rose-900 text-[11px] font-bold flex items-center gap-1.5">
-                          <span>🚂 Ga đến:</span>
-                          <span className="font-black text-slate-900">{rail.destinationStation}</span>
-                        </div>
-                      )}
-                      {crossBorder?.destinationCity && (
-                        <div className="mt-2.5 p-2 rounded-xl bg-rose-100/60 border border-rose-200 text-rose-900 text-[11px] font-bold flex items-center gap-1.5">
-                          <span>📍 Thành phố đến:</span>
-                          <span className="font-black text-slate-900">{crossBorder.destinationCity}</span>
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -1102,6 +1387,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
               )}
 
               {/* 2. OCEAN SPECS (FCL & LCL) */}
+              {/* 2. OCEAN SPECS (FCL & LCL) */}
               {(inquiry.serviceType === 'Sea Freight (FCL)' || inquiry.serviceType === 'Sea Freight (LCL)') && ocean && (
                 <div className="space-y-2.5">
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
@@ -1111,7 +1397,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                     </div>
                     <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
                       <span className="text-[10px] text-slate-400 block font-medium">Hình thức đường biển</span>
-                      <span className="font-extrabold text-slate-900">{ocean.mode || 'FCL (Full Container)'}</span>
+                      <span className="font-extrabold text-slate-900">{isLcl ? 'LCL (Gom hàng lẻ CFS)' : 'FCL (Nguyên container)'}</span>
                     </div>
                     <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
                       <span className="text-[10px] text-slate-400 block font-medium">Điều kiện nhận & giao</span>
@@ -1119,7 +1405,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                         {ocean.originServiceTerm || (isFcl ? 'CY' : 'CFS')} ➔ {ocean.destinationServiceTerm || (isFcl ? 'CY' : 'CFS')}
                       </span>
                     </div>
-                    {ocean.containerType ? (
+                    {isFcl && ocean.containerType ? (
                       <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
                         <span className="text-[10px] text-slate-400 block font-medium">Loại Container</span>
                         <span className="font-extrabold text-slate-900">{ocean.containerType}</span>
@@ -1131,15 +1417,15 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                         <span className="font-extrabold text-indigo-700">{ocean.incoterm}</span>
                       </div>
                     ) : null}
-                    {ocean.freeDemDetDaysRequested ? (
+                    {isFcl && ocean.freeDemDetDaysRequested ? (
                       <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
-                        <span className="text-[10px] text-slate-400 block font-medium">Miễn phí Dem/Det yêu cầu</span>
+                        <span className="text-[10px] text-slate-400 block font-medium">Miễn phí Dem/Det</span>
                         <span className="font-extrabold text-slate-900">{ocean.freeDemDetDaysRequested} Ngày</span>
                       </div>
                     ) : null}
                   </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                     {isFcl && ocean.containerCount ? (
                       <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
                         <span className="text-[10px] text-slate-400 block font-medium">Số lượng & Tần suất Container</span>
@@ -1156,94 +1442,13 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                         </span>
                       </div>
                     ) : null}
-                    {ocean.cbmVolume ? (
+                    {ocean.preferredShippingLines ? (
                       <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
-                        <span className="text-[10px] text-slate-400 block font-medium">Thể tích LCL (CBM)</span>
-                        <span className="font-extrabold text-slate-900">{ocean.cbmVolume} CBM</span>
-                      </div>
-                    ) : null}
-                    {ocean.polPort ? (
-                      <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
-                        <span className="text-[10px] text-slate-400 block font-medium">{isLcl ? 'Kho CFS lấy hàng (Origin CFS)' : 'Cảng bốc (POL)'}</span>
-                        <span className="font-extrabold text-slate-900 truncate block">{ocean.polPort}</span>
-                      </div>
-                    ) : null}
-                    {ocean.podPort ? (
-                      <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
-                        <span className="text-[10px] text-slate-400 block font-medium">{isLcl ? 'Kho CFS giao hàng (Destination CFS)' : 'Cảng dỡ (POD)'}</span>
-                        <span className="font-extrabold text-slate-900 truncate block">{ocean.podPort}</span>
+                        <span className="text-[10px] text-slate-400 block font-medium">Hãng tàu ưu tiên</span>
+                        <span className="font-extrabold text-indigo-800">{ocean.preferredShippingLines}</span>
                       </div>
                     ) : null}
                   </div>
-
-                  {/* Chi tiết cho LCL nếu là gom hàng lẻ CFS */}
-                  {(ocean.mode?.includes('LCL') || inquiry.serviceType === 'Sea Freight (LCL)' || ocean.lclCbm || ocean.lclPieces) && (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 p-3 bg-white rounded-xl border border-cyan-200/80 shadow-2xs">
-                      <div>
-                        <span className="text-[10px] text-cyan-800 font-semibold block">Số lượng kiện LCL:</span>
-                        <span className="font-extrabold text-slate-900">{ocean.lclPieces || 1} kiện / pallet</span>
-                      </div>
-                      <div>
-                        <span className="text-[10px] text-cyan-800 font-semibold block">Quy cách đóng gói:</span>
-                        <span className="font-extrabold text-slate-900 truncate block" title={ocean.lclPackaging || ocean.packageType}>
-                          {ocean.lclPackaging || ocean.packageType || 'Pallet chuẩn'}
-                        </span>
-                      </div>
-                      {ocean.lclDimensions ? (
-                        <div>
-                          <span className="text-[10px] text-cyan-800 font-semibold block">Kích thước 1 kiện (DxRxC):</span>
-                          <span className="font-extrabold text-slate-900">
-                            {ocean.lclDimensions.lengthCm}x{ocean.lclDimensions.widthCm}x{ocean.lclDimensions.heightCm} cm
-                          </span>
-                        </div>
-                      ) : null}
-                      {ocean.lclGrossWeightKg !== undefined && ocean.lclGrossWeightKg !== null ? (
-                        <div>
-                          <span className="text-[10px] text-cyan-800 font-semibold block">Trọng lượng thực (Gross):</span>
-                          <span className="font-extrabold text-slate-900">{Number(ocean.lclGrossWeightKg).toLocaleString('vi-VN')} kg</span>
-                        </div>
-                      ) : null}
-                      {ocean.lclCbm !== undefined && ocean.lclCbm !== null ? (
-                        <div>
-                          <span className="text-[10px] text-cyan-800 font-semibold block">Tổng thể tích tính toán:</span>
-                          <span className="font-extrabold text-cyan-900">{ocean.lclCbm} CBM</span>
-                        </div>
-                      ) : null}
-                      {ocean.lclChargeableWeightKg !== undefined && ocean.lclChargeableWeightKg !== null ? (
-                        <div>
-                          <span className="text-[10px] text-cyan-800 font-semibold block">Trọng lượng tính cước:</span>
-                          <span className="font-extrabold text-indigo-900">
-                            {Number(ocean.lclChargeableWeightKg).toLocaleString('vi-VN')} kg ({ocean.lclRevenueTon || (ocean.lclChargeableWeightKg / 1000).toFixed(2)} RT)
-                          </span>
-                        </div>
-                      ) : null}
-                      {typeof ocean.lclStackable === 'boolean' && (
-                        <div>
-                          <span className="text-[10px] text-cyan-800 font-semibold block">Xếp chồng hàng (Stackable):</span>
-                          <span className={`font-extrabold ${ocean.lclStackable ? 'text-emerald-700' : 'text-amber-700'}`}>
-                            {ocean.lclStackable ? '✓ Cho phép xếp chồng' : '⚠️ Không được xếp chồng'}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {(ocean.pickupAddress || ocean.deliveryAddress) && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
-                      {ocean.pickupAddress ? (
-                        <div className="bg-cyan-50/60 p-2.5 rounded-xl border border-cyan-200/80 shadow-2xs">
-                          <span className="text-[10px] text-cyan-800 font-bold block">📍 Kho lấy hàng (Pickup):</span>
-                          <span className="font-medium text-xs text-slate-900 block mt-0.5">{ocean.pickupAddress}</span>
-                        </div>
-                      ) : null}
-                      {ocean.deliveryAddress ? (
-                        <div className="bg-rose-50/60 p-2.5 rounded-xl border border-rose-200/80 shadow-2xs">
-                          <span className="text-[10px] text-rose-800 font-bold block">📍 Kho giao hàng (Delivery):</span>
-                          <span className="font-medium text-xs text-slate-900 block mt-0.5">{ocean.deliveryAddress}</span>
-                        </div>
-                      ) : null}
-                    </div>
-                  )}
                 </div>
               )}
 
@@ -1252,126 +1457,53 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                 <div className="space-y-2.5">
                   {air.airServiceType === 'Express / Courier' ? (
                     /* Express / Courier Layout */
-                    <div className="space-y-2.5">
-                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
-                        <div className="bg-amber-50/80 p-2.5 rounded-xl border border-amber-200 shadow-2xs">
-                          <span className="text-[10px] text-amber-800 block font-bold">Phân loại hàng không</span>
-                          <span className="font-extrabold text-amber-950">⚡ Express / Courier</span>
-                        </div>
-                        <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
-                          <span className="text-[10px] text-slate-400 block font-medium">Loại bưu kiện</span>
-                          <span className="font-extrabold text-slate-900 truncate block">
-                            {air.expressPackageType?.includes('Document') ? '📄 Tài liệu / Thư tín' : '📦 Hàng mẫu / Bưu phẩm'}
-                          </span>
-                        </div>
-                        <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
-                          <span className="text-[10px] text-slate-400 block font-medium">Số gói / hộp</span>
-                          <span className="font-extrabold text-slate-900">{air.packageCount || 1} hộp</span>
-                        </div>
-                        <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
-                          <span className="text-[10px] text-slate-400 block font-medium">Trọng lượng tính cước (CW)</span>
-                          <span className="font-extrabold text-indigo-700">{air.chargeableWeightKgs ? `${air.chargeableWeightKgs} kg CW` : `${air.grossWeightKgs || 0} kg`}</span>
-                        </div>
-                        <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
-                          <span className="text-[10px] text-slate-400 block font-medium">Mã Zip Đi → Đến</span>
-                          <span className="font-extrabold text-slate-900 truncate block">
-                            {air.originPostalCode || 'VN'} → {air.destinationPostalCode || 'Dest'}
-                          </span>
-                        </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                      <div className="bg-amber-50/80 p-2.5 rounded-xl border border-amber-200 shadow-2xs">
+                        <span className="text-[10px] text-amber-800 block font-bold">Phân loại hàng không</span>
+                        <span className="font-extrabold text-amber-950">⚡ Express / Courier</span>
                       </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                        <div className="bg-white p-2.5 rounded-xl border border-slate-200 shadow-2xs">
-                          <span className="text-[10px] text-slate-500 font-bold block">🚪 Lấy hàng tận nơi (Door Pickup):</span>
-                          <span className="font-bold text-xs text-slate-900 block mt-0.5">{air.pickupAddress || inquiry.origin || 'Chưa cung cấp'}</span>
-                        </div>
-                        <div className="bg-white p-2.5 rounded-xl border border-slate-200 shadow-2xs">
-                          <span className="text-[10px] text-slate-500 font-bold block">🚪 Giao hàng tận nơi (Door Delivery):</span>
-                          <span className="font-bold text-xs text-slate-900 block mt-0.5">{air.deliveryAddress || inquiry.destination || 'Chưa cung cấp'}</span>
-                        </div>
+                      <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
+                        <span className="text-[10px] text-slate-400 block font-medium">Loại bưu kiện</span>
+                        <span className="font-extrabold text-slate-900 truncate block">
+                          {air.expressPackageType?.includes('Document') ? '📄 Tài liệu / Thư tín' : '📦 Hàng mẫu / Bưu phẩm'}
+                        </span>
+                      </div>
+                      <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
+                        <span className="text-[10px] text-slate-400 block font-medium">Điều kiện phục vụ</span>
+                        <span className="font-extrabold text-indigo-800">Door ➔ Door (Tận nơi)</span>
+                      </div>
+                      <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
+                        <span className="text-[10px] text-slate-400 block font-medium">Mã Zip Đi → Đến</span>
+                        <span className="font-extrabold text-slate-900 truncate block">
+                          {air.originPostalCode || 'VN'} → {air.destinationPostalCode || 'Dest'}
+                        </span>
                       </div>
                     </div>
                   ) : (
                     /* Air Freight / Cargo Layout */
-                    <div className="space-y-2.5">
-                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
-                        <div className="bg-sky-50/80 p-2.5 rounded-xl border border-sky-200 shadow-2xs">
-                          <span className="text-[10px] text-sky-800 block font-bold">Phân loại hàng không</span>
-                          <span className="font-extrabold text-sky-950">✈️ Air Freight / Cargo</span>
-                        </div>
-                        <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
-                          <span className="text-[10px] text-slate-400 block font-medium">Vai trò doanh nghiệp</span>
-                          <span className="font-extrabold text-blue-700">{air.tradeRole || inquiry.tradeRole || 'Xuất khẩu (Export)'}</span>
-                        </div>
-                        <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
-                          <span className="text-[10px] text-slate-400 block font-medium">Điều kiện nhận & giao</span>
-                          <span className="font-extrabold text-sky-900">
-                            {air.originServiceTerm || 'Airport'} ➔ {air.destinationServiceTerm || 'Airport'}
-                          </span>
-                        </div>
-                        {(air.originAirport || air.destinationAirport) ? (
-                          <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
-                            <span className="text-[10px] text-slate-400 block font-medium">Sân bay đi → đến</span>
-                            <span className="font-extrabold text-slate-900 truncate block">{air.originAirport || 'AOL'} → {air.destinationAirport || 'AOD'}</span>
-                          </div>
-                        ) : null}
-                        {air.chargeableWeightKgs || air.grossWeightKgs ? (
-                          <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
-                            <span className="text-[10px] text-slate-400 block font-medium">Trọng lượng tính cước (CW)</span>
-                            <span className="font-extrabold text-indigo-700">{air.chargeableWeightKgs ? `${air.chargeableWeightKgs} kg` : `${air.grossWeightKgs} kg`}</span>
-                          </div>
-                        ) : null}
-                        {air.volumetricWeightKgs ? (
-                          <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
-                            <span className="text-[10px] text-slate-400 block font-medium">Trọng lượng quy đổi (VW)</span>
-                            <span className="font-extrabold text-slate-900">{air.volumetricWeightKgs} kg</span>
-                          </div>
-                        ) : null}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+                      <div className="bg-sky-50/80 p-2.5 rounded-xl border border-sky-200 shadow-2xs">
+                        <span className="text-[10px] text-sky-800 block font-bold">Phân loại hàng không</span>
+                        <span className="font-extrabold text-sky-950">✈️ Air Freight / Cargo</span>
                       </div>
-
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                        {air.packageCount ? (
-                          <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
-                            <span className="text-[10px] text-slate-400 block font-medium">Số kiện hàng</span>
-                            <span className="font-extrabold text-slate-900">{air.packageCount} kiện</span>
-                          </div>
-                        ) : null}
-                        <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
-                          <span className="text-[10px] text-slate-400 block font-medium">Số lượng chuyến bay</span>
-                          <span className="font-extrabold text-indigo-700">{air.shipmentCount || 1} {air.frequencyUnit || 'Chuyến / Tháng'}</span>
-                        </div>
-                        {typeof air.stackable === 'boolean' ? (
-                          <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
-                            <span className="text-[10px] text-slate-400 block font-medium">Xếp chồng (Stackable)</span>
-                            <span className={`font-extrabold ${air.stackable ? 'text-emerald-700' : 'text-amber-700'}`}>
-                              {air.stackable ? '✓ Cho phép chồng' : '⚠️ Không chồng'}
-                            </span>
-                          </div>
-                        ) : null}
-                        {typeof air.customsAtAirport === 'boolean' ? (
-                          <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
-                            <span className="text-[10px] text-slate-400 block font-medium">Thông quan sân bay</span>
-                            <span className="font-extrabold text-emerald-700">{air.customsAtAirport ? 'Bao gồm thủ tục' : 'Không yêu cầu'}</span>
-                          </div>
-                        ) : null}
+                      <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
+                        <span className="text-[10px] text-slate-400 block font-medium">Vai trò doanh nghiệp</span>
+                        <span className="font-extrabold text-blue-700">{air.tradeRole || inquiry.tradeRole || 'Xuất khẩu (Export)'}</span>
                       </div>
-
-                      {(air.pickupAddress || air.deliveryAddress) && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
-                          {air.pickupAddress ? (
-                            <div className="bg-sky-50/60 p-2.5 rounded-xl border border-sky-200/80 shadow-2xs">
-                              <span className="text-[10px] text-sky-800 font-bold block">📍 Kho lấy hàng (Pickup):</span>
-                              <span className="font-medium text-xs text-slate-900 block mt-0.5">{air.pickupAddress}</span>
-                            </div>
-                          ) : null}
-                          {air.deliveryAddress ? (
-                            <div className="bg-rose-50/60 p-2.5 rounded-xl border border-rose-200/80 shadow-2xs">
-                              <span className="text-[10px] text-rose-800 font-bold block">📍 Kho giao hàng (Delivery):</span>
-                              <span className="font-medium text-xs text-slate-900 block mt-0.5">{air.deliveryAddress}</span>
-                            </div>
-                          ) : null}
-                        </div>
-                      )}
+                      <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
+                        <span className="text-[10px] text-slate-400 block font-medium">Điều kiện nhận & giao</span>
+                        <span className="font-extrabold text-sky-900">
+                          {air.originServiceTerm || 'Airport'} ➔ {air.destinationServiceTerm || 'Airport'}
+                        </span>
+                      </div>
+                      <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
+                        <span className="text-[10px] text-slate-400 block font-medium">Số chuyến bay & Tần suất</span>
+                        <span className="font-extrabold text-indigo-700">{air.shipmentCount || 1} {air.frequencyUnit || 'Chuyến / Tuần'}</span>
+                      </div>
+                      <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
+                        <span className="text-[10px] text-slate-400 block font-medium">Thông quan sân bay</span>
+                        <span className="font-extrabold text-emerald-700">{air.customsAtAirport ? '✓ Bao gồm thủ tục' : 'Tự thông quan'}</span>
+                      </div>
                     </div>
                   )}
                 </div>
