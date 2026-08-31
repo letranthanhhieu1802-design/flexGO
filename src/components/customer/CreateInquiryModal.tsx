@@ -833,7 +833,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
       errors.push('Ngày lấy hàng dự kiến (Pickup Date) là bắt buộc.');
     }
 
-    if (!weightKg.trim() && !volumeCbm.trim()) {
+    if (serviceType !== 'Warehousing' && serviceType !== 'Project Cargo' && !weightKg.trim() && !volumeCbm.trim()) {
       errors.push('Vui lòng nhập Khối lượng (kg) hoặc Thể tích (cbm) của hàng hóa.');
     }
 
