@@ -1062,36 +1062,24 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
         </div>
       )}
 
-      {/* 3. PUBLIC LEADS DATA TABLE WITH TOP & BOTTOM SYNCHRONIZED SCROLLBARS, FROZEN HEADER, AND VERTICAL SCROLL */}
+      {/* 3. PUBLIC LEADS DATA TABLE (Căn chỉnh trong 1 khung nhìn màn hình, không cần thanh cuộn ngang) */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden w-full flex flex-col">
-        {/* Top Horizontal Scrollbar (Đồng bộ trực quan với thanh cuộn bên dưới) */}
-        <div 
-          ref={topScrollRef}
-          onScroll={handleTopScroll}
-          className="w-full overflow-x-auto overflow-y-hidden bg-slate-50 border-b border-slate-200 z-30 select-none"
-          title="Thanh cuộn ngang"
-        >
-          <div style={{ width: `${tableScrollWidth}px`, height: '1px' }} />
-        </div>
-
-        {/* Scrollable Table Area: Vertical max-h-[620px] + Horizontal scroll with Frozen Sticky Header (Bottom scrollbar hidden) */}
+        {/* Scrollable Table Area: Vertical max-h-[640px] */}
         <div 
           ref={tableScrollRef}
-          onScroll={handleTableScroll}
-          className="overflow-x-auto overflow-y-auto max-h-[620px] relative scroll-smooth focus:outline-none hide-horizontal-scrollbar"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          className="overflow-y-auto max-h-[640px] relative scroll-smooth focus:outline-none w-full"
           tabIndex={0}
         >
-          <table className="w-full min-w-[1080px] text-left border-collapse" id="leadboard-data-table">
+          <table className="w-full text-left border-collapse" id="leadboard-data-table">
             {/* Frozen Sticky Table Header */}
             <thead className="sticky top-0 z-20 bg-slate-100 shadow-xs border-b border-slate-200">
-              <tr className="bg-slate-100 text-[11px] font-bold text-slate-600 uppercase tracking-wider select-none">
+              <tr className="bg-slate-100 text-[10.5px] font-bold text-slate-600 uppercase tracking-wider select-none">
                 {/* 1. STT */}
-                <th className="py-3.5 px-3 w-12 text-center sticky top-0 z-20 bg-slate-100 border-b border-slate-200">STT</th>
+                <th className="py-3 px-2.5 w-10 text-center sticky top-0 z-20 bg-slate-100 border-b border-slate-200">STT</th>
                 
                 {/* 2. Ngày đăng & Hạn */}
                 <th 
-                  className="py-3.5 px-3 cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap min-w-[125px] sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
+                  className="py-3 px-2.5 cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
                   onClick={() => handleSort('createdDate')}
                 >
                   <div className="flex items-center gap-1">
@@ -1102,7 +1090,7 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
 
                 {/* 3. Mã Lead */}
                 <th 
-                  className="py-3.5 px-3 cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap min-w-[95px] sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
+                  className="py-3 px-2.5 cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
                   onClick={() => handleSort('code')}
                 >
                   <div className="flex items-center gap-1">
@@ -1112,23 +1100,23 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
                 </th>
 
                 {/* 4. Nhóm Dịch Vụ */}
-                <th className="py-3.5 px-3 whitespace-nowrap min-w-[130px] sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
+                <th className="py-3 px-2.5 whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
                   <span>Nhóm Dịch Vụ</span>
                 </th>
 
                 {/* 5. Nhóm Hàng */}
-                <th className="py-3.5 px-3 whitespace-nowrap min-w-[115px] sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
+                <th className="py-3 px-2.5 whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
                   <span>Nhóm Hàng</span>
                 </th>
 
                 {/* 6. Hình Thức / Mô Hình */}
-                <th className="py-3.5 px-3 whitespace-nowrap min-w-[130px] sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
+                <th className="py-3 px-2.5 whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
                   <span>Hình Thức / Mô Hình</span>
                 </th>
 
                 {/* 7. Loại Hợp Đồng */}
                 <th 
-                  className="py-3.5 px-3 cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap min-w-[130px] sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
+                  className="py-3 px-2.5 cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
                   onClick={() => handleSort('pricingType')}
                 >
                   <div className="flex items-center gap-1">
@@ -1139,7 +1127,7 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
 
                 {/* 8. Tổng Giá Trị */}
                 <th 
-                  className="py-3.5 px-3 text-right cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap min-w-[145px] sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
+                  className="py-3 px-2.5 text-right cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
                   onClick={() => handleSort('estimatedValueVND')}
                 >
                   <div className="flex items-center justify-end gap-1">
@@ -1150,7 +1138,7 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
 
                 {/* 9. Báo Giá / Lượt Xem */}
                 <th 
-                  className="py-3.5 px-3 text-center cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap min-w-[115px] sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
+                  className="py-3 px-2.5 text-center cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
                   onClick={() => handleSort('quotesCount')}
                 >
                   <div className="flex items-center justify-center gap-1">
@@ -1160,7 +1148,7 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
                 </th>
 
                 {/* 10. Thao Tác */}
-                <th className="py-3.5 px-3 text-center min-w-[135px] whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
+                <th className="py-3 px-2.5 text-center whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
                   <span>Thao Tác</span>
                 </th>
               </tr>
@@ -1207,7 +1195,6 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
                   const operationMode = getOperationModeDisplay(lead);
                   const isExpanded = !!expandedLeadIds[lead.id];
                   const isUnlocked = !!unlockedLeadIds[lead.id];
-                  const padClass = tableDensity === 'compact' ? 'py-2 px-3' : 'py-3.5 px-3';
                   const isContract = lead.pricingType === 'CONTRACT';
                   const itemIndex = (safeCurrentPage - 1) * pageSize + index + 1;
 
@@ -1221,155 +1208,110 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
                         }`}
                       >
                         {/* Cột 1: STT */}
-                        <td className={`${padClass} text-center font-mono text-slate-500 font-bold text-xs w-12 select-none`}>
+                        <td className="py-3 px-2.5 text-center font-mono text-slate-500 font-bold text-xs w-10 select-none">
                           {itemIndex}
                         </td>
 
                         {/* Cột 2: Ngày Đăng & Hạn Nộp */}
-                        <td className={`${padClass} whitespace-nowrap`}>
-                          <div className="space-y-1 text-xs">
-                            <div className="text-slate-500 font-medium flex items-center gap-1" title={`Ngày đăng tin: ${lead.createdDate}`}>
-                              <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                              <span>{lead.createdDate}</span>
-                            </div>
+                        <td className="py-3 px-2.5 whitespace-nowrap">
+                          <div className="space-y-0.5 text-xs">
+                            <span className="text-slate-700 font-medium block">{lead.createdDate}</span>
                             {lead.dueDate && (
-                              <div className="flex items-center gap-1 text-[10.5px] text-rose-600 font-bold bg-rose-50/90 px-1.5 py-0.5 rounded border border-rose-200/70 w-fit" title={`Hạn chót nộp báo giá: ${lead.dueDate}`}>
-                                <Hourglass className="w-2.5 h-2.5 text-rose-500 shrink-0" />
-                                <span>Hạn: {lead.dueDate}</span>
-                              </div>
+                              <span className="text-[10px] text-rose-600 font-bold bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200/60 inline-block">
+                                Hạn: {lead.dueDate}
+                              </span>
                             )}
                           </div>
                         </td>
 
-                        {/* Cột 3: Mã Lead (Chỉ hiển thị text, không nút copy) */}
-                        <td className={`${padClass} whitespace-nowrap`}>
+                        {/* Cột 3: Mã Lead */}
+                        <td className="py-3 px-2.5 whitespace-nowrap">
                           <span className="font-mono font-black text-indigo-600 text-xs">
                             {lead.code}
                           </span>
                         </td>
 
-                        {/* Cột 4: Nhóm Dịch Vụ */}
-                        <td className={`${padClass} whitespace-nowrap`}>
+                        {/* Cột 4: Nhóm Dịch Vụ (Badge chữ rõ ràng, không icon rườm rà) */}
+                        <td className="py-3 px-2.5 whitespace-nowrap">
                           <span
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold border ${serviceStyle.bg}`}
+                            className={`inline-block px-2 py-0.5 rounded-md text-[10.5px] font-bold border ${serviceStyle.bg}`}
                             title={lead.serviceType}
                           >
-                            {serviceStyle.icon}
-                            <span>{serviceStyle.label}</span>
+                            {serviceStyle.label}
                           </span>
                         </td>
 
                         {/* Cột 5: Nhóm Hàng (Hàng thường / Hàng lạnh / Hàng nguy hiểm) */}
-                        <td className={`${padClass} whitespace-nowrap`}>
-                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] font-extrabold border ${cargoGroup.bg}`}>
-                            <span>{cargoGroup.icon}</span>
-                            <span>{cargoGroup.label}</span>
+                        <td className="py-3 px-2.5 whitespace-nowrap">
+                          <span className={`inline-block px-2 py-0.5 rounded-md text-[10.5px] font-bold border ${cargoGroup.bg}`}>
+                            {cargoGroup.label}
                           </span>
                         </td>
 
                         {/* Cột 6: Hình Thức / Mô Hình */}
-                        <td className={`${padClass} whitespace-nowrap`}>
-                          <span className="text-xs font-bold text-slate-800 bg-slate-50 px-2 py-1 rounded-md border border-slate-200">
+                        <td className="py-3 px-2.5 whitespace-nowrap">
+                          <span className="text-xs font-semibold text-slate-800">
                             {operationMode}
                           </span>
                         </td>
 
                         {/* Cột 7: Loại Hợp Đồng (Theo lô / Chuyến lẻ hoặc Hợp đồng) */}
-                        <td className={`${padClass} whitespace-nowrap`}>
+                        <td className="py-3 px-2.5 whitespace-nowrap">
                           {isContract ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10.5px] font-extrabold bg-purple-100 text-purple-800 border border-purple-200">
-                              <Repeat className="w-2.5 h-2.5 text-purple-600" />
-                              <span>Hợp đồng</span>
+                            <span className="inline-block px-2 py-0.5 rounded-md text-[10.5px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                              Hợp đồng
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10.5px] font-extrabold bg-cyan-100 text-cyan-800 border border-cyan-200">
-                              <Tag className="w-2.5 h-2.5 text-cyan-700" />
-                              <span>Theo lô / Chuyến lẻ</span>
+                            <span className="inline-block px-2 py-0.5 rounded-md text-[10.5px] font-bold bg-cyan-50 text-cyan-700 border border-cyan-200">
+                              Theo lô
                             </span>
                           )}
                         </td>
 
                         {/* Cột 8: Tổng Giá Trị */}
-                        <td className={`${padClass} text-right whitespace-nowrap`}>
+                        <td className="py-3 px-2.5 text-right whitespace-nowrap">
                           <div className="space-y-0.5">
-                            <span className="text-xs font-extrabold text-emerald-700 block">
+                            <span className="text-xs font-black text-emerald-700 block">
                               {lead.estimatedValueDisplay}
                             </span>
-                            <span className="text-[10px] font-medium text-slate-400 block">
+                            <span className="text-[9.5px] font-medium text-slate-400 block">
                               {isContract ? 'Ngân sách / tháng' : 'Tổng dự toán lô'}
                             </span>
                           </div>
                         </td>
 
                         {/* Cột 9: Thống Kê Báo Giá & Lượt Xem */}
-                        <td className={`${padClass} text-center whitespace-nowrap`}>
-                          <div className="flex flex-col items-center gap-1">
-                            <div 
-                              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${
-                                (lead.quotesCount || 0) === 0
-                                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                  : (lead.quotesCount || 0) <= 2
-                                  ? 'bg-blue-50 text-blue-700 border-blue-200'
-                                  : 'bg-amber-50 text-amber-800 border-amber-200'
-                              }`}
-                              title={`${lead.quotesCount || 0} nhà xe / đối tác đã nộp báo giá`}
-                            >
-                              <Send className="w-2.5 h-2.5" />
-                              <span>{lead.quotesCount || 0} Báo giá</span>
-                            </div>
-
-                            <div className="flex items-center gap-1 text-[10px] text-slate-400 font-medium" title={`${lead.viewsCount || 0} lần click mở xem chi tiết`}>
-                              <Eye className="w-3 h-3 text-slate-400" />
-                              <span>{lead.viewsCount || 0} xem</span>
-                            </div>
+                        <td className="py-3 px-2.5 text-center whitespace-nowrap">
+                          <div className="flex flex-col items-center gap-0.5">
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/80">
+                              {lead.quotesCount || 0} báo giá
+                            </span>
+                            <span className="text-[9.5px] text-slate-400 font-medium">
+                              {lead.viewsCount || 0} xem
+                            </span>
                           </div>
                         </td>
 
-                        {/* Cột 10: Thao Tác (Xem Chi Tiết & Share) */}
-                        <td className={`${padClass} text-center whitespace-nowrap`} onClick={(e) => e.stopPropagation()}>
-                          <div className="flex items-center justify-center gap-1.5">
-                            {/* Nút Sao chép liên kết Lead Board */}
-                            <button
-                              id={`share-lead-row-btn-${lead.code}`}
-                              type="button"
-                              onClick={(e) => handleCopyLeadLink(lead.code, e)}
-                              className={`p-1.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center cursor-pointer border ${
-                                copiedLeadLinkId === lead.code
-                                  ? 'bg-emerald-600 text-white border-emerald-600 ring-2 ring-emerald-300'
-                                  : 'bg-white hover:bg-slate-100 text-slate-500 hover:text-slate-800 border-slate-200 hover:border-slate-300'
-                              }`}
-                              title={
-                                copiedLeadLinkId === lead.code
-                                  ? 'Đã sao chép link Lead Board!'
-                                  : `Sao chép liên kết Lead Board lọc theo mã ${lead.code}`
-                              }
-                            >
-                              {copiedLeadLinkId === lead.code ? (
-                                <Check className="w-3.5 h-3.5 text-white" />
-                              ) : (
-                                <Share2 className="w-3.5 h-3.5" />
-                              )}
-                            </button>
-
-                            <button
-                              id={`toggle-lead-btn-${lead.code}`}
-                              type="button"
-                              onClick={(e) => toggleExpand(lead.id, e)}
-                              className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs ${
-                                isExpanded
-                                  ? 'bg-indigo-600 text-white shadow-xs'
-                                  : 'bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 hover:border-indigo-300'
-                              }`}
-                              title={isExpanded ? 'Thu gọn chi tiết lead' : 'Mở xem chi tiết hồ sơ'}
-                            >
-                              <span>{isExpanded ? 'Đóng' : 'Xem chi tiết'}</span>
-                              {isExpanded ? (
-                                <ChevronUp className="w-3.5 h-3.5" />
-                              ) : (
-                                <ChevronDown className="w-3.5 h-3.5" />
-                              )}
-                            </button>
-                          </div>
+                        {/* Cột 10: Thao Tác (Chỉ 1 nút Xem Chi Tiết / Đóng gọn gàng) */}
+                        <td className="py-3 px-2.5 text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            id={`toggle-lead-btn-${lead.code}`}
+                            type="button"
+                            onClick={(e) => toggleExpand(lead.id, e)}
+                            className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all inline-flex items-center justify-center gap-1 cursor-pointer shadow-2xs ${
+                              isExpanded
+                                ? 'bg-indigo-600 text-white shadow-xs'
+                                : 'bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 hover:border-indigo-300'
+                            }`}
+                            title={isExpanded ? 'Thu gọn chi tiết lead' : 'Mở xem chi tiết hồ sơ'}
+                          >
+                            <span>{isExpanded ? 'Đóng' : 'Xem chi tiết'}</span>
+                            {isExpanded ? (
+                              <ChevronUp className="w-3.5 h-3.5" />
+                            ) : (
+                              <ChevronDown className="w-3.5 h-3.5" />
+                            )}
+                          </button>
                         </td>
                       </tr>
 
