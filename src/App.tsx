@@ -117,6 +117,18 @@ export function App() {
   // Selected Detail Views
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
 
+  // Viewed Inquiries Tracking State (for A + B (mới) counts across CRM and Leadboard)
+  const [viewedInquiryCodes, setViewedInquiryCodes] = useState<string[]>([
+    'FG-2608250001', // Already viewed by default
+  ]);
+
+  const handleMarkInquiryAsViewed = (codeOrId: string) => {
+    if (!codeOrId) return;
+    const targetLead = leads.find((l) => l.id === codeOrId || l.code === codeOrId || l.inquiryCode === codeOrId);
+    const codeToMark = targetLead ? (targetLead.code || targetLead.inquiryCode || codeOrId) : codeOrId;
+    setViewedInquiryCodes((prev) => (prev.includes(codeToMark) ? prev : [...prev, codeToMark]));
+  };
+
   // Global Keyboard Shortcut: ⌘K or Ctrl+K for Command Palette
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -859,6 +871,7 @@ export function App() {
   };
 
   const handleIncrementLeadViews = (leadId: string) => {
+    handleMarkInquiryAsViewed(leadId);
     setLeads((prevLeads) =>
       prevLeads.map((l) => {
         if (l.id === leadId) {
@@ -1094,6 +1107,9 @@ export function App() {
                 quotations={quotations}
                 currentUser={currentUser}
                 wallet={wallet}
+                initialTab={(currentView.params?.initialTab as any) || 'overview'}
+                viewedInquiryCodes={viewedInquiryCodes}
+                onMarkInquiryAsViewed={handleMarkInquiryAsViewed}
                 onBack={() => {
                   setSelectedCustomerId(null);
                   setCurrentView({ type: 'workspace', view: 'supplier-crm' });
@@ -1114,12 +1130,15 @@ export function App() {
           return (
             <MiniCRMPage
               customers={crmCustomers}
-              onSelectCustomer={(id) => {
+              inquiries={inquiries}
+              leads={leads}
+              viewedInquiryCodes={viewedInquiryCodes}
+              onSelectCustomer={(id, initialTab) => {
                 setSelectedCustomerId(id);
                 setCurrentView({
                   type: 'workspace',
                   view: 'supplier-crm',
-                  params: { customerId: id },
+                  params: { customerId: id, initialTab: initialTab || 'overview' },
                 });
               }}
               onNavigate={setCurrentView}

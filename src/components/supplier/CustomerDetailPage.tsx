@@ -72,6 +72,9 @@ interface CustomerDetailPageProps {
   quotations?: QuotationItem[];
   currentUser?: UserPersona;
   wallet?: FlexCreditWallet;
+  initialTab?: 'overview' | 'inquiries';
+  viewedInquiryCodes?: string[];
+  onMarkInquiryAsViewed?: (inquiryCode: string) => void;
   onBack: () => void;
   onOpenCreateQuotation?: (leadOrCustomer?: any) => void;
   onNavigate: (view: CurrentView) => void;
@@ -87,6 +90,9 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({
   quotations = [],
   currentUser = { id: 'usr-supplier-01', name: 'Minh Tran', role: 'Supplier' as any, companyName: 'Global Dual Logistics & Trade Corp', email: 'minh.tran@globalduallogistics.vn', phone: '0908123456', avatar: '', preferences: { language: 'vi', theme: 'light', notifications: { email: true, push: true, sms: false, marketing: false }, defaultCurrency: 'VND', homeHub: 'SUPPLIER' } },
   wallet = { balanceCredits: 15400, balanceVND: 15400000, bonusCredits: 1800, tierName: 'Gold', discountOnLeads: 15, monthlySpentCredits: 3200, autoTopUpEnabled: true, autoTopUpThreshold: 2000, autoTopUpAmount: 5000 },
+  initialTab = 'overview',
+  viewedInquiryCodes = [],
+  onMarkInquiryAsViewed,
   onBack,
   onOpenCreateQuotation,
   onNavigate,
@@ -94,7 +100,13 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({
   onToggleSaveLead,
   onSubmitQuotation,
 }) => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'inquiries'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'inquiries'>(initialTab);
+
+  React.useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
 
   const [activities, setActivities] = useState<ActivityLog[]>(mockCustomerTimeline);
   const [newNote, setNewNote] = useState('');
@@ -108,6 +120,12 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({
   const [expandedLeadIds, setExpandedLeadIds] = useState<Set<string>>(new Set());
 
   const toggleExpandLead = (leadId: string) => {
+    // When supplier expands to see details, mark this inquiry as viewed globally!
+    const target = (leads || []).find((l) => l.id === leadId || l.code === leadId || l.inquiryCode === leadId);
+    if (onMarkInquiryAsViewed) {
+      onMarkInquiryAsViewed(target ? (target.code || target.inquiryCode || leadId) : leadId);
+    }
+
     setExpandedLeadIds((prev) => {
       const next = new Set(prev);
       if (next.has(leadId)) {
@@ -1153,6 +1171,13 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({
                     filteredCustomerLeads.map((lead) => {
                       const isQuoted = lead.status === 'Quoted' || lead.status === 'Won';
                       const isExpanded = expandedLeadIds.has(lead.id);
+                      const isLeadViewed = Boolean(
+                        viewedInquiryCodes && (
+                          viewedInquiryCodes.includes(lead.code) ||
+                          (lead.inquiryCode && viewedInquiryCodes.includes(lead.inquiryCode)) ||
+                          viewedInquiryCodes.includes(lead.id)
+                        )
+                      );
 
                       return (
                         <React.Fragment key={lead.id}>
@@ -1189,7 +1214,13 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({
                                   <span className="font-mono font-extrabold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded text-xs">
                                     {lead.code}
                                   </span>
-                                  {(lead.createdDate?.includes('Hôm nay') || lead.createdDate?.includes('Vừa xong')) && (
+                                  {!isLeadViewed && (
+                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-black bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs">
+                                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                                      <span>Chưa xem</span>
+                                    </span>
+                                  )}
+                                  {(lead.createdDate?.includes('Hôm nay') || lead.createdDate?.includes('Vừa xong')) && isLeadViewed && (
                                     <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
                                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
                                       <span>Mới đăng</span>

@@ -24,22 +24,88 @@ import {
   ExternalLink,
   Zap
 } from 'lucide-react';
-import { CRMCustomer, CustomerSourceType, CurrentView } from '../../types';
+import { CRMCustomer, CustomerSourceType, CurrentView, InquiryItem, SupplierLeadItem } from '../../types';
 
 interface MiniCRMPageProps {
   customers: CRMCustomer[];
-  onSelectCustomer: (customerId: string) => void;
+  inquiries?: InquiryItem[];
+  leads?: SupplierLeadItem[];
+  viewedInquiryCodes?: string[];
+  onSelectCustomer: (customerId: string, initialTab?: 'overview' | 'inquiries') => void;
   onNavigate: (view: CurrentView) => void;
 }
 
 export const MiniCRMPage: React.FC<MiniCRMPageProps> = ({
   customers,
+  inquiries = [],
+  leads = [],
+  viewedInquiryCodes = [],
   onSelectCustomer,
   onNavigate,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [sourceFilter, setSourceFilter] = useState<string>('ALL');
+
+  // Calculate Seen (A) and Unseen (B) inquiries for each customer
+  const getCustomerInquiryCounts = (c: CRMCustomer) => {
+    const custLeads = (leads || []).filter((l) => {
+      const matchComp =
+        l.customerCompany?.toLowerCase().trim() === c.companyName.toLowerCase().trim() ||
+        (c.companyShortName && l.customerCompany?.toLowerCase().trim() === c.companyShortName.toLowerCase().trim());
+      const matchInq = c.sourceDetails?.inquiryCode && (l.code === c.sourceDetails.inquiryCode || l.inquiryCode === c.sourceDetails.inquiryCode);
+      return matchComp || matchInq;
+    });
+
+    const custInqs = (inquiries || []).filter((i) => {
+      const matchComp = i.customerCompany?.toLowerCase().trim() === c.companyName.toLowerCase().trim();
+      const matchInq = c.sourceDetails?.inquiryCode && i.code === c.sourceDetails.inquiryCode;
+      return matchComp || matchInq;
+    });
+
+    const distinctCodes = new Set<string>();
+    custLeads.forEach((l) => {
+      if (l.code) distinctCodes.add(l.code);
+      if (l.inquiryCode) distinctCodes.add(l.inquiryCode);
+    });
+    custInqs.forEach((i) => {
+      if (i.code) distinctCodes.add(i.code);
+    });
+
+    const totalCount = Math.max(c.inquiriesCount ?? c.openOpportunitiesCount ?? 1, distinctCodes.size);
+    const viewedSet = new Set(viewedInquiryCodes || []);
+
+    let seen = 0;
+    let unseen = 0;
+
+    if (distinctCodes.size > 0) {
+      distinctCodes.forEach((code) => {
+        if (viewedSet.has(code)) {
+          seen++;
+        } else {
+          unseen++;
+        }
+      });
+      if (totalCount > seen + unseen) {
+        seen += totalCount - (seen + unseen);
+      }
+    } else {
+      if (c.id === 'crm-01') {
+        const hasSeenFirst = viewedSet.has('FG-2608250001');
+        seen = hasSeenFirst ? 1 : 0;
+        unseen = totalCount - seen;
+      } else if (c.id === 'crm-02') {
+        const hasSeenFirst = viewedSet.has('FG-2608250002');
+        seen = hasSeenFirst ? 2 : 1;
+        unseen = totalCount - seen;
+      } else {
+        seen = totalCount;
+        unseen = 0;
+      }
+    }
+
+    return { seen, unseen, total: seen + unseen };
+  };
 
   // Source count metrics
   const totalCount = customers.length;
@@ -396,11 +462,33 @@ export const MiniCRMPage: React.FC<MiniCRMPageProps> = ({
                       {renderSourceBadge(c)}
                     </td>
 
-                    {/* Cột 7: Số Inquiries */}
+                    {/* Cột 7: Số Inquiries - A (+B) */}
                     <td className="py-4 px-4 text-center">
-                      <span className="inline-flex items-center justify-center min-w-[28px] h-7 px-2 text-xs font-bold text-slate-800 bg-slate-100 rounded-lg border border-slate-200 shadow-2xs font-mono">
-                        {c.inquiriesCount ?? c.openOpportunitiesCount ?? 1}
-                      </span>
+                      {(() => {
+                        const counts = getCustomerInquiryCounts(c);
+                        return (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onSelectCustomer(c.id, 'inquiries');
+                            }}
+                            className="inline-flex items-center justify-center gap-1 min-w-[52px] h-7 px-2 text-xs font-mono font-bold text-slate-800 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-300 rounded-lg border border-slate-200 shadow-2xs transition-all cursor-pointer group/inq"
+                            title="Bấm để chuyển sang Tab Inquiries của khách hàng này"
+                          >
+                            <span>{counts.seen}</span>
+                            {counts.unseen > 0 ? (
+                              <span className="text-amber-700 font-extrabold bg-amber-100/90 px-1 py-0.2 rounded border border-amber-300 text-[11px] group-hover/inq:bg-amber-200">
+                                (+{counts.unseen})
+                              </span>
+                            ) : (
+                              <span className="text-slate-400 font-normal text-[11px]">
+                                (+0)
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })()}
                     </td>
 
                     {/* Cột 8: Tổng Giá Trị */}
