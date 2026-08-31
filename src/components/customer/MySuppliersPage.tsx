@@ -227,25 +227,22 @@ export const MySuppliersPage: React.FC<MySuppliersPageProps> = ({
     switch (source) {
       case 'AWARDED_QUOTE':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 shadow-2xs whitespace-nowrap">
-            <Trophy className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
-            <span>Awarded</span>
+          <span className="inline-block px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 shadow-2xs whitespace-nowrap">
+            Awarded
           </span>
         );
 
       case 'DIRECT_PROFILE_REQUEST':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs whitespace-nowrap">
-            <Globe className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-            <span>Direct RFQ</span>
+          <span className="inline-block px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs whitespace-nowrap">
+            Direct RFQ
           </span>
         );
 
       case 'CURRENT_SUPPLIER':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-sky-50 text-sky-700 border border-sky-200 shadow-2xs whitespace-nowrap">
-            <FileText className="w-3.5 h-3.5 text-sky-600 shrink-0" />
-            <span>Current Supplier</span>
+          <span className="inline-block px-2.5 py-1 rounded-lg text-xs font-bold bg-sky-50 text-sky-700 border border-sky-200 shadow-2xs whitespace-nowrap">
+            Current Supplier
           </span>
         );
 
@@ -599,35 +596,20 @@ export const MySuppliersPage: React.FC<MySuppliersPageProps> = ({
                       <button
                         type="button"
                         onClick={(e) => handleOpenSupplier360(supplier, e)}
-                        className="text-left font-extrabold text-slate-900 hover:text-indigo-600 transition-colors cursor-pointer flex items-center gap-1 group/pic text-xs"
+                        className="text-left font-extrabold text-slate-900 hover:text-indigo-600 transition-colors cursor-pointer block text-xs"
                         title="Bấm để xem Profile chi tiết của PIC nhà cung cấp"
                       >
-                        <span className="group-hover/pic:underline">{supplier.contactPerson || 'Chưa cập nhật'}</span>
-                        <ArrowUpRight className="w-3 h-3 text-slate-400 group-hover/pic:text-indigo-600 transition-colors opacity-0 group-hover/pic:opacity-100" />
+                        <span>{supplier.contactPerson || 'Chưa cập nhật'}</span>
                       </button>
                       <div className="text-[11px] text-slate-500 font-medium mt-0.5">
                         {supplier.contactRole || (supplier.contactPerson === 'Minh Tran' ? 'Key Account Manager' : supplier.contactPerson === 'Le Quoc Bao' ? 'Pricing & Sales Lead' : supplier.contactPerson === 'Thanh Vo' ? 'Operations Manager' : 'Chuyên viên Báo giá & Điều hành')}
                       </div>
-                      {supplier.contactPhone && (
-                        <div className="flex items-center gap-1.5 mt-1 text-[11px] text-slate-400 font-mono">
-                          <Phone className="w-3 h-3 text-slate-400" />
-                          <span>{supplier.contactPhone}</span>
-                          <button
-                            onClick={(e) => copyToClipboard(supplier.contactPhone, `phone-${supplier.id}`, e)}
-                            title="Sao chép SĐT"
-                            className="p-0.5 text-slate-400 hover:text-indigo-600 cursor-pointer"
-                          >
-                            {copiedKey === `phone-${supplier.id}` ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
-                          </button>
-                        </div>
-                      )}
                     </td>
 
                     {/* Cột 3: Công Ty (Tên công ty + MST) */}
                     <td className="py-4 px-4">
-                      <div className="font-bold text-slate-900 text-sm group-hover:text-indigo-600 transition-colors flex items-center gap-1.5">
-                        <span>{supplier.name}</span>
-                        {supplier.verified && <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />}
+                      <div className="font-bold text-slate-900 text-sm group-hover:text-indigo-600 transition-colors">
+                        {supplier.name}
                       </div>
                       {supplier.taxId ? (
                         <div className="text-[11px] text-slate-500 font-mono mt-0.5">
@@ -640,19 +622,14 @@ export const MySuppliersPage: React.FC<MySuppliersPageProps> = ({
                       )}
                     </td>
 
-                    {/* Cột 4: Dịch Vụ Cung Cấp */}
-                    <td className="py-4 px-4 max-w-xs">
+                    {/* Cột 4: Dịch Vụ Cung Cấp (Hiển thị đầy đủ tất cả các dịch vụ đã tick chọn) */}
+                    <td className="py-4 px-4 max-w-sm">
                       <div className="flex flex-wrap gap-1">
-                        {supplier.services.slice(0, 3).map((srv) => (
-                          <span key={srv} className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                        {supplier.services.map((srv) => (
+                          <span key={srv} className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200 whitespace-nowrap">
                             {srv}
                           </span>
                         ))}
-                        {supplier.services.length > 3 && (
-                          <span className="px-1.5 py-0.5 rounded text-[10px] bg-slate-100 text-slate-500 font-bold">
-                            +{supplier.services.length - 3}
-                          </span>
-                        )}
                       </div>
                     </td>
 
@@ -667,10 +644,9 @@ export const MySuppliersPage: React.FC<MySuppliersPageProps> = ({
                         type="button"
                         id={`supplier-quotes-btn-${supplier.id}`}
                         onClick={(e) => handleViewSupplierInquiries(supplier, e)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100/90 hover:bg-indigo-50 text-slate-800 hover:text-indigo-700 font-bold text-xs border border-slate-200 hover:border-indigo-300 transition-all hover:scale-105 shadow-2xs cursor-pointer group/quoteBtn"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100/90 hover:bg-indigo-50 text-slate-800 hover:text-indigo-700 font-bold text-xs border border-slate-200 hover:border-indigo-300 transition-all hover:scale-105 shadow-2xs cursor-pointer"
                         title={`Bấm để xem các Inquiries của bạn mà ${supplier.name} đã gửi báo giá`}
                       >
-                        <FileText className="w-3.5 h-3.5 text-indigo-600 group-hover/quoteBtn:scale-110 transition-transform" />
                         <span>{getSupplierQuoteCountForCustomer(supplier)} báo giá</span>
                       </button>
                     </td>
@@ -680,10 +656,9 @@ export const MySuppliersPage: React.FC<MySuppliersPageProps> = ({
                       <div className="flex items-center justify-end gap-1.5">
                         <button
                           onClick={() => handleOpenSupplier360(supplier)}
-                          className="px-3.5 py-1.5 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                          className="px-3.5 py-1.5 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition-colors cursor-pointer shadow-2xs"
                         >
-                          <Eye className="w-3.5 h-3.5 text-indigo-600" />
-                          <span>360° View</span>
+                          360° View
                         </button>
                       </div>
                     </td>
