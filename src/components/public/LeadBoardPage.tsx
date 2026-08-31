@@ -8,6 +8,7 @@ import {
   Truck, 
   Ship, 
   Plane, 
+  Train,
   ArrowRight, 
   Plus, 
   Building2, 
@@ -92,6 +93,8 @@ interface ServiceTabItem {
   id: string;
   name: string;
   nameVi: string;
+  badge: string;
+  subtext: string;
   serviceType: ServiceType | 'ALL';
   icon: React.ComponentType<{ className?: string }>;
   colorClass: string;
@@ -174,12 +177,14 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
     setTimeout(() => setCopiedLeadLinkId(null), 2500);
   };
 
-  // Service Navigation Tabs configuration (8 dịch vụ chia đều 2 dòng x 4 cột, không cần thanh scroll)
+  // 8 Core Logistics Services + All Modes Filter Navigator
   const serviceTabs: ServiceTabItem[] = [
     {
       id: 'ALL',
       name: 'All Modes',
       nameVi: 'Tất cả dịch vụ',
+      badge: 'All Modes',
+      subtext: 'Toàn bộ cơ hội báo giá',
       serviceType: 'ALL',
       icon: Layers,
       colorClass: 'text-indigo-600',
@@ -189,7 +194,9 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
     {
       id: 'Trucking',
       name: 'Trucking',
-      nameVi: 'Vận tải đường bộ',
+      nameVi: 'Đường Bộ',
+      badge: 'LTL / FTL',
+      subtext: 'Xe tải thùng kín, bạt, đông lạnh...',
       serviceType: 'Trucking',
       icon: Truck,
       colorClass: 'text-blue-600',
@@ -197,9 +204,11 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
       activeClass: 'bg-blue-600 text-white shadow-sm ring-1 ring-blue-600',
     },
     {
-      id: 'Sea Freight (FCL)',
-      name: 'Ocean FCL',
-      nameVi: 'Đường biển FCL',
+      id: 'Sea Freight',
+      name: 'Sea Freight',
+      nameVi: 'Đường Biển',
+      badge: 'FCL / LCL',
+      subtext: 'Cảng đi - Cảng đến quốc tế & nội địa',
       serviceType: 'Sea Freight (FCL)',
       icon: Ship,
       colorClass: 'text-cyan-600',
@@ -207,19 +216,11 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
       activeClass: 'bg-cyan-600 text-white shadow-sm ring-1 ring-cyan-600',
     },
     {
-      id: 'Sea Freight (LCL)',
-      name: 'Ocean LCL',
-      nameVi: 'Đường biển LCL (CFS)',
-      serviceType: 'Sea Freight (LCL)',
-      icon: Boxes,
-      colorClass: 'text-teal-600',
-      bgLightClass: 'bg-teal-50',
-      activeClass: 'bg-teal-600 text-white shadow-sm ring-1 ring-teal-600',
-    },
-    {
       id: 'Air Freight',
       name: 'Air Freight',
-      nameVi: 'Hàng không Express',
+      nameVi: 'Hàng Không',
+      badge: 'Cargo / Express',
+      subtext: 'Chuyển phát nhanh & Air Cargo',
       serviceType: 'Air Freight',
       icon: Plane,
       colorClass: 'text-sky-600',
@@ -227,11 +228,13 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
       activeClass: 'bg-sky-600 text-white shadow-sm ring-1 ring-sky-600',
     },
     {
-      id: 'Cold Chain',
-      name: 'Cold Chain',
-      nameVi: 'Chuỗi lạnh & Nhiệt độ',
-      serviceType: 'Cold Chain',
-      icon: Snowflake,
+      id: 'Rail Freight',
+      name: 'Rail Freight',
+      nameVi: 'Đường Sắt',
+      badge: 'FCL / LCL Ga',
+      subtext: 'Tuyến Bắc Nam & Ga liên vận',
+      serviceType: 'Rail Freight',
+      icon: Train,
       colorClass: 'text-emerald-600',
       bgLightClass: 'bg-emerald-50',
       activeClass: 'bg-emerald-600 text-white shadow-sm ring-1 ring-emerald-600',
@@ -239,35 +242,66 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
     {
       id: 'Warehousing',
       name: 'Warehousing',
-      nameVi: 'Kho bãi & 3PL',
+      nameVi: 'Kho Bãi 3PL',
+      badge: '6 Loại hình kho',
+      subtext: 'Kho thường, ngoại quan, lạnh...',
       serviceType: 'Warehousing',
-      icon: Warehouse,
+      icon: Building2,
+      colorClass: 'text-purple-600',
+      bgLightClass: 'bg-purple-50',
+      activeClass: 'bg-purple-600 text-white shadow-sm ring-1 ring-purple-600',
+    },
+    {
+      id: 'Customs Clearance',
+      name: 'Customs Clearance',
+      nameVi: 'Thủ Tục Hải Quan',
+      badge: 'Khai báo & C/O',
+      subtext: 'Thông quan cảng, sân bay, cửa khẩu',
+      serviceType: 'Customs Clearance',
+      icon: FileText,
       colorClass: 'text-amber-600',
       bgLightClass: 'bg-amber-50',
       activeClass: 'bg-amber-600 text-white shadow-sm ring-1 ring-amber-600',
     },
     {
-      id: 'Customs & Cross-Border',
-      name: 'Customs & Cross-Border',
-      nameVi: 'Hải quan & Xuyên biên giới',
-      serviceType: 'Customs Clearance',
-      icon: FileCheck2,
-      colorClass: 'text-violet-600',
-      bgLightClass: 'bg-violet-50',
-      activeClass: 'bg-violet-600 text-white shadow-sm ring-1 ring-violet-600',
+      id: 'Cross-border',
+      name: 'Cross-Border',
+      nameVi: 'Cross-Border',
+      badge: 'VN ↔ GMS / TQ',
+      subtext: 'Vận tải bộ xuyên biên giới',
+      serviceType: 'Cross-border',
+      icon: Globe,
+      colorClass: 'text-orange-600',
+      bgLightClass: 'bg-orange-50',
+      activeClass: 'bg-orange-600 text-white shadow-sm ring-1 ring-orange-600',
+    },
+    {
+      id: 'Project Cargo',
+      name: 'Project Cargo',
+      nameVi: 'Integrated / Dự Án',
+      badge: 'OOG / Đa PT',
+      subtext: 'Hàng siêu trường siêu trọng, dự án',
+      serviceType: 'Project Cargo',
+      icon: Layers,
+      colorClass: 'text-indigo-600',
+      bgLightClass: 'bg-indigo-50',
+      activeClass: 'bg-indigo-600 text-white shadow-sm ring-1 ring-indigo-600',
     },
   ];
 
   // Count leads per service
   const serviceCounts = useMemo(() => {
-    const counts: Record<string, number> = { ALL: leads.length };
-    serviceTabs.forEach((tab) => {
-      if (tab.id === 'Customs & Cross-Border') {
-        counts[tab.id] = leads.filter((l) => l.serviceType === 'Customs Clearance' || l.serviceType === 'Cross-border').length;
-      } else if (tab.id !== 'ALL') {
-        counts[tab.id] = leads.filter((l) => l.serviceType === tab.serviceType).length;
-      }
-    });
+    const counts: Record<string, number> = {
+      ALL: leads.length,
+      Trucking: leads.filter((l) => l.serviceType === 'Trucking' || l.serviceType === 'Cold Chain').length,
+      'Sea Freight': leads.filter((l) => l.serviceType === 'Sea Freight (FCL)' || l.serviceType === 'Sea Freight (LCL)').length,
+      'Air Freight': leads.filter((l) => l.serviceType === 'Air Freight').length,
+      'Rail Freight': leads.filter((l) => l.serviceType === 'Rail Freight').length,
+      Warehousing: leads.filter((l) => l.serviceType === 'Warehousing').length,
+      'Customs Clearance': leads.filter((l) => l.serviceType === 'Customs Clearance').length,
+      'Cross-border': leads.filter((l) => l.serviceType === 'Cross-border' || (l.serviceType as string) === 'Cross-Border').length,
+      'Project Cargo': leads.filter((l) => l.serviceType === 'Project Cargo').length,
+    };
     return counts;
   }, [leads]);
 
@@ -330,11 +364,15 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
           lead.code.toLowerCase().includes(term) ||
           (lead.inquiryCode && lead.inquiryCode.toLowerCase().includes(term));
 
-        // Service Tab
+        // Service Tab (Hỗ trợ 8 nhóm dịch vụ cốt lõi)
         const matchesService =
           selectedService === 'ALL' ||
-          (selectedService === 'Customs & Cross-Border'
-            ? lead.serviceType === 'Customs Clearance' || lead.serviceType === 'Cross-border'
+          (selectedService === 'Trucking'
+            ? lead.serviceType === 'Trucking' || lead.serviceType === 'Cold Chain'
+            : selectedService === 'Sea Freight'
+            ? lead.serviceType === 'Sea Freight (FCL)' || lead.serviceType === 'Sea Freight (LCL)'
+            : selectedService === 'Cross-border'
+            ? lead.serviceType === 'Cross-border' || (lead.serviceType as string) === 'Cross-Border'
             : lead.serviceType === selectedService);
 
         // Pricing Type Filter (Lô / Hợp đồng)
@@ -810,19 +848,19 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
         </div>
       </div>
 
-      {/* 1. SERVICE TABS NAVIGATOR (Hiển thị 2 line, mỗi line 4 dịch vụ, không cần thanh scroll) */}
+      {/* 1. SERVICE TABS NAVIGATOR (8 Nhóm Dịch Vụ Cốt Lõi + Tất Cả Dịch Vụ) */}
       <div className="space-y-2.5">
         <div className="flex items-center justify-between">
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
             <SlidersHorizontal className="w-3.5 h-3.5 text-indigo-600" />
-            <span>Phân Loại Theo Phương Thức Vận Tải & Dịch Vụ Logistics</span>
+            <span>Phân Loại Theo 8 Nhóm Dịch Vụ Logistics & Vận Tải</span>
           </h2>
           <span className="text-xs text-slate-400">
             Hiển thị <strong className="text-slate-800">{filteredAndSortedLeads.length}</strong> / {leads.length} cơ hội
           </span>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 w-full">
+        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-9 gap-2 w-full">
           {serviceTabs.map((tab) => {
             const Icon = tab.icon;
             const isSelected = selectedService === tab.id;
@@ -833,13 +871,14 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
                 key={tab.id}
                 id={`leadboard-service-tab-${tab.id}`}
                 onClick={() => setSelectedService(tab.id)}
-                className={`group px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center justify-between gap-2 cursor-pointer border w-full text-left ${
+                className={`group p-2.5 rounded-2xl text-xs font-bold transition-all flex flex-col justify-between cursor-pointer border text-left min-h-[92px] relative ${
                   isSelected
                     ? tab.activeClass
                     : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200 shadow-2xs hover:border-slate-300'
                 }`}
               >
-                <div className="flex items-center gap-2.5 min-w-0">
+                {/* Top line: Icon + Badge + Lead Count */}
+                <div className="flex items-center justify-between gap-1 w-full mb-1">
                   <div
                     className={`p-1.5 rounded-xl transition-colors shrink-0 ${
                       isSelected ? 'bg-white/20 text-white' : `${tab.bgLightClass} ${tab.colorClass}`
@@ -847,20 +886,42 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
                   >
                     <Icon className="w-4 h-4" />
                   </div>
-                  <div className="min-w-0">
-                    <div className="leading-tight truncate text-xs font-bold">{tab.nameVi}</div>
-                    <div className={`text-[10px] font-medium leading-none mt-0.5 truncate ${isSelected ? 'text-white/80' : 'text-slate-400'}`}>
-                      {tab.name}
-                    </div>
+                  <div className="flex items-center gap-1">
+                    {tab.badge && (
+                      <span
+                        className={`px-1.5 py-0.5 text-[8.5px] font-black rounded-md tracking-tight ${
+                          isSelected
+                            ? 'bg-white/20 text-white'
+                            : 'bg-slate-100 text-slate-600 border border-slate-200/80'
+                        }`}
+                      >
+                        {tab.badge}
+                      </span>
+                    )}
+                    <span
+                      className={`px-1.5 py-0.5 text-[10px] font-black rounded-full shrink-0 ${
+                        isSelected
+                          ? 'bg-white text-slate-900 shadow-2xs'
+                          : 'bg-slate-100 text-slate-700 group-hover:bg-slate-200'
+                      }`}
+                    >
+                      {count}
+                    </span>
                   </div>
                 </div>
-                <span
-                  className={`ml-1 px-2 py-0.5 text-[10.5px] font-extrabold rounded-full shrink-0 ${
-                    isSelected ? 'bg-white text-slate-900' : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
-                  }`}
-                >
-                  {count}
-                </span>
+
+                {/* Middle & Bottom: Service Title & Subtext */}
+                <div className="min-w-0 mt-auto">
+                  <div className="leading-tight truncate text-xs font-black">{tab.nameVi}</div>
+                  <div
+                    className={`text-[9.5px] font-medium leading-tight mt-0.5 truncate ${
+                      isSelected ? 'text-white/80' : 'text-slate-400'
+                    }`}
+                    title={tab.subtext}
+                  >
+                    {tab.subtext}
+                  </div>
+                </div>
               </button>
             );
           })}
