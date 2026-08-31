@@ -750,13 +750,14 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
     const specs = lead.serviceSpecs || lead.inquiry?.serviceSpecs;
 
     if (sType === 'Trucking') {
+      if (specs?.trucking?.multiDropPoints && specs.trucking.multiDropPoints > 0) return 'Giao đa điểm';
       return specs?.trucking?.loadType || (lead.volumeDisplay?.includes('LTL') ? 'LTL (Hàng ghép)' : 'FTL (Nguyên xe)');
     }
     if (sType === 'Cold Chain') {
       return specs?.coldChain?.vehicleOrContType || 'Xe lạnh FTL';
     }
     if (sType === 'Sea Freight (FCL)') {
-      return 'FCL (Nguyên cont)';
+      return specs?.ocean?.containerType ? `FCL (${specs.ocean.containerType})` : 'FCL (Nguyên cont)';
     }
     if (sType === 'Sea Freight (LCL)') {
       return 'LCL (Gom lẻ CFS)';
@@ -766,7 +767,7 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
       return isExpress ? 'Express / Chuyển phát' : 'Air Cargo Direct';
     }
     if (sType === 'Rail Freight') {
-      return specs?.rail?.mode || specs?.rail?.containerType || 'FCL Container Ga';
+      return specs?.rail?.containerType || 'FCL Cont Ga';
     }
     if (sType === 'Warehousing') {
       return specs?.warehousing?.warehouseType ? specs.warehousing.warehouseType.split(' (')[0] : 'Kho Thường';
@@ -778,7 +779,12 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
       return specs?.crossBorder?.cargoMode ? specs.crossBorder.cargoMode.split(' (')[0] : 'Xe chạy thẳng GMS';
     }
     if (sType === 'Project Cargo') {
-      return specs?.project?.projectCategory || 'Distribution';
+      const cat = specs?.project?.projectCategory;
+      if (cat === 'DISTRIBUTION') return 'Phân phối chuỗi';
+      if (cat === 'CROSS_DOCK') return 'Trạm Cross-Dock';
+      if (cat === 'PORT_ICD') return 'Con thoi Cảng - ICD';
+      if (cat === 'MULTIMODAL') return 'Đa phương thức';
+      return 'Dự án phân phối';
     }
     return 'Tiêu chuẩn';
   };

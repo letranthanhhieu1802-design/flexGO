@@ -998,19 +998,19 @@ export const LeadInquiryDetailCard: React.FC<LeadInquiryDetailCardProps> = ({
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
               <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
                 <span className="text-[10px] text-slate-400 block font-medium">Dải nhiệt độ</span>
-                <span className="font-extrabold text-amber-900">{coldChain.temperatureRange || '+2°C đến +8°C'}</span>
+                <span className="font-extrabold text-amber-900">{coldChain.temperatureCategory || coldChain.temperatureRange || '+2°C đến +8°C'}</span>
               </div>
               <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
-                <span className="text-[10px] text-slate-400 block font-medium">Dung sai nhiệt</span>
-                <span className="font-extrabold text-slate-900">{coldChain.temperatureTolerance || '±1.5°C'}</span>
+                <span className="text-[10px] text-slate-400 block font-medium">Loại phương tiện / Dung sai</span>
+                <span className="font-extrabold text-slate-900">{coldChain.vehicleOrContType || coldChain.temperatureTolerance || 'Xe tải lạnh chuyên dụng'}</span>
               </div>
               <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
                 <span className="text-[10px] text-slate-400 block font-medium">Pre-cooling</span>
-                <span className="font-extrabold text-emerald-700">{coldChain.preCoolingRequired ? '✓ Bắt buộc' : 'Tiêu chuẩn'}</span>
+                <span className="font-extrabold text-emerald-700">{coldChain.preCoolingRequested || coldChain.preCoolingRequired ? '✓ Bắt buộc' : 'Tiêu chuẩn'}</span>
               </div>
               <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
-                <span className="text-[10px] text-slate-400 block font-medium">IoT Logger</span>
-                <span className="font-extrabold text-indigo-700">{coldChain.iotLoggerRequired ? '✓ Cảm biến Real-time' : 'Data Logger USB'}</span>
+                <span className="text-[10px] text-slate-400 block font-medium">IoT Datalogger</span>
+                <span className="font-extrabold text-indigo-700">{coldChain.realtimeGpsTempLogging || coldChain.iotLoggerRequired ? '✓ Cảm biến Real-time' : 'Data Logger USB'}</span>
               </div>
             </div>
           )}
@@ -1023,12 +1023,15 @@ export const LeadInquiryDetailCard: React.FC<LeadInquiryDetailCardProps> = ({
                 <span className="font-extrabold text-slate-900">{warehousing.warehouseType || 'Kho Grade A'}</span>
               </div>
               <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
-                <span className="text-[10px] text-slate-400 block font-medium">Diện tích thuê</span>
-                <span className="font-extrabold text-purple-900">{warehousing.storageAreaM2 || 2500} m²</span>
+                <span className="text-[10px] text-slate-400 block font-medium">Diện tích thuê / Vị trí kệ</span>
+                <span className="font-extrabold text-purple-900">
+                  {warehousing.storageAreaSqm || warehousing.storageAreaM2 ? `${warehousing.storageAreaSqm || warehousing.storageAreaM2} m²` : ''} 
+                  {warehousing.palletPositions ? ` (${warehousing.palletPositions} Pallets)` : ''}
+                </span>
               </div>
               <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
-                <span className="text-[10px] text-slate-400 block font-medium">Tích hợp WMS</span>
-                <span className="font-extrabold text-emerald-700">{warehousing.wmsIntegrationRequired ? '✓ API ERP' : 'Báo cáo Excel'}</span>
+                <span className="text-[10px] text-slate-400 block font-medium">Tích hợp WMS API</span>
+                <span className="font-extrabold text-emerald-700">{warehousing.wmsIntegrationNeeded || warehousing.wmsIntegrationRequired ? '✓ API ERP SAP/WMS' : 'Báo cáo Excel định kỳ'}</span>
               </div>
               <div className="bg-white p-2.5 rounded-xl border border-indigo-100 shadow-2xs">
                 <span className="text-[10px] text-slate-400 block font-medium">PCCC Sprinkler</span>
