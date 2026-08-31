@@ -1,32 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Flame, 
   Search, 
-  Filter, 
-  DollarSign, 
-  TrendingUp, 
-  CheckCircle2, 
-  ArrowRight, 
-  Clock, 
-  Building2, 
-  Truck, 
-  Ship, 
-  Plane, 
-  Sparkles, 
   ChevronRight,
   ChevronDown,
   ChevronUp,
-  Plus,
-  Zap,
   Bookmark,
   BookmarkCheck,
-  Star,
-  Eye,
-  KeyRound,
-  ExternalLink,
-  Unlock,
-  Coins,
-  ShieldCheck,
+  CheckCircle2, 
+  ArrowUpDown,
   X
 } from 'lucide-react';
 import { 
@@ -55,6 +36,9 @@ interface SupplierLeadsPageProps {
   onIncrementLeadViews?: (leadId: string) => void;
 }
 
+type SortField = 'code' | 'createdDate' | 'dueDate' | 'serviceType' | 'estimatedValueVND' | 'quotesCount' | 'status';
+type SortOrder = 'asc' | 'desc';
+
 export const SupplierLeadsPage: React.FC<SupplierLeadsPageProps> = ({
   leads,
   currentUser,
@@ -70,12 +54,14 @@ export const SupplierLeadsPage: React.FC<SupplierLeadsPageProps> = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [serviceFilter, setServiceFilter] = useState<string>('ALL');
   const [viewScope, setViewScope] = useState<'ALL' | 'SAVED'>('ALL');
   const [expandedLeadIds, setExpandedLeadIds] = useState<Record<string, boolean>>({});
   const [unlockedLeadIds, setUnlockedLeadIds] = useState<Record<string, boolean>>({});
-  const [leadToUnlockConfirm, setLeadToUnlockConfirm] = useState<SupplierLeadItem | null>(null);
   const [activeCompareModalLead, setActiveCompareModalLead] = useState<SupplierLeadItem | null>(null);
   const [unlockToastMessage, setUnlockToastMessage] = useState<string | null>(null);
+  const [sortField, setSortField] = useState<SortField>('createdDate');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
   // Read URL query params on mount (e.g. ?inquiry=INQ-xxxxx or ?rfq=...)
   useEffect(() => {
@@ -97,13 +83,23 @@ export const SupplierLeadsPage: React.FC<SupplierLeadsPageProps> = ({
 
   const savedCount = leads.filter((l) => l.isSaved).length;
 
-  const toggleExpandLead = (leadId: string) => {
+  const toggleExpandLead = (leadId: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
     setExpandedLeadIds((prev) => ({
       ...prev,
       [leadId]: !prev[leadId],
     }));
     if (onIncrementLeadViews) {
       onIncrementLeadViews(leadId);
+    }
+  };
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortField(field);
+      setSortOrder('desc');
     }
   };
 
@@ -120,65 +116,216 @@ export const SupplierLeadsPage: React.FC<SupplierLeadsPageProps> = ({
     return `${prefix}***`;
   };
 
-  const handleUnlockLead = (lead: SupplierLeadItem, e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
+  const handleUnlockLead = (lead: SupplierLeadItem) => {
     const isAlreadyUnlocked = Boolean(unlockedLeadIds[lead.id] || lead.isUnlocked);
     if (isAlreadyUnlocked) {
       setActiveCompareModalLead({ ...lead, isUnlocked: true });
-    } else {
-      setLeadToUnlockConfirm(lead);
+      return;
     }
-  };
 
-  const handleOpenCompareModal = (lead: SupplierLeadItem, e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    const isAlreadyUnlocked = Boolean(unlockedLeadIds[lead.id] || lead.isUnlocked);
-    setActiveCompareModalLead({ ...lead, isUnlocked: isAlreadyUnlocked });
-  };
-
-  const confirmUnlockWithCredit = (leadId: string, creditCost: number = 50) => {
-    const targetLead = leads.find((l) => l.id === leadId);
-    const leadTitle = targetLead ? `${targetLead.code} - ${targetLead.customerCompany}` : leadId;
+    const creditCost = 50;
+    const leadTitle = `${lead.code} - ${lead.customerCompany}`;
     
     if (onUnlockLead) {
-      const success = onUnlockLead(leadId, creditCost);
+      const success = onUnlockLead(lead.id, creditCost);
       if (!success) {
-        if (onNavigate) {
-          onNavigate({ type: 'workspace', view: 'flexcredit-add' });
-        }
-        return false;
+        if (onNavigate) onNavigate({ type: 'workspace', view: 'flexcredit-add' });
+        return;
       }
     } else if (onDeductCredit) {
       const success = onDeductCredit(creditCost, `Mở khóa SĐT & Ma trận Báo giá (${leadTitle})`);
       if (!success) {
-        if (onNavigate) {
-          onNavigate({ type: 'workspace', view: 'flexcredit-add' });
-        }
-        return false;
+        if (onNavigate) onNavigate({ type: 'workspace', view: 'flexcredit-add' });
+        return;
       }
     }
     
-    setUnlockedLeadIds((prev) => ({ ...prev, [leadId]: true }));
-    setExpandedLeadIds((prev) => ({ ...prev, [leadId]: true }));
-    setLeadToUnlockConfirm(null);
-    if (targetLead) {
-      const updatedLead = { ...targetLead, isUnlocked: true };
-      setActiveCompareModalLead(updatedLead);
-    }
+    setUnlockedLeadIds((prev) => ({ ...prev, [lead.id]: true }));
+    setExpandedLeadIds((prev) => ({ ...prev, [lead.id]: true }));
+    const updatedLead = { ...lead, isUnlocked: true };
+    setActiveCompareModalLead(updatedLead);
     
-    setUnlockToastMessage(`Đã mở khóa thành công ${targetLead?.customerCompany || 'Lead'} (-${creditCost} Credits)! Hotline & Ma trận giá đã sẵn sàng.`);
+    setUnlockToastMessage(`Đã mở khóa thành công ${lead.customerCompany} (-${creditCost} Credits)! Hotline & Ma trận giá đã sẵn sàng.`);
     setTimeout(() => {
       setUnlockToastMessage(null);
     }, 4500);
-
-    return true;
   };
 
-  const filteredLeads = leads.filter((l) => {
-    // Scope filter (All vs Saved)
-    if (viewScope === 'SAVED' && !l.isSaved) {
-      return false;
+  const handleOpenCompareModal = (lead: SupplierLeadItem) => {
+    const isAlreadyUnlocked = Boolean(unlockedLeadIds[lead.id] || lead.isUnlocked);
+    setActiveCompareModalLead({ ...lead, isUnlocked: isAlreadyUnlocked });
+  };
+
+  // Helper Badge Style cho Service Group (Phẳng, không icon)
+  const getServiceBadgeStyle = (service: ServiceType) => {
+    switch (service) {
+      case 'Trucking':
+        return 'bg-blue-50 text-blue-700 border-blue-200/80';
+      case 'Sea Freight (FCL)':
+        return 'bg-cyan-50 text-cyan-700 border-cyan-200/80';
+      case 'Sea Freight (LCL)':
+        return 'bg-teal-50 text-teal-700 border-teal-200/80';
+      case 'Air Freight':
+        return 'bg-sky-50 text-sky-700 border-sky-200/80';
+      case 'Rail Freight':
+        return 'bg-amber-50 text-amber-700 border-amber-200/80';
+      case 'Cold Chain':
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200/80';
+      case 'Warehousing':
+        return 'bg-purple-50 text-purple-700 border-purple-200/80';
+      case 'Customs Clearance':
+        return 'bg-rose-50 text-rose-700 border-rose-200/80';
+      case 'Cross-border':
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200/80';
+      case 'Project Cargo':
+        return 'bg-indigo-50 text-indigo-700 border-indigo-200/80';
+      default:
+        return 'bg-slate-100 text-slate-700 border-slate-200';
     }
+  };
+
+  // Helper Badge Style cho Phân loại hàng hóa
+  const getCargoBadgeStyle = (classification?: string) => {
+    switch (classification) {
+      case 'Reefer':
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+      case 'Hazmat':
+        return 'bg-rose-50 text-rose-700 border-rose-200';
+      default:
+        return 'bg-slate-50 text-slate-600 border-slate-200';
+    }
+  };
+
+  const getCargoLabel = (classification?: string) => {
+    switch (classification) {
+      case 'Reefer':
+        return 'Hàng lạnh';
+      case 'Hazmat':
+        return 'Hàng nguy hiểm';
+      default:
+        return 'Hàng thường';
+    }
+  };
+
+  // Helper xác định Hình Thức / Mô Hình dịch vụ theo chuẩn rút gọn
+  const getOperationModeDisplay = (lead: SupplierLeadItem) => {
+    const sType = lead.serviceType;
+    const specs = lead.serviceSpecs || lead.inquiry?.serviceSpecs;
+    const textContext = `${lead.inquiry?.title || ''} ${lead.volumeDisplay || ''} ${lead.cargoDetails || ''} ${lead.contractTerm || ''}`.toLowerCase();
+
+    // 1. Đường bộ (Trucking & Cold Chain)
+    if (sType === 'Trucking' || sType === 'Cold Chain') {
+      const loadType = specs?.trucking?.loadType;
+      if (loadType?.includes('LTL') || textContext.includes('ltl') || textContext.includes('hàng ghép') || textContext.includes('ghép hàng')) {
+        return 'LTL';
+      }
+      return 'FTL';
+    }
+
+    // 2. Đường biển (Sea Freight FCL & LCL)
+    if (sType === 'Sea Freight (FCL)' || sType === 'Sea Freight (LCL)') {
+      if (sType === 'Sea Freight (LCL)' || specs?.ocean?.mode?.includes('LCL') || textContext.includes('lcl') || textContext.includes('gom lẻ')) {
+        return 'LCL';
+      }
+      return 'FCL';
+    }
+
+    // 3. Hàng không (Air Freight)
+    if (sType === 'Air Freight') {
+      const isExpress = specs?.air?.airServiceType === 'Express / Courier' || 
+                        specs?.air?.serviceLevel?.toLowerCase().includes('priority') ||
+                        textContext.includes('express') || 
+                        textContext.includes('hỏa tốc') || 
+                        textContext.includes('chuyển phát');
+      return isExpress ? 'Express' : 'Air Freight';
+    }
+
+    // 4. Đường sắt (Rail Freight)
+    if (sType === 'Rail Freight') {
+      const isLcl = specs?.rail?.mode?.includes('LCL') || textContext.includes('lcl') || textContext.includes('hàng lẻ') || textContext.includes('ghép');
+      return isLcl ? 'LCL' : 'FCL';
+    }
+
+    // 5. Kho bãi (Warehousing)
+    if (sType === 'Warehousing') {
+      const whType = (specs?.warehousing?.warehouseType || textContext).toLowerCase();
+      if (whType.includes('ngoại quan') || whType.includes('bonded')) return 'Kho ngoại quan';
+      if (whType.includes('lạnh') || whType.includes('mát') || whType.includes('cold')) return 'Kho lạnh';
+      if (whType.includes('nguy hiểm') || whType.includes('dg') || whType.includes('hóa chất')) return 'Kho hàng nguy hiểm';
+      if (whType.includes('fulfillment') || whType.includes('tmđt') || whType.includes('thương mại điện tử')) return 'Kho Fulfillment';
+      if (whType.includes('tự quản') || whType.includes('self-storage')) return 'Kho tự quản';
+      return 'Kho thường';
+    }
+
+    // 6. Thủ tục hải quan (Customs Clearance)
+    if (sType === 'Customs Clearance') {
+      const tradeRole = (specs?.customs?.tradeRole || lead.inquiry?.tradeRole || textContext).toLowerCase();
+      const decType = (specs?.customs?.declarationType || '').toLowerCase();
+      if (tradeRole.includes('xuất') || tradeRole.includes('export') || decType.includes('xuất') || decType.includes('b11')) {
+        return 'Xuất khẩu';
+      }
+      return 'Nhập khẩu';
+    }
+
+    // 7. Xuyên biên giới (Cross-border)
+    if (sType === 'Cross-border') {
+      if (textContext.includes('ltl') || textContext.includes('hàng ghép') || textContext.includes('ghép')) {
+        return 'LTL';
+      }
+      return 'FTL';
+    }
+
+    // 8. Logistics Dự án (Project Cargo)
+    if (sType === 'Project Cargo') {
+      const cat = specs?.project?.projectCategory;
+      if (cat === 'DISTRIBUTION' || textContext.includes('phân phối')) return 'Phân phối';
+      if (cat === 'CROSS_DOCK' || textContext.includes('cross-dock') || textContext.includes('chia chọn')) return 'Cross-dock';
+      if (cat === 'PORT_ICD' || textContext.includes('cảng') || textContext.includes('icd') || textContext.includes('con thoi')) return 'Cảng';
+      if (cat === 'MULTIMODAL' || textContext.includes('đa phương thức')) return 'Đa phương thức';
+      return 'Phân phối';
+    }
+
+    return 'FTL';
+  };
+
+  // Helper Badge Style cho Trạng thái Lead (Thêm Lost)
+  const getStatusBadgeStyle = (status: LeadStatus) => {
+    switch (status) {
+      case 'Open':
+        return 'bg-blue-50 text-blue-700 border-blue-200';
+      case 'Quoted':
+        return 'bg-purple-50 text-purple-700 border-purple-200';
+      case 'Won':
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+      case 'Lost':
+        return 'bg-rose-50 text-rose-700 border-rose-200';
+      case 'Closed':
+        return 'bg-slate-100 text-slate-600 border-slate-200';
+      default:
+        return 'bg-slate-100 text-slate-700 border-slate-200';
+    }
+  };
+
+  const getStatusDisplay = (status: LeadStatus) => {
+    switch (status) {
+      case 'Open':
+        return 'Open';
+      case 'Quoted':
+        return 'Quoted';
+      case 'Won':
+        return 'Won';
+      case 'Lost':
+        return 'Lost';
+      case 'Closed':
+        return 'Closed';
+      default:
+        return status;
+    }
+  };
+
+  // Filter leads
+  const filteredLeads = leads.filter((l) => {
+    if (viewScope === 'SAVED' && !l.isSaved) return false;
 
     const matchesSearch =
       l.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -187,42 +334,31 @@ export const SupplierLeadsPage: React.FC<SupplierLeadsPageProps> = ({
       l.cargoDetails.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus = statusFilter === 'ALL' || l.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    const matchesService = serviceFilter === 'ALL' || l.serviceType === serviceFilter;
+
+    return matchesSearch && matchesStatus && matchesService;
   });
 
-  const getStatusBadge = (status: LeadStatus) => {
-    switch (status) {
-      case 'Open':
-        return 'bg-blue-50 text-blue-700 border-blue-200 font-bold';
-      case 'Quoted':
-        return 'bg-indigo-50 text-indigo-700 border-indigo-200 font-semibold';
-      case 'Won':
-        return 'bg-emerald-50 text-emerald-700 border-emerald-200 font-bold';
-      case 'Lost':
-        return 'bg-rose-50 text-rose-700 border-rose-200 font-medium';
-      case 'Closed':
-        return 'bg-slate-100 text-slate-600 border-slate-200 font-medium';
-      default:
-        return 'bg-slate-100 text-slate-700 border-slate-200';
-    }
-  };
+  // Sorting
+  const sortedLeads = [...filteredLeads].sort((a, b) => {
+    let aVal: any = a[sortField as keyof SupplierLeadItem] || '';
+    let bVal: any = b[sortField as keyof SupplierLeadItem] || '';
 
-  const getServiceIcon = (service: ServiceType) => {
-    switch (service) {
-      case 'Trucking':
-        return <Truck className="w-3.5 h-3.5 text-blue-600" />;
-      case 'Sea Freight (FCL)':
-      case 'Sea Freight (LCL)':
-        return <Ship className="w-3.5 h-3.5 text-cyan-600" />;
-      case 'Air Freight':
-        return <Plane className="w-3.5 h-3.5 text-sky-600" />;
-      default:
-        return <Zap className="w-3.5 h-3.5 text-amber-600" />;
+    if (sortField === 'estimatedValueVND') {
+      aVal = a.estimatedValueVND || 0;
+      bVal = b.estimatedValueVND || 0;
+    } else if (sortField === 'quotesCount') {
+      aVal = a.quotesCount || 0;
+      bVal = b.quotesCount || 0;
     }
-  };
+
+    if (aVal < bVal) return sortOrder === 'asc' ? -1 : 1;
+    if (aVal > bVal) return sortOrder === 'asc' ? 1 : -1;
+    return 0;
+  });
 
   return (
-    <div className="w-full max-w-[1720px] mx-auto px-2 sm:px-4 lg:px-6 py-6 animate-in fade-in duration-200">
+    <div className="w-full max-w-[1720px] mx-auto px-2 sm:px-4 lg:px-6 py-6 animate-in fade-in duration-200 space-y-5">
       {/* Toast Notification */}
       {unlockToastMessage && (
         <div className="fixed top-20 right-6 z-50 animate-in fade-in slide-in-from-top-4 duration-300">
@@ -233,414 +369,471 @@ export const SupplierLeadsPage: React.FC<SupplierLeadsPageProps> = ({
         </div>
       )}
 
-      {/* Breadcrumb */}
-      <div className="flex items-center space-x-2 text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wider">
-        <span>Supplier Workspace</span>
-        <ChevronRight className="w-3.5 h-3.5" />
-        <span className="text-indigo-600">My Leads</span>
-      </div>
-
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-slate-200">
+      {/* Breadcrumb & Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-200">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">My Leads</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Quản lý, phân loại các tuyến vận tải đã lưu từ sàn Lead Board. Click vào từng dòng lead để xem hồ sơ chi tiết và gửi báo giá.
+          <div className="flex items-center space-x-2 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+            <span>Supplier Workspace</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+            <span className="text-indigo-600">My Leads</span>
+          </div>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Cơ Hội Vận Tải Của Tôi (My Leads)</h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+            Quản lý, phân loại các tuyến vận tải đã lưu từ sàn Lead Board. Mở xem chi tiết từng lead để tạo báo giá hoặc đối soát giá đối thủ.
           </p>
         </div>
-
-        <div className="flex items-center space-x-3">
-          <button
-            id="supplier-pipeline-btn"
-            onClick={() => onNavigate({ type: 'workspace', view: 'supplier-pipeline' })}
-            className="px-3.5 py-2.5 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors shadow-xs flex items-center space-x-1.5 cursor-pointer"
-          >
-            <span>Kanban Pipeline</span>
-          </button>
-          <button
-            id="browse-public-leads-btn"
-            onClick={() => onNavigate({ type: 'public', tab: 'lead-board' })}
-            className="flex items-center space-x-2 px-4 py-2.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
-          >
-            <Flame className="w-4 h-4 text-orange-400" />
-            <span>Sàn Public Lead Board</span>
-          </button>
-        </div>
       </div>
 
-      {/* Summary KPI Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 my-6">
+      {/* Quick Summary Counts - 6 Cards (Total, Open, Quoted, Won, Lost, Closed) */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        {/* Total */}
         <div 
-          id="kpi-saved-leads-btn"
-          onClick={() => {
-            setViewScope('SAVED');
-            setStatusFilter('ALL');
-          }}
-          className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-            viewScope === 'SAVED'
-              ? 'bg-amber-50/80 border-amber-300 ring-2 ring-amber-400 shadow-sm'
-              : 'bg-white border-slate-200/80 hover:bg-amber-50/40'
+          onClick={() => { setStatusFilter('ALL'); setViewScope('ALL'); }}
+          className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
+            statusFilter === 'ALL' && viewScope === 'ALL' ? 'bg-indigo-50/80 border-indigo-300 ring-2 ring-indigo-500/20 shadow-xs' : 'bg-white border-slate-200/90 hover:bg-slate-50'
           }`}
         >
-          <div className="flex items-center justify-between text-xs font-bold text-amber-900">
-            <span className="flex items-center gap-1.5">
-              <BookmarkCheck className="w-3.5 h-3.5 text-amber-600 fill-amber-500" />
-              <span>Tuyến Đã Lưu (Saved)</span>
-            </span>
-            <span className="w-2 h-2 rounded-full bg-amber-500" />
-          </div>
-          <p className="text-2xl font-black text-amber-600 mt-1">{savedCount}</p>
-          <span className="text-[11px] text-amber-700/80 mt-0.5 block">Đang cân nhắc báo giá</span>
+          <span className="text-xs font-semibold text-slate-500">Tất cả Leads</span>
+          <p className="text-xl font-black text-slate-900 mt-1">{leads.length}</p>
         </div>
 
+        {/* Open */}
         <div 
-          onClick={() => {
-            setViewScope('ALL');
-            setStatusFilter('Open');
-          }}
-          className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-            viewScope === 'ALL' && statusFilter === 'Open'
-              ? 'bg-blue-50 border-blue-200 ring-2 ring-blue-400 shadow-xs'
-              : 'bg-white border-slate-200/80 hover:bg-slate-50'
+          onClick={() => { setStatusFilter('Open'); setViewScope('ALL'); }}
+          className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
+            statusFilter === 'Open' ? 'bg-blue-50/80 border-blue-300 ring-2 ring-blue-500/20 shadow-xs' : 'bg-white border-slate-200/90 hover:bg-slate-50'
           }`}
         >
-          <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
-            <span>Open Leads</span>
-            <span className="w-2 h-2 rounded-full bg-blue-500" />
-          </div>
-          <p className="text-2xl font-black text-blue-600 mt-1">
+          <span className="text-xs font-semibold text-blue-700 flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+            <span>Đang mở (Open)</span>
+          </span>
+          <p className="text-xl font-black text-blue-600 mt-1">
             {leads.filter((l) => l.status === 'Open').length}
           </p>
-          <span className="text-[11px] text-slate-400 mt-0.5 block">Chưa gửi báo giá</span>
         </div>
 
+        {/* Quoted */}
         <div 
-          onClick={() => {
-            setViewScope('ALL');
-            setStatusFilter('Quoted');
-          }}
-          className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-            viewScope === 'ALL' && statusFilter === 'Quoted'
-              ? 'bg-indigo-50 border-indigo-200 ring-2 ring-indigo-400 shadow-xs'
-              : 'bg-white border-slate-200/80 hover:bg-slate-50'
+          onClick={() => { setStatusFilter('Quoted'); setViewScope('ALL'); }}
+          className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
+            statusFilter === 'Quoted' ? 'bg-purple-50/80 border-purple-300 ring-2 ring-purple-500/20 shadow-xs' : 'bg-white border-slate-200/90 hover:bg-slate-50'
           }`}
         >
-          <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
-            <span>Quoted</span>
-            <span className="w-2 h-2 rounded-full bg-indigo-500" />
-          </div>
-          <p className="text-2xl font-black text-indigo-600 mt-1">
+          <span className="text-xs font-semibold text-purple-700 flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-purple-500"></span>
+            <span>Đã báo giá</span>
+          </span>
+          <p className="text-xl font-black text-purple-600 mt-1">
             {leads.filter((l) => l.status === 'Quoted').length}
           </p>
-          <span className="text-[11px] text-slate-400 mt-0.5 block">Đã gửi báo giá</span>
         </div>
 
+        {/* Won */}
         <div 
-          onClick={() => {
-            setViewScope('ALL');
-            setStatusFilter('Won');
-          }}
-          className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-            viewScope === 'ALL' && statusFilter === 'Won'
-              ? 'bg-emerald-50 border-emerald-200 ring-2 ring-emerald-400 shadow-xs'
-              : 'bg-white border-slate-200/80 hover:bg-slate-50'
+          onClick={() => { setStatusFilter('Won'); setViewScope('ALL'); }}
+          className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
+            statusFilter === 'Won' ? 'bg-emerald-50/80 border-emerald-300 ring-2 ring-emerald-500/20 shadow-xs' : 'bg-white border-slate-200/90 hover:bg-slate-50'
           }`}
         >
-          <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
-            <span>Won Deals</span>
-            <span className="w-2 h-2 rounded-full bg-emerald-500" />
-          </div>
-          <p className="text-2xl font-black text-emerald-600 mt-1">
-            {leads.filter((l) => l.status === 'Won').length} Deals
+          <span className="text-xs font-semibold text-emerald-700 flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span>Thắng thầu (Won)</span>
+          </span>
+          <p className="text-xl font-black text-emerald-600 mt-1">
+            {leads.filter((l) => l.status === 'Won').length}
           </p>
-          <span className="text-[11px] text-emerald-600 font-semibold mt-0.5 block">Khách hàng chọn</span>
+        </div>
+
+        {/* Lost */}
+        <div 
+          onClick={() => { setStatusFilter('Lost'); setViewScope('ALL'); }}
+          className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
+            statusFilter === 'Lost' ? 'bg-rose-50/80 border-rose-300 ring-2 ring-rose-500/20 shadow-xs' : 'bg-white border-slate-200/90 hover:bg-slate-50'
+          }`}
+        >
+          <span className="text-xs font-semibold text-rose-700 flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-rose-500"></span>
+            <span>Trượt thầu (Lost)</span>
+          </span>
+          <p className="text-xl font-black text-rose-600 mt-1">
+            {leads.filter((l) => l.status === 'Lost').length}
+          </p>
+        </div>
+
+        {/* Closed */}
+        <div 
+          onClick={() => { setStatusFilter('Closed'); setViewScope('ALL'); }}
+          className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
+            statusFilter === 'Closed' ? 'bg-slate-100 border-slate-300 ring-2 ring-slate-400/20 shadow-xs' : 'bg-white border-slate-200/90 hover:bg-slate-50'
+          }`}
+        >
+          <span className="text-xs font-semibold text-slate-500 flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-slate-400"></span>
+            <span>Đã đóng (Closed)</span>
+          </span>
+          <p className="text-xl font-black text-slate-600 mt-1">
+            {leads.filter((l) => l.status === 'Closed').length}
+          </p>
         </div>
       </div>
 
-      {/* Filter and Search Bar */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-4 mb-6 shadow-xs flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        {/* Search */}
-        <div className="relative flex-1">
+      {/* Search and Filters Bar */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs">
+        <div className="relative flex-1 w-full">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
-            id="leads-search-input"
+            id="supplier-leads-search-input"
             type="text"
-            placeholder="Tìm theo Mã Lead, Chủ hàng, Tuyến đường, Hàng hóa..."
+            placeholder="Tìm theo Mã ID (FG-...), chủ hàng, tuyến đường, hàng hóa..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-slate-800"
+            className="w-full pl-9 pr-4 py-2 text-xs bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium"
           />
-        </div>
-
-        {/* Filters */}
-        <div className="flex items-center space-x-3 overflow-x-auto pb-1 md:pb-0">
-          {/* Scope Segment (All vs Saved) */}
-          <div className="flex items-center bg-slate-100 p-1 rounded-xl shrink-0">
+          {searchTerm && (
             <button
               type="button"
-              id="scope-all-leads-btn"
+              onClick={() => setSearchTerm('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          {/* Scope Toggle (Tất cả / Đã lưu) */}
+          <div className="inline-flex p-1 bg-slate-100 rounded-xl border border-slate-200 text-xs font-semibold">
+            <button
+              type="button"
               onClick={() => setViewScope('ALL')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
                 viewScope === 'ALL'
-                  ? 'bg-white text-slate-900 shadow-xs'
-                  : 'text-slate-500 hover:text-slate-800'
+                  ? 'bg-white text-indigo-700 shadow-2xs'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               Tất cả Leads ({leads.length})
             </button>
             <button
               type="button"
-              id="scope-saved-leads-btn"
               onClick={() => setViewScope('SAVED')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+              className={`px-3 py-1 rounded-lg transition-all cursor-pointer flex items-center gap-1 ${
                 viewScope === 'SAVED'
-                  ? 'bg-amber-500 text-white shadow-xs'
-                  : 'text-slate-500 hover:text-slate-800'
+                  ? 'bg-amber-50 text-amber-800 shadow-2xs font-bold'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <BookmarkCheck className="w-3.5 h-3.5" />
+              <Bookmark className="w-3.5 h-3.5 text-amber-500" />
               <span>Đã lưu ({savedCount})</span>
             </button>
           </div>
 
+          {/* Service Filter */}
+          <select
+            id="supplier-lead-service-select"
+            value={serviceFilter}
+            onChange={(e) => setServiceFilter(e.target.value)}
+            className="px-3 py-2 text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-hidden cursor-pointer"
+          >
+            <option value="ALL">Tất cả Nhóm Dịch Vụ</option>
+            <option value="Trucking">Đường bộ</option>
+            <option value="Sea Freight (FCL)">Đường biển (FCL)</option>
+            <option value="Sea Freight (LCL)">Đường biển (LCL)</option>
+            <option value="Air Freight">Hàng không</option>
+            <option value="Rail Freight">Đường sắt</option>
+            <option value="Cold Chain">Chuỗi lạnh</option>
+            <option value="Warehousing">Kho bãi 3PL</option>
+            <option value="Customs Clearance">Hải quan</option>
+            <option value="Cross-border">Xuyên biên giới</option>
+            <option value="Project Cargo">Logistics Dự án</option>
+          </select>
+
           {/* Status Filter */}
           <select
-            id="leads-status-select"
+            id="supplier-lead-status-select"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-hidden cursor-pointer shrink-0"
+            className="px-3 py-2 text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-hidden cursor-pointer"
           >
-            <option value="ALL">All Statuses (Tất cả)</option>
-            <option value="Open">Open (Chưa báo giá)</option>
-            <option value="Quoted">Quoted (Đã báo giá)</option>
-            <option value="Won">Won (Trúng thầu)</option>
-            <option value="Lost">Lost (Trượt thầu)</option>
-            <option value="Closed">Closed (Hết hạn)</option>
+            <option value="ALL">Tất cả Trạng thái</option>
+            <option value="Open">Open</option>
+            <option value="Quoted">Quoted</option>
+            <option value="Won">Won</option>
+            <option value="Lost">Lost</option>
+            <option value="Closed">Closed</option>
           </select>
         </div>
       </div>
 
-      {/* Leads Table */}
+      {/* MODERN STANDARDIZED 11-COLUMN DATA TABLE (Căn chỉnh 100% trong 1 khung nhìn, không cần cuộn ngang) */}
       <div 
-        id="supplier-leads-table-container"
-        className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden"
+        id="supplier-leads-data-table-container"
+        className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden w-full flex flex-col"
       >
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
-            <thead>
-              <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-semibold uppercase tracking-wider">
-                <th className="py-3.5 px-4 w-10 text-center">Lưu</th>
-                <th className="py-3.5 px-4">Mã ID</th>
-                <th className="py-3.5 px-4">Customer & Contact</th>
-                <th className="py-3.5 px-4">Service</th>
-                <th className="py-3.5 px-4">Route</th>
-                <th className="py-3.5 px-4">Estimated Value</th>
-                <th className="py-3.5 px-4">Created Date</th>
-                <th className="py-3.5 px-4">Status</th>
-                <th className="py-3.5 px-4 text-right">Actions</th>
+        <div className="overflow-y-auto max-h-[660px] relative scroll-smooth focus:outline-none w-full">
+          <table className="w-full text-left border-collapse table-auto" id="supplier-leads-data-table">
+            {/* Table Header */}
+            <thead className="sticky top-0 z-20 bg-slate-100 shadow-xs border-b border-slate-200">
+              <tr className="bg-slate-100 text-[10px] font-bold text-slate-600 uppercase tracking-wider select-none">
+                {/* 1. STT */}
+                <th className="py-2.5 px-1.5 w-8 text-center sticky top-0 z-20 bg-slate-100 border-b border-slate-200">STT</th>
+                
+                {/* 2. Ngày đăng & Hạn */}
+                <th 
+                  className="py-2.5 px-2 cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
+                  onClick={() => handleSort('createdDate')}
+                >
+                  <div className="flex items-center gap-1">
+                    <span>Ngày Đăng / Hạn</span>
+                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                  </div>
+                </th>
+
+                {/* 3. Mã ID */}
+                <th 
+                  className="py-2.5 px-2 cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
+                  onClick={() => handleSort('code')}
+                >
+                  <div className="flex items-center gap-1">
+                    <span>Mã ID</span>
+                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                  </div>
+                </th>
+
+                {/* 4. Nhóm Dịch Vụ */}
+                <th className="py-2.5 px-2 whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
+                  <span>Nhóm Dịch Vụ</span>
+                </th>
+
+                {/* 5. Nhóm Hàng */}
+                <th className="py-2.5 px-1.5 whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
+                  <span>Nhóm Hàng</span>
+                </th>
+
+                {/* 6. Mô Hình */}
+                <th className="py-2.5 px-1.5 whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
+                  <span>Mô Hình</span>
+                </th>
+
+                {/* 7. Loại Hợp Đồng */}
+                <th 
+                  className="py-2.5 px-1.5 cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
+                  onClick={() => handleSort('serviceType')}
+                >
+                  <span>Loại Hợp Đồng</span>
+                </th>
+
+                {/* 8. Tổng Giá Trị */}
+                <th 
+                  className="py-2.5 px-2 text-right cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
+                  onClick={() => handleSort('estimatedValueVND')}
+                >
+                  <div className="flex items-center justify-end gap-1">
+                    <span>Tổng Giá Trị</span>
+                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                  </div>
+                </th>
+
+                {/* 9. Trạng Thái (Status - Có Lost) */}
+                <th 
+                  className="py-2.5 px-1.5 text-center cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
+                  onClick={() => handleSort('status')}
+                >
+                  <div className="flex items-center justify-center gap-1">
+                    <span>Trạng Thái</span>
+                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                  </div>
+                </th>
+
+                {/* 10. Báo Giá / Lượt Xem */}
+                <th 
+                  className="py-2.5 px-1.5 text-center cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
+                  onClick={() => handleSort('quotesCount')}
+                >
+                  <div className="flex items-center justify-center gap-1">
+                    <span>Báo Giá / Xem</span>
+                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                  </div>
+                </th>
+
+                {/* 11. Thao Tác (Chỉ 1 nút Xem Chi Tiết) */}
+                <th className="py-2.5 px-2 text-center whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
+                  <span>Thao Tác</span>
+                </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filteredLeads.length === 0 ? (
+
+            {/* Table Body */}
+            <tbody className="divide-y divide-slate-100 text-xs">
+              {sortedLeads.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="py-12 text-center text-slate-400">
-                    <div className="max-w-md mx-auto space-y-3">
-                      <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-500 mx-auto flex items-center justify-center">
-                        <Bookmark className="w-6 h-6" />
-                      </div>
-                      <h4 className="font-bold text-slate-800 text-sm">
+                  <td colSpan={11} className="py-16 text-center text-slate-400">
+                    <div className="max-w-md mx-auto space-y-2">
+                      <p className="font-bold text-slate-700 text-sm">
                         {viewScope === 'SAVED'
-                          ? 'Chưa có tuyến tiềm năng nào được lưu'
-                          : 'Không tìm thấy cơ hội phù hợp'}
-                      </h4>
-                      <p className="text-xs text-slate-500">
-                        {viewScope === 'SAVED'
-                          ? 'Hãy truy cập Sàn Lead Board, click biểu tượng Bookmark để lưu lại các tuyến tiềm năng cân nhắc báo giá.'
-                          : 'Thử thay đổi từ khóa hoặc bộ lọc trạng thái để xem thêm cơ hội.'}
+                          ? 'Chưa có tuyến vận tải nào được lưu'
+                          : 'Không tìm thấy cơ hội vận tải nào phù hợp'}
                       </p>
-                      {viewScope === 'SAVED' && (
-                        <button
-                          type="button"
-                          onClick={() => onNavigate({ type: 'public', tab: 'lead-board' })}
-                          className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs cursor-pointer"
-                        >
-                          <Flame className="w-3.5 h-3.5 text-orange-300" />
-                          <span>Duyệt Sàn Lead Board Ngay</span>
-                        </button>
-                      )}
+                      <p className="text-xs text-slate-400">
+                        {viewScope === 'SAVED'
+                          ? 'Hãy mở thẻ chi tiết Lead và bấm nút Lưu để theo dõi các tuyến tiềm năng.'
+                          : 'Hãy thử thay đổi từ khóa tìm kiếm hoặc điều chỉnh lại bộ lọc.'}
+                      </p>
                     </div>
                   </td>
                 </tr>
               ) : (
-                filteredLeads.map((lead) => {
+                sortedLeads.map((lead, idx) => {
                   const isExpanded = Boolean(expandedLeadIds[lead.id]);
                   const isUnlocked = Boolean(unlockedLeadIds[lead.id] || lead.isUnlocked);
+                  const isContract = lead.pricingType === 'CONTRACT';
+                  const operationMode = getOperationModeDisplay(lead);
 
                   return (
                     <React.Fragment key={lead.id}>
                       <tr
-                        id={`lead-row-${lead.code}`}
+                        id={`supplier-lead-row-${lead.code}`}
                         onClick={() => toggleExpandLead(lead.id)}
-                        className={`transition-colors cursor-pointer group ${
+                        className={`transition-colors cursor-pointer select-none ${
                           isExpanded
-                            ? 'bg-indigo-50/80 border-l-4 border-l-indigo-600'
-                            : lead.isSaved
-                              ? 'bg-amber-50/20 hover:bg-amber-50/50'
-                              : 'hover:bg-indigo-50/40'
+                            ? 'bg-indigo-50/60 font-medium'
+                            : idx % 2 === 0
+                            ? 'bg-white hover:bg-slate-50/90'
+                            : 'bg-slate-50/40 hover:bg-slate-100/70'
                         }`}
                       >
-                        {/* Bookmark Toggle Column */}
-                        <td className="py-4 px-3 text-center" onClick={(e) => e.stopPropagation()}>
-                          <button
-                            type="button"
-                            id={`toggle-save-${lead.code}`}
-                            onClick={() => onToggleSaveLead && onToggleSaveLead(lead.id)}
-                            className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
-                              lead.isSaved
-                                ? 'bg-amber-50 border-amber-300 text-amber-600 hover:bg-amber-100 shadow-2xs'
-                                : 'border-slate-200 hover:bg-slate-100 text-slate-400 hover:text-slate-700'
-                            }`}
-                            title={lead.isSaved ? 'Đang lưu (Click để bỏ lưu)' : 'Lưu vào My Leads'}
-                          >
-                            {lead.isSaved ? (
-                              <BookmarkCheck className="w-3.5 h-3.5 fill-amber-500 text-amber-700" />
-                            ) : (
-                              <Bookmark className="w-3.5 h-3.5" />
-                            )}
-                          </button>
+                        {/* Cột 1: STT */}
+                        <td className="py-2.5 px-1.5 text-center text-slate-400 font-mono text-[10.5px]">
+                          {idx + 1}
                         </td>
 
-                        <td className="py-4 px-4 font-mono font-semibold text-indigo-700">
-                          <div className="flex items-center space-x-1.5">
-                            <span>{lead.code}</span>
-                            {lead.matchScore >= 95 && (
-                              <span className="text-[10px] font-bold text-orange-600 bg-orange-50 px-1 py-0.2 rounded">
-                                {lead.matchScore}% Match
-                              </span>
-                            )}
-                          </div>
-                        </td>
-
-                        <td className="py-4 px-4 max-w-xs">
-                          <p className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
-                            {lead.customerCompany}
-                          </p>
-                          <p className="text-[11px] text-slate-500 mt-0.5">
-                            {lead.contactName} • {lead.contactRole}
-                          </p>
-                        </td>
-
-                        <td className="py-4 px-4">
-                          <div className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-medium">
-                            {getServiceIcon(lead.serviceType)}
-                            <span>{lead.serviceType}</span>
-                          </div>
-                        </td>
-
-                        <td className="py-4 px-4 font-medium text-slate-800">
-                          {lead.route}
-                        </td>
-
-                        <td className="py-4 px-4 whitespace-nowrap">
+                        {/* Cột 2: Ngày Đăng & Hạn Nộp */}
+                        <td className="py-2.5 px-2 whitespace-nowrap">
                           <div className="space-y-0.5">
-                            <span className="font-black text-emerald-700 text-sm block">
-                              {(lead.estimatedValueVND || (lead.estimatedValueDisplay ? parseInt(lead.estimatedValueDisplay.replace(/\D/g, ''), 10) : 0) || 0).toLocaleString('vi-VN')}
+                            <span className="text-slate-700 font-semibold block text-[10.5px]">
+                              {lead.createdDate}
                             </span>
-                            <span className="text-[10px] font-semibold text-slate-500 block">
-                              {lead.pricingType === 'CONTRACT' ? 'VNĐ / tháng' : 'VNĐ / lô'}
+                            <span className="inline-block px-1.5 py-0.2 rounded text-[9px] font-bold bg-rose-50 text-rose-600 border border-rose-200">
+                              Hạn: {lead.dueDate || '7 ngày'}
                             </span>
                           </div>
                         </td>
 
-                        <td className="py-4 px-4 text-slate-500 whitespace-nowrap">
-                          {lead.createdDate}
+                        {/* Cột 3: Mã ID */}
+                        <td className="py-2.5 px-2 whitespace-nowrap">
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-mono font-bold text-indigo-700 text-xs">
+                              {lead.code}
+                            </span>
+                            {lead.isSaved && (
+                              <BookmarkCheck className="w-3 h-3 text-amber-500 fill-amber-500 shrink-0" title="Đã lưu" />
+                            )}
+                          </div>
                         </td>
 
-                        <td className="py-4 px-4">
-                          <span
-                            className={`inline-flex items-center px-2.5 py-1 rounded-md text-[11px] border ${getStatusBadge(
-                              lead.status
-                            )}`}
-                          >
-                            {lead.status}
+                        {/* Cột 4: Nhóm Dịch Vụ */}
+                        <td className="py-2.5 px-2 whitespace-nowrap">
+                          <span className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-bold border ${getServiceBadgeStyle(lead.serviceType)}`}>
+                            {lead.serviceType}
                           </span>
                         </td>
 
-                        <td className="py-4 px-4 text-right" onClick={(e) => e.stopPropagation()}>
-                          <div className="flex items-center justify-end space-x-2">
-                            {lead.status === 'Open' ? (
-                              <button
-                                id={`create-quote-for-lead-${lead.code}`}
-                                onClick={() => onOpenCreateQuotation(lead)}
-                                className="px-3 py-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-xs transition-all flex items-center space-x-1 cursor-pointer"
-                              >
-                                <Plus className="w-3.5 h-3.5" />
-                                <span>Báo giá</span>
-                              </button>
-                            ) : lead.status === 'Quoted' ? (
-                              <button
-                                id={`view-quote-for-lead-${lead.code}`}
-                                onClick={() => onOpenCreateQuotation(lead)}
-                                className="px-3 py-1.5 text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 rounded-lg transition-all flex items-center space-x-1 cursor-pointer"
-                              >
-                                <CheckCircle2 className="w-3.5 h-3.5 text-indigo-600" />
-                                <span>Đã báo giá</span>
-                              </button>
-                            ) : lead.status === 'Won' ? (
-                              <span className="inline-flex items-center gap-1 text-emerald-700 font-bold text-xs bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg">
-                                <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                                <span>Trúng thầu</span>
-                              </span>
-                            ) : lead.status === 'Lost' ? (
-                              <span className="inline-flex items-center gap-1 text-rose-600 font-medium text-xs bg-rose-50 border border-rose-200 px-2.5 py-1 rounded-lg">
-                                <span>Trượt thầu</span>
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 text-slate-500 font-medium text-xs bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-lg">
-                                <span>Đã đóng</span>
-                              </span>
-                            )}
+                        {/* Cột 5: Nhóm Hàng */}
+                        <td className="py-2.5 px-1.5 whitespace-nowrap">
+                          <span className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-bold border ${getCargoBadgeStyle(lead.cargoClassification)}`}>
+                            {getCargoLabel(lead.cargoClassification)}
+                          </span>
+                        </td>
 
-                            {/* Expand/Collapse Toggle Button */}
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toggleExpandLead(lead.id);
-                              }}
-                              className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
-                                isExpanded
-                                  ? 'bg-indigo-600 text-white border-indigo-600'
-                                  : 'border-slate-200 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50'
-                              }`}
-                              title={isExpanded ? 'Thu gọn chi tiết' : 'Xem chi tiết lead'}
-                            >
-                              {isExpanded ? (
-                                <ChevronUp className="w-3.5 h-3.5" />
-                              ) : (
-                                <ChevronDown className="w-3.5 h-3.5" />
-                              )}
-                            </button>
+                        {/* Cột 6: Mô Hình */}
+                        <td className="py-2.5 px-1.5 whitespace-nowrap">
+                          <span className="text-slate-800 font-semibold text-xs">
+                            {operationMode}
+                          </span>
+                        </td>
+
+                        {/* Cột 7: Loại Hợp Đồng */}
+                        <td className="py-2.5 px-1.5 whitespace-nowrap">
+                          {isContract ? (
+                            <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                              Hợp đồng
+                            </span>
+                          ) : (
+                            <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold bg-cyan-50 text-cyan-700 border border-cyan-200">
+                              Theo lô
+                            </span>
+                          )}
+                        </td>
+
+                        {/* Cột 8: Tổng Giá Trị */}
+                        <td className="py-2.5 px-2 text-right whitespace-nowrap">
+                          <div className="space-y-0.5">
+                            <span className="text-xs sm:text-[12.5px] font-black text-emerald-700 block tracking-tight">
+                              {(lead.estimatedValueVND || (lead.estimatedValueDisplay ? parseInt(lead.estimatedValueDisplay.replace(/\D/g, ''), 10) : 0) || 0).toLocaleString('vi-VN')}
+                            </span>
+                            <span className="text-[9.5px] font-semibold text-slate-500 block">
+                              {isContract ? 'VNĐ / tháng' : 'VNĐ / lô'}
+                            </span>
                           </div>
+                        </td>
+
+                        {/* Cột 9: Trạng Thái (Status - Có Lost) */}
+                        <td className="py-2.5 px-1.5 text-center whitespace-nowrap">
+                          <span className={`inline-block px-2.5 py-0.5 rounded-md text-[10px] font-bold border ${getStatusBadgeStyle(lead.status)}`}>
+                            {getStatusDisplay(lead.status)}
+                          </span>
+                        </td>
+
+                        {/* Cột 10: Thống Kê Báo Giá & Lượt Xem */}
+                        <td className="py-2.5 px-1.5 text-center whitespace-nowrap">
+                          <div className="flex flex-col items-center gap-0.5">
+                            <span className="px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/80">
+                              {lead.quotesCount || 0} báo giá
+                            </span>
+                            <span className="text-[9px] text-slate-400 font-medium">
+                              {lead.viewsCount || 0} xem
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* Cột 11: Thao Tác (Chỉ 1 nút Xem Chi Tiết) */}
+                        <td className="py-2.5 px-2 text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            id={`toggle-supplier-lead-btn-${lead.code}`}
+                            type="button"
+                            onClick={(e) => toggleExpandLead(lead.id, e)}
+                            className={`px-2.5 py-1 text-xs font-bold rounded-xl transition-all inline-flex items-center justify-center gap-1 cursor-pointer shadow-2xs ${
+                              isExpanded
+                                ? 'bg-indigo-600 text-white shadow-xs'
+                                : 'bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 hover:border-indigo-300'
+                            }`}
+                            title={isExpanded ? 'Thu gọn chi tiết lead' : 'Mở xem chi tiết hồ sơ & thao tác'}
+                          >
+                            <span>{isExpanded ? 'Đóng' : 'Xem chi tiết'}</span>
+                            {isExpanded ? (
+                              <ChevronUp className="w-3.5 h-3.5" />
+                            ) : (
+                              <ChevronDown className="w-3.5 h-3.5" />
+                            )}
+                          </button>
                         </td>
                       </tr>
 
-                      {/* Expandable Technical Specs Row */}
+                      {/* DÒNG CHI TIẾT EXPANDED (SUPPLIER VIEW: CÓ NÚT BÁO GIÁ, MỞ KHÓA / SO SÁNH ĐỐI THỦ, CHIA SẺ, LƯU) */}
                       {isExpanded && (
-                        <tr className="bg-indigo-50/40 border-b border-indigo-100 animate-in fade-in duration-150">
-                          <td colSpan={9} className="p-3 sm:p-4">
+                        <tr className="bg-indigo-50/30 border-b border-indigo-100 animate-in fade-in duration-150">
+                          <td colSpan={11} className="p-3 sm:p-5">
                             <LeadInquiryDetailCard
-                              lead={lead}
+                              lead={{ ...lead, isUnlocked }}
                               isUnlocked={isUnlocked}
+                              isCustomerView={false}
                               maskCompanyName={maskCompanyName}
                               maskContactPerson={maskContactPerson}
                               onUnlockClick={() => handleUnlockLead(lead)}
-                              onOpenCreateQuotation={onOpenCreateQuotation}
-                              onToggleSaveLead={(_, e) => {
-                                if (e) e.stopPropagation();
-                                onToggleSaveLead && onToggleSaveLead(lead.id);
-                              }}
-                              onCompareClick={handleOpenCompareModal}
+                              onOpenCreateQuotation={() => onOpenCreateQuotation(lead)}
+                              onToggleSaveLead={(l, e) => onToggleSaveLead && onToggleSaveLead(l.id)}
+                              onCompareClick={() => handleOpenCompareModal(lead)}
                             />
                           </td>
                         </tr>
@@ -654,133 +847,19 @@ export const SupplierLeadsPage: React.FC<SupplierLeadsPageProps> = ({
         </div>
       </div>
 
-      {/* UNLOCK LEAD CONFIRMATION MODAL WITH BENEFIT CHECKLIST */}
-      {leadToUnlockConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-200">
-            {/* Modal Header */}
-            <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-indigo-600 p-6 text-white relative">
-              <button
-                type="button"
-                onClick={() => setLeadToUnlockConfirm(null)}
-                className="absolute top-4 right-4 p-1.5 rounded-full bg-white/20 hover:bg-white/30 text-white transition-colors cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-2xl bg-white/20 backdrop-blur-md">
-                  <KeyRound className="w-6 h-6 text-amber-200" />
-                </div>
-                <div>
-                  <span className="text-[11px] font-black uppercase tracking-wider text-amber-200 bg-amber-900/30 px-2 py-0.5 rounded-full">
-                    FlexCredit Lead Unlock
-                  </span>
-                  <h3 className="text-lg font-bold mt-1">Mở Khóa Hồ Sơ & Đối Thủ Cạnh Tranh</h3>
-                </div>
-              </div>
-            </div>
-
-            {/* Modal Body */}
-            <div className="p-6 space-y-4">
-              {/* Inquiry Mini Summary */}
-              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-xs font-bold text-indigo-700">
-                    {leadToUnlockConfirm.code}
-                  </span>
-                  <span className="text-[11px] font-bold text-slate-500">
-                    {leadToUnlockConfirm.serviceType}
-                  </span>
-                </div>
-                <h4 className="font-extrabold text-sm text-slate-900">
-                  {leadToUnlockConfirm.route}
-                </h4>
-                <p className="text-xs text-slate-600">
-                  Chủ hàng: <strong className="text-slate-900">{maskCompanyName(leadToUnlockConfirm.customerCompany, false)}</strong> • Sản lượng: <strong>{leadToUnlockConfirm.volumeDisplay}</strong>
-                </p>
-              </div>
-
-              {/* Unlocked Benefits Checklist */}
-              <div className="space-y-2">
-                <h5 className="text-xs font-black uppercase text-slate-700 tracking-wider">
-                  Quyền Lợi Nhận Được Sau Khi Mở Khóa:
-                </h5>
-                <div className="grid grid-cols-1 gap-2.5 text-xs">
-                  <div className="p-2.5 rounded-xl bg-emerald-50/60 border border-emerald-200/80 flex items-start gap-2.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                    <div>
-                      <span className="font-bold text-slate-900 block">Hotline, Zalo & Email Người Mua Hàng</span>
-                      <span className="text-[11px] text-slate-500">Trao đổi 1-1 trực tiếp, chốt lịch khảo sát và gửi báo giá ưu đãi.</span>
-                    </div>
-                  </div>
-
-                  <div className="p-2.5 rounded-xl bg-indigo-50/60 border border-indigo-200/80 flex items-start gap-2.5">
-                    <CheckCircle2 className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
-                    <div>
-                      <span className="font-bold text-slate-900 block">Ma Trận Giá Của Các Nhà Xe Đối Thủ</span>
-                      <span className="text-[11px] text-slate-500">Xem mức giá thấp nhất Top 1, bóc tách cước chính, phụ phí BAF và vé BOT.</span>
-                    </div>
-                  </div>
-
-                  <div className="p-2.5 rounded-xl bg-purple-50/60 border border-purple-200/80 flex items-start gap-2.5">
-                    <CheckCircle2 className="w-4 h-4 text-purple-600 shrink-0 mt-0.5" />
-                    <div>
-                      <span className="font-bold text-slate-900 block">Tên & Năng Lực Của Các Đối Thủ</span>
-                      <span className="text-[11px] text-slate-500">Xếp hạng uy tín, thời gian giao hàng SLA và điều khoản công nợ đối thủ.</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Unlock Action Button */}
-              <div className="pt-2 flex flex-col items-center gap-2.5">
-                <button
-                  id="confirm-unlock-modal-btn"
-                  type="button"
-                  onClick={() => confirmUnlockWithCredit(leadToUnlockConfirm.id, 50)}
-                  className="w-full py-3.5 px-6 bg-gradient-to-r from-orange-500 via-orange-600 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white rounded-2xl text-sm font-extrabold shadow-lg shadow-orange-500/30 flex items-center justify-center gap-2.5 transition-all transform hover:-translate-y-0.5 cursor-pointer active:scale-95"
-                >
-                  <Unlock className="w-4 h-4" />
-                  <span>Mở Khóa Ngay (50 FlexCredit)</span>
-                </button>
-
-                <div className="flex items-center justify-center gap-1.5 text-xs text-slate-600 font-medium">
-                  <Coins className="w-4 h-4 text-amber-500" />
-                  <span>
-                    Số dư ví của bạn: <strong className="font-extrabold text-slate-900">{wallet?.balanceCredits ?? 15350} Credits</strong>
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Modal Footer */}
-            <div className="bg-slate-50 px-6 py-3 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
-              <span>Trừ 50 Credits ngay khi xác nhận</span>
-              <button
-                type="button"
-                onClick={() => setLeadToUnlockConfirm(null)}
-                className="font-bold text-slate-600 hover:text-slate-900 hover:underline cursor-pointer"
-              >
-                Để sau / Đóng
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* SUPPLIER LEAD COMPARE & QUOTE MODAL (WITH FLEXCREDIT UNLOCK) */}
+      {/* Supplier Lead Compare Modal (Ma Trận Đối Thủ) */}
       {activeCompareModalLead && (
         <SupplierLeadCompareModal
-          isOpen={true}
+          isOpen={Boolean(activeCompareModalLead)}
           lead={activeCompareModalLead}
-          currentUser={currentUser}
-          quotations={quotations}
-          wallet={wallet}
           isUnlocked={Boolean(unlockedLeadIds[activeCompareModalLead.id] || activeCompareModalLead.isUnlocked)}
           onClose={() => setActiveCompareModalLead(null)}
-          onUnlockWithCredit={(leadId, creditCost) => confirmUnlockWithCredit(leadId, creditCost)}
-          onSubmitQuotation={onSubmitQuotation || (() => {})}
-          onNavigate={onNavigate}
+          onUnlock={() => handleUnlockLead(activeCompareModalLead)}
+          onOpenCreateQuotation={() => {
+            const l = activeCompareModalLead;
+            setActiveCompareModalLead(null);
+            onOpenCreateQuotation(l);
+          }}
         />
       )}
     </div>
