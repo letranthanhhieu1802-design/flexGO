@@ -654,58 +654,133 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
       case 'Trucking':
         return {
           bg: 'bg-blue-50 text-blue-700 border-blue-200/80',
-          icon: <Truck className="w-3 h-3 text-blue-600 shrink-0" />,
+          icon: <Truck className="w-3.5 h-3.5 text-blue-600 shrink-0" />,
           label: 'Đường bộ',
         };
       case 'Sea Freight (FCL)':
         return {
           bg: 'bg-cyan-50 text-cyan-700 border-cyan-200/80',
-          icon: <Ship className="w-3 h-3 text-cyan-600 shrink-0" />,
-          label: 'Biển (FCL)',
+          icon: <Ship className="w-3.5 h-3.5 text-cyan-600 shrink-0" />,
+          label: 'Đường biển (FCL)',
         };
       case 'Sea Freight (LCL)':
         return {
           bg: 'bg-teal-50 text-teal-700 border-teal-200/80',
-          icon: <Boxes className="w-3 h-3 text-teal-600 shrink-0" />,
-          label: 'Biển (LCL)',
+          icon: <Boxes className="w-3.5 h-3.5 text-teal-600 shrink-0" />,
+          label: 'Đường biển (LCL)',
         };
       case 'Air Freight':
         return {
           bg: 'bg-sky-50 text-sky-700 border-sky-200/80',
-          icon: <Plane className="w-3 h-3 text-sky-600 shrink-0" />,
+          icon: <Plane className="w-3.5 h-3.5 text-sky-600 shrink-0" />,
           label: 'Hàng không',
+        };
+      case 'Rail Freight':
+        return {
+          bg: 'bg-emerald-50 text-emerald-700 border-emerald-200/80',
+          icon: <Train className="w-3.5 h-3.5 text-emerald-600 shrink-0" />,
+          label: 'Đường sắt',
         };
       case 'Cold Chain':
         return {
           bg: 'bg-emerald-50 text-emerald-700 border-emerald-200/80',
-          icon: <Snowflake className="w-3 h-3 text-emerald-600 shrink-0" />,
+          icon: <Snowflake className="w-3.5 h-3.5 text-emerald-600 shrink-0" />,
           label: 'Chuỗi lạnh',
         };
       case 'Warehousing':
         return {
-          bg: 'bg-amber-50 text-amber-800 border-amber-200/80',
-          icon: <Warehouse className="w-3 h-3 text-amber-600 shrink-0" />,
-          label: 'Kho bãi',
+          bg: 'bg-purple-50 text-purple-700 border-purple-200/80',
+          icon: <Building2 className="w-3.5 h-3.5 text-purple-600 shrink-0" />,
+          label: 'Kho bãi 3PL',
         };
       case 'Customs Clearance':
         return {
-          bg: 'bg-violet-50 text-violet-700 border-violet-200/80',
-          icon: <FileCheck2 className="w-3 h-3 text-violet-600 shrink-0" />,
-          label: 'Hải quan',
+          bg: 'bg-amber-50 text-amber-800 border-amber-200/80',
+          icon: <FileText className="w-3.5 h-3.5 text-amber-600 shrink-0" />,
+          label: 'Thủ tục hải quan',
         };
       case 'Cross-border':
         return {
-          bg: 'bg-rose-50 text-rose-700 border-rose-200/80',
-          icon: <Globe className="w-3 h-3 text-rose-600 shrink-0" />,
-          label: 'Xuyên biên giới',
+          bg: 'bg-orange-50 text-orange-700 border-orange-200/80',
+          icon: <Globe className="w-3.5 h-3.5 text-orange-600 shrink-0" />,
+          label: 'Cross-Border',
+        };
+      case 'Project Cargo':
+        return {
+          bg: 'bg-indigo-50 text-indigo-700 border-indigo-200/80',
+          icon: <Layers className="w-3.5 h-3.5 text-indigo-600 shrink-0" />,
+          label: 'Integrated / Dự án',
         };
       default:
         return {
           bg: 'bg-slate-50 text-slate-700 border-slate-200',
-          icon: <Zap className="w-3 h-3 text-slate-600 shrink-0" />,
+          icon: <Zap className="w-3.5 h-3.5 text-slate-600 shrink-0" />,
           label: service,
         };
     }
+  };
+
+  // Helper phân loại Nhóm Hàng (Hàng thường, Hàng lạnh, Hàng nguy hiểm)
+  const getCargoGroupBadge = (lead: SupplierLeadItem) => {
+    const cargoClass = lead.cargoClassification || lead.inquiry?.cargoClassification;
+    if (cargoClass === 'Reefer' || lead.serviceType === 'Cold Chain') {
+      return {
+        label: 'Hàng lạnh',
+        icon: '❄️',
+        bg: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+      };
+    }
+    if (cargoClass === 'Hazmat') {
+      return {
+        label: 'Hàng nguy hiểm',
+        icon: '⚠️',
+        bg: 'bg-rose-50 text-rose-800 border-rose-200',
+      };
+    }
+    return {
+      label: 'Hàng thường',
+      icon: '📦',
+      bg: 'bg-slate-100 text-slate-700 border-slate-200',
+    };
+  };
+
+  // Helper xác định Hình Thức / Mô Hình dịch vụ
+  const getOperationModeDisplay = (lead: SupplierLeadItem) => {
+    const sType = lead.serviceType;
+    const specs = lead.serviceSpecs || lead.inquiry?.serviceSpecs;
+
+    if (sType === 'Trucking') {
+      return specs?.trucking?.loadType || (lead.volumeDisplay?.includes('LTL') ? 'LTL (Hàng ghép)' : 'FTL (Nguyên xe)');
+    }
+    if (sType === 'Cold Chain') {
+      return specs?.coldChain?.vehicleOrContType || 'Xe lạnh FTL';
+    }
+    if (sType === 'Sea Freight (FCL)') {
+      return 'FCL (Nguyên cont)';
+    }
+    if (sType === 'Sea Freight (LCL)') {
+      return 'LCL (Gom lẻ CFS)';
+    }
+    if (sType === 'Air Freight') {
+      const isExpress = specs?.air?.airServiceType === 'Express / Courier' || lead.cargoDetails?.toLowerCase().includes('express');
+      return isExpress ? 'Express / Chuyển phát' : 'Air Cargo Direct';
+    }
+    if (sType === 'Rail Freight') {
+      return specs?.rail?.mode || specs?.rail?.containerType || 'FCL Container Ga';
+    }
+    if (sType === 'Warehousing') {
+      return specs?.warehousing?.warehouseType ? specs.warehousing.warehouseType.split(' (')[0] : 'Kho Thường';
+    }
+    if (sType === 'Customs Clearance') {
+      return specs?.customs?.declarationType ? specs.customs.declarationType.split(' (')[0] : 'Nhập KD (A11)';
+    }
+    if (sType === 'Cross-border') {
+      return specs?.crossBorder?.cargoMode ? specs.crossBorder.cargoMode.split(' (')[0] : 'Xe chạy thẳng GMS';
+    }
+    if (sType === 'Project Cargo') {
+      return specs?.project?.projectCategory || 'Distribution';
+    }
+    return 'Tiêu chuẩn';
   };
 
   return (
@@ -1007,15 +1082,16 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           tabIndex={0}
         >
-          <table className="w-full min-w-[960px] text-left border-collapse" id="leadboard-data-table">
-            {/* Frozen Sticky Table Header (Stay fixed during vertical scroll) */}
+          <table className="w-full min-w-[1080px] text-left border-collapse" id="leadboard-data-table">
+            {/* Frozen Sticky Table Header */}
             <thead className="sticky top-0 z-20 bg-slate-100 shadow-xs border-b border-slate-200">
               <tr className="bg-slate-100 text-[11px] font-bold text-slate-600 uppercase tracking-wider select-none">
+                {/* 1. STT */}
                 <th className="py-3.5 px-3 w-12 text-center sticky top-0 z-20 bg-slate-100 border-b border-slate-200">STT</th>
                 
-                {/* Cột 1: Ngày đăng & Hạn nộp */}
+                {/* 2. Ngày đăng & Hạn */}
                 <th 
-                  className="py-3.5 px-3 cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap min-w-[130px] sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
+                  className="py-3.5 px-3 cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap min-w-[125px] sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
                   onClick={() => handleSort('createdDate')}
                 >
                   <div className="flex items-center gap-1">
@@ -1024,9 +1100,9 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
                   </div>
                 </th>
 
-                {/* Cột 2: Mã Lead */}
+                {/* 3. Mã Lead */}
                 <th 
-                  className="py-3.5 px-3 cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap min-w-[110px] sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
+                  className="py-3.5 px-3 cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap min-w-[95px] sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
                   onClick={() => handleSort('code')}
                 >
                   <div className="flex items-center gap-1">
@@ -1035,36 +1111,46 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
                   </div>
                 </th>
 
-                {/* Cột 3: Loại dịch vụ */}
-                <th className="py-3.5 px-3 whitespace-nowrap min-w-[140px] sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
-                  <span>Dịch Vụ Logistics</span>
+                {/* 4. Nhóm Dịch Vụ */}
+                <th className="py-3.5 px-3 whitespace-nowrap min-w-[130px] sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
+                  <span>Nhóm Dịch Vụ</span>
                 </th>
 
-                {/* Cột 4: Loại hình (Lô / Hợp đồng) */}
+                {/* 5. Nhóm Hàng */}
+                <th className="py-3.5 px-3 whitespace-nowrap min-w-[115px] sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
+                  <span>Nhóm Hàng</span>
+                </th>
+
+                {/* 6. Hình Thức / Mô Hình */}
+                <th className="py-3.5 px-3 whitespace-nowrap min-w-[130px] sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
+                  <span>Hình Thức / Mô Hình</span>
+                </th>
+
+                {/* 7. Loại Hợp Đồng */}
                 <th 
-                  className="py-3.5 px-3 cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap min-w-[125px] sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
+                  className="py-3.5 px-3 cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap min-w-[130px] sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
                   onClick={() => handleSort('pricingType')}
                 >
                   <div className="flex items-center gap-1">
-                    <span>Loại Hình</span>
+                    <span>Loại Hợp Đồng</span>
                     <ArrowUpDown className="w-3 h-3 text-slate-400" />
                   </div>
                 </th>
 
-                {/* Cột 5: Tổng giá trị dự kiến */}
+                {/* 8. Tổng Giá Trị */}
                 <th 
-                  className="py-3.5 px-3 text-right cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap min-w-[155px] sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
+                  className="py-3.5 px-3 text-right cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap min-w-[145px] sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
                   onClick={() => handleSort('estimatedValueVND')}
                 >
                   <div className="flex items-center justify-end gap-1">
-                    <span>Tổng Giá Trị Dự Kiến</span>
+                    <span>Tổng Giá Trị</span>
                     <ArrowUpDown className="w-3 h-3 text-slate-400" />
                   </div>
                 </th>
 
-                {/* Cột 6: Thống kê Báo Giá & Lượt Xem */}
+                {/* 9. Báo Giá / Lượt Xem */}
                 <th 
-                  className="py-3.5 px-3 text-center cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap min-w-[120px] sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
+                  className="py-3.5 px-3 text-center cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap min-w-[115px] sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
                   onClick={() => handleSort('quotesCount')}
                 >
                   <div className="flex items-center justify-center gap-1">
@@ -1073,8 +1159,8 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
                   </div>
                 </th>
 
-                {/* Cột 7: Thao tác */}
-                <th className="py-3.5 px-3 text-center min-w-[130px] whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
+                {/* 10. Thao Tác */}
+                <th className="py-3.5 px-3 text-center min-w-[135px] whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
                   <span>Thao Tác</span>
                 </th>
               </tr>
@@ -1084,7 +1170,7 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
             <tbody className="divide-y divide-slate-100 text-xs">
               {filteredAndSortedLeads.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-16 text-center">
+                  <td colSpan={10} className="py-16 text-center">
                     <div className="max-w-sm mx-auto space-y-3">
                       <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
                         <Search className="w-6 h-6" />
@@ -1117,6 +1203,8 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
               ) : (
                 paginatedLeads.map((lead, index) => {
                   const serviceStyle = getServiceBadgeStyle(lead.serviceType);
+                  const cargoGroup = getCargoGroupBadge(lead);
+                  const operationMode = getOperationModeDisplay(lead);
                   const isExpanded = !!expandedLeadIds[lead.id];
                   const isUnlocked = !!unlockedLeadIds[lead.id];
                   const padClass = tableDensity === 'compact' ? 'py-2 px-3' : 'py-3.5 px-3';
@@ -1132,12 +1220,12 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
                           isExpanded ? 'bg-indigo-50/30' : index % 2 === 1 ? 'bg-slate-50/40' : 'bg-white'
                         }`}
                       >
-                        {/* Cột STT (Số Thứ Tự) */}
+                        {/* Cột 1: STT */}
                         <td className={`${padClass} text-center font-mono text-slate-500 font-bold text-xs w-12 select-none`}>
                           {itemIndex}
                         </td>
 
-                        {/* Cột 1: Ngày Đăng & Hạn Nộp */}
+                        {/* Cột 2: Ngày Đăng & Hạn Nộp */}
                         <td className={`${padClass} whitespace-nowrap`}>
                           <div className="space-y-1 text-xs">
                             <div className="text-slate-500 font-medium flex items-center gap-1" title={`Ngày đăng tin: ${lead.createdDate}`}>
@@ -1153,28 +1241,17 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
                           </div>
                         </td>
 
-                        {/* Cột 2: Mã Lead */}
+                        {/* Cột 3: Mã Lead (Chỉ hiển thị text, không nút copy) */}
                         <td className={`${padClass} whitespace-nowrap`}>
-                          <div className="flex items-center gap-1 font-mono font-bold text-slate-800 text-xs">
-                            <span className="text-indigo-600 hover:underline">{lead.code}</span>
-                            <button
-                              onClick={(e) => handleCopyCode(lead.code, e)}
-                              className="text-slate-400 hover:text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity p-0.5"
-                              title="Copy mã Lead"
-                            >
-                              {copiedCode === lead.code ? (
-                                <Check className="w-3 h-3 text-emerald-600" />
-                              ) : (
-                                <Copy className="w-3 h-3" />
-                              )}
-                            </button>
-                          </div>
+                          <span className="font-mono font-black text-indigo-600 text-xs">
+                            {lead.code}
+                          </span>
                         </td>
 
-                        {/* Cột 3: Loại dịch vụ */}
+                        {/* Cột 4: Nhóm Dịch Vụ */}
                         <td className={`${padClass} whitespace-nowrap`}>
                           <span
-                            className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-[11px] font-bold border ${serviceStyle.bg}`}
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold border ${serviceStyle.bg}`}
                             title={lead.serviceType}
                           >
                             {serviceStyle.icon}
@@ -1182,34 +1259,37 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
                           </span>
                         </td>
 
-                        {/* Cột 4: Loại hình (Lô / Hợp đồng) */}
-                        <td className={padClass}>
-                          <div className="space-y-1">
-                            {isContract ? (
-                              <div className="inline-flex flex-col items-start gap-0.5">
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-purple-100 text-purple-800 border border-purple-200">
-                                  <Repeat className="w-2.5 h-2.5 text-purple-600" />
-                                  <span>Hợp đồng</span>
-                                </span>
-                                <span className="text-[10px] text-slate-500 font-medium block">
-                                  {lead.contractTerm || 'Định kỳ dài hạn'}
-                                </span>
-                              </div>
-                            ) : (
-                              <div className="inline-flex flex-col items-start gap-0.5">
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-cyan-100 text-cyan-800 border border-cyan-200">
-                                  <Tag className="w-2.5 h-2.5 text-cyan-700" />
-                                  <span>Theo Lô (Spot)</span>
-                                </span>
-                                <span className="text-[10px] text-slate-500 font-medium block">
-                                  {lead.contractTerm || 'Chuyến lẻ / Dự án'}
-                                </span>
-                              </div>
-                            )}
-                          </div>
+                        {/* Cột 5: Nhóm Hàng (Hàng thường / Hàng lạnh / Hàng nguy hiểm) */}
+                        <td className={`${padClass} whitespace-nowrap`}>
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] font-extrabold border ${cargoGroup.bg}`}>
+                            <span>{cargoGroup.icon}</span>
+                            <span>{cargoGroup.label}</span>
+                          </span>
                         </td>
 
-                        {/* Cột 5: Tổng giá trị dự kiến */}
+                        {/* Cột 6: Hình Thức / Mô Hình */}
+                        <td className={`${padClass} whitespace-nowrap`}>
+                          <span className="text-xs font-bold text-slate-800 bg-slate-50 px-2 py-1 rounded-md border border-slate-200">
+                            {operationMode}
+                          </span>
+                        </td>
+
+                        {/* Cột 7: Loại Hợp Đồng (Theo lô / Chuyến lẻ hoặc Hợp đồng) */}
+                        <td className={`${padClass} whitespace-nowrap`}>
+                          {isContract ? (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10.5px] font-extrabold bg-purple-100 text-purple-800 border border-purple-200">
+                              <Repeat className="w-2.5 h-2.5 text-purple-600" />
+                              <span>Hợp đồng</span>
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10.5px] font-extrabold bg-cyan-100 text-cyan-800 border border-cyan-200">
+                              <Tag className="w-2.5 h-2.5 text-cyan-700" />
+                              <span>Theo lô / Chuyến lẻ</span>
+                            </span>
+                          )}
+                        </td>
+
+                        {/* Cột 8: Tổng Giá Trị */}
                         <td className={`${padClass} text-right whitespace-nowrap`}>
                           <div className="space-y-0.5">
                             <span className="text-xs font-extrabold text-emerald-700 block">
@@ -1221,10 +1301,9 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
                           </div>
                         </td>
 
-                        {/* Cột 6: Thống kê Báo Giá & Lượt Xem */}
+                        {/* Cột 9: Thống Kê Báo Giá & Lượt Xem */}
                         <td className={`${padClass} text-center whitespace-nowrap`}>
                           <div className="flex flex-col items-center gap-1">
-                            {/* Số lượng báo giá đã nộp */}
                             <div 
                               className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${
                                 (lead.quotesCount || 0) === 0
@@ -1239,7 +1318,6 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
                               <span>{lead.quotesCount || 0} Báo giá</span>
                             </div>
 
-                            {/* Số lượt xem */}
                             <div className="flex items-center gap-1 text-[10px] text-slate-400 font-medium" title={`${lead.viewsCount || 0} lần click mở xem chi tiết`}>
                               <Eye className="w-3 h-3 text-slate-400" />
                               <span>{lead.viewsCount || 0} xem</span>
@@ -1247,7 +1325,7 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
                           </div>
                         </td>
 
-                        {/* Cột 7: Thao tác (Xem chi tiết & Thao tác) */}
+                        {/* Cột 10: Thao Tác (Xem Chi Tiết & Share) */}
                         <td className={`${padClass} text-center whitespace-nowrap`} onClick={(e) => e.stopPropagation()}>
                           <div className="flex items-center justify-center gap-1.5">
                             {/* Nút Sao chép liên kết Lead Board */}
@@ -1282,7 +1360,7 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
                                   ? 'bg-indigo-600 text-white shadow-xs'
                                   : 'bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 hover:border-indigo-300'
                               }`}
-                              title={isExpanded ? 'Thu gọn chi tiết lead' : 'Mở xem chi tiết hồ sơ & cụm thao tác (báo giá, mở khóa, lưu lead)'}
+                              title={isExpanded ? 'Thu gọn chi tiết lead' : 'Mở xem chi tiết hồ sơ'}
                             >
                               <span>{isExpanded ? 'Đóng' : 'Xem chi tiết'}</span>
                               {isExpanded ? (
@@ -1298,7 +1376,7 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
                       {/* Expandable Technical Specs Row */}
                       {isExpanded && (
                         <tr className="bg-indigo-50/40 border-b border-indigo-100">
-                          <td colSpan={8} className="p-3 sm:p-4">
+                          <td colSpan={10} className="p-3 sm:p-4">
                             <LeadInquiryDetailCard
                               lead={lead}
                               isUnlocked={isUnlocked}
