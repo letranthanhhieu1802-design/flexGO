@@ -817,26 +817,94 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
   const validateInquiryForm = (): string[] => {
     const errors: string[] = [];
 
-    if (!origin.trim()) {
-      errors.push('Địa điểm lấy hàng / Nơi đi (Origin) là bắt buộc.');
+    // 1. Kiểm tra Nơi đi / Địa điểm xuất phát theo từng loại dịch vụ
+    if (serviceType === 'Customs Clearance') {
+      if (!origin.trim() && !customsSpecs.customsSubDepartment?.trim()) {
+        errors.push('Vui lòng nhập Chi Cục Hải Quan Mở Tờ Khai.');
+      }
+    } else if (serviceType === 'Warehousing') {
+      if (!origin.trim() && !warehousingSpecs.targetLocation?.trim()) {
+        errors.push('Vui lòng nhập Khu vực & Địa bàn kho bãi mục tiêu.');
+      }
+    } else if (serviceType === 'Project Cargo') {
+      if (!origin.trim() && !projectSpecs.coverageScope?.trim()) {
+        errors.push('Vui lòng nhập Phạm vi địa bàn hoặc Mạng lưới HUB dự án.');
+      }
+    } else if (serviceType === 'Air Freight') {
+      if (!origin.trim() && !airSpecs.originAirport?.trim()) {
+        errors.push('Vui lòng chọn Sân bay đi / Cất cánh (AOD).');
+      }
+    } else if (serviceType === 'Sea Freight (FCL)' || serviceType === 'Sea Freight (LCL)') {
+      if (!origin.trim() && !oceanSpecs.polPort?.trim()) {
+        errors.push('Vui lòng chọn Cảng bốc hàng (POL) hoặc Kho CFS xuất phát.');
+      }
+    } else if (serviceType === 'Rail Freight') {
+      if (!origin.trim() && !railSpecs.originStation?.trim()) {
+        errors.push('Vui lòng chọn Ga xuất phát / Ga đi.');
+      }
+    } else if (serviceType === 'Cross-border') {
+      if (!origin.trim() && !crossBorderSpecs.originProvince?.trim()) {
+        errors.push('Vui lòng chọn Tỉnh/Thành xuất phát.');
+      }
+    } else {
+      if (!origin.trim()) {
+        errors.push('Địa điểm lấy hàng / Nơi đi (Origin) là bắt buộc.');
+      }
     }
 
-    if (serviceType !== 'Warehousing' && !destination.trim()) {
-      errors.push('Địa điểm giao hàng / Nơi đến (Destination) là bắt buộc.');
+    // 2. Kiểm tra Nơi đến / Điểm giao (Chỉ áp dụng cho các nhóm dịch vụ vận tải có tuyến đường)
+    const requiresDestination = [
+      'Trucking',
+      'Sea Freight (FCL)',
+      'Sea Freight (LCL)',
+      'Air Freight',
+      'Rail Freight',
+      'Cross-border',
+      'Cold Chain',
+    ].includes(serviceType);
+
+    if (requiresDestination && !destination.trim()) {
+      if (serviceType === 'Air Freight') {
+        errors.push('Vui lòng chọn Sân bay đến / Hạ cánh (AOA).');
+      } else if (serviceType === 'Sea Freight (FCL)' || serviceType === 'Sea Freight (LCL)') {
+        errors.push('Vui lòng chọn Cảng dỡ hàng (POD) hoặc Kho CFS đích.');
+      } else if (serviceType === 'Rail Freight') {
+        errors.push('Vui lòng chọn Ga đến / Ga đích.');
+      } else if (serviceType === 'Cross-border') {
+        errors.push('Vui lòng chọn Quốc gia & Địa điểm đích.');
+      } else {
+        errors.push('Địa điểm giao hàng / Nơi đến (Destination) là bắt buộc.');
+      }
     }
 
+    // 3. Hạn chót nhận báo giá (RFQ Deadline)
     if (!expiryDate) {
       errors.push('Hạn chót nhận báo giá (RFQ Deadline) là bắt buộc.');
     }
 
+    // 4. Ngày bắt đầu / Lấy hàng dự kiến
     if (!pickupDate) {
-      errors.push('Ngày lấy hàng dự kiến (Pickup Date) là bắt buộc.');
+      if (serviceType === 'Customs Clearance') {
+        errors.push('Vui lòng chọn Ngày dự kiến mở tờ khai / làm thủ tục hải quan.');
+      } else if (serviceType === 'Warehousing') {
+        errors.push('Vui lòng chọn Ngày dự kiến bắt đầu thuê kho.');
+      } else if (serviceType === 'Project Cargo') {
+        errors.push('Vui lòng chọn Ngày dự kiến triển khai dự án.');
+      } else {
+        errors.push('Ngày lấy hàng dự kiến (Pickup Date) là bắt buộc.');
+      }
     }
 
-    if (serviceType !== 'Warehousing' && serviceType !== 'Project Cargo' && !weightKg.trim() && !volumeCbm.trim()) {
+    // 5. Kiểm tra Trọng lượng / Thể tích (Miễn trừ cho Kho Bãi, Dự Án, Thủ Tục Hải Quan và FCL đã có số container)
+    const isWeightVolumeExempt = ['Warehousing', 'Project Cargo', 'Customs Clearance'].includes(serviceType);
+    const hasOceanFclContainer = (serviceType === 'Sea Freight (FCL)' || (serviceType === 'Sea Freight (LCL)' && oceanSpecs.mode?.includes('FCL'))) && (oceanSpecs.containerCount || 0) > 0;
+    const hasAirWeight = serviceType === 'Air Freight' && Boolean(airSpecs.grossWeightKgs || airSpecs.chargeableWeightKgs);
+
+    if (!isWeightVolumeExempt && !hasOceanFclContainer && !hasAirWeight && !weightKg.trim() && !volumeCbm.trim()) {
       errors.push('Vui lòng nhập Khối lượng (kg) hoặc Thể tích (cbm) của hàng hóa.');
     }
 
+    // 6. Ràng buộc hàng lạnh / nguy hiểm
     if (cargoClassification === 'Reefer' && !temperatureRequirement) {
       errors.push('Vui lòng chọn dải nhiệt độ bảo quản cho hàng đông lạnh.');
     }
@@ -871,7 +939,15 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
     }
 
     setValidationErrors([]);
-    const finalTitle = title.trim() || (origin && destination ? `${origin.split(',')[0]} → ${destination.split(',')[0]} (${serviceType})` : `Yêu cầu báo giá ${serviceType}`);
+    const finalTitle = title.trim() || (
+      serviceType === 'Customs Clearance'
+        ? `Thủ tục Hải quan - ${origin.trim() || customsSpecs.customsSubDepartment || 'Chi cục Hải quan'}`
+        : serviceType === 'Warehousing'
+        ? `Thuê kho bãi 3PL - ${origin.trim() || warehousingSpecs.targetLocation || 'Kho tiêu chuẩn'}`
+        : serviceType === 'Project Cargo'
+        ? `Dự án logistics - ${projectSpecs.projectName || origin.trim() || 'Chuỗi cung ứng'}`
+        : (origin && destination ? `${origin.split(',')[0]} → ${destination.split(',')[0]} (${serviceType})` : `Yêu cầu báo giá ${serviceType}`)
+    );
 
     const reqs: string[] = [];
     if (gpsRequired) reqs.push('GPS Live Telematics Tracking');
