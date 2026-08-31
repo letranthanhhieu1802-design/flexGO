@@ -133,6 +133,48 @@ export const CustomerRatesPage: React.FC<CustomerRatesPageProps> = ({
   }, [rates, searchTerm, serviceFilter, statusFilter, sourceFilter]);
 
   // Helpers
+  const getCargoGroup = (rate: CustomerRateItem) => {
+    const text = `${rate.cargoType || ''} ${rate.title || ''} ${rate.serviceType || ''}`.toLowerCase();
+    if (rate.serviceType === 'Cold Chain' || text.includes('lạnh') || text.includes('reefer') || text.includes('mát') || text.includes('thực phẩm tươi')) {
+      return 'Hàng lạnh';
+    }
+    if (text.includes('nguy hiểm') || text.includes('hazmat') || text.includes('dg') || text.includes('hóa chất') || text.includes('pin')) {
+      return 'Hàng nguy hiểm';
+    }
+    return 'Hàng thường';
+  };
+
+  const getOperationMode = (rate: CustomerRateItem) => {
+    const sType = rate.serviceType;
+    const text = `${rate.equipmentOrVehicleType || ''} ${rate.loadType || ''} ${rate.title || ''}`.toLowerCase();
+    if (sType === 'Trucking' || sType === 'Cold Chain') {
+      if (text.includes('ltl') || text.includes('hàng ghép') || text.includes('ghép')) return 'LTL';
+      return 'FTL';
+    }
+    if (sType === 'Sea Freight (FCL)' || sType === 'Sea Freight (LCL)') {
+      if (sType === 'Sea Freight (LCL)' || text.includes('lcl') || text.includes('gom lẻ')) return 'LCL';
+      return 'FCL';
+    }
+    if (sType === 'Air Freight') {
+      if (text.includes('express') || text.includes('hỏa tốc')) return 'Express';
+      return 'Air Cargo';
+    }
+    if (sType === 'Warehousing') {
+      if (text.includes('lạnh')) return 'Kho lạnh';
+      if (text.includes('ngoại quan')) return 'Kho ngoại quan';
+      return 'Kho thường';
+    }
+    if (sType === 'Customs Clearance') {
+      if (text.includes('xuất')) return 'Xuất khẩu';
+      return 'Nhập khẩu';
+    }
+    if (sType === 'Cross-border') {
+      if (text.includes('ltl') || text.includes('ghép')) return 'LTL';
+      return 'FTL';
+    }
+    return rate.loadType || 'FTL';
+  };
+
   const getServiceIcon = (type: ServiceType) => {
     switch (type) {
       case 'Trucking':
@@ -464,22 +506,24 @@ export const CustomerRatesPage: React.FC<CustomerRatesPageProps> = ({
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                <th className="p-4">Mã & Tuyến Đường</th>
-                <th className="p-4">Phương Thức & Quy Cách</th>
-                <th className="p-4">Nhà Cung Cấp (Supplier)</th>
-                <th className="p-4">Đơn Giá Cước Chuẩn</th>
-                <th className="p-4">Nguồn Gốc Giá</th>
-                <th className="p-4">Hiệu Lực & Thời Hạn</th>
-                <th className="p-4">Trạng Thái</th>
-                <th className="p-4 text-right">Thao Tác</th>
+              <tr className="bg-slate-100/90 border-b border-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                <th className="py-2.5 px-2 text-center w-10">STT</th>
+                <th className="py-2.5 px-3 whitespace-nowrap">Nhóm Dịch Vụ</th>
+                <th className="py-2.5 px-2 whitespace-nowrap">Nhóm Hàng</th>
+                <th className="py-2.5 px-2 whitespace-nowrap">Mô Hình</th>
+                <th className="py-2.5 px-3 whitespace-nowrap">Chi Tiết</th>
+                <th className="py-2.5 px-3 whitespace-nowrap">Đơn Giá</th>
+                <th className="py-2.5 px-3 whitespace-nowrap">Nhà Cung Cấp</th>
+                <th className="py-2.5 px-3 whitespace-nowrap">Nguồn Giá</th>
+                <th className="py-2.5 px-3 whitespace-nowrap">Thời Hạn</th>
+                <th className="py-2.5 px-3 text-center whitespace-nowrap">Thao Tác</th>
               </tr>
             </thead>
 
             <tbody className="divide-y divide-slate-100 text-xs">
               {filteredRates.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="p-12 text-center text-slate-500">
+                  <td colSpan={10} className="p-12 text-center text-slate-500">
                     <FileSpreadsheet className="w-12 h-12 text-slate-300 mx-auto mb-3" />
                     <p className="font-bold text-slate-700">Không tìm thấy biểu giá nào phù hợp</p>
                     <p className="text-xs text-slate-400 mt-1">
@@ -488,7 +532,7 @@ export const CustomerRatesPage: React.FC<CustomerRatesPageProps> = ({
                   </td>
                 </tr>
               ) : (
-                filteredRates.map((rate) => {
+                filteredRates.map((rate, idx) => {
                   const isExpanded = Boolean(expandedRateIds[rate.id]);
 
                   return (
@@ -500,90 +544,72 @@ export const CustomerRatesPage: React.FC<CustomerRatesPageProps> = ({
                         className={`cursor-pointer transition-colors ${
                           isExpanded
                             ? 'bg-indigo-50/40 hover:bg-indigo-50/60 font-medium'
-                            : 'hover:bg-slate-50/80'
+                            : idx % 2 === 0
+                            ? 'bg-white hover:bg-slate-50/90'
+                            : 'bg-slate-50/40 hover:bg-slate-100/70'
                         }`}
                       >
-                        {/* Code & Route */}
-                        <td className="p-4">
-                          <div className="flex items-center gap-2">
-                            <span className="text-slate-400">
-                              {isExpanded ? (
-                                <ChevronUp className="w-4 h-4 text-indigo-600 shrink-0" />
-                              ) : (
-                                <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
-                              )}
+                        {/* Cột 1: STT */}
+                        <td className="py-3 px-2 text-center text-slate-400 font-mono text-xs">
+                          {idx + 1}
+                        </td>
+
+                        {/* Cột 2: Nhóm Dịch Vụ */}
+                        <td className="py-3 px-3 whitespace-nowrap">
+                          <span className="font-semibold text-slate-900 text-xs">
+                            {rate.serviceType}
+                          </span>
+                        </td>
+
+                        {/* Cột 3: Nhóm Hàng */}
+                        <td className="py-3 px-2 whitespace-nowrap text-xs text-slate-700">
+                          {getCargoGroup(rate)}
+                        </td>
+
+                        {/* Cột 4: Mô Hình */}
+                        <td className="py-3 px-2 whitespace-nowrap text-xs text-slate-700">
+                          {getOperationMode(rate)}
+                        </td>
+
+                        {/* Cột 5: Chi Tiết */}
+                        <td className="py-3 px-3 min-w-[200px] max-w-xs">
+                          <div className="space-y-0.5">
+                            <span className="font-mono text-indigo-700 font-bold text-xs block">
+                              {rate.code}
                             </span>
-                            <div>
-                              <span className="font-mono text-indigo-700 font-bold block text-xs">
-                                {rate.code}
-                              </span>
-                              <div className="font-semibold text-slate-900 mt-0.5 max-w-xs truncate" title={rate.title}>
-                                {rate.title}
-                              </div>
-                              <div className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
-                                <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
-                                <span>{rate.routeDisplay || `${rate.origin.split(',')[0]} → ${rate.destination.split(',')[0]}`}</span>
-                              </div>
+                            <div className="font-semibold text-slate-900 truncate" title={rate.title}>
+                              {rate.title}
+                            </div>
+                            <div className="text-[11px] text-slate-500 truncate">
+                              {rate.routeDisplay || `${rate.origin.split(',')[0]} → ${rate.destination.split(',')[0]}`}
                             </div>
                           </div>
                         </td>
 
-                        {/* Service & Equipment */}
-                        <td className="p-4">
-                          <div className="space-y-1">
-                            <span className="inline-flex items-center gap-1.5 bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md text-xs font-semibold whitespace-nowrap">
-                              {getServiceIcon(rate.serviceType)}
-                              <span>{rate.serviceType}</span>
+                        {/* Cột 6: Đơn Giá (chỉ thể hiện đơn giá awarded, không icon/badge) */}
+                        <td className="py-3 px-3 whitespace-nowrap font-bold text-slate-900 text-xs">
+                          {rate.rateDisplay || `${rate.baseRateAmount.toLocaleString('vi-VN')} ${rate.baseRateCurrency === 'USD' ? '$' : '₫'} / ${rate.pricingUnit}`}
+                        </td>
+
+                        {/* Cột 7: Nhà Cung Cấp */}
+                        <td className="py-3 px-3 whitespace-nowrap">
+                          <div className="space-y-0.5">
+                            <span className="font-semibold text-slate-900 block text-xs">
+                              {rate.supplierName}
                             </span>
-                            <div className="text-[11px] text-slate-500">
-                              {rate.equipmentOrVehicleType || rate.loadType || 'Tiêu chuẩn'}
-                            </div>
-                          </div>
-                        </td>
-
-                        {/* Supplier */}
-                        <td className="p-4">
-                          <div className="font-bold text-slate-900">
-                            {rate.supplierName}
-                          </div>
-                          {rate.supplierTaxId && (
-                            <div className="text-[10.5px] text-slate-400 font-mono">
-                              MST: {rate.supplierTaxId}
-                            </div>
-                          )}
-                        </td>
-
-                        {/* Rate & Pricing Unit */}
-                        <td className="p-4 whitespace-nowrap">
-                          <div className="font-black text-indigo-700 text-sm">
-                            {rate.rateDisplay}
-                          </div>
-                          <div className="flex items-center gap-1 mt-0.5">
-                            {rate.allInclusive ? (
-                              <span className="px-1.5 py-0.2 text-[9.5px] font-bold bg-emerald-100 text-emerald-800 rounded">
-                                Trọn gói All-in
-                              </span>
-                            ) : (
-                              <span className="px-1.5 py-0.2 text-[9.5px] font-medium bg-slate-100 text-slate-600 rounded">
-                                + Phụ phí ngoài
-                              </span>
-                            )}
-                            {rate.vatPercent !== undefined && (
-                              <span className="text-[10px] text-slate-400">
-                                VAT {rate.vatPercent}%
+                            {rate.supplierTaxId && (
+                              <span className="text-[10.5px] text-slate-400 font-mono block">
+                                MST: {rate.supplierTaxId}
                               </span>
                             )}
                           </div>
                         </td>
 
-                        {/* Source Type */}
-                        <td className="p-4 whitespace-nowrap">
+                        {/* Cột 8: Nguồn Giá */}
+                        <td className="py-3 px-3 whitespace-nowrap text-xs text-slate-700">
                           {rate.sourceType === 'AWARDED_INQUIRY' ? (
                             <div className="space-y-0.5">
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
-                                <Sparkles className="w-3 h-3 text-purple-600" />
-                                <span>Trao Thầu RFQ</span>
-                              </span>
+                              <span>Trao thầu RFQ</span>
                               {rate.linkedInquiryCode && (
                                 <button
                                   type="button"
@@ -595,7 +621,7 @@ export const CustomerRatesPage: React.FC<CustomerRatesPageProps> = ({
                                       params: { inquiryCode: rate.linkedInquiryCode },
                                     });
                                   }}
-                                  className="text-[10px] text-indigo-600 hover:underline flex items-center gap-0.5 block font-mono"
+                                  className="text-[10.5px] text-indigo-600 hover:underline flex items-center gap-0.5 font-mono block"
                                 >
                                   <span>{rate.linkedInquiryCode}</span>
                                   <ExternalLink className="w-2.5 h-2.5" />
@@ -604,62 +630,53 @@ export const CustomerRatesPage: React.FC<CustomerRatesPageProps> = ({
                             </div>
                           ) : (
                             <div className="space-y-0.5">
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] font-medium bg-slate-100 text-slate-700 border border-slate-200">
-                                <FileText className="w-3 h-3 text-slate-500" />
-                                <span>HĐ Nội Bộ</span>
-                              </span>
+                              <span>HĐ Nội bộ</span>
                               {rate.contractCode && (
-                                <div className="text-[10px] text-slate-400 font-mono">
+                                <span className="text-[10px] text-slate-400 font-mono block">
                                   {rate.contractCode}
-                                </div>
+                                </span>
                               )}
                             </div>
                           )}
                         </td>
 
-                        {/* Validity Dates */}
-                        <td className="p-4 whitespace-nowrap">
-                          <div className="flex items-center gap-1 text-[11px] text-slate-700 font-medium">
-                            <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                            <span>{rate.validFrom} → {rate.validTo}</span>
-                          </div>
+                        {/* Cột 9: Thời Hạn */}
+                        <td className="py-3 px-3 whitespace-nowrap text-xs text-slate-700 font-mono">
+                          <div>{rate.validFrom} → {rate.validTo}</div>
                           {rate.transitTime && (
-                            <div className="flex items-center gap-1 text-[10.5px] text-slate-400 mt-0.5">
-                              <Clock className="w-3 h-3 text-slate-400 shrink-0" />
-                              <span>SLA: {rate.transitTime}</span>
+                            <div className="text-[10.5px] text-slate-400 font-sans mt-0.5">
+                              SLA: {rate.transitTime}
                             </div>
                           )}
                         </td>
 
-                        {/* Status */}
-                        <td className="p-4 whitespace-nowrap">
-                          {getStatusBadge(rate.status)}
-                        </td>
-
-                        {/* Action Buttons */}
-                        <td className="p-4 text-right whitespace-nowrap">
-                          <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
-                            {/* Create Inquiry with this Benchmark */}
+                        {/* Cột 10: Thao Tác */}
+                        <td className="py-3 px-3 text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex items-center justify-center gap-1.5">
+                            {/* Toggle Expand Details */}
                             <button
                               type="button"
-                              id={`create-inquiry-from-rate-${rate.code}`}
-                              onClick={() => {
-                                if (onOpenCreateInquiryWithBenchmark) {
-                                  onOpenCreateInquiryWithBenchmark(rate);
-                                }
-                              }}
-                              className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl transition-all shadow-2xs cursor-pointer"
-                              title="Sử dụng thông số và giá này làm Target Budget để đăng RFQ mới"
+                              onClick={() => toggleExpandRate(rate.id)}
+                              className={`px-2.5 py-1 text-xs font-bold rounded-xl transition-all inline-flex items-center justify-center gap-1 cursor-pointer shadow-2xs ${
+                                isExpanded
+                                  ? 'bg-indigo-600 text-white shadow-xs'
+                                  : 'bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 hover:border-indigo-300'
+                              }`}
+                              title={isExpanded ? 'Thu gọn chi tiết' : 'Mở xem chi tiết biểu giá'}
                             >
-                              <Sparkles className="w-3 h-3 text-indigo-600" />
-                              <span className="hidden xl:inline">Tạo RFQ</span>
+                              <span>{isExpanded ? 'Đóng' : 'Xem chi tiết'}</span>
+                              {isExpanded ? (
+                                <ChevronUp className="w-3.5 h-3.5" />
+                              ) : (
+                                <ChevronDown className="w-3.5 h-3.5" />
+                              )}
                             </button>
 
                             {/* Edit */}
                             <button
                               type="button"
                               onClick={() => handleOpenEditModal(rate)}
-                              className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 transition-colors cursor-pointer"
+                              className="p-1.5 rounded-lg text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 border border-slate-200 transition-colors cursor-pointer"
                               title="Chỉnh sửa biểu giá"
                             >
                               <Edit3 className="w-3.5 h-3.5" />
@@ -687,7 +704,7 @@ export const CustomerRatesPage: React.FC<CustomerRatesPageProps> = ({
                       {/* ========================================================= */}
                       {isExpanded && (
                         <tr className="bg-indigo-50/20 border-b border-indigo-100 animate-in fade-in duration-150">
-                          <td colSpan={8} className="p-4 sm:p-6">
+                          <td colSpan={10} className="p-4 sm:p-6">
                             <div className="space-y-4">
                               {/* Top Banner with Full Route & Title */}
                               <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
