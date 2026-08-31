@@ -102,15 +102,17 @@ export const MySuppliersPage: React.FC<MySuppliersPageProps> = ({
     }
   };
 
-  // Navigate to My Inquiries filtered by this supplier
+  // Navigate to My Inquiries filtered by this supplier code (Mã NCC / Supplier ID)
   const handleViewSupplierInquiries = (supplier: SupplierCompany, e?: React.MouseEvent) => {
     if (e) {
       e.stopPropagation();
     }
+    const targetCodeOrId = supplier.code || supplier.id;
     onNavigate({
       type: 'workspace',
       view: 'customer-inquiries',
       params: {
+        supplierCode: targetCodeOrId,
         supplierId: supplier.id,
         supplierName: supplier.name,
       },

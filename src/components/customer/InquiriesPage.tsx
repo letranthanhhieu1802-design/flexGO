@@ -69,50 +69,52 @@ export const InquiriesPage: React.FC<InquiriesPageProps> = ({
     }
   };
 
-  // Find active supplier object if available
-  const activeSupplierObj = suppliers.find(
-    (s) =>
-      s.id.toLowerCase() === supplierFilter.toLowerCase() ||
-      s.name.toLowerCase() === supplierFilter.toLowerCase()
-  );
+  // Find active supplier object if available by Supplier Code (S-YYMMDDXX), ID, or Name
+  const activeSupplierObj = suppliers.find((s) => {
+    const filter = supplierFilter.toLowerCase().trim();
+    return (
+      (s.code && s.code.toLowerCase() === filter) ||
+      s.id.toLowerCase() === filter ||
+      s.name.toLowerCase() === filter
+    );
+  });
 
-  // Check if an inquiry involves the selected supplier
+  // Check if an inquiry involves the selected supplier (matched by Supplier Code / ID)
   const isInquiryMatchingSupplier = (inq: InquiryItem, filter: string): boolean => {
     if (!filter) return true;
     const lower = filter.toLowerCase().trim();
+    const targetSupplierId = activeSupplierObj?.id?.toLowerCase() || lower;
+    const targetSupplierCode = activeSupplierObj?.code?.toLowerCase() || lower;
 
-    // 1. Direct match in quotations
+    // 1. Direct match in quotations by supplierId or supplier code
     const matchingQuote = quotations.find((q) => {
       if (q.inquiryCode !== inq.code) return false;
-      if (q.supplierId && (q.supplierId.toLowerCase() === lower || (activeSupplierObj && q.supplierId === activeSupplierObj.id))) {
+      const qSupplierId = (q.supplierId || '').toLowerCase();
+      if (qSupplierId === targetSupplierId || qSupplierId === targetSupplierCode) {
         return true;
       }
-      if (q.supplierName && (q.supplierName.toLowerCase() === lower || (activeSupplierObj && q.supplierName.toLowerCase() === activeSupplierObj.name.toLowerCase()) || q.supplierName.toLowerCase().includes(lower))) {
+      if (activeSupplierObj && q.supplierName && q.supplierName.toLowerCase() === activeSupplierObj.name.toLowerCase()) {
         return true;
       }
       return false;
     });
     if (matchingQuote) return true;
 
-    // 2. Direct match in invitedSuppliers array
+    // 2. Direct match in invitedSuppliers array by Supplier Code or Supplier ID
     if (inq.invitedSuppliers && inq.invitedSuppliers.length > 0) {
-      const isInvited = inq.invitedSuppliers.some(
-        (name) =>
-          name.toLowerCase() === lower ||
-          (activeSupplierObj && name.toLowerCase() === activeSupplierObj.name.toLowerCase()) ||
-          name.toLowerCase().includes(lower) ||
-          lower.includes(name.toLowerCase())
-      );
+      const isInvited = inq.invitedSuppliers.some((nameOrCode) => {
+        const lowerVal = nameOrCode.toLowerCase().trim();
+        return (
+          lowerVal === targetSupplierCode ||
+          lowerVal === targetSupplierId ||
+          (activeSupplierObj && lowerVal === activeSupplierObj.name.toLowerCase())
+        );
+      });
       if (isInvited) return true;
     }
 
     // 3. Match in sourceDetails or awarded contract
     if (activeSupplierObj?.sourceDetails?.inquiryCode === inq.code) {
-      return true;
-    }
-
-    // 4. Text match in inquiry title/description
-    if (inq.title.toLowerCase().includes(lower) || inq.description?.toLowerCase().includes(lower)) {
       return true;
     }
 
@@ -495,15 +497,20 @@ export const InquiriesPage: React.FC<InquiriesPageProps> = ({
           className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-3 bg-gradient-to-r from-indigo-50 via-blue-50/50 to-indigo-50/80 border border-indigo-200 rounded-2xl animate-in fade-in duration-200 shadow-2xs"
         >
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow-2xs shrink-0">
-              <Building2 className="w-4 h-4" />
+            <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-mono font-bold text-xs shadow-2xs shrink-0">
+              NCC
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs font-semibold text-indigo-700">Đang lọc theo Nhà Cung Cấp:</span>
-                <span className="text-xs font-bold text-indigo-950 bg-white px-2.5 py-0.5 rounded-lg border border-indigo-200 shadow-2xs">
-                  {activeSupplierObj?.name || supplierFilter}
+                <span className="text-xs font-semibold text-indigo-700">Đang lọc Inquiries theo Mã NCC:</span>
+                <span className="font-mono font-bold text-xs text-indigo-900 bg-white px-2.5 py-1 rounded-lg border border-indigo-200 shadow-2xs">
+                  {activeSupplierObj?.code || supplierFilter}
                 </span>
+                {activeSupplierObj && (
+                  <span className="text-xs font-bold text-slate-800">
+                    - {activeSupplierObj.name}
+                  </span>
+                )}
                 <span className="text-[11px] font-bold text-indigo-600 bg-indigo-100/80 px-2 py-0.5 rounded-md">
                   {filteredInquiries.length} inquiries phù hợp
                 </span>

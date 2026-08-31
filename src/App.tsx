@@ -955,8 +955,8 @@ export function App() {
               leads={leads}
               quotations={quotations}
               suppliers={suppliers}
-              initialSupplierFilter={currentView.params?.supplierId || currentView.params?.supplierName}
-              initialSupplierName={currentView.params?.supplierName}
+              initialSupplierFilter={currentView.params?.supplierCode || currentView.params?.supplierId || ''}
+              initialSupplierName={currentView.params?.supplierCode || currentView.params?.supplierName || ''}
               onSelectInquiry={(inq) => {
                 const code = typeof inq === 'string' ? inq : inq.code;
                 setCurrentView({
