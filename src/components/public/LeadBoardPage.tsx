@@ -744,49 +744,85 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
     };
   };
 
-  // Helper xác định Hình Thức / Mô Hình dịch vụ
+  // Helper xác định Hình Thức / Mô Hình dịch vụ theo chuẩn rút gọn
   const getOperationModeDisplay = (lead: SupplierLeadItem) => {
     const sType = lead.serviceType;
     const specs = lead.serviceSpecs || lead.inquiry?.serviceSpecs;
+    const textContext = `${lead.inquiry?.title || ''} ${lead.volumeDisplay || ''} ${lead.cargoDetails || ''} ${lead.contractTerm || ''}`.toLowerCase();
 
-    if (sType === 'Trucking') {
-      if (specs?.trucking?.multiDropPoints && specs.trucking.multiDropPoints > 0) return 'Giao đa điểm';
-      return specs?.trucking?.loadType || (lead.volumeDisplay?.includes('LTL') ? 'LTL (Hàng ghép)' : 'FTL (Nguyên xe)');
+    // 1. Đường bộ (Trucking & Cold Chain)
+    if (sType === 'Trucking' || sType === 'Cold Chain') {
+      const loadType = specs?.trucking?.loadType;
+      if (loadType?.includes('LTL') || textContext.includes('ltl') || textContext.includes('hàng ghép') || textContext.includes('ghép hàng')) {
+        return 'LTL';
+      }
+      return 'FTL';
     }
-    if (sType === 'Cold Chain') {
-      return specs?.coldChain?.vehicleOrContType || 'Xe lạnh FTL';
+
+    // 2. Đường biển (Sea Freight FCL & LCL)
+    if (sType === 'Sea Freight (FCL)' || sType === 'Sea Freight (LCL)') {
+      if (sType === 'Sea Freight (LCL)' || specs?.ocean?.mode?.includes('LCL') || textContext.includes('lcl') || textContext.includes('gom lẻ')) {
+        return 'LCL';
+      }
+      return 'FCL';
     }
-    if (sType === 'Sea Freight (FCL)') {
-      return specs?.ocean?.containerType ? `FCL (${specs.ocean.containerType})` : 'FCL (Nguyên cont)';
-    }
-    if (sType === 'Sea Freight (LCL)') {
-      return 'LCL (Gom lẻ CFS)';
-    }
+
+    // 3. Hàng không (Air Freight)
     if (sType === 'Air Freight') {
-      const isExpress = specs?.air?.airServiceType === 'Express / Courier' || lead.cargoDetails?.toLowerCase().includes('express');
-      return isExpress ? 'Express / Chuyển phát' : 'Air Cargo Direct';
+      const isExpress = specs?.air?.airServiceType === 'Express / Courier' || 
+                        specs?.air?.serviceLevel?.toLowerCase().includes('priority') ||
+                        textContext.includes('express') || 
+                        textContext.includes('hỏa tốc') || 
+                        textContext.includes('chuyển phát');
+      return isExpress ? 'Express' : 'Air Freight';
     }
+
+    // 4. Đường sắt (Rail Freight)
     if (sType === 'Rail Freight') {
-      return specs?.rail?.containerType || 'FCL Cont Ga';
+      const isLcl = specs?.rail?.mode?.includes('LCL') || textContext.includes('lcl') || textContext.includes('hàng lẻ') || textContext.includes('ghép');
+      return isLcl ? 'LCL' : 'FCL';
     }
+
+    // 5. Kho bãi (Warehousing)
     if (sType === 'Warehousing') {
-      return specs?.warehousing?.warehouseType ? specs.warehousing.warehouseType.split(' (')[0] : 'Kho Thường';
+      const whType = (specs?.warehousing?.warehouseType || textContext).toLowerCase();
+      if (whType.includes('ngoại quan') || whType.includes('bonded')) return 'Kho ngoại quan';
+      if (whType.includes('lạnh') || whType.includes('mát') || whType.includes('cold')) return 'Kho lạnh';
+      if (whType.includes('nguy hiểm') || whType.includes('dg') || whType.includes('hóa chất')) return 'Kho hàng nguy hiểm';
+      if (whType.includes('fulfillment') || whType.includes('tmđt') || whType.includes('thương mại điện tử')) return 'Kho Fulfillment';
+      if (whType.includes('tự quản') || whType.includes('self-storage')) return 'Kho tự quản';
+      return 'Kho thường';
     }
+
+    // 6. Thủ tục hải quan (Customs Clearance)
     if (sType === 'Customs Clearance') {
-      return specs?.customs?.declarationType ? specs.customs.declarationType.split(' (')[0] : 'Nhập KD (A11)';
+      const tradeRole = (specs?.customs?.tradeRole || lead.inquiry?.tradeRole || textContext).toLowerCase();
+      const decType = (specs?.customs?.declarationType || '').toLowerCase();
+      if (tradeRole.includes('xuất') || tradeRole.includes('export') || decType.includes('xuất') || decType.includes('b11')) {
+        return 'Xuất khẩu';
+      }
+      return 'Nhập khẩu';
     }
+
+    // 7. Xuyên biên giới (Cross-border)
     if (sType === 'Cross-border') {
-      return specs?.crossBorder?.cargoMode ? specs.crossBorder.cargoMode.split(' (')[0] : 'Xe chạy thẳng GMS';
+      if (textContext.includes('ltl') || textContext.includes('hàng ghép') || textContext.includes('ghép')) {
+        return 'LTL';
+      }
+      return 'FTL';
     }
+
+    // 8. Logistics Dự án (Project Cargo)
     if (sType === 'Project Cargo') {
       const cat = specs?.project?.projectCategory;
-      if (cat === 'DISTRIBUTION') return 'Phân phối chuỗi';
-      if (cat === 'CROSS_DOCK') return 'Trạm Cross-Dock';
-      if (cat === 'PORT_ICD') return 'Con thoi Cảng - ICD';
-      if (cat === 'MULTIMODAL') return 'Đa phương thức';
-      return 'Dự án phân phối';
+      if (cat === 'DISTRIBUTION' || textContext.includes('phân phối')) return 'Phân phối';
+      if (cat === 'CROSS_DOCK' || textContext.includes('cross-dock') || textContext.includes('chia chọn')) return 'Cross-dock';
+      if (cat === 'PORT_ICD' || textContext.includes('cảng') || textContext.includes('icd') || textContext.includes('con thoi')) return 'Cảng';
+      if (cat === 'MULTIMODAL' || textContext.includes('đa phương thức')) return 'Đa phương thức';
+      return 'Phân phối';
     }
-    return 'Tiêu chuẩn';
+
+    return 'FTL';
   };
 
   return (
