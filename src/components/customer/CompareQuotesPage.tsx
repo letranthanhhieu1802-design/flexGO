@@ -468,7 +468,7 @@ export const CompareQuotesPage: React.FC<CompareQuotesPageProps> = ({
             </div>
             <div>
               <div className="font-black text-sm text-emerald-900">
-                Đã Trao Thầu Thành Công Cho Báo Giá {awardedQuoteCode || 'QUO-89201'}!
+                Đã Trao Thầu Thành Công Cho Yêu Cầu {activeInquiry.code}!
               </div>
               <p className="text-emerald-700 text-xs mt-0.5">
                 Nhà cung cấp đã nhận được thông báo trúng thầu. Bạn có thể tiến hành ký kết phụ lục hợp đồng e-Contract và kích hoạt chuyến vận chuyển.

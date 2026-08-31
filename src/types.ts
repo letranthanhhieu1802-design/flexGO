@@ -41,6 +41,7 @@ export type CurrentView =
 
 export interface UserProfile {
   id: string;
+  code?: string; // C-YYMMDDXX (Customer), F-YYMMDDXX (Forwarder), S-YYMMDDXX (Supplier)
   name: string;
   email: string;
   avatarUrl?: string;
@@ -649,6 +650,7 @@ export interface SupplierSourceDetails {
 
 export interface SupplierCompany {
   id: string;
+  code?: string; // S-YYMMDDXX
   name: string;
   logo: string;
   tagline: string;

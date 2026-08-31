@@ -15,6 +15,7 @@ import { comprehensiveInquiries, comprehensiveSupplierLeads } from './mockLeadsC
 export const mockUsers: Record<CompanyType, UserProfile> = {
   CUSTOMER: {
     id: 'usr-cust-01',
+    code: 'C-26081501',
     name: 'Hieu Le',
     email: 'hieu.le@abcmanufacturing.com.vn',
     roleTitle: 'Head of Procurement & Supply Chain',
@@ -34,6 +35,7 @@ export const mockUsers: Record<CompanyType, UserProfile> = {
   },
   SUPPLIER: {
     id: 'usr-supp-01',
+    code: 'S-26082001',
     name: 'Minh Tran',
     email: 'minh.tran@vinatranslogistics.com',
     roleTitle: 'Enterprise Logistics Account Director',
@@ -53,6 +55,7 @@ export const mockUsers: Record<CompanyType, UserProfile> = {
   },
   BOTH: {
     id: 'usr-both-01',
+    code: 'F-26081801',
     name: 'Thanh Vo',
     email: 'thanh.vo@globalduallogistics.vn',
     roleTitle: 'VP of Commercial & 4PL Operations',
@@ -246,6 +249,7 @@ export const initialQuotations: QuotationItem[] = [
 export const mockSuppliers: SupplierCompany[] = [
   {
     id: 'supp-01',
+    code: 'S-26082001',
     name: 'VinaTrans Logistics JSC',
     logo: 'VT',
     tagline: 'Leading multimodal logistics network across Vietnam & ASEAN',
@@ -279,6 +283,7 @@ export const mockSuppliers: SupplierCompany[] = [
     warehouseArea: '65,000 m² (Bonded & General)',
     establishedYear: 2008,
     contactPerson: 'Minh Tran',
+    contactRole: 'Key Account Director',
     contactEmail: 'minh.tran@vinatranslogistics.com',
     contactPhone: '+84 (0) 28 3822 9988',
     totalQuotesSubmitted: 512,
@@ -294,6 +299,7 @@ export const mockSuppliers: SupplierCompany[] = [
   },
   {
     id: 'supp-04',
+    code: 'S-26082002',
     name: 'Saigon Ocean Freight & Logistics',
     logo: 'SO',
     tagline: 'Global ocean container lines & coastal domestic feedering',
@@ -327,6 +333,7 @@ export const mockSuppliers: SupplierCompany[] = [
     warehouseArea: '35,000 m² Container Depot',
     establishedYear: 2010,
     contactPerson: 'Le Quoc Bao',
+    contactRole: 'Pricing & Sea Freight Lead',
     contactEmail: 'bao.le@saigonocean.com',
     contactPhone: '+84 (0) 28 3910 8822',
     totalQuotesSubmitted: 420,
@@ -342,6 +349,7 @@ export const mockSuppliers: SupplierCompany[] = [
   },
   {
     id: 'supp-06',
+    code: 'S-26082003',
     name: 'Global Dual Logistics & Trade Corp',
     logo: 'GD',
     tagline: 'Cross-border intermodal & trade compliance solutions',
@@ -375,6 +383,7 @@ export const mockSuppliers: SupplierCompany[] = [
     warehouseArea: '18,000 m² Kho ngoại quan',
     establishedYear: 2015,
     contactPerson: 'Thanh Vo',
+    contactRole: 'VP of Operations',
     contactEmail: 'thanh.vo@globalduallogistics.vn',
     contactPhone: '+84 (0) 908 555 666',
     totalQuotesSubmitted: 195,
@@ -390,6 +399,7 @@ export const mockSuppliers: SupplierCompany[] = [
   },
   {
     id: 'supp-02',
+    code: 'S-26082004',
     name: 'Mekong Express Logistics',
     logo: 'ME',
     tagline: 'High-speed express intermodal & cross-border freight specialist',
@@ -421,6 +431,7 @@ export const mockSuppliers: SupplierCompany[] = [
     warehouseArea: '22,000 m²',
     establishedYear: 2014,
     contactPerson: 'Nguyen Van Tu',
+    contactRole: 'Sales & Dispatch Lead',
     contactEmail: 'tu.nguyen@mekongexpress.com',
     contactPhone: '+84 (0) 28 7300 4567',
     totalQuotesSubmitted: 290,
@@ -436,6 +447,7 @@ export const mockSuppliers: SupplierCompany[] = [
   },
   {
     id: 'supp-05',
+    code: 'S-26082005',
     name: 'SkyBridge Cargo Asia',
     logo: 'SB',
     tagline: 'Express air charter & aerospace high-priority logistics',
@@ -467,6 +479,7 @@ export const mockSuppliers: SupplierCompany[] = [
     warehouseArea: '12,000 m² Airport Cold Hub',
     establishedYear: 2019,
     contactPerson: 'Pham Minh Khang',
+    contactRole: 'Air Freight Pricing Manager',
     contactEmail: 'khang.pham@skybridgeasia.com',
     contactPhone: '+84 (0) 24 3584 7711',
     totalQuotesSubmitted: 110,
@@ -482,6 +495,7 @@ export const mockSuppliers: SupplierCompany[] = [
   },
   {
     id: 'supp-03',
+    code: 'S-26082006',
     name: 'VietLogix Intermodal',
     logo: 'VL',
     tagline: 'Smart supply chain infrastructure & smart warehousing solutions',
@@ -513,6 +527,7 @@ export const mockSuppliers: SupplierCompany[] = [
     warehouseArea: '90,000 m²',
     establishedYear: 2017,
     contactPerson: 'Do Thi Mai',
+    contactRole: 'Warehousing Solutions Lead',
     contactEmail: 'mai.do@vietlogix.vn',
     contactPhone: '+84 (0) 274 380 9191',
     totalQuotesSubmitted: 175,
@@ -528,6 +543,7 @@ export const mockSuppliers: SupplierCompany[] = [
   },
   {
     id: 'supp-07',
+    code: 'S-26082007',
     name: 'Indo-Trans Logistics (ITL Corp)',
     logo: 'ITL',
     tagline: 'Premier national contract logistics & distribution network',
@@ -560,6 +576,7 @@ export const mockSuppliers: SupplierCompany[] = [
     warehouseArea: '250,000 m² Kho phân phối toàn quốc',
     establishedYear: 2000,
     contactPerson: 'Đặng Tuấn Anh',
+    contactRole: 'Senior Key Account Manager',
     contactEmail: 'solutions@itlvn.com',
     contactPhone: '+84 (0) 909 666 777',
     totalQuotesSubmitted: 0,
@@ -575,6 +592,7 @@ export const mockSuppliers: SupplierCompany[] = [
   },
   {
     id: 'supp-08',
+    code: 'S-26082008',
     name: 'VIMC Ocean Transport & Logistics',
     logo: 'VIMC',
     tagline: 'National maritime carrier & global ocean shipping alliances',
@@ -607,6 +625,7 @@ export const mockSuppliers: SupplierCompany[] = [
     warehouseArea: '50,000 m² Bãi Container & ICD',
     establishedYear: 1995,
     contactPerson: 'Nguyễn Thị Hải Yến',
+    contactRole: 'Head of Ocean Carrier Pricing',
     contactEmail: 'ocean-rates@vimc-logistics.vn',
     contactPhone: '+84 (0) 912 789 555',
     totalQuotesSubmitted: 0,
@@ -622,6 +641,7 @@ export const mockSuppliers: SupplierCompany[] = [
   },
   {
     id: 'supp-09',
+    code: 'S-26082009',
     name: 'Á Châu Trans-Border Logistics Corp',
     logo: 'AC',
     tagline: 'Specialized overland cross-border trucking Vietnam - China',
@@ -654,6 +674,7 @@ export const mockSuppliers: SupplierCompany[] = [
     warehouseArea: '15,000 m² Bãi tập kết cửa khẩu',
     establishedYear: 2012,
     contactPerson: 'Hoàng Quốc Việt',
+    contactRole: 'Cross-Border Operations Manager',
     contactEmail: 'border-team@achau-logistics.vn',
     contactPhone: '+84 (0) 913 222 111',
     totalQuotesSubmitted: 0,
@@ -669,6 +690,7 @@ export const mockSuppliers: SupplierCompany[] = [
   },
   {
     id: 'supp-10',
+    code: 'S-26082010',
     name: 'Sotrans International Logistics',
     logo: 'ST',
     tagline: 'Leading national warehousing, port logistics & CFS consolidation',
@@ -701,6 +723,7 @@ export const mockSuppliers: SupplierCompany[] = [
     warehouseArea: '100,000 m² Hệ thống kho CFS & Kho bãi',
     establishedYear: 1975,
     contactPerson: 'Đỗ Thúy Hằng',
+    contactRole: 'CFS & LCL Operations Lead',
     contactEmail: 'lcl-rates@sotrans.com.vn',
     contactPhone: '+84 (0) 902 555 444',
     totalQuotesSubmitted: 0,

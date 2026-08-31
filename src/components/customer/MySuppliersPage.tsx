@@ -185,6 +185,7 @@ export const MySuppliersPage: React.FC<MySuppliersPageProps> = ({
   const filteredSuppliers = useMemo(() => {
     return localSuppliers.filter((s) => {
       const matchesSearch =
+        (s.code && s.code.toLowerCase().includes(searchTerm.toLowerCase())) ||
         s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (s.taxId && s.taxId.toLowerCase().includes(searchTerm.toLowerCase())) ||
         s.contactPerson.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -570,8 +571,9 @@ export const MySuppliersPage: React.FC<MySuppliersPageProps> = ({
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                  <th className="py-3.5 px-4 text-center w-14">STT</th>
-                  <th className="py-3.5 px-4 min-w-[200px]">Thông Tin PIC</th>
+                  <th className="py-3.5 px-4 text-center w-12">STT</th>
+                  <th className="py-3.5 px-4 min-w-[130px]">Mã NCC</th>
+                  <th className="py-3.5 px-4 min-w-[180px]">Thông Tin PIC</th>
                   <th className="py-3.5 px-4 min-w-[220px]">Công Ty</th>
                   <th className="py-3.5 px-4">Dịch Vụ Cung Cấp</th>
                   <th className="py-3.5 px-4">Nguồn</th>
@@ -591,7 +593,14 @@ export const MySuppliersPage: React.FC<MySuppliersPageProps> = ({
                       {idx + 1}
                     </td>
 
-                    {/* Cột 2: Thông Tin PIC (Tên + Chức vụ subtext) */}
+                    {/* Cột 2: Mã NCC (S-YYMMDDXX) */}
+                    <td className="py-4 px-4">
+                      <span className="font-mono font-bold text-xs text-indigo-700 bg-indigo-50/80 px-2.5 py-1 rounded-md border border-indigo-200/70 inline-block shadow-2xs">
+                        {supplier.code || `S-2608200${idx + 1}`}
+                      </span>
+                    </td>
+
+                    {/* Cột 3: Thông Tin PIC (Tên + Chức vụ subtext) */}
                     <td className="py-4 px-4">
                       <button
                         type="button"
@@ -606,7 +615,7 @@ export const MySuppliersPage: React.FC<MySuppliersPageProps> = ({
                       </div>
                     </td>
 
-                    {/* Cột 3: Công Ty (Tên công ty + MST) */}
+                    {/* Cột 4: Công Ty (Tên công ty + MST) */}
                     <td className="py-4 px-4">
                       <div className="font-bold text-slate-900 text-sm group-hover:text-indigo-600 transition-colors">
                         {supplier.name}
@@ -622,7 +631,7 @@ export const MySuppliersPage: React.FC<MySuppliersPageProps> = ({
                       )}
                     </td>
 
-                    {/* Cột 4: Dịch Vụ Cung Cấp (Hiển thị đầy đủ tất cả các dịch vụ đã tick chọn) */}
+                    {/* Cột 5: Dịch Vụ Cung Cấp (Hiển thị đầy đủ tất cả các dịch vụ đã tick chọn) */}
                     <td className="py-4 px-4 max-w-sm">
                       <div className="flex flex-wrap gap-1">
                         {supplier.services.map((srv) => (
@@ -633,12 +642,12 @@ export const MySuppliersPage: React.FC<MySuppliersPageProps> = ({
                       </div>
                     </td>
 
-                    {/* Cột 5: Nguồn */}
+                    {/* Cột 6: Nguồn */}
                     <td className="py-4 px-4">
                       {renderSourceBadge(supplier)}
                     </td>
 
-                    {/* Cột 6: Số Lượng Báo Giá (Tính theo số báo giá cho Inquiry của Customer này) */}
+                    {/* Cột 7: Số Lượng Báo Giá (Tính theo số báo giá cho Inquiry của Customer này) */}
                     <td className="py-4 px-4 text-center" onClick={(e) => e.stopPropagation()}>
                       <button
                         type="button"
@@ -651,7 +660,7 @@ export const MySuppliersPage: React.FC<MySuppliersPageProps> = ({
                       </button>
                     </td>
 
-                    {/* Cột 7: Thao Tác (360 View) */}
+                    {/* Cột 8: Thao Tác (360 View) */}
                     <td className="py-4 px-4 text-right" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-1.5">
                         <button

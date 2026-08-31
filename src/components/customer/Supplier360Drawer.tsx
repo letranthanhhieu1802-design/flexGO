@@ -120,9 +120,14 @@ export const Supplier360Drawer: React.FC<Supplier360DrawerProps> = ({
               </div>
               <p className="text-xs text-slate-500 mt-1 line-clamp-1">{supplier.tagline}</p>
               
-              <div className="flex items-center gap-3 mt-2 text-xs text-slate-500">
+              <div className="flex flex-wrap items-center gap-2.5 mt-2 text-xs text-slate-500">
+                {supplier.code && (
+                  <span className="font-mono bg-indigo-50 border border-indigo-200 text-indigo-700 px-2.5 py-0.5 rounded-md font-bold text-xs shadow-2xs">
+                    Mã NCC: {supplier.code}
+                  </span>
+                )}
                 {supplier.taxId && (
-                  <span className="font-mono bg-slate-100 px-2 py-0.5 rounded text-slate-700 font-semibold">
+                  <span className="font-mono bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md text-slate-700 font-semibold text-xs">
                     MST: {supplier.taxId}
                   </span>
                 )}

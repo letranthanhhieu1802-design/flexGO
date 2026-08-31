@@ -448,12 +448,12 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4 pt-3 border-t border-indigo-200/60 text-xs">
               <div>
-                <span className="text-[10px] text-indigo-700 uppercase font-semibold">Mã Báo Giá / Gói Thầu:</span>
-                <p className="font-mono font-bold text-slate-900 mt-0.5">{details?.quoteCode || 'QUO-89201'} ({details?.inquiryCode || 'FG-2608250001'})</p>
+                <span className="text-[10px] text-indigo-700 uppercase font-semibold">Mã Yêu Cầu (Inquiry):</span>
+                <p className="font-mono font-bold text-slate-900 mt-0.5">{details?.inquiryCode || 'FG-2608250001'}</p>
               </div>
               <div>
-                <span className="text-[10px] text-indigo-700 uppercase font-semibold">Hợp Đồng Ký Kết:</span>
-                <p className="font-mono font-semibold text-slate-900 mt-0.5">{details?.contractCode || 'HD-2026/001'}</p>
+                <span className="text-[10px] text-indigo-700 uppercase font-semibold">Ngày Trao Thầu:</span>
+                <p className="font-medium text-slate-900 mt-0.5">{details?.declaredDate || 'Aug 21, 2026'}</p>
               </div>
               <div>
                 <span className="text-[10px] text-indigo-700 uppercase font-semibold">Trạng Thái:</span>
