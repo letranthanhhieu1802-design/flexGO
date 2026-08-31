@@ -1168,12 +1168,6 @@ export const LeadInquiryDetailCard: React.FC<LeadInquiryDetailCardProps> = ({
               "{customerOperatingNotes}"
             </p>
           </div>
-          {lead.contractTerm && (
-            <div className="pt-2 text-[11px] text-slate-500 font-semibold flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-indigo-600" />
-              <span>Thời hạn hợp đồng cam kết: <strong>{lead.contractTerm}</strong></span>
-            </div>
-          )}
         </div>
 
         {/* Right: Attached Documents */}
