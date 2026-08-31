@@ -515,7 +515,7 @@ export const CustomerRatesPage: React.FC<CustomerRatesPageProps> = ({
                 <th className="py-2.5 px-3 whitespace-nowrap">Đơn Giá</th>
                 <th className="py-2.5 px-3 whitespace-nowrap">Nhà Cung Cấp</th>
                 <th className="py-2.5 px-3 whitespace-nowrap">Nguồn Giá</th>
-                <th className="py-2.5 px-3 whitespace-nowrap">Thời Hạn</th>
+                <th className="py-2.5 px-3 whitespace-nowrap">Hiệu Lực Giá</th>
                 <th className="py-2.5 px-3 text-center whitespace-nowrap">Thao Tác</th>
               </tr>
             </thead>
@@ -571,19 +571,9 @@ export const CustomerRatesPage: React.FC<CustomerRatesPageProps> = ({
                           {getOperationMode(rate)}
                         </td>
 
-                        {/* Cột 5: Chi Tiết */}
-                        <td className="py-3 px-3 min-w-[200px] max-w-xs">
-                          <div className="space-y-0.5">
-                            <span className="font-mono text-indigo-700 font-bold text-xs block">
-                              {rate.code}
-                            </span>
-                            <div className="font-semibold text-slate-900 truncate" title={rate.title}>
-                              {rate.title}
-                            </div>
-                            <div className="text-[11px] text-slate-500 truncate">
-                              {rate.routeDisplay || `${rate.origin.split(',')[0]} → ${rate.destination.split(',')[0]}`}
-                            </div>
-                          </div>
+                        {/* Cột 5: Chi Tiết (Tuyến đường/phạm vi dịch vụ ngắn gọn, không mã RATE) */}
+                        <td className="py-3 px-3 whitespace-nowrap text-xs font-semibold text-slate-900">
+                          {rate.routeDisplay || `${rate.origin.split(',')[0]} → ${rate.destination.split(',')[0]}`}
                         </td>
 
                         {/* Cột 6: Đơn Giá (chỉ thể hiện đơn giá awarded, không icon/badge) */}
@@ -640,14 +630,9 @@ export const CustomerRatesPage: React.FC<CustomerRatesPageProps> = ({
                           )}
                         </td>
 
-                        {/* Cột 9: Thời Hạn */}
+                        {/* Cột 9: Hiệu Lực Giá (Chỉ thể hiện ngày giá hết hạn) */}
                         <td className="py-3 px-3 whitespace-nowrap text-xs text-slate-700 font-mono">
-                          <div>{rate.validFrom} → {rate.validTo}</div>
-                          {rate.transitTime && (
-                            <div className="text-[10.5px] text-slate-400 font-sans mt-0.5">
-                              SLA: {rate.transitTime}
-                            </div>
-                          )}
+                          {rate.validTo}
                         </td>
 
                         {/* Cột 10: Thao Tác */}
