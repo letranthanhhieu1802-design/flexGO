@@ -398,8 +398,8 @@ export const MiniCRMPage: React.FC<MiniCRMPageProps> = ({
 
                     {/* Cột 7: Số Inquiries */}
                     <td className="py-4 px-4 text-center">
-                      <span className="inline-flex items-center justify-center min-w-[28px] px-2.5 py-1 text-xs font-bold bg-slate-100/90 text-slate-800 rounded-xl border border-slate-200 shadow-2xs">
-                        {c.inquiriesCount ?? c.openOpportunitiesCount ?? 1} inquiries
+                      <span className="inline-flex items-center justify-center min-w-[28px] h-7 px-2 text-xs font-bold text-slate-800 bg-slate-100 rounded-lg border border-slate-200 shadow-2xs font-mono">
+                        {c.inquiriesCount ?? c.openOpportunitiesCount ?? 1}
                       </span>
                     </td>
 
