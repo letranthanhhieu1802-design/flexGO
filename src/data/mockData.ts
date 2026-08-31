@@ -971,6 +971,7 @@ export const initialOpportunities: OpportunityItem[] = [
 export const initialCRMCustomers: CRMCustomer[] = [
   {
     id: 'crm-01',
+    code: 'C-26081501',
     companyName: 'ABC Manufacturing Co., Ltd.',
     companyShortName: 'ABC Manufacturing VN',
     englishName: 'ABC Precision Manufacturing Vietnam Co., Ltd.',
@@ -1037,6 +1038,7 @@ export const initialCRMCustomers: CRMCustomer[] = [
   },
   {
     id: 'crm-02',
+    code: 'C-26081502',
     companyName: 'VinTech Solar Energy Corp',
     companyShortName: 'VinTech Solar',
     englishName: 'VinTech Clean Energy & Photovoltaics Joint Stock Company',
@@ -1101,6 +1103,7 @@ export const initialCRMCustomers: CRMCustomer[] = [
   },
   {
     id: 'crm-03',
+    code: 'C-26081503',
     companyName: 'Saigon Precision Electronics JSC',
     companyShortName: 'Saigon Precision Metal',
     englishName: 'Saigon Precision Machinery & Parts Joint Stock Company',
@@ -1166,6 +1169,7 @@ export const initialCRMCustomers: CRMCustomer[] = [
   },
   {
     id: 'crm-04',
+    code: 'C-26081504',
     companyName: 'Dong Nai Footwear Alliance',
     companyShortName: 'DN Footwear Alliance',
     englishName: 'Dong Nai Export Footwear Manufacturing Alliance',
@@ -1227,6 +1231,7 @@ export const initialCRMCustomers: CRMCustomer[] = [
   },
   {
     id: 'crm-05',
+    code: 'C-26081505',
     companyName: 'Mekong Agri-Food Export Ltd',
     companyShortName: 'Mekong Agri-Food',
     englishName: 'Mekong Agricultural & Food Export Company Limited',
@@ -1288,6 +1293,7 @@ export const initialCRMCustomers: CRMCustomer[] = [
   },
   {
     id: 'crm-06',
+    code: 'C-26081506',
     companyName: 'An Phát Plastic & Chemical Compound JSC',
     companyShortName: 'An Phát Plastic',
     englishName: 'An Phat Bioplastics & High-Tech Polymers JSC',
@@ -1348,6 +1354,7 @@ export const initialCRMCustomers: CRMCustomer[] = [
   },
   {
     id: 'crm-07',
+    code: 'C-26081507',
     companyName: 'Tokyo Medical Devices Vietnam Ltd.',
     companyShortName: 'Tokyo Medical VN',
     englishName: 'Tokyo Medical Precision Devices & Instruments Vietnam Co., Ltd.',

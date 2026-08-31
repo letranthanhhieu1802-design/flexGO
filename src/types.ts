@@ -831,6 +831,7 @@ export interface CRMCustomerSourceDetails {
 
 export interface CRMCustomer {
   id: string;
+  code?: string; // C-YYMMDDXX
   companyName: string;
   companyShortName?: string;
   englishName?: string;

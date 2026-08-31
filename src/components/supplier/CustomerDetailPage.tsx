@@ -549,6 +549,9 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({
             <div>
               <div className="flex items-center space-x-2 flex-wrap gap-y-1">
                 <h1 className="text-2xl font-black text-slate-900 tracking-tight">{customer.companyName}</h1>
+                <span className="font-mono font-bold text-xs bg-indigo-50 text-indigo-800 border border-indigo-200 px-2.5 py-0.5 rounded-md shadow-2xs">
+                  {customer.code || customer.id}
+                </span>
                 <span className="px-2.5 py-0.5 text-xs font-bold bg-purple-100 text-purple-800 rounded-md">
                   {customer.flexGoMemberTier || `${customer.status} TIER`}
                 </span>
