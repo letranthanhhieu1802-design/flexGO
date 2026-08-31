@@ -1294,6 +1294,7 @@ export function App() {
       {/* Create Quotation Modal */}
       <CreateQuotationModal
         isOpen={isCreateQuotationOpen}
+        lead={activeQuotingLead}
         onClose={() => {
           setIsCreateQuotationOpen(false);
           setActiveQuotingLead(null);
