@@ -584,22 +584,22 @@ export const InquiriesPage: React.FC<InquiriesPageProps> = ({
         </div>
       </div>
 
-      {/* MODERN STANDARDIZED 11-COLUMN DATA TABLE (1 Khung nhìn, không cuộn ngang) */}
+      {/* MODERN STANDARDIZED 11-COLUMN DATA TABLE (Căn chỉnh 100% trong 1 khung nhìn, không cần cuộn ngang) */}
       <div 
         id="inquiries-data-table-container"
         className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden w-full flex flex-col"
       >
         <div className="overflow-y-auto max-h-[660px] relative scroll-smooth focus:outline-none w-full">
-          <table className="w-full text-left border-collapse" id="inquiries-data-table">
+          <table className="w-full text-left border-collapse table-auto" id="inquiries-data-table">
             {/* Table Header */}
             <thead className="sticky top-0 z-20 bg-slate-100 shadow-xs border-b border-slate-200">
-              <tr className="bg-slate-100 text-[10.5px] font-bold text-slate-600 uppercase tracking-wider select-none">
+              <tr className="bg-slate-100 text-[10px] font-bold text-slate-600 uppercase tracking-wider select-none">
                 {/* 1. STT */}
-                <th className="py-3 px-2.5 w-10 text-center sticky top-0 z-20 bg-slate-100 border-b border-slate-200">STT</th>
+                <th className="py-2.5 px-1.5 w-8 text-center sticky top-0 z-20 bg-slate-100 border-b border-slate-200">STT</th>
                 
                 {/* 2. Ngày đăng & Hạn */}
                 <th 
-                  className="py-3 px-2.5 cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
+                  className="py-2.5 px-2 cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
                   onClick={() => handleSort('createdDate')}
                 >
                   <div className="flex items-center gap-1">
@@ -610,7 +610,7 @@ export const InquiriesPage: React.FC<InquiriesPageProps> = ({
 
                 {/* 3. Mã ID */}
                 <th 
-                  className="py-3 px-2.5 cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
+                  className="py-2.5 px-2 cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
                   onClick={() => handleSort('code')}
                 >
                   <div className="flex items-center gap-1">
@@ -620,28 +620,28 @@ export const InquiriesPage: React.FC<InquiriesPageProps> = ({
                 </th>
 
                 {/* 4. Nhóm Dịch Vụ */}
-                <th className="py-3 px-2.5 whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
+                <th className="py-2.5 px-2 whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
                   <span>Nhóm Dịch Vụ</span>
                 </th>
 
                 {/* 5. Nhóm Hàng */}
-                <th className="py-3 px-2.5 whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
+                <th className="py-2.5 px-1.5 whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
                   <span>Nhóm Hàng</span>
                 </th>
 
-                {/* 6. Hình Thức / Mô Hình */}
-                <th className="py-3 px-2.5 whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
-                  <span>Hình Thức / Mô Hình</span>
+                {/* 6. Mô Hình */}
+                <th className="py-2.5 px-1.5 whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
+                  <span>Mô Hình</span>
                 </th>
 
                 {/* 7. Loại Hợp Đồng */}
-                <th className="py-3 px-2.5 whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
+                <th className="py-2.5 px-1.5 whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
                   <span>Loại Hợp Đồng</span>
                 </th>
 
                 {/* 8. Tổng Giá Trị */}
                 <th 
-                  className="py-3 px-2.5 text-right cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
+                  className="py-2.5 px-2 text-right cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
                   onClick={() => handleSort('estimatedValueVND')}
                 >
                   <div className="flex items-center justify-end gap-1">
@@ -652,7 +652,7 @@ export const InquiriesPage: React.FC<InquiriesPageProps> = ({
 
                 {/* 9. Trạng Thái (Status) */}
                 <th 
-                  className="py-3 px-2.5 text-center cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
+                  className="py-2.5 px-1.5 text-center cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
                   onClick={() => handleSort('status')}
                 >
                   <div className="flex items-center justify-center gap-1">
@@ -663,7 +663,7 @@ export const InquiriesPage: React.FC<InquiriesPageProps> = ({
 
                 {/* 10. Báo Giá / Lượt Xem */}
                 <th 
-                  className="py-3 px-2.5 text-center cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
+                  className="py-2.5 px-1.5 text-center cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
                   onClick={() => handleSort('responsesCount')}
                 >
                   <div className="flex items-center justify-center gap-1">
@@ -673,7 +673,7 @@ export const InquiriesPage: React.FC<InquiriesPageProps> = ({
                 </th>
 
                 {/* 11. Thao Tác (Chỉ 1 nút Xem Chi Tiết) */}
-                <th className="py-3 px-2.5 text-center whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
+                <th className="py-2.5 px-2 text-center whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
                   <span>Thao Tác</span>
                 </th>
               </tr>
@@ -712,101 +712,101 @@ export const InquiriesPage: React.FC<InquiriesPageProps> = ({
                         }`}
                       >
                         {/* Cột 1: STT */}
-                        <td className="py-3 px-2.5 text-center text-slate-400 font-mono text-[11px]">
+                        <td className="py-2.5 px-1.5 text-center text-slate-400 font-mono text-[10.5px]">
                           {idx + 1}
                         </td>
 
                         {/* Cột 2: Ngày Đăng & Hạn */}
-                        <td className="py-3 px-2.5 whitespace-nowrap">
+                        <td className="py-2.5 px-2 whitespace-nowrap">
                           <div className="space-y-0.5">
-                            <span className="text-slate-700 font-semibold block text-[11px]">
+                            <span className="text-slate-700 font-semibold block text-[10.5px]">
                               {inq.createdDate}
                             </span>
-                            <span className="inline-block px-1.5 py-0.2 rounded text-[9.5px] font-bold bg-rose-50 text-rose-600 border border-rose-200">
+                            <span className="inline-block px-1.5 py-0.2 rounded text-[9px] font-bold bg-rose-50 text-rose-600 border border-rose-200">
                               Hạn: {inq.expiryDate || inq.pickupDate || '7 ngày'}
                             </span>
                           </div>
                         </td>
 
                         {/* Cột 3: Mã ID */}
-                        <td className="py-3 px-2.5 whitespace-nowrap">
+                        <td className="py-2.5 px-2 whitespace-nowrap">
                           <span className="font-mono font-bold text-indigo-700 text-xs">
                             {inq.code}
                           </span>
                         </td>
 
                         {/* Cột 4: Nhóm Dịch Vụ */}
-                        <td className="py-3 px-2.5 whitespace-nowrap">
-                          <span className={`inline-block px-2 py-0.5 rounded-md text-[10.5px] font-bold border ${getServiceBadgeStyle(inq.serviceType)}`}>
+                        <td className="py-2.5 px-2 whitespace-nowrap">
+                          <span className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-bold border ${getServiceBadgeStyle(inq.serviceType)}`}>
                             {inq.serviceType}
                           </span>
                         </td>
 
                         {/* Cột 5: Nhóm Hàng */}
-                        <td className="py-3 px-2.5 whitespace-nowrap">
-                          <span className={`inline-block px-2 py-0.5 rounded-md text-[10.5px] font-bold border ${getCargoBadgeStyle(inq.cargoClassification)}`}>
+                        <td className="py-2.5 px-1.5 whitespace-nowrap">
+                          <span className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-bold border ${getCargoBadgeStyle(inq.cargoClassification)}`}>
                             {getCargoLabel(inq.cargoClassification)}
                           </span>
                         </td>
 
-                        {/* Cột 6: Hình Thức / Mô Hình */}
-                        <td className="py-3 px-2.5 whitespace-nowrap">
+                        {/* Cột 6: Mô Hình */}
+                        <td className="py-2.5 px-1.5 whitespace-nowrap">
                           <span className="text-slate-800 font-semibold text-xs">
                             {operationMode}
                           </span>
                         </td>
 
                         {/* Cột 7: Loại Hợp Đồng */}
-                        <td className="py-3 px-2.5 whitespace-nowrap">
+                        <td className="py-2.5 px-1.5 whitespace-nowrap">
                           {isContract ? (
-                            <span className="inline-block px-2 py-0.5 rounded-md text-[10.5px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                            <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
                               Hợp đồng
                             </span>
                           ) : (
-                            <span className="inline-block px-2 py-0.5 rounded-md text-[10.5px] font-bold bg-cyan-50 text-cyan-700 border border-cyan-200">
+                            <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold bg-cyan-50 text-cyan-700 border border-cyan-200">
                               Theo lô
                             </span>
                           )}
                         </td>
 
                         {/* Cột 8: Tổng Giá Trị */}
-                        <td className="py-3 px-2.5 text-right whitespace-nowrap">
+                        <td className="py-2.5 px-2 text-right whitespace-nowrap">
                           <div className="space-y-0.5">
-                            <span className="text-xs sm:text-[13px] font-black text-emerald-700 block tracking-tight">
+                            <span className="text-xs sm:text-[12.5px] font-black text-emerald-700 block tracking-tight">
                               {rawBudgetNum ? rawBudgetNum.toLocaleString('vi-VN') : 'Thỏa thuận'}
                             </span>
-                            <span className="text-[10px] font-semibold text-slate-500 block">
+                            <span className="text-[9.5px] font-semibold text-slate-500 block">
                               {isContract ? 'VNĐ / tháng' : 'VNĐ / lô'}
                             </span>
                           </div>
                         </td>
 
                         {/* Cột 9: Trạng Thái (Status) */}
-                        <td className="py-3 px-2.5 text-center whitespace-nowrap">
-                          <span className={`inline-block px-2.5 py-0.5 rounded-md text-[10.5px] font-bold border ${getStatusBadgeStyle(inq.status)}`}>
+                        <td className="py-2.5 px-1.5 text-center whitespace-nowrap">
+                          <span className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-bold border ${getStatusBadgeStyle(inq.status)}`}>
                             {getStatusDisplay(inq.status)}
                           </span>
                         </td>
 
                         {/* Cột 10: Thống Kê Báo Giá & Lượt Xem */}
-                        <td className="py-3 px-2.5 text-center whitespace-nowrap">
+                        <td className="py-2.5 px-1.5 text-center whitespace-nowrap">
                           <div className="flex flex-col items-center gap-0.5">
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/80">
+                            <span className="px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/80">
                               {inq.responsesCount || 0} báo giá
                             </span>
-                            <span className="text-[9.5px] text-slate-400 font-medium">
+                            <span className="text-[9px] text-slate-400 font-medium">
                               {inq.viewsCount || (inq.responsesCount * 6 + 12)} xem
                             </span>
                           </div>
                         </td>
 
                         {/* Cột 11: Thao Tác (Chỉ 1 nút Xem Chi Tiết) */}
-                        <td className="py-3 px-2.5 text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                        <td className="py-2.5 px-2 text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                           <button
                             id={`toggle-inquiry-btn-${inq.code}`}
                             type="button"
                             onClick={(e) => toggleExpandInquiry(inq.id, e)}
-                            className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all inline-flex items-center justify-center gap-1 cursor-pointer shadow-2xs ${
+                            className={`px-2.5 py-1 text-xs font-bold rounded-xl transition-all inline-flex items-center justify-center gap-1 cursor-pointer shadow-2xs ${
                               isExpanded
                                 ? 'bg-indigo-600 text-white shadow-xs'
                                 : 'bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 hover:border-indigo-300'
