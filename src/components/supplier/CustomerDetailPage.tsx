@@ -373,6 +373,173 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({
     return true;
   };
 
+  // Helper Badge Style cho Nhóm Dịch Vụ
+  const getServiceBadgeStyle = (service: string) => {
+    switch (service) {
+      case 'Trucking':
+        return 'bg-blue-50 text-blue-700 border-blue-200/80';
+      case 'Sea Freight (FCL)':
+        return 'bg-cyan-50 text-cyan-700 border-cyan-200/80';
+      case 'Sea Freight (LCL)':
+        return 'bg-teal-50 text-teal-700 border-teal-200/80';
+      case 'Air Freight':
+        return 'bg-sky-50 text-sky-700 border-sky-200/80';
+      case 'Rail Freight':
+        return 'bg-amber-50 text-amber-700 border-amber-200/80';
+      case 'Cold Chain':
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200/80';
+      case 'Warehousing':
+        return 'bg-purple-50 text-purple-700 border-purple-200/80';
+      case 'Customs Clearance':
+        return 'bg-rose-50 text-rose-700 border-rose-200/80';
+      case 'Cross-border':
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200/80';
+      case 'Project Cargo':
+        return 'bg-indigo-50 text-indigo-700 border-indigo-200/80';
+      default:
+        return 'bg-slate-100 text-slate-700 border-slate-200';
+    }
+  };
+
+  // Helper Badge Style cho Phân loại hàng hóa
+  const getCargoBadgeStyle = (classification?: string) => {
+    switch (classification) {
+      case 'Reefer':
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+      case 'Hazmat':
+        return 'bg-rose-50 text-rose-700 border-rose-200';
+      default:
+        return 'bg-slate-50 text-slate-600 border-slate-200';
+    }
+  };
+
+  const getCargoLabel = (classification?: string) => {
+    switch (classification) {
+      case 'Reefer':
+        return 'Hàng lạnh';
+      case 'Hazmat':
+        return 'Hàng nguy hiểm';
+      default:
+        return 'Hàng thường';
+    }
+  };
+
+  // Helper xác định Hình Thức / Mô Hình dịch vụ theo chuẩn rút gọn
+  const getOperationModeDisplay = (lead: SupplierLeadItem) => {
+    const sType = lead.serviceType;
+    const specs = lead.serviceSpecs || lead.inquiry?.serviceSpecs;
+    const textContext = `${lead.inquiry?.title || ''} ${lead.volumeDisplay || ''} ${lead.cargoDetails || ''} ${lead.contractTerm || ''}`.toLowerCase();
+
+    // 1. Đường bộ (Trucking & Cold Chain)
+    if (sType === 'Trucking' || sType === 'Cold Chain') {
+      const loadType = specs?.trucking?.loadType;
+      if (loadType?.includes('LTL') || textContext.includes('ltl') || textContext.includes('hàng ghép') || textContext.includes('ghép hàng')) {
+        return 'LTL';
+      }
+      return 'FTL';
+    }
+
+    // 2. Đường biển (Sea Freight FCL & LCL)
+    if (sType === 'Sea Freight (FCL)' || sType === 'Sea Freight (LCL)') {
+      if (sType === 'Sea Freight (LCL)' || specs?.ocean?.mode?.includes('LCL') || textContext.includes('lcl') || textContext.includes('gom lẻ')) {
+        return 'LCL';
+      }
+      return 'FCL';
+    }
+
+    // 3. Hàng không (Air Freight)
+    if (sType === 'Air Freight') {
+      const isExpress = specs?.air?.airServiceType === 'Express / Courier' || 
+                        specs?.air?.serviceLevel?.toLowerCase().includes('priority') ||
+                        textContext.includes('express') || 
+                        textContext.includes('hỏa tốc') || 
+                        textContext.includes('chuyển phát');
+      return isExpress ? 'Express' : 'Air Freight';
+    }
+
+    // 4. Đường sắt (Rail Freight)
+    if (sType === 'Rail Freight') {
+      const isLcl = specs?.rail?.mode?.includes('LCL') || textContext.includes('lcl') || textContext.includes('hàng lẻ') || textContext.includes('ghép');
+      return isLcl ? 'LCL' : 'FCL';
+    }
+
+    // 5. Kho bãi (Warehousing)
+    if (sType === 'Warehousing') {
+      const whType = (specs?.warehousing?.warehouseType || textContext).toLowerCase();
+      if (whType.includes('ngoại quan') || whType.includes('bonded')) return 'Kho ngoại quan';
+      if (whType.includes('lạnh') || whType.includes('mát') || whType.includes('cold')) return 'Kho lạnh';
+      if (whType.includes('nguy hiểm') || whType.includes('dg') || whType.includes('hóa chất')) return 'Kho hàng nguy hiểm';
+      if (whType.includes('fulfillment') || whType.includes('tmđt') || whType.includes('thương mại điện tử')) return 'Kho Fulfillment';
+      if (whType.includes('tự quản') || whType.includes('self-storage')) return 'Kho tự quản';
+      return 'Kho thường';
+    }
+
+    // 6. Thủ tục hải quan (Customs Clearance)
+    if (sType === 'Customs Clearance') {
+      const tradeRole = (specs?.customs?.tradeRole || lead.inquiry?.tradeRole || textContext).toLowerCase();
+      const decType = (specs?.customs?.declarationType || '').toLowerCase();
+      if (tradeRole.includes('xuất') || tradeRole.includes('export') || decType.includes('xuất') || decType.includes('b11')) {
+        return 'Xuất khẩu';
+      }
+      return 'Nhập khẩu';
+    }
+
+    // 7. Xuyên biên giới (Cross-border)
+    if (sType === 'Cross-border') {
+      if (textContext.includes('ltl') || textContext.includes('hàng ghép') || textContext.includes('ghép')) {
+        return 'LTL';
+      }
+      return 'FTL';
+    }
+
+    // 8. Logistics Dự án (Project Cargo)
+    if (sType === 'Project Cargo') {
+      const cat = specs?.project?.projectCategory;
+      if (cat === 'DISTRIBUTION' || textContext.includes('phân phối')) return 'Phân phối';
+      if (cat === 'CROSS_DOCK' || textContext.includes('cross-dock') || textContext.includes('chia chọn')) return 'Cross-dock';
+      if (cat === 'PORT_ICD' || textContext.includes('cảng') || textContext.includes('icd') || textContext.includes('con thoi')) return 'Cảng';
+      if (cat === 'MULTIMODAL' || textContext.includes('đa phương thức')) return 'Đa phương thức';
+      return 'Phân phối';
+    }
+
+    return 'FTL';
+  };
+
+  // Helper Badge Style cho Trạng thái Lead
+  const getStatusBadgeStyle = (status: LeadStatus) => {
+    switch (status) {
+      case 'Open':
+        return 'bg-blue-50 text-blue-700 border-blue-200';
+      case 'Quoted':
+        return 'bg-purple-50 text-purple-700 border-purple-200';
+      case 'Won':
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+      case 'Lost':
+        return 'bg-rose-50 text-rose-700 border-rose-200';
+      case 'Closed':
+        return 'bg-slate-100 text-slate-600 border-slate-200';
+      default:
+        return 'bg-slate-100 text-slate-700 border-slate-200';
+    }
+  };
+
+  const getStatusDisplay = (status: LeadStatus) => {
+    switch (status) {
+      case 'Open':
+        return 'Open';
+      case 'Quoted':
+        return 'Quoted';
+      case 'Won':
+        return 'Won';
+      case 'Lost':
+        return 'Lost';
+      case 'Closed':
+        return 'Closed';
+      default:
+        return status;
+    }
+  };
+
   const getServiceIcon = (type: string) => {
     switch (type) {
       case 'Trucking':
@@ -1145,32 +1312,34 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-slate-50 border-b border-slate-200 text-[11px] font-extrabold text-slate-600 uppercase tracking-wider">
-                    <th className="py-3.5 px-3 text-center w-10">Lưu</th>
-                    <th className="py-3.5 px-4">Mã Inquiry & Ngày</th>
-                    <th className="py-3.5 px-4">Tuyến Đường & Dịch Vụ</th>
-                    <th className="py-3.5 px-4">Hàng Hóa & Khối Lượng</th>
-                    <th className="py-3.5 px-4 text-right">Đơn Giá Dự Kiến</th>
-                    <th className="py-3.5 px-4 text-right">Giá Trị Dự Kiến</th>
-                    <th className="py-3.5 px-4 text-center">Hạn Nộp</th>
-                    <th className="py-3.5 px-4 text-center">Báo Giá Tham Gia</th>
-                    <th className="py-3.5 px-4 text-center">Trạng Thái & Khóa</th>
-                    <th className="py-3.5 px-4 text-right">Thao Tác</th>
+                  <tr className="bg-slate-100/90 border-b border-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                    <th className="py-2.5 px-2 text-center w-10">STT</th>
+                    <th className="py-2.5 px-3 whitespace-nowrap">Ngày Đăng / Hạn</th>
+                    <th className="py-2.5 px-3 whitespace-nowrap">Mã ID</th>
+                    <th className="py-2.5 px-3 whitespace-nowrap">Nhóm Dịch Vụ</th>
+                    <th className="py-2.5 px-2 whitespace-nowrap">Nhóm Hàng</th>
+                    <th className="py-2.5 px-2 whitespace-nowrap">Mô Hình</th>
+                    <th className="py-2.5 px-2 whitespace-nowrap">Loại Hợp Đồng</th>
+                    <th className="py-2.5 px-3 text-right whitespace-nowrap">Tổng Giá Trị</th>
+                    <th className="py-2.5 px-2 text-center whitespace-nowrap">Trạng Thái</th>
+                    <th className="py-2.5 px-2 text-center whitespace-nowrap">Báo Giá / Xem</th>
+                    <th className="py-2.5 px-3 text-center whitespace-nowrap">Thao Tác</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-xs">
                   {filteredCustomerLeads.length === 0 ? (
                     <tr>
-                      <td colSpan={10} className="py-12 text-center text-slate-400">
+                      <td colSpan={11} className="py-12 text-center text-slate-400">
                         <Coins className="w-8 h-8 text-slate-300 mx-auto mb-2" />
                         <p className="font-bold text-slate-600 text-sm">Không tìm thấy inquiry nào khớp với bộ lọc</p>
                         <p className="text-xs text-slate-400 mt-1">Thử đổi từ khóa tìm kiếm hoặc bấm "Báo Giá Mới" để chào giá trực tiếp.</p>
                       </td>
                     </tr>
                   ) : (
-                    filteredCustomerLeads.map((lead) => {
-                      const isQuoted = lead.status === 'Quoted' || lead.status === 'Won';
+                    filteredCustomerLeads.map((lead, idx) => {
                       const isExpanded = expandedLeadIds.has(lead.id);
+                      const isContract = lead.pricingType === 'CONTRACT';
+                      const operationMode = getOperationModeDisplay(lead);
                       const isLeadViewed = Boolean(
                         viewedInquiryCodes && (
                           viewedInquiryCodes.includes(lead.code) ||
@@ -1182,179 +1351,144 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({
                       return (
                         <React.Fragment key={lead.id}>
                           <tr 
-                            className={`transition-colors group cursor-pointer ${
-                              isExpanded ? 'bg-indigo-50/50' : 'hover:bg-indigo-50/30'
+                            className={`transition-colors group cursor-pointer select-none ${
+                              isExpanded 
+                                ? 'bg-indigo-50/60 font-medium' 
+                                : idx % 2 === 0
+                                ? 'bg-white hover:bg-slate-50/90'
+                                : 'bg-slate-50/40 hover:bg-slate-100/70'
                             }`}
                             onClick={() => toggleExpandLead(lead.id)}
                           >
-                            {/* 0. Bookmark Toggle */}
-                            <td className="py-4 px-3 text-center align-top" onClick={(e) => e.stopPropagation()}>
-                              <button
-                                type="button"
-                                onClick={() => onToggleSaveLead && onToggleSaveLead(lead.id)}
-                                className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
-                                  lead.isSaved
-                                    ? 'bg-amber-50 border-amber-300 text-amber-600 hover:bg-amber-100 shadow-2xs'
-                                    : 'border-slate-200 hover:bg-slate-100 text-slate-400 hover:text-slate-700'
-                                }`}
-                                title={lead.isSaved ? 'Đang lưu trong My Leads (Click để bỏ lưu)' : 'Lưu Inquiry vào My Leads'}
-                              >
-                                {lead.isSaved ? (
-                                  <BookmarkCheck className="w-3.5 h-3.5 fill-amber-500 text-amber-700" />
-                                ) : (
-                                  <Bookmark className="w-3.5 h-3.5" />
-                                )}
-                              </button>
+                            {/* Cột 1: STT */}
+                            <td className="py-3 px-2 text-center text-slate-400 font-mono text-xs">
+                              {idx + 1}
                             </td>
 
-                            {/* 1. Mã Inquiry & Ngày */}
-                            <td className="py-4 px-4 align-top">
-                              <div className="space-y-1">
-                                <div className="flex items-center gap-1.5 flex-wrap">
-                                  <span className="font-mono font-extrabold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded text-xs">
-                                    {lead.code}
-                                  </span>
-                                  {!isLeadViewed && (
-                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-black bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs">
-                                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                                      <span>Chưa xem</span>
-                                    </span>
-                                  )}
-                                  {(lead.createdDate?.includes('Hôm nay') || lead.createdDate?.includes('Vừa xong')) && isLeadViewed && (
-                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
-                                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-                                      <span>Mới đăng</span>
-                                    </span>
-                                  )}
-                                </div>
-                                {lead.inquiryCode && lead.inquiryCode !== lead.code && (
-                                  <p className="font-mono text-[10px] text-slate-400">{lead.inquiryCode}</p>
-                                )}
-                                <p className="text-[11px] text-slate-400">{lead.createdDate}</p>
-                                <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600">
-                                  {lead.pricingType === 'CONTRACT' ? 'Hợp đồng' : 'Theo lô'}
-                                </span>
-                              </div>
-                            </td>
-
-                            {/* 2. Tuyến Đường & Dịch Vụ */}
-                            <td className="py-4 px-4 align-top max-w-xs">
-                              <div className="space-y-1">
-                                <div className="flex items-center gap-1.5">
-                                  {getServiceIcon(lead.serviceType)}
-                                  <span className="font-bold text-slate-900">{lead.route}</span>
-                                </div>
-                                <div className="flex items-center gap-1 text-[11px] text-slate-500">
-                                  <span>{lead.origin}</span>
-                                  <span className="text-slate-400">→</span>
-                                  <span>{lead.destination}</span>
-                                </div>
-                                <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-700">
-                                  {lead.serviceType}
-                                </span>
-                              </div>
-                            </td>
-
-                            {/* 3. Hàng Hóa & Khối Lượng */}
-                            <td className="py-4 px-4 align-top max-w-xs">
-                              <div className="space-y-1">
-                                <p className="font-semibold text-slate-800 line-clamp-2">{lead.cargoDetails}</p>
-                                <p className="font-bold text-indigo-700 text-[11px]">{lead.volumeDisplay}</p>
-                              </div>
-                            </td>
-
-                            {/* 4. Đơn Giá Dự Kiến */}
-                            <td className="py-4 px-4 align-top text-right font-mono font-bold text-slate-800">
-                              {lead.unitPriceDisplay || 'Thương lượng'}
-                            </td>
-
-                            {/* 5. Giá Trị Dự Kiến */}
-                            <td className="py-4 px-4 align-top text-right">
+                            {/* Cột 2: Ngày Đăng & Hạn Nộp */}
+                            <td className="py-3 px-3 whitespace-nowrap">
                               <div className="space-y-0.5">
-                                <span className="font-mono font-black text-emerald-700 text-sm">
-                                  {lead.estimatedValueDisplay}
+                                <span className="text-slate-700 font-semibold block text-xs">
+                                  {lead.createdDate || 'Aug 31, 2026'}
                                 </span>
-                                <p className="text-[10px] text-slate-400">Ngân sách dự toán</p>
-                              </div>
-                            </td>
-
-                            {/* 6. Hạn Nộp */}
-                            <td className="py-4 px-4 align-top text-center">
-                              <div className="space-y-1">
-                                <span className="font-semibold text-slate-700 text-[11px]">{lead.dueDate || 'Còn 3 ngày'}</span>
-                                <span className="block text-[10px] text-rose-600 font-bold bg-rose-50 px-1.5 py-0.5 rounded border border-rose-100">
-                                  Sắp hết hạn
+                                <span className="inline-block px-1.5 py-0.2 rounded text-[9px] font-bold bg-rose-50 text-rose-600 border border-rose-200">
+                                  Hạn: {lead.dueDate || '7 ngày'}
                                 </span>
                               </div>
                             </td>
 
-                            {/* 7. Báo Giá Tham Gia */}
-                            <td className="py-4 px-4 align-top text-center">
-                              <div className="inline-flex flex-col items-center">
-                                <span className="px-2.5 py-1 rounded-full text-xs font-black bg-purple-50 text-purple-800 border border-purple-200">
-                                  {lead.quotesCount} báo giá
+                            {/* Cột 3: Mã ID */}
+                            <td className="py-3 px-3 whitespace-nowrap">
+                              <div className="flex items-center gap-1.5">
+                                <span className="font-mono font-bold text-indigo-700 text-xs">
+                                  {lead.code}
                                 </span>
-                                <span className="text-[10px] text-slate-400 mt-0.5">
-                                  {lead.viewsCount || 45} lượt xem
-                                </span>
-                              </div>
-                            </td>
-
-                            {/* 8. Trạng Thái & Khóa */}
-                            <td className="py-4 px-4 align-top text-center">
-                              <div className="space-y-1.5">
-                                <span className={`inline-block px-2.5 py-1 rounded-full text-[11px] font-extrabold ${
-                                  lead.status === 'Open'
-                                    ? 'bg-blue-100 text-blue-800'
-                                    : lead.status === 'Quoted'
-                                    ? 'bg-emerald-100 text-emerald-800'
-                                    : lead.status === 'Won'
-                                    ? 'bg-purple-100 text-purple-800'
-                                    : 'bg-slate-100 text-slate-600'
-                                }`}>
-                                  {lead.status === 'Open' ? 'Đang mở' : lead.status === 'Quoted' ? 'Đã báo giá' : lead.status === 'Won' ? 'Trúng thầu' : lead.status}
-                                </span>
-
-                                <div>
-                                  {lead.isUnlocked ? (
-                                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                                      <Unlock className="w-3 h-3 text-emerald-600" /> Đã mở khóa giá
-                                    </span>
-                                  ) : (
-                                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
-                                      <Lock className="w-3 h-3 text-slate-400" /> Chưa mở giá
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            </td>
-
-                            {/* 9. Thao Tác */}
-                            <td className="py-4 px-4 align-top text-right" onClick={(e) => e.stopPropagation()}>
-                              <button
-                                type="button"
-                                onClick={() => toggleExpandLead(lead.id)}
-                                className={`px-3 py-2 rounded-xl text-xs font-bold transition-all shadow-2xs inline-flex items-center gap-1.5 cursor-pointer ${
-                                  isExpanded
-                                    ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                                    : 'bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-600 hover:text-white hover:border-indigo-600'
-                                }`}
-                              >
-                                <Eye className="w-3.5 h-3.5" />
-                                <span>{isExpanded ? 'Thu gọn' : 'Xem chi tiết'}</span>
-                                {isExpanded ? (
-                                  <ChevronUp className="w-3.5 h-3.5" />
-                                ) : (
-                                  <ChevronDown className="w-3.5 h-3.5" />
+                                {lead.isSaved && (
+                                  <BookmarkCheck className="w-3 h-3 text-amber-500 fill-amber-500 shrink-0" title="Đã lưu" />
                                 )}
-                              </button>
+                              </div>
+                            </td>
+
+                            {/* Cột 4: Nhóm Dịch Vụ */}
+                            <td className="py-3 px-3 whitespace-nowrap">
+                              <span className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-bold border ${getServiceBadgeStyle(lead.serviceType)}`}>
+                                {lead.serviceType}
+                              </span>
+                            </td>
+
+                            {/* Cột 5: Nhóm Hàng */}
+                            <td className="py-3 px-2 whitespace-nowrap">
+                              <span className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-bold border ${getCargoBadgeStyle(lead.cargoClassification)}`}>
+                                {getCargoLabel(lead.cargoClassification)}
+                              </span>
+                            </td>
+
+                            {/* Cột 6: Mô Hình */}
+                            <td className="py-3 px-2 whitespace-nowrap">
+                              <span className="text-slate-800 font-semibold text-xs">
+                                {operationMode}
+                              </span>
+                            </td>
+
+                            {/* Cột 7: Loại Hợp Đồng */}
+                            <td className="py-3 px-2 whitespace-nowrap">
+                              {isContract ? (
+                                <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                                  Hợp đồng
+                                </span>
+                              ) : (
+                                <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold bg-cyan-50 text-cyan-700 border border-cyan-200">
+                                  Theo lô
+                                </span>
+                              )}
+                            </td>
+
+                            {/* Cột 8: Tổng Giá Trị */}
+                            <td className="py-3 px-3 text-right whitespace-nowrap">
+                              <div className="space-y-0.5">
+                                <span className="text-xs sm:text-[12.5px] font-black text-emerald-700 block tracking-tight">
+                                  {(lead.estimatedValueVND || (lead.estimatedValueDisplay ? parseInt(lead.estimatedValueDisplay.replace(/\D/g, ''), 10) : 0) || 0).toLocaleString('vi-VN')}
+                                </span>
+                                <span className="text-[9.5px] font-semibold text-slate-500 block">
+                                  {isContract ? 'VNĐ / tháng' : 'VNĐ / lô'}
+                                </span>
+                              </div>
+                            </td>
+
+                            {/* Cột 9: Trạng Thái */}
+                            <td className="py-3 px-2 text-center whitespace-nowrap">
+                              <span className={`inline-block px-2.5 py-0.5 rounded-md text-[10px] font-bold border ${getStatusBadgeStyle(lead.status)}`}>
+                                {getStatusDisplay(lead.status)}
+                              </span>
+                            </td>
+
+                            {/* Cột 10: Thống Kê Báo Giá & Lượt Xem */}
+                            <td className="py-3 px-2 text-center whitespace-nowrap">
+                              <div className="flex flex-col items-center gap-0.5">
+                                <span className="px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/80">
+                                  {lead.quotesCount || 0} báo giá
+                                </span>
+                                <span className="text-[9px] text-slate-400 font-medium">
+                                  {lead.viewsCount || 45} xem
+                                </span>
+                              </div>
+                            </td>
+
+                            {/* Cột 11: Thao Tác - Nút Xem chi tiết + Subtext Chưa xem nếu chưa mở xem */}
+                            <td className="py-3 px-3 text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                              <div className="flex flex-col items-center">
+                                <button
+                                  type="button"
+                                  onClick={() => toggleExpandLead(lead.id)}
+                                  className={`px-2.5 py-1 text-xs font-bold rounded-xl transition-all inline-flex items-center justify-center gap-1 cursor-pointer shadow-2xs ${
+                                    isExpanded
+                                      ? 'bg-indigo-600 text-white shadow-xs'
+                                      : 'bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 hover:border-indigo-300'
+                                  }`}
+                                  title={isExpanded ? 'Thu gọn chi tiết lead' : 'Mở xem chi tiết hồ sơ & thao tác'}
+                                >
+                                  <span>{isExpanded ? 'Đóng' : 'Xem chi tiết'}</span>
+                                  {isExpanded ? (
+                                    <ChevronUp className="w-3.5 h-3.5" />
+                                  ) : (
+                                    <ChevronDown className="w-3.5 h-3.5" />
+                                  )}
+                                </button>
+
+                                {/* Subtext Chưa xem: chỉ hiển thị khi chưa mở xem */}
+                                {!isLeadViewed && (
+                                  <span className="text-[10px] font-bold text-amber-600 block mt-0.5 animate-pulse">
+                                    Chưa xem
+                                  </span>
+                                )}
+                              </div>
                             </td>
                           </tr>
 
                           {/* EXPANDED TECHNICAL SPECS & DETAIL CARD (GIỐNG LEAD BOARD) */}
                           {isExpanded && (
                             <tr className="bg-indigo-50/40 border-b border-indigo-100 animate-in fade-in duration-150">
-                              <td colSpan={10} className="p-3 sm:p-5">
+                              <td colSpan={11} className="p-3 sm:p-5">
                                 <div className="space-y-3">
                                   {/* Quick Action Top Bar inside expanded card */}
                                   <div className="flex flex-wrap items-center justify-between bg-white px-4 py-3 rounded-2xl border border-indigo-100 shadow-2xs gap-3">
