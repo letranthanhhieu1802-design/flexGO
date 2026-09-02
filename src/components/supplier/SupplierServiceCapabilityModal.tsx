@@ -87,7 +87,7 @@ export interface ServiceCategoryTree {
   }[];
 }
 
-// 8 Service Categories with Rich Preset Data
+// 8 Service Categories with 100% Comprehensive Standardized VAS LOV Options
 export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
   {
     id: 'trucking',
@@ -178,16 +178,23 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
               { id: 'p-4', name: 'Cẩu tự hành bốc dỡ', priceText: '1,500,000 ₫ / Ca', isChecked: false },
             ],
             vasOptions: [
+              'Tìm xe quay đầu / Ghép chiều về (Backhaul)',
               'Bốc xếp nhân công 2 đầu kho',
+              'Định vị GPS Real-time & Share Link hành trình',
+              'Giấy phép vào phố giờ cấm tải (HN/HCM)',
+              'Hạ bửng nâng thủy lực thùng xe',
+              'Niêm phong kẹp chì Seal an ninh & Ảnh đối soát',
+              'Thu hồi chứng từ gốc POD hỏa tốc 24-48h',
               'Chèn lót túi khí & Chằng buộc lashing',
-              'Đóng gói màng co PE / Pallet',
-              'Dịch vụ thu hộ tiền hàng COD',
+              'Dịch vụ cẩu tự hành / Xe cẩu hạ bãi',
               'Bảo hiểm trách nhiệm hàng hóa 100%',
+              'Đóng gói màng co PE / Pallet',
               'Đóng thùng gỗ / Khung sắt bảo vệ',
             ],
             defaultVas: [
               'Bốc xếp nhân công 2 đầu kho',
-              'Chèn lót túi khí & Chằng buộc lashing',
+              'Định vị GPS Real-time & Share Link hành trình',
+              'Thu hồi chứng từ gốc POD hỏa tốc 24-48h',
               'Bảo hiểm trách nhiệm hàng hóa 100%',
             ],
           },
@@ -221,8 +228,19 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
               { id: 'pltl-1', name: 'Bốc vác lên lầu / Vào hẻm sâu', priceText: '150,000 ₫ / Kiện', isChecked: true },
               { id: 'pltl-2', name: 'Thu hộ COD & Đối soát 24h', priceText: '1% giá trị thu hộ', isChecked: true },
             ],
-            vasOptions: ['Giao tận nơi Door-to-Door', 'Đóng gói màng PE / Khung gỗ', 'Thu hộ COD', 'Dán tem nhãn phụ'],
-            defaultVas: ['Giao tận nơi Door-to-Door', 'Đóng gói màng PE / Khung gỗ'],
+            vasOptions: [
+              'Giao nhận tận nơi Door-to-Door',
+              'Đóng gói màng co PE / Đóng khung gỗ kiện lẻ',
+              'Dịch vụ thu hộ tiền hàng COD & Đối soát 24h',
+              'Bốc vác lên tầng / Vào hẻm sâu',
+              'Dán tem nhãn mã vạch kiện lẻ',
+              'Bảo hiểm hàng hóa vận chuyển',
+            ],
+            defaultVas: [
+              'Giao nhận tận nơi Door-to-Door',
+              'Đóng gói màng co PE / Đóng khung gỗ kiện lẻ',
+              'Dịch vụ thu hộ tiền hàng COD & Đối soát 24h',
+            ],
           },
         ],
       },
@@ -273,8 +291,19 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
               { id: 'pref-1', name: 'Genset cắm điện dự phòng liên tục', priceText: '400,000 ₫ / Ca', isChecked: true },
               { id: 'pref-2', name: 'Giao hàng đa điểm chuỗi siêu thị', priceText: '300,000 ₫ / Điểm', isChecked: true },
             ],
-            vasOptions: ['Pre-cooling buồng lạnh', 'Bốc dỡ kho lạnh 2 đầu', 'Giao đa điểm siêu thị', 'Bảo hiểm đứt gãy chuỗi lạnh'],
-            defaultVas: ['Pre-cooling buồng lạnh', 'Bốc dỡ kho lạnh 2 đầu', 'Bảo hiểm đứt gãy chuỗi lạnh'],
+            vasOptions: [
+              'Pre-cooling làm lạnh thùng xe trước 60 phút',
+              'Cảm biến nhiệt độ IoT & Xuất biểu đồ nhiệt PDF',
+              'Máy phát điện Genset dự phòng cắm điện liên tục',
+              'Giao hàng đa điểm hẹn giờ Time-slot siêu thị',
+              'Bảo hiểm rủi ro sốc nhiệt / Hư hỏng thực phẩm',
+              'Bốc dỡ kho lạnh 2 đầu gửi/nhận',
+            ],
+            defaultVas: [
+              'Pre-cooling làm lạnh thùng xe trước 60 phút',
+              'Cảm biến nhiệt độ IoT & Xuất biểu đồ nhiệt PDF',
+              'Bảo hiểm rủi ro sốc nhiệt / Hư hỏng thực phẩm',
+            ],
           },
         ],
       },
@@ -312,8 +341,19 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
               { id: 'phaz-1', name: 'Phí xin giấy phép lưu hành hóa chất', priceText: '1,200,000 ₫ / Chuyến', isChecked: true },
               { id: 'phaz-2', name: 'Hộ tống an toàn qua hầm/đèo', priceText: '800,000 ₫ / Chuyến', isChecked: false },
             ],
-            vasOptions: ['Khai báo hóa chất bộ Công Thương', 'Hộ tống an toàn', 'Bảo hiểm rủi ro ô nhiễm môi trường'],
-            defaultVas: ['Khai báo hóa chất bộ Công Thương', 'Bảo hiểm rủi ro ô nhiễm môi trường'],
+            vasOptions: [
+              'Tài xế có chứng chỉ nghiệp vụ hàng nguy hiểm & PCCC',
+              'Bộ ứng cứu sự cố hóa chất Spill-Kit & PPE',
+              'Xin giấy phép lưu hành hàng nguy hiểm liên tỉnh',
+              'Hộ tống an toàn qua hầm / đèo',
+              'Bảo hiểm bồi thường ô nhiễm môi trường',
+              'Khai báo hóa chất Bộ Công Thương',
+            ],
+            defaultVas: [
+              'Tài xế có chứng chỉ nghiệp vụ hàng nguy hiểm & PCCC',
+              'Bộ ứng cứu sự cố hóa chất Spill-Kit & PPE',
+              'Bảo hiểm bồi thường ô nhiễm môi trường',
+            ],
           },
         ],
       },
@@ -372,8 +412,20 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
               { id: 'psea-1', name: 'Khai báo an ninh AMS/ISF (Mỹ) / AFR (Nhật)', priceText: '$35 / BL', isChecked: true },
               { id: 'psea-2', name: 'Phí chỉnh sửa vận đơn sau cut-off', priceText: '$40 / Lần', isChecked: false },
             ],
-            vasOptions: ['Bảo hiểm hàng hải loại A', 'Lashing chằng buộc an toàn trong cont', 'Hun trùng ISPM 15', 'Khai báo hải quan cảng'],
-            defaultVas: ['Bảo hiểm hàng hải loại A', 'Lashing chằng buộc an toàn trong cont'],
+            vasOptions: [
+              'Chính sách gia hạn Free Demurrage/Detention 14-21 ngày',
+              'Phát hành vận đơn điện tử e-BL / Telex Release',
+              'Khai báo an ninh trước giờ tàu (AMS/ISF/AFR)',
+              'Lashing chằng buộc hàng chuyên dụng trong cont',
+              'Bảo hiểm hàng hải quốc tế All-Risks (Loại A)',
+              'Hun trùng kiểm dịch gỗ ISPM 15 & Cấp chứng thư',
+              'Thủ tục hải quan trọn gói tại bến cảng',
+            ],
+            defaultVas: [
+              'Chính sách gia hạn Free Demurrage/Detention 14-21 ngày',
+              'Lashing chằng buộc hàng chuyên dụng trong cont',
+              'Bảo hiểm hàng hải quốc tế All-Risks (Loại A)',
+            ],
           },
           {
             id: 'sea-gen-lcl',
@@ -404,8 +456,19 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             paidSurchargeOptions: [
               { id: 'plcl-1', name: 'Phí lưu kho CFS quá 5 ngày', priceText: '$5 / CBM / Ngày', isChecked: true },
             ],
-            vasOptions: ['Đóng kiện gỗ bảo vệ', 'Dán tem nhãn vận chuyển', 'Giao tận nơi Door-to-Door nước ngoài'],
-            defaultVas: ['Đóng kiện gỗ bảo vệ', 'Dán tem nhãn vận chuyển'],
+            vasOptions: [
+              'Đóng màng co PE / Đóng kiện gỗ bảo vệ',
+              'Dán tem nhãn vận chuyển mã vạch',
+              'Dịch vụ gom hàng CFS & Phân loại mã hàng lẻ',
+              'Giao tận nơi Door-to-Door nước ngoài',
+              'Bảo hiểm hàng hải quốc tế',
+              'Thủ tục hải quan hàng lẻ CFS',
+            ],
+            defaultVas: [
+              'Đóng màng co PE / Đóng kiện gỗ bảo vệ',
+              'Dán tem nhãn vận chuyển mã vạch',
+              'Bảo hiểm hàng hải quốc tế',
+            ],
           },
         ],
       },
@@ -442,8 +505,19 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             paidSurchargeOptions: [
               { id: 'pref-plug', name: 'Phí cắm điện lưu bãi cảng vượt định mức', priceText: '$65 / Ngày', isChecked: true },
             ],
-            vasOptions: ['Kiểm dịch thực vật xuất khẩu', 'Làm lạnh trước thùng cont', 'Bảo hiểm đứt gãy nhiệt độ'],
-            defaultVas: ['Kiểm dịch thực vật xuất khẩu', 'Bảo hiểm đứt gãy nhiệt độ'],
+            vasOptions: [
+              'PTI Test kiểm tra giàn lạnh cont trước cấp vỏ',
+              'Data Logger giám sát nhiệt độ và độ ẩm liên tục',
+              'Cắm điện bãi cảng Reefer Plug 24/7',
+              'Kiểm dịch thực vật / Động vật xuất khẩu tại cảng',
+              'Bảo hiểm đứt gãy chuỗi lạnh hàng hải',
+              'Làm lạnh buồng cont trước khi đóng hàng',
+            ],
+            defaultVas: [
+              'PTI Test kiểm tra giàn lạnh cont trước cấp vỏ',
+              'Data Logger giám sát nhiệt độ và độ ẩm liên tục',
+              'Bảo hiểm đứt gãy chuỗi lạnh hàng hải',
+            ],
           },
         ],
       },
@@ -480,8 +554,18 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             paidSurchargeOptions: [
               { id: 'phaz-dg', name: 'Phí DG Surcharge của hãng tàu', priceText: '$150 / Cont', isChecked: true },
             ],
-            vasOptions: ['Chằng buộc lashing chống dịch chuyển hóa chất', 'Khai báo hải quan hàng nguy hiểm'],
-            defaultVas: ['Chằng buộc lashing chống dịch chuyển hóa chất'],
+            vasOptions: [
+              'Duyệt bảng dữ liệu an toàn MSDS với DG Hãng tàu',
+              'Dán tem nhãn cảnh báo IMO chuẩn 4 mặt cont',
+              'Chằng buộc lashing chống dịch chuyển hóa chất',
+              'Khai báo an toàn hàng hải nguy hiểm IMO',
+              'Bảo hiểm rủi ro hóa chất hàng hải',
+            ],
+            defaultVas: [
+              'Duyệt bảng dữ liệu an toàn MSDS với DG Hãng tàu',
+              'Chằng buộc lashing chống dịch chuyển hóa chất',
+              'Bảo hiểm rủi ro hóa chất hàng hải',
+            ],
           },
         ],
       },
@@ -526,8 +610,19 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             paidSurchargeOptions: [
               { id: 'pair-1', name: 'Phí soi chiếu an ninh & Phí THC sân bay', priceText: '1,200 ₫ / Kg', isChecked: true },
             ],
-            vasOptions: ['Đóng gói chuẩn IATA', 'Door-to-Airport cấp tốc', 'Bảo hiểm hàng không All-Risks'],
-            defaultVas: ['Đóng gói chuẩn IATA', 'Door-to-Airport cấp tốc'],
+            vasOptions: [
+              'Soi chiếu an ninh X-Ray ưu tiên tại kho TCS/SCSC',
+              'Cấp mã vận đơn hàng không điện tử e-AWB',
+              'Đóng thùng carton / Thùng gỗ chuẩn IATA',
+              'Giao nhận cấp tốc Door-to-Airport / Airport-to-Door',
+              'Thông quan khẩn cấp hàng mẫu / Phụ tùng AOG',
+              'Bảo hiểm hàng không All-Risks 100%',
+            ],
+            defaultVas: [
+              'Soi chiếu an ninh X-Ray ưu tiên tại kho TCS/SCSC',
+              'Đóng thùng carton / Thùng gỗ chuẩn IATA',
+              'Bảo hiểm hàng không All-Risks 100%',
+            ],
           },
           {
             id: 'air-gen-exp',
@@ -558,8 +653,17 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             paidSurchargeOptions: [
               { id: 'pexp-1', name: 'Phụ phí xăng dầu & Vùng sâu vùng xa', priceText: 'Theo biểu phí hãng', isChecked: true },
             ],
-            vasOptions: ['Thông quan khẩn cấp hàng mẫu', 'Hand-Carry bay cùng kiện hàng', 'Bảo hiểm 100%'],
-            defaultVas: ['Thông quan khẩn cấp hàng mẫu'],
+            vasOptions: [
+              'Lấy hàng tận nơi Door-to-Door hỏa tốc',
+              'Thông quan khẩn cấp hàng mẫu / Chứng từ',
+              'Dịch vụ áp tải VIP bay cùng kiện hàng (Hand-Carry)',
+              'Phát hàng hẹn giờ 24h - 48h toàn cầu',
+              'Bảo hiểm chuyển phát nhanh 100%',
+            ],
+            defaultVas: [
+              'Lấy hàng tận nơi Door-to-Door hỏa tốc',
+              'Thông quan khẩn cấp hàng mẫu / Chứng từ',
+            ],
           },
         ],
       },
@@ -596,8 +700,18 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             paidSurchargeOptions: [
               { id: 'pref-air', name: 'Phí bổ sung đá khô / Gel lạnh tại điểm transit', priceText: '$80 / Thùng', isChecked: true },
             ],
-            vasOptions: ['Đóng đá khô & màng giữ nhiệt', 'Thông quan ưu tiên line lạnh', 'Bảo hiểm dược phẩm GDP'],
-            defaultVas: ['Đóng đá khô & màng giữ nhiệt', 'Bảo hiểm dược phẩm GDP'],
+            vasOptions: [
+              'Bổ sung đá khô / Gel lạnh chuyên dụng tại transit',
+              'Thùng giữ nhiệt công nghệ cao Envirotainer / Va-Q-tec',
+              'Ưu tiên lưu kho lạnh sân bay GDP (+2°C ~ +8°C / -20°C)',
+              'Giám sát nhiệt độ thời gian thực qua App',
+              'Bảo hiểm dược phẩm GDP toàn trình',
+            ],
+            defaultVas: [
+              'Bổ sung đá khô / Gel lạnh chuyên dụng tại transit',
+              'Thùng giữ nhiệt công nghệ cao Envirotainer / Va-Q-tec',
+              'Bảo hiểm dược phẩm GDP toàn trình',
+            ],
           },
         ],
       },
@@ -634,8 +748,18 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             paidSurchargeOptions: [
               { id: 'pdg-air', name: 'Phí kiểm tra hàng nguy hiểm Dangerous Goods Fee', priceText: '$75 / AWB', isChecked: true },
             ],
-            vasOptions: ['Lập bảng khai báo DGR Shipper Declaration', 'Dán nhãn IATA chuẩn', 'Đóng gói bao bì UN'],
-            defaultVas: ['Lập bảng khai báo DGR Shipper Declaration', 'Đóng gói bao bì UN'],
+            vasOptions: [
+              'Lập tờ khai DGR Shipper Declaration for Dangerous Goods',
+              'Đóng gói bao bì chuẩn UN Certified Packaging',
+              'Dán nhãn phân lớp IATA Dangerous Goods',
+              'Kiểm tra an ninh bay chuyên biệt hàng nguy hiểm',
+              'Bảo hiểm hàng nguy hiểm hàng không',
+            ],
+            defaultVas: [
+              'Lập tờ khai DGR Shipper Declaration for Dangerous Goods',
+              'Đóng gói bao bì chuẩn UN Certified Packaging',
+              'Dán nhãn phân lớp IATA Dangerous Goods',
+            ],
           },
         ],
       },
@@ -680,8 +804,18 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             paidSurchargeOptions: [
               { id: 'prail-1', name: 'Phí lưu bãi ga quá 48h', priceText: '150,000 ₫ / Cont / Ngày', isChecked: true },
             ],
-            vasOptions: ['Kéo cont First/Last-mile tận kho', 'Bốc xếp tại ga', 'Chằng buộc lashing toa xe'],
-            defaultVas: ['Kéo cont First/Last-mile tận kho', 'Chằng buộc lashing toa xe'],
+            vasOptions: [
+              'Cẩu hạ container 2 đầu ga (Sóng Thần, Giáp Bát, Yên Viên)',
+              'Kẹp chì niêm phong an ninh đường sắt',
+              'Kéo container First-mile / Last-mile tận kho',
+              'Chằng buộc lashing toa xe an toàn',
+              'Bảo hiểm hàng hóa đường sắt 100%',
+            ],
+            defaultVas: [
+              'Cẩu hạ container 2 đầu ga (Sóng Thần, Giáp Bát, Yên Viên)',
+              'Kéo container First-mile / Last-mile tận kho',
+              'Bảo hiểm hàng hóa đường sắt 100%',
+            ],
           },
           {
             id: 'rail-gen-lcl',
@@ -712,8 +846,16 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             paidSurchargeOptions: [
               { id: 'prail-lcl', name: 'Giao nhận tận nơi Door-to-Door', priceText: 'Theo cự ly km', isChecked: true },
             ],
-            vasOptions: ['Vận chuyển tận nhà Door-to-Door', 'Bọc màng PE chống bụi'],
-            defaultVas: ['Vận chuyển tận nhà Door-to-Door'],
+            vasOptions: [
+              'Bốc xếp tại bãi kho ga',
+              'Vận chuyển tận nơi Door-to-Door',
+              'Đóng gói bọc màng PE chống bụi',
+              'Thu hộ tiền hàng COD tại ga đến',
+            ],
+            defaultVas: [
+              'Bốc xếp tại bãi kho ga',
+              'Vận chuyển tận nơi Door-to-Door',
+            ],
           },
         ],
       },
@@ -750,8 +892,16 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             paidSurchargeOptions: [
               { id: 'pr-ref', name: 'Phí cắm điện lưu bãi ga', priceText: '350,000 ₫ / Ngày', isChecked: true },
             ],
-            vasOptions: ['Thông quan liên vận quốc tế sang Trung Quốc', 'Bảo hiểm hàng lạnh'],
-            defaultVas: ['Thông quan liên vận quốc tế sang Trung Quốc'],
+            vasOptions: [
+              'Cấp điện máy phát Genset liên tục trên toa xe lạnh',
+              'Kiểm tra kỹ thuật nhiệt độ từng chặng ga',
+              'Thủ tục hải quan liên vận quốc tế sang TQ qua Ga Đồng Đăng',
+              'Bảo hiểm đứt gãy nhiệt độ đường sắt',
+            ],
+            defaultVas: [
+              'Cấp điện máy phát Genset liên tục trên toa xe lạnh',
+              'Thủ tục hải quan liên vận quốc tế sang TQ qua Ga Đồng Đăng',
+            ],
           },
         ],
       },
@@ -788,8 +938,16 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             paidSurchargeOptions: [
               { id: 'pr-haz', name: 'Phí áp tải an toàn đường sắt', priceText: '2,000,000 ₫ / Chuyến', isChecked: true },
             ],
-            vasOptions: ['Hồ sơ an toàn hóa chất đường sắt', 'Bảo hiểm sự cố môi trường'],
-            defaultVas: ['Hồ sơ an toàn hóa chất đường sắt'],
+            vasOptions: [
+              'Toa xe chuyên dụng cách ly an toàn',
+              'Áp tải kỹ thuật an toàn hóa chất đường ray',
+              'Hồ sơ an toàn hóa chất đường sắt',
+              'Bảo hiểm bồi thường sự cố môi trường',
+            ],
+            defaultVas: [
+              'Toa xe chuyên dụng cách ly an toàn',
+              'Áp tải kỹ thuật an toàn hóa chất đường ray',
+            ],
           },
         ],
       },
@@ -835,8 +993,18 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
               { id: 'pwh-1', name: 'Phí nâng hạ xe nâng bốc xếp', priceText: '35,000 ₫ / Pallet', isChecked: true },
               { id: 'pwh-2', name: 'Phí làm việc ngoài giờ hành chính', priceText: '200,000 ₫ / Giờ', isChecked: false },
             ],
-            vasOptions: ['Dán tem phụ tiếng Việt', 'Quấn màng co PE pallet', 'Đóng gói Kitting combo', 'Đóng kiện gỗ'],
-            defaultVas: ['Dán tem phụ tiếng Việt', 'Quấn màng co PE pallet'],
+            vasOptions: [
+              'Dán tem phụ tiếng Việt / Barcode SKU',
+              'Quấn màng co PE Pallet & Đóng đai bảo vệ',
+              'Đóng gói Kitting combo / Hộp quà',
+              'Kiểm đếm quét mã vạch Barcode/RFID',
+              'Bảo hiểm cháy nổ kho bãi 100%',
+            ],
+            defaultVas: [
+              'Dán tem phụ tiếng Việt / Barcode SKU',
+              'Quấn màng co PE Pallet & Đóng đai bảo vệ',
+              'Bảo hiểm cháy nổ kho bãi 100%',
+            ],
           },
           {
             id: 'wh-gen-bon',
@@ -867,8 +1035,17 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             paidSurchargeOptions: [
               { id: 'pwh-bon', name: 'Phí thủ tục hải quan mở/thanh khoản tờ khai kho', priceText: '800,000 ₫ / Bộ', isChecked: true },
             ],
-            vasOptions: ['Hun trùng ISPM 15', 'Tách ghép hàng xuất khẩu', 'Khai báo hải quan ngoại quan'],
-            defaultVas: ['Khai báo hải quan ngoại quan', 'Hun trùng ISPM 15'],
+            vasOptions: [
+              'Khai báo hải quan mở & thanh khoản kho ngoại quan',
+              'Hun trùng kiểm dịch gỗ ISPM 15',
+              'Tách ghép chia chọn hàng xuất khẩu',
+              'Báo cáo tồn kho định kỳ cơ quan hải quan',
+              'Bảo hiểm hàng hóa ngoại quan',
+            ],
+            defaultVas: [
+              'Khai báo hải quan mở & thanh khoản kho ngoại quan',
+              'Hun trùng kiểm dịch gỗ ISPM 15',
+            ],
           },
           {
             id: 'wh-gen-ful',
@@ -899,8 +1076,18 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             paidSurchargeOptions: [
               { id: 'pwh-ful', name: 'Phí xử lý hàng hoàn (Reverse Logistics)', priceText: '5,000 ₫ / Đơn hoàn', isChecked: true },
             ],
-            vasOptions: ['Chèn thiệp cảm ơn & Quà tặng', 'Đóng gói Kitting combo', 'Dán tem barcode SKU lẻ'],
-            defaultVas: ['Chèn thiệp cảm ơn & Quà tặng', 'Dán tem barcode SKU lẻ'],
+            vasOptions: [
+              'Đồng bộ API tự động với sàn Shopee, TikTok Shop, Lazada',
+              'In đơn, đóng gói carton & bàn giao hỏa tốc < 12h',
+              'Xử lý hàng hoàn đổi trả (Reverse Logistics)',
+              'Chèn thiệp cảm ơn & Quà tặng combo',
+              'Dán tem barcode SKU lẻ',
+            ],
+            defaultVas: [
+              'Đồng bộ API tự động với sàn Shopee, TikTok Shop, Lazada',
+              'In đơn, đóng gói carton & bàn giao hỏa tốc < 12h',
+              'Chèn thiệp cảm ơn & Quà tặng combo',
+            ],
           },
           {
             id: 'wh-gen-self',
@@ -931,8 +1118,16 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             paidSurchargeOptions: [
               { id: 'pwh-self', name: 'Bộ vật tư thùng carton & băng keo', priceText: '150,000 ₫ / Bộ', isChecked: true },
             ],
-            vasOptions: ['Bảo hiểm tài sản khoang', 'Cung cấp vật tư đóng gói tại chỗ'],
-            defaultVas: ['Bảo hiểm tài sản khoang'],
+            vasOptions: [
+              'Bảo hiểm tài sản khoang tự quản',
+              'Khóa số độc lập & Truy cập 24/7',
+              'Cung cấp vật tư đóng gói tại chỗ',
+              'Hỗ trợ xe đẩy bốc dỡ nội bộ',
+            ],
+            defaultVas: [
+              'Bảo hiểm tài sản khoang tự quản',
+              'Khóa số độc lập & Truy cập 24/7',
+            ],
           },
         ],
       },
@@ -969,8 +1164,18 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             paidSurchargeOptions: [
               { id: 'pwh-cold', name: 'Phí cấp đông nhanh (Blast Freezing)', priceText: '500,000 ₫ / Tấn', isChecked: true },
             ],
-            vasOptions: ['Cấp đông nhanh Pre-cooling', 'Kiểm soát hạn dùng FEFO', 'Bảo hiểm rủi ro mất nhiệt độ'],
-            defaultVas: ['Kiểm soát hạn dùng FEFO', 'Bảo hiểm rủi ro mất nhiệt độ'],
+            vasOptions: [
+              'Cấp đông nhanh Pre-cooling / Blast Freezing',
+              'Quản lý hạn sử dụng chuẩn FIFO / FEFO',
+              'Cảm biến giám sát nhiệt độ IoT 24/7',
+              'Xuất biểu đồ nhiệt độ lưu kho định kỳ',
+              'Bảo hiểm hư hỏng do mất nhiệt độ',
+            ],
+            defaultVas: [
+              'Quản lý hạn sử dụng chuẩn FIFO / FEFO',
+              'Cảm biến giám sát nhiệt độ IoT 24/7',
+              'Bảo hiểm hư hỏng do mất nhiệt độ',
+            ],
           },
           {
             id: 'wh-ref-bon',
@@ -1001,8 +1206,16 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             paidSurchargeOptions: [
               { id: 'pwh-ref-bon', name: 'Phí lấy mẫu kiểm dịch tại kho', priceText: '500,000 ₫ / Lô', isChecked: true },
             ],
-            vasOptions: ['Kiểm dịch thực vật / động vật', 'Thủ tục tạm nhập tái xuất'],
-            defaultVas: ['Kiểm dịch thực vật / động vật'],
+            vasOptions: [
+              'Kiểm dịch thực vật / Động vật nông thủy sản',
+              'Thủ tục hải quan tạm nhập tái xuất lạnh',
+              'Báo cáo nhiệt độ gửi cơ quan kiểm dịch',
+              'Lấy mẫu kiểm tra vệ sinh ATTP',
+            ],
+            defaultVas: [
+              'Kiểm dịch thực vật / Động vật nông thủy sản',
+              'Thủ tục hải quan tạm nhập tái xuất lạnh',
+            ],
           },
           {
             id: 'wh-ref-self',
@@ -1033,8 +1246,16 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             paidSurchargeOptions: [
               { id: 'pwh-ref-self', name: 'Thùng xốp & Đá gel bổ sung', priceText: '80,000 ₫ / Bộ', isChecked: true },
             ],
-            vasOptions: ['Khóa từ độc lập', 'Backup điện tự động'],
-            defaultVas: ['Backup điện tự động'],
+            vasOptions: [
+              'Khoang lạnh độc lập (-18°C ~ +5°C)',
+              'Backup điện máy phát tự động trong 5 giây',
+              'Khóa từ độc lập & Camera 24/7',
+              'Cung cấp đá gel / Thùng xốp bảo quản',
+            ],
+            defaultVas: [
+              'Backup điện máy phát tự động trong 5 giây',
+              'Khóa từ độc lập & Camera 24/7',
+            ],
           },
         ],
       },
@@ -1071,8 +1292,18 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             paidSurchargeOptions: [
               { id: 'pwh-haz', name: 'Phí xử lý chất thải bao bì nguy hại', priceText: 'Theo khối lượng kg', isChecked: true },
             ],
-            vasOptions: ['Bảo hiểm trách nhiệm hóa chất', 'Báo cáo tồn kho hóa chất gửi Sở Công Thương'],
-            defaultVas: ['Bảo hiểm trách nhiệm hóa chất'],
+            vasOptions: [
+              'Hệ thống PCCC bọt Foam tự động',
+              'Rãnh thu gom hóa chất tràn & Bể chứa sự cố',
+              'Bảo hiểm trách nhiệm bồi thường môi trường',
+              'Báo cáo tồn kho hóa chất gửi Sở Công Thương',
+              'Đội ứng phó sự cố hóa chất túc trực 24/7',
+            ],
+            defaultVas: [
+              'Hệ thống PCCC bọt Foam tự động',
+              'Bảo hiểm trách nhiệm bồi thường môi trường',
+              'Báo cáo tồn kho hóa chất gửi Sở Công Thương',
+            ],
           },
           {
             id: 'wh-haz-bon',
@@ -1103,8 +1334,16 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             paidSurchargeOptions: [
               { id: 'pwh-haz-bon', name: 'Phí giám định chất lượng hóa chất', priceText: 'Theo biểu phí Vinacontrol', isChecked: true },
             ],
-            vasOptions: ['Khai báo hóa chất cổng một cửa', 'Giám định chất lượng'],
-            defaultVas: ['Khai báo hóa chất cổng một cửa'],
+            vasOptions: [
+              'Khai báo hóa chất một cửa quốc gia',
+              'Giám định chất lượng hóa chất chuyên ngành',
+              'Lưu mẫu thử nghiệm an toàn',
+              'Thủ tục hải quan ngoại quan hóa chất',
+            ],
+            defaultVas: [
+              'Khai báo hóa chất một cửa quốc gia',
+              'Giám định chất lượng hóa chất chuyên ngành',
+            ],
           },
           {
             id: 'wh-haz-self',
@@ -1135,8 +1374,16 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             paidSurchargeOptions: [
               { id: 'pwh-haz-self', name: 'Phí kiểm tra an toàn định kỳ', priceText: '200,000 ₫ / Tháng', isChecked: true },
             ],
-            vasOptions: ['Tủ an toàn chống cháy nổ', 'Cảm biến nồng độ khí'],
-            defaultVas: ['Tủ an toàn chống cháy nổ'],
+            vasOptions: [
+              'Tủ an toàn chống cháy nổ cách ly',
+              'Cảm biến cảnh báo nồng độ khí rò rỉ',
+              'Kiểm soát ra vào vân tay bảo mật',
+              'Bảo hiểm rủi ro cháy nổ hóa chất',
+            ],
+            defaultVas: [
+              'Tủ an toàn chống cháy nổ cách ly',
+              'Cảm biến cảnh báo nồng độ khí rò rỉ',
+            ],
           },
         ],
       },
@@ -1195,8 +1442,18 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
               { id: 'pcus-1', name: 'Phí hỗ trợ kiểm hóa luồng Đỏ tại cảng', priceText: '500,000 ₫ / Cont', isChecked: true },
               { id: 'pcus-2', name: 'Phí xin C/O các Form D, E, EUR.1', priceText: '600,000 ₫ / Bộ', isChecked: false },
             ],
-            vasOptions: ['Xin cấp C/O các form', 'Tham vấn giá & Kiểm hóa hộ', 'Thủ tục hoàn thuế', 'Báo cáo quyết toán năm'],
-            defaultVas: ['Xin cấp C/O các form', 'Tham vấn giá & Kiểm hóa hộ'],
+            vasOptions: [
+              'Xin cấp C/O các form (Form D, E, EUR.1, VK, CPTPP...)',
+              'Tư vấn áp mã HS Code chính xác',
+              'Tham vấn giá hải quan & Hỗ trợ kiểm hóa luồng Đỏ',
+              'Thủ tục hoàn thuế & Báo cáo quyết toán năm',
+              'Xin giấy phép nhập khẩu tự động',
+            ],
+            defaultVas: [
+              'Xin cấp C/O các form (Form D, E, EUR.1, VK, CPTPP...)',
+              'Tư vấn áp mã HS Code chính xác',
+              'Tham vấn giá hải quan & Hỗ trợ kiểm hóa luồng Đỏ',
+            ],
           },
         ],
       },
@@ -1233,8 +1490,18 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             paidSurchargeOptions: [
               { id: 'pchk-1', name: 'Lệ phí kiểm nghiệm mẫu phòng Lab', priceText: 'Theo biên lai nhà nước', isChecked: true },
             ],
-            vasOptions: ['Đăng ký kiểm dịch trực tuyến', 'Đưa hàng về kho bảo quản chờ kết quả', 'Xin giấy phép ATTP'],
-            defaultVas: ['Đăng ký kiểm dịch trực tuyến', 'Đưa hàng về kho bảo quản chờ kết quả'],
+            vasOptions: [
+              'Đăng ký kiểm dịch thực vật / Động vật trực tuyến',
+              'Đưa hàng về kho bảo quản chờ kết quả kiểm nghiệm',
+              'Xin giấy phép vệ sinh An toàn thực phẩm (ATTP)',
+              'Lấy mẫu kiểm tra tại cảng nhanh trong 24h',
+              'Cấp chứng thư thông quan kiểm dịch',
+            ],
+            defaultVas: [
+              'Đăng ký kiểm dịch thực vật / Động vật trực tuyến',
+              'Đưa hàng về kho bảo quản chờ kết quả kiểm nghiệm',
+              'Cấp chứng thư thông quan kiểm dịch',
+            ],
           },
         ],
       },
@@ -1271,8 +1538,18 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             paidSurchargeOptions: [
               { id: 'phaz-cus', name: 'Phí xin giấy phép nhập khẩu tiền chất', priceText: '1,500,000 ₫ / Giấy phép', isChecked: true },
             ],
-            vasOptions: ['Thẩm định bảng MSDS', 'Khai báo hóa chất một cửa quốc gia', 'Xin giấy phép tiền chất'],
-            defaultVas: ['Thẩm định bảng MSDS', 'Khai báo hóa chất một cửa quốc gia'],
+            vasOptions: [
+              'Thẩm định bảng dữ liệu an toàn MSDS',
+              'Khai báo hóa chất trên Cổng một cửa quốc gia',
+              'Xin giấy phép nhập khẩu tiền chất công nghiệp',
+              'Đăng ký kiểm tra chất lượng nhà nước hóa chất',
+              'Giấy phép vận chuyển quá cảnh hàng nguy hiểm',
+            ],
+            defaultVas: [
+              'Thẩm định bảng dữ liệu an toàn MSDS',
+              'Khai báo hóa chất trên Cổng một cửa quốc gia',
+              'Xin giấy phép nhập khẩu tiền chất công nghiệp',
+            ],
           },
         ],
       },
@@ -1330,8 +1607,18 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             paidSurchargeOptions: [
               { id: 'pcb-1', name: 'Phí sang tải tại bãi kiểm hóa cửa khẩu', priceText: '1,500,000 ₫ / Xe', isChecked: true },
             ],
-            vasOptions: ['Thủ tục hải quan 2 đầu biên giới', 'Sang tải sang xe đối tác nước ngoài', 'Bảo hiểm hàng hóa quốc tế'],
-            defaultVas: ['Thủ tục hải quan 2 đầu biên giới', 'Sang tải sang xe đối tác nước ngoài'],
+            vasOptions: [
+              'Thủ tục hải quan 2 đầu biên giới (VN ↔ TQ/Lào/Cam)',
+              'Dịch vụ sang tải tại bãi kiểm hóa cửa khẩu',
+              'Đổi đầu kéo liên vận quốc tế tại mốc biên giới',
+              'Định vị GPS hành trình liên vận quốc tế',
+              'Bảo hiểm hàng hóa quốc tế toàn trình',
+            ],
+            defaultVas: [
+              'Thủ tục hải quan 2 đầu biên giới (VN ↔ TQ/Lào/Cam)',
+              'Dịch vụ sang tải tại bãi kiểm hóa cửa khẩu',
+              'Bảo hiểm hàng hóa quốc tế toàn trình',
+            ],
           },
           {
             id: 'cb-gen-ltl',
@@ -1362,8 +1649,16 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             paidSurchargeOptions: [
               { id: 'pcb-ltl', name: 'Phí thu hộ tiền hàng nước ngoài (COD)', priceText: '1.5% giá trị thu hộ', isChecked: true },
             ],
-            vasOptions: ['Giao hàng Door-to-Door', 'Thu hộ tiền hàng tại Phnom Penh', 'Dán tem nhãn tiếng bản địa'],
-            defaultVas: ['Giao hàng Door-to-Door', 'Thu hộ tiền hàng tại Phnom Penh'],
+            vasOptions: [
+              'Giao hàng Door-to-Door tại Phnom Penh / Quảng Châu',
+              'Dịch vụ thu hộ tiền hàng ngoại tệ (COD)',
+              'Dán tem nhãn tiếng bản địa theo luật sở tại',
+              'Bọc màng co bảo vệ kiện lẻ',
+            ],
+            defaultVas: [
+              'Giao hàng Door-to-Door tại Phnom Penh / Quảng Châu',
+              'Dịch vụ thu hộ tiền hàng ngoại tệ (COD)',
+            ],
           },
         ],
       },
@@ -1400,8 +1695,18 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             paidSurchargeOptions: [
               { id: 'pcb-ref', name: 'Phí cắm điện buồng lạnh tại bãi chờ cửa khẩu', priceText: '500,000 ₫ / Đêm', isChecked: true },
             ],
-            vasOptions: ['Kiểm dịch thực vật biên giới', 'Theo dõi nhiệt độ real-time', 'Sang tải lạnh chuyên dụng'],
-            defaultVas: ['Kiểm dịch thực vật biên giới', 'Theo dõi nhiệt độ real-time'],
+            vasOptions: [
+              'Ưu tiên thông quan nhanh làn xanh nông sản tươi',
+              'Cắm điện buồng lạnh tại bãi chờ cửa khẩu',
+              'Theo dõi nhiệt độ thùng xe real-time qua App',
+              'Kiểm dịch thực vật tại cửa khẩu 2 đầu biên giới',
+              'Sang tải buồng lạnh chuyên dụng',
+            ],
+            defaultVas: [
+              'Ưu tiên thông quan nhanh làn xanh nông sản tươi',
+              'Theo dõi nhiệt độ thùng xe real-time qua App',
+              'Kiểm dịch thực vật tại cửa khẩu 2 đầu biên giới',
+            ],
           },
         ],
       },
@@ -1438,8 +1743,16 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             paidSurchargeOptions: [
               { id: 'pcb-haz', name: 'Phí giấy phép quá cảnh liên quốc gia', priceText: '3,500,000 ₫ / Giấy phép', isChecked: true },
             ],
-            vasOptions: ['Giấy phép vận chuyển quá cảnh liên quốc gia', 'Hộ tống an toàn qua cửa khẩu'],
-            defaultVas: ['Giấy phép vận chuyển quá cảnh liên quốc gia'],
+            vasOptions: [
+              'Giấy phép vận chuyển quá cảnh liên quốc gia',
+              'Hộ tống an toàn qua cửa khẩu quốc tế',
+              'Bộ ứng cứu sự cố hóa chất quốc tế',
+              'Bảo hiểm trách nhiệm ô nhiễm môi trường xuyên biên giới',
+            ],
+            defaultVas: [
+              'Giấy phép vận chuyển quá cảnh liên quốc gia',
+              'Hộ tống an toàn qua cửa khẩu quốc tế',
+            ],
           },
         ],
       },
@@ -1484,8 +1797,18 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             paidSurchargeOptions: [
               { id: 'pproj-1', name: 'Giao hàng hẹn giờ chính xác (Time-slot)', priceText: '200,000 ₫ / Điểm', isChecked: true },
             ],
-            vasOptions: ['Báo cáo KPI giao nhận hàng ngày', 'Quản lý thu hồi vỏ pallet', 'Bảo hiểm tổng thể'],
-            defaultVas: ['Báo cáo KPI giao nhận hàng ngày', 'Bảo hiểm tổng thể'],
+            vasOptions: [
+              'Tháp điều hành Control Tower quản lý 63 tỉnh thành',
+              'Giao hàng hẹn giờ chính xác Time-slot siêu thị',
+              'Báo cáo KPI giao nhận & Đối soát e-POD hàng ngày',
+              'Quản lý thu hồi vỏ pallet & Thùng rỗng',
+              'Bảo hiểm trách nhiệm phân phối tổng thể',
+            ],
+            defaultVas: [
+              'Tháp điều hành Control Tower quản lý 63 tỉnh thành',
+              'Báo cáo KPI giao nhận & Đối soát e-POD hàng ngày',
+              'Bảo hiểm trách nhiệm phân phối tổng thể',
+            ],
           },
           {
             id: 'proj-gen-xdock',
@@ -1516,8 +1839,16 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             paidSurchargeOptions: [
               { id: 'pproj-xdock', name: 'Phí phân loại chi tiết theo mã SKU', priceText: '500 ₫ / Sản phẩm', isChecked: true },
             ],
-            vasOptions: ['Phân loại mã SKU nhanh', 'Quét barcode tự động'],
-            defaultVas: ['Phân loại mã SKU nhanh'],
+            vasOptions: [
+              'Phân loại chia chọn nhanh theo mã SKU',
+              'Quét mã vạch Barcode tự động xuất bến < 4h',
+              'Sang xe tải không lưu kho',
+              'Bọc màng PE kiện hàng sang tải',
+            ],
+            defaultVas: [
+              'Phân loại chia chọn nhanh theo mã SKU',
+              'Quét mã vạch Barcode tự động xuất bến < 4h',
+            ],
           },
           {
             id: 'proj-gen-port',
@@ -1548,8 +1879,16 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             paidSurchargeOptions: [
               { id: 'pproj-port', name: 'Phí nâng hạ cẩu bãi ngoài giờ', priceText: '400,000 ₫ / Cont', isChecked: true },
             ],
-            vasOptions: ['Nâng hạ cẩu bờ chuyên dụng', 'Bảo quản container bãi cảng'],
-            defaultVas: ['Nâng hạ cẩu bờ chuyên dụng'],
+            vasOptions: [
+              'Nâng hạ cẩu bờ chuyên dụng 50T - 500T',
+              'Rút ruột container máy móc nặng tại bến cảng',
+              'Hạ vỏ cont rỗng về bãi chỉ định giải phóng cont < 12h',
+              'Bảo quản container an toàn bãi cảng',
+            ],
+            defaultVas: [
+              'Nâng hạ cẩu bờ chuyên dụng 50T - 500T',
+              'Rút ruột container máy móc nặng tại bến cảng',
+            ],
           },
           {
             id: 'proj-gen-multi',
@@ -1580,8 +1919,16 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             paidSurchargeOptions: [
               { id: 'pproj-multi', name: 'Bảo hiểm hàng hóa đa phương thức mở rộng', priceText: '0.15% giá trị hàng', isChecked: true },
             ],
-            vasOptions: ['Quản lý chuỗi cung ứng trọn gói 4PL', 'Một vận đơn duy nhất xuyên suốt hành trình'],
-            defaultVas: ['Quản lý chuỗi cung ứng trọn gói 4PL'],
+            vasOptions: [
+              'Quản lý chuỗi cung ứng trọn gói 4PL',
+              'Một vận đơn duy nhất xuyên suốt Biển + Sắt + Bộ + Sông',
+              'Tối ưu lộ trình giảm 25% chi phí & Giảm phát thải CO2',
+              'Bảo hiểm mọi rủi ro hàng hóa đa phương thức',
+            ],
+            defaultVas: [
+              'Quản lý chuỗi cung ứng trọn gói 4PL',
+              'Một vận đơn duy nhất xuyên suốt Biển + Sắt + Bộ + Sông',
+            ],
           },
         ],
       },
@@ -1618,8 +1965,16 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             paidSurchargeOptions: [
               { id: 'pproj-cold', name: 'Phí giao hàng trước 6h sáng', priceText: '250,000 ₫ / Chuyến', isChecked: true },
             ],
-            vasOptions: ['Bàn giao kiểm đếm nhiệt độ từng điểm', 'Biên bản nghiệm thu chất lượng hàng tươi'],
-            defaultVas: ['Bàn giao kiểm đếm nhiệt độ từng điểm'],
+            vasOptions: [
+              'Bàn giao kiểm đếm nhiệt độ từng điểm giao',
+              'Biên bản nghiệm thu chất lượng hàng tươi',
+              'Giao hàng sáng sớm trước 6h',
+              'Bảo hiểm đứt gãy chuỗi lạnh',
+            ],
+            defaultVas: [
+              'Bàn giao kiểm đếm nhiệt độ từng điểm giao',
+              'Biên bản nghiệm thu chất lượng hàng tươi',
+            ],
           },
           {
             id: 'proj-ref-xdock',
@@ -1650,8 +2005,15 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             paidSurchargeOptions: [
               { id: 'pproj-ice', name: 'Phí bổ sung đá gel / đá khô', priceText: '50,000 ₫ / Kg', isChecked: true },
             ],
-            vasOptions: ['Cảm biến nhiệt độ buồng đệm', 'Bảo quản đá gel bổ sung'],
-            defaultVas: ['Cảm biến nhiệt độ buồng đệm'],
+            vasOptions: [
+              'Sàn trung chuyển lạnh duy trì nhiệt độ mát buồng đệm',
+              'Bảo quản đá gel / Đá khô bổ sung',
+              'Sang xe lạnh hỏa tốc trong 2 giờ',
+            ],
+            defaultVas: [
+              'Sàn trung chuyển lạnh duy trì nhiệt độ mát buồng đệm',
+              'Sang xe lạnh hỏa tốc trong 2 giờ',
+            ],
           },
           {
             id: 'proj-ref-port',
@@ -1682,8 +2044,15 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             paidSurchargeOptions: [
               { id: 'pproj-reefer-genset', name: 'Phí chạy Genset trên đường bộ', priceText: '600,000 ₫ / Chuyến', isChecked: true },
             ],
-            vasOptions: ['Cắm điện bãi cảng 24/7', 'Theo dõi nhiệt độ giàn lạnh Reefer liên tục'],
-            defaultVas: ['Cắm điện bãi cảng 24/7'],
+            vasOptions: [
+              'Cắm điện bãi cảng Reefer plug 24/7',
+              'Theo dõi nhiệt độ giàn lạnh Reefer liên tục',
+              'Kéo cont lạnh về nhà máy trong 6h sau khi dỡ tàu',
+            ],
+            defaultVas: [
+              'Cắm điện bãi cảng Reefer plug 24/7',
+              'Theo dõi nhiệt độ giàn lạnh Reefer liên tục',
+            ],
           },
           {
             id: 'proj-ref-multi',
@@ -1714,8 +2083,15 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             paidSurchargeOptions: [
               { id: 'pproj-cold-ins', name: 'Bảo hiểm hư hỏng nông sản lạnh', priceText: '0.25% giá trị hàng', isChecked: true },
             ],
-            vasOptions: ['Giám sát chuỗi lạnh Cold Chain 100% không đứt gãy', 'Bảo hiểm rủi ro mất nhiệt độ'],
-            defaultVas: ['Giám sát chuỗi lạnh Cold Chain 100% không đứt gãy'],
+            vasOptions: [
+              'Giám sát chuỗi lạnh Cold Chain 100% không đứt gãy',
+              'Bảo hiểm rủi ro mất nhiệt độ toàn trình',
+              'Kết hợp tàu lạnh + Đường sắt lạnh + Xe lạnh',
+            ],
+            defaultVas: [
+              'Giám sát chuỗi lạnh Cold Chain 100% không đứt gãy',
+              'Bảo hiểm rủi ro mất nhiệt độ toàn trình',
+            ],
           },
         ],
       },
@@ -1752,8 +2128,16 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             paidSurchargeOptions: [
               { id: 'pproj-haz-pccc', name: 'Phí xe chữa cháy bảo vệ hiện trường', priceText: '2,500,000 ₫ / Ca', isChecked: true },
             ],
-            vasOptions: ['Kẹp chì seal an toàn', 'Biên bản bàn giao hóa chất nghiêm ngặt'],
-            defaultVas: ['Kẹp chì seal an toàn'],
+            vasOptions: [
+              'Kẹp chì seal an toàn bảo mật',
+              'Biên bản bàn giao hóa chất nghiêm ngặt',
+              'Xe chữa cháy bảo vệ hiện trường',
+              'Bảo hiểm bồi thường ô nhiễm môi trường',
+            ],
+            defaultVas: [
+              'Kẹp chì seal an toàn bảo mật',
+              'Biên bản bàn giao hóa chất nghiêm ngặt',
+            ],
           },
           {
             id: 'proj-haz-xdock',
@@ -1784,8 +2168,15 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             paidSurchargeOptions: [
               { id: 'pproj-haz-spill', name: 'Phí xử lý bồn rửa hóa chất', priceText: '800,000 ₫ / Lần', isChecked: true },
             ],
-            vasOptions: ['Trang thiết bị ứng phó sự cố hóa chất', 'Đội ứng cứu phản ứng nhanh'],
-            defaultVas: ['Trang thiết bị ứng phó sự cố hóa chất'],
+            vasOptions: [
+              'Bãi sang tải ngoài trời cách ly an toàn',
+              'Trang thiết bị ứng phó sự cố hóa chất Spill-Kit',
+              'Đội phản ứng nhanh túc trực 24/7',
+            ],
+            defaultVas: [
+              'Bãi sang tải ngoài trời cách ly an toàn',
+              'Trang thiết bị ứng phó sự cố hóa chất Spill-Kit',
+            ],
           },
           {
             id: 'proj-haz-port',
@@ -1816,8 +2207,15 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             paidSurchargeOptions: [
               { id: 'pproj-haz-port-fee', name: 'Lệ phí an ninh hàng nguy hiểm cảng vụ', priceText: '$45 / Cont', isChecked: true },
             ],
-            vasOptions: ['Xe chữa cháy trực tại hiện trường', 'Thủ tục an ninh cảng vụ'],
-            defaultVas: ['Xe chữa cháy trực tại hiện trường'],
+            vasOptions: [
+              'Xe chữa cháy trực tại hiện trường',
+              'Thủ tục an ninh hàng nguy hiểm cảng vụ',
+              'Rút cont hóa chất theo giờ quy định',
+            ],
+            defaultVas: [
+              'Xe chữa cháy trực tại hiện trường',
+              'Thủ tục an ninh hàng nguy hiểm cảng vụ',
+            ],
           },
           {
             id: 'proj-haz-multi',
@@ -1848,8 +2246,15 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             paidSurchargeOptions: [
               { id: 'pproj-haz-multi-ins', name: 'Bảo hiểm trách nhiệm ô nhiễm môi trường', priceText: '0.3% giá trị lô hàng', isChecked: true },
             ],
-            vasOptions: ['Giấy phép vận chuyển liên tỉnh & liên bộ', 'Bảo hiểm bồi thường ô nhiễm môi trường'],
-            defaultVas: ['Giấy phép vận chuyển liên tỉnh & liên bộ'],
+            vasOptions: [
+              'Giấy phép vận chuyển liên tỉnh & liên bộ',
+              'Hành lang an toàn khép kín Biển + Đường sắt chuyên biệt',
+              'Bảo hiểm bồi thường ô nhiễm môi trường',
+            ],
+            defaultVas: [
+              'Giấy phép vận chuyển liên tỉnh & liên bộ',
+              'Bảo hiểm bồi thường ô nhiễm môi trường',
+            ],
           },
         ],
       },
@@ -2264,7 +2669,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                             >
                               <div className="flex items-center gap-1.5">
                                 <span className="text-slate-400">
-                                  {isCgExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+                                  {isCgExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
                                 </span>
 
                                 {/* Cargo Group Checkbox */}
@@ -2687,7 +3092,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                             key={surcharge.id}
                             className={`flex items-center justify-between gap-2 p-2 rounded-xl border transition-all ${
                               surcharge.isChecked 
-                                ? 'bg-amber-100/60 border-amber-300 text-amber-950 font-semibold' 
+                                								? 'bg-amber-100/60 border-amber-300 text-amber-950 font-semibold' 
                                 : 'bg-white border-slate-200 text-slate-600 opacity-80'
                             }`}
                           >
@@ -2725,28 +3130,28 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                 <div className="space-y-3 pt-3 border-t border-slate-100">
                   <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
                     <span className="w-5 h-5 rounded-full bg-indigo-50 text-indigo-700 flex items-center justify-center text-[10.5px] font-bold">4</span>
-                    <span>Dịch Vụ Giá Trị Gia Tăng Đi Kèm (VAS)</span>
+                    <span>Dịch Vụ Giá Trị Gia Tăng Đi Kèm (VAS) ({currentData.selectedVas?.length || 0}/{(activeModel?.vasOptions || []).length})</span>
                   </h4>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-xs">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 text-xs">
                     {(activeModel?.vasOptions || []).map((vas: string, idx: number) => {
                       const isChecked = currentData.selectedVas?.includes(vas);
                       return (
                         <label
                           key={idx}
                           onClick={() => toggleVasItem(vas)}
-                          className={`flex items-center gap-2.5 p-2.5 rounded-xl border transition-all cursor-pointer ${
+                          className={`flex items-start gap-2.5 p-3 rounded-xl border transition-all cursor-pointer select-none ${
                             isChecked
-                              ? 'bg-indigo-50/60 border-indigo-300 text-indigo-950 font-bold'
-                              : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                              ? 'bg-indigo-50/70 border-indigo-300 text-indigo-950 font-bold shadow-2xs ring-1 ring-indigo-500/20'
+                              : 'bg-slate-50/80 border-slate-200 text-slate-700 hover:bg-slate-100 hover:border-slate-300'
                           }`}
                         >
-                          <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center shrink-0 ${
+                          <div className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
                             isChecked ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-300 bg-white'
                           }`}>
                             {isChecked && <Check className="w-2.5 h-2.5 stroke-[3]" />}
                           </div>
-                          <span className="truncate">{vas}</span>
+                          <span className="leading-snug text-xs font-semibold">{vas}</span>
                         </label>
                       );
                     })}
