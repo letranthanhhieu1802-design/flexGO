@@ -3440,51 +3440,181 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                     {/* Free Surcharges (0đ) */}
-                    <div className="bg-emerald-50/40 border border-emerald-200/80 rounded-2xl p-3.5 space-y-2">
-                      <div className="flex items-center gap-1.5 text-emerald-800 font-bold text-xs">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>Phụ Phí Miễn Phí (Đã Bao Gồm 0đ)</span>
+                    <div className="bg-emerald-50/40 border border-emerald-200/80 rounded-2xl p-3.5 space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 text-emerald-800 font-bold text-xs">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>Phụ Phí Miễn Phí (Đã Bao Gồm 0đ)</span>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => setIsAddingFreeSurcharge(true)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold text-emerald-700 bg-emerald-100 hover:bg-emerald-200 border border-emerald-300 rounded-lg transition-all cursor-pointer shadow-2xs"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>Thêm Phụ Phí</span>
+                        </button>
                       </div>
+
                       <p className="text-[11px] text-slate-500">
                         Các dịch vụ/tiện ích đã tính trọn gói không thu thêm để tạo lợi thế cạnh tranh.
                       </p>
 
-                      <div className="space-y-1.5 pt-1">
-                        {(activeModel?.freeSurchargeOptions || []).map((item: string, fIdx: number) => {
+                      {/* Inline Input Box to Add Custom Free Surcharge */}
+                      {isAddingFreeSurcharge && (
+                        <div className="p-2.5 bg-emerald-100/90 rounded-xl border border-emerald-300 space-y-2 animate-in fade-in duration-100">
+                          <input
+                            type="text"
+                            autoFocus
+                            placeholder="Nhập tên phụ phí miễn phí mới..."
+                            value={newFreeSurchargeName}
+                            onChange={(e) => setNewFreeSurchargeName(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleAddFreeSurcharge()}
+                            className="w-full px-2.5 py-1.5 bg-white border border-emerald-300 rounded-lg text-xs font-semibold text-slate-800 focus:outline-hidden focus:border-emerald-600"
+                          />
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setIsAddingFreeSurcharge(false);
+                                setNewFreeSurchargeName('');
+                              }}
+                              className="px-2.5 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-200/60 rounded-lg transition-colors cursor-pointer"
+                            >
+                              Hủy
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleAddFreeSurcharge}
+                              className="px-3 py-1 text-[11px] font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors shadow-2xs cursor-pointer"
+                            >
+                              Thêm Ngay
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="space-y-1.5 pt-0.5 max-h-72 overflow-y-auto pr-0.5">
+                        {(currentData.freeSurchargeOptions || activeModel?.freeSurchargeOptions || []).map((item: string, fIdx: number) => {
                           const isChecked = currentData.freeSurcharges?.includes(item);
                           return (
-                            <label
+                            <div
                               key={fIdx}
-                              onClick={() => toggleFreeSurcharge(item)}
-                              className={`flex items-center gap-2 p-2 rounded-xl border transition-all cursor-pointer ${
+                              className={`group flex items-center justify-between gap-1.5 p-2 rounded-xl border transition-all ${
                                 isChecked
                                   ? 'bg-emerald-100/70 border-emerald-300 text-emerald-950 font-bold'
                                   : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
                               }`}
                             >
-                              <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center shrink-0 ${
-                                isChecked ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-slate-300 bg-white'
-                              }`}>
-                                {isChecked && <Check className="w-2.5 h-2.5 stroke-[3]" />}
-                              </div>
-                              <span className="truncate">{item}</span>
-                            </label>
+                              <label
+                                onClick={() => toggleFreeSurcharge(item)}
+                                className="flex items-center gap-2 cursor-pointer truncate flex-1"
+                              >
+                                <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center shrink-0 ${
+                                  isChecked ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-slate-300 bg-white'
+                                }`}>
+                                  {isChecked && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                                </div>
+                                <span className="truncate">{item}</span>
+                              </label>
+
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteFreeSurchargeOption(item);
+                                }}
+                                className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors opacity-0 group-hover:opacity-100 shrink-0 cursor-pointer"
+                                title="Xóa phụ phí này khỏi danh mục"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            </div>
                           );
                         })}
+
+                        {/* Dashed Add Card */}
+                        {!isAddingFreeSurcharge && (
+                          <button
+                            type="button"
+                            onClick={() => setIsAddingFreeSurcharge(true)}
+                            className="w-full py-2 px-3 border border-dashed border-emerald-300 hover:border-emerald-500 rounded-xl text-emerald-700 bg-emerald-50/50 hover:bg-emerald-100/60 transition-all text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer mt-1"
+                          >
+                            <Plus className="w-3.5 h-3.5" />
+                            <span>+ Thêm phụ phí miễn phí khác</span>
+                          </button>
+                        )}
                       </div>
                     </div>
 
                     {/* Paid Surcharges */}
-                    <div className="bg-amber-50/40 border border-amber-200/80 rounded-2xl p-3.5 space-y-2">
-                      <div className="flex items-center gap-1.5 text-amber-800 font-bold text-xs">
-                        <DollarSign className="w-3.5 h-3.5 text-amber-600" />
-                        <span>Phụ Phí Có Phí (Tính Khi Phát Sinh Thực Tế)</span>
+                    <div className="bg-amber-50/40 border border-amber-200/80 rounded-2xl p-3.5 space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 text-amber-800 font-bold text-xs">
+                          <DollarSign className="w-3.5 h-3.5 text-amber-600" />
+                          <span>Phụ Phí Có Phí (Tính Khi Phát Sinh Thực Tế)</span>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => setIsAddingPaidSurcharge(true)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold text-amber-800 bg-amber-100 hover:bg-amber-200 border border-amber-300 rounded-lg transition-all cursor-pointer shadow-2xs"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>Thêm Phụ Phí</span>
+                        </button>
                       </div>
+
                       <p className="text-[11px] text-slate-500">
                         Tick chọn và thiết lập mức giá tham chiếu khi phát sinh yêu cầu đặc biệt.
                       </p>
 
-                      <div className="space-y-2 pt-1">
+                      {/* Inline Input Box to Add Custom Paid Surcharge */}
+                      {isAddingPaidSurcharge && (
+                        <div className="p-2.5 bg-amber-100/90 rounded-xl border border-amber-300 space-y-2 animate-in fade-in duration-100">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <input
+                              type="text"
+                              autoFocus
+                              placeholder="Tên phụ phí (VD: Phí neo xe chờ hạ hàng)..."
+                              value={newPaidSurchargeName}
+                              onChange={(e) => setNewPaidSurchargeName(e.target.value)}
+                              className="px-2.5 py-1.5 bg-white border border-amber-300 rounded-lg text-xs font-semibold text-slate-800 focus:outline-hidden focus:border-amber-600"
+                            />
+                            <input
+                              type="text"
+                              placeholder="Đơn giá (VD: 400,000 ₫ / Ngày)..."
+                              value={newPaidSurchargePrice}
+                              onChange={(e) => setNewPaidSurchargePrice(e.target.value)}
+                              onKeyDown={(e) => e.key === 'Enter' && handleAddPaidSurcharge()}
+                              className="px-2.5 py-1.5 bg-white border border-amber-300 rounded-lg text-xs font-semibold text-slate-800 focus:outline-hidden focus:border-amber-600"
+                            />
+                          </div>
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setIsAddingPaidSurcharge(false);
+                                setNewPaidSurchargeName('');
+                                setNewPaidSurchargePrice('');
+                              }}
+                              className="px-2.5 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-200/60 rounded-lg transition-colors cursor-pointer"
+                            >
+                              Hủy
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleAddPaidSurcharge}
+                              className="px-3 py-1 text-[11px] font-bold text-white bg-amber-600 hover:bg-amber-700 rounded-lg transition-colors shadow-2xs cursor-pointer"
+                            >
+                              Thêm Ngay
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="space-y-2 pt-0.5 max-h-72 overflow-y-auto pr-0.5">
                         {(currentData.paidSurcharges || []).map((surcharge) => (
                           <div
                             key={surcharge.id}
@@ -3506,53 +3636,149 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                               <span className="truncate">{surcharge.name}</span>
                             </label>
 
-                            <input
-                              type="text"
-                              disabled={!surcharge.isChecked}
-                              value={surcharge.priceText}
-                              onChange={(e) => updatePaidSurchargePrice(surcharge.id, e.target.value)}
-                              className={`w-36 px-2 py-1 bg-white border border-slate-200 rounded-lg text-xs font-bold text-right ${
-                                surcharge.isChecked ? 'text-amber-900 focus:border-amber-500' : 'text-slate-400 bg-slate-50'
-                              }`}
-                            />
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <input
+                                type="text"
+                                disabled={!surcharge.isChecked}
+                                value={surcharge.priceText}
+                                onChange={(e) => updatePaidSurchargePrice(surcharge.id, e.target.value)}
+                                className={`w-32 px-2 py-1 bg-white border border-slate-200 rounded-lg text-xs font-bold text-right ${
+                                  surcharge.isChecked ? 'text-amber-900 focus:border-amber-500' : 'text-slate-400 bg-slate-50'
+                                }`}
+                              />
+
+                              <button
+                                type="button"
+                                onClick={() => handleDeletePaidSurcharge(surcharge.id)}
+                                className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors cursor-pointer"
+                                title="Xóa phụ phí này"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
                           </div>
                         ))}
+
+                        {/* Dashed Add Card */}
+                        {!isAddingPaidSurcharge && (
+                          <button
+                            type="button"
+                            onClick={() => setIsAddingPaidSurcharge(true)}
+                            className="w-full py-2 px-3 border border-dashed border-amber-300 hover:border-amber-500 rounded-xl text-amber-800 bg-amber-50/50 hover:bg-amber-100/60 transition-all text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer mt-1"
+                          >
+                            <Plus className="w-3.5 h-3.5" />
+                            <span>+ Thêm phụ phí có phí khác</span>
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
                 </div>
 
                 {/* =========================================================================
-                    PHẦN 4: CÁC DỊCH VỤ GIÁ TRỊ GIA TĂNG (VAS)
+                    PHẦN 4: CÁC DỊCH VỤ GIÁ TRỊ GIA TĂNG (VAS) (HỖ TRỢ THÊM TÙY Ý)
                 ========================================================================= */}
                 <div className="space-y-3 pt-3 border-t border-slate-100">
-                  <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-                    <span className="w-5 h-5 rounded-full bg-indigo-50 text-indigo-700 flex items-center justify-center text-[10.5px] font-bold">4</span>
-                    <span>Dịch Vụ Giá Trị Gia Tăng Đi Kèm (VAS) ({currentData.selectedVas?.length || 0}/{(activeModel?.vasOptions || []).length})</span>
-                  </h4>
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                      <span className="w-5 h-5 rounded-full bg-indigo-50 text-indigo-700 flex items-center justify-center text-[10.5px] font-bold">4</span>
+                      <span>Dịch Vụ Giá Trị Gia Tăng Đi Kèm (VAS) ({currentData.selectedVas?.length || 0}/{(currentData.vasOptions || activeModel?.vasOptions || []).length})</span>
+                    </h4>
+
+                    <button
+                      type="button"
+                      onClick={() => setIsAddingVas(true)}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition-all cursor-pointer shadow-2xs"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Thêm VAS Mới</span>
+                    </button>
+                  </div>
+
+                  {/* Inline Input Box to Add Custom VAS */}
+                  {isAddingVas && (
+                    <div className="p-2.5 bg-indigo-50/90 rounded-xl border border-indigo-200 space-y-2 animate-in fade-in duration-100">
+                      <input
+                        type="text"
+                        autoFocus
+                        placeholder="Nhập tên dịch vụ giá trị gia tăng (VAS) mới..."
+                        value={newVasName}
+                        onChange={(e) => setNewVasName(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleAddVasOption()}
+                        className="w-full px-2.5 py-1.5 bg-white border border-indigo-300 rounded-lg text-xs font-semibold text-slate-800 focus:outline-hidden focus:border-indigo-600"
+                      />
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsAddingVas(false);
+                            setNewVasName('');
+                          }}
+                          className="px-2.5 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-200/60 rounded-lg transition-colors cursor-pointer"
+                        >
+                          Hủy
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleAddVasOption}
+                          className="px-3 py-1 text-[11px] font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors shadow-2xs cursor-pointer"
+                        >
+                          Thêm Ngay
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 text-xs">
-                    {(activeModel?.vasOptions || []).map((vas: string, idx: number) => {
+                    {(currentData.vasOptions || activeModel?.vasOptions || []).map((vas: string, idx: number) => {
                       const isChecked = currentData.selectedVas?.includes(vas);
                       return (
-                        <label
+                        <div
                           key={idx}
-                          onClick={() => toggleVasItem(vas)}
-                          className={`flex items-start gap-2.5 p-3 rounded-xl border transition-all cursor-pointer select-none ${
+                          className={`group flex items-start justify-between gap-2 p-3 rounded-xl border transition-all select-none ${
                             isChecked
                               ? 'bg-indigo-50/70 border-indigo-300 text-indigo-950 font-bold shadow-2xs ring-1 ring-indigo-500/20'
                               : 'bg-slate-50/80 border-slate-200 text-slate-700 hover:bg-slate-100 hover:border-slate-300'
                           }`}
                         >
-                          <div className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
-                            isChecked ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-300 bg-white'
-                          }`}>
-                            {isChecked && <Check className="w-2.5 h-2.5 stroke-[3]" />}
-                          </div>
-                          <span className="leading-snug text-xs font-semibold">{vas}</span>
-                        </label>
+                          <label
+                            onClick={() => toggleVasItem(vas)}
+                            className="flex items-start gap-2.5 cursor-pointer flex-1"
+                          >
+                            <div className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
+                              isChecked ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-300 bg-white'
+                            }`}>
+                              {isChecked && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                            </div>
+                            <span className="leading-snug text-xs font-semibold">{vas}</span>
+                          </label>
+
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteVasOption(vas);
+                            }}
+                            className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors opacity-0 group-hover:opacity-100 shrink-0 cursor-pointer"
+                            title="Xóa VAS này"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
                       );
                     })}
+
+                    {/* Dashed Add Card for VAS */}
+                    {!isAddingVas && (
+                      <button
+                        type="button"
+                        onClick={() => setIsAddingVas(true)}
+                        className="p-3 border border-dashed border-indigo-300 hover:border-indigo-500 rounded-xl text-indigo-700 bg-indigo-50/40 hover:bg-indigo-100/60 transition-all text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer min-h-[50px]"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>+ Thêm dịch vụ VAS mới</span>
+                      </button>
+                    )}
                   </div>
                 </div>
 
