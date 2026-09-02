@@ -55,8 +55,10 @@ export interface ModelCapabilityFormData {
   operationCapacity: string;
   serviceCommitment: string;
   routes: CapabilityRouteItem[];
+  freeSurchargeOptions?: string[];
   freeSurcharges: string[];
   paidSurcharges: PaidSurchargeItem[];
+  vasOptions?: string[];
   selectedVas: string[];
 }
 
@@ -2631,6 +2633,17 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
   // Active focused model for the right-side form
   const [activeModelId, setActiveModelId] = useState<string>('trk-gen-ftl');
 
+  // New Surcharges & VAS Creation Input States
+  const [isAddingFreeSurcharge, setIsAddingFreeSurcharge] = useState(false);
+  const [newFreeSurchargeName, setNewFreeSurchargeName] = useState('');
+
+  const [isAddingPaidSurcharge, setIsAddingPaidSurcharge] = useState(false);
+  const [newPaidSurchargeName, setNewPaidSurchargeName] = useState('');
+  const [newPaidSurchargePrice, setNewPaidSurchargePrice] = useState('');
+
+  const [isAddingVas, setIsAddingVas] = useState(false);
+  const [newVasName, setNewVasName] = useState('');
+
   // Custom Form Data per model: Map model.id -> ModelCapabilityFormData
   const [modelFormData, setModelFormData] = useState<Record<string, ModelCapabilityFormData>>(() => {
     const initial: Record<string, ModelCapabilityFormData> = {};
@@ -2642,8 +2655,10 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
             operationCapacity: m.defaultOperation,
             serviceCommitment: m.defaultCommitment,
             routes: JSON.parse(JSON.stringify(m.defaultRoutes)),
+            freeSurchargeOptions: [...m.freeSurchargeOptions],
             freeSurcharges: [...m.defaultFreeSurcharges],
             paidSurcharges: JSON.parse(JSON.stringify(m.paidSurchargeOptions)),
+            vasOptions: [...m.vasOptions],
             selectedVas: [...m.defaultVas],
           };
         });
@@ -2733,8 +2748,10 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
     operationCapacity: activeModel?.defaultOperation || '',
     serviceCommitment: activeModel?.defaultCommitment || '',
     routes: activeModel ? JSON.parse(JSON.stringify(activeModel.defaultRoutes)) : [],
+    freeSurchargeOptions: activeModel?.freeSurchargeOptions || [],
     freeSurcharges: activeModel?.defaultFreeSurcharges || [],
     paidSurcharges: activeModel?.paidSurchargeOptions || [],
+    vasOptions: activeModel?.vasOptions || [],
     selectedVas: activeModel?.defaultVas || [],
   };
 
@@ -2788,7 +2805,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
   };
 
   // ==========================================
-  // SECTION 3 & 4: SURCHARGES & VAS OPERATIONS
+  // SECTION 3: SURCHARGES OPERATIONS & CUSTOM ADD
   // ==========================================
   const toggleFreeSurcharge = (item: string) => {
     const current = currentData.freeSurcharges || [];
@@ -2796,6 +2813,28 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
       ? current.filter((s) => s !== item)
       : [...current, item];
     updateCurrentFormData('freeSurcharges', updated);
+  };
+
+  const handleAddFreeSurcharge = () => {
+    const name = newFreeSurchargeName.trim();
+    if (!name) return;
+    const currentOptions = currentData.freeSurchargeOptions || activeModel?.freeSurchargeOptions || [];
+    if (!currentOptions.includes(name)) {
+      updateCurrentFormData('freeSurchargeOptions', [...currentOptions, name]);
+    }
+    const currentChecked = currentData.freeSurcharges || [];
+    if (!currentChecked.includes(name)) {
+      updateCurrentFormData('freeSurcharges', [...currentChecked, name]);
+    }
+    setNewFreeSurchargeName('');
+    setIsAddingFreeSurcharge(false);
+  };
+
+  const handleDeleteFreeSurchargeOption = (item: string) => {
+    const currentOptions = currentData.freeSurchargeOptions || activeModel?.freeSurchargeOptions || [];
+    updateCurrentFormData('freeSurchargeOptions', currentOptions.filter((o) => o !== item));
+    const currentChecked = currentData.freeSurcharges || [];
+    updateCurrentFormData('freeSurcharges', currentChecked.filter((o) => o !== item));
   };
 
   const togglePaidSurcharge = (id: string) => {
@@ -2808,6 +2847,28 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
     updateCurrentFormData('paidSurcharges', updated);
   };
 
+  const handleAddPaidSurcharge = () => {
+    const name = newPaidSurchargeName.trim();
+    if (!name) return;
+    const newPaidItem: PaidSurchargeItem = {
+      id: `p-custom-${Date.now()}`,
+      name,
+      priceText: newPaidSurchargePrice.trim() || 'Thỏa thuận',
+      isChecked: true,
+    };
+    updateCurrentFormData('paidSurcharges', [...(currentData.paidSurcharges || []), newPaidItem]);
+    setNewPaidSurchargeName('');
+    setNewPaidSurchargePrice('');
+    setIsAddingPaidSurcharge(false);
+  };
+
+  const handleDeletePaidSurcharge = (id: string) => {
+    updateCurrentFormData(
+      'paidSurcharges',
+      (currentData.paidSurcharges || []).filter((s) => s.id !== id)
+    );
+  };
+
   const updatePaidSurchargePrice = (id: string, priceText: string) => {
     const updated = (currentData.paidSurcharges || []).map((s) => {
       if (s.id === id) {
@@ -2818,12 +2879,37 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
     updateCurrentFormData('paidSurcharges', updated);
   };
 
+  // ==========================================
+  // SECTION 4: VAS OPERATIONS & CUSTOM ADD
+  // ==========================================
   const toggleVasItem = (vas: string) => {
     const current = currentData.selectedVas || [];
     const updated = current.includes(vas)
       ? current.filter((v) => v !== vas)
       : [...current, vas];
     updateCurrentFormData('selectedVas', updated);
+  };
+
+  const handleAddVasOption = () => {
+    const name = newVasName.trim();
+    if (!name) return;
+    const currentOptions = currentData.vasOptions || activeModel?.vasOptions || [];
+    if (!currentOptions.includes(name)) {
+      updateCurrentFormData('vasOptions', [...currentOptions, name]);
+    }
+    const currentChecked = currentData.selectedVas || [];
+    if (!currentChecked.includes(name)) {
+      updateCurrentFormData('selectedVas', [...currentChecked, name]);
+    }
+    setNewVasName('');
+    setIsAddingVas(false);
+  };
+
+  const handleDeleteVasOption = (name: string) => {
+    const currentOptions = currentData.vasOptions || activeModel?.vasOptions || [];
+    updateCurrentFormData('vasOptions', currentOptions.filter((v) => v !== name));
+    const currentChecked = currentData.selectedVas || [];
+    updateCurrentFormData('selectedVas', currentChecked.filter((v) => v !== name));
   };
 
   // ==========================================
@@ -3344,7 +3430,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                 </div>
 
                 {/* =========================================================================
-                    PHẦN 3: CÁC PHỤ PHÍ MIỄN PHÍ & CÓ PHÍ
+                    PHẦN 3: CÁC PHỤ PHÍ MIỄN PHÍ & CÓ PHÍ (HỖ TRỢ THÊM / BỚT TÙY Ý)
                 ========================================================================= */}
                 <div className="space-y-3 pt-3 border-t border-slate-100">
                   <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
