@@ -3866,7 +3866,6 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
               'Đơn Giá (VND) (*)': r.price || 15000000,
               'SLA Thời Gian': r.sla || '24 - 48 giờ',
             }),
-            'Quy Cách Giá': r.pricingStyle || 'All-in',
             'Hạn Giá (YYYY-MM-DD)': r.validUntil || '2026-12-31',
             'Promotion (%)': r.promotionPercent || 0,
           }))
@@ -3891,7 +3890,6 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
               'Bậc V4 (6.1 - 10 CBM) [₫/CBM]': 380000,
               'Bậc V5 (> 10 CBM) [₫/CBM]': 320000,
               'Lịch Chạy Hàng (*)': 'Thứ 2, Thứ 4, Thứ 6 (Xuất bến 20:00)',
-              'Quy Cách Giá': 'All-in',
               'Hạn Giá (YYYY-MM-DD)': '2026-12-31',
               'Promotion (%)': 10,
             },
@@ -3915,7 +3913,6 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
               'Bậc V4 (6.1 - 10 CBM) [₫/CBM]': 320000,
               'Bậc V5 (> 10 CBM) [₫/CBM]': 270000,
               'Lịch Chạy Hàng (*)': 'Thứ 3, Thứ 5, Thứ 7 (Xuất bến 19:30)',
-              'Quy Cách Giá': 'All-in',
               'Hạn Giá (YYYY-MM-DD)': '2026-12-31',
               'Promotion (%)': 0,
             },
@@ -3930,7 +3927,6 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
               'Đơn Vị Tính (*)': 'Chuyến',
               'Đơn Giá (VND) (*)': 14500000,
               'SLA Thời Gian': '4 - 6 giờ',
-              'Quy Cách Giá': 'All-in',
               'Hạn Giá (YYYY-MM-DD)': '2026-12-31',
               'Promotion (%)': 0,
             },
@@ -3944,7 +3940,6 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
               'Đơn Vị Tính (*)': 'Chuyến',
               'Đơn Giá (VND) (*)': 18000000,
               'SLA Thời Gian': '5 - 7 giờ',
-              'Quy Cách Giá': 'All-in',
               'Hạn Giá (YYYY-MM-DD)': '2026-12-31',
               'Promotion (%)': 5,
             },
@@ -3959,7 +3954,6 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
               'Đơn Vị Tính (*)': 'Chuyến',
               'Đơn Giá (VND) (*)': 9500000,
               'SLA Thời Gian': '7 - 9 giờ',
-              'Quy Cách Giá': 'All-in',
               'Hạn Giá (YYYY-MM-DD)': '2026-12-31',
               'Promotion (%)': 10,
             },
@@ -3973,7 +3967,6 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
               'Đơn Vị Tính (*)': 'Chuyến',
               'Đơn Giá (VND) (*)': 45000000,
               'SLA Thời Gian': '45 - 50 giờ',
-              'Quy Cách Giá': 'All-in',
               'Hạn Giá (YYYY-MM-DD)': '2026-12-31',
               'Promotion (%)': 0,
             },
@@ -3988,7 +3981,6 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
               'Đơn Vị Tính (*)': 'Chuyến',
               'Đơn Giá (VND) (*)': 28500000,
               'SLA Thời Gian': '48 - 60 giờ',
-              'Quy Cách Giá': 'All-in',
               'Hạn Giá (YYYY-MM-DD)': '2026-12-31',
               'Promotion (%)': 15,
             },
@@ -4002,7 +3994,6 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
               'Đơn Vị Tính (*)': 'Chuyến',
               'Đơn Giá (VND) (*)': 16500000,
               'SLA Thời Gian': '24 - 36 giờ',
-              'Quy Cách Giá': 'All-in',
               'Hạn Giá (YYYY-MM-DD)': '2026-12-31',
               'Promotion (%)': 0,
             },
@@ -4019,7 +4010,6 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
         { wch: 15 }, // ĐVT
         { wch: 18 }, // Đơn Giá
         { wch: isLtlTrucking ? 32 : 16 }, // Lịch Chạy Hàng / SLA
-        { wch: 16 }, // Quy Cách Giá
         { wch: 18 }, // Hạn Giá
         { wch: 15 }, // Promotion
       ];
@@ -4033,7 +4023,6 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
               'Loại Thùng Phương Tiện': bodyType,
               'Phân Khúc Tải Trọng Hợp Lệ': t,
               'Đơn Vị Tính Khuyên Dùng': isLtlTrucking ? 'Kg, CBM' : 'Chuyến',
-              'Quy Cách Giá Hợp Lệ': 'All-in / Chưa gồm phụ phí',
             });
           });
         });
@@ -4042,7 +4031,6 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
           lovData.push({
             'Loại Phương Tiện': veh,
             'Đơn Vị Tính Khuyên Dùng': activeModel?.unitLov?.join(', ') || 'Chuyến, Tấn',
-            'Quy Cách Giá Hợp Lệ': 'All-in / Chưa gồm phụ phí',
           });
         });
       }
@@ -4148,8 +4136,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
             ? (String(row['Đơn Vị Tính (*)'] || row['Đơn Vị Tính'] || row['ĐVT'] || '').toLowerCase().includes('cbm') ? 'CBM' : 'Kg')
             : (isTrucking ? 'Chuyến' : String(row['Đơn Vị Tính (*)'] || row['Đơn Vị Tính'] || row['ĐVT'] || defaultUnit).trim());
           const sla = String(row['Lịch Chạy Hàng (*)'] || row['Lịch Chạy Hàng'] || row['Lịch Chạy'] || row['Lịch chạy'] || row['SLA Thời Gian'] || row['SLA'] || (isLtlTrucking ? 'Thứ 2, Thứ 4, Thứ 6' : '24 - 48 giờ')).trim();
-          const rawStyle = String(row['Quy Cách Giá'] || '').trim().toLowerCase();
-          const pricingStyle: 'All-in' | 'Chưa gồm phụ phí' = rawStyle.includes('chưa') || rawStyle.includes('phụ') ? 'Chưa gồm phụ phí' : 'All-in';
+          const pricingStyle: 'All-in' | 'Chưa gồm phụ phí' = 'All-in';
           
           let validUntil = String(row['Hạn Giá (YYYY-MM-DD)'] || row['Hạn Giá'] || row['Hạn giá'] || '2026-12-31').trim();
           if (!/^\d{4}-\d{2}-\d{2}$/.test(validUntil)) {
@@ -4885,7 +4872,6 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                 <th className={`py-2.5 px-2 text-center ${isLtlTable ? 'min-w-[150px]' : 'min-w-[90px]'}`}>
                                   {isLtlTable ? 'Lịch Chạy Hàng' : 'SLA'}
                                 </th>
-                                <th className="py-2.5 px-2.5 min-w-[135px]">Quy Cách Giá</th>
                                 <th className="py-2.5 px-2.5 min-w-[130px] text-center">Hạn Giá</th>
                                 <th className="py-2.5 px-2 min-w-[85px] text-center">Promotion</th>
                                 <th className="py-2.5 px-1.5 text-center w-9 min-w-[36px]">Xóa</th>
@@ -4897,7 +4883,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                         <tbody className="divide-y divide-slate-200 bg-white">
                           {(!currentData.routes || currentData.routes.length === 0) ? (
                             <tr>
-                              <td colSpan={activeCategory?.id === 'trucking' ? 14 : 13} className="py-8 text-center text-slate-400 font-medium">
+                              <td colSpan={activeCategory?.id === 'trucking' ? 13 : 12} className="py-8 text-center text-slate-400 font-medium">
                                 Chưa có tuyến đường nào. Bấm nút <strong className="text-indigo-600 font-bold">+ Thêm Tuyến Mới</strong> để khai báo bảng giá.
                               </td>
                             </tr>
@@ -5198,19 +5184,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                     )}
                                   </td>
 
-                                  {/* 10. Quy cách giá */}
-                                  <td className="p-0 align-top">
-                                    <select
-                                      value={route.pricingStyle}
-                                      onChange={(e) => handleUpdateRouteRow(route.id, 'pricingStyle', e.target.value)}
-                                      className="w-full px-2 py-2 bg-transparent text-slate-800 text-xs font-medium cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
-                                    >
-                                      <option value="All-in">Trọn gói All-in</option>
-                                      <option value="Chưa gồm phụ phí">+ Phụ phí ngoài</option>
-                                    </select>
-                                  </td>
-
-                                  {/* 11. Hạn Giá (Date) */}
+                                  {/* 10. Hạn Giá (Date) */}
                                   <td className="p-0 align-top">
                                     <input
                                       type="date"
