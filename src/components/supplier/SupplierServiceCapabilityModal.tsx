@@ -29,11 +29,37 @@ import {
 } from 'lucide-react';
 import { ServiceType } from '../../types';
 
+export const TRUCKING_BODY_TYPES = [
+  'Xe Tải Thùng Kín (Dry Box Truck) - [An ninh cao / Chống ướt]',
+  'Xe Tải Mui Bạt (Tarpaulin Truck) - [Mở bạt 2 bên hông]',
+  'Xe Tải Có Bửng Nâng Thủy Lực (Tail-lift) - [Bửng nâng tự động]',
+  'Xe Tải Thùng Lửng / Mooc Sàn (Flatbed) - [Cẩu hạ từ trên nóc]',
+  'Đầu Kéo Kéo Container (Tractor Drayage) - [Kéo vỏ Cont Cảng / ICD]',
+  'Khác (Nhập tùy chọn)...',
+];
+
+export const TRUCKING_TONNAGES = [
+  '1.0T – 1.9T (Vào phố ban ngày) —— (7 – 9 CBM)',
+  '2.5T – 3.5T (Tải nhẹ liên tỉnh) —— (14 – 16 CBM)',
+  '5.0T – 6.5T (Tải trung) —— (25 – 30 CBM)',
+  '8.0T (Tải nặng 2 chân) —— (45 – 50 CBM)',
+  '15.0T (Tải nặng 3 chân) —— (55 – 60 CBM)',
+  '18.0T – 20.0T (4 chân - 5 chân tải nặng) —— (~65 CBM)',
+  'Đầu kéo Cont 20ft (Tải trọng 26 - 28 Tấn) —— (~33 CBM)',
+  'Đầu kéo Cont 40ft (Tải trọng 28 - 30 Tấn) —— (~67 CBM)',
+  'Đầu kéo Cont 45ft High Cube —— (~85 CBM)',
+  'Khác (Nhập tùy chọn)...',
+];
+
 export interface CapabilityRouteItem {
   id: string;
   route: string;
   origin: string;
   destination: string;
+  truckBodyType?: string;
+  customTruckBodyType?: string;
+  truckTonnage?: string;
+  customTruckTonnage?: string;
   vehicleType: string;
   pricingUnit: string;
   price: number;
@@ -126,6 +152,8 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
                 route: 'HCM ⇄ Hà Nội',
                 origin: 'KCN Tân Bình (TP.HCM)',
                 destination: 'KCN Thăng Long (Hà Nội)',
+                truckBodyType: 'Xe Tải Thùng Kín (Dry Box Truck) - [An ninh cao / Chống ướt]',
+                truckTonnage: '15.0T (Tải nặng 3 chân) —— (55 – 60 CBM)',
                 vehicleType: 'Xe tải 15T thùng kín',
                 pricingUnit: 'Chuyến',
                 price: 28500000,
@@ -139,6 +167,8 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
                 route: 'HCM ⇄ Đà Nẵng',
                 origin: 'KCN Sóng Thần (Bình Dương)',
                 destination: 'KCN Hòa Khánh (Đà Nẵng)',
+                truckBodyType: 'Xe Tải Thùng Kín (Dry Box Truck) - [An ninh cao / Chống ướt]',
+                truckTonnage: '8.0T (Tải nặng 2 chân) —— (45 – 50 CBM)',
                 vehicleType: 'Xe tải 8T thùng kín',
                 pricingUnit: 'Chuyến',
                 price: 16500000,
@@ -152,6 +182,8 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
                 route: 'HCM ⇄ Nha Trang',
                 origin: 'Bình Tân (TP.HCM)',
                 destination: 'Cam Ranh (Khánh Hòa)',
+                truckBodyType: 'Xe Tải Thùng Kín (Dry Box Truck) - [An ninh cao / Chống ướt]',
+                truckTonnage: '5.0T – 6.5T (Tải trung) —— (25 – 30 CBM)',
                 vehicleType: 'Xe tải 5T thùng kín',
                 pricingUnit: 'Chuyến',
                 price: 7800000,
@@ -2770,13 +2802,18 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
   // SECTION 2: ROUTES TABLE OPERATIONS
   // ==========================================
   const handleAddRouteRow = () => {
-    const defaultVehicle = activeModel?.vehicleLov?.[0] || 'Phương tiện chuẩn';
+    const isTrucking = activeCategory?.id === 'trucking';
+    const defaultBody = TRUCKING_BODY_TYPES[0];
+    const defaultTonnage = TRUCKING_TONNAGES[4]; // 15T
+    const defaultVehicle = isTrucking ? 'Xe tải 15T thùng kín' : (activeModel?.vehicleLov?.[0] || 'Phương tiện chuẩn');
     const defaultUnit = activeModel?.unitLov?.[0] || 'Chuyến';
     const newRoute: CapabilityRouteItem = {
       id: `r-new-${Date.now()}`,
       route: 'Hành Lang Tuyến Mới',
       origin: 'Điểm Lấy Hàng (Kho / Cảng)',
       destination: 'Điểm Giao Hàng (Kho / Cảng)',
+      truckBodyType: isTrucking ? defaultBody : undefined,
+      truckTonnage: isTrucking ? defaultTonnage : undefined,
       vehicleType: defaultVehicle,
       pricingUnit: defaultUnit,
       price: 15000000,
@@ -3256,7 +3293,14 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                             <th className="py-2.5 px-2.5 min-w-[130px]">Tuyến Đường</th>
                             <th className="py-2.5 px-2.5 min-w-[120px]">Điểm Đi</th>
                             <th className="py-2.5 px-2.5 min-w-[120px]">Điểm Đến</th>
-                            <th className="py-2.5 px-2.5 min-w-[140px]">Loại Phương Tiện</th>
+                            {activeCategory?.id === 'trucking' ? (
+                              <>
+                                <th className="py-2.5 px-2.5 min-w-[170px]">Loại Thùng Phương Tiện</th>
+                                <th className="py-2.5 px-2.5 min-w-[170px]">Phân Khúc Tải Trọng</th>
+                              </>
+                            ) : (
+                              <th className="py-2.5 px-2.5 min-w-[140px]">Loại Phương Tiện</th>
+                            )}
                             <th className="py-2.5 px-2 w-24">ĐVT</th>
                             <th className="py-2.5 px-2.5 min-w-[110px]">Đơn Giá</th>
                             <th className="py-2.5 px-2 min-w-[85px]">SLA</th>
@@ -3269,7 +3313,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                         <tbody className="divide-y divide-slate-100">
                           {(!currentData.routes || currentData.routes.length === 0) ? (
                             <tr>
-                              <td colSpan={11} className="py-6 text-center text-slate-400">
+                              <td colSpan={activeCategory?.id === 'trucking' ? 12 : 11} className="py-6 text-center text-slate-400">
                                 Chưa có tuyến đường nào. Bấm nút <strong>"+ Thêm Tuyến Mới"</strong> để khai báo bảng giá.
                               </td>
                             </tr>
@@ -3279,16 +3323,17 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                               const discountedPrice = hasPromo 
                                 ? Math.round(route.price * (1 - route.promotionPercent / 100)) 
                                 : route.price;
+                              const isTrucking = activeCategory?.id === 'trucking';
 
                               return (
                                 <tr key={route.id} className="hover:bg-slate-50/80 transition-colors">
                                   {/* 1. STT */}
-                                  <td className="py-2 px-1 text-center font-mono text-slate-400 font-bold text-[11px]">
+                                  <td className="py-2 px-1 text-center font-mono text-slate-400 font-bold text-[11px] align-top pt-3">
                                     {idx + 1}
                                   </td>
 
                                   {/* 2. Tuyến */}
-                                  <td className="py-2 px-1.5">
+                                  <td className="py-2 px-1.5 align-top">
                                     <input
                                       type="text"
                                       value={route.route}
@@ -3299,7 +3344,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                   </td>
 
                                   {/* 3. Điểm Đi */}
-                                  <td className="py-2 px-1.5">
+                                  <td className="py-2 px-1.5 align-top">
                                     <input
                                       type="text"
                                       value={route.origin}
@@ -3310,7 +3355,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                   </td>
 
                                   {/* 4. Điểm Đến */}
-                                  <td className="py-2 px-1.5">
+                                  <td className="py-2 px-1.5 align-top">
                                     <input
                                       type="text"
                                       value={route.destination}
@@ -3320,18 +3365,90 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                     />
                                   </td>
 
-                                  {/* 5. Loại Phương Tiện (LOV) */}
-                                  <td className="py-2 px-1.5">
-                                    <select
-                                      value={route.vehicleType}
-                                      onChange={(e) => handleUpdateRouteRow(route.id, 'vehicleType', e.target.value)}
-                                      className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 text-xs focus:bg-white focus:border-indigo-500"
-                                    >
-                                      {(activeModel?.vehicleLov || [route.vehicleType]).map((veh: string, vIdx: number) => (
-                                        <option key={vIdx} value={veh}>{veh}</option>
-                                      ))}
-                                    </select>
-                                  </td>
+                                  {/* 5. Cột Phương Tiện: Tách 2 cột nếu là Đường Bộ */}
+                                  {isTrucking ? (
+                                    <>
+                                      {/* 5a. Loại Thùng Phương Tiện (LOV + Custom Option) */}
+                                      <td className="py-2 px-1.5 align-top">
+                                        <select
+                                          value={route.truckBodyType || (TRUCKING_BODY_TYPES.includes(route.vehicleType) ? route.vehicleType : (route.customTruckBodyType ? 'Khác (Nhập tùy chọn)...' : TRUCKING_BODY_TYPES[0]))}
+                                          onChange={(e) => {
+                                            const val = e.target.value;
+                                            handleUpdateRouteRow(route.id, 'truckBodyType', val);
+                                            if (val !== 'Khác (Nhập tùy chọn)...') {
+                                              handleUpdateRouteRow(route.id, 'customTruckBodyType', '');
+                                              handleUpdateRouteRow(route.id, 'vehicleType', `${route.truckTonnage ? route.truckTonnage.split(' (')[0] : ''} ${val.split(' (')[0]}`.trim());
+                                            }
+                                          }}
+                                          className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 text-xs focus:bg-white focus:border-indigo-500 font-medium"
+                                        >
+                                          {TRUCKING_BODY_TYPES.map((b, bIdx) => (
+                                            <option key={bIdx} value={b}>{b}</option>
+                                          ))}
+                                        </select>
+                                        {(route.truckBodyType === 'Khác (Nhập tùy chọn)...' || (!TRUCKING_BODY_TYPES.includes(route.truckBodyType || '') && route.customTruckBodyType)) && (
+                                          <input
+                                            type="text"
+                                            autoFocus
+                                            value={route.customTruckBodyType || ''}
+                                            onChange={(e) => {
+                                              const customVal = e.target.value;
+                                              handleUpdateRouteRow(route.id, 'customTruckBodyType', customVal);
+                                              handleUpdateRouteRow(route.id, 'vehicleType', `${route.truckTonnage ? route.truckTonnage.split(' (')[0] : ''} ${customVal}`.trim());
+                                            }}
+                                            placeholder="Gõ loại thùng riêng..."
+                                            className="w-full mt-1 px-2 py-1 bg-amber-50/80 border border-amber-300 rounded-lg text-slate-900 text-xs font-semibold focus:bg-white focus:border-amber-500 shadow-2xs"
+                                          />
+                                        )}
+                                      </td>
+
+                                      {/* 5b. Phân Khúc Tải Trọng (LOV + Custom Option) */}
+                                      <td className="py-2 px-1.5 align-top">
+                                        <select
+                                          value={route.truckTonnage || (TRUCKING_TONNAGES.includes(route.vehicleType) ? route.vehicleType : (route.customTruckTonnage ? 'Khác (Nhập tùy chọn)...' : TRUCKING_TONNAGES[4]))}
+                                          onChange={(e) => {
+                                            const val = e.target.value;
+                                            handleUpdateRouteRow(route.id, 'truckTonnage', val);
+                                            if (val !== 'Khác (Nhập tùy chọn)...') {
+                                              handleUpdateRouteRow(route.id, 'customTruckTonnage', '');
+                                              handleUpdateRouteRow(route.id, 'vehicleType', `${val.split(' (')[0]} ${route.truckBodyType ? route.truckBodyType.split(' (')[0] : ''}`.trim());
+                                            }
+                                          }}
+                                          className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 text-xs focus:bg-white focus:border-indigo-500 font-medium"
+                                        >
+                                          {TRUCKING_TONNAGES.map((t, tIdx) => (
+                                            <option key={tIdx} value={t}>{t}</option>
+                                          ))}
+                                        </select>
+                                        {(route.truckTonnage === 'Khác (Nhập tùy chọn)...' || (!TRUCKING_TONNAGES.includes(route.truckTonnage || '') && route.customTruckTonnage)) && (
+                                          <input
+                                            type="text"
+                                            autoFocus
+                                            value={route.customTruckTonnage || ''}
+                                            onChange={(e) => {
+                                              const customVal = e.target.value;
+                                              handleUpdateRouteRow(route.id, 'customTruckTonnage', customVal);
+                                              handleUpdateRouteRow(route.id, 'vehicleType', `${customVal} ${route.truckBodyType ? route.truckBodyType.split(' (')[0] : ''}`.trim());
+                                            }}
+                                            placeholder="Gõ tải trọng riêng..."
+                                            className="w-full mt-1 px-2 py-1 bg-amber-50/80 border border-amber-300 rounded-lg text-slate-900 text-xs font-semibold focus:bg-white focus:border-amber-500 shadow-2xs"
+                                          />
+                                        )}
+                                      </td>
+                                    </>
+                                  ) : (
+                                    <td className="py-2 px-1.5 align-top">
+                                      <select
+                                        value={route.vehicleType}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'vehicleType', e.target.value)}
+                                        className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 text-xs focus:bg-white focus:border-indigo-500"
+                                      >
+                                        {(activeModel?.vehicleLov || [route.vehicleType]).map((veh: string, vIdx: number) => (
+                                          <option key={vIdx} value={veh}>{veh}</option>
+                                        ))}
+                                      </select>
+                                    </td>
+                                  )}
 
                                   {/* 6. Đơn vị tính (LOV) */}
                                   <td className="py-2 px-1">
