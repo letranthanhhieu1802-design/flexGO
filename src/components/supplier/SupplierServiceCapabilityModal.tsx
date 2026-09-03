@@ -75,6 +75,79 @@ export interface ScheduleModalData {
   customNote: string;
 }
 
+// =========================================================================
+// LTL TIERED PRICING DEFINITIONS (KHUNG BẬC GIÁ CHUẨN THỊ TRƯỜNG CỐ ĐỊNH)
+// =========================================================================
+export interface LtlWeightTier {
+  id: string;
+  rangeLabel: string;
+  subLabel: string;
+  minKg: number;
+  maxKg: number;
+  price: number; // VND per Kg
+}
+
+export interface LtlVolumeTier {
+  id: string;
+  rangeLabel: string;
+  subLabel: string;
+  minCbm: number;
+  maxCbm: number;
+  price: number; // VND per CBM
+}
+
+export interface LtlTieredPricingConfig {
+  minCharge: number; // Cước tối thiểu (VND)
+  pricingBasis: 'weight' | 'volume'; // Đơn vị tính chính
+  weightTiers: LtlWeightTier[];
+  volumeTiers: LtlVolumeTier[];
+}
+
+export const DEFAULT_LTL_WEIGHT_TIERS: LtlWeightTier[] = [
+  { id: 'w1', rangeLabel: '1 – 50 Kg', subLabel: 'Hàng lẻ kiện nhỏ', minKg: 1, maxKg: 50, price: 2500 },
+  { id: 'w2', rangeLabel: '51 – 200 Kg', subLabel: 'Hàng lẻ thông dụng', minKg: 51, maxKg: 200, price: 2000 },
+  { id: 'w3', rangeLabel: '201 – 500 Kg', subLabel: 'Hàng sỉ kiện trung', minKg: 201, maxKg: 500, price: 1650 },
+  { id: 'w4', rangeLabel: '501 – 1,000 Kg', subLabel: 'Hàng kiện lớn (0.5 – 1T)', minKg: 501, maxKg: 1000, price: 1350 },
+  { id: 'w5', rangeLabel: '> 1,000 Kg', subLabel: 'Ghép lô tải nặng (> 1T)', minKg: 1001, maxKg: 999999, price: 1100 },
+];
+
+export const DEFAULT_LTL_VOLUME_TIERS: LtlVolumeTier[] = [
+  { id: 'v1', rangeLabel: '< 1.0 CBM', subLabel: 'Kiện hàng nhẹ nhỏ', minCbm: 0.1, maxCbm: 1.0, price: 600000 },
+  { id: 'v2', rangeLabel: '1.0 – 3.0 CBM', subLabel: 'Ghép thể tích phổ biến', minCbm: 1.0, maxCbm: 3.0, price: 500000 },
+  { id: 'v3', rangeLabel: '3.1 – 6.0 CBM', subLabel: 'Kiện cồng kềnh trung', minCbm: 3.1, maxCbm: 6.0, price: 420000 },
+  { id: 'v4', rangeLabel: '6.1 – 10.0 CBM', subLabel: 'Lô hàng thể tích lớn', minCbm: 6.1, maxCbm: 10.0, price: 380000 },
+  { id: 'v5', rangeLabel: '> 10.0 CBM', subLabel: 'Lô siêu khối tích (> 10 m³)', minCbm: 10.1, maxCbm: 999999, price: 320000 },
+];
+
+export const createDefaultLtlPricingConfig = (basis: 'weight' | 'volume' = 'weight', baseKgPrice: number = 2000, baseCbmPrice: number = 500000): LtlTieredPricingConfig => {
+  return {
+    minCharge: basis === 'weight' ? 100000 : 150000,
+    pricingBasis: basis,
+    weightTiers: [
+      { id: 'w1', rangeLabel: '1 – 50 Kg', subLabel: 'Hàng lẻ kiện nhỏ', minKg: 1, maxKg: 50, price: Math.round(baseKgPrice * 1.25) },
+      { id: 'w2', rangeLabel: '51 – 200 Kg', subLabel: 'Hàng lẻ thông dụng', minKg: 51, maxKg: 200, price: baseKgPrice },
+      { id: 'w3', rangeLabel: '201 – 500 Kg', subLabel: 'Hàng sỉ kiện trung', minKg: 201, maxKg: 500, price: Math.round(baseKgPrice * 0.825) },
+      { id: 'w4', rangeLabel: '501 – 1,000 Kg', subLabel: 'Hàng kiện lớn (0.5 – 1T)', minKg: 501, maxKg: 1000, price: Math.round(baseKgPrice * 0.675) },
+      { id: 'w5', rangeLabel: '> 1,000 Kg', subLabel: 'Ghép lô tải nặng (> 1T)', minKg: 1001, maxKg: 999999, price: Math.round(baseKgPrice * 0.55) },
+    ],
+    volumeTiers: [
+      { id: 'v1', rangeLabel: '< 1.0 CBM', subLabel: 'Kiện hàng nhẹ nhỏ', minCbm: 0.1, maxCbm: 1.0, price: Math.round(baseCbmPrice * 1.2) },
+      { id: 'v2', rangeLabel: '1.0 – 3.0 CBM', subLabel: 'Ghép thể tích phổ biến', minCbm: 1.0, maxCbm: 3.0, price: baseCbmPrice },
+      { id: 'v3', rangeLabel: '3.1 – 6.0 CBM', subLabel: 'Kiện cồng kềnh trung', minCbm: 3.1, maxCbm: 6.0, price: Math.round(baseCbmPrice * 0.84) },
+      { id: 'v4', rangeLabel: '6.1 – 10.0 CBM', subLabel: 'Lô hàng thể tích lớn', minCbm: 6.1, maxCbm: 10.0, price: Math.round(baseCbmPrice * 0.76) },
+      { id: 'v5', rangeLabel: '> 10.0 CBM', subLabel: 'Lô siêu khối tích (> 10 m³)', minCbm: 10.1, maxCbm: 999999, price: Math.round(baseCbmPrice * 0.64) },
+    ],
+  };
+};
+
+export interface TieredPricingModalData {
+  routeId: string;
+  routeName: string;
+  origin: string;
+  destination: string;
+  pricingConfig: LtlTieredPricingConfig;
+}
+
 export const TRUCKING_BODY_TYPES = [
   'Xe Tải Thùng Kín (Dry Box Truck) - [An ninh cao / Chống ướt]',
   'Xe Tải Mui Bạt (Tarpaulin Truck) - [Mở bạt 2 bên hông]',
@@ -277,6 +350,7 @@ export interface CapabilityRouteItem {
   pricingStyle: 'All-in' | 'Chưa gồm phụ phí';
   validUntil?: string; // Hạn giá (Date giá)
   promotionPercent: number; // 0 - 50%
+  ltlPricing?: LtlTieredPricingConfig; // Biểu giá ma trận 5 bậc chuẩn LTL (Kg & CBM)
 }
 
 export interface PaidSurchargeItem {
@@ -1020,6 +1094,7 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
                 pricingStyle: 'All-in',
                 validUntil: '2026-12-31',
                 promotionPercent: 10,
+                ltlPricing: createDefaultLtlPricingConfig('weight', 2000, 500000),
               },
               {
                 id: 'r-ltl-2',
@@ -1037,6 +1112,7 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
                 pricingStyle: 'All-in',
                 validUntil: '2026-12-31',
                 promotionPercent: 0,
+                ltlPricing: createDefaultLtlPricingConfig('volume', 1800, 420000),
               },
             ],
             freeSurchargeOptions: [
@@ -3583,6 +3659,43 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
     setScheduleModalData(null);
   };
 
+  const [tieredPricingModalData, setTieredPricingModalData] = useState<TieredPricingModalData | null>(null);
+  const [tieredPricingActiveTab, setTieredPricingActiveTab] = useState<'weight' | 'volume'>('weight');
+
+  const handleOpenTieredPricingModal = (route: CapabilityRouteItem) => {
+    const isWeightBasis = !route.pricingUnit || route.pricingUnit.toLowerCase().includes('kg');
+    const existingConfig = route.ltlPricing || createDefaultLtlPricingConfig(
+      isWeightBasis ? 'weight' : 'volume',
+      route.price > 0 ? (isWeightBasis ? route.price : Math.round(route.price / 250)) : 2000,
+      route.price > 0 ? (!isWeightBasis ? route.price : Math.round(route.price * 250)) : 500000
+    );
+
+    setTieredPricingModalData({
+      routeId: route.id,
+      routeName: route.route,
+      origin: route.origin,
+      destination: route.destination,
+      pricingConfig: JSON.parse(JSON.stringify(existingConfig)),
+    });
+    setTieredPricingActiveTab(isWeightBasis ? 'weight' : 'volume');
+  };
+
+  const handleSaveTieredPricingModal = () => {
+    if (!tieredPricingModalData) return;
+    const { routeId, pricingConfig } = tieredPricingModalData;
+    const isWeight = pricingConfig.pricingBasis === 'weight';
+    const repPrice = isWeight 
+      ? (pricingConfig.weightTiers[2]?.price || pricingConfig.weightTiers[0]?.price || 1650)
+      : (pricingConfig.volumeTiers[2]?.price || pricingConfig.volumeTiers[0]?.price || 420000);
+
+    handleUpdateRouteRowMultiple(routeId, {
+      ltlPricing: pricingConfig,
+      pricingUnit: isWeight ? 'Kg' : 'CBM',
+      price: repPrice,
+    });
+    setTieredPricingModalData(null);
+  };
+
   // Custom Form Data per model: Map model.id -> ModelCapabilityFormData
   const [modelFormData, setModelFormData] = useState<Record<string, ModelCapabilityFormData>>(() => {
     const initial: Record<string, ModelCapabilityFormData> = {};
@@ -3736,10 +3849,21 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
               'Loại Phương Tiện (*)': r.vehicleType || activeModel?.vehicleLov?.[0] || 'Phương tiện chuẩn',
             }),
             'Đơn Vị Tính (*)': r.pricingUnit || (isLtlTrucking ? 'Kg' : (isTrucking ? 'Chuyến' : 'Tấn')),
-            'Đơn Giá (VND) (*)': r.price || (isLtlTrucking ? 1650 : 15000000),
             ...(isLtlTrucking ? {
+              'Cước Sàn Tối Thiểu (Min Charge)': r.ltlPricing?.minCharge || 100000,
+              'Bậc 1 (1 - 50 Kg) [₫/Kg]': r.ltlPricing?.weightTiers[0]?.price || 2500,
+              'Bậc 2 (51 - 200 Kg) [₫/Kg]': r.ltlPricing?.weightTiers[1]?.price || 2000,
+              'Bậc 3 (201 - 500 Kg) [₫/Kg]': r.ltlPricing?.weightTiers[2]?.price || 1650,
+              'Bậc 4 (501 - 1000 Kg) [₫/Kg]': r.ltlPricing?.weightTiers[3]?.price || 1350,
+              'Bậc 5 (> 1000 Kg) [₫/Kg]': r.ltlPricing?.weightTiers[4]?.price || 1100,
+              'Bậc V1 (< 1 CBM) [₫/CBM]': r.ltlPricing?.volumeTiers[0]?.price || 600000,
+              'Bậc V2 (1 - 3 CBM) [₫/CBM]': r.ltlPricing?.volumeTiers[1]?.price || 500000,
+              'Bậc V3 (3.1 - 6 CBM) [₫/CBM]': r.ltlPricing?.volumeTiers[2]?.price || 420000,
+              'Bậc V4 (6.1 - 10 CBM) [₫/CBM]': r.ltlPricing?.volumeTiers[3]?.price || 380000,
+              'Bậc V5 (> 10 CBM) [₫/CBM]': r.ltlPricing?.volumeTiers[4]?.price || 320000,
               'Lịch Chạy Hàng (*)': r.sla || 'Thứ 2, Thứ 4, Thứ 6 (Xuất bến 20:00)',
             } : {
+              'Đơn Giá (VND) (*)': r.price || 15000000,
               'SLA Thời Gian': r.sla || '24 - 48 giờ',
             }),
             'Quy Cách Giá': r.pricingStyle || 'All-in',
@@ -3755,7 +3879,17 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
               'Loại Thùng Phương Tiện (*)': 'Xe Thùng Kín Chuyên Tuyến Ghép LTL',
               'Phân Khúc Tải Trọng (*)': '15.0T (3 Chân thùng kín chạy tuyến cố định) —— (55 – 60 CBM)',
               'Đơn Vị Tính (*)': 'Kg',
-              'Đơn Giá (VND) (*)': 1650,
+              'Cước Sàn Tối Thiểu (Min Charge)': 100000,
+              'Bậc 1 (1 - 50 Kg) [₫/Kg]': 2500,
+              'Bậc 2 (51 - 200 Kg) [₫/Kg]': 2000,
+              'Bậc 3 (201 - 500 Kg) [₫/Kg]': 1650,
+              'Bậc 4 (501 - 1000 Kg) [₫/Kg]': 1350,
+              'Bậc 5 (> 1000 Kg) [₫/Kg]': 1100,
+              'Bậc V1 (< 1 CBM) [₫/CBM]': 600000,
+              'Bậc V2 (1 - 3 CBM) [₫/CBM]': 500000,
+              'Bậc V3 (3.1 - 6 CBM) [₫/CBM]': 420000,
+              'Bậc V4 (6.1 - 10 CBM) [₫/CBM]': 380000,
+              'Bậc V5 (> 10 CBM) [₫/CBM]': 320000,
               'Lịch Chạy Hàng (*)': 'Thứ 2, Thứ 4, Thứ 6 (Xuất bến 20:00)',
               'Quy Cách Giá': 'All-in',
               'Hạn Giá (YYYY-MM-DD)': '2026-12-31',
@@ -3769,7 +3903,17 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
               'Loại Thùng Phương Tiện (*)': 'Xe Mui Bạt Trục Bắc - Nam (Ghép Hàng Thể Tích)',
               'Phân Khúc Tải Trọng (*)': '8.0T – 9.0T (2 Chân thùng dài 9.8m ghép hàng cồng kềnh) —— (~55 CBM)',
               'Đơn Vị Tính (*)': 'CBM',
-              'Đơn Giá (VND) (*)': 420000,
+              'Cước Sàn Tối Thiểu (Min Charge)': 150000,
+              'Bậc 1 (1 - 50 Kg) [₫/Kg]': 2250,
+              'Bậc 2 (51 - 200 Kg) [₫/Kg]': 1800,
+              'Bậc 3 (201 - 500 Kg) [₫/Kg]': 1500,
+              'Bậc 4 (501 - 1000 Kg) [₫/Kg]': 1200,
+              'Bậc 5 (> 1000 Kg) [₫/Kg]': 1000,
+              'Bậc V1 (< 1 CBM) [₫/CBM]': 500000,
+              'Bậc V2 (1 - 3 CBM) [₫/CBM]': 420000,
+              'Bậc V3 (3.1 - 6 CBM) [₫/CBM]': 350000,
+              'Bậc V4 (6.1 - 10 CBM) [₫/CBM]': 320000,
+              'Bậc V5 (> 10 CBM) [₫/CBM]': 270000,
               'Lịch Chạy Hàng (*)': 'Thứ 3, Thứ 5, Thứ 7 (Xuất bến 19:30)',
               'Quy Cách Giá': 'All-in',
               'Hạn Giá (YYYY-MM-DD)': '2026-12-31',
@@ -4018,6 +4162,41 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
           const rawCode = String(row['Mã Tuyến (Route Code)'] || row['Mã Tuyến'] || '').trim();
           const routeCode = rawCode || `RC-${modelPrefix}-${String(parsedRoutes.length + 1).padStart(3, '0')}`;
 
+          let ltlPricing: LtlTieredPricingConfig | undefined = undefined;
+          if (isLtlTrucking) {
+            const minCharge = parseFloat(String(row['Cước Sàn Tối Thiểu (Min Charge)'] || row['Cước Tối Thiểu'] || row['Min Charge'] || (pricingUnit === 'CBM' ? 150000 : 100000))) || (pricingUnit === 'CBM' ? 150000 : 100000);
+            const w1 = parseFloat(String(row['Bậc 1 (1 - 50 Kg) [₫/Kg]'] || row['Bậc 1 (1 - 50 Kg)'] || '')) || Math.round(price * 1.25) || 2500;
+            const w2 = parseFloat(String(row['Bậc 2 (51 - 200 Kg) [₫/Kg]'] || row['Bậc 2 (51 - 200 Kg)'] || '')) || price || 2000;
+            const w3 = parseFloat(String(row['Bậc 3 (201 - 500 Kg) [₫/Kg]'] || row['Bậc 3 (201 - 500 Kg)'] || '')) || Math.round(price * 0.825) || 1650;
+            const w4 = parseFloat(String(row['Bậc 4 (501 - 1000 Kg) [₫/Kg]'] || row['Bậc 4 (501 - 1000 Kg)'] || '')) || Math.round(price * 0.675) || 1350;
+            const w5 = parseFloat(String(row['Bậc 5 (> 1000 Kg) [₫/Kg]'] || row['Bậc 5 (> 1000 Kg)'] || '')) || Math.round(price * 0.55) || 1100;
+
+            const v1 = parseFloat(String(row['Bậc V1 (< 1 CBM) [₫/CBM]'] || row['Bậc V1 (< 1 CBM)'] || '')) || 600000;
+            const v2 = parseFloat(String(row['Bậc V2 (1 - 3 CBM) [₫/CBM]'] || row['Bậc V2 (1 - 3 CBM)'] || '')) || 500000;
+            const v3 = parseFloat(String(row['Bậc V3 (3.1 - 6 CBM) [₫/CBM]'] || row['Bậc V3 (3.1 - 6 CBM)'] || '')) || 420000;
+            const v4 = parseFloat(String(row['Bậc V4 (6.1 - 10 CBM) [₫/CBM]'] || row['Bậc V4 (6.1 - 10 CBM)'] || '')) || 380000;
+            const v5 = parseFloat(String(row['Bậc V5 (> 10 CBM) [₫/CBM]'] || row['Bậc V5 (> 10 CBM)'] || '')) || 320000;
+
+            ltlPricing = {
+              minCharge,
+              pricingBasis: pricingUnit === 'CBM' ? 'volume' : 'weight',
+              weightTiers: [
+                { id: 'w1', rangeLabel: '1 – 50 Kg', subLabel: 'Hàng lẻ kiện nhỏ', minKg: 1, maxKg: 50, price: w1 },
+                { id: 'w2', rangeLabel: '51 – 200 Kg', subLabel: 'Hàng lẻ thông dụng', minKg: 51, maxKg: 200, price: w2 },
+                { id: 'w3', rangeLabel: '201 – 500 Kg', subLabel: 'Hàng sỉ kiện trung', minKg: 201, maxKg: 500, price: w3 },
+                { id: 'w4', rangeLabel: '501 – 1,000 Kg', subLabel: 'Hàng kiện lớn (0.5 – 1T)', minKg: 501, maxKg: 1000, price: w4 },
+                { id: 'w5', rangeLabel: '> 1,000 Kg', subLabel: 'Ghép lô tải nặng (> 1T)', minKg: 1001, maxKg: 999999, price: w5 },
+              ],
+              volumeTiers: [
+                { id: 'v1', rangeLabel: '< 1.0 CBM', subLabel: 'Kiện hàng nhẹ nhỏ', minCbm: 0.1, maxCbm: 1.0, price: v1 },
+                { id: 'v2', rangeLabel: '1.0 – 3.0 CBM', subLabel: 'Ghép thể tích phổ biến', minCbm: 1.0, maxCbm: 3.0, price: v2 },
+                { id: 'v3', rangeLabel: '3.1 – 6.0 CBM', subLabel: 'Kiện cồng kềnh trung', minCbm: 3.1, maxCbm: 6.0, price: v3 },
+                { id: 'v4', rangeLabel: '6.1 – 10.0 CBM', subLabel: 'Lô hàng thể tích lớn', minCbm: 6.1, maxCbm: 10.0, price: v4 },
+                { id: 'v5', rangeLabel: '> 10.0 CBM', subLabel: 'Lô siêu khối tích (> 10 m³)', minCbm: 10.1, maxCbm: 999999, price: v5 },
+              ],
+            };
+          }
+
           parsedRoutes.push({
             id: `r-import-${Date.now()}-${rIdx}`,
             routeCode,
@@ -4034,6 +4213,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
             pricingStyle,
             validUntil,
             promotionPercent,
+            ltlPricing,
           });
           validCount++;
         });
@@ -4116,6 +4296,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
       pricingStyle: 'All-in',
       validUntil: '2026-12-31',
       promotionPercent: 0,
+      ltlPricing: isLtlTrucking ? createDefaultLtlPricingConfig('weight', 2000, 500000) : undefined,
     };
 
     updateCurrentFormData('routes', [...(currentData.routes || []), newRoute]);
@@ -4937,22 +5118,55 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                     )}
                                   </td>
 
-                                  {/* 8. Đơn giá */}
-                                  <td className="p-0 align-top">
-                                    <div className="flex flex-col h-full">
-                                      <input
-                                        type="number"
-                                        value={route.price || ''}
-                                        onChange={(e) => handleUpdateRouteRow(route.id, 'price', parseFloat(e.target.value) || 0)}
-                                        placeholder="0"
-                                        className="w-full px-2.5 py-2 text-right bg-transparent text-slate-900 font-bold text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
-                                      />
-                                      {hasPromo && (
-                                        <div className="text-[10.5px] text-emerald-600 font-bold text-right px-2.5 pb-1 bg-emerald-50/60 border-t border-emerald-100 whitespace-nowrap">
-                                          Giảm còn: {discountedPrice.toLocaleString('vi-VN')} {route.currency}
-                                        </div>
-                                      )}
-                                    </div>
+                                  {/* 8. Đơn giá (Hỗ trợ Ma Trận 5 Bậc Giá Chuẩn cho LTL) */}
+                                  <td className="p-1 align-middle">
+                                    {isLtlTrucking ? (
+                                      <div className="flex flex-col gap-1">
+                                        <button
+                                          type="button"
+                                          onClick={() => handleOpenTieredPricingModal(route)}
+                                          className="w-full px-2.5 py-1.5 rounded-xl border border-indigo-200 bg-gradient-to-r from-indigo-50/90 via-white to-indigo-50/70 hover:from-indigo-100 hover:to-indigo-50 text-indigo-950 text-left transition-all cursor-pointer shadow-2xs group flex items-center justify-between gap-1.5"
+                                          title="Nhấp để cấu hình chi tiết ma trận 5 bậc giá chuẩn thị trường (Kg / CBM)"
+                                        >
+                                          <div className="min-w-0 flex-1">
+                                            <div className="flex items-center justify-between gap-1">
+                                              <span className="font-mono font-bold text-xs text-indigo-900 truncate">
+                                                {route.ltlPricing?.pricingBasis === 'volume'
+                                                  ? `${(route.ltlPricing.volumeTiers[4]?.price || 320000).toLocaleString('vi-VN')} – ${(route.ltlPricing.volumeTiers[0]?.price || 600000).toLocaleString('vi-VN')} ₫`
+                                                  : `${(route.ltlPricing?.weightTiers[4]?.price || 1100).toLocaleString('vi-VN')} – ${(route.ltlPricing?.weightTiers[0]?.price || 2500).toLocaleString('vi-VN')} ₫`}
+                                              </span>
+                                              <span className="text-[9.5px] font-bold text-indigo-700 bg-indigo-100/90 px-1.5 py-0.2 rounded-md shrink-0">
+                                                5 Bậc
+                                              </span>
+                                            </div>
+                                            <div className="text-[10px] text-slate-500 font-medium flex items-center justify-between mt-0.5">
+                                              <span>Sàn (Min): <strong className="text-slate-800">{((route.ltlPricing?.minCharge) || (route.pricingUnit === 'CBM' ? 150000 : 100000)).toLocaleString('vi-VN')} ₫</strong></span>
+                                              <span className="text-indigo-600 font-semibold group-hover:underline">Chi tiết ➔</span>
+                                            </div>
+                                          </div>
+                                        </button>
+                                        {hasPromo && (
+                                          <div className="text-[10px] text-emerald-600 font-bold text-right px-1 whitespace-nowrap">
+                                            Giảm cước: -{route.promotionPercent}%
+                                          </div>
+                                        )}
+                                      </div>
+                                    ) : (
+                                      <div className="flex flex-col h-full">
+                                        <input
+                                          type="number"
+                                          value={route.price || ''}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'price', parseFloat(e.target.value) || 0)}
+                                          placeholder="0"
+                                          className="w-full px-2.5 py-2 text-right bg-transparent text-slate-900 font-bold text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
+                                        />
+                                        {hasPromo && (
+                                          <div className="text-[10.5px] text-emerald-600 font-bold text-right px-2.5 pb-1 bg-emerald-50/60 border-t border-emerald-100 whitespace-nowrap">
+                                            Giảm còn: {discountedPrice.toLocaleString('vi-VN')} {route.currency}
+                                          </div>
+                                        )}
+                                      </div>
+                                    )}
                                   </td>
 
                                   {/* 9. SLA / Lịch Chạy Hàng (Multi-select Days of Week & Time for LTL) */}
@@ -5930,6 +6144,327 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
               >
                 <Check className="w-4 h-4" />
                 <span>Xác Nhận & Lưu Lịch Chạy</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================================
+          MODAL: CẤU HÌNH MA TRẬN 5 BẬC GIÁ CHUẨN LTL (KG & CBM)
+      ========================================================================= */}
+      {tieredPricingModalData && (
+        <div className="fixed inset-0 z-[130] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 max-w-2xl w-full overflow-hidden flex flex-col animate-in zoom-in-95 duration-150 max-h-[90vh]">
+            {/* Modal Header */}
+            <div className="px-6 py-4 bg-gradient-to-r from-indigo-50 via-white to-purple-50/30 border-b border-slate-200 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-600/20 shrink-0">
+                  <DollarSign className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                    <span>Ma Trận 5 Bậc Giá Chuẩn Thị Trường (LTL)</span>
+                    <span className="px-2 py-0.5 text-[10px] font-bold bg-indigo-100 text-indigo-800 rounded-full">Khung Cố Định</span>
+                  </h3>
+                  <p className="text-[11px] text-slate-500 font-medium">
+                    Tuyến: <strong className="text-indigo-700">{tieredPricingModalData.routeName}</strong> ({tieredPricingModalData.origin} ⇄ {tieredPricingModalData.destination})
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setTieredPricingModalData(null)}
+                className="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-all cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-5 overflow-y-auto">
+              {/* Basis Switch & Tabs */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-1.5 bg-slate-100/80 rounded-2xl border border-slate-200">
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setTieredPricingActiveTab('weight')}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                      tieredPricingActiveTab === 'weight'
+                        ? 'bg-white text-indigo-900 shadow-xs ring-1 ring-slate-200/80'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    <span>Biểu Giá Theo Trọng Lượng (Kg)</span>
+                    {tieredPricingModalData.pricingConfig.pricingBasis === 'weight' && (
+                      <span className="w-2 h-2 rounded-full bg-emerald-500" title="Đang là đơn vị mặc định của tuyến" />
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setTieredPricingActiveTab('volume')}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                      tieredPricingActiveTab === 'volume'
+                        ? 'bg-white text-indigo-900 shadow-xs ring-1 ring-slate-200/80'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    <span>Biểu Giá Theo Thể Tích (CBM)</span>
+                    {tieredPricingModalData.pricingConfig.pricingBasis === 'volume' && (
+                      <span className="w-2 h-2 rounded-full bg-emerald-500" title="Đang là đơn vị mặc định của tuyến" />
+                    )}
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-2 pr-2 text-xs">
+                  <span className="text-slate-500 font-medium">Đơn vị chính:</span>
+                  <select
+                    value={tieredPricingModalData.pricingConfig.pricingBasis}
+                    onChange={(e) => {
+                      const newBasis = e.target.value as 'weight' | 'volume';
+                      setTieredPricingModalData({
+                        ...tieredPricingModalData,
+                        pricingConfig: {
+                          ...tieredPricingModalData.pricingConfig,
+                          pricingBasis: newBasis,
+                        },
+                      });
+                      setTieredPricingActiveTab(newBasis);
+                    }}
+                    className="px-2.5 py-1 bg-white border border-slate-300 rounded-lg text-xs font-bold text-indigo-900 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                  >
+                    <option value="weight">Tính theo Kg</option>
+                    <option value="volume">Tính theo CBM</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Min Charge Setting */}
+              <div className="p-3.5 bg-amber-50/70 border border-amber-200 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold text-xs shrink-0">
+                    Min
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold text-amber-950 block">Cước Sàn Tối Thiểu (Min Charge)</span>
+                    <span className="text-[11px] text-amber-800 font-medium">Áp dụng khi kiện hàng siêu nhỏ / tổng cước theo đơn giá thấp hơn mức sàn</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-center">
+                  <input
+                    type="number"
+                    value={tieredPricingModalData.pricingConfig.minCharge || ''}
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value) || 0;
+                      setTieredPricingModalData({
+                        ...tieredPricingModalData,
+                        pricingConfig: {
+                          ...tieredPricingModalData.pricingConfig,
+                          minCharge: val,
+                        },
+                      });
+                    }}
+                    placeholder="100000"
+                    className="w-32 px-3 py-1.5 bg-white border border-amber-300 rounded-xl text-right text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  />
+                  <span className="text-xs font-bold text-amber-900">₫ / Lô</span>
+                </div>
+              </div>
+
+              {/* Tab 1: Weight Tiers (Kg) */}
+              {tieredPricingActiveTab === 'weight' && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-800 uppercase tracking-wide">
+                      Bảng 5 Khung Bậc Trọng Lượng Chuẩn (₫/Kg)
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const base = tieredPricingModalData.pricingConfig.weightTiers[1]?.price || 2000;
+                        const newTiers = [
+                          { ...tieredPricingModalData.pricingConfig.weightTiers[0], price: Math.round(base * 1.25) },
+                          { ...tieredPricingModalData.pricingConfig.weightTiers[1], price: base },
+                          { ...tieredPricingModalData.pricingConfig.weightTiers[2], price: Math.round(base * 0.825) },
+                          { ...tieredPricingModalData.pricingConfig.weightTiers[3], price: Math.round(base * 0.675) },
+                          { ...tieredPricingModalData.pricingConfig.weightTiers[4], price: Math.round(base * 0.55) },
+                        ];
+                        setTieredPricingModalData({
+                          ...tieredPricingModalData,
+                          pricingConfig: {
+                            ...tieredPricingModalData.pricingConfig,
+                            weightTiers: newTiers,
+                          },
+                        });
+                      }}
+                      className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer"
+                    >
+                      ⚡ Tự động tính giảm dần từ bậc 2
+                    </button>
+                  </div>
+
+                  <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-2xs bg-white">
+                    <table className="w-full text-left border-collapse text-xs">
+                      <thead>
+                        <tr className="bg-slate-100 border-b border-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                          <th className="py-2.5 px-3 w-12 text-center">Bậc</th>
+                          <th className="py-2.5 px-3 min-w-[140px]">Khoảng Trọng Lượng</th>
+                          <th className="py-2.5 px-3 min-w-[150px]">Loại Hàng Khuyên Dùng</th>
+                          <th className="py-2.5 px-3 min-w-[150px] text-right">Đơn Giá (₫ / Kg)</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {tieredPricingModalData.pricingConfig.weightTiers.map((tier, tIdx) => (
+                          <tr key={tier.id} className="hover:bg-indigo-50/20 transition-colors">
+                            <td className="py-2.5 px-3 text-center font-bold text-indigo-700 font-mono">
+                              #{tIdx + 1}
+                            </td>
+                            <td className="py-2.5 px-3 font-bold text-slate-900">
+                              <span className="px-2 py-0.5 bg-slate-100 rounded-lg text-slate-800 border border-slate-200">
+                                {tier.rangeLabel}
+                              </span>
+                            </td>
+                            <td className="py-2.5 px-3 text-slate-600 font-medium">
+                              {tier.subLabel}
+                            </td>
+                            <td className="py-2.5 px-3 text-right">
+                              <div className="inline-flex items-center gap-1.5 justify-end">
+                                <input
+                                  type="number"
+                                  value={tier.price || ''}
+                                  onChange={(e) => {
+                                    const val = parseFloat(e.target.value) || 0;
+                                    const nextTiers = [...tieredPricingModalData.pricingConfig.weightTiers];
+                                    nextTiers[tIdx] = { ...nextTiers[tIdx], price: val };
+                                    setTieredPricingModalData({
+                                      ...tieredPricingModalData,
+                                      pricingConfig: {
+                                        ...tieredPricingModalData.pricingConfig,
+                                        weightTiers: nextTiers,
+                                      },
+                                    });
+                                  }}
+                                  placeholder="0"
+                                  className="w-28 px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-right text-xs font-bold text-indigo-950 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                />
+                                <span className="font-semibold text-slate-500">₫</span>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* Tab 2: Volume Tiers (CBM) */}
+              {tieredPricingActiveTab === 'volume' && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-800 uppercase tracking-wide">
+                      Bảng 5 Khung Bậc Thể Tích Chuẩn (₫/CBM)
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const base = tieredPricingModalData.pricingConfig.volumeTiers[1]?.price || 500000;
+                        const newTiers = [
+                          { ...tieredPricingModalData.pricingConfig.volumeTiers[0], price: Math.round(base * 1.2) },
+                          { ...tieredPricingModalData.pricingConfig.volumeTiers[1], price: base },
+                          { ...tieredPricingModalData.pricingConfig.volumeTiers[2], price: Math.round(base * 0.84) },
+                          { ...tieredPricingModalData.pricingConfig.volumeTiers[3], price: Math.round(base * 0.76) },
+                          { ...tieredPricingModalData.pricingConfig.volumeTiers[4], price: Math.round(base * 0.64) },
+                        ];
+                        setTieredPricingModalData({
+                          ...tieredPricingModalData,
+                          pricingConfig: {
+                            ...tieredPricingModalData.pricingConfig,
+                            volumeTiers: newTiers,
+                          },
+                        });
+                      }}
+                      className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer"
+                    >
+                      ⚡ Tự động tính giảm dần từ bậc 2
+                    </button>
+                  </div>
+
+                  <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-2xs bg-white">
+                    <table className="w-full text-left border-collapse text-xs">
+                      <thead>
+                        <tr className="bg-slate-100 border-b border-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                          <th className="py-2.5 px-3 w-12 text-center">Bậc</th>
+                          <th className="py-2.5 px-3 min-w-[140px]">Khoảng Thể Tích</th>
+                          <th className="py-2.5 px-3 min-w-[150px]">Loại Hàng Khuyên Dùng</th>
+                          <th className="py-2.5 px-3 min-w-[150px] text-right">Đơn Giá (₫ / CBM)</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {tieredPricingModalData.pricingConfig.volumeTiers.map((tier, tIdx) => (
+                          <tr key={tier.id} className="hover:bg-indigo-50/20 transition-colors">
+                            <td className="py-2.5 px-3 text-center font-bold text-indigo-700 font-mono">
+                              #{tIdx + 1}
+                            </td>
+                            <td className="py-2.5 px-3 font-bold text-slate-900">
+                              <span className="px-2 py-0.5 bg-slate-100 rounded-lg text-slate-800 border border-slate-200">
+                                {tier.rangeLabel}
+                              </span>
+                            </td>
+                            <td className="py-2.5 px-3 text-slate-600 font-medium">
+                              {tier.subLabel}
+                            </td>
+                            <td className="py-2.5 px-3 text-right">
+                              <div className="inline-flex items-center gap-1.5 justify-end">
+                                <input
+                                  type="number"
+                                  value={tier.price || ''}
+                                  onChange={(e) => {
+                                    const val = parseFloat(e.target.value) || 0;
+                                    const nextTiers = [...tieredPricingModalData.pricingConfig.volumeTiers];
+                                    nextTiers[tIdx] = { ...nextTiers[tIdx], price: val };
+                                    setTieredPricingModalData({
+                                      ...tieredPricingModalData,
+                                      pricingConfig: {
+                                        ...tieredPricingModalData.pricingConfig,
+                                        volumeTiers: nextTiers,
+                                      },
+                                    });
+                                  }}
+                                  placeholder="0"
+                                  className="w-28 px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-right text-xs font-bold text-indigo-950 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                />
+                                <span className="font-semibold text-slate-500">₫</span>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => setTieredPricingModalData(null)}
+                className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-200/60 rounded-xl transition-colors cursor-pointer"
+              >
+                Hủy Bỏ
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSaveTieredPricingModal}
+                className="inline-flex items-center gap-1.5 px-5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-md shadow-indigo-600/20 cursor-pointer"
+              >
+                <Check className="w-4 h-4" />
+                <span>Xác Nhận & Lưu Ma Trận Bậc Giá</span>
               </button>
             </div>
           </div>
