@@ -126,9 +126,54 @@ export const ALL_DEFAULT_REEFER_TONNAGES = [
   'Đầu kéo + Cont 40RF / 40RH Cao Lạnh (26 – 28 Tấn) —— (~67 CBM)',
 ];
 
-export const getTonnagesForBodyType = (bodyType?: string, isReefer?: boolean): string[] => {
-  const map = isReefer ? REEFER_TRUCKING_BODY_TYPE_MAP : TRUCKING_BODY_TYPE_MAP;
-  const allDefaults = isReefer ? ALL_DEFAULT_REEFER_TONNAGES : ALL_DEFAULT_TRUCKING_TONNAGES;
+// HAZMAT (HÀNG NGUY HIỂM / DG) TRUCK BODY TYPES & TONNAGES (ĐỒNG BỘ 100% VỚI MÀN HÌNH ĐĂNG NHU CẦU CUSTOMER)
+export const HAZMAT_TRUCKING_BODY_TYPES = [
+  'Xe Tải Thùng Kín Chuyên Dụng Hóa Chất (DG Dry Box) - [Sàn chống tĩnh điện / Tiếp địa]',
+  'Xe Bồn Xitec Chuyên Dụng (Chemical Tanker) - [Bồn Inox 316L / Chống tràn]',
+  'Đầu Kéo Kéo Bồn ISO Tank / Cont Hóa Chất (Hazmat Drayage) - [ISO Tank T11/T75 Quốc tế]',
+  'Khác (Nhập tùy chọn)...',
+];
+
+export const HAZMAT_TRUCKING_BODY_TYPE_MAP: Record<string, string[]> = {
+  'Xe Tải Thùng Kín Chuyên Dụng Hóa Chất (DG Dry Box) - [Sàn chống tĩnh điện / Tiếp địa]': [
+    '1.9T – 3.5T (Hóa chất nội đô) —— (12 – 15 CBM)',
+    '5.0T – 8.0T (Hóa chất liên tỉnh) —— (28 – 40 CBM)',
+    '15.0T (3 Chân chở phuy / IBC Tank) —— (50 – 55 CBM)',
+  ],
+  'Xe Bồn Xitec Chuyên Dụng (Chemical Tanker) - [Bồn Inox 316L / Chống tràn]': [
+    '10.000 Lít – 18.000 Lít (Bồn 3-4 ngăn) —— (10 – 18 m³)',
+    '25.000 Lít – 32.000 Lít (Mooc bồn Axit/Kiềm) —— (25 – 32 m³)',
+  ],
+  'Đầu Kéo Kéo Bồn ISO Tank / Cont Hóa Chất (Hazmat Drayage) - [ISO Tank T11/T75 Quốc tế]': [
+    'Đầu kéo + Bồn ISO Tank 20ft (T11 / T50 / T75) —— (24.000 – 26.000 Lít)',
+    'Đầu kéo + Cont 20ft / 40ft chở hàng đóng phuy —— (33 – 67 CBM)',
+  ],
+};
+
+export const ALL_DEFAULT_HAZMAT_TONNAGES = [
+  '1.9T – 3.5T (Hóa chất nội đô) —— (12 – 15 CBM)',
+  '5.0T – 8.0T (Hóa chất liên tỉnh) —— (28 – 40 CBM)',
+  '15.0T (3 Chân chở phuy / IBC Tank) —— (50 – 55 CBM)',
+  '10.000 Lít – 18.000 Lít (Bồn 3-4 ngăn) —— (10 – 18 m³)',
+  '25.000 Lít – 32.000 Lít (Mooc bồn Axit/Kiềm) —— (25 – 32 m³)',
+  'Đầu kéo + Bồn ISO Tank 20ft (T11 / T50 / T75) —— (24.000 – 26.000 Lít)',
+  'Đầu kéo + Cont 20ft / 40ft chở hàng đóng phuy —— (33 – 67 CBM)',
+];
+
+export const getTonnagesForBodyType = (
+  bodyType?: string, 
+  cargoTypeOrIsReefer?: 'general' | 'reefer' | 'hazmat' | boolean
+): string[] => {
+  let map = TRUCKING_BODY_TYPE_MAP;
+  let allDefaults = ALL_DEFAULT_TRUCKING_TONNAGES;
+
+  if (cargoTypeOrIsReefer === 'hazmat') {
+    map = HAZMAT_TRUCKING_BODY_TYPE_MAP;
+    allDefaults = ALL_DEFAULT_HAZMAT_TONNAGES;
+  } else if (cargoTypeOrIsReefer === 'reefer' || cargoTypeOrIsReefer === true) {
+    map = REEFER_TRUCKING_BODY_TYPE_MAP;
+    allDefaults = ALL_DEFAULT_REEFER_TONNAGES;
+  }
 
   if (!bodyType) return [...allDefaults, 'Khác (Nhập tùy chọn)...'];
   
@@ -440,7 +485,99 @@ export const DEFAULT_REEFER_TRUCKING_VAS_ITEMS: CapabilityVasItem[] = [
   },
 ];
 
+// HAZMAT (HÀNG NGUY HIỂM) TRUCKING VAS ITEMS (ĐỒNG BỘ 100% VỚI MÀN HÌNH ĐĂNG NHU CẦU CUSTOMER)
+export const DEFAULT_HAZMAT_TRUCKING_VAS_ITEMS: CapabilityVasItem[] = [
+  // 1. Pháp Lý & Giấy Phép Hàng Nguy Hiểm
+  {
+    id: 'vas-dg-1',
+    name: 'Xin Giấy phép vận chuyển hàng nguy hiểm (PCCC & Bộ Công An)',
+    desc: 'Hoàn tất hồ sơ thẩm định và xin giấy phép lưu hành theo Nghị định 34/2024/NĐ-CP.',
+    category: 'Pháp Lý & Giấy Phép',
+    tag: 'Giấy phép PCCC',
+    priceText: '1,200,000 ₫ / Lô',
+    isChecked: true,
+    isPopular: true,
+  },
+  {
+    id: 'vas-dg-2',
+    name: 'Khai báo hóa chất Bộ Công Thương & Kiểm tra an toàn',
+    desc: 'Thực hiện khai báo hóa chất nguy hiểm trên Cổng thông tin một cửa quốc gia.',
+    category: 'Pháp Lý & Giấy Phép',
+    tag: 'Khai báo Bộ Công Thương',
+    priceText: '500,000 ₫ / Bộ',
+    isChecked: false,
+  },
+
+  // 2. Trang Bị An Toàn & Xử Lý Sự Cố Khẩn Cấp
+  {
+    id: 'vas-dg-3',
+    name: 'Bộ trang bị xử lý sự cố tràn đổ Spill Kit (Spill Kit Response)',
+    desc: 'Bộ dụng cụ khẩn cấp trên xe gồm cát trơ, tấm thấm hóa chất, xẻng chống tia lửa và thùng chứa sự cố.',
+    category: 'Trang Bị & An Toàn',
+    tag: 'Spill Kit khẩn cấp',
+    priceText: '0 ₫ (Miễn phí)',
+    isChecked: true,
+    isPopular: true,
+  },
+  {
+    id: 'vas-dg-4',
+    name: 'Dán biển cảnh báo Placard IMO / UN 4 chiều (IMO Placarding)',
+    desc: 'Dán bảng số UN và nhãn cảnh báo nguy hiểm 4 mặt xe theo quy chuẩn quốc tế ADR/IMO.',
+    category: 'Trang Bị & An Toàn',
+    tag: 'Dán biển Placard',
+    priceText: '150,000 ₫ / Xe',
+    isChecked: true,
+    isPopular: true,
+  },
+  {
+    id: 'vas-dg-5',
+    name: 'Tài xế & Áp tải có chứng chỉ nghiệp vụ an toàn DG (Certified Crew)',
+    desc: 'Đội ngũ đã được đào tạo và cấp thẻ an toàn vận chuyển hóa chất / PCCC hợp lệ.',
+    category: 'Trang Bị & An Toàn',
+    tag: 'Chứng chỉ DG',
+    priceText: '300,000 ₫ / Chuyến',
+    isChecked: true,
+    isPopular: true,
+  },
+
+  // 3. Chằng Buộc & Phương Tiện Đặc Thù
+  {
+    id: 'vas-dg-6',
+    name: 'Chằng buộc & Khóa lashing chuyên dụng Thùng phuy / IBC Tank',
+    desc: 'Khóa tăng đơ sàn và thanh chống xô lệch đặc dụng cho bồn 1000L và phuy hóa chất.',
+    category: 'Chằng Buộc & Phương Tiện',
+    tag: 'Khóa lashing IBC/Phuy',
+    priceText: '350,000 ₫ / Xe',
+    isChecked: true,
+  },
+  {
+    id: 'vas-dg-7',
+    name: 'Xe hộ tống an ninh / Xe hoa tiêu dẫn đường (Escort Convoy)',
+    desc: 'Xe dẫn đường chuyên dụng cho các lô hàng hóa chất cực kỳ nguy hiểm qua đèo dốc, hầm đường bộ.',
+    category: 'Chằng Buộc & Phương Tiện',
+    tag: 'Xe hộ tống dẫn đường',
+    priceText: '1,500,000 ₫ / Chuyến',
+    isChecked: false,
+  },
+
+  // 4. Bảo Hiểm & Môi Trường
+  {
+    id: 'vas-dg-8',
+    name: 'Bảo hiểm trách nhiệm môi trường & Cháy nổ hóa chất (Liability)',
+    desc: 'Bảo hiểm bao gồm chi phí tẩy rửa khắc phục ô nhiễm môi trường và thiệt hại cháy nổ.',
+    category: 'Bảo Hiểm & Môi Trường',
+    tag: 'Bảo hiểm môi trường',
+    priceText: '0.25% Giá trị hàng',
+    isChecked: true,
+    isPopular: true,
+  },
+];
+
 export const getDefaultVasItemsForModel = (modelId?: string, categoryId?: string): CapabilityVasItem[] => {
+  if (modelId === 'trk-haz-ftl' || modelId?.includes('haz') || modelId?.includes('dg')) {
+    return JSON.parse(JSON.stringify(DEFAULT_HAZMAT_TRUCKING_VAS_ITEMS));
+  }
+
   if (modelId === 'trk-ref-ftl' || modelId?.includes('ref') || modelId?.includes('cold')) {
     return JSON.parse(JSON.stringify(DEFAULT_REEFER_TRUCKING_VAS_ITEMS));
   }
@@ -946,54 +1083,90 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             id: 'trk-haz-ftl',
             name: 'FTL (Xe chuyên dụng nguyên chuyến)',
             code: 'FTL',
-            defaultFleet: '15 xe chuyên dụng trang bị bọt PCCC, rãnh chống tràn và giấy phép DG',
-            defaultOperation: 'Tài xế có chứng chỉ vận chuyển hàng nguy hiểm, trang bị bộ Spill-Kit khẩn cấp',
-            defaultCommitment: 'Tuân thủ 100% quy chuẩn an toàn hóa chất Nghị định 34/2024/NĐ-CP',
-            vehicleLov: ['Xe tải chở hóa chất 15T', 'Xe tải chở hóa chất 8T', 'Đầu kéo chở bồn ISO Tank'],
+            defaultFleet: '15 xe chuyên dụng trang bị bọt PCCC, rãnh chống tràn và giấy phép DG (Bồn Xitec, ISO Tank, Xe tải thùng kín DG)',
+            defaultOperation: 'Tài xế & Áp tải 100% có chứng chỉ nghiệp vụ an toàn DG, trang bị bộ Spill-Kit khẩn cấp & dán nhãn Placard UN 4 chiều',
+            defaultCommitment: 'Tuân thủ 100% quy chuẩn an toàn hóa chất Nghị định 34/2024/NĐ-CP, cam kết bảo hiểm trách nhiệm môi trường',
+            vehicleLov: [
+              'Xe tải chở hóa chất 15T (3 chân)',
+              'Xe tải chở hóa chất 8T',
+              'Xe tải chở hóa chất 3.5T (Nội đô)',
+              'Xe bồn Xitec Inox 316L (10k - 18k Lít)',
+              'Mooc bồn Xitec Axit/Kiềm (25k - 32k Lít)',
+              'Đầu kéo chở bồn ISO Tank 20ft',
+              'Đầu kéo chở Cont hóa chất 20ft/40ft',
+            ],
             unitLov: ['Chuyến'],
             defaultRoutes: [
               {
                 id: 'r-haz-1',
+                routeCode: 'RC-DG-001',
                 route: 'Bà Rịa - Vũng Tàu ⇄ Bình Dương',
                 origin: 'KCN Phú Mỹ (BR-VT)',
                 destination: 'KCN VSIP 2 (Bình Dương)',
-                vehicleType: 'Xe tải chở hóa chất 15T',
+                truckBodyType: 'Xe Tải Thùng Kín Chuyên Dụng Hóa Chất (DG Dry Box) - [Sàn chống tĩnh điện / Tiếp địa]',
+                truckTonnage: '15.0T (3 Chân chở phuy / IBC Tank) —— (50 – 55 CBM)',
+                vehicleType: 'Xe tải 15T thùng kín chuyên dụng hóa chất',
                 pricingUnit: 'Chuyến',
                 price: 14500000,
                 currency: 'VND',
                 sla: '4 - 6 giờ',
                 pricingStyle: 'All-in',
+                validUntil: '2026-12-31',
                 promotionPercent: 0,
+              },
+              {
+                id: 'r-haz-2',
+                routeCode: 'RC-DG-002',
+                route: 'Hải Phòng ⇄ Bắc Ninh',
+                origin: 'Cảng Đình Vũ (Hải Phòng)',
+                destination: 'KCN Yên Phong (Bắc Ninh)',
+                truckBodyType: 'Đầu Kéo Kéo Bồn ISO Tank / Cont Hóa Chất (Hazmat Drayage) - [ISO Tank T11/T75 Quốc tế]',
+                truckTonnage: 'Đầu kéo + Bồn ISO Tank 20ft (T11 / T50 / T75) —— (24.000 – 26.000 Lít)',
+                vehicleType: 'Đầu kéo bồn ISO Tank 20ft',
+                pricingUnit: 'Chuyến',
+                price: 18000000,
+                currency: 'VND',
+                sla: '5 - 7 giờ',
+                pricingStyle: 'All-in',
+                validUntil: '2026-12-31',
+                promotionPercent: 5,
               },
             ],
             freeSurchargeOptions: [
-              'Bộ ứng cứu sự cố hóa chất Spill-Kit',
-              'Trang bị bảo hộ lao động PPE tiêu chuẩn',
-              'Bình chữa cháy bọt Foam chuyên dụng',
-              'Kẹp chì niêm phong seal an ninh hóa chất',
+              'Bộ ứng cứu tràn đổ hóa chất Spill-Kit & Bình bọt Foam PCCC',
+              'Trang thiết bị bảo hộ lao động an toàn hóa chất PPE tiêu chuẩn',
+              'Dán biển cảnh báo số UN & Placard IMO 4 chiều quanh xe',
+              'Phí cầu đường & Trạm thu phí BOT chính tuyến',
             ],
             defaultFreeSurcharges: [
-              'Bộ ứng cứu sự cố hóa chất Spill-Kit',
-              'Trang bị bảo hộ lao động PPE tiêu chuẩn',
-              'Kẹp chì niêm phong seal an ninh hóa chất',
+              'Bộ ứng cứu tràn đổ hóa chất Spill-Kit & Bình bọt Foam PCCC',
+              'Trang thiết bị bảo hộ lao động an toàn hóa chất PPE tiêu chuẩn',
+              'Dán biển cảnh báo số UN & Placard IMO 4 chiều quanh xe',
+              'Phí cầu đường & Trạm thu phí BOT chính tuyến',
             ],
             paidSurchargeOptions: [
-              { id: 'phaz-1', name: 'Phí xin giấy phép lưu hành hàng nguy hiểm', priceText: '1,200,000 ₫ / Chuyến', isChecked: true },
-              { id: 'phaz-2', name: 'Hộ tống an toàn qua hầm / đèo', priceText: '800,000 ₫ / Chuyến', isChecked: false },
-              { id: 'phaz-3', name: 'Phí kiểm tra an toàn PCCC hiện trường', priceText: '500,000 ₫ / Lần', isChecked: false },
+              { id: 'phaz-1', name: 'Phí xin giấy phép lưu hành hàng nguy hiểm (PCCC & Bộ Công An)', priceText: '1,200,000 ₫ / Lô', isChecked: true },
+              { id: 'phaz-2', name: 'Phí hộ tống an toàn qua hầm Hải Vân / đèo dốc đặc biệt', priceText: '1,500,000 ₫ / Chuyến', isChecked: false },
+              { id: 'phaz-3', name: 'Phí kiểm tra nồng độ khí / Thử áp lực bồn xitec trước khi nạp', priceText: '600,000 ₫ / Lần', isChecked: false },
+              { id: 'phaz-4', name: 'Phí chèn lót túi khí & khóa tăng đơ sàn chống xô lệch phuy/IBC', priceText: '250,000 ₫ / Xe', isChecked: true },
             ],
             vasOptions: [
-              'Tài xế có chứng chỉ nghiệp vụ hàng nguy hiểm & PCCC',
-              'Bộ ứng cứu sự cố hóa chất Spill-Kit & PPE',
-              'Xin giấy phép lưu hành hàng nguy hiểm liên tỉnh',
-              'Hộ tống an toàn qua hầm / đèo',
-              'Bảo hiểm bồi thường ô nhiễm môi trường',
-              'Khai báo hóa chất Bộ Công Thương',
+              'Xin Giấy phép vận chuyển hàng nguy hiểm (PCCC & Bộ Công An)',
+              'Khai báo hóa chất Bộ Công Thương & Kiểm tra an toàn',
+              'Bộ trang bị xử lý sự cố tràn đổ Spill Kit (Spill Kit Response)',
+              'Dán biển cảnh báo Placard IMO / UN 4 chiều (IMO Placarding)',
+              'Tài xế & Áp tải có chứng chỉ nghiệp vụ an toàn DG (Certified Crew)',
+              'Chằng buộc & Khóa lashing chuyên dụng Thùng phuy / IBC Tank',
+              'Xe hộ tống an ninh / Xe hoa tiêu dẫn đường (Escort Convoy)',
+              'Bảo hiểm trách nhiệm môi trường & Cháy nổ hóa chất (Liability)',
             ],
             defaultVas: [
-              'Tài xế có chứng chỉ nghiệp vụ hàng nguy hiểm & PCCC',
-              'Bộ ứng cứu sự cố hóa chất Spill-Kit & PPE',
-              'Bảo hiểm bồi thường ô nhiễm môi trường',
+              'Xin Giấy phép vận chuyển hàng nguy hiểm (PCCC & Bộ Công An)',
+              'Bộ trang bị xử lý sự cố tràn đổ Spill Kit (Spill Kit Response)',
+              'Dán biển cảnh báo Placard IMO / UN 4 chiều (IMO Placarding)',
+              'Tài xế & Áp tải có chứng chỉ nghiệp vụ an toàn DG (Certified Crew)',
+              'Chằng buộc & Khóa lashing chuyên dụng Thùng phuy / IBC Tank',
+              'Bảo hiểm trách nhiệm môi trường & Cháy nổ hóa chất (Liability)',
             ],
           },
         ],
@@ -3401,8 +3574,10 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
       setIsExportingTemplate(true);
       const isTrucking = activeCategory?.id === 'trucking';
       const isReeferTrucking = isTrucking && (activeCargoGroup?.name?.includes('lạnh') || activeModel?.name?.includes('lạnh') || activeModel?.id?.includes('ref'));
-      const bodyTypes = isReeferTrucking ? REEFER_TRUCKING_BODY_TYPES : TRUCKING_BODY_TYPES;
-      const bodyMap = isReeferTrucking ? REEFER_TRUCKING_BODY_TYPE_MAP : TRUCKING_BODY_TYPE_MAP;
+      const isHazmatTrucking = isTrucking && (activeCargoGroup?.name?.includes('nguy hiểm') || activeModel?.name?.includes('nguy hiểm') || activeModel?.id?.includes('haz') || activeModel?.id?.includes('dg'));
+      const cargoType: 'general' | 'reefer' | 'hazmat' = isHazmatTrucking ? 'hazmat' : (isReeferTrucking ? 'reefer' : 'general');
+      const bodyTypes = isHazmatTrucking ? HAZMAT_TRUCKING_BODY_TYPES : (isReeferTrucking ? REEFER_TRUCKING_BODY_TYPES : TRUCKING_BODY_TYPES);
+      const bodyMap = isHazmatTrucking ? HAZMAT_TRUCKING_BODY_TYPE_MAP : (isReeferTrucking ? REEFER_TRUCKING_BODY_TYPE_MAP : TRUCKING_BODY_TYPE_MAP);
       const modelCode = activeModel?.code || activeCategory?.id || 'FTL';
 
       // 1. Data rows for Sheet 1: BANG_GIA_TUYEN_DUONG
@@ -3414,7 +3589,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
             'Điểm Đến (*)': r.destination,
             ...(isTrucking ? {
               'Loại Thùng Phương Tiện (*)': r.truckBodyType || bodyTypes[0],
-              'Phân Khúc Tải Trọng (*)': r.truckTonnage || getTonnagesForBodyType(r.truckBodyType, isReeferTrucking)[0],
+              'Phân Khúc Tải Trọng (*)': r.truckTonnage || getTonnagesForBodyType(r.truckBodyType, cargoType)[0],
             } : {
               'Loại Phương Tiện (*)': r.vehicleType || activeModel?.vehicleLov?.[0] || 'Phương tiện chuẩn',
             }),
@@ -3425,7 +3600,36 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
             'Hạn Giá (YYYY-MM-DD)': r.validUntil || '2026-12-31',
             'Promotion (%)': r.promotionPercent || 0,
           }))
-        : isReeferTrucking ? [
+        : isHazmatTrucking ? [
+            {
+              'Mã Tuyến': `RC-${modelCode.toUpperCase()}-001`,
+              'Tuyến Đường (*)': 'Bà Rịa - Vũng Tàu ⇄ Bình Dương',
+              'Điểm Đi (*)': 'KCN Phú Mỹ (BR-VT)',
+              'Điểm Đến (*)': 'KCN VSIP 2 (Bình Dương)',
+              'Loại Thùng Phương Tiện (*)': 'Xe Tải Thùng Kín Chuyên Dụng Hóa Chất (DG Dry Box) - [Sàn chống tĩnh điện / Tiếp địa]',
+              'Phân Khúc Tải Trọng (*)': '15.0T (3 Chân chở phuy / IBC Tank) —— (50 – 55 CBM)',
+              'Đơn Vị Tính (*)': 'Chuyến',
+              'Đơn Giá (VND) (*)': 14500000,
+              'SLA Thời Gian': '4 - 6 giờ',
+              'Quy Cách Giá': 'All-in',
+              'Hạn Giá (YYYY-MM-DD)': '2026-12-31',
+              'Promotion (%)': 0,
+            },
+            {
+              'Mã Tuyến': `RC-${modelCode.toUpperCase()}-002`,
+              'Tuyến Đường (*)': 'Hải Phòng ⇄ Bắc Ninh',
+              'Điểm Đi (*)': 'Cảng Đình Vũ (Hải Phòng)',
+              'Điểm Đến (*)': 'KCN Yên Phong (Bắc Ninh)',
+              'Loại Thùng Phương Tiện (*)': 'Đầu Kéo Kéo Bồn ISO Tank / Cont Hóa Chất (Hazmat Drayage) - [ISO Tank T11/T75 Quốc tế]',
+              'Phân Khúc Tải Trọng (*)': 'Đầu kéo + Bồn ISO Tank 20ft (T11 / T50 / T75) —— (24.000 – 26.000 Lít)',
+              'Đơn Vị Tính (*)': 'Chuyến',
+              'Đơn Giá (VND) (*)': 18000000,
+              'SLA Thời Gian': '5 - 7 giờ',
+              'Quy Cách Giá': 'All-in',
+              'Hạn Giá (YYYY-MM-DD)': '2026-12-31',
+              'Promotion (%)': 5,
+            },
+          ] : isReeferTrucking ? [
             {
               'Mã Tuyến': `RC-${modelCode.toUpperCase()}-001`,
               'Tuyến Đường (*)': 'Đà Lạt ⇄ TP.HCM',
@@ -3562,12 +3766,14 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
 
         const isTrucking = activeCategory?.id === 'trucking';
         const isReeferTrucking = isTrucking && (activeCargoGroup?.name?.includes('lạnh') || activeModel?.name?.includes('lạnh') || activeModel?.id?.includes('ref'));
-        const bodyTypes = isReeferTrucking ? REEFER_TRUCKING_BODY_TYPES : TRUCKING_BODY_TYPES;
+        const isHazmatTrucking = isTrucking && (activeCargoGroup?.name?.includes('nguy hiểm') || activeModel?.name?.includes('nguy hiểm') || activeModel?.id?.includes('haz') || activeModel?.id?.includes('dg'));
+        const cargoType: 'general' | 'reefer' | 'hazmat' = isHazmatTrucking ? 'hazmat' : (isReeferTrucking ? 'reefer' : 'general');
+        const bodyTypes = isHazmatTrucking ? HAZMAT_TRUCKING_BODY_TYPES : (isReeferTrucking ? REEFER_TRUCKING_BODY_TYPES : TRUCKING_BODY_TYPES);
         const modelPrefix = (activeModel?.code || activeCategory?.id || 'RC').toUpperCase().replace(/[^A-Z0-9]/g, '');
         const defaultUnit = isTrucking ? 'Chuyến' : (activeModel?.unitLov?.[0] || 'Chuyến');
         const defaultBody = bodyTypes[0];
-        const defaultTonnages = getTonnagesForBodyType(defaultBody, isReeferTrucking);
-        const defaultTonnage = isReeferTrucking ? defaultTonnages[0] : (defaultTonnages[defaultTonnages.length - 2] || defaultTonnages[0]);
+        const defaultTonnages = getTonnagesForBodyType(defaultBody, cargoType);
+        const defaultTonnage = defaultTonnages[0];
 
         const parsedRoutes: CapabilityRouteItem[] = [];
         const warnings: string[] = [];
@@ -3609,7 +3815,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
             const matchedBody = bodyTypes.find((b) => b.toLowerCase().includes(rawBody.toLowerCase()) || rawBody.toLowerCase().includes(b.split(' (')[0].toLowerCase()));
             truckBodyType = matchedBody || defaultBody;
 
-            const validTonnages = getTonnagesForBodyType(truckBodyType, isReeferTrucking);
+            const validTonnages = getTonnagesForBodyType(truckBodyType, cargoType);
             const rawTonnage = String(row['Phân Khúc Tải Trọng (*)'] || row['Phân Khúc Tải Trọng'] || row['Tải Trọng'] || '').trim();
             const matchedTonnage = validTonnages.find((t) => t.toLowerCase().includes(rawTonnage.toLowerCase()) || rawTonnage.toLowerCase().includes(t.split(' (')[0].toLowerCase()));
             truckTonnage = matchedTonnage || validTonnages[0] || defaultTonnage;
@@ -3703,11 +3909,13 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
   const handleAddRouteRow = () => {
     const isTrucking = activeCategory?.id === 'trucking';
     const isReeferTrucking = isTrucking && (activeCargoGroup?.name?.includes('lạnh') || activeModel?.name?.includes('lạnh') || activeModel?.id?.includes('ref'));
-    const bodyTypes = isReeferTrucking ? REEFER_TRUCKING_BODY_TYPES : TRUCKING_BODY_TYPES;
+    const isHazmatTrucking = isTrucking && (activeCargoGroup?.name?.includes('nguy hiểm') || activeModel?.name?.includes('nguy hiểm') || activeModel?.id?.includes('haz') || activeModel?.id?.includes('dg'));
+    const cargoType: 'general' | 'reefer' | 'hazmat' = isHazmatTrucking ? 'hazmat' : (isReeferTrucking ? 'reefer' : 'general');
+    const bodyTypes = isHazmatTrucking ? HAZMAT_TRUCKING_BODY_TYPES : (isReeferTrucking ? REEFER_TRUCKING_BODY_TYPES : TRUCKING_BODY_TYPES);
     const defaultBody = bodyTypes[0];
-    const defaultTonnages = getTonnagesForBodyType(defaultBody, isReeferTrucking);
-    const defaultTonnage = isReeferTrucking ? defaultTonnages[0] : (defaultTonnages[defaultTonnages.length - 2] || defaultTonnages[0]);
-    const defaultVehicle = isReeferTrucking ? 'Xe đông lạnh 5T' : (isTrucking ? 'Xe tải 15T thùng kín' : (activeModel?.vehicleLov?.[0] || 'Phương tiện chuẩn'));
+    const defaultTonnages = getTonnagesForBodyType(defaultBody, cargoType);
+    const defaultTonnage = isHazmatTrucking ? defaultTonnages[2] || defaultTonnages[0] : (isReeferTrucking ? defaultTonnages[0] : (defaultTonnages[defaultTonnages.length - 2] || defaultTonnages[0]));
+    const defaultVehicle = isHazmatTrucking ? 'Xe tải hóa chất 15T' : (isReeferTrucking ? 'Xe đông lạnh 5T' : (isTrucking ? 'Xe tải 15T thùng kín' : (activeModel?.vehicleLov?.[0] || 'Phương tiện chuẩn')));
     const defaultUnit = activeModel?.unitLov?.[0] || 'Chuyến';
     const modelPrefix = (activeModel?.code || activeCategory?.id || 'RC').toUpperCase().replace(/[^A-Z0-9]/g, '');
     const nextIdx = (currentData.routes || []).length + 1;
@@ -3716,16 +3924,16 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
     const newRoute: CapabilityRouteItem = {
       id: `r-new-${Date.now()}`,
       routeCode: generatedRouteCode,
-      route: isReeferTrucking ? 'Đà Lạt ⇄ TP.HCM' : 'Hành Lang Tuyến Mới',
-      origin: isReeferTrucking ? 'Đức Trọng (Lâm Đồng)' : 'Điểm Lấy Hàng (Kho / Cảng)',
-      destination: isReeferTrucking ? 'Chợ đầu mối Thủ Đức (TP.HCM)' : 'Điểm Giao Hàng (Kho / Cảng)',
+      route: isHazmatTrucking ? 'Bà Rịa - Vũng Tàu ⇄ Bình Dương' : (isReeferTrucking ? 'Đà Lạt ⇄ TP.HCM' : 'Hành Lang Tuyến Mới'),
+      origin: isHazmatTrucking ? 'KCN Phú Mỹ (BR-VT)' : (isReeferTrucking ? 'Đức Trọng (Lâm Đồng)' : 'Điểm Lấy Hàng (Kho / Cảng)'),
+      destination: isHazmatTrucking ? 'KCN VSIP 2 (Bình Dương)' : (isReeferTrucking ? 'Chợ đầu mối Thủ Đức (TP.HCM)' : 'Điểm Giao Hàng (Kho / Cảng)'),
       truckBodyType: isTrucking ? defaultBody : undefined,
       truckTonnage: isTrucking ? defaultTonnage : undefined,
       vehicleType: defaultVehicle,
       pricingUnit: defaultUnit,
-      price: isReeferTrucking ? 9500000 : 15000000,
+      price: isHazmatTrucking ? 14500000 : (isReeferTrucking ? 9500000 : 15000000),
       currency: defaultUnit.includes('USD') ? 'USD' : 'VND',
-      sla: isReeferTrucking ? '7 - 9 giờ' : '24 - 48 giờ',
+      sla: isHazmatTrucking ? '4 - 6 giờ' : (isReeferTrucking ? '7 - 9 giờ' : '24 - 48 giờ'),
       pricingStyle: 'All-in',
       validUntil: '2026-12-31',
       promotionPercent: 0,
@@ -4326,7 +4534,9 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                 : route.price;
                               const isTrucking = activeCategory?.id === 'trucking';
                               const isReeferTrucking = isTrucking && (activeCargoGroup?.name?.includes('lạnh') || activeModel?.name?.includes('lạnh') || activeModel?.id?.includes('ref'));
-                              const currentTruckBodyTypes = isReeferTrucking ? REEFER_TRUCKING_BODY_TYPES : TRUCKING_BODY_TYPES;
+                              const isHazmatTrucking = isTrucking && (activeCargoGroup?.name?.includes('nguy hiểm') || activeModel?.name?.includes('nguy hiểm') || activeModel?.id?.includes('haz') || activeModel?.id?.includes('dg'));
+                              const cargoType: 'general' | 'reefer' | 'hazmat' = isHazmatTrucking ? 'hazmat' : (isReeferTrucking ? 'reefer' : 'general');
+                              const currentTruckBodyTypes = isHazmatTrucking ? HAZMAT_TRUCKING_BODY_TYPES : (isReeferTrucking ? REEFER_TRUCKING_BODY_TYPES : TRUCKING_BODY_TYPES);
                               const effectiveRouteCode = route.routeCode || `RC-${(activeModel?.code || activeCategory?.id || 'GEN').toUpperCase().replace(/[^A-Z0-9]/g, '')}-${String(idx + 1).padStart(3, '0')}`;
 
                               return (
@@ -4401,7 +4611,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                                       customTruckBodyType: '',
                                                     });
                                                   } else {
-                                                    const validTonnages = getTonnagesForBodyType(val, isReeferTrucking);
+                                                    const validTonnages = getTonnagesForBodyType(val, cargoType);
                                                     const newTonnage = (route.truckTonnage && validTonnages.includes(route.truckTonnage))
                                                       ? route.truckTonnage
                                                       : validTonnages[0];
@@ -4445,7 +4655,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                       {/* 6b. Phân Khúc Tải Trọng Ràng Buộc Theo Loại Thùng (LOV + Custom Option) */}
                                       <td className="p-0 align-top">
                                         {(() => {
-                                          const boundTonnages = getTonnagesForBodyType(route.truckBodyType || currentTruckBodyTypes[0], isReeferTrucking);
+                                          const boundTonnages = getTonnagesForBodyType(route.truckBodyType || currentTruckBodyTypes[0], cargoType);
                                           const currentTonnageVal = boundTonnages.includes(route.truckTonnage || '')
                                             ? route.truckTonnage
                                             : (route.customTruckTonnage || route.truckTonnage === 'Khác (Nhập tùy chọn)...' ? 'Khác (Nhập tùy chọn)...' : boundTonnages[0]);
