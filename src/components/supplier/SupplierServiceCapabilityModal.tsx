@@ -109,6 +109,7 @@ export interface CapabilityRouteItem {
   currency: 'VND' | 'USD';
   sla: string;
   pricingStyle: 'All-in' | 'Chưa gồm phụ phí';
+  validUntil?: string; // Hạn giá (Date giá)
   promotionPercent: number; // 0 - 50%
 }
 
@@ -203,6 +204,7 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
                 currency: 'VND',
                 sla: '48 - 60 giờ',
                 pricingStyle: 'All-in',
+                validUntil: '2026-12-31',
                 promotionPercent: 15,
               },
               {
@@ -218,6 +220,7 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
                 currency: 'VND',
                 sla: '24 - 36 giờ',
                 pricingStyle: 'All-in',
+                validUntil: '2026-12-31',
                 promotionPercent: 0,
               },
               {
@@ -233,6 +236,7 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
                 currency: 'VND',
                 sla: '10 - 12 giờ',
                 pricingStyle: 'All-in',
+                validUntil: '2026-12-31',
                 promotionPercent: 20,
               },
             ],
@@ -2864,6 +2868,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
       currency: defaultUnit.includes('USD') ? 'USD' : 'VND',
       sla: '24 - 48 giờ',
       pricingStyle: 'All-in',
+      validUntil: '2026-12-31',
       promotionPercent: 0,
     };
 
@@ -3356,31 +3361,32 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                       <table className="w-full text-left border-collapse text-xs">
                         <thead>
                           <tr className="bg-slate-100/90 border-b border-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider">
-                            <th className="py-2.5 px-2 text-center w-8">STT</th>
-                            <th className="py-2.5 px-2.5 min-w-[130px]">Tuyến Đường</th>
-                            <th className="py-2.5 px-2.5 min-w-[120px]">Điểm Đi</th>
-                            <th className="py-2.5 px-2.5 min-w-[120px]">Điểm Đến</th>
+                            <th className="py-2.5 px-2 text-center w-8 min-w-[34px]">STT</th>
+                            <th className="py-2.5 px-2.5 min-w-[140px]">Tuyến Đường</th>
+                            <th className="py-2.5 px-2.5 min-w-[130px]">Điểm Đi</th>
+                            <th className="py-2.5 px-2.5 min-w-[130px]">Điểm Đến</th>
                             {activeCategory?.id === 'trucking' ? (
                               <>
-                                <th className="py-2.5 px-2.5 min-w-[170px]">Loại Thùng Phương Tiện</th>
-                                <th className="py-2.5 px-2.5 min-w-[170px]">Phân Khúc Tải Trọng</th>
+                                <th className="py-2.5 px-2.5 min-w-[210px]">Loại Thùng Phương Tiện</th>
+                                <th className="py-2.5 px-2.5 min-w-[220px]">Phân Khúc Tải Trọng</th>
                               </>
                             ) : (
-                              <th className="py-2.5 px-2.5 min-w-[140px]">Loại Phương Tiện</th>
+                              <th className="py-2.5 px-2.5 min-w-[150px]">Loại Phương Tiện</th>
                             )}
-                            <th className="py-2.5 px-2 w-24">ĐVT</th>
-                            <th className="py-2.5 px-2.5 min-w-[110px]">Đơn Giá</th>
-                            <th className="py-2.5 px-2 min-w-[85px]">SLA</th>
-                            <th className="py-2.5 px-2 w-28">Quy Cách Giá</th>
-                            <th className="py-2.5 px-2 min-w-[90px] text-center">Promotion</th>
-                            <th className="py-2.5 px-1.5 text-center w-8">Xóa</th>
+                            <th className="py-2.5 px-2 w-20 min-w-[75px] text-center">ĐVT</th>
+                            <th className="py-2.5 px-2.5 min-w-[130px]">Đơn Giá</th>
+                            <th className="py-2.5 px-2 min-w-[95px]">SLA</th>
+                            <th className="py-2.5 px-2 min-w-[135px]">Quy Cách Giá</th>
+                            <th className="py-2.5 px-2.5 min-w-[130px]">Hạn Giá (Date)</th>
+                            <th className="py-2.5 px-2 min-w-[85px] text-center">Promotion</th>
+                            <th className="py-2.5 px-1.5 text-center w-8 min-w-[34px]">Xóa</th>
                           </tr>
                         </thead>
 
                         <tbody className="divide-y divide-slate-100">
                           {(!currentData.routes || currentData.routes.length === 0) ? (
                             <tr>
-                              <td colSpan={activeCategory?.id === 'trucking' ? 12 : 11} className="py-6 text-center text-slate-400">
+                              <td colSpan={activeCategory?.id === 'trucking' ? 13 : 12} className="py-6 text-center text-slate-400">
                                 Chưa có tuyến đường nào. Bấm nút <strong>"+ Thêm Tuyến Mới"</strong> để khai báo bảng giá.
                               </td>
                             </tr>
@@ -3609,19 +3615,30 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                   </td>
 
                                   {/* 9. Quy cách giá */}
-                                  <td className="py-2 px-1">
+                                  <td className="py-2 px-1 align-top">
                                     <select
                                       value={route.pricingStyle}
                                       onChange={(e) => handleUpdateRouteRow(route.id, 'pricingStyle', e.target.value)}
-                                      className="w-full px-1.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 text-xs focus:bg-white focus:border-indigo-500"
+                                      className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 text-xs focus:bg-white focus:border-indigo-500 font-medium"
                                     >
                                       <option value="All-in">Trọn gói All-in</option>
                                       <option value="Chưa gồm phụ phí">+ Phụ phí ngoài</option>
                                     </select>
                                   </td>
 
-                                  {/* 10. Promotion (%) */}
-                                  <td className="py-2 px-1 text-center">
+                                  {/* 10. Hạn Giá (Date) */}
+                                  <td className="py-2 px-1 align-top">
+                                    <input
+                                      type="date"
+                                      value={route.validUntil || '2026-12-31'}
+                                      onChange={(e) => handleUpdateRouteRow(route.id, 'validUntil', e.target.value)}
+                                      className="w-full px-1.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 text-xs font-semibold focus:bg-white focus:border-indigo-500"
+                                      title="Thời hạn hiệu lực của mức giá này"
+                                    />
+                                  </td>
+
+                                  {/* 11. Promotion (%) */}
+                                  <td className="py-2 px-1 text-center align-top">
                                     <div className="relative inline-flex items-center">
                                       <input
                                         type="number"
@@ -3643,8 +3660,8 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                     </div>
                                   </td>
 
-                                  {/* 11. Thao tác Xóa */}
-                                  <td className="py-2 px-1 text-center">
+                                  {/* 12. Thao tác Xóa */}
+                                  <td className="py-2 px-1 text-center align-top pt-2.5">
                                     <button
                                       type="button"
                                       onClick={() => handleDeleteRouteRow(route.id)}
