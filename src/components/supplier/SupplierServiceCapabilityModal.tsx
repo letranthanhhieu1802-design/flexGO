@@ -4385,9 +4385,9 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                       {/* 6a. Loại Thùng Phương Tiện (LOV + Custom Option) */}
                                       <td className="p-0 align-top">
                                         {(() => {
-                                          const currentBodyTypeVal = TRUCKING_BODY_TYPES.includes(route.truckBodyType || '')
+                                          const currentBodyTypeVal = currentTruckBodyTypes.includes(route.truckBodyType || '')
                                             ? route.truckBodyType
-                                            : (route.customTruckBodyType || route.truckBodyType === 'Khác (Nhập tùy chọn)...' ? 'Khác (Nhập tùy chọn)...' : TRUCKING_BODY_TYPES[0]);
+                                            : (route.customTruckBodyType || route.truckBodyType === 'Khác (Nhập tùy chọn)...' ? 'Khác (Nhập tùy chọn)...' : currentTruckBodyTypes[0]);
 
                                           return (
                                             <div className="flex flex-col h-full">
@@ -4401,7 +4401,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                                       customTruckBodyType: '',
                                                     });
                                                   } else {
-                                                    const validTonnages = getTonnagesForBodyType(val);
+                                                    const validTonnages = getTonnagesForBodyType(val, isReeferTrucking);
                                                     const newTonnage = (route.truckTonnage && validTonnages.includes(route.truckTonnage))
                                                       ? route.truckTonnage
                                                       : validTonnages[0];
@@ -4415,11 +4415,11 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                                 }}
                                                 className="w-full px-2.5 py-2 bg-transparent text-slate-800 text-xs font-medium cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
                                               >
-                                                {TRUCKING_BODY_TYPES.map((b, bIdx) => (
+                                                {currentTruckBodyTypes.map((b, bIdx) => (
                                                   <option key={bIdx} value={b}>{b}</option>
                                                 ))}
                                               </select>
-                                              {(currentBodyTypeVal === 'Khác (Nhập tùy chọn)...' || (!TRUCKING_BODY_TYPES.includes(route.truckBodyType || '') && route.customTruckBodyType)) && (
+                                              {(currentBodyTypeVal === 'Khác (Nhập tùy chọn)...' || (!currentTruckBodyTypes.includes(route.truckBodyType || '') && route.customTruckBodyType)) && (
                                                 <div className="p-1 bg-amber-50/90 border-t border-amber-200">
                                                   <input
                                                     type="text"
@@ -4445,7 +4445,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                       {/* 6b. Phân Khúc Tải Trọng Ràng Buộc Theo Loại Thùng (LOV + Custom Option) */}
                                       <td className="p-0 align-top">
                                         {(() => {
-                                          const boundTonnages = getTonnagesForBodyType(route.truckBodyType || TRUCKING_BODY_TYPES[0]);
+                                          const boundTonnages = getTonnagesForBodyType(route.truckBodyType || currentTruckBodyTypes[0], isReeferTrucking);
                                           const currentTonnageVal = boundTonnages.includes(route.truckTonnage || '')
                                             ? route.truckTonnage
                                             : (route.customTruckTonnage || route.truckTonnage === 'Khác (Nhập tùy chọn)...' ? 'Khác (Nhập tùy chọn)...' : boundTonnages[0]);
