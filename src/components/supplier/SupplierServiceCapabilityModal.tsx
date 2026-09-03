@@ -38,18 +38,61 @@ export const TRUCKING_BODY_TYPES = [
   'Khác (Nhập tùy chọn)...',
 ];
 
-export const TRUCKING_TONNAGES = [
+export const TRUCKING_BODY_TYPE_MAP: Record<string, string[]> = {
+  'Xe Tải Thùng Kín (Dry Box Truck) - [An ninh cao / Chống ướt]': [
+    '1.0T – 1.9T (Vào phố ban ngày) —— (7 – 9 CBM)',
+    '2.5T – 3.5T (Tải nhẹ liên tỉnh) —— (14 – 16 CBM)',
+    '5.0T – 6.5T (Tải trung) —— (25 – 30 CBM)',
+    '8.0T (Tải nặng 2 chân) —— (45 – 50 CBM)',
+    '15.0T (Tải nặng 3 chân) —— (55 – 60 CBM)',
+  ],
+  'Xe Tải Mui Bạt (Tarpaulin Truck) - [Mở bạt 2 bên hông]': [
+    '2.5T – 3.5T (Mui bạt tiêu chuẩn) —— (~15 CBM)',
+    '5.0T – 7.0T (Mui bạt trung) —— (~32 CBM)',
+    '8.0T – 9.0T (2 chân thùng dài 9.8m cồng kềnh) —— (~55 CBM)',
+    '15.0T (3 chân mui bạt) —— (~58 CBM)',
+    '18.0T – 20.0T (4 chân - 5 chân tải nặng) —— (~65 CBM)',
+  ],
+  'Xe Tải Có Bửng Nâng Thủy Lực (Tail-lift) - [Bửng nâng tự động]': [
+    '1.9T – 2.5T (Bửng nâng tải 500kg) —— (9 – 12 CBM)',
+    '5.0T (Bửng nâng tải 1.0T – 1.5T) —— (~26 CBM)',
+    '8.0T – 15.0T (Bửng nâng tải nặng 2.0T) —— (45 – 55 CBM)',
+  ],
+  'Xe Tải Thùng Lửng / Mooc Sàn (Flatbed) - [Cẩu hạ từ trên nóc]': [
+    '5.0T – 8.0T (Thùng lửng cẩu hàng) —— (Không giới hạn nóc)',
+    '15.0T (Thùng lửng 3 chân) —— (Không giới hạn nóc)',
+  ],
+  'Đầu Kéo Kéo Container (Tractor Drayage) - [Kéo vỏ Cont Cảng / ICD]': [
+    'Đầu kéo + Rơ-mooc 20ft (Tải trọng 26 - 28 Tấn) —— (~33 CBM)',
+    'Đầu kéo + Rơ-mooc 40ft (Xương / Cổ cò - Tải trọng 28 - 30 Tấn) —— (~67 CBM)',
+    'Đầu kéo + Rơ-mooc 45ft High Cube —— (~85 CBM)',
+  ],
+};
+
+export const ALL_DEFAULT_TRUCKING_TONNAGES = [
   '1.0T – 1.9T (Vào phố ban ngày) —— (7 – 9 CBM)',
   '2.5T – 3.5T (Tải nhẹ liên tỉnh) —— (14 – 16 CBM)',
   '5.0T – 6.5T (Tải trung) —— (25 – 30 CBM)',
   '8.0T (Tải nặng 2 chân) —— (45 – 50 CBM)',
   '15.0T (Tải nặng 3 chân) —— (55 – 60 CBM)',
   '18.0T – 20.0T (4 chân - 5 chân tải nặng) —— (~65 CBM)',
-  'Đầu kéo Cont 20ft (Tải trọng 26 - 28 Tấn) —— (~33 CBM)',
-  'Đầu kéo Cont 40ft (Tải trọng 28 - 30 Tấn) —— (~67 CBM)',
-  'Đầu kéo Cont 45ft High Cube —— (~85 CBM)',
-  'Khác (Nhập tùy chọn)...',
+  'Đầu kéo + Rơ-mooc 20ft (Tải trọng 26 - 28 Tấn) —— (~33 CBM)',
+  'Đầu kéo + Rơ-mooc 40ft (Xương / Cổ cò - Tải trọng 28 - 30 Tấn) —— (~67 CBM)',
+  'Đầu kéo + Rơ-mooc 45ft High Cube —— (~85 CBM)',
 ];
+
+export const getTonnagesForBodyType = (bodyType?: string): string[] => {
+  if (!bodyType) return [...ALL_DEFAULT_TRUCKING_TONNAGES, 'Khác (Nhập tùy chọn)...'];
+  
+  // Find key matching
+  for (const [key, tonnages] of Object.entries(TRUCKING_BODY_TYPE_MAP)) {
+    if (bodyType === key || bodyType.includes(key) || key.includes(bodyType)) {
+      return [...tonnages, 'Khác (Nhập tùy chọn)...'];
+    }
+  }
+  
+  return [...ALL_DEFAULT_TRUCKING_TONNAGES, 'Khác (Nhập tùy chọn)...'];
+};
 
 export interface CapabilityRouteItem {
   id: string;
@@ -2804,7 +2847,8 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
   const handleAddRouteRow = () => {
     const isTrucking = activeCategory?.id === 'trucking';
     const defaultBody = TRUCKING_BODY_TYPES[0];
-    const defaultTonnage = TRUCKING_TONNAGES[4]; // 15T
+    const defaultTonnages = getTonnagesForBodyType(defaultBody);
+    const defaultTonnage = defaultTonnages[defaultTonnages.length - 2] || defaultTonnages[0];
     const defaultVehicle = isTrucking ? 'Xe tải 15T thùng kín' : (activeModel?.vehicleLov?.[0] || 'Phương tiện chuẩn');
     const defaultUnit = activeModel?.unitLov?.[0] || 'Chuyến';
     const newRoute: CapabilityRouteItem = {
@@ -3377,7 +3421,14 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                             handleUpdateRouteRow(route.id, 'truckBodyType', val);
                                             if (val !== 'Khác (Nhập tùy chọn)...') {
                                               handleUpdateRouteRow(route.id, 'customTruckBodyType', '');
-                                              handleUpdateRouteRow(route.id, 'vehicleType', `${route.truckTonnage ? route.truckTonnage.split(' (')[0] : ''} ${val.split(' (')[0]}`.trim());
+                                              const validTonnages = getTonnagesForBodyType(val);
+                                              if (!validTonnages.includes(route.truckTonnage || '')) {
+                                                const fallbackTonnage = validTonnages[0];
+                                                handleUpdateRouteRow(route.id, 'truckTonnage', fallbackTonnage);
+                                                handleUpdateRouteRow(route.id, 'vehicleType', `${fallbackTonnage.split(' (')[0]} ${val.split(' (')[0]}`.trim());
+                                              } else {
+                                                handleUpdateRouteRow(route.id, 'vehicleType', `${route.truckTonnage ? route.truckTonnage.split(' (')[0] : ''} ${val.split(' (')[0]}`.trim());
+                                              }
                                             }
                                           }}
                                           className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 text-xs focus:bg-white focus:border-indigo-500 font-medium"
@@ -3402,38 +3453,51 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                         )}
                                       </td>
 
-                                      {/* 5b. Phân Khúc Tải Trọng (LOV + Custom Option) */}
+                                      {/* 5b. Phân Khúc Tải Trọng Ràng Buộc Theo Loại Thùng (LOV + Custom Option) */}
                                       <td className="py-2 px-1.5 align-top">
-                                        <select
-                                          value={route.truckTonnage || (TRUCKING_TONNAGES.includes(route.vehicleType) ? route.vehicleType : (route.customTruckTonnage ? 'Khác (Nhập tùy chọn)...' : TRUCKING_TONNAGES[4]))}
-                                          onChange={(e) => {
-                                            const val = e.target.value;
-                                            handleUpdateRouteRow(route.id, 'truckTonnage', val);
-                                            if (val !== 'Khác (Nhập tùy chọn)...') {
-                                              handleUpdateRouteRow(route.id, 'customTruckTonnage', '');
-                                              handleUpdateRouteRow(route.id, 'vehicleType', `${val.split(' (')[0]} ${route.truckBodyType ? route.truckBodyType.split(' (')[0] : ''}`.trim());
-                                            }
-                                          }}
-                                          className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 text-xs focus:bg-white focus:border-indigo-500 font-medium"
-                                        >
-                                          {TRUCKING_TONNAGES.map((t, tIdx) => (
-                                            <option key={tIdx} value={t}>{t}</option>
-                                          ))}
-                                        </select>
-                                        {(route.truckTonnage === 'Khác (Nhập tùy chọn)...' || (!TRUCKING_TONNAGES.includes(route.truckTonnage || '') && route.customTruckTonnage)) && (
-                                          <input
-                                            type="text"
-                                            autoFocus
-                                            value={route.customTruckTonnage || ''}
-                                            onChange={(e) => {
-                                              const customVal = e.target.value;
-                                              handleUpdateRouteRow(route.id, 'customTruckTonnage', customVal);
-                                              handleUpdateRouteRow(route.id, 'vehicleType', `${customVal} ${route.truckBodyType ? route.truckBodyType.split(' (')[0] : ''}`.trim());
-                                            }}
-                                            placeholder="Gõ tải trọng riêng..."
-                                            className="w-full mt-1 px-2 py-1 bg-amber-50/80 border border-amber-300 rounded-lg text-slate-900 text-xs font-semibold focus:bg-white focus:border-amber-500 shadow-2xs"
-                                          />
-                                        )}
+                                        {(() => {
+                                          const boundTonnages = getTonnagesForBodyType(route.truckBodyType || TRUCKING_BODY_TYPES[0]);
+                                          const isCustom = route.truckTonnage === 'Khác (Nhập tùy chọn)...' || (!boundTonnages.includes(route.truckTonnage || '') && route.customTruckTonnage);
+                                          const currentTonnageVal = route.truckTonnage && boundTonnages.includes(route.truckTonnage)
+                                            ? route.truckTonnage
+                                            : (isCustom ? 'Khác (Nhập tùy chọn)...' : boundTonnages[0]);
+
+                                          return (
+                                            <>
+                                              <select
+                                                value={currentTonnageVal}
+                                                onChange={(e) => {
+                                                  const val = e.target.value;
+                                                  handleUpdateRouteRow(route.id, 'truckTonnage', val);
+                                                  if (val !== 'Khác (Nhập tùy chọn)...') {
+                                                    handleUpdateRouteRow(route.id, 'customTruckTonnage', '');
+                                                    handleUpdateRouteRow(route.id, 'vehicleType', `${val.split(' (')[0]} ${route.truckBodyType ? route.truckBodyType.split(' (')[0] : ''}`.trim());
+                                                  }
+                                                }}
+                                                className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 text-xs focus:bg-white focus:border-indigo-500 font-medium"
+                                              >
+                                                {boundTonnages.map((t, tIdx) => (
+                                                  <option key={tIdx} value={t}>{t}</option>
+                                                ))}
+                                              </select>
+
+                                              {isCustom && (
+                                                <input
+                                                  type="text"
+                                                  autoFocus
+                                                  value={route.customTruckTonnage || ''}
+                                                  onChange={(e) => {
+                                                    const customVal = e.target.value;
+                                                    handleUpdateRouteRow(route.id, 'customTruckTonnage', customVal);
+                                                    handleUpdateRouteRow(route.id, 'vehicleType', `${customVal} ${route.truckBodyType ? route.truckBodyType.split(' (')[0] : ''}`.trim());
+                                                  }}
+                                                  placeholder="Gõ tải trọng riêng..."
+                                                  className="w-full mt-1 px-2 py-1 bg-amber-50/80 border border-amber-300 rounded-lg text-slate-900 text-xs font-semibold focus:bg-white focus:border-amber-500 shadow-2xs"
+                                                />
+                                              )}
+                                            </>
+                                          );
+                                        })()}
                                       </td>
                                     </>
                                   ) : (
