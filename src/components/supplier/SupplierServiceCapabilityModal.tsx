@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import * as XLSX from 'xlsx';
 import { 
   X, 
   ChevronRight, 
@@ -25,7 +26,14 @@ import {
   Trash2,
   Flame,
   Percent,
-  Tag
+  Tag,
+  Download,
+  Upload,
+  FileSpreadsheet,
+  FileUp,
+  AlertTriangle,
+  RefreshCw,
+  FileCheck
 } from 'lucide-react';
 import { ServiceType } from '../../types';
 
@@ -3049,6 +3057,18 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
   const [newVasPrice, setNewVasPrice] = useState('');
   const [newVasTag, setNewVasTag] = useState('');
 
+  // Excel Import / Export State
+  const [excelImportPreview, setExcelImportPreview] = useState<{
+    fileName: string;
+    routes: CapabilityRouteItem[];
+    validCount: number;
+    errorCount: number;
+    warnings: string[];
+  } | null>(null);
+  const [excelImportMode, setExcelImportMode] = useState<'replace' | 'append'>('replace');
+  const [isExportingTemplate, setIsExportingTemplate] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   // Custom Form Data per model: Map model.id -> ModelCapabilityFormData
   const [modelFormData, setModelFormData] = useState<Record<string, ModelCapabilityFormData>>(() => {
     const initial: Record<string, ModelCapabilityFormData> = {};
@@ -3171,6 +3191,284 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
         [field]: val,
       },
     }));
+  };
+
+  // ==========================================
+  // SECTION 2: EXCEL TEMPLATE EXPORT & IMPORT ENGINE
+  // ==========================================
+  const handleDownloadExcelTemplate = () => {
+    try {
+      setIsExportingTemplate(true);
+      const isTrucking = activeCategory?.id === 'trucking';
+      const modelCode = activeModel?.code || activeCategory?.id || 'FTL';
+
+      // 1. Data rows for Sheet 1: BANG_GIA_TUYEN_DUONG
+      const sampleData = (currentData.routes && currentData.routes.length > 0)
+        ? currentData.routes.map((r, i) => ({
+            'Mã Tuyến': r.routeCode || `RC-${modelCode.toUpperCase()}-${String(i + 1).padStart(3, '0')}`,
+            'Tuyến Đường (*)': r.route,
+            'Điểm Đi (*)': r.origin,
+            'Điểm Đến (*)': r.destination,
+            ...(isTrucking ? {
+              'Loại Thùng Phương Tiện (*)': r.truckBodyType || TRUCKING_BODY_TYPES[0],
+              'Phân Khúc Tải Trọng (*)': r.truckTonnage || '15.0T (Tải nặng 3 chân) —— (55 – 60 CBM)',
+            } : {
+              'Loại Phương Tiện (*)': r.vehicleType || activeModel?.vehicleLov?.[0] || 'Phương tiện chuẩn',
+            }),
+            'Đơn Vị Tính (*)': r.pricingUnit || (isTrucking ? 'Chuyến' : 'Tấn'),
+            'Đơn Giá (VND) (*)': r.price || 15000000,
+            'SLA Thời Gian': r.sla || '24 - 48 giờ',
+            'Quy Cách Giá': r.pricingStyle || 'All-in',
+            'Hạn Giá (YYYY-MM-DD)': r.validUntil || '2026-12-31',
+            'Promotion (%)': r.promotionPercent || 0,
+          }))
+        : [
+            {
+              'Mã Tuyến': `RC-${modelCode.toUpperCase()}-001`,
+              'Tuyến Đường (*)': 'HCM ⇄ Hà Nội',
+              'Điểm Đi (*)': 'KCN Tân Bình (TP.HCM)',
+              'Điểm Đến (*)': 'KCN Thăng Long (Hà Nội)',
+              ...(isTrucking ? {
+                'Loại Thùng Phương Tiện (*)': 'Xe Tải Thùng Kín (Dry Box Truck) - [An ninh cao / Chống ướt]',
+                'Phân Khúc Tải Trọng (*)': '15.0T (Tải nặng 3 chân) —— (55 – 60 CBM)',
+              } : {
+                'Loại Phương Tiện (*)': 'Xe tải 15T thùng kín',
+              }),
+              'Đơn Vị Tính (*)': isTrucking ? 'Chuyến' : 'Tấn',
+              'Đơn Giá (VND) (*)': 28500000,
+              'SLA Thời Gian': '48 - 60 giờ',
+              'Quy Cách Giá': 'All-in',
+              'Hạn Giá (YYYY-MM-DD)': '2026-12-31',
+              'Promotion (%)': 15,
+            },
+            {
+              'Mã Tuyến': `RC-${modelCode.toUpperCase()}-002`,
+              'Tuyến Đường (*)': 'HCM ⇄ Đà Nẵng',
+              'Điểm Đi (*)': 'KCN Sóng Thần (Bình Dương)',
+              'Điểm Đến (*)': 'KCN Hòa Khánh (Đà Nẵng)',
+              ...(isTrucking ? {
+                'Loại Thùng Phương Tiện (*)': 'Xe Tải Thùng Kín (Dry Box Truck) - [An ninh cao / Chống ướt]',
+                'Phân Khúc Tải Trọng (*)': '8.0T (Tải nặng 2 chân) —— (45 – 50 CBM)',
+              } : {
+                'Loại Phương Tiện (*)': 'Xe tải 8T thùng kín',
+              }),
+              'Đơn Vị Tính (*)': isTrucking ? 'Chuyến' : 'Tấn',
+              'Đơn Giá (VND) (*)': 16500000,
+              'SLA Thời Gian': '24 - 36 giờ',
+              'Quy Cách Giá': 'All-in',
+              'Hạn Giá (YYYY-MM-DD)': '2026-12-31',
+              'Promotion (%)': 0,
+            },
+          ];
+
+      const ws1 = XLSX.utils.json_to_sheet(sampleData);
+      ws1['!cols'] = [
+        { wch: 15 }, // Mã Tuyến
+        { wch: 22 }, // Tuyến Đường
+        { wch: 28 }, // Điểm Đi
+        { wch: 28 }, // Điểm Đến
+        { wch: 38 }, // Loại Thùng
+        { wch: 35 }, // Tải Trọng
+        { wch: 15 }, // ĐVT
+        { wch: 18 }, // Đơn Giá
+        { wch: 16 }, // SLA
+        { wch: 16 }, // Quy Cách Giá
+        { wch: 18 }, // Hạn Giá
+        { wch: 15 }, // Promotion
+      ];
+
+      // 2. Data rows for Sheet 2: DANH_MUC_CHUAN_LOV
+      const lovData: any[] = [];
+      if (isTrucking) {
+        Object.entries(TRUCKING_BODY_TYPE_MAP).forEach(([bodyType, tonnages]) => {
+          tonnages.forEach((t) => {
+            lovData.push({
+              'Loại Thùng Phương Tiện': bodyType,
+              'Phân Khúc Tải Trọng Hợp Lệ': t,
+              'Đơn Vị Tính Khuyên Dùng': 'Chuyến',
+              'Quy Cách Giá Hợp Lệ': 'All-in / Chưa gồm phụ phí',
+            });
+          });
+        });
+      } else {
+        (activeModel?.vehicleLov || ['Phương tiện chuẩn']).forEach((veh: string) => {
+          lovData.push({
+            'Loại Phương Tiện': veh,
+            'Đơn Vị Tính Khuyên Dùng': activeModel?.unitLov?.join(', ') || 'Chuyến, Tấn',
+            'Quy Cách Giá Hợp Lệ': 'All-in / Chưa gồm phụ phí',
+          });
+        });
+      }
+
+      const ws2 = XLSX.utils.json_to_sheet(lovData);
+      ws2['!cols'] = [{ wch: 45 }, { wch: 45 }, { wch: 22 }, { wch: 28 }];
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws1, 'BANG_GIA_TUYEN_DUONG');
+      XLSX.utils.book_append_sheet(wb, ws2, 'DANH_MUC_CHUAN_LOV');
+
+      XLSX.writeFile(wb, `flexGO_BieuGia_${modelCode}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    } catch (err) {
+      console.error('Export Excel Template Error:', err);
+      alert('Không thể tạo file template Excel. Vui lòng thử lại.');
+    } finally {
+      setIsExportingTemplate(false);
+    }
+  };
+
+  const handleUploadExcelFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const bstr = evt.target?.result;
+        const wb = XLSX.read(bstr, { type: 'binary' });
+        const sheetName = wb.SheetNames.includes('BANG_GIA_TUYEN_DUONG') 
+          ? 'BANG_GIA_TUYEN_DUONG' 
+          : wb.SheetNames[0];
+        const ws = wb.Sheets[sheetName];
+        const rawJson: any[] = XLSX.utils.sheet_to_json(ws, { defval: '' });
+
+        if (!rawJson || rawJson.length === 0) {
+          alert('File Excel không có dữ liệu hàng nào. Vui lòng kiểm tra lại.');
+          return;
+        }
+
+        const isTrucking = activeCategory?.id === 'trucking';
+        const modelPrefix = (activeModel?.code || activeCategory?.id || 'RC').toUpperCase().replace(/[^A-Z0-9]/g, '');
+        const defaultUnit = isTrucking ? 'Chuyến' : (activeModel?.unitLov?.[0] || 'Chuyến');
+        const defaultBody = TRUCKING_BODY_TYPES[0];
+        const defaultTonnages = getTonnagesForBodyType(defaultBody);
+        const defaultTonnage = defaultTonnages[defaultTonnages.length - 2] || defaultTonnages[0];
+
+        const parsedRoutes: CapabilityRouteItem[] = [];
+        const warnings: string[] = [];
+        let validCount = 0;
+        let errorCount = 0;
+
+        rawJson.forEach((row, rIdx) => {
+          const rowNum = rIdx + 2; // Excel row numbering
+          const routeName = String(row['Tuyến Đường (*)'] || row['Tuyến Đường'] || row['Tuyến'] || '').trim();
+          const origin = String(row['Điểm Đi (*)'] || row['Điểm Đi'] || row['Điểm đi'] || '').trim();
+          const destination = String(row['Điểm Đến (*)'] || row['Điểm Đến'] || row['Điểm đến'] || '').trim();
+          const rawPrice = row['Đơn Giá (VND) (*)'] || row['Đơn Giá'] || row['Đơn giá'] || row['Giá'];
+          const price = typeof rawPrice === 'number' ? rawPrice : parseFloat(String(rawPrice).replace(/[^0-9.]/g, '')) || 0;
+
+          if (!routeName && !origin && !destination && price === 0) {
+            // Empty row
+            return;
+          }
+
+          if (!routeName || !origin || !destination) {
+            errorCount++;
+            warnings.push(`Dòng ${rowNum}: Thiếu thông tin Tuyến đường, Điểm đi hoặc Điểm đến.`);
+            return;
+          }
+
+          if (price <= 0) {
+            errorCount++;
+            warnings.push(`Dòng ${rowNum}: Đơn giá không hợp lệ (phải lớn hơn 0).`);
+            return;
+          }
+
+          // Body type & tonnage
+          let truckBodyType: string | undefined = undefined;
+          let truckTonnage: string | undefined = undefined;
+          let vehicleType = String(row['Loại Phương Tiện (*)'] || row['Loại Phương Tiện'] || '').trim();
+
+          if (isTrucking) {
+            const rawBody = String(row['Loại Thùng Phương Tiện (*)'] || row['Loại Thùng'] || '').trim();
+            const matchedBody = TRUCKING_BODY_TYPES.find((b) => b.toLowerCase().includes(rawBody.toLowerCase()) || rawBody.toLowerCase().includes(b.split(' (')[0].toLowerCase()));
+            truckBodyType = matchedBody || defaultBody;
+
+            const validTonnages = getTonnagesForBodyType(truckBodyType);
+            const rawTonnage = String(row['Phân Khúc Tải Trọng (*)'] || row['Phân Khúc Tải Trọng'] || row['Tải Trọng'] || '').trim();
+            const matchedTonnage = validTonnages.find((t) => t.toLowerCase().includes(rawTonnage.toLowerCase()) || rawTonnage.toLowerCase().includes(t.split(' (')[0].toLowerCase()));
+            truckTonnage = matchedTonnage || validTonnages[0] || defaultTonnage;
+            vehicleType = `${truckTonnage.split(' (')[0]} ${truckBodyType.split(' (')[0]}`.trim();
+          } else if (!vehicleType) {
+            vehicleType = activeModel?.vehicleLov?.[0] || 'Phương tiện chuẩn';
+          }
+
+          const pricingUnit = isTrucking ? 'Chuyến' : String(row['Đơn Vị Tính (*)'] || row['Đơn Vị Tính'] || row['ĐVT'] || defaultUnit).trim();
+          const sla = String(row['SLA Thời Gian'] || row['SLA'] || '24 - 48 giờ').trim();
+          const rawStyle = String(row['Quy Cách Giá'] || '').trim().toLowerCase();
+          const pricingStyle: 'All-in' | 'Chưa gồm phụ phí' = rawStyle.includes('chưa') || rawStyle.includes('phụ') ? 'Chưa gồm phụ phí' : 'All-in';
+          
+          let validUntil = String(row['Hạn Giá (YYYY-MM-DD)'] || row['Hạn Giá'] || row['Hạn giá'] || '2026-12-31').trim();
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(validUntil)) {
+            validUntil = '2026-12-31';
+          }
+
+          const rawPromo = row['Promotion (%)'] || row['Promotion'] || row['Khuyến mãi (%)'] || 0;
+          const promotionPercent = Math.min(50, Math.max(0, parseInt(String(rawPromo)) || 0));
+
+          const rawCode = String(row['Mã Tuyến (Route Code)'] || row['Mã Tuyến'] || '').trim();
+          const routeCode = rawCode || `RC-${modelPrefix}-${String(parsedRoutes.length + 1).padStart(3, '0')}`;
+
+          parsedRoutes.push({
+            id: `r-import-${Date.now()}-${rIdx}`,
+            routeCode,
+            route: routeName,
+            origin,
+            destination,
+            truckBodyType,
+            truckTonnage,
+            vehicleType,
+            pricingUnit,
+            price,
+            currency: 'VND',
+            sla,
+            pricingStyle,
+            validUntil,
+            promotionPercent,
+          });
+          validCount++;
+        });
+
+        if (parsedRoutes.length === 0) {
+          alert('Không tìm thấy dòng dữ liệu hợp lệ nào trong file Excel.');
+          return;
+        }
+
+        setExcelImportPreview({
+          fileName: file.name,
+          routes: parsedRoutes,
+          validCount,
+          errorCount,
+          warnings,
+        });
+      } catch (err) {
+        console.error('Parse Excel Error:', err);
+        alert('Đã xảy ra lỗi khi đọc file Excel. Vui lòng đảm bảo file theo đúng định dạng template chuẩn.');
+      }
+    };
+
+    reader.readAsBinaryString(file);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleConfirmExcelImport = () => {
+    if (!excelImportPreview) return;
+    
+    if (excelImportMode === 'replace') {
+      updateCurrentFormData('routes', excelImportPreview.routes);
+    } else {
+      // Append mode - renumber route codes
+      const existing = currentData.routes || [];
+      const modelPrefix = (activeModel?.code || activeCategory?.id || 'RC').toUpperCase().replace(/[^A-Z0-9]/g, '');
+      const renumberedNew = excelImportPreview.routes.map((r, i) => ({
+        ...r,
+        routeCode: `RC-${modelPrefix}-${String(existing.length + i + 1).padStart(3, '0')}`,
+      }));
+      updateCurrentFormData('routes', [...existing, ...renumberedNew]);
+    }
+
+    setExcelImportPreview(null);
   };
 
   // ==========================================
@@ -3700,20 +3998,60 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                     PHẦN 2: CÁC TUYẾN ĐƯỜNG - ĐƠN GIÁ - ĐƠN VỊ TÍNH - SLA (BẢNG THÊM/BỚT ĐƯỢC)
                 ========================================================================= */}
                 <div className="space-y-3 pt-3 border-t border-slate-100">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-                      <span className="w-5 h-5 rounded-full bg-indigo-50 text-indigo-700 flex items-center justify-center text-[10.5px] font-bold">2</span>
-                      <span>Các Tuyến Đường & Biểu Giá Tham Chiếu ({currentData.routes?.length || 0})</span>
-                    </h4>
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                        <span className="w-5 h-5 rounded-full bg-indigo-50 text-indigo-700 flex items-center justify-center text-[10.5px] font-bold">2</span>
+                        <span>Các Tuyến Đường & Biểu Giá Tham Chiếu ({currentData.routes?.length || 0})</span>
+                      </h4>
+                      <p className="text-[11px] text-slate-500 mt-0.5">
+                        Chỉnh sửa trực tiếp trên bảng biểu giá hoặc tải template Excel để nhập liệu hàng loạt.
+                      </p>
+                    </div>
 
-                    <button
-                      type="button"
-                      onClick={handleAddRouteRow}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl transition-all cursor-pointer"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>Thêm Tuyến Mới</span>
-                    </button>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {/* Hidden File Input for Excel Upload */}
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleUploadExcelFile}
+                        accept=".xlsx, .xls, .csv"
+                        className="hidden"
+                      />
+
+                      {/* Download Excel Template Button */}
+                      <button
+                        type="button"
+                        onClick={handleDownloadExcelTemplate}
+                        disabled={isExportingTemplate}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 rounded-xl transition-all cursor-pointer shadow-2xs hover:border-slate-400"
+                        title="Tải file Excel mẫu chuẩn hóa kèm danh mục LOV tra cứu"
+                      >
+                        <Download className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>Tải Mẫu Excel</span>
+                      </button>
+
+                      {/* Upload Excel Button */}
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded-xl transition-all cursor-pointer shadow-2xs"
+                        title="Upload file Excel bảng giá tuyến đường để nhập hàng loạt"
+                      >
+                        <Upload className="w-3.5 h-3.5 text-emerald-700" />
+                        <span>Nhập Từ Excel</span>
+                      </button>
+
+                      {/* Add Single Route Button */}
+                      <button
+                        type="button"
+                        onClick={handleAddRouteRow}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl transition-all cursor-pointer shadow-2xs"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Thêm Tuyến</span>
+                      </button>
+                    </div>
                   </div>
 
                   {/* Dynamic Excel-Style Data Grid Table */}
@@ -4556,6 +4894,185 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
           </div>
         </div>
       </div>
+
+      {/* =========================================================================
+          MODAL XEM TRƯỚC VÀ XÁC NHẬN NHẬP DỮ LIỆU TỪ FILE EXCEL
+      ========================================================================= */}
+      {excelImportPreview && (
+        <div className="fixed inset-0 z-60 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-4xl max-h-[88vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            {/* Modal Header */}
+            <div className="px-5 py-4 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center">
+                  <FileSpreadsheet className="w-4.5 h-4.5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold leading-tight flex items-center gap-2">
+                    <span>Xác Nhận Nhập Tuyến Đường & Biểu Giá Từ File Excel</span>
+                  </h3>
+                  <p className="text-[11px] text-slate-400 mt-0.5">
+                    Tệp tin tải lên: <span className="text-emerald-400 font-mono font-medium">{excelImportPreview.fileName}</span>
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setExcelImportPreview(null)}
+                className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-5 overflow-y-auto space-y-4 flex-1">
+              {/* Summary Stats Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                  <span className="text-[11px] text-slate-500 block font-medium">Tổng số dòng đọc được</span>
+                  <span className="text-lg font-black text-slate-800">{excelImportPreview.routes.length + excelImportPreview.errorCount}</span>
+                </div>
+                <div className="p-3 bg-emerald-50/80 border border-emerald-200 rounded-xl">
+                  <span className="text-[11px] text-emerald-700 block font-bold">Dòng hợp lệ sẵn sàng</span>
+                  <span className="text-lg font-black text-emerald-700">{excelImportPreview.validCount}</span>
+                </div>
+                <div className="p-3 bg-amber-50/80 border border-amber-200 rounded-xl">
+                  <span className="text-[11px] text-amber-700 block font-bold">Dòng lỗi / Bỏ qua</span>
+                  <span className="text-lg font-black text-amber-700">{excelImportPreview.errorCount}</span>
+                </div>
+              </div>
+
+              {/* Warnings List if any */}
+              {excelImportPreview.warnings.length > 0 && (
+                <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl space-y-1">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-amber-800">
+                    <AlertTriangle className="w-3.5 h-3.5" />
+                    <span>Cảnh báo dữ liệu trong file:</span>
+                  </div>
+                  <ul className="text-[11px] text-amber-700 list-disc list-inside space-y-0.5 max-h-24 overflow-y-auto">
+                    {excelImportPreview.warnings.map((w, idx) => (
+                      <li key={idx}>{w}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Import Mode Selection */}
+              <div className="p-3.5 bg-indigo-50/70 border border-indigo-200 rounded-xl space-y-2">
+                <span className="text-xs font-bold text-indigo-900 block">
+                  Chọn phương thức cập nhật vào bảng biểu giá:
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <label 
+                    onClick={() => setExcelImportMode('replace')}
+                    className={`flex items-center gap-2.5 p-2.5 rounded-lg border cursor-pointer transition-all ${
+                      excelImportMode === 'replace'
+                        ? 'bg-white border-indigo-500 shadow-2xs ring-1 ring-indigo-500/20 text-indigo-950 font-bold'
+                        : 'bg-white/60 border-slate-200 text-slate-600 hover:bg-white'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="excelImportMode"
+                      checked={excelImportMode === 'replace'}
+                      onChange={() => setExcelImportMode('replace')}
+                      className="text-indigo-600"
+                    />
+                    <div>
+                      <div className="text-xs font-bold text-slate-900">Ghi đè toàn bộ (Replace)</div>
+                      <div className="text-[10.5px] text-slate-500 font-normal">Xóa toàn bộ {currentData.routes?.length || 0} tuyến cũ và thay bằng {excelImportPreview.validCount} tuyến mới từ file</div>
+                    </div>
+                  </label>
+
+                  <label 
+                    onClick={() => setExcelImportMode('append')}
+                    className={`flex items-center gap-2.5 p-2.5 rounded-lg border cursor-pointer transition-all ${
+                      excelImportMode === 'append'
+                        ? 'bg-white border-indigo-500 shadow-2xs ring-1 ring-indigo-500/20 text-indigo-950 font-bold'
+                        : 'bg-white/60 border-slate-200 text-slate-600 hover:bg-white'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="excelImportMode"
+                      checked={excelImportMode === 'append'}
+                      onChange={() => setExcelImportMode('append')}
+                      className="text-indigo-600"
+                    />
+                    <div>
+                      <div className="text-xs font-bold text-slate-900">Thêm nối tiếp (Append)</div>
+                      <div className="text-[10.5px] text-slate-500 font-normal">Giữ nguyên {currentData.routes?.length || 0} tuyến hiện tại và thêm {excelImportPreview.validCount} tuyến vào cuối bảng</div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              {/* Data Preview Table */}
+              <div className="space-y-1.5">
+                <span className="text-xs font-bold text-slate-800 block">
+                  Xem trước danh sách ({excelImportPreview.routes.length} tuyến hợp lệ):
+                </span>
+                <div className="border border-slate-200 rounded-xl overflow-hidden max-h-60 overflow-y-auto">
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead>
+                      <tr className="bg-slate-100 border-b border-slate-200 text-[10.5px] font-bold text-slate-700 uppercase">
+                        <th className="py-2 px-2 text-center w-8">#</th>
+                        <th className="py-2 px-2">Mã Tuyến</th>
+                        <th className="py-2 px-2">Tuyến Đường</th>
+                        <th className="py-2 px-2">Điểm Đi</th>
+                        <th className="py-2 px-2">Điểm Đến</th>
+                        <th className="py-2 px-2">Loại Thùng / Phương Tiện</th>
+                        <th className="py-2 px-2">Tải Trọng</th>
+                        <th className="py-2 px-2 text-right">Đơn Giá</th>
+                        <th className="py-2 px-2">SLA</th>
+                        <th className="py-2 px-2">Hạn Giá</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {excelImportPreview.routes.map((r, i) => (
+                        <tr key={i} className="hover:bg-slate-50">
+                          <td className="py-1.5 px-2 text-center text-slate-400 font-mono text-[10.5px]">{i + 1}</td>
+                          <td className="py-1.5 px-2 font-mono font-bold text-indigo-700 text-[10.5px]">{r.routeCode}</td>
+                          <td className="py-1.5 px-2 font-bold text-slate-900">{r.route}</td>
+                          <td className="py-1.5 px-2 text-slate-600">{r.origin}</td>
+                          <td className="py-1.5 px-2 text-slate-600">{r.destination}</td>
+                          <td className="py-1.5 px-2 text-slate-700 truncate max-w-[120px]">{r.truckBodyType?.split(' (')[0] || r.vehicleType}</td>
+                          <td className="py-1.5 px-2 text-slate-700 truncate max-w-[100px]">{r.truckTonnage?.split(' (')[0] || '-'}</td>
+                          <td className="py-1.5 px-2 text-right font-bold text-emerald-700">{r.price.toLocaleString('vi-VN')} ₫</td>
+                          <td className="py-1.5 px-2 text-slate-600">{r.sla}</td>
+                          <td className="py-1.5 px-2 text-slate-600 font-mono text-[10.5px]">{r.validUntil}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-5 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => setExcelImportPreview(null)}
+                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-200/60 rounded-xl transition-colors cursor-pointer"
+              >
+                Hủy Bỏ
+              </button>
+
+              <button
+                type="button"
+                onClick={handleConfirmExcelImport}
+                className="inline-flex items-center gap-1.5 px-5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-all shadow-md cursor-pointer"
+              >
+                <Check className="w-4 h-4" />
+                <span>Xác Nhận Nhập ({excelImportPreview.validCount} Tuyến)</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
