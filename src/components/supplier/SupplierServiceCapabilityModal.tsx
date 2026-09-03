@@ -18,6 +18,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Clock,
+  Calendar,
   MapPin,
   DollarSign,
   ShieldCheck,
@@ -36,6 +37,24 @@ import {
   FileCheck
 } from 'lucide-react';
 import { ServiceType } from '../../types';
+
+export const DAYS_OF_WEEK_LOV = [
+  { id: 'T2', name: 'Thứ 2', short: 'T2' },
+  { id: 'T3', name: 'Thứ 3', short: 'T3' },
+  { id: 'T4', name: 'Thứ 4', short: 'T4' },
+  { id: 'T5', name: 'Thứ 5', short: 'T5' },
+  { id: 'T6', name: 'Thứ 6', short: 'T6' },
+  { id: 'T7', name: 'Thứ 7', short: 'T7' },
+  { id: 'CN', name: 'Chủ Nhật', short: 'CN' },
+];
+
+export const SCHEDULE_PRESETS = [
+  { label: 'Hàng ngày', days: ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ Nhật'] },
+  { label: 'T2 - T6', days: ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6'] },
+  { label: 'T2, T4, T6', days: ['Thứ 2', 'Thứ 4', 'Thứ 6'] },
+  { label: 'T3, T5, T7', days: ['Thứ 3', 'Thứ 5', 'Thứ 7'] },
+  { label: 'T2 - T7', days: ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'] },
+];
 
 export const TRUCKING_BODY_TYPES = [
   'Xe Tải Thùng Kín (Dry Box Truck) - [An ninh cao / Chống ướt]',
@@ -3499,6 +3518,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
   const [excelImportMode, setExcelImportMode] = useState<'replace' | 'append'>('replace');
   const [isExportingTemplate, setIsExportingTemplate] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [openScheduleRouteId, setOpenScheduleRouteId] = useState<string | null>(null);
 
   // Custom Form Data per model: Map model.id -> ModelCapabilityFormData
   const [modelFormData, setModelFormData] = useState<Record<string, ModelCapabilityFormData>>(() => {
@@ -4872,16 +4892,160 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                     </div>
                                   </td>
 
-                                  {/* 9. SLA / Lịch Chạy Hàng */}
-                                  <td className="p-0 align-top">
-                                    <input
-                                      type="text"
-                                      value={route.sla}
-                                      onChange={(e) => handleUpdateRouteRow(route.id, 'sla', e.target.value)}
-                                      placeholder={isLtlTrucking ? "Thứ 2, Thứ 4, Thứ 7..." : "24 - 36h"}
-                                      className="w-full px-2 py-2 text-center bg-transparent text-slate-800 text-xs font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
-                                      title={isLtlTrucking ? "Lịch gom hàng / xuất bến các thứ trong tuần" : "Thời gian vận chuyển dự kiến"}
-                                    />
+                                  {/* 9. SLA / Lịch Chạy Hàng (Multi-select Days of Week for LTL) */}
+                                  <td className="p-0 align-top relative">
+                                    {isLtlTrucking ? (
+                                      <div className="relative p-1">
+                                        <button
+                                          type="button"
+                                          onClick={() => setOpenScheduleRouteId(openScheduleRouteId === route.id ? null : route.id)}
+                                          className={`w-full min-h-[34px] px-2 py-1 rounded-lg border text-left text-xs transition-all flex items-center justify-between gap-1 cursor-pointer ${
+                                            route.sla
+                                              ? 'bg-indigo-50/80 border-indigo-200 text-indigo-900 font-semibold hover:bg-indigo-100/80 hover:border-indigo-300'
+                                              : 'bg-slate-50 border-dashed border-slate-300 text-slate-400 hover:bg-slate-100 hover:text-slate-600'
+                                          }`}
+                                          title="Nhấp để chọn các thứ trong tuần xe xuất bến"
+                                        >
+                                          <span className="truncate block font-medium">
+                                            {route.sla || 'Chọn các thứ...'}
+                                          </span>
+                                          <Calendar className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                                        </button>
+
+                                        {/* Interactive Multi-Select Popover */}
+                                        {openScheduleRouteId === route.id && (
+                                          <>
+                                            {/* Backdrop to close on click outside */}
+                                            <div 
+                                              className="fixed inset-0 z-40 bg-transparent" 
+                                              onClick={() => setOpenScheduleRouteId(null)} 
+                                            />
+                                            <div 
+                                              className="absolute z-50 top-full left-0 mt-1 w-72 bg-white border border-slate-200 rounded-xl shadow-2xl p-3 space-y-2.5 text-slate-800 animate-in fade-in zoom-in-95 duration-150"
+                                              style={{ minWidth: '270px' }}
+                                            >
+                                              {/* Header */}
+                                              <div className="flex items-center justify-between border-b border-slate-100 pb-1.5">
+                                                <span className="text-[11px] font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                                                  <Calendar className="w-3.5 h-3.5 text-indigo-600" />
+                                                  Lịch Chạy Trong Tuần
+                                                </span>
+                                                <button
+                                                  type="button"
+                                                  onClick={() => setOpenScheduleRouteId(null)}
+                                                  className="text-slate-400 hover:text-slate-700 hover:bg-slate-100 text-xs font-bold w-5 h-5 flex items-center justify-center rounded cursor-pointer"
+                                                >
+                                                  ✕
+                                                </button>
+                                              </div>
+
+                                              {/* Quick Presets */}
+                                              <div className="space-y-1">
+                                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Chọn nhanh</span>
+                                                <div className="flex flex-wrap gap-1">
+                                                  {SCHEDULE_PRESETS.map((preset, pIdx) => {
+                                                    const isSelected = preset.days.every(d => (route.sla || '').includes(d)) && 
+                                                      DAYS_OF_WEEK_LOV.filter(d => (route.sla || '').includes(d.name)).length === preset.days.length;
+                                                    return (
+                                                      <button
+                                                        key={pIdx}
+                                                        type="button"
+                                                        onClick={() => {
+                                                          handleUpdateRouteRow(route.id, 'sla', preset.days.join(', '));
+                                                        }}
+                                                        className={`px-2 py-1 text-[10.5px] rounded-lg border font-medium transition-all cursor-pointer ${
+                                                          isSelected
+                                                            ? 'bg-indigo-600 border-indigo-600 text-white font-bold shadow-2xs'
+                                                            : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 hover:border-slate-300'
+                                                        }`}
+                                                      >
+                                                        {preset.label}
+                                                      </button>
+                                                    );
+                                                  })}
+                                                </div>
+                                              </div>
+
+                                              {/* 7 Days of Week Checkboxes */}
+                                              <div className="space-y-1">
+                                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Các thứ trong tuần</span>
+                                                <div className="grid grid-cols-2 gap-1.5">
+                                                  {DAYS_OF_WEEK_LOV.map((day) => {
+                                                    const isChecked = (route.sla || '').includes(day.name);
+                                                    return (
+                                                      <label
+                                                        key={day.id}
+                                                        className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg border text-xs font-medium cursor-pointer transition-all select-none ${
+                                                          isChecked 
+                                                            ? 'bg-indigo-50 border-indigo-300 text-indigo-950 font-bold' 
+                                                            : 'bg-slate-50/60 border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900'
+                                                        }`}
+                                                      >
+                                                        <input
+                                                          type="checkbox"
+                                                          checked={isChecked}
+                                                          onChange={(e) => {
+                                                            let currentDays = DAYS_OF_WEEK_LOV.filter(d => (route.sla || '').includes(d.name)).map(d => d.name);
+                                                            if (e.target.checked) {
+                                                              if (!currentDays.includes(day.name)) currentDays.push(day.name);
+                                                            } else {
+                                                              currentDays = currentDays.filter(d => d !== day.name);
+                                                            }
+                                                            // Sort by original week order
+                                                            const sortedDays = DAYS_OF_WEEK_LOV.filter(d => currentDays.includes(d.name)).map(d => d.name);
+                                                            handleUpdateRouteRow(route.id, 'sla', sortedDays.join(', '));
+                                                          }}
+                                                          className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-3.5 h-3.5 cursor-pointer"
+                                                        />
+                                                        <span>{day.name}</span>
+                                                      </label>
+                                                    );
+                                                  })}
+                                                </div>
+                                              </div>
+
+                                              {/* Custom / Notes Input */}
+                                              <div className="space-y-1 pt-1 border-t border-slate-100">
+                                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Ghi chú giờ xuất bến (tùy chọn)</span>
+                                                <input
+                                                  type="text"
+                                                  value={route.sla || ''}
+                                                  onChange={(e) => handleUpdateRouteRow(route.id, 'sla', e.target.value)}
+                                                  placeholder="VD: Thứ 2, Thứ 4, Thứ 6 (Xuất bến 20:00)"
+                                                  className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                                />
+                                              </div>
+
+                                              {/* Footer Action buttons */}
+                                              <div className="pt-1.5 border-t border-slate-100 flex items-center justify-between">
+                                                <button
+                                                  type="button"
+                                                  onClick={() => handleUpdateRouteRow(route.id, 'sla', '')}
+                                                  className="text-xs text-slate-500 hover:text-rose-600 font-medium cursor-pointer"
+                                                >
+                                                  Xóa chọn
+                                                </button>
+                                                <button
+                                                  type="button"
+                                                  onClick={() => setOpenScheduleRouteId(null)}
+                                                  className="px-3.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-all cursor-pointer shadow-xs"
+                                                >
+                                                  Xong
+                                                </button>
+                                              </div>
+                                            </div>
+                                          </>
+                                        )}
+                                      </div>
+                                    ) : (
+                                      <input
+                                        type="text"
+                                        value={route.sla}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'sla', e.target.value)}
+                                        placeholder="24 - 36h"
+                                        className="w-full px-2 py-2 text-center bg-transparent text-slate-800 text-xs font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
+                                      />
+                                    )}
                                   </td>
 
                                   {/* 10. Quy cách giá */}
