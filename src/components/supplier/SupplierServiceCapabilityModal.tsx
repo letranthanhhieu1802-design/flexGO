@@ -25,6 +25,7 @@ import {
   Package,
   Plus,
   Trash2,
+  Copy,
   Flame,
   Percent,
   Tag,
@@ -4366,6 +4367,31 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
     updateCurrentFormData('routes', updatedRoutes);
   };
 
+  const handleDuplicateRouteRow = (routeId: string) => {
+    const currentRoutes = currentData.routes || [];
+    const targetIdx = currentRoutes.findIndex((r) => r.id === routeId);
+    if (targetIdx === -1) return;
+
+    const sourceRoute = currentRoutes[targetIdx];
+    const modelPrefix = (activeModel?.code || activeCategory?.id || 'RC').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    const nextIdx = currentRoutes.length + 1;
+    const generatedRouteCode = `RC-${modelPrefix}-${String(nextIdx).padStart(3, '0')}`;
+
+    const duplicatedRoute: CapabilityRouteItem = {
+      ...JSON.parse(JSON.stringify(sourceRoute)),
+      id: `r-dup-${Date.now()}`,
+      routeCode: generatedRouteCode,
+    };
+
+    const updatedRoutes = [
+      ...currentRoutes.slice(0, targetIdx + 1),
+      duplicatedRoute,
+      ...currentRoutes.slice(targetIdx + 1),
+    ];
+
+    updateCurrentFormData('routes', updatedRoutes);
+  };
+
   // ==========================================
   // SECTION 3: SURCHARGES OPERATIONS & CUSTOM ADD
   // ==========================================
@@ -4921,7 +4947,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                 )}
                                 <th className="py-2.5 px-2.5 min-w-[130px] text-center">Hạn Giá</th>
                                 <th className="py-2.5 px-2 min-w-[85px] text-center">Promotion</th>
-                                <th className="py-2.5 px-1.5 text-center w-9 min-w-[36px]">Xóa</th>
+                                <th className="py-2.5 px-2 text-center w-16 min-w-[65px]">Action</th>
                               </tr>
                             );
                           })()}
@@ -5356,16 +5382,26 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                     </div>
                                   </td>
 
-                                  {/* 14. Thao tác Xóa */}
+                                  {/* 14. Action (Duplicate & Delete) */}
                                   <td className="p-0 text-center bg-slate-50/40 align-middle">
-                                    <button
-                                      type="button"
-                                      onClick={() => handleDeleteRouteRow(route.id)}
-                                      className="w-full h-full py-2.5 flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
-                                      title="Xóa tuyến đường này"
-                                    >
-                                      <Trash2 className="w-3.5 h-3.5" />
-                                    </button>
+                                    <div className="flex items-center justify-center gap-1 px-1 py-1.5">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleDuplicateRouteRow(route.id)}
+                                        className="w-7 h-7 inline-flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all cursor-pointer"
+                                        title="Nhân bản (duplicate) tuyến đường này"
+                                      >
+                                        <Copy className="w-3.5 h-3.5" />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleDeleteRouteRow(route.id)}
+                                        className="w-7 h-7 inline-flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all cursor-pointer"
+                                        title="Xóa tuyến đường này"
+                                      >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                      </button>
+                                    </div>
                                   </td>
                                 </tr>
                               );
