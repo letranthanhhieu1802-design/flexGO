@@ -4910,7 +4910,8 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                   <th className="py-2.5 px-2.5 min-w-[180px]">{isFclTable ? 'Loại Vỏ Container' : 'Loại Phương Tiện'}</th>
                                 )}
                                 <th className="py-2.5 px-2 w-20 min-w-[75px] text-center">ĐVT</th>
-                                <th className="py-2.5 px-2.5 min-w-[175px] text-right">Đơn Giá & Tỷ Giá</th>
+                                <th className="py-2.5 px-2 w-20 min-w-[80px] text-center">Tiền Tệ</th>
+                                <th className="py-2.5 px-2.5 min-w-[150px] text-right">Đơn Giá</th>
                                 <th className={`py-2.5 px-2 text-center ${isLtlTable ? 'min-w-[150px]' : 'min-w-[90px]'}`}>
                                   {isLtlTable ? 'Lịch Chạy Hàng' : 'SLA'}
                                 </th>
@@ -4929,7 +4930,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                         <tbody className="divide-y divide-slate-200 bg-white">
                           {(!currentData.routes || currentData.routes.length === 0) ? (
                             <tr>
-                              <td colSpan={activeCategory?.id === 'trucking' ? 14 : (((activeCategory?.id === 'ocean' || activeCategory?.id === 'rail') && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL')) ? 14 : 13)} className="py-8 text-center text-slate-400 font-medium">
+                              <td colSpan={activeCategory?.id === 'trucking' ? 15 : (((activeCategory?.id === 'ocean' || activeCategory?.id === 'rail') && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL')) ? 15 : 14)} className="py-8 text-center text-slate-400 font-medium">
                                 Chưa có tuyến đường nào. Bấm nút <strong className="text-indigo-600 font-bold">+ Thêm Tuyến Mới</strong> để khai báo bảng giá.
                               </td>
                             </tr>
@@ -5150,14 +5151,26 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                         onChange={(e) => handleUpdateRouteRow(route.id, 'pricingUnit', e.target.value)}
                                         className="w-full px-1.5 py-2 bg-transparent text-slate-800 text-xs font-medium text-center focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all cursor-pointer"
                                       >
-                                        {(activeModel?.unitLov || ['Kg', 'CBM', 'Chuyến', 'Tấn', 'Cont 40ft', 'Pallet']).map((u: string, uIdx: number) => (
+                                        {(activeModel?.unitLov || ['Kg', 'CBM', 'Chuyến', 'Tấn', 'Cont', 'Pallet']).map((u: string, uIdx: number) => (
                                           <option key={uIdx} value={u}>{u}</option>
                                         ))}
                                       </select>
                                     )}
                                   </td>
 
-                                  {/* 8. Đơn giá (USD/VND, Live currency conversion & Ma Trận 5 Bậc cho LTL) */}
+                                  {/* 8. Tiền Tệ (USD / VND) */}
+                                  <td className="p-0 text-center bg-slate-50/30 align-middle">
+                                    <select
+                                      value={route.currency || (isOcean ? 'USD' : 'VND')}
+                                      onChange={(e) => handleUpdateRouteRow(route.id, 'currency', e.target.value as 'VND' | 'USD')}
+                                      className="w-full px-1.5 py-2 bg-transparent text-slate-800 text-xs font-bold text-center cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
+                                    >
+                                      <option value="USD">USD ($)</option>
+                                      <option value="VND">VND (₫)</option>
+                                    </select>
+                                  </td>
+
+                                  {/* 9. Đơn giá (Nhập giá + Live currency conversion tag & Ma Trận 5 Bậc cho LTL) */}
                                   <td className="p-1.5 align-middle">
                                     {isLtlTrucking ? (
                                       <div className="flex flex-col gap-1">
@@ -5192,23 +5205,13 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                       </div>
                                     ) : (
                                       <div className="flex flex-col gap-1">
-                                        <div className="flex items-center gap-1">
-                                          <select
-                                            value={route.currency || (isOcean ? 'USD' : 'VND')}
-                                            onChange={(e) => handleUpdateRouteRow(route.id, 'currency', e.target.value as 'VND' | 'USD')}
-                                            className="px-1.5 py-1 text-[11px] font-black rounded-lg border border-slate-300 bg-slate-100 text-slate-800 cursor-pointer focus:outline-none focus:ring-1 focus:ring-indigo-500 shrink-0"
-                                          >
-                                            <option value="USD">USD ($)</option>
-                                            <option value="VND">VND (₫)</option>
-                                          </select>
-                                          <input
-                                            type="number"
-                                            value={route.price || ''}
-                                            onChange={(e) => handleUpdateRouteRow(route.id, 'price', parseFloat(e.target.value) || 0)}
-                                            placeholder="0"
-                                            className="w-full px-2 py-1 text-right bg-white border border-slate-200 rounded-lg text-slate-900 font-bold text-xs focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
-                                          />
-                                        </div>
+                                        <input
+                                          type="number"
+                                          value={route.price || ''}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'price', parseFloat(e.target.value) || 0)}
+                                          placeholder="0"
+                                          className="w-full px-2.5 py-1.5 text-right bg-white border border-slate-200 rounded-lg text-slate-900 font-bold text-xs focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
+                                        />
 
                                         {/* Live Currency Conversion Tag */}
                                         {route.price > 0 && (
