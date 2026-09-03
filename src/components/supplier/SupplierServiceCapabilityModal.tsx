@@ -3807,18 +3807,6 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                             </div>
                           );
                         })}
-
-                        {/* Dashed Add Card */}
-                        {!isAddingFreeSurcharge && (
-                          <button
-                            type="button"
-                            onClick={() => setIsAddingFreeSurcharge(true)}
-                            className="w-full py-2 px-3 border border-dashed border-emerald-300 hover:border-emerald-500 rounded-xl text-emerald-700 bg-emerald-50/50 hover:bg-emerald-100/60 transition-all text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer mt-1"
-                          >
-                            <Plus className="w-3.5 h-3.5" />
-                            <span>+ Thêm phụ phí miễn phí khác</span>
-                          </button>
-                        )}
                       </div>
                     </div>
 
@@ -3932,18 +3920,6 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                             </div>
                           </div>
                         ))}
-
-                        {/* Dashed Add Card */}
-                        {!isAddingPaidSurcharge && (
-                          <button
-                            type="button"
-                            onClick={() => setIsAddingPaidSurcharge(true)}
-                            className="w-full py-2 px-3 border border-dashed border-amber-300 hover:border-amber-500 rounded-xl text-amber-800 bg-amber-50/50 hover:bg-amber-100/60 transition-all text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer mt-1"
-                          >
-                            <Plus className="w-3.5 h-3.5" />
-                            <span>+ Thêm phụ phí có phí khác</span>
-                          </button>
-                        )}
                       </div>
                     </div>
                   </div>
