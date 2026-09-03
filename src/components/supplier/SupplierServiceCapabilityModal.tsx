@@ -89,17 +89,57 @@ export const ALL_DEFAULT_TRUCKING_TONNAGES = [
   'Đầu kéo + Rơ-mooc 45ft High Cube —— (~85 CBM)',
 ];
 
-export const getTonnagesForBodyType = (bodyType?: string): string[] => {
-  if (!bodyType) return [...ALL_DEFAULT_TRUCKING_TONNAGES, 'Khác (Nhập tùy chọn)...'];
+// REEFER (HÀNG LẠNH) TRUCK BODY TYPES & TONNAGES (ĐỒNG BỘ 100% VỚI MÀN HÌNH ĐĂNG NHU CẦU CUSTOMER)
+export const REEFER_TRUCKING_BODY_TYPES = [
+  'Xe Tải Thùng Đông Lạnh Nhỏ (City Reefer) - [Vào phố / Giao siêu thị]',
+  'Xe Tải Thùng Đông Lạnh Trung (Regional Reefer) - [Giàn lạnh Thermo King]',
+  'Xe Tải Đông Lạnh Tải Nặng 3 Chân (Long-haul Reefer) - [Trục Bắc Nam / 16-18 Pallets]',
+  'Đầu Kéo Kéo Container Lạnh (Reefer Drayage) - [Cont 20RF / 40RF + Genset]',
+  'Khác (Nhập tùy chọn)...',
+];
+
+export const REEFER_TRUCKING_BODY_TYPE_MAP: Record<string, string[]> = {
+  'Xe Tải Thùng Đông Lạnh Nhỏ (City Reefer) - [Vào phố / Giao siêu thị]': [
+    '1.0T – 1.4T (Vào phố ban ngày) —— (6 – 7 CBM)',
+    '1.9T – 2.4T (Thùng lạnh 3-4 Pallets) —— (9 – 11 CBM)',
+  ],
+  'Xe Tải Thùng Đông Lạnh Trung (Regional Reefer) - [Giàn lạnh Thermo King]': [
+    '3.5T (Thùng dài 4.3m – 5.2m) —— (15 – 18 CBM)',
+    '5.0T – 6.5T (Thùng dài 5.8m – 6.2m) —— (24 – 28 CBM)',
+  ],
+  'Xe Tải Đông Lạnh Tải Nặng 3 Chân (Long-haul Reefer) - [Trục Bắc Nam / 16-18 Pallets]': [
+    '12.0T – 15.0T (3 Chân thùng dài 9.2m – 9.6m) —— (48 – 54 CBM)',
+  ],
+  'Đầu Kéo Kéo Container Lạnh (Reefer Drayage) - [Cont 20RF / 40RF + Genset]': [
+    'Đầu kéo + Cont 20RF Lạnh (22 – 24 Tấn) —— (~28 CBM)',
+    'Đầu kéo + Cont 40RF / 40RH Cao Lạnh (26 – 28 Tấn) —— (~67 CBM)',
+  ],
+};
+
+export const ALL_DEFAULT_REEFER_TONNAGES = [
+  '1.0T – 1.4T (Vào phố ban ngày) —— (6 – 7 CBM)',
+  '1.9T – 2.4T (Thùng lạnh 3-4 Pallets) —— (9 – 11 CBM)',
+  '3.5T (Thùng dài 4.3m – 5.2m) —— (15 – 18 CBM)',
+  '5.0T – 6.5T (Thùng dài 5.8m – 6.2m) —— (24 – 28 CBM)',
+  '12.0T – 15.0T (3 Chân thùng dài 9.2m – 9.6m) —— (48 – 54 CBM)',
+  'Đầu kéo + Cont 20RF Lạnh (22 – 24 Tấn) —— (~28 CBM)',
+  'Đầu kéo + Cont 40RF / 40RH Cao Lạnh (26 – 28 Tấn) —— (~67 CBM)',
+];
+
+export const getTonnagesForBodyType = (bodyType?: string, isReefer?: boolean): string[] => {
+  const map = isReefer ? REEFER_TRUCKING_BODY_TYPE_MAP : TRUCKING_BODY_TYPE_MAP;
+  const allDefaults = isReefer ? ALL_DEFAULT_REEFER_TONNAGES : ALL_DEFAULT_TRUCKING_TONNAGES;
+
+  if (!bodyType) return [...allDefaults, 'Khác (Nhập tùy chọn)...'];
   
   // Find key matching
-  for (const [key, tonnages] of Object.entries(TRUCKING_BODY_TYPE_MAP)) {
+  for (const [key, tonnages] of Object.entries(map)) {
     if (bodyType === key || bodyType.includes(key) || key.includes(bodyType)) {
       return [...tonnages, 'Khác (Nhập tùy chọn)...'];
     }
   }
   
-  return [...ALL_DEFAULT_TRUCKING_TONNAGES, 'Khác (Nhập tùy chọn)...'];
+  return [...allDefaults, 'Khác (Nhập tùy chọn)...'];
 };
 
 export interface CapabilityRouteItem {
@@ -273,7 +313,138 @@ export const DEFAULT_TRUCKING_VAS_ITEMS: CapabilityVasItem[] = [
   },
 ];
 
+// REEFER (HÀNG LẠNH) TRUCKING VAS ITEMS (ĐỒNG BỘ 100% VỚI MÀN HÌNH ĐĂNG NHU CẦU CUSTOMER)
+export const DEFAULT_REEFER_TRUCKING_VAS_ITEMS: CapabilityVasItem[] = [
+  // 1. Dịch Vụ Bốc Xếp & Bảo Quản Lạnh
+  {
+    id: 'vas-rf-1',
+    name: 'Bốc dỡ & Bốc xếp hàng hóa 2 đầu kho lạnh (Cold Loading Labor)',
+    desc: 'Đội ngũ nhân công bốc dỡ, chuyển hàng từ kho lạnh lên/xuống thùng xe nhanh chóng, đúng quy trình cách nhiệt.',
+    category: 'Dịch Vụ Bốc Xếp & Bảo Quản Lạnh',
+    tag: 'Bốc dỡ kho lạnh',
+    priceText: '600,000 ₫ / Điểm',
+    isChecked: true,
+    isPopular: true,
+  },
+  {
+    id: 'vas-rf-2',
+    name: 'Bốc dỡ qua Dock trùm túi khí phòng lạnh (Inflatable Shelter Cold Dock)',
+    desc: 'Bốc dỡ qua cửa đệm khí phòng lạnh cách nhiệt, ngăn thoát nhiệt và chống đọng sương bề mặt hàng.',
+    category: 'Dịch Vụ Bốc Xếp & Bảo Quản Lạnh',
+    tag: 'Dock trùm túi khí',
+    priceText: '250,000 ₫ / Điểm',
+    isChecked: false,
+  },
+  {
+    id: 'vas-rf-3',
+    name: 'Cung cấp đá gel bảo ôn, đá khô / Thùng xốp bổ trợ (Gel Ice Packs & Foam Box)',
+    desc: 'Trang bị phụ trợ duy trì độ lạnh cho các kiện hàng lấy dỡ phân tán hoặc giao hàng chặng cuối.',
+    category: 'Dịch Vụ Bốc Xếp & Bảo Quản Lạnh',
+    tag: 'Đá gel / Thùng xốp',
+    priceText: '150,000 ₫ / Kiện',
+    isChecked: false,
+  },
+
+  // 2. Thiết Bị & Phương Tiện Lạnh Chuyên Dụng
+  {
+    id: 'vas-rf-4',
+    name: 'Làm lạnh trước thùng xe 30-60 phút (Pre-cooling)',
+    desc: 'Đưa nhiệt độ buồng lạnh về đúng Set-point (-20°C đến 5°C) trước khi mở cửa nhận hàng, chống sốc nhiệt.',
+    category: 'Thiết Bị & Phương Tiện Lạnh',
+    tag: 'Pre-cooling',
+    priceText: '0 ₫ (Miễn phí)',
+    isChecked: true,
+    isPopular: true,
+  },
+  {
+    id: 'vas-rf-5',
+    name: 'Máy phát điện dự phòng Clip-on Genset (Continuous Power)',
+    desc: 'Đảm bảo giàn lạnh cont/xe chạy liên tục suốt tuyến Bắc - Nam không gián đoạn nguồn điện.',
+    category: 'Thiết Bị & Phương Tiện Lạnh',
+    tag: 'Genset liên tục',
+    priceText: '400,000 ₫ / Ca',
+    isChecked: true,
+    isPopular: true,
+  },
+  {
+    id: 'vas-rf-6',
+    name: 'Hạ bửng nâng thủy lực giao hàng chuỗi siêu thị (Hydraulic Tail-lift)',
+    desc: 'Xe tải đông lạnh trang bị bửng nâng hạ pallet hàng đông lạnh vào kho/cửa hàng không có dock.',
+    category: 'Thiết Bị & Phương Tiện Lạnh',
+    tag: 'Bửng nâng thủy lực',
+    priceText: '200,000 ₫ / Điểm',
+    isChecked: false,
+  },
+
+  // 3. Giám Sát Nhiệt Độ & Chứng Từ
+  {
+    id: 'vas-rf-7',
+    name: 'Thiết bị IoT GPS & Cảm biến nhiệt Real-time 24/7 (Live Temp Log)',
+    desc: 'Cung cấp link theo dõi nhiệt độ trực tuyến 24/7 và cảnh báo lệch dải nhiệt độ tức thì.',
+    category: 'Giám Sát Nhiệt Độ & Chứng Từ',
+    tag: 'IoT Cảm biến nhiệt 24/7',
+    priceText: '0 ₫ (Miễn phí)',
+    isChecked: true,
+    isPopular: true,
+  },
+  {
+    id: 'vas-rf-8',
+    name: 'Xuất biểu đồ dữ liệu nhiệt độ PDF toàn trình có mốc thời gian (Temp Graph Export)',
+    desc: 'Bàn giao file PDF biểu đồ nhiệt độ tự động ghi nhận từ lúc đóng hàng đến lúc mở cửa giao nhận.',
+    category: 'Giám Sát Nhiệt Độ & Chứng Từ',
+    tag: 'Xuất biểu đồ nhiệt PDF',
+    priceText: '0 ₫ (Miễn phí)',
+    isChecked: true,
+    isPopular: true,
+  },
+  {
+    id: 'vas-rf-9',
+    name: 'Thu hồi chứng từ gốc POD & Biên bản nghiệm thu nhiệt độ trong 24h-48h',
+    desc: 'Bàn giao lại biên bản giao nhận có chữ ký xác nhận nhiệt độ đạt chuẩn về văn phòng chủ hàng hỏa tốc.',
+    category: 'Giám Sát Nhiệt Độ & Chứng Từ',
+    tag: 'Thu hồi POD & Biên bản nhiệt',
+    priceText: '100,000 ₫ / Bộ',
+    isChecked: true,
+    isPopular: true,
+  },
+
+  // 4. Quy Định, Pháp Lý & Bảo Hiểm
+  {
+    id: 'vas-rf-10',
+    name: 'Bảo hiểm rủi ro đứt gãy chuỗi lạnh 100% (Temperature Excursion Policy)',
+    desc: 'Cam kết bồi thường 100% nếu xảy ra sự cố suy giảm chất lượng do máy lạnh trục trặc hoặc mất nhiệt độ.',
+    category: 'Quy Định, Pháp Lý & Bảo Hiểm',
+    tag: 'Bảo hiểm chuỗi lạnh 100%',
+    priceText: '0.2% Giá trị hàng',
+    isChecked: true,
+    isPopular: true,
+  },
+  {
+    id: 'vas-rf-11',
+    name: 'Giao hàng đa điểm & Kiểm đếm chi tiết từng điểm dỡ lạnh (Multi-drop & Counting)',
+    desc: 'Giao hàng phân tán nhiều điểm (chuỗi siêu thị, đại lý, kho phụ) và kiểm đếm chi tiết từng kiện.',
+    category: 'Quy Định, Pháp Lý & Bảo Hiểm',
+    tag: 'Giao đa điểm siêu thị',
+    priceText: '300,000 ₫ / Điểm',
+    isChecked: true,
+    isPopular: true,
+  },
+  {
+    id: 'vas-rf-12',
+    name: 'Cắm điện duy trì tại bãi / kho trung chuyển qua đêm (Yard Plug-in Fee)',
+    desc: 'Cung cấp nguồn điện 3 pha tại bãi đỗ xe khi xe chờ dỡ hàng qua đêm hoặc lưu ca chờ thủ tục.',
+    category: 'Quy Định, Pháp Lý & Bảo Hiểm',
+    tag: 'Cắm điện bãi qua đêm',
+    priceText: '500,000 ₫ / Đêm',
+    isChecked: false,
+  },
+];
+
 export const getDefaultVasItemsForModel = (modelId?: string, categoryId?: string): CapabilityVasItem[] => {
+  if (modelId === 'trk-ref-ftl' || modelId?.includes('ref') || modelId?.includes('cold')) {
+    return JSON.parse(JSON.stringify(DEFAULT_REEFER_TRUCKING_VAS_ITEMS));
+  }
+
   if (categoryId === 'trucking' || modelId?.startsWith('trk-')) {
     return JSON.parse(JSON.stringify(DEFAULT_TRUCKING_VAS_ITEMS));
   }
@@ -673,67 +844,96 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             id: 'trk-ref-ftl',
             name: 'FTL (Xe lạnh nguyên chuyến)',
             code: 'FTL',
-            defaultFleet: '20 xe đông lạnh chuyên dụng (2.5T - 15T, Thermo King kép)',
-            defaultOperation: 'Kiểm soát dải nhiệt độ -25°C đến +15°C, xuất biểu đồ nhiệt PDF sau chuyến đi',
-            defaultCommitment: 'Cam kết không đứt gãy chuỗi lạnh, đền bù 100% nếu sốc nhiệt do máy lạnh',
-            vehicleLov: ['Xe đông lạnh 15T', 'Xe đông lạnh 8T', 'Xe đông lạnh 5T', 'Xe đông lạnh 2.5T'],
+            defaultFleet: '20 xe đông lạnh chuyên dụng (1.0T - 15T, Container 20RF/40RF, Thermo King kép)',
+            defaultOperation: 'Kiểm soát dải nhiệt độ -25°C đến +15°C, định vị IoT GPS 24/7, xuất biểu đồ nhiệt PDF toàn trình',
+            defaultCommitment: 'Cam kết không đứt gãy chuỗi lạnh, đền bù 100% nếu xảy ra sốc nhiệt hoặc hỏng hóc máy lạnh',
+            vehicleLov: [
+              'Xe đông lạnh 15T (3 chân)',
+              'Xe đông lạnh 8T (2 chân)',
+              'Xe đông lạnh 5T',
+              'Xe đông lạnh 3.5T',
+              'Xe đông lạnh 1.9T (Vào phố)',
+              'Xe đông lạnh 1.4T (Vào phố)',
+              'Đầu kéo Cont 40RF Lạnh',
+              'Đầu kéo Cont 20RF Lạnh',
+            ],
             unitLov: ['Chuyến'],
             defaultRoutes: [
               {
                 id: 'r-ref-1',
+                routeCode: 'RC-FTL-001',
                 route: 'Đà Lạt ⇄ TP.HCM',
                 origin: 'Đức Trọng (Lâm Đồng)',
                 destination: 'Chợ đầu mối Thủ Đức (TP.HCM)',
-                vehicleType: 'Xe đông lạnh 8T',
+                truckBodyType: 'Xe Tải Thùng Đông Lạnh Trung (Regional Reefer) - [Giàn lạnh Thermo King]',
+                truckTonnage: '5.0T – 6.5T (Thùng dài 5.8m – 6.2m) —— (24 – 28 CBM)',
+                vehicleType: 'Xe đông lạnh 5T',
                 pricingUnit: 'Chuyến',
                 price: 9500000,
                 currency: 'VND',
                 sla: '7 - 9 giờ',
                 pricingStyle: 'All-in',
+                validUntil: '2026-12-31',
                 promotionPercent: 10,
               },
               {
                 id: 'r-ref-2',
+                routeCode: 'RC-FTL-002',
                 route: 'Cần Thơ ⇄ Hà Nội',
                 origin: 'KCN Trà Nóc (Cần Thơ)',
                 destination: 'KCN Quang Minh (Hà Nội)',
+                truckBodyType: 'Xe Tải Đông Lạnh Tải Nặng 3 Chân (Long-haul Reefer) - [Trục Bắc Nam / 16-18 Pallets]',
+                truckTonnage: '12.0T – 15.0T (3 Chân thùng dài 9.2m – 9.6m) —— (48 – 54 CBM)',
                 vehicleType: 'Xe đông lạnh 15T',
                 pricingUnit: 'Chuyến',
                 price: 45000000,
                 currency: 'VND',
                 sla: '45 - 50 giờ',
                 pricingStyle: 'All-in',
+                validUntil: '2026-12-31',
                 promotionPercent: 0,
               },
             ],
             freeSurchargeOptions: [
-              'Pre-cooling làm lạnh thùng trước 60 phút',
-              'Cảm biến nhiệt độ IoT Real-time',
-              'Xuất biểu đồ nhiệt PDF toàn trình',
-              'Phí cầu đường BOT toàn tuyến',
+              'Pre-cooling làm lạnh thùng trước 30-60 phút',
+              'Cảm biến nhiệt độ IoT GPS Real-time 24/7',
+              'Xuất biểu đồ nhiệt PDF toàn trình đối soát',
+              'Phí cầu đường & Trạm thu phí BOT toàn tuyến',
             ],
             defaultFreeSurcharges: [
-              'Pre-cooling làm lạnh thùng trước 60 phút',
-              'Cảm biến nhiệt độ IoT Real-time',
-              'Phí cầu đường BOT toàn tuyến',
+              'Pre-cooling làm lạnh thùng trước 30-60 phút',
+              'Cảm biến nhiệt độ IoT GPS Real-time 24/7',
+              'Xuất biểu đồ nhiệt PDF toàn trình đối soát',
+              'Phí cầu đường & Trạm thu phí BOT toàn tuyến',
             ],
             paidSurchargeOptions: [
-              { id: 'pref-1', name: 'Máy phát Genset cắm điện dự phòng liên tục', priceText: '400,000 ₫ / Ca', isChecked: true },
-              { id: 'pref-2', name: 'Giao hàng đa điểm chuỗi siêu thị', priceText: '300,000 ₫ / Điểm', isChecked: true },
-              { id: 'pref-3', name: 'Phí lưu ca xe thùng lạnh qua đêm', priceText: '800,000 ₫ / Đêm', isChecked: false },
+              { id: 'pref-1', name: 'Máy phát điện Genset cắm điện dự phòng liên tục', priceText: '400,000 ₫ / Ca', isChecked: true },
+              { id: 'pref-2', name: 'Giao hàng đa điểm chuỗi siêu thị / đại lý lẻ', priceText: '300,000 ₫ / Điểm', isChecked: true },
+              { id: 'pref-3', name: 'Phí cắm điện duy trì tại bãi / lưu ca đêm', priceText: '500,000 ₫ / Đêm', isChecked: false },
+              { id: 'pref-4', name: 'Bốc dỡ qua Dock trùm túi khí phòng lạnh', priceText: '250,000 ₫ / Điểm', isChecked: false },
+              { id: 'pref-5', name: 'Cung cấp đá gel bảo ôn / Đá khô bổ trợ', priceText: '150,000 ₫ / Kiện', isChecked: false },
             ],
             vasOptions: [
-              'Pre-cooling làm lạnh thùng xe trước 60 phút',
-              'Cảm biến nhiệt độ IoT & Xuất biểu đồ nhiệt PDF',
-              'Máy phát điện Genset dự phòng cắm điện liên tục',
-              'Giao hàng đa điểm hẹn giờ Time-slot siêu thị',
-              'Bảo hiểm rủi ro sốc nhiệt / Hư hỏng thực phẩm',
-              'Bốc dỡ kho lạnh 2 đầu gửi/nhận',
+              'Bốc dỡ & Bốc xếp kho lạnh 2 đầu gửi/nhận',
+              'Làm lạnh trước thùng xe 30-60 phút (Pre-cooling)',
+              'Thiết bị IoT GPS & Cảm biến nhiệt Real-time 24/7',
+              'Xuất biểu đồ dữ liệu nhiệt độ PDF toàn trình',
+              'Máy phát điện dự phòng Clip-on Genset liên tục',
+              'Bảo hiểm rủi ro đứt gãy chuỗi lạnh 100%',
+              'Giao hàng đa điểm & Kiểm đếm chi tiết từng điểm dỡ lạnh',
+              'Hạ bửng nâng thủy lực giao hàng chuỗi siêu thị',
+              'Bốc dỡ qua Dock trùm túi khí phòng lạnh',
+              'Cung cấp đá gel bảo ôn, đá khô / Thùng xốp bổ trợ',
+              'Cắm điện duy trì tại bãi / kho qua đêm',
+              'Thu hồi chứng từ gốc POD & Biên bản nghiệm thu nhiệt',
             ],
             defaultVas: [
-              'Pre-cooling làm lạnh thùng xe trước 60 phút',
-              'Cảm biến nhiệt độ IoT & Xuất biểu đồ nhiệt PDF',
-              'Bảo hiểm rủi ro sốc nhiệt / Hư hỏng thực phẩm',
+              'Bốc dỡ & Bốc xếp kho lạnh 2 đầu gửi/nhận',
+              'Làm lạnh trước thùng xe 30-60 phút (Pre-cooling)',
+              'Thiết bị IoT GPS & Cảm biến nhiệt Real-time 24/7',
+              'Xuất biểu đồ dữ liệu nhiệt độ PDF toàn trình',
+              'Máy phát điện dự phòng Clip-on Genset liên tục',
+              'Bảo hiểm rủi ro đứt gãy chuỗi lạnh 100%',
             ],
           },
         ],
@@ -3200,6 +3400,9 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
     try {
       setIsExportingTemplate(true);
       const isTrucking = activeCategory?.id === 'trucking';
+      const isReeferTrucking = isTrucking && (activeCargoGroup?.name?.includes('lạnh') || activeModel?.name?.includes('lạnh') || activeModel?.id?.includes('ref'));
+      const bodyTypes = isReeferTrucking ? REEFER_TRUCKING_BODY_TYPES : TRUCKING_BODY_TYPES;
+      const bodyMap = isReeferTrucking ? REEFER_TRUCKING_BODY_TYPE_MAP : TRUCKING_BODY_TYPE_MAP;
       const modelCode = activeModel?.code || activeCategory?.id || 'FTL';
 
       // 1. Data rows for Sheet 1: BANG_GIA_TUYEN_DUONG
@@ -3210,8 +3413,8 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
             'Điểm Đi (*)': r.origin,
             'Điểm Đến (*)': r.destination,
             ...(isTrucking ? {
-              'Loại Thùng Phương Tiện (*)': r.truckBodyType || TRUCKING_BODY_TYPES[0],
-              'Phân Khúc Tải Trọng (*)': r.truckTonnage || '15.0T (Tải nặng 3 chân) —— (55 – 60 CBM)',
+              'Loại Thùng Phương Tiện (*)': r.truckBodyType || bodyTypes[0],
+              'Phân Khúc Tải Trọng (*)': r.truckTonnage || getTonnagesForBodyType(r.truckBodyType, isReeferTrucking)[0],
             } : {
               'Loại Phương Tiện (*)': r.vehicleType || activeModel?.vehicleLov?.[0] || 'Phương tiện chuẩn',
             }),
@@ -3222,19 +3425,44 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
             'Hạn Giá (YYYY-MM-DD)': r.validUntil || '2026-12-31',
             'Promotion (%)': r.promotionPercent || 0,
           }))
-        : [
+        : isReeferTrucking ? [
+            {
+              'Mã Tuyến': `RC-${modelCode.toUpperCase()}-001`,
+              'Tuyến Đường (*)': 'Đà Lạt ⇄ TP.HCM',
+              'Điểm Đi (*)': 'Đức Trọng (Lâm Đồng)',
+              'Điểm Đến (*)': 'Chợ đầu mối Thủ Đức (TP.HCM)',
+              'Loại Thùng Phương Tiện (*)': 'Xe Tải Thùng Đông Lạnh Trung (Regional Reefer) - [Giàn lạnh Thermo King]',
+              'Phân Khúc Tải Trọng (*)': '5.0T – 6.5T (Thùng dài 5.8m – 6.2m) —— (24 – 28 CBM)',
+              'Đơn Vị Tính (*)': 'Chuyến',
+              'Đơn Giá (VND) (*)': 9500000,
+              'SLA Thời Gian': '7 - 9 giờ',
+              'Quy Cách Giá': 'All-in',
+              'Hạn Giá (YYYY-MM-DD)': '2026-12-31',
+              'Promotion (%)': 10,
+            },
+            {
+              'Mã Tuyến': `RC-${modelCode.toUpperCase()}-002`,
+              'Tuyến Đường (*)': 'Cần Thơ ⇄ Hà Nội',
+              'Điểm Đi (*)': 'KCN Trà Nóc (Cần Thơ)',
+              'Điểm Đến (*)': 'KCN Quang Minh (Hà Nội)',
+              'Loại Thùng Phương Tiện (*)': 'Xe Tải Đông Lạnh Tải Nặng 3 Chân (Long-haul Reefer) - [Trục Bắc Nam / 16-18 Pallets]',
+              'Phân Khúc Tải Trọng (*)': '12.0T – 15.0T (3 Chân thùng dài 9.2m – 9.6m) —— (48 – 54 CBM)',
+              'Đơn Vị Tính (*)': 'Chuyến',
+              'Đơn Giá (VND) (*)': 45000000,
+              'SLA Thời Gian': '45 - 50 giờ',
+              'Quy Cách Giá': 'All-in',
+              'Hạn Giá (YYYY-MM-DD)': '2026-12-31',
+              'Promotion (%)': 0,
+            },
+          ] : [
             {
               'Mã Tuyến': `RC-${modelCode.toUpperCase()}-001`,
               'Tuyến Đường (*)': 'HCM ⇄ Hà Nội',
               'Điểm Đi (*)': 'KCN Tân Bình (TP.HCM)',
               'Điểm Đến (*)': 'KCN Thăng Long (Hà Nội)',
-              ...(isTrucking ? {
-                'Loại Thùng Phương Tiện (*)': 'Xe Tải Thùng Kín (Dry Box Truck) - [An ninh cao / Chống ướt]',
-                'Phân Khúc Tải Trọng (*)': '15.0T (Tải nặng 3 chân) —— (55 – 60 CBM)',
-              } : {
-                'Loại Phương Tiện (*)': 'Xe tải 15T thùng kín',
-              }),
-              'Đơn Vị Tính (*)': isTrucking ? 'Chuyến' : 'Tấn',
+              'Loại Thùng Phương Tiện (*)': 'Xe Tải Thùng Kín (Dry Box Truck) - [An ninh cao / Chống ướt]',
+              'Phân Khúc Tải Trọng (*)': '15.0T (Tải nặng 3 chân) —— (55 – 60 CBM)',
+              'Đơn Vị Tính (*)': 'Chuyến',
               'Đơn Giá (VND) (*)': 28500000,
               'SLA Thời Gian': '48 - 60 giờ',
               'Quy Cách Giá': 'All-in',
@@ -3246,13 +3474,9 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
               'Tuyến Đường (*)': 'HCM ⇄ Đà Nẵng',
               'Điểm Đi (*)': 'KCN Sóng Thần (Bình Dương)',
               'Điểm Đến (*)': 'KCN Hòa Khánh (Đà Nẵng)',
-              ...(isTrucking ? {
-                'Loại Thùng Phương Tiện (*)': 'Xe Tải Thùng Kín (Dry Box Truck) - [An ninh cao / Chống ướt]',
-                'Phân Khúc Tải Trọng (*)': '8.0T (Tải nặng 2 chân) —— (45 – 50 CBM)',
-              } : {
-                'Loại Phương Tiện (*)': 'Xe tải 8T thùng kín',
-              }),
-              'Đơn Vị Tính (*)': isTrucking ? 'Chuyến' : 'Tấn',
+              'Loại Thùng Phương Tiện (*)': 'Xe Tải Thùng Kín (Dry Box Truck) - [An ninh cao / Chống ướt]',
+              'Phân Khúc Tải Trọng (*)': '8.0T (Tải nặng 2 chân) —— (45 – 50 CBM)',
+              'Đơn Vị Tính (*)': 'Chuyến',
               'Đơn Giá (VND) (*)': 16500000,
               'SLA Thời Gian': '24 - 36 giờ',
               'Quy Cách Giá': 'All-in',
@@ -3280,7 +3504,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
       // 2. Data rows for Sheet 2: DANH_MUC_CHUAN_LOV
       const lovData: any[] = [];
       if (isTrucking) {
-        Object.entries(TRUCKING_BODY_TYPE_MAP).forEach(([bodyType, tonnages]) => {
+        Object.entries(bodyMap).forEach(([bodyType, tonnages]) => {
           tonnages.forEach((t) => {
             lovData.push({
               'Loại Thùng Phương Tiện': bodyType,
@@ -3337,11 +3561,13 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
         }
 
         const isTrucking = activeCategory?.id === 'trucking';
+        const isReeferTrucking = isTrucking && (activeCargoGroup?.name?.includes('lạnh') || activeModel?.name?.includes('lạnh') || activeModel?.id?.includes('ref'));
+        const bodyTypes = isReeferTrucking ? REEFER_TRUCKING_BODY_TYPES : TRUCKING_BODY_TYPES;
         const modelPrefix = (activeModel?.code || activeCategory?.id || 'RC').toUpperCase().replace(/[^A-Z0-9]/g, '');
         const defaultUnit = isTrucking ? 'Chuyến' : (activeModel?.unitLov?.[0] || 'Chuyến');
-        const defaultBody = TRUCKING_BODY_TYPES[0];
-        const defaultTonnages = getTonnagesForBodyType(defaultBody);
-        const defaultTonnage = defaultTonnages[defaultTonnages.length - 2] || defaultTonnages[0];
+        const defaultBody = bodyTypes[0];
+        const defaultTonnages = getTonnagesForBodyType(defaultBody, isReeferTrucking);
+        const defaultTonnage = isReeferTrucking ? defaultTonnages[0] : (defaultTonnages[defaultTonnages.length - 2] || defaultTonnages[0]);
 
         const parsedRoutes: CapabilityRouteItem[] = [];
         const warnings: string[] = [];
@@ -3380,10 +3606,10 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
 
           if (isTrucking) {
             const rawBody = String(row['Loại Thùng Phương Tiện (*)'] || row['Loại Thùng'] || '').trim();
-            const matchedBody = TRUCKING_BODY_TYPES.find((b) => b.toLowerCase().includes(rawBody.toLowerCase()) || rawBody.toLowerCase().includes(b.split(' (')[0].toLowerCase()));
+            const matchedBody = bodyTypes.find((b) => b.toLowerCase().includes(rawBody.toLowerCase()) || rawBody.toLowerCase().includes(b.split(' (')[0].toLowerCase()));
             truckBodyType = matchedBody || defaultBody;
 
-            const validTonnages = getTonnagesForBodyType(truckBodyType);
+            const validTonnages = getTonnagesForBodyType(truckBodyType, isReeferTrucking);
             const rawTonnage = String(row['Phân Khúc Tải Trọng (*)'] || row['Phân Khúc Tải Trọng'] || row['Tải Trọng'] || '').trim();
             const matchedTonnage = validTonnages.find((t) => t.toLowerCase().includes(rawTonnage.toLowerCase()) || rawTonnage.toLowerCase().includes(t.split(' (')[0].toLowerCase()));
             truckTonnage = matchedTonnage || validTonnages[0] || defaultTonnage;
@@ -3476,10 +3702,12 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
   // ==========================================
   const handleAddRouteRow = () => {
     const isTrucking = activeCategory?.id === 'trucking';
-    const defaultBody = TRUCKING_BODY_TYPES[0];
-    const defaultTonnages = getTonnagesForBodyType(defaultBody);
-    const defaultTonnage = defaultTonnages[defaultTonnages.length - 2] || defaultTonnages[0];
-    const defaultVehicle = isTrucking ? 'Xe tải 15T thùng kín' : (activeModel?.vehicleLov?.[0] || 'Phương tiện chuẩn');
+    const isReeferTrucking = isTrucking && (activeCargoGroup?.name?.includes('lạnh') || activeModel?.name?.includes('lạnh') || activeModel?.id?.includes('ref'));
+    const bodyTypes = isReeferTrucking ? REEFER_TRUCKING_BODY_TYPES : TRUCKING_BODY_TYPES;
+    const defaultBody = bodyTypes[0];
+    const defaultTonnages = getTonnagesForBodyType(defaultBody, isReeferTrucking);
+    const defaultTonnage = isReeferTrucking ? defaultTonnages[0] : (defaultTonnages[defaultTonnages.length - 2] || defaultTonnages[0]);
+    const defaultVehicle = isReeferTrucking ? 'Xe đông lạnh 5T' : (isTrucking ? 'Xe tải 15T thùng kín' : (activeModel?.vehicleLov?.[0] || 'Phương tiện chuẩn'));
     const defaultUnit = activeModel?.unitLov?.[0] || 'Chuyến';
     const modelPrefix = (activeModel?.code || activeCategory?.id || 'RC').toUpperCase().replace(/[^A-Z0-9]/g, '');
     const nextIdx = (currentData.routes || []).length + 1;
@@ -3488,16 +3716,16 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
     const newRoute: CapabilityRouteItem = {
       id: `r-new-${Date.now()}`,
       routeCode: generatedRouteCode,
-      route: 'Hành Lang Tuyến Mới',
-      origin: 'Điểm Lấy Hàng (Kho / Cảng)',
-      destination: 'Điểm Giao Hàng (Kho / Cảng)',
+      route: isReeferTrucking ? 'Đà Lạt ⇄ TP.HCM' : 'Hành Lang Tuyến Mới',
+      origin: isReeferTrucking ? 'Đức Trọng (Lâm Đồng)' : 'Điểm Lấy Hàng (Kho / Cảng)',
+      destination: isReeferTrucking ? 'Chợ đầu mối Thủ Đức (TP.HCM)' : 'Điểm Giao Hàng (Kho / Cảng)',
       truckBodyType: isTrucking ? defaultBody : undefined,
       truckTonnage: isTrucking ? defaultTonnage : undefined,
       vehicleType: defaultVehicle,
       pricingUnit: defaultUnit,
-      price: 15000000,
+      price: isReeferTrucking ? 9500000 : 15000000,
       currency: defaultUnit.includes('USD') ? 'USD' : 'VND',
-      sla: '24 - 48 giờ',
+      sla: isReeferTrucking ? '7 - 9 giờ' : '24 - 48 giờ',
       pricingStyle: 'All-in',
       validUntil: '2026-12-31',
       promotionPercent: 0,
@@ -4097,6 +4325,8 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                 ? Math.round(route.price * (1 - route.promotionPercent / 100)) 
                                 : route.price;
                               const isTrucking = activeCategory?.id === 'trucking';
+                              const isReeferTrucking = isTrucking && (activeCargoGroup?.name?.includes('lạnh') || activeModel?.name?.includes('lạnh') || activeModel?.id?.includes('ref'));
+                              const currentTruckBodyTypes = isReeferTrucking ? REEFER_TRUCKING_BODY_TYPES : TRUCKING_BODY_TYPES;
                               const effectiveRouteCode = route.routeCode || `RC-${(activeModel?.code || activeCategory?.id || 'GEN').toUpperCase().replace(/[^A-Z0-9]/g, '')}-${String(idx + 1).padStart(3, '0')}`;
 
                               return (
