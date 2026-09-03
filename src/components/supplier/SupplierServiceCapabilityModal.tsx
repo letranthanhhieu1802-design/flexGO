@@ -2870,14 +2870,37 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
     updateCurrentFormData('routes', [...(currentData.routes || []), newRoute]);
   };
 
-  const handleUpdateRouteRow = (routeId: string, field: keyof CapabilityRouteItem, val: any) => {
-    const updatedRoutes = (currentData.routes || []).map((r) => {
-      if (r.id === routeId) {
-        return { ...r, [field]: val };
-      }
-      return r;
+  const handleUpdateRouteRowMultiple = (routeId: string, updates: Partial<CapabilityRouteItem>) => {
+    setModelFormData((prev) => {
+      const currentModelData = prev[activeModelId] || {
+        fleet: activeModel?.defaultFleet || '',
+        operationCapacity: activeModel?.defaultOperation || '',
+        serviceCommitment: activeModel?.defaultCommitment || '',
+        routes: activeModel ? JSON.parse(JSON.stringify(activeModel.defaultRoutes)) : [],
+        freeSurchargeOptions: activeModel?.freeSurchargeOptions || [],
+        freeSurcharges: activeModel?.defaultFreeSurcharges || [],
+        paidSurchargeOptions: activeModel?.paidSurchargeOptions || [],
+        vasOptions: activeModel?.vasOptions || [],
+        selectedVas: activeModel?.defaultVas || [],
+      };
+      const updatedRoutes = (currentModelData.routes || []).map((r: CapabilityRouteItem) => {
+        if (r.id === routeId) {
+          return { ...r, ...updates };
+        }
+        return r;
+      });
+      return {
+        ...prev,
+        [activeModelId]: {
+          ...currentModelData,
+          routes: updatedRoutes,
+        },
+      };
     });
-    updateCurrentFormData('routes', updatedRoutes);
+  };
+
+  const handleUpdateRouteRow = (routeId: string, field: keyof CapabilityRouteItem, val: any) => {
+    handleUpdateRouteRowMultiple(routeId, { [field]: val });
   };
 
   const handleDeleteRouteRow = (routeId: string) => {
@@ -3414,53 +3437,69 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                     <>
                                       {/* 5a. Loại Thùng Phương Tiện (LOV + Custom Option) */}
                                       <td className="py-2 px-1.5 align-top">
-                                        <select
-                                          value={route.truckBodyType || (TRUCKING_BODY_TYPES.includes(route.vehicleType) ? route.vehicleType : (route.customTruckBodyType ? 'Khác (Nhập tùy chọn)...' : TRUCKING_BODY_TYPES[0]))}
-                                          onChange={(e) => {
-                                            const val = e.target.value;
-                                            handleUpdateRouteRow(route.id, 'truckBodyType', val);
-                                            if (val !== 'Khác (Nhập tùy chọn)...') {
-                                              handleUpdateRouteRow(route.id, 'customTruckBodyType', '');
-                                              const validTonnages = getTonnagesForBodyType(val);
-                                              if (!validTonnages.includes(route.truckTonnage || '')) {
-                                                const fallbackTonnage = validTonnages[0];
-                                                handleUpdateRouteRow(route.id, 'truckTonnage', fallbackTonnage);
-                                                handleUpdateRouteRow(route.id, 'vehicleType', `${fallbackTonnage.split(' (')[0]} ${val.split(' (')[0]}`.trim());
-                                              } else {
-                                                handleUpdateRouteRow(route.id, 'vehicleType', `${route.truckTonnage ? route.truckTonnage.split(' (')[0] : ''} ${val.split(' (')[0]}`.trim());
-                                              }
-                                            }
-                                          }}
-                                          className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 text-xs focus:bg-white focus:border-indigo-500 font-medium"
-                                        >
-                                          {TRUCKING_BODY_TYPES.map((b, bIdx) => (
-                                            <option key={bIdx} value={b}>{b}</option>
-                                          ))}
-                                        </select>
-                                        {(route.truckBodyType === 'Khác (Nhập tùy chọn)...' || (!TRUCKING_BODY_TYPES.includes(route.truckBodyType || '') && route.customTruckBodyType)) && (
-                                          <input
-                                            type="text"
-                                            autoFocus
-                                            value={route.customTruckBodyType || ''}
-                                            onChange={(e) => {
-                                              const customVal = e.target.value;
-                                              handleUpdateRouteRow(route.id, 'customTruckBodyType', customVal);
-                                              handleUpdateRouteRow(route.id, 'vehicleType', `${route.truckTonnage ? route.truckTonnage.split(' (')[0] : ''} ${customVal}`.trim());
-                                            }}
-                                            placeholder="Gõ loại thùng riêng..."
-                                            className="w-full mt-1 px-2 py-1 bg-amber-50/80 border border-amber-300 rounded-lg text-slate-900 text-xs font-semibold focus:bg-white focus:border-amber-500 shadow-2xs"
-                                          />
-                                        )}
+                                        {(() => {
+                                          const currentBodyTypeVal = TRUCKING_BODY_TYPES.includes(route.truckBodyType || '')
+                                            ? route.truckBodyType
+                                            : (route.customTruckBodyType || route.truckBodyType === 'Khác (Nhập tùy chọn)...' ? 'Khác (Nhập tùy chọn)...' : TRUCKING_BODY_TYPES[0]);
+
+                                          return (
+                                            <>
+                                              <select
+                                                value={currentBodyTypeVal}
+                                                onChange={(e) => {
+                                                  const val = e.target.value;
+                                                  if (val === 'Khác (Nhập tùy chọn)...') {
+                                                    handleUpdateRouteRowMultiple(route.id, {
+                                                      truckBodyType: val,
+                                                      customTruckBodyType: '',
+                                                    });
+                                                  } else {
+                                                    const validTonnages = getTonnagesForBodyType(val);
+                                                    const newTonnage = (route.truckTonnage && validTonnages.includes(route.truckTonnage))
+                                                      ? route.truckTonnage
+                                                      : validTonnages[0];
+                                                    handleUpdateRouteRowMultiple(route.id, {
+                                                      truckBodyType: val,
+                                                      customTruckBodyType: '',
+                                                      truckTonnage: newTonnage,
+                                                      vehicleType: `${newTonnage ? newTonnage.split(' (')[0] : ''} ${val.split(' (')[0]}`.trim(),
+                                                    });
+                                                  }
+                                                }}
+                                                className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 text-xs focus:bg-white focus:border-indigo-500 font-medium"
+                                              >
+                                                {TRUCKING_BODY_TYPES.map((b, bIdx) => (
+                                                  <option key={bIdx} value={b}>{b}</option>
+                                                ))}
+                                              </select>
+                                              {(currentBodyTypeVal === 'Khác (Nhập tùy chọn)...' || (!TRUCKING_BODY_TYPES.includes(route.truckBodyType || '') && route.customTruckBodyType)) && (
+                                                <input
+                                                  type="text"
+                                                  autoFocus
+                                                  value={route.customTruckBodyType || ''}
+                                                  onChange={(e) => {
+                                                    const customVal = e.target.value;
+                                                    handleUpdateRouteRowMultiple(route.id, {
+                                                      customTruckBodyType: customVal,
+                                                      vehicleType: `${route.truckTonnage ? route.truckTonnage.split(' (')[0] : ''} ${customVal}`.trim(),
+                                                    });
+                                                  }}
+                                                  placeholder="Gõ loại thùng riêng..."
+                                                  className="w-full mt-1 px-2 py-1 bg-amber-50/80 border border-amber-300 rounded-lg text-slate-900 text-xs font-semibold focus:bg-white focus:border-amber-500 shadow-2xs"
+                                                />
+                                              )}
+                                            </>
+                                          );
+                                        })()}
                                       </td>
 
                                       {/* 5b. Phân Khúc Tải Trọng Ràng Buộc Theo Loại Thùng (LOV + Custom Option) */}
                                       <td className="py-2 px-1.5 align-top">
                                         {(() => {
                                           const boundTonnages = getTonnagesForBodyType(route.truckBodyType || TRUCKING_BODY_TYPES[0]);
-                                          const isCustom = route.truckTonnage === 'Khác (Nhập tùy chọn)...' || (!boundTonnages.includes(route.truckTonnage || '') && route.customTruckTonnage);
-                                          const currentTonnageVal = route.truckTonnage && boundTonnages.includes(route.truckTonnage)
+                                          const currentTonnageVal = boundTonnages.includes(route.truckTonnage || '')
                                             ? route.truckTonnage
-                                            : (isCustom ? 'Khác (Nhập tùy chọn)...' : boundTonnages[0]);
+                                            : (route.customTruckTonnage || route.truckTonnage === 'Khác (Nhập tùy chọn)...' ? 'Khác (Nhập tùy chọn)...' : boundTonnages[0]);
 
                                           return (
                                             <>
@@ -3468,10 +3507,17 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                                 value={currentTonnageVal}
                                                 onChange={(e) => {
                                                   const val = e.target.value;
-                                                  handleUpdateRouteRow(route.id, 'truckTonnage', val);
-                                                  if (val !== 'Khác (Nhập tùy chọn)...') {
-                                                    handleUpdateRouteRow(route.id, 'customTruckTonnage', '');
-                                                    handleUpdateRouteRow(route.id, 'vehicleType', `${val.split(' (')[0]} ${route.truckBodyType ? route.truckBodyType.split(' (')[0] : ''}`.trim());
+                                                  if (val === 'Khác (Nhập tùy chọn)...') {
+                                                    handleUpdateRouteRowMultiple(route.id, {
+                                                      truckTonnage: val,
+                                                      customTruckTonnage: '',
+                                                    });
+                                                  } else {
+                                                    handleUpdateRouteRowMultiple(route.id, {
+                                                      truckTonnage: val,
+                                                      customTruckTonnage: '',
+                                                      vehicleType: `${val.split(' (')[0]} ${route.truckBodyType ? route.truckBodyType.split(' (')[0] : ''}`.trim(),
+                                                    });
                                                   }
                                                 }}
                                                 className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 text-xs focus:bg-white focus:border-indigo-500 font-medium"
@@ -3481,15 +3527,17 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                                 ))}
                                               </select>
 
-                                              {isCustom && (
+                                              {(currentTonnageVal === 'Khác (Nhập tùy chọn)...' || (!boundTonnages.includes(route.truckTonnage || '') && route.customTruckTonnage)) && (
                                                 <input
                                                   type="text"
                                                   autoFocus
                                                   value={route.customTruckTonnage || ''}
                                                   onChange={(e) => {
                                                     const customVal = e.target.value;
-                                                    handleUpdateRouteRow(route.id, 'customTruckTonnage', customVal);
-                                                    handleUpdateRouteRow(route.id, 'vehicleType', `${customVal} ${route.truckBodyType ? route.truckBodyType.split(' (')[0] : ''}`.trim());
+                                                    handleUpdateRouteRowMultiple(route.id, {
+                                                      customTruckTonnage: customVal,
+                                                      vehicleType: `${customVal} ${route.truckBodyType ? route.truckBodyType.split(' (')[0] : ''}`.trim(),
+                                                    });
                                                   }}
                                                   placeholder="Gõ tải trọng riêng..."
                                                   className="w-full mt-1 px-2 py-1 bg-amber-50/80 border border-amber-300 rounded-lg text-slate-900 text-xs font-semibold focus:bg-white focus:border-amber-500 shadow-2xs"
