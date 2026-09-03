@@ -121,6 +121,323 @@ export interface PaidSurchargeItem {
   isChecked: boolean;
 }
 
+export interface CapabilityVasItem {
+  id: string;
+  name: string;
+  desc?: string;
+  category: string; // VD: 'Dịch Vụ Bốc Xếp & Đóng Gói', 'Phương Tiện & Thiết Bị Phụ Trợ', 'Giám Sát, An Ninh & Chứng Từ', 'Quy Định, Pháp Lý & Bảo Hiểm'
+  tag?: string;
+  priceText: string;
+  isChecked: boolean;
+  isPopular?: boolean;
+}
+
+export const DEFAULT_TRUCKING_VAS_ITEMS: CapabilityVasItem[] = [
+  // 1. Dịch Vụ Bốc Xếp & Đóng Gói
+  {
+    id: 'vas-trk-1',
+    name: 'Bốc xếp nhân công 2 đầu kho (Loading / Unloading Labor)',
+    desc: 'Hỗ trợ đội ngũ công nhân khuân vác, bốc dỡ hàng hóa từ sàn kho lên thùng xe và ngược lại.',
+    category: 'Dịch Vụ Bốc Xếp & Đóng Gói',
+    tag: 'Bốc xếp 2 đầu',
+    priceText: '500,000 ₫ / Điểm',
+    isChecked: true,
+    isPopular: true,
+  },
+  {
+    id: 'vas-trk-2',
+    name: 'Đóng gói màng co PE & Quấn bọc Pallet (Packaging & Palletizing)',
+    desc: 'Quấn bọc màng co PE nhiều lớp chống nước, chống bụi và quấn đai nẹp kiện hàng.',
+    category: 'Dịch Vụ Bốc Xếp & Đóng Gói',
+    tag: 'Đóng gói PE / Pallet',
+    priceText: '150,000 ₫ / Pallet',
+    isChecked: false,
+  },
+  {
+    id: 'vas-trk-3',
+    name: 'Đóng thùng gỗ / Khung sắt bảo vệ hàng dễ vỡ (Wooden Crate Packing)',
+    desc: 'Gia công thùng gỗ kín hoặc khung nan bảo vệ chống va đập cho máy móc, linh kiện điện tử.',
+    category: 'Dịch Vụ Bốc Xếp & Đóng Gói',
+    tag: 'Đóng thùng gỗ',
+    priceText: '600,000 ₫ / Kiện',
+    isChecked: false,
+  },
+  {
+    id: 'vas-trk-4',
+    name: 'Chèn lót túi khí & Chằng buộc tăng đơ lashing (Lashing & Dunnage)',
+    desc: 'Sử dụng túi khí chèn khe hở và dây cảo tăng đơ chịu lực cố định kiện hàng trong thùng xe.',
+    category: 'Dịch Vụ Bốc Xếp & Đóng Gói',
+    tag: 'Chằng buộc an toàn',
+    priceText: '350,000 ₫ / Chuyến',
+    isChecked: false,
+  },
+
+  // 2. Phương Tiện & Thiết Bị Phụ Trợ
+  {
+    id: 'vas-trk-5',
+    name: 'Hạ bửng nâng thủy lực thùng xe (Hydraulic Tail-lift Truck)',
+    desc: 'Xe tải trang bị bàn nâng thủy lực phía sau hỗ trợ lên/xuống pallet hoặc kiện nặng không cần xe nâng.',
+    category: 'Phương Tiện & Thiết Bị Phụ Trợ',
+    tag: 'Bửng nâng thủy lực',
+    priceText: '200,000 ₫ / Điểm',
+    isChecked: false,
+    isPopular: true,
+  },
+  {
+    id: 'vas-trk-6',
+    name: 'Dịch vụ cẩu tự hành / Xe cẩu hạ bãi (Mobile Crane Handling)',
+    desc: 'Bố trí xe cẩu tự hành 3.5T - 15T cẩu hạ máy móc thiết bị nặng tại hiện trường.',
+    category: 'Phương Tiện & Thiết Bị Phụ Trợ',
+    tag: 'Cẩu tự hành',
+    priceText: '1,500,000 ₫ / Ca',
+    isChecked: false,
+  },
+  {
+    id: 'vas-trk-7',
+    name: 'Tìm xe quay đầu / Ghép chiều về (Backhaul / Return Trucking)',
+    desc: 'Ưu tiên kết nối xe rỗng chiều về tuyến này để tối ưu 25% - 40% chi phí cước vận chuyển.',
+    category: 'Phương Tiện & Thiết Bị Phụ Trợ',
+    tag: 'Xe quay đầu giá tốt',
+    priceText: 'Giảm 25-40% cước',
+    isChecked: true,
+    isPopular: true,
+  },
+
+  // 3. Giám Sát, An Ninh & Chứng Từ
+  {
+    id: 'vas-trk-8',
+    name: 'Định vị GPS Real-time & Share Link hành trình 24/7 (Live GPS Tracking)',
+    desc: 'Cung cấp đường link GPS theo dõi trực tuyến 24/7 lộ trình xe di chuyển cho chủ hàng và kho nhận.',
+    category: 'Giám Sát, An Ninh & Chứng Từ',
+    tag: 'GPS Real-time 24/7',
+    priceText: '0 ₫ (Miễn phí)',
+    isChecked: true,
+    isPopular: true,
+  },
+  {
+    id: 'vas-trk-9',
+    name: 'Niêm phong chì Seal an ninh & Chụp ảnh đối soát 2 đầu (Security Seal & Inspection)',
+    desc: 'Kẹp chì an ninh bảo mật thùng xe và chụp ảnh đối soát kiện hàng 2 đầu gửi/nhận trước khi xuất bến.',
+    category: 'Giám Sát, An Ninh & Chứng Từ',
+    tag: 'Niêm phong Seal',
+    priceText: '0 ₫ (Miễn phí)',
+    isChecked: false,
+  },
+  {
+    id: 'vas-trk-10',
+    name: 'Thu hồi chứng từ gốc POD hỏa tốc trong 24h-48h (POD Return Express)',
+    desc: 'Bàn giao lại biên bản giao nhận có chữ ký đóng dấu gốc về văn phòng chủ hàng hỏa tốc.',
+    category: 'Giám Sát, An Ninh & Chứng Từ',
+    tag: 'Thu hồi POD gốc',
+    priceText: '100,000 ₫ / Bộ',
+    isChecked: true,
+    isPopular: true,
+  },
+
+  // 4. Quy Định, Pháp Lý & Bảo Hiểm
+  {
+    id: 'vas-trk-11',
+    name: 'Giấy phép vào phố giờ cấm tải nội đô (HN/HCM) (City Day Entry Permit)',
+    desc: 'Thu xếp giấy phép lưu thông nội đô giờ cấm tải cho xe tải vào ban ngày.',
+    category: 'Quy Định, Pháp Lý & Bảo Hiểm',
+    tag: 'Giấy phép phố cấm',
+    priceText: '350,000 ₫ / Giấy phép',
+    isChecked: false,
+    isPopular: true,
+  },
+  {
+    id: 'vas-trk-12',
+    name: 'Bảo hiểm trách nhiệm hàng hóa vận tải nội địa 100% (Cargo Insurance)',
+    desc: 'Bảo hiểm trách nhiệm vận chuyển bồi thường 100% giá trị khai báo khi xảy ra sự cố trên hành trình.',
+    category: 'Quy Định, Pháp Lý & Bảo Hiểm',
+    tag: 'Bảo hiểm 100%',
+    priceText: '0.15% Giá trị hàng',
+    isChecked: true,
+  },
+  {
+    id: 'vas-trk-13',
+    name: 'Phí lưu ca xe / Chờ bốc dỡ qua đêm tại kho (Truck Detention Fee)',
+    desc: 'Chi phí bồi dưỡng thời gian xe phải chờ quá số giờ định mức hoặc lưu qua đêm tại kho.',
+    category: 'Quy Định, Pháp Lý & Bảo Hiểm',
+    tag: 'Lưu ca bãi đêm',
+    priceText: '500,000 ₫ / Đêm',
+    isChecked: false,
+  },
+];
+
+export const getDefaultVasItemsForModel = (modelId?: string, categoryId?: string): CapabilityVasItem[] => {
+  if (categoryId === 'trucking' || modelId?.startsWith('trk-')) {
+    return JSON.parse(JSON.stringify(DEFAULT_TRUCKING_VAS_ITEMS));
+  }
+
+  if (categoryId === 'ocean' || modelId?.startsWith('ocn-')) {
+    return [
+      {
+        id: 'vas-ocn-1',
+        name: 'Khai báo tải trọng xác thực VGM & Cân cont (VGM Filing & Scale)',
+        desc: 'Truyền dữ liệu VGM điện tử cho hãng tàu theo công ước quốc tế SOLAS.',
+        category: 'Thủ Tục Cảng & Chứng Từ Hàng Hải',
+        tag: 'Khai báo VGM',
+        priceText: '350,000 ₫ / Cont',
+        isChecked: true,
+      },
+      {
+        id: 'vas-ocn-2',
+        name: 'Phát hành chứng từ xuất xứ hàng hóa C/O (Certificate of Origin)',
+        desc: 'Xin cấp C/O các form A, B, D, E, AK, AJ, VJ, EUR.1...',
+        category: 'Thủ Tục Cảng & Chứng Từ Hàng Hải',
+        tag: 'C/O Express',
+        priceText: '600,000 ₫ / Bộ',
+        isChecked: true,
+      },
+      {
+        id: 'vas-ocn-3',
+        name: 'Khử trùng / Hun trùng kiểm dịch thực vật (Fumigation & Phytosanitary)',
+        desc: 'Cấp chứng thư hun trùng đạt chuẩn quốc tế xuất khẩu.',
+        category: 'Thủ Tục Cảng & Chứng Từ Hàng Hải',
+        tag: 'Hun trùng',
+        priceText: '450,000 ₫ / Cont',
+        isChecked: false,
+      },
+      {
+        id: 'vas-ocn-4',
+        name: 'Bảo hiểm vận chuyển đường biển quốc tế (Marine Cargo Insurance ICC-A)',
+        desc: 'Bảo hiểm mọi rủi ro hàng hải bồi thường 110% CIF.',
+        category: 'An Toàn & Bảo Hiểm Hàng Hải',
+        tag: 'Bảo hiểm ICC-A',
+        priceText: '0.18% Giá trị Invoice',
+        isChecked: true,
+      },
+      {
+        id: 'vas-ocn-5',
+        name: 'Kẹp chì định vị điện tử GPS E-Seal (Electronic Container Seal)',
+        desc: 'Thiết bị khóa định vị vệ tinh theo dõi nhiệt độ & mở cửa container.',
+        category: 'An Toàn & Bảo Hiểm Hàng Hải',
+        tag: 'E-Seal GPS',
+        priceText: '250,000 ₫ / Cont',
+        isChecked: false,
+      },
+      {
+        id: 'vas-ocn-6',
+        name: 'Đóng hàng / Rút ruột container tại kho CFS / Bãi Cảng',
+        desc: 'Đội ngũ xe nâng và công nhân rút/đóng hàng chuyên nghiệp.',
+        category: 'Khai Thác Bãi & Rút Ruột Cont',
+        tag: 'Rút ruột cont',
+        priceText: '1,200,000 ₫ / Cont 40ft',
+        isChecked: false,
+      },
+    ];
+  }
+
+  if (categoryId === 'air' || modelId?.startsWith('air-')) {
+    return [
+      {
+        id: 'vas-air-1',
+        name: 'Đóng thùng carton chuẩn IATA / Quấn màng bọc Pallet hàng không',
+        desc: 'Gia cố bao bì chịu lực va đập khi xếp dỡ khoang hàng máy bay.',
+        category: 'Đóng Gói & Xử Lý Sân Bay',
+        tag: 'Đóng gói IATA',
+        priceText: '200,000 ₫ / Kiện',
+        isChecked: false,
+      },
+      {
+        id: 'vas-air-2',
+        name: 'Soi chiếu an ninh X-Ray & Cân đo thể tích tự động (X-Ray & Dimension)',
+        desc: 'Kiểm tra an ninh nhà ga hàng không Nội Bài / Tân Sơn Nhất.',
+        category: 'Đóng Gói & Xử Lý Sân Bay',
+        tag: 'Soi chiếu X-Ray',
+        priceText: '0 ₫ (Miễn phí)',
+        isChecked: true,
+      },
+      {
+        id: 'vas-air-3',
+        name: 'Khai báo hàng nguy hiểm DGR & Dán nhãn chuẩn UN (Dangerous Goods Declaration)',
+        desc: 'Chứng chỉ IATA DGR khai báo pin lithium, hóa chất, sơn...',
+        category: 'Chứng Từ & Khai Báo Hàng Không',
+        tag: 'DGR Declaration',
+        priceText: '1,200,000 ₫ / Lô',
+        isChecked: false,
+      },
+      {
+        id: 'vas-air-4',
+        name: 'Cấp phát House AWB / Master AWB hỏa tốc (e-AWB Instant Transmission)',
+        desc: 'Truyền e-AWB qua hệ thống CASS hãng hàng không.',
+        category: 'Chứng Từ & Khai Báo Hàng Không',
+        tag: 'e-AWB Express',
+        priceText: '300,000 ₫ / Bộ',
+        isChecked: true,
+      },
+      {
+        id: 'vas-air-5',
+        name: 'Giao nhận tận nơi Door-to-Airport / Airport-to-Door hỏa tốc',
+        desc: 'Xe tải trung chuyển sân bay giao nhận trong ngày.',
+        category: 'Giao Nhận & Bảo Hiểm',
+        tag: 'Door-to-Airport',
+        priceText: '500,000 ₫ / Chuyến',
+        isChecked: true,
+      },
+      {
+        id: 'vas-air-6',
+        name: 'Bảo hiểm hàng không giá trị cao (All-Risk Air Cargo Insurance)',
+        desc: 'Bảo hiểm toàn diện cho hàng linh kiện điện tử, dược phẩm.',
+        category: 'Giao Nhận & Bảo Hiểm',
+        tag: 'Bảo hiểm Hàng không',
+        priceText: '0.2% Giá trị hàng',
+        isChecked: true,
+      },
+    ];
+  }
+
+  // Generic fallback
+  return [
+    {
+      id: 'vas-gen-1',
+      name: 'Bốc xếp & Nâng hạ hàng hóa chuyên dụng (Handling Support)',
+      desc: 'Bố trí công nhân và phương tiện nâng hạ máy móc hàng hóa.',
+      category: 'Dịch Vụ Bốc Xếp & Đóng Gói',
+      tag: 'Bốc xếp chuyên nghiệp',
+      priceText: '300,000 ₫ / Điểm',
+      isChecked: true,
+    },
+    {
+      id: 'vas-gen-2',
+      name: 'Đóng kiện gỗ & Màng co bảo vệ hàng hóa (Protective Packing)',
+      desc: 'Bao gói chống trầy xước, chống va đập cho hàng hóa giá trị.',
+      category: 'Dịch Vụ Bốc Xếp & Đóng Gói',
+      tag: 'Bảo vệ đóng gói',
+      priceText: '400,000 ₫ / Kiện',
+      isChecked: false,
+    },
+    {
+      id: 'vas-gen-3',
+      name: 'Định vị GPS Real-time & Giám sát trực tuyến 24/7 (Live Monitoring)',
+      desc: 'Theo dõi tiến độ hành trình và trạng thái hàng hóa trực tuyến.',
+      category: 'Giám Sát, An Ninh & Chứng Từ',
+      tag: 'GPS 24/7',
+      priceText: '0 ₫ (Miễn phí)',
+      isChecked: true,
+    },
+    {
+      id: 'vas-gen-4',
+      name: 'Thu hồi chứng từ gốc & Đối soát biên bản trong 24h-48h (POD Return)',
+      desc: 'Bàn giao chứng từ gốc giao nhận về văn phòng khách hàng.',
+      category: 'Giám Sát, An Ninh & Chứng Từ',
+      tag: 'Thu hồi chứng từ',
+      priceText: '100,000 ₫ / Bộ',
+      isChecked: true,
+    },
+    {
+      id: 'vas-gen-5',
+      name: 'Bảo hiểm trách nhiệm hàng hóa 100% (Cargo Insurance)',
+      desc: 'Cam kết bồi thường 100% giá trị hàng hóa khi phát sinh tổn thất.',
+      category: 'Quy Định, Pháp Lý & Bảo Hiểm',
+      tag: 'Bảo hiểm 100%',
+      priceText: '0.15% Giá trị hàng',
+      isChecked: true,
+    },
+  ];
+};
+
 export interface ModelCapabilityFormData {
   fleet: string;
   operationCapacity: string;
@@ -131,6 +448,7 @@ export interface ModelCapabilityFormData {
   paidSurcharges: PaidSurchargeItem[];
   vasOptions?: string[];
   selectedVas: string[];
+  vasItems?: CapabilityVasItem[];
 }
 
 export interface ServiceCategoryTree {
@@ -2726,6 +3044,10 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
 
   const [isAddingVas, setIsAddingVas] = useState(false);
   const [newVasName, setNewVasName] = useState('');
+  const [newVasCategory, setNewVasCategory] = useState('');
+  const [newVasDesc, setNewVasDesc] = useState('');
+  const [newVasPrice, setNewVasPrice] = useState('');
+  const [newVasTag, setNewVasTag] = useState('');
 
   // Custom Form Data per model: Map model.id -> ModelCapabilityFormData
   const [modelFormData, setModelFormData] = useState<Record<string, ModelCapabilityFormData>>(() => {
@@ -2743,6 +3065,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
             paidSurcharges: JSON.parse(JSON.stringify(m.paidSurchargeOptions)),
             vasOptions: [...m.vasOptions],
             selectedVas: [...m.defaultVas],
+            vasItems: getDefaultVasItemsForModel(m.id, cat.id),
           };
         });
       });
@@ -2836,6 +3159,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
     paidSurcharges: activeModel?.paidSurchargeOptions || [],
     vasOptions: activeModel?.vasOptions || [],
     selectedVas: activeModel?.defaultVas || [],
+    vasItems: getDefaultVasItemsForModel(activeModelId, activeCategory?.id),
   };
 
   // Update field in current model
@@ -2896,6 +3220,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
         paidSurchargeOptions: activeModel?.paidSurchargeOptions || [],
         vasOptions: activeModel?.vasOptions || [],
         selectedVas: activeModel?.defaultVas || [],
+        vasItems: getDefaultVasItemsForModel(activeModelId, activeCategory?.id),
       };
       const updatedRoutes = (currentModelData.routes || []).map((r: CapabilityRouteItem) => {
         if (r.id === routeId) {
@@ -2998,36 +3323,60 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
   };
 
   // ==========================================
-  // SECTION 4: VAS OPERATIONS & CUSTOM ADD
+  // SECTION 4: VAS OPERATIONS & CUSTOM ADD (CATEGORIZED & WITH PRICE INPUT)
   // ==========================================
-  const toggleVasItem = (vas: string) => {
-    const current = currentData.selectedVas || [];
-    const updated = current.includes(vas)
-      ? current.filter((v) => v !== vas)
-      : [...current, vas];
-    updateCurrentFormData('selectedVas', updated);
+  const activeVasItems: CapabilityVasItem[] = currentData.vasItems || getDefaultVasItemsForModel(activeModelId, activeCategory?.id);
+
+  const toggleVasItem = (id: string) => {
+    const updated = activeVasItems.map((item) => {
+      if (item.id === id) {
+        return { ...item, isChecked: !item.isChecked };
+      }
+      return item;
+    });
+    updateCurrentFormData('vasItems', updated);
+    updateCurrentFormData('selectedVas', updated.filter((v) => v.isChecked).map((v) => v.name));
+  };
+
+  const updateVasPrice = (id: string, priceText: string) => {
+    const updated = activeVasItems.map((item) => {
+      if (item.id === id) {
+        return { ...item, priceText };
+      }
+      return item;
+    });
+    updateCurrentFormData('vasItems', updated);
+  };
+
+  const handleDeleteVas = (id: string) => {
+    const updated = activeVasItems.filter((item) => item.id !== id);
+    updateCurrentFormData('vasItems', updated);
+    updateCurrentFormData('selectedVas', updated.filter((v) => v.isChecked).map((v) => v.name));
   };
 
   const handleAddVasOption = () => {
     const name = newVasName.trim();
     if (!name) return;
-    const currentOptions = currentData.vasOptions || activeModel?.vasOptions || [];
-    if (!currentOptions.includes(name)) {
-      updateCurrentFormData('vasOptions', [...currentOptions, name]);
-    }
-    const currentChecked = currentData.selectedVas || [];
-    if (!currentChecked.includes(name)) {
-      updateCurrentFormData('selectedVas', [...currentChecked, name]);
-    }
+    const category = newVasCategory.trim() || 'Dịch Vụ Phụ Trợ & Tiện Ích';
+    const newItem: CapabilityVasItem = {
+      id: `vas-custom-${Date.now()}`,
+      name,
+      category,
+      desc: newVasDesc.trim() || 'Dịch vụ phụ trợ tùy chỉnh theo yêu cầu của khách hàng.',
+      tag: newVasTag.trim() || 'VAS Tùy chọn',
+      priceText: newVasPrice.trim() || 'Thỏa thuận',
+      isChecked: true,
+      isPopular: false,
+    };
+    const updated = [...activeVasItems, newItem];
+    updateCurrentFormData('vasItems', updated);
+    updateCurrentFormData('selectedVas', updated.filter((v) => v.isChecked).map((v) => v.name));
     setNewVasName('');
+    setNewVasCategory('');
+    setNewVasDesc('');
+    setNewVasPrice('');
+    setNewVasTag('');
     setIsAddingVas(false);
-  };
-
-  const handleDeleteVasOption = (name: string) => {
-    const currentOptions = currentData.vasOptions || activeModel?.vasOptions || [];
-    updateCurrentFormData('vasOptions', currentOptions.filter((v) => v !== name));
-    const currentChecked = currentData.selectedVas || [];
-    updateCurrentFormData('selectedVas', currentChecked.filter((v) => v !== name));
   };
 
   // ==========================================
@@ -3041,6 +3390,9 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
           if (selectedModelIds[m.id]) {
             const data = modelFormData[m.id];
             const primaryRoute = data?.routes?.[0];
+            const modelVasItems = data?.vasItems || getDefaultVasItemsForModel(m.id, cat.id);
+            const activeVasList = modelVasItems.filter((v) => v.isChecked).map((v) => `${v.name} (${v.priceText})`);
+
             declaredList.push({
               id: `srv-${m.id}`,
               serviceType: cat.serviceType,
@@ -3058,7 +3410,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
               routes: data?.routes || [],
               freeSurcharges: data?.freeSurcharges || [],
               paidSurcharges: data?.paidSurcharges || [],
-              vasList: data?.selectedVas || [],
+              vasList: activeVasList.length > 0 ? activeVasList : (data?.selectedVas || []),
             });
           }
         });
@@ -3926,14 +4278,19 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                 </div>
 
                 {/* =========================================================================
-                    PHẦN 4: CÁC DỊCH VỤ GIÁ TRỊ GIA TĂNG (VAS) (HỖ TRỢ THÊM TÙY Ý)
+                    PHẦN 4: CÁC DỊCH VỤ GIÁ TRỊ GIA TĂNG (VAS) (PHÂN LOẠI THEO HẠNG MỤC & NHẬP ĐƠN GIÁ)
                 ========================================================================= */}
                 <div className="space-y-3 pt-3 border-t border-slate-100">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-                      <span className="w-5 h-5 rounded-full bg-indigo-50 text-indigo-700 flex items-center justify-center text-[10.5px] font-bold">4</span>
-                      <span>Dịch Vụ Giá Trị Gia Tăng Đi Kèm (VAS) ({currentData.selectedVas?.length || 0}/{(currentData.vasOptions || activeModel?.vasOptions || []).length})</span>
-                    </h4>
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                        <span className="w-5 h-5 rounded-full bg-indigo-50 text-indigo-700 flex items-center justify-center text-[10.5px] font-bold">4</span>
+                        <span>Dịch Vụ Giá Trị Gia Tăng Đi Kèm (VAS) ({activeVasItems.filter((v) => v.isChecked).length}/{activeVasItems.length})</span>
+                      </h4>
+                      <p className="text-[11px] text-slate-500 mt-0.5">
+                        Tick chọn các dịch vụ VAS có khả năng đáp ứng và thiết lập đơn giá tham chiếu minh bạch.
+                      </p>
+                    </div>
 
                     <button
                       type="button"
@@ -3945,24 +4302,105 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                     </button>
                   </div>
 
-                  {/* Inline Input Box to Add Custom VAS */}
+                  {/* Inline Input Box to Add Custom Categorized VAS */}
                   {isAddingVas && (
-                    <div className="p-2.5 bg-indigo-50/90 rounded-xl border border-indigo-200 space-y-2 animate-in fade-in duration-100">
-                      <input
-                        type="text"
-                        autoFocus
-                        placeholder="Nhập tên dịch vụ giá trị gia tăng (VAS) mới..."
-                        value={newVasName}
-                        onChange={(e) => setNewVasName(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && handleAddVasOption()}
-                        className="w-full px-2.5 py-1.5 bg-white border border-indigo-300 rounded-lg text-xs font-semibold text-slate-800 focus:outline-hidden focus:border-indigo-600"
-                      />
-                      <div className="flex items-center justify-end gap-1.5">
+                    <div className="p-3.5 bg-indigo-50/90 rounded-2xl border border-indigo-200 space-y-2.5 animate-in fade-in duration-100">
+                      <div className="text-xs font-bold text-indigo-900 flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+                        <span>Khai Báo Dịch Vụ Giá Trị Gia Tăng (VAS) Mới</span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                            Tên dịch vụ VAS *
+                          </label>
+                          <input
+                            type="text"
+                            autoFocus
+                            placeholder="VD: Kiểm đếm chi tiết từng SKU / Serial..."
+                            value={newVasName}
+                            onChange={(e) => setNewVasName(e.target.value)}
+                            className="w-full px-2.5 py-1.5 bg-white border border-indigo-300 rounded-lg text-xs font-semibold text-slate-800 focus:outline-hidden focus:border-indigo-600"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                            Hạng mục phân loại
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="VD: Dịch Vụ Bốc Xếp & Đóng Gói..."
+                            value={newVasCategory}
+                            onChange={(e) => setNewVasCategory(e.target.value)}
+                            list="vas-category-suggestions"
+                            className="w-full px-2.5 py-1.5 bg-white border border-indigo-300 rounded-lg text-xs font-semibold text-slate-800 focus:outline-hidden focus:border-indigo-600"
+                          />
+                          <datalist id="vas-category-suggestions">
+                            <option value="Dịch Vụ Bốc Xếp & Đóng Gói" />
+                            <option value="Phương Tiện & Thiết Bị Phụ Trợ" />
+                            <option value="Giám Sát, An Ninh & Chứng Từ" />
+                            <option value="Quy Định, Pháp Lý & Bảo Hiểm" />
+                            <option value="Thủ Tục Cảng & Chứng Từ Hàng Hải" />
+                            <option value="Đóng Gói & Xử Lý Sân Bay" />
+                            <option value="Dịch Vụ Khai Thác Kho Bãi" />
+                          </datalist>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                            Đơn giá tham chiếu
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="VD: 300,000 ₫ / Điểm, 150,000 ₫ / Pallet, 0 ₫..."
+                            value={newVasPrice}
+                            onChange={(e) => setNewVasPrice(e.target.value)}
+                            className="w-full px-2.5 py-1.5 bg-white border border-indigo-300 rounded-lg text-xs font-semibold text-slate-800 focus:outline-hidden focus:border-indigo-600"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                            Tag nhãn ngắn gọn (Hiển thị badge)
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="VD: Kiểm đếm SKU, Cẩu bãi..."
+                            value={newVasTag}
+                            onChange={(e) => setNewVasTag(e.target.value)}
+                            className="w-full px-2.5 py-1.5 bg-white border border-indigo-300 rounded-lg text-xs font-semibold text-slate-800 focus:outline-hidden focus:border-indigo-600"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                          Mô tả chi tiết nội dung VAS
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Mô tả tóm tắt quy trình hoặc phạm vi cung cấp..."
+                          value={newVasDesc}
+                          onChange={(e) => setNewVasDesc(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && handleAddVasOption()}
+                          className="w-full px-2.5 py-1.5 bg-white border border-indigo-300 rounded-lg text-xs font-semibold text-slate-800 focus:outline-hidden focus:border-indigo-600"
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-end gap-1.5 pt-1">
                         <button
                           type="button"
                           onClick={() => {
                             setIsAddingVas(false);
                             setNewVasName('');
+                            setNewVasCategory('');
+                            setNewVasDesc('');
+                            setNewVasPrice('');
+                            setNewVasTag('');
                           }}
                           className="px-2.5 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-200/60 rounded-lg transition-colors cursor-pointer"
                         >
@@ -3979,57 +4417,112 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                     </div>
                   )}
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 text-xs">
-                    {(currentData.vasOptions || activeModel?.vasOptions || []).map((vas: string, idx: number) => {
-                      const isChecked = currentData.selectedVas?.includes(vas);
-                      return (
-                        <div
-                          key={idx}
-                          className={`group flex items-start justify-between gap-2 p-3 rounded-xl border transition-all select-none ${
-                            isChecked
-                              ? 'bg-indigo-50/70 border-indigo-300 text-indigo-950 font-bold shadow-2xs ring-1 ring-indigo-500/20'
-                              : 'bg-slate-50/80 border-slate-200 text-slate-700 hover:bg-slate-100 hover:border-slate-300'
-                          }`}
-                        >
-                          <label
-                            onClick={() => toggleVasItem(vas)}
-                            className="flex items-start gap-2.5 cursor-pointer flex-1"
-                          >
-                            <div className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
-                              isChecked ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-300 bg-white'
-                            }`}>
-                              {isChecked && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                  {/* Grouped VAS by Category */}
+                  {(() => {
+                    const groupedVas = activeVasItems.reduce((acc, item) => {
+                      const cat = item.category || 'Dịch Vụ Phụ Trợ & Tiện Ích';
+                      if (!acc[cat]) acc[cat] = [];
+                      acc[cat].push(item);
+                      return acc;
+                    }, {} as Record<string, CapabilityVasItem[]>);
+
+                    return (
+                      <div className="space-y-4 pt-1">
+                        {Object.entries(groupedVas).map(([categoryName, items], gIdx) => {
+                          const checkedInGroup = items.filter((i) => i.isChecked).length;
+                          return (
+                            <div key={gIdx} className="bg-slate-50/70 border border-slate-200/90 rounded-2xl p-3.5 space-y-2.5">
+                              {/* Category Header */}
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <span className="w-2 h-2 rounded-full bg-indigo-600"></span>
+                                  <span className="text-xs font-bold text-slate-800 uppercase tracking-wide">
+                                    {categoryName}
+                                  </span>
+                                </div>
+                                <span className="px-2 py-0.5 text-[10.5px] font-bold bg-white text-indigo-700 border border-indigo-200/80 rounded-full shadow-2xs">
+                                  Đã chọn: {checkedInGroup}/{items.length}
+                                </span>
+                              </div>
+
+                              {/* Grid of Items in this Category */}
+                              <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5">
+                                {items.map((vasItem) => (
+                                  <div
+                                    key={vasItem.id}
+                                    className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-2.5 rounded-xl border transition-all ${
+                                      vasItem.isChecked
+                                        ? 'bg-indigo-50/70 border-indigo-300 text-indigo-950 font-medium shadow-2xs ring-1 ring-indigo-500/20'
+                                        : 'bg-white border-slate-200 text-slate-600 opacity-85 hover:opacity-100 hover:border-slate-300'
+                                    }`}
+                                  >
+                                    {/* Left: Checkbox & Info */}
+                                    <label
+                                      onClick={() => toggleVasItem(vasItem.id)}
+                                      className="flex items-start gap-2.5 cursor-pointer flex-1 min-w-0"
+                                    >
+                                      <div
+                                        className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
+                                          vasItem.isChecked ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-300 bg-white'
+                                        }`}
+                                      >
+                                        {vasItem.isChecked && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                                      </div>
+                                      <div className="min-w-0 flex-1">
+                                        <div className="flex items-center gap-1.5 flex-wrap">
+                                          <span className={`text-xs font-bold leading-tight ${vasItem.isChecked ? 'text-slate-900' : 'text-slate-700'}`}>
+                                            {vasItem.name}
+                                          </span>
+                                          {vasItem.tag && (
+                                            <span className="px-1.5 py-0.2 text-[9.5px] font-bold bg-indigo-100/80 text-indigo-800 border border-indigo-200 rounded shrink-0">
+                                              {vasItem.tag}
+                                            </span>
+                                          )}
+                                        </div>
+                                        {vasItem.desc && (
+                                          <p className="text-[10.5px] text-slate-500 mt-0.5 leading-snug line-clamp-2">
+                                            {vasItem.desc}
+                                          </p>
+                                        )}
+                                      </div>
+                                    </label>
+
+                                    {/* Right: Price Input & Delete Button */}
+                                    <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-center pl-6 sm:pl-0">
+                                      <div className="relative">
+                                        <input
+                                          type="text"
+                                          disabled={!vasItem.isChecked}
+                                          value={vasItem.priceText}
+                                          onChange={(e) => updateVasPrice(vasItem.id, e.target.value)}
+                                          placeholder="Đơn giá tham chiếu..."
+                                          title="Mức giá tham chiếu khi khách hàng yêu cầu dịch vụ này"
+                                          className={`w-36 sm:w-40 px-2.5 py-1.5 bg-white border rounded-lg text-xs font-bold text-right transition-all ${
+                                            vasItem.isChecked
+                                              ? 'border-indigo-300 text-indigo-900 focus:border-indigo-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-2xs'
+                                              : 'border-slate-200 text-slate-400 bg-slate-100 cursor-not-allowed'
+                                          }`}
+                                        />
+                                      </div>
+
+                                      <button
+                                        type="button"
+                                        onClick={() => handleDeleteVas(vasItem.id)}
+                                        className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer shrink-0"
+                                        title="Xóa VAS này"
+                                      >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                      </button>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
                             </div>
-                            <span className="leading-snug text-xs font-semibold">{vas}</span>
-                          </label>
-
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteVasOption(vas);
-                            }}
-                            className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors opacity-0 group-hover:opacity-100 shrink-0 cursor-pointer"
-                            title="Xóa VAS này"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </button>
-                        </div>
-                      );
-                    })}
-
-                    {/* Dashed Add Card for VAS */}
-                    {!isAddingVas && (
-                      <button
-                        type="button"
-                        onClick={() => setIsAddingVas(true)}
-                        className="p-3 border border-dashed border-indigo-300 hover:border-indigo-500 rounded-xl text-indigo-700 bg-indigo-50/40 hover:bg-indigo-100/60 transition-all text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer min-h-[50px]"
-                      >
-                        <Plus className="w-3.5 h-3.5" />
-                        <span>+ Thêm dịch vụ VAS mới</span>
-                      </button>
-                    )}
-                  </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 {/* Bottom Actions */}
