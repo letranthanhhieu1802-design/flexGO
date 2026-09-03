@@ -56,6 +56,25 @@ export const SCHEDULE_PRESETS = [
   { label: 'T2 - T7', days: ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'] },
 ];
 
+export const DEPARTURE_TIMES_LOV = [
+  { time: '20:00', label: '20:00 (Xuất bến ca tối chính)' },
+  { time: '19:30', label: '19:30 (Xuất bến ca tối sớm)' },
+  { time: '21:00', label: '21:00 (Xuất bến ca tối)' },
+  { time: '22:00', label: '22:00 (Xuất bến ca đêm)' },
+  { time: '12:00', label: '12:00 (Xuất bến ca trưa)' },
+  { time: '06:00', label: '06:00 (Xuất bến ca sáng sớm)' },
+];
+
+export interface ScheduleModalData {
+  routeId: string;
+  routeName: string;
+  origin: string;
+  destination: string;
+  selectedDays: string[];
+  departureTime: string;
+  customNote: string;
+}
+
 export const TRUCKING_BODY_TYPES = [
   'Xe Tải Thùng Kín (Dry Box Truck) - [An ninh cao / Chống ướt]',
   'Xe Tải Mui Bạt (Tarpaulin Truck) - [Mở bạt 2 bên hông]',
@@ -3518,7 +3537,51 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
   const [excelImportMode, setExcelImportMode] = useState<'replace' | 'append'>('replace');
   const [isExportingTemplate, setIsExportingTemplate] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [openScheduleRouteId, setOpenScheduleRouteId] = useState<string | null>(null);
+  const [scheduleModalData, setScheduleModalData] = useState<ScheduleModalData | null>(null);
+
+  const handleOpenScheduleModal = (route: CapabilityRouteItem) => {
+    const currentSla = route.sla || '';
+    let parsedDays = DAYS_OF_WEEK_LOV.filter((d) => currentSla.includes(d.name)).map((d) => d.name);
+    if (currentSla.includes('Hàng ngày') || currentSla.includes('hàng ngày') || currentSla.includes('T2 - CN')) {
+      parsedDays = DAYS_OF_WEEK_LOV.map((d) => d.name);
+    }
+
+    // Extract time from string (e.g. 20:00 or 19:30)
+    const timeMatch = currentSla.match(/(\d{1,2}:\d{2})/);
+    const departureTime = timeMatch ? timeMatch[1] : '20:00';
+
+    setScheduleModalData({
+      routeId: route.id,
+      routeName: route.route,
+      origin: route.origin,
+      destination: route.destination,
+      selectedDays: parsedDays.length > 0 ? parsedDays : ['Thứ 2', 'Thứ 4', 'Thứ 6'],
+      departureTime,
+      customNote: '',
+    });
+  };
+
+  const handleSaveScheduleModal = () => {
+    if (!scheduleModalData) return;
+    const { routeId, selectedDays, departureTime, customNote } = scheduleModalData;
+
+    let formatted = '';
+    if (selectedDays.length === 7) {
+      formatted = `Hàng ngày${departureTime ? ` (Xuất bến ${departureTime})` : ''}`;
+    } else if (selectedDays.length > 0) {
+      const sortedDays = DAYS_OF_WEEK_LOV.filter((d) => selectedDays.includes(d.name)).map((d) => d.name);
+      formatted = `${sortedDays.join(', ')}${departureTime ? ` (Xuất bến ${departureTime})` : ''}`;
+    } else if (departureTime) {
+      formatted = `Xuất bến ${departureTime}`;
+    }
+
+    if (customNote && customNote.trim()) {
+      formatted += ` - ${customNote.trim()}`;
+    }
+
+    handleUpdateRouteRow(routeId, 'sla', formatted);
+    setScheduleModalData(null);
+  };
 
   // Custom Form Data per model: Map model.id -> ModelCapabilityFormData
   const [modelFormData, setModelFormData] = useState<Record<string, ModelCapabilityFormData>>(() => {
@@ -4892,151 +4955,24 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                     </div>
                                   </td>
 
-                                  {/* 9. SLA / Lịch Chạy Hàng (Multi-select Days of Week for LTL) */}
-                                  <td className="p-0 align-top relative">
+                                  {/* 9. SLA / Lịch Chạy Hàng (Multi-select Days of Week & Time for LTL) */}
+                                  <td className="p-1 align-middle">
                                     {isLtlTrucking ? (
-                                      <div className="relative p-1">
-                                        <button
-                                          type="button"
-                                          onClick={() => setOpenScheduleRouteId(openScheduleRouteId === route.id ? null : route.id)}
-                                          className={`w-full min-h-[34px] px-2 py-1 rounded-lg border text-left text-xs transition-all flex items-center justify-between gap-1 cursor-pointer ${
-                                            route.sla
-                                              ? 'bg-indigo-50/80 border-indigo-200 text-indigo-900 font-semibold hover:bg-indigo-100/80 hover:border-indigo-300'
-                                              : 'bg-slate-50 border-dashed border-slate-300 text-slate-400 hover:bg-slate-100 hover:text-slate-600'
-                                          }`}
-                                          title="Nhấp để chọn các thứ trong tuần xe xuất bến"
-                                        >
-                                          <span className="truncate block font-medium">
-                                            {route.sla || 'Chọn các thứ...'}
-                                          </span>
-                                          <Calendar className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
-                                        </button>
-
-                                        {/* Interactive Multi-Select Popover */}
-                                        {openScheduleRouteId === route.id && (
-                                          <>
-                                            {/* Backdrop to close on click outside */}
-                                            <div 
-                                              className="fixed inset-0 z-40 bg-transparent" 
-                                              onClick={() => setOpenScheduleRouteId(null)} 
-                                            />
-                                            <div 
-                                              className="absolute z-50 top-full left-0 mt-1 w-72 bg-white border border-slate-200 rounded-xl shadow-2xl p-3 space-y-2.5 text-slate-800 animate-in fade-in zoom-in-95 duration-150"
-                                              style={{ minWidth: '270px' }}
-                                            >
-                                              {/* Header */}
-                                              <div className="flex items-center justify-between border-b border-slate-100 pb-1.5">
-                                                <span className="text-[11px] font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-                                                  <Calendar className="w-3.5 h-3.5 text-indigo-600" />
-                                                  Lịch Chạy Trong Tuần
-                                                </span>
-                                                <button
-                                                  type="button"
-                                                  onClick={() => setOpenScheduleRouteId(null)}
-                                                  className="text-slate-400 hover:text-slate-700 hover:bg-slate-100 text-xs font-bold w-5 h-5 flex items-center justify-center rounded cursor-pointer"
-                                                >
-                                                  ✕
-                                                </button>
-                                              </div>
-
-                                              {/* Quick Presets */}
-                                              <div className="space-y-1">
-                                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Chọn nhanh</span>
-                                                <div className="flex flex-wrap gap-1">
-                                                  {SCHEDULE_PRESETS.map((preset, pIdx) => {
-                                                    const isSelected = preset.days.every(d => (route.sla || '').includes(d)) && 
-                                                      DAYS_OF_WEEK_LOV.filter(d => (route.sla || '').includes(d.name)).length === preset.days.length;
-                                                    return (
-                                                      <button
-                                                        key={pIdx}
-                                                        type="button"
-                                                        onClick={() => {
-                                                          handleUpdateRouteRow(route.id, 'sla', preset.days.join(', '));
-                                                        }}
-                                                        className={`px-2 py-1 text-[10.5px] rounded-lg border font-medium transition-all cursor-pointer ${
-                                                          isSelected
-                                                            ? 'bg-indigo-600 border-indigo-600 text-white font-bold shadow-2xs'
-                                                            : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 hover:border-slate-300'
-                                                        }`}
-                                                      >
-                                                        {preset.label}
-                                                      </button>
-                                                    );
-                                                  })}
-                                                </div>
-                                              </div>
-
-                                              {/* 7 Days of Week Checkboxes */}
-                                              <div className="space-y-1">
-                                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Các thứ trong tuần</span>
-                                                <div className="grid grid-cols-2 gap-1.5">
-                                                  {DAYS_OF_WEEK_LOV.map((day) => {
-                                                    const isChecked = (route.sla || '').includes(day.name);
-                                                    return (
-                                                      <label
-                                                        key={day.id}
-                                                        className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg border text-xs font-medium cursor-pointer transition-all select-none ${
-                                                          isChecked 
-                                                            ? 'bg-indigo-50 border-indigo-300 text-indigo-950 font-bold' 
-                                                            : 'bg-slate-50/60 border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900'
-                                                        }`}
-                                                      >
-                                                        <input
-                                                          type="checkbox"
-                                                          checked={isChecked}
-                                                          onChange={(e) => {
-                                                            let currentDays = DAYS_OF_WEEK_LOV.filter(d => (route.sla || '').includes(d.name)).map(d => d.name);
-                                                            if (e.target.checked) {
-                                                              if (!currentDays.includes(day.name)) currentDays.push(day.name);
-                                                            } else {
-                                                              currentDays = currentDays.filter(d => d !== day.name);
-                                                            }
-                                                            // Sort by original week order
-                                                            const sortedDays = DAYS_OF_WEEK_LOV.filter(d => currentDays.includes(d.name)).map(d => d.name);
-                                                            handleUpdateRouteRow(route.id, 'sla', sortedDays.join(', '));
-                                                          }}
-                                                          className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-3.5 h-3.5 cursor-pointer"
-                                                        />
-                                                        <span>{day.name}</span>
-                                                      </label>
-                                                    );
-                                                  })}
-                                                </div>
-                                              </div>
-
-                                              {/* Custom / Notes Input */}
-                                              <div className="space-y-1 pt-1 border-t border-slate-100">
-                                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Ghi chú giờ xuất bến (tùy chọn)</span>
-                                                <input
-                                                  type="text"
-                                                  value={route.sla || ''}
-                                                  onChange={(e) => handleUpdateRouteRow(route.id, 'sla', e.target.value)}
-                                                  placeholder="VD: Thứ 2, Thứ 4, Thứ 6 (Xuất bến 20:00)"
-                                                  className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                                />
-                                              </div>
-
-                                              {/* Footer Action buttons */}
-                                              <div className="pt-1.5 border-t border-slate-100 flex items-center justify-between">
-                                                <button
-                                                  type="button"
-                                                  onClick={() => handleUpdateRouteRow(route.id, 'sla', '')}
-                                                  className="text-xs text-slate-500 hover:text-rose-600 font-medium cursor-pointer"
-                                                >
-                                                  Xóa chọn
-                                                </button>
-                                                <button
-                                                  type="button"
-                                                  onClick={() => setOpenScheduleRouteId(null)}
-                                                  className="px-3.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-all cursor-pointer shadow-xs"
-                                                >
-                                                  Xong
-                                                </button>
-                                              </div>
-                                            </div>
-                                          </>
-                                        )}
-                                      </div>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleOpenScheduleModal(route)}
+                                        className={`w-full min-h-[34px] px-2.5 py-1.5 rounded-xl border text-left text-xs transition-all flex items-center justify-between gap-1.5 cursor-pointer shadow-2xs group ${
+                                          route.sla
+                                            ? 'bg-indigo-50/90 border-indigo-200 text-indigo-950 font-semibold hover:bg-indigo-100 hover:border-indigo-300'
+                                            : 'bg-slate-50 border-dashed border-slate-300 text-slate-400 hover:bg-slate-100 hover:text-slate-600'
+                                        }`}
+                                        title="Nhấp để thiết lập các thứ trong tuần & thời gian xuất bến"
+                                      >
+                                        <span className="truncate block font-semibold leading-tight">
+                                          {route.sla || 'Chọn lịch & giờ chạy...'}
+                                        </span>
+                                        <Calendar className="w-3.5 h-3.5 text-indigo-600 shrink-0 group-hover:scale-110 transition-transform" />
+                                      </button>
                                     ) : (
                                       <input
                                         type="text"
@@ -5785,6 +5721,215 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
               >
                 <Check className="w-4 h-4" />
                 <span>Xác Nhận Nhập ({excelImportPreview.validCount} Tuyến)</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================================
+          MODAL: THIẾT LẬP LỊCH CHẠY HÀNG & THỜI GIAN XUẤT BẾN (LTL)
+      ========================================================================= */}
+      {scheduleModalData && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 max-w-lg w-full overflow-hidden flex flex-col animate-in zoom-in-95 duration-150">
+            {/* Modal Header */}
+            <div className="px-5 py-4 bg-gradient-to-r from-indigo-50 via-white to-indigo-50/40 border-b border-slate-200 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-600/20 shrink-0">
+                  <Calendar className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">
+                    Cấu Hình Lịch Chạy & Giờ Xuất Bến
+                  </h3>
+                  <p className="text-[11px] text-slate-500 font-medium">
+                    Tuyến: <strong className="text-indigo-700">{scheduleModalData.routeName}</strong> ({scheduleModalData.origin} ⇄ {scheduleModalData.destination})
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setScheduleModalData(null)}
+                className="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-all cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-5 space-y-4 overflow-y-auto max-h-[75vh]">
+              {/* 1. Chọn Nhanh Tần Suất */}
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-slate-800 uppercase tracking-wide">
+                  1. Chọn nhanh tần suất
+                </label>
+                <div className="flex flex-wrap gap-1.5">
+                  {SCHEDULE_PRESETS.map((preset, pIdx) => {
+                    const isSelected = preset.days.every(d => scheduleModalData.selectedDays.includes(d)) && 
+                      scheduleModalData.selectedDays.length === preset.days.length;
+                    return (
+                      <button
+                        key={pIdx}
+                        type="button"
+                        onClick={() => {
+                          setScheduleModalData({
+                            ...scheduleModalData,
+                            selectedDays: [...preset.days],
+                          });
+                        }}
+                        className={`px-3 py-1.5 text-xs rounded-xl border font-bold transition-all cursor-pointer ${
+                          isSelected
+                            ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs'
+                            : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-800'
+                        }`}
+                      >
+                        {preset.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* 2. LOV Các Thứ Trong Tuần (7 Ngày) */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-slate-800 uppercase tracking-wide">
+                    2. Các thứ trong tuần ({scheduleModalData.selectedDays.length}/7 ngày)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (scheduleModalData.selectedDays.length === 7) {
+                        setScheduleModalData({ ...scheduleModalData, selectedDays: [] });
+                      } else {
+                        setScheduleModalData({ ...scheduleModalData, selectedDays: DAYS_OF_WEEK_LOV.map(d => d.name) });
+                      }
+                    }}
+                    className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 cursor-pointer"
+                  >
+                    {scheduleModalData.selectedDays.length === 7 ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {DAYS_OF_WEEK_LOV.map((day) => {
+                    const isChecked = scheduleModalData.selectedDays.includes(day.name);
+                    return (
+                      <label
+                        key={day.id}
+                        className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs font-bold cursor-pointer transition-all select-none ${
+                          isChecked 
+                            ? 'bg-indigo-50 border-indigo-400 text-indigo-950 shadow-2xs ring-1 ring-indigo-500/20' 
+                            : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 hover:border-slate-300'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={(e) => {
+                            let current = [...scheduleModalData.selectedDays];
+                            if (e.target.checked) {
+                              if (!current.includes(day.name)) current.push(day.name);
+                            } else {
+                              current = current.filter(d => d !== day.name);
+                            }
+                            const sorted = DAYS_OF_WEEK_LOV.filter(d => current.includes(d.name)).map(d => d.name);
+                            setScheduleModalData({ ...scheduleModalData, selectedDays: sorted });
+                          }}
+                          className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer"
+                        />
+                        <span>{day.name}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* 3. Thời Gian Xuất Bến (Departure Time LOV) */}
+              <div className="space-y-2 pt-2 border-t border-slate-100">
+                <label className="block text-xs font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-indigo-600" />
+                  3. Thời gian xe xuất bến
+                </label>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                  {DEPARTURE_TIMES_LOV.map((dt, dtIdx) => {
+                    const isChosen = scheduleModalData.departureTime === dt.time;
+                    return (
+                      <button
+                        key={dtIdx}
+                        type="button"
+                        onClick={() => {
+                          setScheduleModalData({
+                            ...scheduleModalData,
+                            departureTime: dt.time,
+                          });
+                        }}
+                        className={`px-2.5 py-1.5 text-left rounded-xl border text-xs transition-all cursor-pointer ${
+                          isChosen
+                            ? 'bg-indigo-600 border-indigo-600 text-white font-bold shadow-2xs'
+                            : 'bg-slate-50 border-slate-200 text-slate-700 font-medium hover:bg-slate-100 hover:border-slate-300'
+                        }`}
+                      >
+                        <span className="block font-bold">{dt.time}</span>
+                        <span className={`text-[10px] block truncate ${isChosen ? 'text-indigo-100' : 'text-slate-500'}`}>
+                          {dt.label.replace(`${dt.time} `, '')}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="flex items-center gap-2 pt-1">
+                  <span className="text-xs font-semibold text-slate-600 whitespace-nowrap">Hoặc nhập giờ khác:</span>
+                  <input
+                    type="time"
+                    value={scheduleModalData.departureTime || '20:00'}
+                    onChange={(e) => setScheduleModalData({ ...scheduleModalData, departureTime: e.target.value })}
+                    className="px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:bg-white focus:outline-none focus:border-indigo-500 cursor-pointer"
+                  />
+                </div>
+              </div>
+
+              {/* 4. Xem Trước Chuỗi Kết Quả (Live Preview) */}
+              <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-1">
+                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+                  Xem trước hiển thị trên biểu giá:
+                </span>
+                <div className="text-xs font-bold text-indigo-900 bg-white border border-indigo-200 rounded-xl px-3 py-2 flex items-center gap-2 shadow-2xs">
+                  <Calendar className="w-4 h-4 text-indigo-600 shrink-0" />
+                  <span>
+                    {(() => {
+                      const days = scheduleModalData.selectedDays;
+                      const time = scheduleModalData.departureTime;
+                      if (days.length === 7) return `Hàng ngày${time ? ` (Xuất bến ${time})` : ''}`;
+                      if (days.length > 0) return `${days.join(', ')}${time ? ` (Xuất bến ${time})` : ''}`;
+                      if (time) return `Xuất bến ${time}`;
+                      return 'Chưa chọn lịch chạy';
+                    })()}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-5 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => setScheduleModalData(null)}
+                className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-200/60 rounded-xl transition-colors cursor-pointer"
+              >
+                Hủy Bỏ
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSaveScheduleModal}
+                className="inline-flex items-center gap-1.5 px-5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-md shadow-indigo-600/20 cursor-pointer"
+              >
+                <Check className="w-4 h-4" />
+                <span>Xác Nhận & Lưu Lịch Chạy</span>
               </button>
             </div>
           </div>
