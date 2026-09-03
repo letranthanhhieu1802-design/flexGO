@@ -188,7 +188,7 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
               'Xe bửng nâng thủy lực',
               'Xe cẩu tự hành 5T-15T',
             ],
-            unitLov: ['Chuyến', 'Tấn', 'CBM', 'Cont 40ft'],
+            unitLov: ['Chuyến'],
             defaultRoutes: [
               {
                 id: 'r-1',
@@ -343,7 +343,7 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             defaultOperation: 'Kiểm soát dải nhiệt độ -25°C đến +15°C, xuất biểu đồ nhiệt PDF sau chuyến đi',
             defaultCommitment: 'Cam kết không đứt gãy chuỗi lạnh, đền bù 100% nếu sốc nhiệt do máy lạnh',
             vehicleLov: ['Xe đông lạnh 15T', 'Xe đông lạnh 8T', 'Xe đông lạnh 5T', 'Xe đông lạnh 2.5T'],
-            unitLov: ['Chuyến', 'Tấn', 'Cont 40RF'],
+            unitLov: ['Chuyến'],
             defaultRoutes: [
               {
                 id: 'r-ref-1',
@@ -416,7 +416,7 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             defaultOperation: 'Tài xế có chứng chỉ vận chuyển hàng nguy hiểm, trang bị bộ Spill-Kit khẩn cấp',
             defaultCommitment: 'Tuân thủ 100% quy chuẩn an toàn hóa chất Nghị định 34/2024/NĐ-CP',
             vehicleLov: ['Xe tải chở hóa chất 15T', 'Xe tải chở hóa chất 8T', 'Đầu kéo chở bồn ISO Tank'],
-            unitLov: ['Chuyến', 'Tấn', 'Cont'],
+            unitLov: ['Chuyến'],
             defaultRoutes: [
               {
                 id: 'r-haz-1',
@@ -3563,16 +3563,22 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                   )}
 
                                   {/* 6. Đơn vị tính (LOV) */}
-                                  <td className="py-2 px-1">
-                                    <select
-                                      value={route.pricingUnit}
-                                      onChange={(e) => handleUpdateRouteRow(route.id, 'pricingUnit', e.target.value)}
-                                      className="w-full px-1.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 text-xs focus:bg-white focus:border-indigo-500 font-medium"
-                                    >
-                                      {(activeModel?.unitLov || ['Chuyến', 'Tấn', 'Kg', 'CBM', 'Cont 40ft', 'Pallet']).map((u: string, uIdx: number) => (
-                                        <option key={uIdx} value={u}>{u}</option>
-                                      ))}
-                                    </select>
+                                  <td className="py-2 px-1 align-top">
+                                    {activeModel?.unitLov?.length === 1 ? (
+                                      <div className="w-full px-1.5 py-1.5 bg-slate-100/90 border border-slate-200 rounded-lg text-slate-700 text-xs font-bold text-center select-none shadow-2xs">
+                                        {activeModel.unitLov[0]}
+                                      </div>
+                                    ) : (
+                                      <select
+                                        value={route.pricingUnit}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'pricingUnit', e.target.value)}
+                                        className="w-full px-1.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 text-xs focus:bg-white focus:border-indigo-500 font-medium"
+                                      >
+                                        {(activeModel?.unitLov || ['Chuyến', 'Tấn', 'Kg', 'CBM', 'Cont 40ft', 'Pallet']).map((u: string, uIdx: number) => (
+                                          <option key={uIdx} value={u}>{u}</option>
+                                        ))}
+                                      </select>
+                                    )}
                                   </td>
 
                                   {/* 7. Đơn giá */}
