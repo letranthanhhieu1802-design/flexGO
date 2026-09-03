@@ -96,6 +96,7 @@ export const getTonnagesForBodyType = (bodyType?: string): string[] => {
 
 export interface CapabilityRouteItem {
   id: string;
+  routeCode?: string; // Mã tuyến tự sinh (VD: RC-FTL-001)
   route: string;
   origin: string;
   destination: string;
@@ -193,6 +194,7 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             defaultRoutes: [
               {
                 id: 'r-1',
+                routeCode: 'RC-FTL-001',
                 route: 'HCM ⇄ Hà Nội',
                 origin: 'KCN Tân Bình (TP.HCM)',
                 destination: 'KCN Thăng Long (Hà Nội)',
@@ -209,6 +211,7 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
               },
               {
                 id: 'r-2',
+                routeCode: 'RC-FTL-002',
                 route: 'HCM ⇄ Đà Nẵng',
                 origin: 'KCN Sóng Thần (Bình Dương)',
                 destination: 'KCN Hòa Khánh (Đà Nẵng)',
@@ -225,6 +228,7 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
               },
               {
                 id: 'r-3',
+                routeCode: 'RC-FTL-003',
                 route: 'HCM ⇄ Nha Trang',
                 origin: 'Bình Tân (TP.HCM)',
                 destination: 'Cam Ranh (Khánh Hòa)',
@@ -2855,8 +2859,13 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
     const defaultTonnage = defaultTonnages[defaultTonnages.length - 2] || defaultTonnages[0];
     const defaultVehicle = isTrucking ? 'Xe tải 15T thùng kín' : (activeModel?.vehicleLov?.[0] || 'Phương tiện chuẩn');
     const defaultUnit = activeModel?.unitLov?.[0] || 'Chuyến';
+    const modelPrefix = (activeModel?.code || activeCategory?.id || 'RC').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    const nextIdx = (currentData.routes || []).length + 1;
+    const generatedRouteCode = `RC-${modelPrefix}-${String(nextIdx).padStart(3, '0')}`;
+
     const newRoute: CapabilityRouteItem = {
       id: `r-new-${Date.now()}`,
+      routeCode: generatedRouteCode,
       route: 'Hành Lang Tuyến Mới',
       origin: 'Điểm Lấy Hàng (Kho / Cảng)',
       destination: 'Điểm Giao Hàng (Kho / Cảng)',
@@ -3362,6 +3371,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                         <thead>
                           <tr className="bg-slate-100/90 border-b border-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider">
                             <th className="py-2.5 px-2 text-center w-8 min-w-[34px]">STT</th>
+                            <th className="py-2.5 px-2.5 min-w-[115px]">Mã Tuyến</th>
                             <th className="py-2.5 px-2.5 min-w-[140px]">Tuyến Đường</th>
                             <th className="py-2.5 px-2.5 min-w-[130px]">Điểm Đi</th>
                             <th className="py-2.5 px-2.5 min-w-[130px]">Điểm Đến</th>
@@ -3386,7 +3396,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                         <tbody className="divide-y divide-slate-100">
                           {(!currentData.routes || currentData.routes.length === 0) ? (
                             <tr>
-                              <td colSpan={activeCategory?.id === 'trucking' ? 13 : 12} className="py-6 text-center text-slate-400">
+                              <td colSpan={activeCategory?.id === 'trucking' ? 14 : 13} className="py-6 text-center text-slate-400">
                                 Chưa có tuyến đường nào. Bấm nút <strong>"+ Thêm Tuyến Mới"</strong> để khai báo bảng giá.
                               </td>
                             </tr>
@@ -3397,6 +3407,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                 ? Math.round(route.price * (1 - route.promotionPercent / 100)) 
                                 : route.price;
                               const isTrucking = activeCategory?.id === 'trucking';
+                              const effectiveRouteCode = route.routeCode || `RC-${(activeModel?.code || activeCategory?.id || 'GEN').toUpperCase().replace(/[^A-Z0-9]/g, '')}-${String(idx + 1).padStart(3, '0')}`;
 
                               return (
                                 <tr key={route.id} className="hover:bg-slate-50/80 transition-colors">
@@ -3405,7 +3416,17 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                     {idx + 1}
                                   </td>
 
-                                  {/* 2. Tuyến */}
+                                  {/* 2. Mã Tuyến (Tự sinh) */}
+                                  <td className="py-2 px-1.5 align-top">
+                                    <div 
+                                      className="w-full px-2 py-1.5 bg-indigo-50/80 border border-indigo-200/80 rounded-lg text-indigo-700 font-mono font-bold text-[11px] text-center select-all tracking-tight shadow-2xs"
+                                      title="Mã tuyến định danh tự sinh của hệ thống"
+                                    >
+                                      {effectiveRouteCode}
+                                    </div>
+                                  </td>
+
+                                  {/* 3. Tuyến */}
                                   <td className="py-2 px-1.5 align-top">
                                     <input
                                       type="text"
