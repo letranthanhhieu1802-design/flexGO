@@ -148,6 +148,22 @@ export interface TieredPricingModalData {
   pricingConfig: LtlTieredPricingConfig;
 }
 
+export const TRANSIT_TYPE_LOV = [
+  { value: 'Direct', label: 'Direct (Đi thẳng)' },
+  { value: 'Transit', label: 'Transit (Chuyển tải)' },
+];
+
+export const FREE_DEM_DET_LOV = [
+  { value: 7, label: '7 Ngày (Chuẩn hãng tàu)' },
+  { value: 10, label: '10 Ngày' },
+  { value: 14, label: '14 Ngày (Khuyên dùng)' },
+  { value: 21, label: '21 Ngày' },
+  { value: 28, label: '28 Ngày' },
+  { value: 0, label: 'Khác (Nhập ngày)...' },
+];
+
+export const USD_TO_VND_EXCHANGE_RATE = 25400; // Tỷ giá tham chiếu USD / VND quy đổi tức thì
+
 export const TRUCKING_BODY_TYPES = [
   'Xe Tải Thùng Kín (Dry Box Truck) - [An ninh cao / Chống ướt]',
   'Xe Tải Mui Bạt (Tarpaulin Truck) - [Mở bạt 2 bên hông]',
@@ -347,10 +363,13 @@ export interface CapabilityRouteItem {
   price: number;
   currency: 'VND' | 'USD';
   sla: string;
-  pricingStyle: 'All-in' | 'Chưa gồm phụ phí';
-  validUntil?: string; // Hạn giá (Date giá)
-  promotionPercent: number; // 0 - 50%
-  ltlPricing?: LtlTieredPricingConfig; // Biểu giá ma trận 5 bậc chuẩn LTL (Kg & CBM)
+  transitType?: 'Direct' | 'Transit';
+  freeDemDetDays?: number;
+  customFreeDemDetDays?: string;
+  pricingStyle?: 'All-in' | 'Chưa gồm phụ phí';
+  validUntil?: string;
+  promotionPercent: number;
+  ltlPricing?: LtlTieredPricingConfig;
 }
 
 export interface PaidSurchargeItem {
@@ -1362,33 +1381,39 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             defaultFleet: 'Service Contract trực tiếp với Maersk, ONE, COSCO, MSC, Evergreen',
             defaultOperation: 'Cam kết giữ chỗ Space & Equipment mùa cao điểm, phát hành Seaway Bill / e-BL trong 2h',
             defaultCommitment: 'Đảm bảo đúng lịch tàu, hỗ trợ Free Dem/Det 14 - 21 ngày tại cảng đến',
-            vehicleLov: ['Cont 20ft Dry (20GP)', 'Cont 40ft Dry (40GP)', 'Cont 40ft High Cube (40HC)', 'Cont 45HC', 'Cont Open Top', 'Cont Flat Rack'],
-            unitLov: ['Cont 20GP (USD)', 'Cont 40HC (USD)', 'Cont 45HC (USD)'],
+            vehicleLov: ['40ft High Cube (40HC)', '20ft General (20DC)', '40ft General (40DC)', '20ft Reefer (20RF Lạnh)', '40ft Reefer (40RF Lạnh)', '45ft High Cube (45HC)', 'Open Top / Flat Rack', 'ISO Tank Bồn chất lỏng'],
+            unitLov: ['Cont'],
             defaultRoutes: [
               {
                 id: 'r-sea-1',
+                routeCode: 'RC-FCL-001',
                 route: 'Cát Lái (VNCLI) ⇄ Hamburg (Đức)',
                 origin: 'Cảng Cát Lái (TP.HCM)',
                 destination: 'Cảng Hamburg (Germany)',
-                vehicleType: 'Cont 40ft High Cube (40HC)',
-                pricingUnit: 'Cont 40HC (USD)',
+                vehicleType: '40ft High Cube (40HC)',
+                pricingUnit: 'Cont',
                 price: 2450,
                 currency: 'USD',
                 sla: '28 - 32 ngày',
-                pricingStyle: 'Chưa gồm phụ phí',
+                transitType: 'Direct',
+                freeDemDetDays: 14,
+                validUntil: '2026-12-31',
                 promotionPercent: 12,
               },
               {
                 id: 'r-sea-2',
+                routeCode: 'RC-FCL-002',
                 route: 'Cái Mép (VNCMT) ⇄ Los Angeles (USLAX)',
                 origin: 'Cảng Cái Mép (Bà Rịa - Vũng Tàu)',
                 destination: 'Cảng Los Angeles (USA)',
-                vehicleType: 'Cont 40ft High Cube (40HC)',
-                pricingUnit: 'Cont 40HC (USD)',
+                vehicleType: '40ft High Cube (40HC)',
+                pricingUnit: 'Cont',
                 price: 2850,
                 currency: 'USD',
                 sla: '16 - 18 ngày',
-                pricingStyle: 'Chưa gồm phụ phí',
+                transitType: 'Direct',
+                freeDemDetDays: 14,
+                validUntil: '2026-12-31',
                 promotionPercent: 15,
               },
             ],
@@ -1490,20 +1515,23 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             defaultFleet: 'Booking cont lạnh Reefer (-25°C ~ +15°C) PTI đạt chuẩn hãng tàu',
             defaultOperation: 'Cắm điện liên tục tại bãi cảng và trên tàu, theo dõi nhiệt độ Data Logger',
             defaultCommitment: 'Cam kết chất lượng nông thủy sản tươi nguyên vẹn khi tới cảng đích',
-            vehicleLov: ['Cont 20ft Reefer (20RF)', 'Cont 40ft Reefer (40RF/40RH)'],
-            unitLov: ['Cont 40RF (USD)', 'Cont 20RF (USD)'],
+            vehicleLov: ['40ft Reefer (40RF/40RH Lạnh)', '20ft Reefer (20RF Lạnh)'],
+            unitLov: ['Cont'],
             defaultRoutes: [
               {
                 id: 'r-sea-ref-1',
+                routeCode: 'RC-REF-001',
                 route: 'Cát Lái ⇄ Thượng Hải (CNSHA)',
                 origin: 'Cảng Cát Lái (TP.HCM)',
                 destination: 'Cảng Thượng Hải (China)',
-                vehicleType: 'Cont 40ft Reefer (40RF/40RH)',
-                pricingUnit: 'Cont 40RF (USD)',
+                vehicleType: '40ft Reefer (40RF/40RH Lạnh)',
+                pricingUnit: 'Cont',
                 price: 1850,
                 currency: 'USD',
                 sla: '6 - 8 ngày',
-                pricingStyle: 'Chưa gồm phụ phí',
+                transitType: 'Direct',
+                freeDemDetDays: 7,
+                validUntil: '2026-12-31',
                 promotionPercent: 10,
               },
             ],
@@ -1549,19 +1577,22 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             defaultOperation: 'Duyệt MSDS nhanh với bộ phận DG Hãng tàu trong 24h, xếp cont vị trí an toàn trên boong',
             defaultCommitment: 'Tuân thủ 100% Bộ luật Hàng hải quốc tế IMDG Code',
             vehicleLov: ['Cont 20ft DG IMO', 'Cont 40ft DG IMO', 'Bồn ISO Tank'],
-            unitLov: ['Cont 20ft (USD)', 'Cont 40ft (USD)'],
+            unitLov: ['Cont'],
             defaultRoutes: [
               {
                 id: 'r-sea-haz-1',
+                routeCode: 'RC-IMO-001',
                 route: 'Cái Mép ⇄ Rotterdam (NLRTM)',
                 origin: 'Cảng Cái Mép (BR-VT)',
                 destination: 'Cảng Rotterdam (Hà Lan)',
                 vehicleType: 'Cont 40ft DG IMO',
-                pricingUnit: 'Cont 40ft (USD)',
+                pricingUnit: 'Cont',
                 price: 3650,
                 currency: 'USD',
                 sla: '26 - 30 ngày',
-                pricingStyle: 'Chưa gồm phụ phí',
+                transitType: 'Direct',
+                freeDemDetDays: 7,
+                validUntil: '2026-12-31',
                 promotionPercent: 0,
               },
             ],
@@ -1838,20 +1869,23 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             defaultFleet: 'Đoàn tàu hàng chuyên tuyến Bắc Nam & Ga Sóng Thần, Giáp Bát, Yên Viên',
             defaultOperation: 'Chạy đúng giờ theo biểu đồ chạy tàu của Tổng công ty Đường sắt VN',
             defaultCommitment: 'Tiết kiệm 30% chi phí so với đường bộ, an toàn tuyệt đối',
-            vehicleLov: ['Container 40ft đường sắt', 'Toa hàng kín (Toa G)', 'Toa thành cao (Toa H)'],
-            unitLov: ['Container 40ft', 'Toa xe', 'Tấn'],
+            vehicleLov: ['Container 40ft đường sắt', 'Container 20ft đường sắt', 'Toa hàng kín (Toa G)', 'Toa thành cao (Toa H)'],
+            unitLov: ['Cont', 'Toa xe', 'Tấn'],
             defaultRoutes: [
               {
                 id: 'r-rail-1',
+                routeCode: 'RC-RAIL-001',
                 route: 'Ga Sóng Thần ⇄ Ga Giáp Bát',
                 origin: 'Ga Sóng Thần (Bình Dương)',
                 destination: 'Ga Giáp Bát (Hà Nội)',
                 vehicleType: 'Container 40ft đường sắt',
-                pricingUnit: 'Container 40ft',
+                pricingUnit: 'Cont',
                 price: 21000000,
                 currency: 'VND',
                 sla: '65 - 72 giờ',
-                pricingStyle: 'All-in',
+                transitType: 'Direct',
+                freeDemDetDays: 7,
+                validUntil: '2026-12-31',
                 promotionPercent: 10,
               },
             ],
@@ -4253,6 +4287,9 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
   // ==========================================
   const handleAddRouteRow = () => {
     const isTrucking = activeCategory?.id === 'trucking';
+    const isOcean = activeCategory?.id === 'ocean' || activeModel?.id?.startsWith('sea-');
+    const isRail = activeCategory?.id === 'rail' || activeModel?.id?.startsWith('rail-');
+    const isFcl = (isOcean && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL')) || (isRail && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL')));
     const isLtlTrucking = isTrucking && (activeModel?.id === 'trk-gen-ltl' || activeModel?.name?.includes('LTL') || activeModel?.code === 'LTL');
     const isReeferTrucking = isTrucking && !isLtlTrucking && (activeCargoGroup?.name?.includes('lạnh') || activeModel?.name?.includes('lạnh') || activeModel?.id?.includes('ref'));
     const isHazmatTrucking = isTrucking && !isLtlTrucking && (activeCargoGroup?.name?.includes('nguy hiểm') || activeModel?.name?.includes('nguy hiểm') || activeModel?.id?.includes('haz') || activeModel?.id?.includes('dg'));
@@ -4261,8 +4298,8 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
     const defaultBody = bodyTypes[0];
     const defaultTonnages = getTonnagesForBodyType(defaultBody, cargoType);
     const defaultTonnage = isLtlTrucking ? defaultTonnages[2] || defaultTonnages[0] : (isHazmatTrucking ? defaultTonnages[2] || defaultTonnages[0] : (isReeferTrucking ? defaultTonnages[0] : (defaultTonnages[defaultTonnages.length - 2] || defaultTonnages[0])));
-    const defaultVehicle = isLtlTrucking ? 'Xe thùng kín 15T ghép tuyến' : (isHazmatTrucking ? 'Xe tải hóa chất 15T' : (isReeferTrucking ? 'Xe đông lạnh 5T' : (isTrucking ? 'Xe tải 15T thùng kín' : (activeModel?.vehicleLov?.[0] || 'Phương tiện chuẩn'))));
-    const defaultUnit = isLtlTrucking ? 'Kg' : (activeModel?.unitLov?.[0] || 'Chuyến');
+    const defaultVehicle = isLtlTrucking ? 'Xe thùng kín 15T ghép tuyến' : (isHazmatTrucking ? 'Xe tải hóa chất 15T' : (isReeferTrucking ? 'Xe đông lạnh 5T' : (isTrucking ? 'Xe tải 15T thùng kín' : (activeModel?.vehicleLov?.[0] || (isFcl ? '40ft High Cube (40HC)' : 'Phương tiện chuẩn')))));
+    const defaultUnit = isFcl ? 'Cont' : (isLtlTrucking ? 'Kg' : (activeModel?.unitLov?.[0] || 'Chuyến'));
     const modelPrefix = (activeModel?.code || activeCategory?.id || 'RC').toUpperCase().replace(/[^A-Z0-9]/g, '');
     const nextIdx = (currentData.routes || []).length + 1;
     const generatedRouteCode = `RC-${modelPrefix}-${String(nextIdx).padStart(3, '0')}`;
@@ -4270,17 +4307,18 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
     const newRoute: CapabilityRouteItem = {
       id: `r-new-${Date.now()}`,
       routeCode: generatedRouteCode,
-      route: isLtlTrucking ? 'Hà Nội ⇄ TP.HCM' : (isHazmatTrucking ? 'Bà Rịa - Vũng Tàu ⇄ Bình Dương' : (isReeferTrucking ? 'Đà Lạt ⇄ TP.HCM' : 'Hành Lang Tuyến Mới')),
-      origin: isLtlTrucking ? 'Hub Thanh Trì (Hà Nội)' : (isHazmatTrucking ? 'KCN Phú Mỹ (BR-VT)' : (isReeferTrucking ? 'Đức Trọng (Lâm Đồng)' : 'Điểm Lấy Hàng (Kho / Cảng)')),
-      destination: isLtlTrucking ? 'Hub Quận 12 (TP.HCM)' : (isHazmatTrucking ? 'KCN VSIP 2 (Bình Dương)' : (isReeferTrucking ? 'Chợ đầu mối Thủ Đức (TP.HCM)' : 'Điểm Giao Hàng (Kho / Cảng)')),
+      route: isLtlTrucking ? 'Hà Nội ⇄ TP.HCM' : (isOcean ? (isFcl ? 'Cát Lái (VNCLI) ⇄ Hamburg (Đức)' : 'Kho CFS Cát Lái ⇄ Singapore') : (isHazmatTrucking ? 'Bà Rịa - Vũng Tàu ⇄ Bình Dương' : (isReeferTrucking ? 'Đà Lạt ⇄ TP.HCM' : (isRail ? 'Ga Sóng Thần ⇄ Ga Giáp Bát' : 'Hành Lang Tuyến Mới')))),
+      origin: isLtlTrucking ? 'Hub Thanh Trì (Hà Nội)' : (isOcean ? 'Cảng Cát Lái (TP.HCM)' : (isHazmatTrucking ? 'KCN Phú Mỹ (BR-VT)' : (isReeferTrucking ? 'Đức Trọng (Lâm Đồng)' : (isRail ? 'Ga Sóng Thần (Bình Dương)' : 'Điểm Lấy Hàng (Kho / Cảng)')))),
+      destination: isLtlTrucking ? 'Hub Quận 12 (TP.HCM)' : (isOcean ? (isFcl ? 'Cảng Hamburg (Germany)' : 'Cảng Singapore') : (isHazmatTrucking ? 'KCN VSIP 2 (Bình Dương)' : (isReeferTrucking ? 'Chợ đầu mối Thủ Đức (TP.HCM)' : (isRail ? 'Ga Giáp Bát (Hà Nội)' : 'Điểm Giao Hàng (Kho / Cảng)')))),
       truckBodyType: isTrucking ? defaultBody : undefined,
       truckTonnage: isTrucking ? defaultTonnage : undefined,
       vehicleType: defaultVehicle,
       pricingUnit: defaultUnit,
-      price: isLtlTrucking ? 1650 : (isHazmatTrucking ? 14500000 : (isReeferTrucking ? 9500000 : 15000000)),
-      currency: 'VND',
-      sla: isLtlTrucking ? 'Thứ 2, Thứ 4, Thứ 6' : (isHazmatTrucking ? '4 - 6 giờ' : (isReeferTrucking ? '7 - 9 giờ' : '24 - 48 giờ')),
-      pricingStyle: 'All-in',
+      price: isLtlTrucking ? 1650 : (isOcean ? (isFcl ? 2450 : 25) : (isHazmatTrucking ? 14500000 : (isReeferTrucking ? 9500000 : (isRail ? (isFcl ? 21000000 : 1100) : 15000000)))),
+      currency: isOcean ? 'USD' : 'VND',
+      sla: isLtlTrucking ? 'Thứ 2, Thứ 4, Thứ 6' : (isOcean ? (isFcl ? '28 - 32 ngày' : '3 - 5 ngày') : (isHazmatTrucking ? '4 - 6 giờ' : (isReeferTrucking ? '7 - 9 giờ' : (isRail ? '65 - 72 giờ' : '24 - 48 giờ')))),
+      transitType: 'Direct',
+      freeDemDetDays: isFcl ? 14 : undefined,
       validUntil: '2026-12-31',
       promotionPercent: 0,
       ltlPricing: isLtlTrucking ? createDefaultLtlPricingConfig('weight', 2000, 500000) : undefined,
@@ -4852,6 +4890,10 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                         <thead>
                           {(() => {
                             const isLtlTable = activeCategory?.id === 'trucking' && (activeModel?.id === 'trk-gen-ltl' || activeModel?.name?.includes('LTL') || activeModel?.code === 'LTL');
+                            const isOceanTable = activeCategory?.id === 'ocean' || activeModel?.id?.startsWith('sea-');
+                            const isRailTable = activeCategory?.id === 'rail' || activeModel?.id?.startsWith('rail-');
+                            const isFclTable = (isOceanTable && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL')) || (isRailTable && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL')));
+
                             return (
                               <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
                                 <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
@@ -4865,13 +4907,17 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                     <th className="py-2.5 px-2.5 min-w-[210px]">Phân Khúc Tải Trọng</th>
                                   </>
                                 ) : (
-                                  <th className="py-2.5 px-2.5 min-w-[150px]">Loại Phương Tiện</th>
+                                  <th className="py-2.5 px-2.5 min-w-[180px]">{isFclTable ? 'Loại Vỏ Container' : 'Loại Phương Tiện'}</th>
                                 )}
                                 <th className="py-2.5 px-2 w-20 min-w-[75px] text-center">ĐVT</th>
-                                <th className="py-2.5 px-2.5 min-w-[140px] text-right">Đơn Giá</th>
+                                <th className="py-2.5 px-2.5 min-w-[175px] text-right">Đơn Giá & Tỷ Giá</th>
                                 <th className={`py-2.5 px-2 text-center ${isLtlTable ? 'min-w-[150px]' : 'min-w-[90px]'}`}>
                                   {isLtlTable ? 'Lịch Chạy Hàng' : 'SLA'}
                                 </th>
+                                <th className="py-2.5 px-2.5 min-w-[135px] text-center">Loại Tuyến</th>
+                                {isFclTable && (
+                                  <th className="py-2.5 px-2.5 min-w-[145px] text-center">Free Dem/Det</th>
+                                )}
                                 <th className="py-2.5 px-2.5 min-w-[130px] text-center">Hạn Giá</th>
                                 <th className="py-2.5 px-2 min-w-[85px] text-center">Promotion</th>
                                 <th className="py-2.5 px-1.5 text-center w-9 min-w-[36px]">Xóa</th>
@@ -4883,7 +4929,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                         <tbody className="divide-y divide-slate-200 bg-white">
                           {(!currentData.routes || currentData.routes.length === 0) ? (
                             <tr>
-                              <td colSpan={activeCategory?.id === 'trucking' ? 13 : 12} className="py-8 text-center text-slate-400 font-medium">
+                              <td colSpan={activeCategory?.id === 'trucking' ? 14 : (((activeCategory?.id === 'ocean' || activeCategory?.id === 'rail') && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL')) ? 14 : 13)} className="py-8 text-center text-slate-400 font-medium">
                                 Chưa có tuyến đường nào. Bấm nút <strong className="text-indigo-600 font-bold">+ Thêm Tuyến Mới</strong> để khai báo bảng giá.
                               </td>
                             </tr>
@@ -4894,6 +4940,9 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                 ? Math.round(route.price * (1 - route.promotionPercent / 100)) 
                                 : route.price;
                               const isTrucking = activeCategory?.id === 'trucking';
+                              const isOcean = activeCategory?.id === 'ocean' || activeModel?.id?.startsWith('sea-');
+                              const isRail = activeCategory?.id === 'rail' || activeModel?.id?.startsWith('rail-');
+                              const isFcl = (isOcean && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL')) || (isRail && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL')));
                               const isLtlTrucking = isTrucking && (activeModel?.id === 'trk-gen-ltl' || activeModel?.name?.includes('LTL') || activeModel?.code === 'LTL');
                               const isReeferTrucking = isTrucking && !isLtlTrucking && (activeCargoGroup?.name?.includes('lạnh') || activeModel?.name?.includes('lạnh') || activeModel?.id?.includes('ref'));
                               const isHazmatTrucking = isTrucking && !isLtlTrucking && (activeCargoGroup?.name?.includes('nguy hiểm') || activeModel?.name?.includes('nguy hiểm') || activeModel?.id?.includes('haz') || activeModel?.id?.includes('dg'));
@@ -4908,24 +4957,26 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                     {idx + 1}
                                   </td>
 
-                                  {/* 2. Mã Tuyến (Tự sinh) */}
-                                  <td className="p-0 text-center bg-indigo-50/30 align-middle">
-                                    <span 
-                                      className="font-mono font-bold text-indigo-700 text-xs select-all px-2 block"
-                                      title="Mã tuyến định danh tự sinh của hệ thống"
-                                    >
-                                      {effectiveRouteCode}
-                                    </span>
+                                  {/* 2. Mã Tuyến */}
+                                  <td className="p-0 align-top bg-slate-50/30">
+                                    <input
+                                      type="text"
+                                      value={effectiveRouteCode}
+                                      onChange={(e) => handleUpdateRouteRow(route.id, 'routeCode', e.target.value)}
+                                      placeholder="Mã tuyến..."
+                                      className="w-full px-2 py-2 text-center font-mono font-bold text-indigo-700 text-xs bg-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all uppercase"
+                                      title="Mã định danh tuyến đường nội bộ hoặc quốc tế"
+                                    />
                                   </td>
 
-                                  {/* 3. Tuyến */}
+                                  {/* 3. Tuyến Đường */}
                                   <td className="p-0 align-top">
                                     <input
                                       type="text"
                                       value={route.route}
                                       onChange={(e) => handleUpdateRouteRow(route.id, 'route', e.target.value)}
-                                      placeholder="HCM ⇄ Hà Nội"
-                                      className="w-full px-2.5 py-2 bg-transparent text-slate-900 font-bold text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
+                                      placeholder="Tên tuyến..."
+                                      className="w-full px-2.5 py-2 font-bold text-slate-900 text-xs bg-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
                                     />
                                   </td>
 
@@ -4935,8 +4986,8 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                       type="text"
                                       value={route.origin}
                                       onChange={(e) => handleUpdateRouteRow(route.id, 'origin', e.target.value)}
-                                      placeholder="Bình Tân (TP.HCM)"
-                                      className="w-full px-2.5 py-2 bg-transparent text-slate-800 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
+                                      placeholder="Điểm đi..."
+                                      className="w-full px-2.5 py-2 bg-transparent text-slate-700 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
                                     />
                                   </td>
 
@@ -4946,25 +4997,25 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                       type="text"
                                       value={route.destination}
                                       onChange={(e) => handleUpdateRouteRow(route.id, 'destination', e.target.value)}
-                                      placeholder="Cam Ranh (Khánh Hòa)"
-                                      className="w-full px-2.5 py-2 bg-transparent text-slate-800 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
+                                      placeholder="Điểm đến..."
+                                      className="w-full px-2.5 py-2 bg-transparent text-slate-700 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
                                     />
                                   </td>
 
-                                  {/* 6. Cột Phương Tiện: Tách 2 cột nếu là Đường Bộ */}
+                                  {/* 6. Loại Thùng + Tải Trọng (Trucking) hoặc Loại Phương Tiện / Cont (Phi Trucking) */}
                                   {isTrucking ? (
                                     <>
                                       {/* 6a. Loại Thùng Phương Tiện (LOV + Custom Option) */}
                                       <td className="p-0 align-top">
                                         {(() => {
-                                          const currentBodyTypeVal = currentTruckBodyTypes.includes(route.truckBodyType || '')
-                                            ? route.truckBodyType
+                                          const currentBodyVal = currentTruckBodyTypes.includes(route.truckBodyType || '') 
+                                            ? route.truckBodyType 
                                             : (route.customTruckBodyType || route.truckBodyType === 'Khác (Nhập tùy chọn)...' ? 'Khác (Nhập tùy chọn)...' : currentTruckBodyTypes[0]);
 
                                           return (
                                             <div className="flex flex-col h-full">
                                               <select
-                                                value={currentBodyTypeVal}
+                                                value={currentBodyVal}
                                                 onChange={(e) => {
                                                   const val = e.target.value;
                                                   if (val === 'Khác (Nhập tùy chọn)...') {
@@ -4973,10 +5024,11 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                                       customTruckBodyType: '',
                                                     });
                                                   } else {
-                                                    const validTonnages = getTonnagesForBodyType(val, cargoType);
-                                                    const newTonnage = (route.truckTonnage && validTonnages.includes(route.truckTonnage))
-                                                      ? route.truckTonnage
-                                                      : validTonnages[0];
+                                                    const availableTonnages = getTonnagesForBodyType(val, cargoType);
+                                                    const newTonnage = availableTonnages.includes(route.truckTonnage || '') 
+                                                      ? route.truckTonnage 
+                                                      : (availableTonnages[0] || '15.0T');
+
                                                     handleUpdateRouteRowMultiple(route.id, {
                                                       truckBodyType: val,
                                                       customTruckBodyType: '',
@@ -4987,11 +5039,12 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                                 }}
                                                 className="w-full px-2.5 py-2 bg-transparent text-slate-800 text-xs font-medium cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
                                               >
-                                                {currentTruckBodyTypes.map((b, bIdx) => (
-                                                  <option key={bIdx} value={b}>{b}</option>
+                                                {currentTruckBodyTypes.map((body, bIdx) => (
+                                                  <option key={bIdx} value={body}>{body}</option>
                                                 ))}
                                               </select>
-                                              {(currentBodyTypeVal === 'Khác (Nhập tùy chọn)...' || (!currentTruckBodyTypes.includes(route.truckBodyType || '') && route.customTruckBodyType)) && (
+
+                                              {(currentBodyVal === 'Khác (Nhập tùy chọn)...' || (!currentTruckBodyTypes.includes(route.truckBodyType || '') && route.customTruckBodyType)) && (
                                                 <div className="p-1 bg-amber-50/90 border-t border-amber-200">
                                                   <input
                                                     type="text"
@@ -5104,8 +5157,8 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                     )}
                                   </td>
 
-                                  {/* 8. Đơn giá (Hỗ trợ Ma Trận 5 Bậc Giá Chuẩn cho LTL) */}
-                                  <td className="p-1 align-middle">
+                                  {/* 8. Đơn giá (USD/VND, Live currency conversion & Ma Trận 5 Bậc cho LTL) */}
+                                  <td className="p-1.5 align-middle">
                                     {isLtlTrucking ? (
                                       <div className="flex flex-col gap-1">
                                         <button
@@ -5138,17 +5191,47 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                         )}
                                       </div>
                                     ) : (
-                                      <div className="flex flex-col h-full">
-                                        <input
-                                          type="number"
-                                          value={route.price || ''}
-                                          onChange={(e) => handleUpdateRouteRow(route.id, 'price', parseFloat(e.target.value) || 0)}
-                                          placeholder="0"
-                                          className="w-full px-2.5 py-2 text-right bg-transparent text-slate-900 font-bold text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
-                                        />
-                                        {hasPromo && (
-                                          <div className="text-[10.5px] text-emerald-600 font-bold text-right px-2.5 pb-1 bg-emerald-50/60 border-t border-emerald-100 whitespace-nowrap">
-                                            Giảm còn: {discountedPrice.toLocaleString('vi-VN')} {route.currency}
+                                      <div className="flex flex-col gap-1">
+                                        <div className="flex items-center gap-1">
+                                          <select
+                                            value={route.currency || (isOcean ? 'USD' : 'VND')}
+                                            onChange={(e) => handleUpdateRouteRow(route.id, 'currency', e.target.value as 'VND' | 'USD')}
+                                            className="px-1.5 py-1 text-[11px] font-black rounded-lg border border-slate-300 bg-slate-100 text-slate-800 cursor-pointer focus:outline-none focus:ring-1 focus:ring-indigo-500 shrink-0"
+                                          >
+                                            <option value="USD">USD ($)</option>
+                                            <option value="VND">VND (₫)</option>
+                                          </select>
+                                          <input
+                                            type="number"
+                                            value={route.price || ''}
+                                            onChange={(e) => handleUpdateRouteRow(route.id, 'price', parseFloat(e.target.value) || 0)}
+                                            placeholder="0"
+                                            className="w-full px-2 py-1 text-right bg-white border border-slate-200 rounded-lg text-slate-900 font-bold text-xs focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
+                                          />
+                                        </div>
+
+                                        {/* Live Currency Conversion Tag */}
+                                        {route.price > 0 && (
+                                          <div className="text-[10px] font-semibold px-0.5 flex items-center justify-between">
+                                            {route.currency === 'USD' ? (
+                                              <span className="text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded border border-emerald-200/60">
+                                                ≈ {(route.price * USD_TO_VND_EXCHANGE_RATE).toLocaleString('vi-VN')} ₫
+                                              </span>
+                                            ) : (
+                                              <span className="text-indigo-700 bg-indigo-50 px-1 py-0.5 rounded border border-indigo-200/60">
+                                                ≈ ${Math.round(route.price / USD_TO_VND_EXCHANGE_RATE).toLocaleString('en-US')} USD
+                                              </span>
+                                            )}
+                                            {hasPromo && (
+                                              <span className="text-rose-600 font-bold text-[9.5px]">
+                                                -{route.promotionPercent}%
+                                              </span>
+                                            )}
+                                          </div>
+                                        )}
+                                        {hasPromo && route.price > 0 && (
+                                          <div className="text-[10px] text-emerald-600 font-bold text-right px-1">
+                                            Giảm còn: {discountedPrice.toLocaleString('vi-VN')} {route.currency || (isOcean ? 'USD' : 'VND')}
                                           </div>
                                         )}
                                       </div>
@@ -5184,7 +5267,64 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                     )}
                                   </td>
 
-                                  {/* 10. Hạn Giá (Date) */}
+                                  {/* 10. Loại Tuyến (Direct / Transit) - Sau cột SLA */}
+                                  <td className="p-0 align-top">
+                                    <select
+                                      value={route.transitType || 'Direct'}
+                                      onChange={(e) => handleUpdateRouteRow(route.id, 'transitType', e.target.value as 'Direct' | 'Transit')}
+                                      className={`w-full px-2 py-2 bg-transparent text-xs font-bold cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all ${
+                                        route.transitType === 'Transit' ? 'text-amber-700' : 'text-slate-800'
+                                      }`}
+                                    >
+                                      {TRANSIT_TYPE_LOV.map((opt) => (
+                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                      ))}
+                                    </select>
+                                  </td>
+
+                                  {/* 11. Free Dem/Det (Dành cho Container / FCL) */}
+                                  {isFcl && (
+                                    <td className="p-0 align-top">
+                                      {(() => {
+                                        const isCustom = route.freeDemDetDays === 0 || (![7, 10, 14, 21, 28].includes(route.freeDemDetDays || 14) && route.customFreeDemDetDays);
+                                        const currentVal = isCustom ? 0 : (route.freeDemDetDays || 14);
+                                        return (
+                                          <div className="flex flex-col h-full">
+                                            <select
+                                              value={currentVal}
+                                              onChange={(e) => {
+                                                const val = parseInt(e.target.value, 10);
+                                                if (val === 0) {
+                                                  handleUpdateRouteRowMultiple(route.id, { freeDemDetDays: 0, customFreeDemDetDays: '' });
+                                                } else {
+                                                  handleUpdateRouteRowMultiple(route.id, { freeDemDetDays: val, customFreeDemDetDays: '' });
+                                                }
+                                              }}
+                                              className="w-full px-2 py-2 bg-transparent text-slate-800 text-xs font-semibold cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
+                                            >
+                                              {FREE_DEM_DET_LOV.map((lov) => (
+                                                <option key={lov.value} value={lov.value}>{lov.label}</option>
+                                              ))}
+                                            </select>
+                                            {isCustom && (
+                                              <div className="p-1 bg-amber-50/90 border-t border-amber-200">
+                                                <input
+                                                  type="text"
+                                                  autoFocus
+                                                  value={route.customFreeDemDetDays || ''}
+                                                  onChange={(e) => handleUpdateRouteRow(route.id, 'customFreeDemDetDays', e.target.value)}
+                                                  placeholder="Gõ số ngày..."
+                                                  className="w-full px-2 py-1 bg-white border border-amber-300 rounded text-slate-900 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-amber-500"
+                                                />
+                                              </div>
+                                            )}
+                                          </div>
+                                        );
+                                      })()}
+                                    </td>
+                                  )}
+
+                                  {/* 12. Hạn Giá (Date) */}
                                   <td className="p-0 align-top">
                                     <input
                                       type="date"
@@ -5195,7 +5335,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                     />
                                   </td>
 
-                                  {/* 12. Promotion (%) */}
+                                  {/* 13. Promotion (%) */}
                                   <td className="p-0 text-center align-middle">
                                     <div className="flex items-center justify-center h-full">
                                       <input
@@ -5213,7 +5353,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                     </div>
                                   </td>
 
-                                  {/* 13. Thao tác Xóa */}
+                                  {/* 14. Thao tác Xóa */}
                                   <td className="p-0 text-center bg-slate-50/40 align-middle">
                                     <button
                                       type="button"
