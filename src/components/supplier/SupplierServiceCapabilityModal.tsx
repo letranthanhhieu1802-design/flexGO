@@ -3364,40 +3364,40 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                     </button>
                   </div>
 
-                  {/* Dynamic Table */}
-                  <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-2xs">
+                  {/* Dynamic Excel-Style Data Grid Table */}
+                  <div className="border border-slate-300 rounded-xl overflow-hidden bg-white shadow-2xs">
                     <div className="overflow-x-auto">
                       <table className="w-full text-left border-collapse text-xs">
                         <thead>
-                          <tr className="bg-slate-100/90 border-b border-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider">
-                            <th className="py-2.5 px-2 text-center w-8 min-w-[34px]">STT</th>
-                            <th className="py-2.5 px-2.5 min-w-[115px]">Mã Tuyến</th>
-                            <th className="py-2.5 px-2.5 min-w-[140px]">Tuyến Đường</th>
+                          <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
+                            <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
+                            <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-slate-100">Mã Tuyến</th>
+                            <th className="py-2.5 px-2.5 min-w-[135px]">Tuyến Đường</th>
                             <th className="py-2.5 px-2.5 min-w-[130px]">Điểm Đi</th>
                             <th className="py-2.5 px-2.5 min-w-[130px]">Điểm Đến</th>
                             {activeCategory?.id === 'trucking' ? (
                               <>
-                                <th className="py-2.5 px-2.5 min-w-[210px]">Loại Thùng Phương Tiện</th>
-                                <th className="py-2.5 px-2.5 min-w-[220px]">Phân Khúc Tải Trọng</th>
+                                <th className="py-2.5 px-2.5 min-w-[200px]">Loại Thùng Phương Tiện</th>
+                                <th className="py-2.5 px-2.5 min-w-[210px]">Phân Khúc Tải Trọng</th>
                               </>
                             ) : (
                               <th className="py-2.5 px-2.5 min-w-[150px]">Loại Phương Tiện</th>
                             )}
                             <th className="py-2.5 px-2 w-20 min-w-[75px] text-center">ĐVT</th>
-                            <th className="py-2.5 px-2.5 min-w-[130px]">Đơn Giá</th>
-                            <th className="py-2.5 px-2 min-w-[95px]">SLA</th>
-                            <th className="py-2.5 px-2 min-w-[135px]">Quy Cách Giá</th>
-                            <th className="py-2.5 px-2.5 min-w-[130px]">Hạn Giá (Date)</th>
+                            <th className="py-2.5 px-2.5 min-w-[140px] text-right">Đơn Giá</th>
+                            <th className="py-2.5 px-2 min-w-[90px] text-center">SLA</th>
+                            <th className="py-2.5 px-2.5 min-w-[135px]">Quy Cách Giá</th>
+                            <th className="py-2.5 px-2.5 min-w-[130px] text-center">Hạn Giá</th>
                             <th className="py-2.5 px-2 min-w-[85px] text-center">Promotion</th>
-                            <th className="py-2.5 px-1.5 text-center w-8 min-w-[34px]">Xóa</th>
+                            <th className="py-2.5 px-1.5 text-center w-9 min-w-[36px]">Xóa</th>
                           </tr>
                         </thead>
 
-                        <tbody className="divide-y divide-slate-100">
+                        <tbody className="divide-y divide-slate-200 bg-white">
                           {(!currentData.routes || currentData.routes.length === 0) ? (
                             <tr>
-                              <td colSpan={activeCategory?.id === 'trucking' ? 14 : 13} className="py-6 text-center text-slate-400">
-                                Chưa có tuyến đường nào. Bấm nút <strong>"+ Thêm Tuyến Mới"</strong> để khai báo bảng giá.
+                              <td colSpan={activeCategory?.id === 'trucking' ? 14 : 13} className="py-8 text-center text-slate-400 font-medium">
+                                Chưa có tuyến đường nào. Bấm nút <strong className="text-indigo-600 font-bold">+ Thêm Tuyến Mới</strong> để khai báo bảng giá.
                               </td>
                             </tr>
                           ) : (
@@ -3410,67 +3410,67 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                               const effectiveRouteCode = route.routeCode || `RC-${(activeModel?.code || activeCategory?.id || 'GEN').toUpperCase().replace(/[^A-Z0-9]/g, '')}-${String(idx + 1).padStart(3, '0')}`;
 
                               return (
-                                <tr key={route.id} className="hover:bg-slate-50/80 transition-colors">
+                                <tr key={route.id} className="divide-x divide-slate-200 hover:bg-indigo-50/20 transition-colors">
                                   {/* 1. STT */}
-                                  <td className="py-2 px-1 text-center font-mono text-slate-400 font-bold text-[11px] align-top pt-3">
+                                  <td className="p-0 text-center font-mono text-slate-400 font-semibold text-[11px] bg-slate-50/60 align-middle">
                                     {idx + 1}
                                   </td>
 
                                   {/* 2. Mã Tuyến (Tự sinh) */}
-                                  <td className="py-2 px-1.5 align-top">
-                                    <div 
-                                      className="w-full px-2 py-1.5 bg-indigo-50/80 border border-indigo-200/80 rounded-lg text-indigo-700 font-mono font-bold text-[11px] text-center select-all tracking-tight shadow-2xs"
+                                  <td className="p-0 text-center bg-indigo-50/30 align-middle">
+                                    <span 
+                                      className="font-mono font-bold text-indigo-700 text-xs select-all px-2 block"
                                       title="Mã tuyến định danh tự sinh của hệ thống"
                                     >
                                       {effectiveRouteCode}
-                                    </div>
+                                    </span>
                                   </td>
 
                                   {/* 3. Tuyến */}
-                                  <td className="py-2 px-1.5 align-top">
+                                  <td className="p-0 align-top">
                                     <input
                                       type="text"
                                       value={route.route}
                                       onChange={(e) => handleUpdateRouteRow(route.id, 'route', e.target.value)}
                                       placeholder="HCM ⇄ Hà Nội"
-                                      className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 font-bold text-xs focus:bg-white focus:border-indigo-500"
+                                      className="w-full px-2.5 py-2 bg-transparent text-slate-900 font-bold text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
                                     />
                                   </td>
 
-                                  {/* 3. Điểm Đi */}
-                                  <td className="py-2 px-1.5 align-top">
+                                  {/* 4. Điểm Đi */}
+                                  <td className="p-0 align-top">
                                     <input
                                       type="text"
                                       value={route.origin}
                                       onChange={(e) => handleUpdateRouteRow(route.id, 'origin', e.target.value)}
                                       placeholder="Bình Tân (TP.HCM)"
-                                      className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 text-xs focus:bg-white focus:border-indigo-500"
+                                      className="w-full px-2.5 py-2 bg-transparent text-slate-800 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
                                     />
                                   </td>
 
-                                  {/* 4. Điểm Đến */}
-                                  <td className="py-2 px-1.5 align-top">
+                                  {/* 5. Điểm Đến */}
+                                  <td className="p-0 align-top">
                                     <input
                                       type="text"
                                       value={route.destination}
                                       onChange={(e) => handleUpdateRouteRow(route.id, 'destination', e.target.value)}
                                       placeholder="Cam Ranh (Khánh Hòa)"
-                                      className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 text-xs focus:bg-white focus:border-indigo-500"
+                                      className="w-full px-2.5 py-2 bg-transparent text-slate-800 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
                                     />
                                   </td>
 
-                                  {/* 5. Cột Phương Tiện: Tách 2 cột nếu là Đường Bộ */}
+                                  {/* 6. Cột Phương Tiện: Tách 2 cột nếu là Đường Bộ */}
                                   {isTrucking ? (
                                     <>
-                                      {/* 5a. Loại Thùng Phương Tiện (LOV + Custom Option) */}
-                                      <td className="py-2 px-1.5 align-top">
+                                      {/* 6a. Loại Thùng Phương Tiện (LOV + Custom Option) */}
+                                      <td className="p-0 align-top">
                                         {(() => {
                                           const currentBodyTypeVal = TRUCKING_BODY_TYPES.includes(route.truckBodyType || '')
                                             ? route.truckBodyType
                                             : (route.customTruckBodyType || route.truckBodyType === 'Khác (Nhập tùy chọn)...' ? 'Khác (Nhập tùy chọn)...' : TRUCKING_BODY_TYPES[0]);
 
                                           return (
-                                            <>
+                                            <div className="flex flex-col h-full">
                                               <select
                                                 value={currentBodyTypeVal}
                                                 onChange={(e) => {
@@ -3493,35 +3493,37 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                                     });
                                                   }
                                                 }}
-                                                className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 text-xs focus:bg-white focus:border-indigo-500 font-medium"
+                                                className="w-full px-2.5 py-2 bg-transparent text-slate-800 text-xs font-medium cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
                                               >
                                                 {TRUCKING_BODY_TYPES.map((b, bIdx) => (
                                                   <option key={bIdx} value={b}>{b}</option>
                                                 ))}
                                               </select>
                                               {(currentBodyTypeVal === 'Khác (Nhập tùy chọn)...' || (!TRUCKING_BODY_TYPES.includes(route.truckBodyType || '') && route.customTruckBodyType)) && (
-                                                <input
-                                                  type="text"
-                                                  autoFocus
-                                                  value={route.customTruckBodyType || ''}
-                                                  onChange={(e) => {
-                                                    const customVal = e.target.value;
-                                                    handleUpdateRouteRowMultiple(route.id, {
-                                                      customTruckBodyType: customVal,
-                                                      vehicleType: `${route.truckTonnage ? route.truckTonnage.split(' (')[0] : ''} ${customVal}`.trim(),
-                                                    });
-                                                  }}
-                                                  placeholder="Gõ loại thùng riêng..."
-                                                  className="w-full mt-1 px-2 py-1 bg-amber-50/80 border border-amber-300 rounded-lg text-slate-900 text-xs font-semibold focus:bg-white focus:border-amber-500 shadow-2xs"
-                                                />
+                                                <div className="p-1 bg-amber-50/90 border-t border-amber-200">
+                                                  <input
+                                                    type="text"
+                                                    autoFocus
+                                                    value={route.customTruckBodyType || ''}
+                                                    onChange={(e) => {
+                                                      const customVal = e.target.value;
+                                                      handleUpdateRouteRowMultiple(route.id, {
+                                                        customTruckBodyType: customVal,
+                                                        vehicleType: `${route.truckTonnage ? route.truckTonnage.split(' (')[0] : ''} ${customVal}`.trim(),
+                                                      });
+                                                    }}
+                                                    placeholder="Gõ loại thùng riêng..."
+                                                    className="w-full px-2 py-1 bg-white border border-amber-300 rounded text-slate-900 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-amber-500"
+                                                  />
+                                                </div>
                                               )}
-                                            </>
+                                            </div>
                                           );
                                         })()}
                                       </td>
 
-                                      {/* 5b. Phân Khúc Tải Trọng Ràng Buộc Theo Loại Thùng (LOV + Custom Option) */}
-                                      <td className="py-2 px-1.5 align-top">
+                                      {/* 6b. Phân Khúc Tải Trọng Ràng Buộc Theo Loại Thùng (LOV + Custom Option) */}
+                                      <td className="p-0 align-top">
                                         {(() => {
                                           const boundTonnages = getTonnagesForBodyType(route.truckBodyType || TRUCKING_BODY_TYPES[0]);
                                           const currentTonnageVal = boundTonnages.includes(route.truckTonnage || '')
@@ -3529,7 +3531,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                             : (route.customTruckTonnage || route.truckTonnage === 'Khác (Nhập tùy chọn)...' ? 'Khác (Nhập tùy chọn)...' : boundTonnages[0]);
 
                                           return (
-                                            <>
+                                            <div className="flex flex-col h-full">
                                               <select
                                                 value={currentTonnageVal}
                                                 onChange={(e) => {
@@ -3547,7 +3549,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                                     });
                                                   }
                                                 }}
-                                                className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 text-xs focus:bg-white focus:border-indigo-500 font-medium"
+                                                className="w-full px-2.5 py-2 bg-transparent text-slate-800 text-xs font-medium cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
                                               >
                                                 {boundTonnages.map((t, tIdx) => (
                                                   <option key={tIdx} value={t}>{t}</option>
@@ -3555,32 +3557,34 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                               </select>
 
                                               {(currentTonnageVal === 'Khác (Nhập tùy chọn)...' || (!boundTonnages.includes(route.truckTonnage || '') && route.customTruckTonnage)) && (
-                                                <input
-                                                  type="text"
-                                                  autoFocus
-                                                  value={route.customTruckTonnage || ''}
-                                                  onChange={(e) => {
-                                                    const customVal = e.target.value;
-                                                    handleUpdateRouteRowMultiple(route.id, {
-                                                      customTruckTonnage: customVal,
-                                                      vehicleType: `${customVal} ${route.truckBodyType ? route.truckBodyType.split(' (')[0] : ''}`.trim(),
-                                                    });
-                                                  }}
-                                                  placeholder="Gõ tải trọng riêng..."
-                                                  className="w-full mt-1 px-2 py-1 bg-amber-50/80 border border-amber-300 rounded-lg text-slate-900 text-xs font-semibold focus:bg-white focus:border-amber-500 shadow-2xs"
-                                                />
+                                                <div className="p-1 bg-amber-50/90 border-t border-amber-200">
+                                                  <input
+                                                    type="text"
+                                                    autoFocus
+                                                    value={route.customTruckTonnage || ''}
+                                                    onChange={(e) => {
+                                                      const customVal = e.target.value;
+                                                      handleUpdateRouteRowMultiple(route.id, {
+                                                        customTruckTonnage: customVal,
+                                                        vehicleType: `${customVal} ${route.truckBodyType ? route.truckBodyType.split(' (')[0] : ''}`.trim(),
+                                                      });
+                                                    }}
+                                                    placeholder="Gõ tải trọng riêng..."
+                                                    className="w-full px-2 py-1 bg-white border border-amber-300 rounded text-slate-900 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-amber-500"
+                                                  />
+                                                </div>
                                               )}
-                                            </>
+                                            </div>
                                           );
                                         })()}
                                       </td>
                                     </>
                                   ) : (
-                                    <td className="py-2 px-1.5 align-top">
+                                    <td className="p-0 align-top">
                                       <select
                                         value={route.vehicleType}
                                         onChange={(e) => handleUpdateRouteRow(route.id, 'vehicleType', e.target.value)}
-                                        className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 text-xs focus:bg-white focus:border-indigo-500"
+                                        className="w-full px-2.5 py-2 bg-transparent text-slate-800 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all cursor-pointer"
                                       >
                                         {(activeModel?.vehicleLov || [route.vehicleType]).map((veh: string, vIdx: number) => (
                                           <option key={vIdx} value={veh}>{veh}</option>
@@ -3589,17 +3593,17 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                     </td>
                                   )}
 
-                                  {/* 6. Đơn vị tính (LOV) */}
-                                  <td className="py-2 px-1 align-top">
+                                  {/* 7. Đơn vị tính (LOV) */}
+                                  <td className="p-0 text-center bg-slate-50/40 align-middle">
                                     {activeModel?.unitLov?.length === 1 ? (
-                                      <div className="w-full px-1.5 py-1.5 bg-slate-100/90 border border-slate-200 rounded-lg text-slate-700 text-xs font-bold text-center select-none shadow-2xs">
+                                      <span className="font-bold text-slate-700 text-xs">
                                         {activeModel.unitLov[0]}
-                                      </div>
+                                      </span>
                                     ) : (
                                       <select
                                         value={route.pricingUnit}
                                         onChange={(e) => handleUpdateRouteRow(route.id, 'pricingUnit', e.target.value)}
-                                        className="w-full px-1.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 text-xs focus:bg-white focus:border-indigo-500 font-medium"
+                                        className="w-full px-1.5 py-2 bg-transparent text-slate-800 text-xs font-medium text-center focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all cursor-pointer"
                                       >
                                         {(activeModel?.unitLov || ['Chuyến', 'Tấn', 'Kg', 'CBM', 'Cont 40ft', 'Pallet']).map((u: string, uIdx: number) => (
                                           <option key={uIdx} value={u}>{u}</option>
@@ -3608,85 +3612,82 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                     )}
                                   </td>
 
-                                  {/* 7. Đơn giá */}
-                                  <td className="py-2 px-1.5">
-                                    <input
-                                      type="number"
-                                      value={route.price || ''}
-                                      onChange={(e) => handleUpdateRouteRow(route.id, 'price', parseFloat(e.target.value) || 0)}
-                                      placeholder="18500000"
-                                      className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 font-bold text-xs focus:bg-white focus:border-indigo-500"
-                                    />
-                                    {hasPromo && (
-                                      <div className="text-[10px] text-emerald-600 font-bold mt-0.5 whitespace-nowrap">
-                                        Giá sau giảm: {discountedPrice.toLocaleString('vi-VN')} {route.currency}
-                                      </div>
-                                    )}
+                                  {/* 8. Đơn giá */}
+                                  <td className="p-0 align-top">
+                                    <div className="flex flex-col h-full">
+                                      <input
+                                        type="number"
+                                        value={route.price || ''}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'price', parseFloat(e.target.value) || 0)}
+                                        placeholder="0"
+                                        className="w-full px-2.5 py-2 text-right bg-transparent text-slate-900 font-bold text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
+                                      />
+                                      {hasPromo && (
+                                        <div className="text-[10.5px] text-emerald-600 font-bold text-right px-2.5 pb-1 bg-emerald-50/60 border-t border-emerald-100 whitespace-nowrap">
+                                          Giảm còn: {discountedPrice.toLocaleString('vi-VN')} {route.currency}
+                                        </div>
+                                      )}
+                                    </div>
                                   </td>
 
-                                  {/* 8. SLA */}
-                                  <td className="py-2 px-1">
+                                  {/* 9. SLA */}
+                                  <td className="p-0 align-top">
                                     <input
                                       type="text"
                                       value={route.sla}
                                       onChange={(e) => handleUpdateRouteRow(route.id, 'sla', e.target.value)}
                                       placeholder="24 - 36h"
-                                      className="w-full px-1.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 text-xs focus:bg-white focus:border-indigo-500 font-medium"
+                                      className="w-full px-2 py-2 text-center bg-transparent text-slate-800 text-xs font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
                                     />
                                   </td>
 
-                                  {/* 9. Quy cách giá */}
-                                  <td className="py-2 px-1 align-top">
+                                  {/* 10. Quy cách giá */}
+                                  <td className="p-0 align-top">
                                     <select
                                       value={route.pricingStyle}
                                       onChange={(e) => handleUpdateRouteRow(route.id, 'pricingStyle', e.target.value)}
-                                      className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 text-xs focus:bg-white focus:border-indigo-500 font-medium"
+                                      className="w-full px-2 py-2 bg-transparent text-slate-800 text-xs font-medium cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
                                     >
                                       <option value="All-in">Trọn gói All-in</option>
                                       <option value="Chưa gồm phụ phí">+ Phụ phí ngoài</option>
                                     </select>
                                   </td>
 
-                                  {/* 10. Hạn Giá (Date) */}
-                                  <td className="py-2 px-1 align-top">
+                                  {/* 11. Hạn Giá (Date) */}
+                                  <td className="p-0 align-top">
                                     <input
                                       type="date"
                                       value={route.validUntil || '2026-12-31'}
                                       onChange={(e) => handleUpdateRouteRow(route.id, 'validUntil', e.target.value)}
-                                      className="w-full px-1.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 text-xs font-semibold focus:bg-white focus:border-indigo-500"
+                                      className="w-full px-2 py-2 bg-transparent text-slate-800 text-xs font-medium text-center focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all cursor-pointer"
                                       title="Thời hạn hiệu lực của mức giá này"
                                     />
                                   </td>
 
-                                  {/* 11. Promotion (%) */}
-                                  <td className="py-2 px-1 text-center align-top">
-                                    <div className="relative inline-flex items-center">
+                                  {/* 12. Promotion (%) */}
+                                  <td className="p-0 text-center align-middle">
+                                    <div className="flex items-center justify-center h-full">
                                       <input
                                         type="number"
                                         min={0}
                                         max={50}
                                         value={route.promotionPercent || 0}
                                         onChange={(e) => handleUpdateRouteRow(route.id, 'promotionPercent', Math.min(50, Math.max(0, parseInt(e.target.value) || 0)))}
-                                        className={`w-16 px-1.5 py-1.5 border rounded-lg text-xs font-bold text-center focus:bg-white focus:border-indigo-500 ${
+                                        className={`w-full py-2 text-center text-xs font-bold focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all ${
                                           hasPromo 
-                                            ? 'bg-rose-50 border-rose-300 text-rose-700' 
-                                            : 'bg-slate-50 border-slate-200 text-slate-700'
+                                            ? 'bg-rose-50 text-rose-700 font-black' 
+                                            : 'bg-transparent text-slate-700'
                                         }`}
                                       />
-                                      {hasPromo && (
-                                        <span className="absolute -top-1.5 -right-1 text-[9px] bg-rose-500 text-white font-black px-1 rounded-full flex items-center shadow-xs">
-                                          🔥
-                                        </span>
-                                      )}
                                     </div>
                                   </td>
 
-                                  {/* 12. Thao tác Xóa */}
-                                  <td className="py-2 px-1 text-center align-top pt-2.5">
+                                  {/* 13. Thao tác Xóa */}
+                                  <td className="p-0 text-center bg-slate-50/40 align-middle">
                                     <button
                                       type="button"
                                       onClick={() => handleDeleteRouteRow(route.id)}
-                                      className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors cursor-pointer"
+                                      className="w-full h-full py-2.5 flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                                       title="Xóa tuyến đường này"
                                     >
                                       <Trash2 className="w-3.5 h-3.5" />
