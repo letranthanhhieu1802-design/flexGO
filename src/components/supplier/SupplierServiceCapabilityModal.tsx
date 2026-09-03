@@ -160,14 +160,48 @@ export const ALL_DEFAULT_HAZMAT_TONNAGES = [
   'Đầu kéo + Cont 20ft / 40ft chở hàng đóng phuy —— (33 – 67 CBM)',
 ];
 
+// LTL (GHÉP HÀNG LẺ) TRUCK BODY TYPES & TONNAGES (ĐỒNG BỘ 100% VỚI MÀN HÌNH ĐĂNG NHU CẦU CUSTOMER)
+export const LTL_TRUCKING_BODY_TYPES = [
+  'Xe Thùng Kín Chuyên Tuyến Ghép LTL',
+  'Xe Mui Bạt Trục Bắc - Nam (Ghép Hàng Thể Tích)',
+  'Khác (Nhập tùy chọn)...',
+];
+
+export const LTL_TRUCKING_BODY_TYPE_MAP: Record<string, string[]> = {
+  'Xe Thùng Kín Chuyên Tuyến Ghép LTL': [
+    '5.0T – 6.5T (Trung chuyển liên tỉnh / Hub vệ tinh) —— (25 – 30 CBM)',
+    '8.0T – 9.0T (2 Chân thùng dài ghép tuyến) —— (45 – 50 CBM)',
+    '15.0T (3 Chân thùng kín chạy tuyến cố định) —— (55 – 60 CBM)',
+    'Đầu Kéo + Cont 40ft/45ft HC (Ghép tuyến Bắc - Nam) —— (70 – 85 CBM)',
+  ],
+  'Xe Mui Bạt Trục Bắc - Nam (Ghép Hàng Thể Tích)': [
+    '8.0T – 9.0T (2 Chân thùng dài 9.8m ghép hàng cồng kềnh) —— (~55 CBM)',
+    '15.0T (3 Chân mui bạt mở hông) —— (~58 CBM)',
+    '18.0T – 20.0T (4 Chân - 5 Chân tải nặng ghép máy móc / hàng dài) —— (~65 CBM)',
+    'Đầu Kéo + Rơ-mooc lồng mui bạt (Ghép siêu khối tích) —— (~75 – 85 CBM)',
+  ],
+};
+
+export const ALL_DEFAULT_LTL_TONNAGES = [
+  '5.0T – 6.5T (Trung chuyển liên tỉnh / Hub vệ tinh) —— (25 – 30 CBM)',
+  '8.0T – 9.0T (2 Chân thùng dài ghép tuyến) —— (45 – 50 CBM)',
+  '15.0T (3 Chân thùng kín chạy tuyến cố định) —— (55 – 60 CBM)',
+  '18.0T – 20.0T (4 Chân - 5 Chân tải nặng ghép máy móc / hàng dài) —— (~65 CBM)',
+  'Đầu Kéo + Cont 40ft/45ft HC (Ghép tuyến Bắc - Nam) —— (70 – 85 CBM)',
+  'Đầu Kéo + Rơ-mooc lồng mui bạt (Ghép siêu khối tích) —— (~75 – 85 CBM)',
+];
+
 export const getTonnagesForBodyType = (
   bodyType?: string, 
-  cargoTypeOrIsReefer?: 'general' | 'reefer' | 'hazmat' | boolean
+  cargoTypeOrIsReefer?: 'general' | 'reefer' | 'hazmat' | 'ltl' | boolean
 ): string[] => {
   let map = TRUCKING_BODY_TYPE_MAP;
   let allDefaults = ALL_DEFAULT_TRUCKING_TONNAGES;
 
-  if (cargoTypeOrIsReefer === 'hazmat') {
+  if (cargoTypeOrIsReefer === 'ltl') {
+    map = LTL_TRUCKING_BODY_TYPE_MAP;
+    allDefaults = ALL_DEFAULT_LTL_TONNAGES;
+  } else if (cargoTypeOrIsReefer === 'hazmat') {
     map = HAZMAT_TRUCKING_BODY_TYPE_MAP;
     allDefaults = ALL_DEFAULT_HAZMAT_TONNAGES;
   } else if (cargoTypeOrIsReefer === 'reefer' || cargoTypeOrIsReefer === true) {
@@ -923,24 +957,48 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             id: 'trk-gen-ltl',
             name: 'LTL (Ghép hàng lẻ)',
             code: 'LTL',
-            defaultFleet: 'Đội xe trung chuyển nội đô & Hub gom hàng liên tỉnh',
+            defaultFleet: 'Đội xe trung chuyển nội đô & Hub gom hàng liên tỉnh (Xe thùng kín chuyên tuyến, Xe mui bạt ghép khối tích)',
             defaultOperation: 'Gom hàng xuất bến mỗi ngày lúc 20:00, mạng lưới phân phối đa điểm',
             defaultCommitment: 'Giao hàng đúng hẹn 99%, đối soát e-POD chụp ảnh trong 12h',
-            vehicleLov: ['Xe tải 1.5T', 'Xe tải 2.5T', 'Xe tải 5.0T', 'Hub gom hàng lẻ'],
-            unitLov: ['Kg', 'CBM', 'Kiện', 'Pallet'],
+            vehicleLov: [
+              'Xe Thùng Kín Chuyên Tuyến Ghép LTL',
+              'Xe Mui Bạt Trục Bắc - Nam (Ghép Hàng Thể Tích)',
+            ],
+            unitLov: ['Kg', 'CBM'],
             defaultRoutes: [
               {
                 id: 'r-ltl-1',
+                routeCode: 'RC-LTL-001',
                 route: 'Hà Nội ⇄ TP.HCM',
                 origin: 'Hub Thanh Trì (Hà Nội)',
                 destination: 'Hub Quận 12 (TP.HCM)',
-                vehicleType: 'Hub gom hàng lẻ',
+                truckBodyType: 'Xe Thùng Kín Chuyên Tuyến Ghép LTL',
+                truckTonnage: '15.0T (3 Chân thùng kín chạy tuyến cố định) —— (55 – 60 CBM)',
+                vehicleType: 'Xe thùng kín 15T ghép tuyến',
                 pricingUnit: 'Kg',
                 price: 1650,
                 currency: 'VND',
-                sla: '3 - 4 ngày',
+                sla: 'Thứ 2, Thứ 4, Thứ 6 (Xuất bến 20:00)',
                 pricingStyle: 'All-in',
+                validUntil: '2026-12-31',
                 promotionPercent: 10,
+              },
+              {
+                id: 'r-ltl-2',
+                routeCode: 'RC-LTL-002',
+                route: 'HCM ⇄ Đà Nẵng',
+                origin: 'Hub Bình Tân (TP.HCM)',
+                destination: 'Hub Hòa Cầm (Đà Nẵng)',
+                truckBodyType: 'Xe Mui Bạt Trục Bắc - Nam (Ghép Hàng Thể Tích)',
+                truckTonnage: '8.0T – 9.0T (2 Chân thùng dài 9.8m ghép hàng cồng kềnh) —— (~55 CBM)',
+                vehicleType: 'Xe mui bạt 8T thùng dài ghép tuyến',
+                pricingUnit: 'CBM',
+                price: 420000,
+                currency: 'VND',
+                sla: 'Thứ 3, Thứ 5, Thứ 7 (Xuất bến 19:30)',
+                pricingStyle: 'All-in',
+                validUntil: '2026-12-31',
+                promotionPercent: 0,
               },
             ],
             freeSurchargeOptions: [
@@ -3573,11 +3631,12 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
     try {
       setIsExportingTemplate(true);
       const isTrucking = activeCategory?.id === 'trucking';
-      const isReeferTrucking = isTrucking && (activeCargoGroup?.name?.includes('lạnh') || activeModel?.name?.includes('lạnh') || activeModel?.id?.includes('ref'));
-      const isHazmatTrucking = isTrucking && (activeCargoGroup?.name?.includes('nguy hiểm') || activeModel?.name?.includes('nguy hiểm') || activeModel?.id?.includes('haz') || activeModel?.id?.includes('dg'));
-      const cargoType: 'general' | 'reefer' | 'hazmat' = isHazmatTrucking ? 'hazmat' : (isReeferTrucking ? 'reefer' : 'general');
-      const bodyTypes = isHazmatTrucking ? HAZMAT_TRUCKING_BODY_TYPES : (isReeferTrucking ? REEFER_TRUCKING_BODY_TYPES : TRUCKING_BODY_TYPES);
-      const bodyMap = isHazmatTrucking ? HAZMAT_TRUCKING_BODY_TYPE_MAP : (isReeferTrucking ? REEFER_TRUCKING_BODY_TYPE_MAP : TRUCKING_BODY_TYPE_MAP);
+      const isLtlTrucking = isTrucking && (activeModel?.id === 'trk-gen-ltl' || activeModel?.name?.includes('LTL') || activeModel?.code === 'LTL');
+      const isReeferTrucking = isTrucking && !isLtlTrucking && (activeCargoGroup?.name?.includes('lạnh') || activeModel?.name?.includes('lạnh') || activeModel?.id?.includes('ref'));
+      const isHazmatTrucking = isTrucking && !isLtlTrucking && (activeCargoGroup?.name?.includes('nguy hiểm') || activeModel?.name?.includes('nguy hiểm') || activeModel?.id?.includes('haz') || activeModel?.id?.includes('dg'));
+      const cargoType: 'general' | 'reefer' | 'hazmat' | 'ltl' = isLtlTrucking ? 'ltl' : (isHazmatTrucking ? 'hazmat' : (isReeferTrucking ? 'reefer' : 'general'));
+      const bodyTypes = isLtlTrucking ? LTL_TRUCKING_BODY_TYPES : (isHazmatTrucking ? HAZMAT_TRUCKING_BODY_TYPES : (isReeferTrucking ? REEFER_TRUCKING_BODY_TYPES : TRUCKING_BODY_TYPES));
+      const bodyMap = isLtlTrucking ? LTL_TRUCKING_BODY_TYPE_MAP : (isHazmatTrucking ? HAZMAT_TRUCKING_BODY_TYPE_MAP : (isReeferTrucking ? REEFER_TRUCKING_BODY_TYPE_MAP : TRUCKING_BODY_TYPE_MAP));
       const modelCode = activeModel?.code || activeCategory?.id || 'FTL';
 
       // 1. Data rows for Sheet 1: BANG_GIA_TUYEN_DUONG
@@ -3593,14 +3652,47 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
             } : {
               'Loại Phương Tiện (*)': r.vehicleType || activeModel?.vehicleLov?.[0] || 'Phương tiện chuẩn',
             }),
-            'Đơn Vị Tính (*)': r.pricingUnit || (isTrucking ? 'Chuyến' : 'Tấn'),
-            'Đơn Giá (VND) (*)': r.price || 15000000,
-            'SLA Thời Gian': r.sla || '24 - 48 giờ',
+            'Đơn Vị Tính (*)': r.pricingUnit || (isLtlTrucking ? 'Kg' : (isTrucking ? 'Chuyến' : 'Tấn')),
+            'Đơn Giá (VND) (*)': r.price || (isLtlTrucking ? 1650 : 15000000),
+            ...(isLtlTrucking ? {
+              'Lịch Chạy Hàng (*)': r.sla || 'Thứ 2, Thứ 4, Thứ 6 (Xuất bến 20:00)',
+            } : {
+              'SLA Thời Gian': r.sla || '24 - 48 giờ',
+            }),
             'Quy Cách Giá': r.pricingStyle || 'All-in',
             'Hạn Giá (YYYY-MM-DD)': r.validUntil || '2026-12-31',
             'Promotion (%)': r.promotionPercent || 0,
           }))
-        : isHazmatTrucking ? [
+        : isLtlTrucking ? [
+            {
+              'Mã Tuyến': `RC-${modelCode.toUpperCase()}-001`,
+              'Tuyến Đường (*)': 'Hà Nội ⇄ TP.HCM',
+              'Điểm Đi (*)': 'Hub Thanh Trì (Hà Nội)',
+              'Điểm Đến (*)': 'Hub Quận 12 (TP.HCM)',
+              'Loại Thùng Phương Tiện (*)': 'Xe Thùng Kín Chuyên Tuyến Ghép LTL',
+              'Phân Khúc Tải Trọng (*)': '15.0T (3 Chân thùng kín chạy tuyến cố định) —— (55 – 60 CBM)',
+              'Đơn Vị Tính (*)': 'Kg',
+              'Đơn Giá (VND) (*)': 1650,
+              'Lịch Chạy Hàng (*)': 'Thứ 2, Thứ 4, Thứ 6 (Xuất bến 20:00)',
+              'Quy Cách Giá': 'All-in',
+              'Hạn Giá (YYYY-MM-DD)': '2026-12-31',
+              'Promotion (%)': 10,
+            },
+            {
+              'Mã Tuyến': `RC-${modelCode.toUpperCase()}-002`,
+              'Tuyến Đường (*)': 'HCM ⇄ Đà Nẵng',
+              'Điểm Đi (*)': 'Hub Bình Tân (TP.HCM)',
+              'Điểm Đến (*)': 'Hub Hòa Cầm (Đà Nẵng)',
+              'Loại Thùng Phương Tiện (*)': 'Xe Mui Bạt Trục Bắc - Nam (Ghép Hàng Thể Tích)',
+              'Phân Khúc Tải Trọng (*)': '8.0T – 9.0T (2 Chân thùng dài 9.8m ghép hàng cồng kềnh) —— (~55 CBM)',
+              'Đơn Vị Tính (*)': 'CBM',
+              'Đơn Giá (VND) (*)': 420000,
+              'Lịch Chạy Hàng (*)': 'Thứ 3, Thứ 5, Thứ 7 (Xuất bến 19:30)',
+              'Quy Cách Giá': 'All-in',
+              'Hạn Giá (YYYY-MM-DD)': '2026-12-31',
+              'Promotion (%)': 0,
+            },
+          ] : isHazmatTrucking ? [
             {
               'Mã Tuyến': `RC-${modelCode.toUpperCase()}-001`,
               'Tuyến Đường (*)': 'Bà Rịa - Vũng Tàu ⇄ Bình Dương',
@@ -3699,7 +3791,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
         { wch: 35 }, // Tải Trọng
         { wch: 15 }, // ĐVT
         { wch: 18 }, // Đơn Giá
-        { wch: 16 }, // SLA
+        { wch: isLtlTrucking ? 32 : 16 }, // Lịch Chạy Hàng / SLA
         { wch: 16 }, // Quy Cách Giá
         { wch: 18 }, // Hạn Giá
         { wch: 15 }, // Promotion
@@ -3713,7 +3805,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
             lovData.push({
               'Loại Thùng Phương Tiện': bodyType,
               'Phân Khúc Tải Trọng Hợp Lệ': t,
-              'Đơn Vị Tính Khuyên Dùng': 'Chuyến',
+              'Đơn Vị Tính Khuyên Dùng': isLtlTrucking ? 'Kg, CBM' : 'Chuyến',
               'Quy Cách Giá Hợp Lệ': 'All-in / Chưa gồm phụ phí',
             });
           });
@@ -3765,12 +3857,13 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
         }
 
         const isTrucking = activeCategory?.id === 'trucking';
-        const isReeferTrucking = isTrucking && (activeCargoGroup?.name?.includes('lạnh') || activeModel?.name?.includes('lạnh') || activeModel?.id?.includes('ref'));
-        const isHazmatTrucking = isTrucking && (activeCargoGroup?.name?.includes('nguy hiểm') || activeModel?.name?.includes('nguy hiểm') || activeModel?.id?.includes('haz') || activeModel?.id?.includes('dg'));
-        const cargoType: 'general' | 'reefer' | 'hazmat' = isHazmatTrucking ? 'hazmat' : (isReeferTrucking ? 'reefer' : 'general');
-        const bodyTypes = isHazmatTrucking ? HAZMAT_TRUCKING_BODY_TYPES : (isReeferTrucking ? REEFER_TRUCKING_BODY_TYPES : TRUCKING_BODY_TYPES);
+        const isLtlTrucking = isTrucking && (activeModel?.id === 'trk-gen-ltl' || activeModel?.name?.includes('LTL') || activeModel?.code === 'LTL');
+        const isReeferTrucking = isTrucking && !isLtlTrucking && (activeCargoGroup?.name?.includes('lạnh') || activeModel?.name?.includes('lạnh') || activeModel?.id?.includes('ref'));
+        const isHazmatTrucking = isTrucking && !isLtlTrucking && (activeCargoGroup?.name?.includes('nguy hiểm') || activeModel?.name?.includes('nguy hiểm') || activeModel?.id?.includes('haz') || activeModel?.id?.includes('dg'));
+        const cargoType: 'general' | 'reefer' | 'hazmat' | 'ltl' = isLtlTrucking ? 'ltl' : (isHazmatTrucking ? 'hazmat' : (isReeferTrucking ? 'reefer' : 'general'));
+        const bodyTypes = isLtlTrucking ? LTL_TRUCKING_BODY_TYPES : (isHazmatTrucking ? HAZMAT_TRUCKING_BODY_TYPES : (isReeferTrucking ? REEFER_TRUCKING_BODY_TYPES : TRUCKING_BODY_TYPES));
         const modelPrefix = (activeModel?.code || activeCategory?.id || 'RC').toUpperCase().replace(/[^A-Z0-9]/g, '');
-        const defaultUnit = isTrucking ? 'Chuyến' : (activeModel?.unitLov?.[0] || 'Chuyến');
+        const defaultUnit = isLtlTrucking ? 'Kg' : (isTrucking ? 'Chuyến' : (activeModel?.unitLov?.[0] || 'Chuyến'));
         const defaultBody = bodyTypes[0];
         const defaultTonnages = getTonnagesForBodyType(defaultBody, cargoType);
         const defaultTonnage = defaultTonnages[0];
@@ -3824,8 +3917,10 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
             vehicleType = activeModel?.vehicleLov?.[0] || 'Phương tiện chuẩn';
           }
 
-          const pricingUnit = isTrucking ? 'Chuyến' : String(row['Đơn Vị Tính (*)'] || row['Đơn Vị Tính'] || row['ĐVT'] || defaultUnit).trim();
-          const sla = String(row['SLA Thời Gian'] || row['SLA'] || '24 - 48 giờ').trim();
+          const pricingUnit = isLtlTrucking
+            ? (String(row['Đơn Vị Tính (*)'] || row['Đơn Vị Tính'] || row['ĐVT'] || '').toLowerCase().includes('cbm') ? 'CBM' : 'Kg')
+            : (isTrucking ? 'Chuyến' : String(row['Đơn Vị Tính (*)'] || row['Đơn Vị Tính'] || row['ĐVT'] || defaultUnit).trim());
+          const sla = String(row['Lịch Chạy Hàng (*)'] || row['Lịch Chạy Hàng'] || row['Lịch Chạy'] || row['Lịch chạy'] || row['SLA Thời Gian'] || row['SLA'] || (isLtlTrucking ? 'Thứ 2, Thứ 4, Thứ 6' : '24 - 48 giờ')).trim();
           const rawStyle = String(row['Quy Cách Giá'] || '').trim().toLowerCase();
           const pricingStyle: 'All-in' | 'Chưa gồm phụ phí' = rawStyle.includes('chưa') || rawStyle.includes('phụ') ? 'Chưa gồm phụ phí' : 'All-in';
           
@@ -3908,15 +4003,16 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
   // ==========================================
   const handleAddRouteRow = () => {
     const isTrucking = activeCategory?.id === 'trucking';
-    const isReeferTrucking = isTrucking && (activeCargoGroup?.name?.includes('lạnh') || activeModel?.name?.includes('lạnh') || activeModel?.id?.includes('ref'));
-    const isHazmatTrucking = isTrucking && (activeCargoGroup?.name?.includes('nguy hiểm') || activeModel?.name?.includes('nguy hiểm') || activeModel?.id?.includes('haz') || activeModel?.id?.includes('dg'));
-    const cargoType: 'general' | 'reefer' | 'hazmat' = isHazmatTrucking ? 'hazmat' : (isReeferTrucking ? 'reefer' : 'general');
-    const bodyTypes = isHazmatTrucking ? HAZMAT_TRUCKING_BODY_TYPES : (isReeferTrucking ? REEFER_TRUCKING_BODY_TYPES : TRUCKING_BODY_TYPES);
+    const isLtlTrucking = isTrucking && (activeModel?.id === 'trk-gen-ltl' || activeModel?.name?.includes('LTL') || activeModel?.code === 'LTL');
+    const isReeferTrucking = isTrucking && !isLtlTrucking && (activeCargoGroup?.name?.includes('lạnh') || activeModel?.name?.includes('lạnh') || activeModel?.id?.includes('ref'));
+    const isHazmatTrucking = isTrucking && !isLtlTrucking && (activeCargoGroup?.name?.includes('nguy hiểm') || activeModel?.name?.includes('nguy hiểm') || activeModel?.id?.includes('haz') || activeModel?.id?.includes('dg'));
+    const cargoType: 'general' | 'reefer' | 'hazmat' | 'ltl' = isLtlTrucking ? 'ltl' : (isHazmatTrucking ? 'hazmat' : (isReeferTrucking ? 'reefer' : 'general'));
+    const bodyTypes = isLtlTrucking ? LTL_TRUCKING_BODY_TYPES : (isHazmatTrucking ? HAZMAT_TRUCKING_BODY_TYPES : (isReeferTrucking ? REEFER_TRUCKING_BODY_TYPES : TRUCKING_BODY_TYPES));
     const defaultBody = bodyTypes[0];
     const defaultTonnages = getTonnagesForBodyType(defaultBody, cargoType);
-    const defaultTonnage = isHazmatTrucking ? defaultTonnages[2] || defaultTonnages[0] : (isReeferTrucking ? defaultTonnages[0] : (defaultTonnages[defaultTonnages.length - 2] || defaultTonnages[0]));
-    const defaultVehicle = isHazmatTrucking ? 'Xe tải hóa chất 15T' : (isReeferTrucking ? 'Xe đông lạnh 5T' : (isTrucking ? 'Xe tải 15T thùng kín' : (activeModel?.vehicleLov?.[0] || 'Phương tiện chuẩn')));
-    const defaultUnit = activeModel?.unitLov?.[0] || 'Chuyến';
+    const defaultTonnage = isLtlTrucking ? defaultTonnages[2] || defaultTonnages[0] : (isHazmatTrucking ? defaultTonnages[2] || defaultTonnages[0] : (isReeferTrucking ? defaultTonnages[0] : (defaultTonnages[defaultTonnages.length - 2] || defaultTonnages[0])));
+    const defaultVehicle = isLtlTrucking ? 'Xe thùng kín 15T ghép tuyến' : (isHazmatTrucking ? 'Xe tải hóa chất 15T' : (isReeferTrucking ? 'Xe đông lạnh 5T' : (isTrucking ? 'Xe tải 15T thùng kín' : (activeModel?.vehicleLov?.[0] || 'Phương tiện chuẩn'))));
+    const defaultUnit = isLtlTrucking ? 'Kg' : (activeModel?.unitLov?.[0] || 'Chuyến');
     const modelPrefix = (activeModel?.code || activeCategory?.id || 'RC').toUpperCase().replace(/[^A-Z0-9]/g, '');
     const nextIdx = (currentData.routes || []).length + 1;
     const generatedRouteCode = `RC-${modelPrefix}-${String(nextIdx).padStart(3, '0')}`;
@@ -3924,16 +4020,16 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
     const newRoute: CapabilityRouteItem = {
       id: `r-new-${Date.now()}`,
       routeCode: generatedRouteCode,
-      route: isHazmatTrucking ? 'Bà Rịa - Vũng Tàu ⇄ Bình Dương' : (isReeferTrucking ? 'Đà Lạt ⇄ TP.HCM' : 'Hành Lang Tuyến Mới'),
-      origin: isHazmatTrucking ? 'KCN Phú Mỹ (BR-VT)' : (isReeferTrucking ? 'Đức Trọng (Lâm Đồng)' : 'Điểm Lấy Hàng (Kho / Cảng)'),
-      destination: isHazmatTrucking ? 'KCN VSIP 2 (Bình Dương)' : (isReeferTrucking ? 'Chợ đầu mối Thủ Đức (TP.HCM)' : 'Điểm Giao Hàng (Kho / Cảng)'),
+      route: isLtlTrucking ? 'Hà Nội ⇄ TP.HCM' : (isHazmatTrucking ? 'Bà Rịa - Vũng Tàu ⇄ Bình Dương' : (isReeferTrucking ? 'Đà Lạt ⇄ TP.HCM' : 'Hành Lang Tuyến Mới')),
+      origin: isLtlTrucking ? 'Hub Thanh Trì (Hà Nội)' : (isHazmatTrucking ? 'KCN Phú Mỹ (BR-VT)' : (isReeferTrucking ? 'Đức Trọng (Lâm Đồng)' : 'Điểm Lấy Hàng (Kho / Cảng)')),
+      destination: isLtlTrucking ? 'Hub Quận 12 (TP.HCM)' : (isHazmatTrucking ? 'KCN VSIP 2 (Bình Dương)' : (isReeferTrucking ? 'Chợ đầu mối Thủ Đức (TP.HCM)' : 'Điểm Giao Hàng (Kho / Cảng)')),
       truckBodyType: isTrucking ? defaultBody : undefined,
       truckTonnage: isTrucking ? defaultTonnage : undefined,
       vehicleType: defaultVehicle,
       pricingUnit: defaultUnit,
-      price: isHazmatTrucking ? 14500000 : (isReeferTrucking ? 9500000 : 15000000),
-      currency: defaultUnit.includes('USD') ? 'USD' : 'VND',
-      sla: isHazmatTrucking ? '4 - 6 giờ' : (isReeferTrucking ? '7 - 9 giờ' : '24 - 48 giờ'),
+      price: isLtlTrucking ? 1650 : (isHazmatTrucking ? 14500000 : (isReeferTrucking ? 9500000 : 15000000)),
+      currency: 'VND',
+      sla: isLtlTrucking ? 'Thứ 2, Thứ 4, Thứ 6' : (isHazmatTrucking ? '4 - 6 giờ' : (isReeferTrucking ? '7 - 9 giờ' : '24 - 48 giờ')),
       pricingStyle: 'All-in',
       validUntil: '2026-12-31',
       promotionPercent: 0,
@@ -4445,7 +4541,15 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-1.5 flex-wrap">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {/* LTL Volumetric Conversion Rate Badge */}
+                      {(activeModel?.id === 'trk-gen-ltl' || activeModel?.name?.includes('LTL') || activeModel?.code === 'LTL') && (
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 border border-emerald-300 rounded-xl text-emerald-800 text-xs font-bold shadow-2xs">
+                          <Package className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>1 CBM = 250 Kg (Quy đổi)</span>
+                        </div>
+                      )}
+
                       {/* Hidden File Input for Excel Upload */}
                       <input
                         type="file"
@@ -4495,28 +4599,35 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                     <div className="overflow-x-auto">
                       <table className="w-full text-left border-collapse text-xs">
                         <thead>
-                          <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
-                            <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
-                            <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-slate-100">Mã Tuyến</th>
-                            <th className="py-2.5 px-2.5 min-w-[135px]">Tuyến Đường</th>
-                            <th className="py-2.5 px-2.5 min-w-[130px]">Điểm Đi</th>
-                            <th className="py-2.5 px-2.5 min-w-[130px]">Điểm Đến</th>
-                            {activeCategory?.id === 'trucking' ? (
-                              <>
-                                <th className="py-2.5 px-2.5 min-w-[200px]">Loại Thùng Phương Tiện</th>
-                                <th className="py-2.5 px-2.5 min-w-[210px]">Phân Khúc Tải Trọng</th>
-                              </>
-                            ) : (
-                              <th className="py-2.5 px-2.5 min-w-[150px]">Loại Phương Tiện</th>
-                            )}
-                            <th className="py-2.5 px-2 w-20 min-w-[75px] text-center">ĐVT</th>
-                            <th className="py-2.5 px-2.5 min-w-[140px] text-right">Đơn Giá</th>
-                            <th className="py-2.5 px-2 min-w-[90px] text-center">SLA</th>
-                            <th className="py-2.5 px-2.5 min-w-[135px]">Quy Cách Giá</th>
-                            <th className="py-2.5 px-2.5 min-w-[130px] text-center">Hạn Giá</th>
-                            <th className="py-2.5 px-2 min-w-[85px] text-center">Promotion</th>
-                            <th className="py-2.5 px-1.5 text-center w-9 min-w-[36px]">Xóa</th>
-                          </tr>
+                          {(() => {
+                            const isLtlTable = activeCategory?.id === 'trucking' && (activeModel?.id === 'trk-gen-ltl' || activeModel?.name?.includes('LTL') || activeModel?.code === 'LTL');
+                            return (
+                              <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
+                                <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
+                                <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-slate-100">Mã Tuyến</th>
+                                <th className="py-2.5 px-2.5 min-w-[135px]">Tuyến Đường</th>
+                                <th className="py-2.5 px-2.5 min-w-[130px]">Điểm Đi</th>
+                                <th className="py-2.5 px-2.5 min-w-[130px]">Điểm Đến</th>
+                                {activeCategory?.id === 'trucking' ? (
+                                  <>
+                                    <th className="py-2.5 px-2.5 min-w-[200px]">Loại Thùng Phương Tiện</th>
+                                    <th className="py-2.5 px-2.5 min-w-[210px]">Phân Khúc Tải Trọng</th>
+                                  </>
+                                ) : (
+                                  <th className="py-2.5 px-2.5 min-w-[150px]">Loại Phương Tiện</th>
+                                )}
+                                <th className="py-2.5 px-2 w-20 min-w-[75px] text-center">ĐVT</th>
+                                <th className="py-2.5 px-2.5 min-w-[140px] text-right">Đơn Giá</th>
+                                <th className={`py-2.5 px-2 text-center ${isLtlTable ? 'min-w-[150px]' : 'min-w-[90px]'}`}>
+                                  {isLtlTable ? 'Lịch Chạy Hàng' : 'SLA'}
+                                </th>
+                                <th className="py-2.5 px-2.5 min-w-[135px]">Quy Cách Giá</th>
+                                <th className="py-2.5 px-2.5 min-w-[130px] text-center">Hạn Giá</th>
+                                <th className="py-2.5 px-2 min-w-[85px] text-center">Promotion</th>
+                                <th className="py-2.5 px-1.5 text-center w-9 min-w-[36px]">Xóa</th>
+                              </tr>
+                            );
+                          })()}
                         </thead>
 
                         <tbody className="divide-y divide-slate-200 bg-white">
@@ -4533,10 +4644,11 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                 ? Math.round(route.price * (1 - route.promotionPercent / 100)) 
                                 : route.price;
                               const isTrucking = activeCategory?.id === 'trucking';
-                              const isReeferTrucking = isTrucking && (activeCargoGroup?.name?.includes('lạnh') || activeModel?.name?.includes('lạnh') || activeModel?.id?.includes('ref'));
-                              const isHazmatTrucking = isTrucking && (activeCargoGroup?.name?.includes('nguy hiểm') || activeModel?.name?.includes('nguy hiểm') || activeModel?.id?.includes('haz') || activeModel?.id?.includes('dg'));
-                              const cargoType: 'general' | 'reefer' | 'hazmat' = isHazmatTrucking ? 'hazmat' : (isReeferTrucking ? 'reefer' : 'general');
-                              const currentTruckBodyTypes = isHazmatTrucking ? HAZMAT_TRUCKING_BODY_TYPES : (isReeferTrucking ? REEFER_TRUCKING_BODY_TYPES : TRUCKING_BODY_TYPES);
+                              const isLtlTrucking = isTrucking && (activeModel?.id === 'trk-gen-ltl' || activeModel?.name?.includes('LTL') || activeModel?.code === 'LTL');
+                              const isReeferTrucking = isTrucking && !isLtlTrucking && (activeCargoGroup?.name?.includes('lạnh') || activeModel?.name?.includes('lạnh') || activeModel?.id?.includes('ref'));
+                              const isHazmatTrucking = isTrucking && !isLtlTrucking && (activeCargoGroup?.name?.includes('nguy hiểm') || activeModel?.name?.includes('nguy hiểm') || activeModel?.id?.includes('haz') || activeModel?.id?.includes('dg'));
+                              const cargoType: 'general' | 'reefer' | 'hazmat' | 'ltl' = isLtlTrucking ? 'ltl' : (isHazmatTrucking ? 'hazmat' : (isReeferTrucking ? 'reefer' : 'general'));
+                              const currentTruckBodyTypes = isLtlTrucking ? LTL_TRUCKING_BODY_TYPES : (isHazmatTrucking ? HAZMAT_TRUCKING_BODY_TYPES : (isReeferTrucking ? REEFER_TRUCKING_BODY_TYPES : TRUCKING_BODY_TYPES));
                               const effectiveRouteCode = route.routeCode || `RC-${(activeModel?.code || activeCategory?.id || 'GEN').toUpperCase().replace(/[^A-Z0-9]/g, '')}-${String(idx + 1).padStart(3, '0')}`;
 
                               return (
@@ -4735,7 +4847,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                         onChange={(e) => handleUpdateRouteRow(route.id, 'pricingUnit', e.target.value)}
                                         className="w-full px-1.5 py-2 bg-transparent text-slate-800 text-xs font-medium text-center focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all cursor-pointer"
                                       >
-                                        {(activeModel?.unitLov || ['Chuyến', 'Tấn', 'Kg', 'CBM', 'Cont 40ft', 'Pallet']).map((u: string, uIdx: number) => (
+                                        {(activeModel?.unitLov || ['Kg', 'CBM', 'Chuyến', 'Tấn', 'Cont 40ft', 'Pallet']).map((u: string, uIdx: number) => (
                                           <option key={uIdx} value={u}>{u}</option>
                                         ))}
                                       </select>
@@ -4760,14 +4872,15 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                     </div>
                                   </td>
 
-                                  {/* 9. SLA */}
+                                  {/* 9. SLA / Lịch Chạy Hàng */}
                                   <td className="p-0 align-top">
                                     <input
                                       type="text"
                                       value={route.sla}
                                       onChange={(e) => handleUpdateRouteRow(route.id, 'sla', e.target.value)}
-                                      placeholder="24 - 36h"
+                                      placeholder={isLtlTrucking ? "Thứ 2, Thứ 4, Thứ 7..." : "24 - 36h"}
                                       className="w-full px-2 py-2 text-center bg-transparent text-slate-800 text-xs font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
+                                      title={isLtlTrucking ? "Lịch gom hàng / xuất bến các thứ trong tuần" : "Thời gian vận chuyển dự kiến"}
                                     />
                                   </td>
 
