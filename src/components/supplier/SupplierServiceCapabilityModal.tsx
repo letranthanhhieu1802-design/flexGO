@@ -36,7 +36,14 @@ import {
   AlertTriangle,
   RefreshCw,
   FileCheck,
-  Zap
+  Zap,
+  Camera,
+  Image,
+  Eye,
+  Star,
+  Sliders,
+  Thermometer,
+  ShieldAlert
 } from 'lucide-react';
 import { ServiceType } from '../../types';
 
@@ -109,6 +116,14 @@ export const LCL_SHIPPING_LINES = [
 ];
 
 export const LCL_PACKAGING_TYPES = LCL_SHIPPING_LINES;
+
+export const RAIL_OPERATORS_LOV = [
+  'Đường Sắt Việt Nam (VNR)',
+  'Công ty CP Vận tải & Thương mại Đường sắt (Ratraco)',
+  'Công ty CP Vận tải Đường sắt Hà Nội (Haraco)',
+  'Công ty CP Vận tải Đường sắt Sài Gòn',
+  'Khác (Nhập đơn vị vận hành khác)...',
+];
 
 export const AIR_TRADE_LANE_REGIONS_LOV = [
   'Đông Nam Á (ASEAN)',
@@ -362,6 +377,7 @@ export interface TieredPricingModalData {
   isLcl?: boolean;
   isAirCargo?: boolean;
   isExpress?: boolean;
+  isRailLcl?: boolean;
   pricingConfig: LtlTieredPricingConfig;
 }
 
@@ -565,6 +581,73 @@ export const getTonnagesForBodyType = (
   return [...allDefaults, 'Khác (Nhập tùy chọn)...'];
 };
 
+export interface WarehouseTechSpecs {
+  // Nhom 1: Ket Cau & Mat San
+  clearHeight?: number; // m
+  floorLoad?: number; // tan/m2
+  floorType?: string; // Hardener / Epoxy / Be tong sieu phang
+  columnGrid?: string; // Khau do buoc cot (VD: 12m x 18m)
+  ventilation?: string; // Thong gio tu nhien / cuong buc
+
+  // Nhom 2: Gia Ke & Luu Chua
+  rackingTypes?: string[]; // Selective, Drive-in, VNA, Double Deep...
+  rackingLevels?: number; // So tang ke (VD: 5)
+  palletLoadLimit?: number; // kg / pallet
+  compatiblePalletSizes?: string[]; // 1m x 1.2m, 1.1m x 1.1m...
+
+  // Nhom 3: Cua Dock & San Bai
+  dockDoorsCount?: number; // So cua dock
+  hasDockLeveler?: boolean; // Cau nang tu dong
+  hasDockShelter?: boolean; // Dem khi dock shelter
+  yardTurnaround?: string; // San bai quay dau xe cont
+  operatingHoursTrucks?: string; // Khung gio tiep nhan xe cont
+
+  // Nhom 4: PCCC & An Ninh
+  fireProtectionSystem?: string; // Sprinkler tu dong, hong nuoc...
+  fireProtectionApprovalNo?: string; // So giay nghiem thu PCCC
+  cctvSurveillance?: string; // Camera 24/7
+  securityGuards?: string; // Bao ve chuyen nghiep
+
+  // Nhom 5: WMS & Cong Nghe
+  wmsSoftwareName?: string; // Ten phan mem WMS
+  scanningTechnologies?: string[]; // Barcode, QR, RFID
+  hasApiIntegration?: boolean; // Tich hop API da san / ERP
+  realtimeWebPortal?: boolean; // Web portal bao cao ton kho
+
+  // Nhom 6: Nhiet Do & Nang Luong (Kho Lanh/Mat)
+  temperatureRange?: string; // Dai nhiet do
+  coolingSystemBrand?: string; // Hang may lanh
+  hasAutoDataLogger?: boolean; // Data logger ghi nhiet 24/7
+  hasBackupGeneratorAts?: boolean; // May phat dien du phong ATS < 15s
+
+  // Nhom 7: Giay Phep & Chung Nhan
+  certifications?: string[]; // ISO 9001, HACCP, ISO 22000, GDP, LEED...
+  hasFullInsurance?: boolean; // Bao hiem kho bai 100%
+}
+
+export interface WarehousePhotoItem {
+  id: string;
+  url: string;
+  name?: string;
+  tag?: string;
+  isCover?: boolean;
+}
+
+export interface WarehouseDetailModalData {
+  routeId: string;
+  warehouseCode: string;
+  warehouseName: string;
+  province: string;
+  address: string;
+  isColdStorage?: boolean;
+  isChemicalStorage?: boolean;
+  photos: WarehousePhotoItem[];
+  techSpecs: WarehouseTechSpecs;
+  freeSurcharges: string[];
+  paidSurcharges: PaidSurchargeItem[];
+  vasItems: CapabilityVasItem[];
+}
+
 export interface CapabilityRouteItem {
   id: string;
   routeCode?: string; // Mã tuyến tự sinh (VD: RC-FTL-001)
@@ -591,6 +674,23 @@ export interface CapabilityRouteItem {
   validUntil?: string;
   promotionPercent: number;
   ltlPricing?: LtlTieredPricingConfig;
+  // Truong thong tin chuyen biet cho Kho Bai 3PL (Warehousing)
+  warehouseCode?: string;
+  warehouseName?: string;
+  warehouseProvince?: string;
+  warehouseAddress?: string;
+  capacityArea?: number;
+  capacityPallets?: number;
+  capacityVolume?: number;
+  pricePerArea?: number;
+  pricePerPallet?: number;
+  pricePerVolume?: number;
+  minChargeMonthly?: number;
+  warehousePhotos?: WarehousePhotoItem[];
+  warehouseTechSpecs?: WarehouseTechSpecs;
+  warehouseFreeSurcharges?: string[];
+  warehousePaidSurcharges?: PaidSurchargeItem[];
+  warehouseVasItems?: CapabilityVasItem[];
 }
 
 export interface PaidSurchargeItem {
@@ -2149,8 +2249,8 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             defaultFleet: 'Đoàn tàu hàng chuyên tuyến Bắc Nam & Ga Sóng Thần, Giáp Bát, Yên Viên',
             defaultOperation: 'Chạy đúng giờ theo biểu đồ chạy tàu của Tổng công ty Đường sắt VN',
             defaultCommitment: 'Tiết kiệm 30% chi phí so với đường bộ, an toàn tuyệt đối',
-            vehicleLov: ['Container 40ft đường sắt', 'Container 20ft đường sắt', 'Toa hàng kín (Toa G)', 'Toa thành cao (Toa H)'],
-            unitLov: ['Cont', 'Toa xe', 'Tấn'],
+            vehicleLov: ['Container 20ft', 'Container 40ft'],
+            unitLov: ['Cont'],
             defaultRoutes: [
               {
                 id: 'r-rail-1',
@@ -2158,7 +2258,7 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
                 route: 'Ga Sóng Thần ⇄ Ga Giáp Bát',
                 origin: 'Ga Sóng Thần (Bình Dương)',
                 destination: 'Ga Giáp Bát (Hà Nội)',
-                vehicleType: 'Container 40ft đường sắt',
+                vehicleType: 'Container 40ft',
                 pricingUnit: 'Cont',
                 price: 21000000,
                 currency: 'VND',
@@ -2202,13 +2302,8 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             defaultFleet: 'Toa xe hàng ghép liên tỉnh',
             defaultOperation: 'Gom hàng tại kho bãi ga, giao nhận tại các ga dọc tuyến Bắc Nam',
             defaultCommitment: 'Cước phí rẻ nhất cho hàng nặng, không sợ tắc đường',
-            vehicleLov: [
-              'Hàng lẻ toa ghép đường sắt',
-              'Pallet tiêu chuẩn đường sắt',
-              'Kiện hàng đóng thùng gỗ / Khung sắt',
-              'Khác (Nhập tùy chọn)...',
-            ],
-            unitLov: ['Kg', 'CBM', 'Tấn'],
+            vehicleLov: RAIL_OPERATORS_LOV,
+            unitLov: ['Kg'],
             defaultRoutes: [
               {
                 id: 'r-rail-lcl-1',
@@ -2216,7 +2311,7 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
                 route: 'Sài Gòn ⇄ Hà Nội',
                 origin: 'Ga Sóng Thần (TP.HCM / Bình Dương)',
                 destination: 'Ga Giáp Bát (Hà Nội)',
-                vehicleType: 'Hàng lẻ toa ghép đường sắt',
+                vehicleType: 'Đường Sắt Việt Nam (VNR)',
                 pricingUnit: 'Kg',
                 price: 1100,
                 currency: 'VND',
@@ -2381,15 +2476,28 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             defaultRoutes: [
               {
                 id: 'r-wh-1',
-                route: 'Kho KCN Sóng Thần (Bình Dương)',
-                origin: 'KCN Sóng Thần',
-                destination: 'Phân phối toàn quốc',
+                routeCode: 'WH-BD-001',
+                warehouseCode: 'WH-BD-001',
+                route: 'Kho KCN Sóng Thần 1',
+                warehouseName: 'Kho KCN Sóng Thần 1',
+                origin: 'Bình Dương',
+                warehouseProvince: 'Bình Dương',
+                destination: 'KCN Sóng Thần 1, Dĩ An',
+                warehouseAddress: 'KCN Sóng Thần 1, Dĩ An',
                 vehicleType: 'Kho thường Grade A',
                 pricingUnit: 'm² / Tháng',
                 price: 95000,
+                pricePerArea: 95000,
+                pricePerPallet: 110000,
+                pricePerVolume: 120000,
+                capacityArea: 2500,
+                capacityPallets: 1800,
+                capacityVolume: 3000,
+                minChargeMonthly: 3000000,
                 currency: 'VND',
                 sla: 'Xuất nhập 2 - 4h',
                 pricingStyle: 'All-in',
+                validUntil: '2026-12-31',
                 promotionPercent: 10,
               },
             ],
@@ -3991,6 +4099,167 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
     setScheduleModalData(null);
   };
 
+  // STATE & HANDLERS CHO MODAL CHI TIET CO SO KHO (TECH SPECS, PHOTOS, PHU PHI, VAS)
+  const [warehouseDetailModalData, setWarehouseDetailModalData] = useState<WarehouseDetailModalData | null>(null);
+  const [warehouseDetailActiveTab, setWarehouseDetailActiveTab] = useState<'photos' | 'techSpecs' | 'surcharges' | 'vas'>('photos');
+  const [warehouseTechActiveCategory, setWarehouseTechActiveCategory] = useState<string>('structure');
+  const warehousePhotoUploadRef = useRef<HTMLInputElement>(null);
+
+  const handleOpenWarehouseDetailModal = (route: CapabilityRouteItem) => {
+    const isColdStorage = activeModel?.id?.includes('ref') || activeCargoGroup?.id?.includes('ref') || activeModel?.name?.includes('lạnh');
+    const isChemicalStorage = activeModel?.id?.includes('haz') || activeCargoGroup?.id?.includes('nguy hiểm') || activeModel?.name?.includes('nguy hiểm');
+
+    // Anh mau neu chua co anh
+    const existingPhotos: WarehousePhotoItem[] = route.warehousePhotos && route.warehousePhotos.length > 0 
+      ? JSON.parse(JSON.stringify(route.warehousePhotos))
+      : [
+          {
+            id: 'ph-1',
+            url: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800&auto=format&fit=crop&q=80',
+            name: 'Mat tien & San bai boc do xe cont',
+            tag: 'Mặt tiền & Sân bãi',
+            isCover: true,
+          },
+          {
+            id: 'ph-2',
+            url: 'https://images.unsplash.com/photo-1553413077-190dd305871c?w=800&auto=format&fit=crop&q=80',
+            name: 'He thong ke Racking Selective 5 tang',
+            tag: 'Kệ Racking',
+            isCover: false,
+          },
+          {
+            id: 'ph-3',
+            url: 'https://images.unsplash.com/photo-1616401784845-180882ba9ba8?w=800&auto=format&fit=crop&q=80',
+            name: 'San be tong Epoxy & PCCC Sprinkler',
+            tag: 'Sàn & Trần kho',
+            isCover: false,
+          },
+        ];
+
+    // Thong so ky thuat
+    const existingSpecs: WarehouseTechSpecs = route.warehouseTechSpecs 
+      ? JSON.parse(JSON.stringify(route.warehouseTechSpecs))
+      : {
+          clearHeight: 10.5,
+          floorLoad: 5.0,
+          floorType: 'Bê tông xoa Hardener chống bụi',
+          columnGrid: '12m × 18m',
+          ventilation: 'Quả cầu hút nhiệt & Lam gió tự nhiên',
+          rackingTypes: ['Kệ Selective', 'Kệ Drive-in'],
+          rackingLevels: 5,
+          palletLoadLimit: 1000,
+          compatiblePalletSizes: ['1m × 1.2m (ISO standard)', '1.1m × 1.1m'],
+          dockDoorsCount: 6,
+          hasDockLeveler: true,
+          hasDockShelter: isColdStorage,
+          yardTurnaround: 'Sân rộng 35m, xe cont 40ft/45ft quay đầu 24/7',
+          operatingHoursTrucks: '24/7 không cấm giờ',
+          fireProtectionSystem: 'PCCC tự động Sprinkler (Đã nghiệm thu PCCC)',
+          fireProtectionApprovalNo: 'Số 148/TD-PCCC',
+          cctvSurveillance: 'CCTV 24/7 full kho trong & ngoài, lưu trữ 60 ngày',
+          securityGuards: 'Bảo vệ chuyên nghiệp 2 lớp 24/7',
+          wmsSoftwareName: 'WMS Real-time Cloud',
+          scanningTechnologies: ['Barcode 1D/2D', 'QR Code', 'RFID'],
+          hasApiIntegration: true,
+          realtimeWebPortal: true,
+          temperatureRange: isColdStorage ? '+2°C ~ +8°C' : '+18°C ~ +25°C',
+          coolingSystemBrand: isColdStorage ? 'Bitzer (Đức) / Dàn lạnh Guentner' : undefined,
+          hasAutoDataLogger: isColdStorage,
+          hasBackupGeneratorAts: true,
+          certifications: ['ISO 9001:2015', 'HACCP', 'GDP'],
+          hasFullInsurance: true,
+        };
+
+    const existingFree = route.warehouseFreeSurcharges && route.warehouseFreeSurcharges.length > 0
+      ? [...route.warehouseFreeSurcharges]
+      : (activeModel?.defaultFreeSurcharges || [
+          'Bảo vệ 24/7 & Camera an ninh giám sát',
+          'Bảo hiểm cháy nổ kho bãi 100%',
+          'Phần mềm WMS quản lý tồn kho thời gian thực',
+        ]);
+
+    const existingPaid: PaidSurchargeItem[] = route.warehousePaidSurcharges && route.warehousePaidSurcharges.length > 0
+      ? JSON.parse(JSON.stringify(route.warehousePaidSurcharges))
+      : [
+          { id: 'pwh-1', name: 'Phí nâng hạ & dỡ hàng nhập kho (Inbound)', priceText: '35,000 ₫ / Pallet', isChecked: true },
+          { id: 'pwh-2', name: 'Phí lấy hàng & bốc xếp xuất kho (Outbound)', priceText: '35,000 ₫ / Pallet', isChecked: true },
+          { id: 'pwh-3', name: 'Phí rút ruột container 40ft thủ công & lên Pallet', priceText: '1,200,000 ₫ / Cont 40ft', isChecked: true },
+          { id: 'pwh-4', name: 'Phí kiểm đếm chi tiết từng SKU lẻ', priceText: '500 ₫ / SKU', isChecked: false },
+          { id: 'pwh-5', name: 'Phí làm việc ngoài giờ hành chính', priceText: '200,000 ₫ / Giờ', isChecked: false },
+        ];
+
+    const existingVas: CapabilityVasItem[] = route.warehouseVasItems && route.warehouseVasItems.length > 0
+      ? JSON.parse(JSON.stringify(route.warehouseVasItems))
+      : [
+          { id: 'vwh-1', name: 'Dán tem phụ tiếng Việt / Barcode SKU', category: 'Đóng Gói & Xử Lý', priceText: '400 ₫ / Tem', isChecked: true },
+          { id: 'vwh-2', name: 'Quấn màng co PE Pallet & Đóng đai bảo vệ', category: 'Đóng Gói & Xử Lý', priceText: '35,000 ₫ / Pallet', isChecked: true },
+          { id: 'vwh-3', name: 'Đóng thùng carton kitting combo / Hộp quà', category: 'Đóng Gói & Xử Lý', priceText: '5,000 ₫ / Hộp', isChecked: false },
+          { id: 'vwh-4', name: 'Bảo hiểm cháy nổ tài sản kho bãi', category: 'An Ninh & Bảo Hiểm', priceText: '0.05% giá trị hàng', isChecked: true },
+        ];
+
+    setWarehouseDetailModalData({
+      routeId: route.id,
+      warehouseCode: route.warehouseCode || route.routeCode || 'WH-001',
+      warehouseName: route.warehouseName || route.route || 'Kho Phân Phối DC',
+      province: route.warehouseProvince || route.origin || 'Bình Dương',
+      address: route.warehouseAddress || route.destination || 'KCN Sóng Thần 1, Dĩ An',
+      isColdStorage,
+      isChemicalStorage,
+      photos: existingPhotos,
+      techSpecs: existingSpecs,
+      freeSurcharges: existingFree,
+      paidSurcharges: existingPaid,
+      vasItems: existingVas,
+    });
+    setWarehouseDetailActiveTab('photos');
+    setWarehouseTechActiveCategory('structure');
+  };
+
+  const handleSaveWarehouseDetailModal = () => {
+    if (!warehouseDetailModalData) return;
+    const { routeId, photos, techSpecs, freeSurcharges, paidSurcharges, vasItems } = warehouseDetailModalData;
+    handleUpdateRouteRowMultiple(routeId, {
+      warehousePhotos: photos,
+      warehouseTechSpecs: techSpecs,
+      warehouseFreeSurcharges: freeSurcharges,
+      warehousePaidSurcharges: paidSurcharges,
+      warehouseVasItems: vasItems,
+    });
+    setWarehouseDetailModalData(null);
+  };
+
+  const handleUploadWarehousePhotos = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0 || !warehouseDetailModalData) return;
+
+    Array.from(files).forEach((file: File, fIdx: number) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const res = event.target?.result as string;
+        if (res) {
+          setWarehouseDetailModalData((prev) => {
+            if (!prev) return prev;
+            const isFirst = prev.photos.length === 0 && fIdx === 0;
+            return {
+              ...prev,
+              photos: [
+                ...prev.photos,
+                {
+                  id: `wh-img-${Date.now()}-${fIdx}`,
+                  url: res,
+                  name: file.name,
+                  tag: 'Ảnh thực tế',
+                  isCover: isFirst,
+                },
+              ],
+            };
+          });
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
   const [tieredPricingModalData, setTieredPricingModalData] = useState<TieredPricingModalData | null>(null);
   const [tieredPricingActiveTab, setTieredPricingActiveTab] = useState<'weight' | 'volume'>('weight');
 
@@ -4026,6 +4295,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
       }
     }
 
+    const isRailLclModel = isRail && isLclModel;
     setTieredPricingModalData({
       routeId: route.id,
       routeName: route.route,
@@ -4034,6 +4304,8 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
       currency: routeCurrency,
       isLcl: isLclModel,
       isAirCargo,
+      isExpress,
+      isRailLcl: isRailLclModel,
       pricingConfig: JSON.parse(JSON.stringify(existingConfig)),
     });
     setTieredPricingActiveTab('weight');
@@ -4189,7 +4461,8 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
       setIsExportingTemplate(true);
       const isTrucking = activeCategory?.id === 'trucking';
       const isLtlTrucking = isTrucking && (activeModel?.id === 'trk-gen-ltl' || activeModel?.name?.includes('LTL') || activeModel?.code === 'LTL');
-      const isReeferTrucking = isTrucking && !isLtlTrucking && (activeCargoGroup?.name?.includes('lạnh') || activeModel?.name?.includes('lạnh') || activeModel?.id?.includes('ref'));
+      const isWarehousing = activeCategory?.id === 'warehousing';
+    const isReeferTrucking = isTrucking && !isLtlTrucking && (activeCargoGroup?.name?.includes('lạnh') || activeModel?.name?.includes('lạnh') || activeModel?.id?.includes('ref'));
       const isHazmatTrucking = isTrucking && !isLtlTrucking && (activeCargoGroup?.name?.includes('nguy hiểm') || activeModel?.name?.includes('nguy hiểm') || activeModel?.id?.includes('haz') || activeModel?.id?.includes('dg'));
       const cargoType: 'general' | 'reefer' | 'hazmat' | 'ltl' = isLtlTrucking ? 'ltl' : (isHazmatTrucking ? 'hazmat' : (isReeferTrucking ? 'reefer' : 'general'));
       const bodyTypes = isLtlTrucking ? LTL_TRUCKING_BODY_TYPES : (isHazmatTrucking ? HAZMAT_TRUCKING_BODY_TYPES : (isReeferTrucking ? REEFER_TRUCKING_BODY_TYPES : TRUCKING_BODY_TYPES));
@@ -4640,6 +4913,41 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
     let defaultDestination = 'Điểm Giao Hàng (Kho / Cảng)';
     let defaultPrice = 15000000;
     let defaultSla = '24 - 48 giờ';
+
+    const isWarehousing = activeCategory?.id === 'warehousing';
+    if (isWarehousing) {
+      const nextIdx = (currentData.routes || []).length + 1;
+      const whCode = `WH-DC-${String(nextIdx).padStart(3, '0')}`;
+      const newWhRoute: CapabilityRouteItem = {
+        id: `r-wh-${Date.now()}`,
+        routeCode: whCode,
+        warehouseCode: whCode,
+        route: `Kho Phân Phối DC #${nextIdx}`,
+        warehouseName: `Kho Phân Phối DC #${nextIdx}`,
+        origin: 'Bình Dương',
+        warehouseProvince: 'Bình Dương',
+        destination: 'KCN Sóng Thần 1, Dĩ An',
+        warehouseAddress: 'KCN Sóng Thần 1, Dĩ An',
+        vehicleType: 'Kho tiêu chuẩn Grade A',
+        pricingUnit: 'm² / Tháng',
+        price: 95000,
+        pricePerArea: 95000,
+        pricePerPallet: 110000,
+        pricePerVolume: 120000,
+        capacityArea: 2500,
+        capacityPallets: 1800,
+        capacityVolume: 3000,
+        minChargeMonthly: 3000000,
+        currency: 'VND',
+        sla: 'Xuất nhập 2 - 4h',
+        pricingStyle: 'All-in',
+        validUntil: '2026-12-31',
+        promotionPercent: 5,
+      };
+
+      updateCurrentFormData('routes', [...(currentData.routes || []), newWhRoute]);
+      return;
+    }
 
     if (isAirCargo) {
       defaultRoute = 'SGN (Tân Sơn Nhất) ⇄ NRT (Tokyo Narita)';
@@ -5234,7 +5542,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                     <div>
                       <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
                         <span className="w-5 h-5 rounded-full bg-indigo-50 text-indigo-700 flex items-center justify-center text-[10.5px] font-bold">2</span>
-                        <span>Các Tuyến Đường & Biểu Giá Tham Chiếu ({currentData.routes?.length || 0})</span>
+                        <span>{activeCategory?.id === 'warehousing' ? 'Danh Sách Cơ Sở Kho & Biểu Phí Lưu Kho' : 'Các Tuyến Đường & Biểu Giá Tham Chiếu'} ({currentData.routes?.length || 0})</span>
                       </h4>
                       <p className="text-[11px] text-slate-500 mt-0.5">
                         Chỉnh sửa trực tiếp trên bảng biểu giá hoặc tải template Excel để nhập liệu hàng loạt.
@@ -5305,7 +5613,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                         className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl transition-all cursor-pointer shadow-2xs"
                       >
                         <Plus className="w-3.5 h-3.5" />
-                        <span>Thêm Tuyến</span>
+                        <span>{activeCategory?.id === 'warehousing' ? 'Thêm Kho Mới' : 'Thêm Tuyến'}</span>
                       </button>
                     </div>
                   </div>
@@ -5316,6 +5624,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                       <table className="w-full text-left border-collapse text-xs">
                         <thead>
                           {(() => {
+                            const isWarehousingTable = activeCategory?.id === 'warehousing';
                             const isTruckingTable = activeCategory?.id === 'trucking';
                             const isOceanTable = activeCategory?.id === 'ocean' || activeModel?.id?.startsWith('sea-');
                             const isRailTable = activeCategory?.id === 'rail' || activeModel?.id?.startsWith('rail-');
@@ -5323,9 +5632,36 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                             const isExpressTable = activeCategory?.id === 'air' && (activeModel?.id === 'air-gen-exp' || activeModel?.name?.includes('Express') || activeModel?.code === 'Express');
                             const isAirCargoTable = isAirTable && !isExpressTable;
                             const isFclTable = (isOceanTable && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL')) || (isRailTable && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL')));
-                            const isLclTable = (isOceanTable && (activeModel?.id?.includes('lcl') || activeModel?.name?.includes('LCL') || activeModel?.code === 'LCL')) || (isRailTable && (activeModel?.id?.includes('lcl') || activeModel?.name?.includes('LCL')));
+                            const isOceanLclTable = isOceanTable && (activeModel?.id?.includes('lcl') || activeModel?.name?.includes('LCL') || activeModel?.code === 'LCL');
+                            const isRailLclTable = isRailTable && (activeModel?.id?.includes('lcl') || activeModel?.name?.includes('LCL') || activeModel?.code === 'LCL');
+                            const isLclTable = isOceanLclTable || isRailLclTable;
                             const isLtlTable = isTruckingTable && (activeModel?.id === 'trk-gen-ltl' || activeModel?.name?.includes('LTL') || activeModel?.code === 'LTL');
                             const isLtlOrLclTable = isLtlTable || isLclTable;
+
+                            if (isWarehousingTable) {
+                              return (
+                                <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
+                                  <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
+                                  <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-slate-100">Mã Kho</th>
+                                  <th className="py-2.5 px-2.5 min-w-[180px]">Tên Kho / Trung Tâm DC</th>
+                                  <th className="py-2.5 px-2.5 min-w-[130px]">Tỉnh / Thành Phố</th>
+                                  <th className="py-2.5 px-2.5 min-w-[180px]">KCN / Địa Chỉ Chi Tiết</th>
+                                  <th className="py-2.5 px-2 text-right min-w-[110px] bg-blue-50/70 text-blue-950">Diện Tích (m²)</th>
+                                  <th className="py-2.5 px-2 text-right min-w-[115px] bg-blue-50/70 text-blue-950">Số Pallet (Vị Trí)</th>
+                                  <th className="py-2.5 px-2 text-right min-w-[110px] bg-blue-50/70 text-blue-950">Thể Tích (m³)</th>
+                                  <th className="py-2.5 px-2 text-right min-w-[135px] bg-emerald-50/70 text-emerald-950">Giá m² (/Tháng)</th>
+                                  <th className="py-2.5 px-2 text-right min-w-[135px] bg-emerald-50/70 text-emerald-950">Giá Pallet (/Tháng)</th>
+                                  <th className="py-2.5 px-2 text-right min-w-[135px] bg-emerald-50/70 text-emerald-950">Giá m³ (/Tháng)</th>
+                                  <th className="py-2.5 px-2 text-right min-w-[145px] bg-amber-50/80 text-amber-950">Cước Sàn (Min/Tháng)</th>
+                                  <th className="py-2.5 px-2 w-20 min-w-[80px] text-center">Tiền Tệ</th>
+                                  <th className="py-2.5 px-2.5 min-w-[125px] text-center">SLA Vận Hành</th>
+                                  <th className="py-2.5 px-2.5 min-w-[130px] text-center">Hạn Giá</th>
+                                  <th className="py-2.5 px-2 min-w-[85px] text-center">Promotion</th>
+                                  <th className="py-2.5 px-2.5 min-w-[170px] text-center bg-indigo-50/70 text-indigo-950">Chi Tiết (Specs, Ảnh, VAS)</th>
+                                  <th className="py-2.5 px-2 text-center w-16 min-w-[65px]">Action</th>
+                                </tr>
+                              );
+                            }
 
                             return (
                               <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
@@ -5335,10 +5671,22 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                   <th className="py-2.5 px-2.5 min-w-[140px]">Khu Vực</th>
                                 )}
                                 <th className="py-2.5 px-2.5 min-w-[135px]">Hành Lang Tuyến</th>
-                                <th className="py-2.5 px-2.5 min-w-[130px]">{isLclTable ? 'Kho CFS / Điểm Đi' : (isAirCargoTable ? 'Sân Bay Đi' : (isExpressTable ? 'Điểm Lấy Hàng (Đi)' : 'Điểm Đi'))}</th>
-                                <th className="py-2.5 px-2.5 min-w-[130px]">{isLclTable ? 'Kho CFS / Cảng Đến' : (isAirCargoTable ? 'Sân Bay Đến' : (isExpressTable ? 'Quốc Gia / Điểm Đến' : 'Điểm Đến'))}</th>
+                                <th className="py-2.5 px-2.5 min-w-[130px]">{isRailLclTable ? 'Kho Bãi Ga / Ga Đi' : (isOceanLclTable ? 'Kho CFS / Điểm Đi' : (isAirCargoTable ? 'Sân Bay Đi' : (isExpressTable ? 'Điểm Lấy Hàng (Đi)' : 'Điểm Đi')))}</th>
+                                <th className="py-2.5 px-2.5 min-w-[130px]">{isRailLclTable ? 'Kho Bãi Ga / Ga Đến' : (isOceanLclTable ? 'Kho CFS / Cảng Đến' : (isAirCargoTable ? 'Sân Bay Đến' : (isExpressTable ? 'Quốc Gia / Điểm Đến' : 'Điểm Đến')))}</th>
                                 {isOceanTable && isFclTable && (
-                                  <th className="py-2.5 px-2.5 min-w-[170px]">Hãng Tàu</th>
+                                  <>
+                                    <th className="py-2.5 px-2.5 min-w-[170px]">Hãng Tàu</th>
+                                    <th className="py-2.5 px-2.5 min-w-[180px]">Loại Vỏ Container</th>
+                                  </>
+                                )}
+                                {isOceanTable && isOceanLclTable && (
+                                  <th className="py-2.5 px-2.5 min-w-[180px]">Hãng Tàu / Co-loader</th>
+                                )}
+                                {isRailTable && isFclTable && (
+                                  <th className="py-2.5 px-2.5 min-w-[180px]">Loại Vỏ Container</th>
+                                )}
+                                {isRailTable && isRailLclTable && (
+                                  <th className="py-2.5 px-2.5 min-w-[180px]">Đơn Vị Vận Hành</th>
                                 )}
                                 {isAirCargoTable && (
                                   <th className="py-2.5 px-2.5 min-w-[180px]">Hãng Bay (Airline)</th>
@@ -5351,11 +5699,6 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                     <th className="py-2.5 px-2.5 min-w-[200px]">Loại Thùng Phương Tiện</th>
                                     <th className="py-2.5 px-2.5 min-w-[210px]">Phân Khúc Tải Trọng</th>
                                   </>
-                                )}
-                                {!isAirTable && !isOceanTable && !isTruckingTable && (
-                                  <th className="py-2.5 px-2.5 min-w-[190px]">
-                                    {isFclTable ? 'Loại Vỏ Container' : (isLclTable ? 'Hãng Tàu' : 'Loại Phương Tiện')}
-                                  </th>
                                 )}
                                 <th className="py-2.5 px-2 w-20 min-w-[80px] text-center">ĐVT</th>
                                 <th className="py-2.5 px-2 w-20 min-w-[80px] text-center">Tiền Tệ</th>
@@ -5382,8 +5725,12 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                         <tbody className="divide-y divide-slate-200 bg-white">
                           {(!currentData.routes || currentData.routes.length === 0) ? (
                             <tr>
-                              <td colSpan={activeCategory?.id === 'trucking' ? 15 : ((activeCategory?.id === 'ocean') ? ((activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL') ? 17 : 15) : (((activeCategory?.id === 'rail') && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL')) ? 15 : ((activeCategory?.id === 'air' && (activeModel?.id === 'air-gen-exp' || activeModel?.name?.includes('Express') || activeModel?.code === 'Express')) ? 12 : 14)))} className="py-8 text-center text-slate-400 font-medium">
-                                Chưa có tuyến đường nào. Bấm nút <strong className="text-indigo-600 font-bold">+ Thêm Tuyến Mới</strong> để khai báo bảng giá.
+                              <td colSpan={activeCategory?.id === 'warehousing' ? 18 : (activeCategory?.id === 'trucking' ? 15 : ((activeCategory?.id === 'ocean') ? ((activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL') ? 17 : 15) : (((activeCategory?.id === 'rail') && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL')) ? 15 : ((activeCategory?.id === 'air' && (activeModel?.id === 'air-gen-exp' || activeModel?.name?.includes('Express') || activeModel?.code === 'Express')) ? 13 : 15))))} className="py-8 text-center text-slate-400 font-medium">
+                                {activeCategory?.id === 'warehousing' ? (
+                                  <>Chưa có cơ sở kho nào. Bấm nút <strong className="text-indigo-600 font-bold">+ Thêm Kho Mới</strong> để khai báo năng lực & biểu phí lưu kho.</>
+                                ) : (
+                                  <>Chưa có tuyến đường nào. Bấm nút <strong className="text-indigo-600 font-bold">+ Thêm Tuyến Mới</strong> để khai báo bảng giá.</>
+                                )}
                               </td>
                             </tr>
                           ) : (
@@ -5392,6 +5739,246 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                               const discountedPrice = hasPromo 
                                 ? Math.round(route.price * (1 - route.promotionPercent / 100)) 
                                 : route.price;
+                              const isWarehousingRow = activeCategory?.id === 'warehousing';
+                              if (isWarehousingRow) {
+                                const effWhCode = route.warehouseCode || route.routeCode || `WH-DC-${String(idx + 1).padStart(3, '0')}`;
+                                const effWhName = route.warehouseName || route.route || `Kho Phân Phối DC #${idx + 1}`;
+                                const effProvince = route.warehouseProvince || route.origin || 'Bình Dương';
+                                const effAddress = route.warehouseAddress || route.destination || 'KCN Sóng Thần 1, Dĩ An';
+                                const effCapArea = route.capacityArea ?? 2500;
+                                const effCapPallet = route.capacityPallets ?? 1800;
+                                const effCapVolume = route.capacityVolume ?? 3000;
+                                const effPriceArea = route.pricePerArea ?? (route.price || 95000);
+                                const effPricePallet = route.pricePerPallet ?? 110000;
+                                const effPriceVolume = route.pricePerVolume ?? 120000;
+                                const effMinCharge = route.minChargeMonthly ?? 3000000;
+
+                                return (
+                                  <tr key={route.id} className="hover:bg-indigo-50/20 transition-colors divide-x divide-slate-100 text-xs">
+                                    {/* 1. STT */}
+                                    <td className="p-1 text-center font-bold text-slate-500 w-9 bg-slate-50/50">
+                                      {idx + 1}
+                                    </td>
+
+                                    {/* 2. Mã Kho */}
+                                    <td className="p-1 text-center font-mono font-bold text-indigo-700 bg-indigo-50/20">
+                                      <input
+                                        type="text"
+                                        value={effWhCode}
+                                        onChange={(e) => handleUpdateRouteRowMultiple(route.id, { warehouseCode: e.target.value, routeCode: e.target.value })}
+                                        className="w-full text-center bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded px-1 py-1 font-bold text-indigo-700 text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 3. Tên Kho / Trung Tâm DC */}
+                                    <td className="p-1 align-middle">
+                                      <input
+                                        type="text"
+                                        value={effWhName}
+                                        onChange={(e) => handleUpdateRouteRowMultiple(route.id, { warehouseName: e.target.value, route: e.target.value })}
+                                        placeholder="Tên kho / Trung tâm phân phối..."
+                                        className="w-full px-2 py-1.5 font-bold text-slate-900 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 4. Tỉnh / Thành Phố */}
+                                    <td className="p-1 align-middle">
+                                      <input
+                                        type="text"
+                                        value={effProvince}
+                                        onChange={(e) => handleUpdateRouteRowMultiple(route.id, { warehouseProvince: e.target.value, origin: e.target.value })}
+                                        placeholder="Bình Dương, Bắc Ninh..."
+                                        className="w-full px-2 py-1.5 font-semibold text-slate-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 5. KCN / Địa Chỉ Chi Tiết */}
+                                    <td className="p-1 align-middle">
+                                      <input
+                                        type="text"
+                                        value={effAddress}
+                                        onChange={(e) => handleUpdateRouteRowMultiple(route.id, { warehouseAddress: e.target.value, destination: e.target.value })}
+                                        placeholder="KCN, Phường/Xã, Quận/Huyện..."
+                                        className="w-full px-2 py-1.5 text-slate-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 6. Diện Tích (m²) */}
+                                    <td className="p-1 align-middle text-right bg-blue-50/20">
+                                      <input
+                                        type="number"
+                                        value={effCapArea || ''}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'capacityArea', parseFloat(e.target.value) || 0)}
+                                        placeholder="2500"
+                                        className="w-full px-2 py-1.5 text-right font-semibold text-slate-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 7. Số Pallet (Vị Trí) */}
+                                    <td className="p-1 align-middle text-right bg-blue-50/20">
+                                      <input
+                                        type="number"
+                                        value={effCapPallet || ''}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'capacityPallets', parseFloat(e.target.value) || 0)}
+                                        placeholder="1800"
+                                        className="w-full px-2 py-1.5 text-right font-semibold text-slate-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 8. Thể Tích (m³) */}
+                                    <td className="p-1 align-middle text-right bg-blue-50/20">
+                                      <input
+                                        type="number"
+                                        value={effCapVolume || ''}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'capacityVolume', parseFloat(e.target.value) || 0)}
+                                        placeholder="3000"
+                                        className="w-full px-2 py-1.5 text-right font-semibold text-slate-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 9. Giá m² (/Tháng) */}
+                                    <td className="p-1 align-middle text-right bg-emerald-50/20">
+                                      <input
+                                        type="number"
+                                        value={effPriceArea || ''}
+                                        onChange={(e) => {
+                                          const v = parseFloat(e.target.value) || 0;
+                                          handleUpdateRouteRowMultiple(route.id, { pricePerArea: v, price: v });
+                                        }}
+                                        placeholder="95000"
+                                        className="w-full px-2 py-1.5 text-right font-bold text-emerald-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 10. Giá Pallet (/Tháng) */}
+                                    <td className="p-1 align-middle text-right bg-emerald-50/20">
+                                      <input
+                                        type="number"
+                                        value={effPricePallet || ''}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'pricePerPallet', parseFloat(e.target.value) || 0)}
+                                        placeholder="110000"
+                                        className="w-full px-2 py-1.5 text-right font-bold text-emerald-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 11. Giá m³ (/Tháng) */}
+                                    <td className="p-1 align-middle text-right bg-emerald-50/20">
+                                      <input
+                                        type="number"
+                                        value={effPriceVolume || ''}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'pricePerVolume', parseFloat(e.target.value) || 0)}
+                                        placeholder="120000"
+                                        className="w-full px-2 py-1.5 text-right font-bold text-emerald-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 12. Cước Sàn (Min Charge / Tháng) */}
+                                    <td className="p-1 align-middle text-right bg-amber-50/30">
+                                      <input
+                                        type="number"
+                                        value={effMinCharge || ''}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'minChargeMonthly', parseFloat(e.target.value) || 0)}
+                                        placeholder="3000000"
+                                        className="w-full px-2 py-1.5 text-right font-bold text-amber-900 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 13. Tiền Tệ */}
+                                    <td className="p-0 text-center bg-slate-50/30 align-middle">
+                                      <select
+                                        value={route.currency || 'VND'}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'currency', e.target.value as 'VND' | 'USD')}
+                                        className="w-full px-1.5 py-2 bg-transparent text-slate-800 text-xs font-bold text-center focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                                      >
+                                        <option value="VND">VND (₫)</option>
+                                        <option value="USD">USD ($)</option>
+                                      </select>
+                                    </td>
+
+                                    {/* 14. SLA Vận Hành */}
+                                    <td className="p-1 align-middle">
+                                      <input
+                                        type="text"
+                                        value={route.sla || 'Xuất nhập 2 - 4h'}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'sla', e.target.value)}
+                                        placeholder="2 - 4h, 24/7..."
+                                        className="w-full px-2 py-1.5 text-center text-slate-800 font-medium bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 15. Hạn Giá */}
+                                    <td className="p-0 text-center align-middle">
+                                      <input
+                                        type="date"
+                                        value={route.validUntil || '2026-12-31'}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'validUntil', e.target.value)}
+                                        className="w-full px-2 py-2 bg-transparent text-slate-700 text-xs font-medium text-center focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all cursor-pointer"
+                                      />
+                                    </td>
+
+                                    {/* 16. Promotion (%) */}
+                                    <td className="p-0 text-center align-middle">
+                                      <div className="flex items-center justify-center gap-0.5 px-1">
+                                        <input
+                                          type="number"
+                                          min={0}
+                                          max={100}
+                                          value={route.promotionPercent || 0}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'promotionPercent', Math.min(100, Math.max(0, parseInt(e.target.value) || 0)))}
+                                          className={`w-10 py-1 text-center text-xs font-bold rounded focus:outline-none focus:ring-1 focus:ring-indigo-500 ${(route.promotionPercent || 0) > 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-transparent text-slate-400'}`}
+                                        />
+                                        <span className="text-[11px] text-slate-400 font-bold">%</span>
+                                      </div>
+                                    </td>
+
+                                    {/* 17. Chi Tiết (Specs, Ảnh, Phụ Phí, VAS) */}
+                                    <td className="p-1 text-center align-middle bg-indigo-50/20">
+                                      {(() => {
+                                        const photoCount = route.warehousePhotos?.length ?? 3;
+                                        const vasCount = (route.warehouseVasItems || []).filter(v => v.isChecked).length || 2;
+                                        const paidCount = (route.warehousePaidSurcharges || []).filter(p => p.isChecked).length || 3;
+                                        return (
+                                          <button
+                                            type="button"
+                                            onClick={() => handleOpenWarehouseDetailModal(route)}
+                                            className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold text-indigo-700 bg-indigo-100/90 hover:bg-indigo-200 border border-indigo-300/80 rounded-xl transition-all cursor-pointer shadow-2xs group"
+                                            title="Bấm để cấu hình Specs kỹ thuật, Upload ảnh thực tế, Phụ phí và Dịch vụ VAS cho kho này"
+                                          >
+                                            <span className="text-[11px]">🏢 Chi Tiết</span>
+                                            <span className="text-[9.5px] px-1 py-0.2 bg-white rounded text-indigo-900 border border-indigo-200 font-medium">
+                                              {photoCount} ảnh • {paidCount + vasCount} phí
+                                            </span>
+                                            <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                                          </button>
+                                        );
+                                      })()}
+                                    </td>
+
+                                    {/* 18. Action */}
+                                    <td className="p-1 text-center align-middle w-16">
+                                      <div className="flex items-center justify-center gap-1">
+                                        <button
+                                          type="button"
+                                          onClick={() => handleDuplicateRouteRow(route.id)}
+                                          className="p-1 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-all cursor-pointer"
+                                          title="Nhân bản cơ sở kho này"
+                                        >
+                                          <Copy className="w-3.5 h-3.5" />
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleDeleteRouteRow(route.id)}
+                                          className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-all cursor-pointer"
+                                          title="Xóa cơ sở kho này"
+                                        >
+                                          <Trash2 className="w-3.5 h-3.5" />
+                                        </button>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                );
+                              }
+
                               const isTrucking = activeCategory?.id === 'trucking';
                               const isOcean = activeCategory?.id === 'ocean' || activeModel?.id?.startsWith('sea-');
                               const isRail = activeCategory?.id === 'rail' || activeModel?.id?.startsWith('rail-');
@@ -5764,89 +6351,92 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                         })()}
                                       </td>
                                     </>
-                                  ) : isLcl ? (
-                                    /* 6c. Hãng Tàu / Co-loader (LCL) */
-                                    <td className="p-0 align-top">
-                                      {(() => {
-                                        const shippingLov = LCL_SHIPPING_LINES;
-                                        const currentShippingLine = shippingLov.includes(route.vehicleType)
-                                          ? route.vehicleType
-                                          : (route.customShippingLine || route.customPackagingType || route.vehicleType === 'Khác (Nhập hãng tàu khác)...' ? 'Khác (Nhập hãng tàu khác)...' : (shippingLov[0] || route.vehicleType));
+                                   ) : isLcl ? (
+                                     /* 6c. Đơn Vị Vận Hành (Rail LCL) / Hãng Tàu / Co-loader (Ocean LCL) */
+                                     <td className="p-0 align-top">
+                                       {(() => {
+                                         const isRailLclRow = isRail;
+                                         const operatorLov = isRailLclRow ? RAIL_OPERATORS_LOV : LCL_SHIPPING_LINES;
+                                         const otherLabel = isRailLclRow ? 'Khác (Nhập đơn vị vận hành khác)...' : 'Khác (Nhập hãng tàu khác)...';
+                                         const currentOperator = operatorLov.includes(route.vehicleType)
+                                           ? route.vehicleType
+                                           : (route.customShippingLine || route.customPackagingType || route.vehicleType === otherLabel ? otherLabel : (operatorLov[0] || route.vehicleType));
 
-                                        return (
-                                          <div className="flex flex-col h-full">
-                                            <select
-                                              value={currentShippingLine}
-                                              onChange={(e) => {
-                                                const val = e.target.value;
-                                                if (val === 'Khác (Nhập hãng tàu khác)...') {
-                                                  handleUpdateRouteRowMultiple(route.id, {
-                                                    vehicleType: val,
-                                                    customShippingLine: '',
-                                                    customPackagingType: '',
-                                                  });
-                                                } else {
-                                                  handleUpdateRouteRowMultiple(route.id, {
-                                                    vehicleType: val,
-                                                    customShippingLine: '',
-                                                    customPackagingType: '',
-                                                  });
-                                                }
-                                              }}
-                                              className="w-full px-2.5 py-2 bg-transparent text-slate-800 text-xs font-semibold cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
-                                            >
-                                              {shippingLov.map((line, lIdx) => (
-                                                <option key={lIdx} value={line}>{line}</option>
-                                              ))}
-                                            </select>
+                                         return (
+                                           <div className="flex flex-col h-full">
+                                             <select
+                                               value={currentOperator}
+                                               onChange={(e) => {
+                                                 const val = e.target.value;
+                                                 handleUpdateRouteRowMultiple(route.id, {
+                                                   vehicleType: val,
+                                                   customShippingLine: '',
+                                                   customPackagingType: '',
+                                                 });
+                                               }}
+                                               className="w-full px-2.5 py-2 bg-transparent text-slate-800 text-xs font-semibold cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
+                                             >
+                                               {operatorLov.map((line, lIdx) => (
+                                                 <option key={lIdx} value={line}>{line}</option>
+                                               ))}
+                                             </select>
 
-                                            {(currentShippingLine === 'Khác (Nhập hãng tàu khác)...' || (!shippingLov.includes(route.vehicleType) && (route.customShippingLine || route.customPackagingType))) && (
-                                              <div className="p-1 bg-amber-50/90 border-t border-amber-200">
-                                                <input
-                                                  type="text"
-                                                  autoFocus
-                                                  value={route.customShippingLine || route.customPackagingType || ''}
-                                                  onChange={(e) => {
-                                                    const customVal = e.target.value;
-                                                    handleUpdateRouteRowMultiple(route.id, {
-                                                      customShippingLine: customVal,
-                                                      customPackagingType: customVal,
-                                                      vehicleType: customVal,
-                                                    });
-                                                  }}
-                                                  placeholder="Gõ tên hãng tàu / Co-loader..."
-                                                  className="w-full px-2 py-1 bg-white border border-amber-300 rounded text-slate-900 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-amber-500"
-                                                />
-                                              </div>
-                                            )}
-                                          </div>
-                                        );
-                                      })()}
-                                    </td>
-                                  ) : !isAir ? (
-                                    <td className="p-0 align-top">
-                                      <select
-                                        value={route.vehicleType}
-                                        onChange={(e) => handleUpdateRouteRow(route.id, 'vehicleType', e.target.value)}
-                                        className="w-full px-2.5 py-2 bg-transparent text-slate-800 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all cursor-pointer"
-                                      >
-                                        {(activeModel?.vehicleLov || [route.vehicleType]).map((veh: string, vIdx: number) => (
-                                          <option key={vIdx} value={veh}>{veh}</option>
-                                        ))}
-                                      </select>
-                                    </td>
-                                  ) : null}
+                                             {(currentOperator === otherLabel || (!operatorLov.includes(route.vehicleType) && (route.customShippingLine || route.customPackagingType))) && (
+                                               <div className="p-1 bg-amber-50/90 border-t border-amber-200">
+                                                 <input
+                                                   type="text"
+                                                   autoFocus
+                                                   value={route.customShippingLine || route.customPackagingType || ''}
+                                                   onChange={(e) => {
+                                                     const customVal = e.target.value;
+                                                     handleUpdateRouteRowMultiple(route.id, {
+                                                       customShippingLine: customVal,
+                                                       customPackagingType: customVal,
+                                                       vehicleType: customVal,
+                                                     });
+                                                   }}
+                                                   placeholder={isRailLclRow ? "Gõ tên đơn vị vận hành..." : "Gõ tên hãng tàu / Co-loader..."}
+                                                   className="w-full px-2 py-1 bg-white border border-amber-300 rounded text-slate-900 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-amber-500"
+                                                 />
+                                               </div>
+                                             )}
+                                           </div>
+                                         );
+                                       })()}
+                                     </td>
+                                   ) : !isAir ? (
+                                     <td className="p-0 align-top">
+                                       {(() => {
+                                         const isRailFcl = isRail && isFcl;
+                                         const normalizedVeh = isRailFcl
+                                           ? (route.vehicleType?.includes('20') ? 'Container 20ft' : (route.vehicleType?.includes('40') ? 'Container 40ft' : (activeModel?.vehicleLov?.[0] || 'Container 20ft')))
+                                           : route.vehicleType;
+                                         const options = activeModel?.vehicleLov || [route.vehicleType];
+                                         return (
+                                           <select
+                                             value={normalizedVeh}
+                                             onChange={(e) => handleUpdateRouteRow(route.id, 'vehicleType', e.target.value)}
+                                             className="w-full px-2.5 py-2 bg-transparent text-slate-800 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all cursor-pointer font-medium"
+                                           >
+                                             {options.map((veh: string, vIdx: number) => (
+                                               <option key={vIdx} value={veh}>{veh}</option>
+                                             ))}
+                                           </select>
+                                         );
+                                       })()}
+                                     </td>
+                                   ) : null}
 
-                                  {/* 7. Đơn vị tính (LOV) */}
-                                  <td className="p-0 text-center bg-slate-50/40 align-middle">
-                                    {(isAirCargo || isExpress) ? (
-                                      <span className="font-bold text-sky-900 bg-sky-100/90 px-2 py-0.5 rounded text-xs border border-sky-200">
-                                        Kg
-                                      </span>
-                                    ) : activeModel?.unitLov?.length === 1 ? (
-                                      <span className="font-bold text-slate-700 text-xs">
-                                        {activeModel.unitLov[0]}
-                                      </span>
+                                   {/* 7. Đơn vị tính (LOV) */}
+                                   <td className="p-0 text-center bg-slate-50/40 align-middle">
+                                     {(isAirCargo || isExpress) ? (
+                                       <span className="font-bold text-sky-900 bg-sky-100/90 px-2 py-0.5 rounded text-xs border border-sky-200">
+                                         Kg
+                                       </span>
+                                     ) : (activeModel?.unitLov?.length === 1 || (isRail && isFcl) || (isRail && isLcl)) ? (
+                                       <span className="inline-block font-bold text-slate-800 bg-slate-100/90 px-2.5 py-0.5 rounded text-xs border border-slate-200 shadow-2xs">
+                                         {activeModel?.unitLov?.[0] || ((isRail && isFcl) ? 'Cont' : 'Kg')}
+                                       </span>
                                     ) : (
                                       <select
                                         value={route.pricingUnit}
@@ -6241,6 +6831,24 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                   </div>
                 </div>
 
+                {activeCategory?.id === 'warehousing' ? (
+                  <div className="p-4 bg-gradient-to-r from-blue-50/80 via-indigo-50/60 to-blue-50/80 border border-indigo-200 rounded-2xl flex items-center justify-between gap-3 text-xs shadow-2xs">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+                        <Building2 className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-indigo-950 text-xs">
+                          Quản lý Phụ Phí, Dịch Vụ VAS & Thông Số Kỹ Thuật Theo Từng Kho
+                        </h4>
+                        <p className="text-[11px] text-slate-600 mt-0.5">
+                          Đối với dịch vụ Kho bãi 3PL, mỗi cơ sở kho có chính sách phụ phí handling (In/Out, rút ruột cont), dịch vụ gia tăng và thông số kỹ thuật khác biệt. Vui lòng bấm vào cột <strong>"Chi Tiết"</strong> trên từng dòng kho ở bảng trên để cấu hình.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <>
                 {/* =========================================================================
                     PHẦN 3: CÁC PHỤ PHÍ MIỄN PHÍ & CÓ PHÍ (HỖ TRỢ THÊM / BỚT TÙY Ý)
                 ========================================================================= */}
@@ -6710,6 +7318,8 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                     );
                   })()}
                 </div>
+                  </>
+                )}
 
                 {/* Bottom Actions */}
                 <div className="pt-4 border-t border-slate-100 flex items-center justify-between flex-wrap gap-2">
@@ -7280,13 +7890,13 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                   </div>
                 </div>
               ) : (
-                <div className={`flex items-center justify-between p-2.5 ${tieredPricingModalData.isExpress ? 'bg-amber-50/70 border-amber-200' : 'bg-sky-50/70 border-sky-200'} rounded-2xl border text-xs`}>
-                  <div className={`flex items-center gap-2 font-bold ${tieredPricingModalData.isExpress ? 'text-amber-950' : 'text-sky-950'}`}>
+                <div className={`flex items-center justify-between p-2.5 ${tieredPricingModalData.isExpress ? 'bg-amber-50/70 border-amber-200' : (tieredPricingModalData.isRailLcl ? 'bg-indigo-50/70 border-indigo-200' : 'bg-sky-50/70 border-sky-200')} rounded-2xl border text-xs`}>
+                  <div className={`flex items-center gap-2 font-bold ${tieredPricingModalData.isExpress ? 'text-amber-950' : (tieredPricingModalData.isRailLcl ? 'text-indigo-950' : 'text-sky-950')}`}>
                     <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                    <span>Đơn vị tính cước tiêu chuẩn: <strong>Kilogram (Kg) / Chargeable Weight</strong></span>
+                    <span>Đơn vị tính cước tiêu chuẩn: <strong>{tieredPricingModalData.isRailLcl ? 'Kilogram (Kg) - Hàng lẻ Đường sắt' : 'Kilogram (Kg) / Chargeable Weight'}</strong></span>
                   </div>
-                  <span className={`text-[11px] font-bold ${tieredPricingModalData.isExpress ? 'text-amber-800 border-amber-300' : 'text-sky-700 border-sky-200'} bg-white px-2 py-0.5 rounded-md border`}>
-                    {tieredPricingModalData.isExpress ? '6 Bậc Express (+45kg Base)' : '6 Bậc Tiêu Chuẩn (+100kg Base)'}
+                  <span className={`text-[11px] font-bold ${tieredPricingModalData.isExpress ? 'text-amber-800 border-amber-300' : (tieredPricingModalData.isRailLcl ? 'text-indigo-800 border-indigo-300' : 'text-sky-700 border-sky-200')} bg-white px-2 py-0.5 rounded-md border`}>
+                    {tieredPricingModalData.isExpress ? '6 Bậc Express (+45kg Base)' : (tieredPricingModalData.isRailLcl ? '5 Khung Bậc Trọng Lượng Chuẩn' : '6 Bậc Tiêu Chuẩn (+100kg Base)')}
                   </span>
                 </div>
               )}
@@ -7306,9 +7916,11 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                         ? 'Áp dụng cho kiện hàng tài liệu/hàng mẫu nhỏ dưới 1kg (Cước sàn tối thiểu)'
                         : (tieredPricingModalData.isAirCargo
                           ? 'Áp dụng cho lô hàng kiện nhỏ dưới 45kg (Mức cước tối thiểu mỗi e-AWB)'
-                          : (tieredPricingModalData.isLcl
-                            ? 'Áp dụng cho mỗi House Bill (HBL) / Lô hàng nhỏ hơn ngưỡng min'
-                            : 'Áp dụng khi kiện hàng siêu nhỏ / tổng cước theo đơn giá thấp hơn mức sàn'))}
+                          : (tieredPricingModalData.isRailLcl
+                            ? 'Áp dụng cho mỗi vận đơn đường sắt (Railway Bill) / Lô hàng nhỏ hơn ngưỡng sàn'
+                            : (tieredPricingModalData.isLcl
+                              ? 'Áp dụng cho mỗi House Bill (HBL) / Lô hàng nhỏ hơn ngưỡng min'
+                              : 'Áp dụng khi kiện hàng siêu nhỏ / tổng cước theo đơn giá thấp hơn mức sàn')))}
                     </span>
                   </div>
                 </div>
@@ -7601,6 +8213,1334 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                 <Check className="w-4 h-4" />
                 <span>Xác Nhận & Lưu Ma Trận Bậc Giá</span>
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================================
+          MODAL CHI TIẾT CƠ SỞ KHO: ALBUM ẢNH, 2-COLUMN TECH SPECS, PHỤ PHÍ & VAS
+      ========================================================================= */}
+      {warehouseDetailModalData && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-150">
+            {/* 1. Modal Header */}
+            <div className="px-6 py-4 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex items-center justify-between border-b border-slate-800 shrink-0">
+              <div className="flex items-center gap-3.5">
+                <div className="w-11 h-11 rounded-2xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center shrink-0 shadow-inner">
+                  <Building2 className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="text-base font-black tracking-tight text-white">
+                      {warehouseDetailModalData.warehouseName}
+                    </h3>
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-lg bg-indigo-500/30 text-indigo-200 border border-indigo-400/30">
+                      Mã: {warehouseDetailModalData.warehouseCode}
+                    </span>
+                    {warehouseDetailModalData.isColdStorage && (
+                      <span className="text-[11px] font-bold px-2 py-0.5 rounded-lg bg-cyan-500/20 text-cyan-200 border border-cyan-400/30 flex items-center gap-1">
+                        <Thermometer className="w-3 h-3 text-cyan-300" />
+                        Kho Lạnh
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-slate-300 mt-0.5 flex items-center gap-1.5 flex-wrap">
+                    <MapPin className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                    <span>{warehouseDetailModalData.address}, {warehouseDetailModalData.province}</span>
+                    <span className="text-slate-500">•</span>
+                    <span className="text-indigo-300 font-medium">Chi tiết Specs, Album ảnh, Phụ phí & Dịch vụ VAS</span>
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setWarehouseDetailModalData(null)}
+                className="w-9 h-9 rounded-xl bg-slate-800/80 hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 flex items-center justify-center transition-all cursor-pointer border border-slate-700/60"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* 2. Top Tab Bar */}
+            <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50/90 px-6 py-2.5 shrink-0">
+              <div className="flex items-center gap-2 overflow-x-auto">
+                <button
+                  type="button"
+                  onClick={() => setWarehouseDetailActiveTab('photos')}
+                  className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    warehouseDetailActiveTab === 'photos'
+                      ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
+                      : 'text-slate-600 hover:bg-slate-200/70'
+                  }`}
+                >
+                  <Camera className="w-4 h-4" />
+                  <span>📸 Album Ảnh Thực Tế</span>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                    warehouseDetailActiveTab === 'photos' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
+                  }`}>
+                    {warehouseDetailModalData.photos.length}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setWarehouseDetailActiveTab('techSpecs')}
+                  className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    warehouseDetailActiveTab === 'techSpecs'
+                      ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
+                      : 'text-slate-600 hover:bg-slate-200/70'
+                  }`}
+                >
+                  <Sliders className="w-4 h-4" />
+                  <span>🏗️ Thông Số Kỹ Thuật (Specs)</span>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                    warehouseDetailActiveTab === 'techSpecs' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
+                  }`}>
+                    7 Nhóm
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setWarehouseDetailActiveTab('surcharges')}
+                  className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    warehouseDetailActiveTab === 'surcharges'
+                      ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
+                      : 'text-slate-600 hover:bg-slate-200/70'
+                  }`}
+                >
+                  <DollarSign className="w-4 h-4" />
+                  <span>🏷️ Phụ Phí Handling & Lưu Kho</span>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                    warehouseDetailActiveTab === 'surcharges' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
+                  }`}>
+                    {warehouseDetailModalData.paidSurcharges.filter(s => s.isChecked).length} phí
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setWarehouseDetailActiveTab('vas')}
+                  className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    warehouseDetailActiveTab === 'vas'
+                      ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
+                      : 'text-slate-600 hover:bg-slate-200/70'
+                  }`}
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span>✨ Dịch Vụ Gia Tăng (VAS)</span>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                    warehouseDetailActiveTab === 'vas' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
+                  }`}>
+                    {warehouseDetailModalData.vasItems.filter(v => v.isChecked).length} VAS
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            {/* 3. Modal Body */}
+            <div className="flex-1 overflow-hidden flex flex-col bg-slate-50/40">
+              {/* TAB 1: ALBUM ẢNH KHO */}
+              {warehouseDetailActiveTab === 'photos' && (
+                <div className="flex-1 p-6 overflow-y-auto space-y-4">
+                  <input
+                    type="file"
+                    ref={warehousePhotoUploadRef}
+                    multiple
+                    accept="image/*"
+                    onChange={handleUploadWarehousePhotos}
+                    className="hidden"
+                  />
+
+                  {/* Actions bar for photos */}
+                  <div className="flex items-center justify-between flex-wrap gap-3 p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs">
+                    <div>
+                      <h4 className="font-bold text-slate-900 text-xs flex items-center gap-2">
+                        <Camera className="w-4 h-4 text-indigo-600" />
+                        Hình Ảnh Thực Tế Cơ Sở Kho ({warehouseDetailModalData.photos.length} ảnh)
+                      </h4>
+                      <p className="text-[11px] text-slate-500 mt-0.5">
+                        Tải lên ảnh mặt tiền, kệ hàng, cửa dock, sàn kho, hệ thống PCCC. Ảnh có huy hiệu <span className="font-bold text-amber-700">Ảnh Bìa</span> sẽ được chọn làm ảnh hiển thị chính.
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => warehousePhotoUploadRef.current?.click()}
+                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
+                      >
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>Tải Thêm Ảnh Từ Thiết Bị</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const sampleTags = ['Mặt tiền kho', 'Kệ Selective', 'Sàn Bê tông Epoxy', 'Cửa Dock & Sân cont', 'Hệ thống PCCC Sprinkler'];
+                          const sampleUrls = [
+                            'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800&auto=format&fit=crop&q=80',
+                            'https://images.unsplash.com/photo-1553413077-190dd305871c?w=800&auto=format&fit=crop&q=80',
+                            'https://images.unsplash.com/photo-1616401784845-180882ba9ba8?w=800&auto=format&fit=crop&q=80',
+                            'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&auto=format&fit=crop&q=80',
+                            'https://images.unsplash.com/photo-1578575437130-527eed3abbec?w=800&auto=format&fit=crop&q=80'
+                          ];
+                          const randomIdx = Math.floor(Math.random() * sampleUrls.length);
+                          setWarehouseDetailModalData(prev => {
+                            if (!prev) return prev;
+                            return {
+                              ...prev,
+                              photos: [
+                                ...prev.photos,
+                                {
+                                  id: `wh-samp-${Date.now()}`,
+                                  url: sampleUrls[randomIdx],
+                                  name: sampleTags[randomIdx],
+                                  tag: sampleTags[randomIdx],
+                                  isCover: prev.photos.length === 0,
+                                }
+                              ]
+                            };
+                          });
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl border border-slate-300 transition-all cursor-pointer"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>+ Thêm Ảnh Mẫu Nhanh</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Photo Cards Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {warehouseDetailModalData.photos.map((photo, pIdx) => (
+                      <div
+                        key={photo.id || pIdx}
+                        className={`group relative bg-white rounded-2xl border overflow-hidden shadow-2xs transition-all ${
+                          photo.isCover ? 'border-indigo-500 ring-2 ring-indigo-500/20' : 'border-slate-200 hover:border-indigo-300'
+                        }`}
+                      >
+                        {/* Image preview */}
+                        <div className="relative aspect-video w-full bg-slate-100 overflow-hidden">
+                          <img
+                            src={photo.url}
+                            alt={photo.name || 'Ảnh kho'}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                          {photo.isCover && (
+                            <span className="absolute top-2.5 left-2.5 inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500 text-white font-bold text-[10px] shadow-sm">
+                              <Star className="w-3 h-3 fill-white" />
+                              Ảnh Bìa Chính
+                            </span>
+                          )}
+                          <div className="absolute top-2.5 right-2.5 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            {!photo.isCover && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setWarehouseDetailModalData(prev => {
+                                    if (!prev) return prev;
+                                    return {
+                                      ...prev,
+                                      photos: prev.photos.map(p => ({
+                                        ...p,
+                                        isCover: p.id === photo.id,
+                                      })),
+                                    };
+                                  });
+                                }}
+                                title="Đặt làm ảnh bìa"
+                                className="w-7 h-7 rounded-lg bg-white/90 hover:bg-amber-50 text-slate-700 hover:text-amber-600 shadow-sm flex items-center justify-center transition-colors cursor-pointer"
+                              >
+                                <Star className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setWarehouseDetailModalData(prev => {
+                                  if (!prev) return prev;
+                                  const updated = prev.photos.filter(p => p.id !== photo.id);
+                                  if (photo.isCover && updated.length > 0) {
+                                    updated[0].isCover = true;
+                                  }
+                                  return { ...prev, photos: updated };
+                                });
+                              }}
+                              title="Xóa ảnh này"
+                              className="w-7 h-7 rounded-lg bg-white/90 hover:bg-rose-50 text-slate-700 hover:text-rose-600 shadow-sm flex items-center justify-center transition-colors cursor-pointer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Tag and name inputs */}
+                        <div className="p-3 space-y-2">
+                          <div>
+                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">
+                              Nhãn phân loại ảnh:
+                            </label>
+                            <select
+                              value={photo.tag || 'Mặt tiền & Sân bãi'}
+                              onChange={(e) => {
+                                const newTag = e.target.value;
+                                setWarehouseDetailModalData(prev => {
+                                  if (!prev) return prev;
+                                  return {
+                                    ...prev,
+                                    photos: prev.photos.map(p => p.id === photo.id ? { ...p, tag: newTag } : p),
+                                  };
+                                });
+                              }}
+                              className="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                            >
+                              <option value="Mặt tiền & Sân bãi">🏢 Mặt tiền & Sân bãi bốc dỡ</option>
+                              <option value="Kệ Racking">📦 Hệ thống Giá kệ Racking</option>
+                              <option value="Sàn & Trần kho">🏗️ Mặt sàn & Trần thông thủy</option>
+                              <option value="Cửa Dock">🚛 Cửa Dock & Cầu nâng thủy lực</option>
+                              <option value="PCCC & An ninh">🔥 Hệ thống PCCC & CCTV</option>
+                              <option value="Phòng Lạnh / Mát">❄️ Buồng lạnh & Cụm máy nén</option>
+                              <option value="Khu vực đóng gói VAS">✨ Bàn phân loại / Đóng gói VAS</option>
+                            </select>
+                          </div>
+
+                          <input
+                            type="text"
+                            value={photo.name || ''}
+                            onChange={(e) => {
+                              const newName = e.target.value;
+                              setWarehouseDetailModalData(prev => {
+                                if (!prev) return prev;
+                                return {
+                                  ...prev,
+                                  photos: prev.photos.map(p => p.id === photo.id ? { ...p, name: newName } : p),
+                                };
+                              });
+                            }}
+                            placeholder="Mô tả ngắn góc chụp..."
+                            className="w-full px-2 py-1 bg-transparent border-b border-dashed border-slate-200 text-[11px] text-slate-600 focus:outline-none focus:border-indigo-500"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 2: 2-COLUMN MASTER-DETAIL TECH SPECS */}
+              {warehouseDetailActiveTab === 'techSpecs' && (
+                <div className="flex-1 flex overflow-hidden">
+                  {/* Left Column: Category Navigation */}
+                  <div className="w-64 shrink-0 bg-slate-50/90 border-r border-slate-200 p-3 overflow-y-auto space-y-1.5">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 block mb-1">
+                      Nhóm Thông Số Kỹ Thuật
+                    </span>
+
+                    {[
+                      { id: 'structure', icon: '🏗️', label: 'Kết Cấu & Mặt Sàn', desc: 'Chiều cao, tải trọng sàn, nền' },
+                      { id: 'racking', icon: '📦', label: 'Giá Kệ & Sức Chứa', desc: 'Loại kệ, tầng kệ, tải Pallet' },
+                      { id: 'dock', icon: '🚛', label: 'Cửa Dock & Sân Bãi', desc: 'Cửa xuất nhập, dock leveler' },
+                      { id: 'fire', icon: '🔥', label: 'PCCC & An Ninh', desc: 'Sprinkler, nghiệm thu, camera' },
+                      { id: 'wms', icon: '💻', label: 'WMS & Công Nghệ', desc: 'Phần mềm quản lý, Barcode, API' },
+                      { id: 'temperature', icon: '❄️', label: 'Nhiệt Độ & Năng Lượng', desc: 'Dải nhiệt, máy nén, ATS' },
+                      { id: 'cert', icon: '📜', label: 'Giấy Phép & Chứng Nhận', desc: 'ISO, HACCP, GDP, Bảo hiểm' },
+                    ].map((cat) => {
+                      const isActive = warehouseTechActiveCategory === cat.id;
+                      return (
+                        <button
+                          key={cat.id}
+                          type="button"
+                          onClick={() => setWarehouseTechActiveCategory(cat.id)}
+                          className={`w-full text-left p-2.5 rounded-xl transition-all cursor-pointer flex items-start gap-2.5 ${
+                            isActive
+                              ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
+                              : 'hover:bg-slate-200/70 text-slate-700'
+                          }`}
+                        >
+                          <span className="text-base mt-0.5">{cat.icon}</span>
+                          <div className="min-w-0 flex-1">
+                            <p className={`text-xs font-bold truncate ${isActive ? 'text-white' : 'text-slate-900'}`}>
+                              {cat.label}
+                            </p>
+                            <p className={`text-[10px] truncate ${isActive ? 'text-indigo-100' : 'text-slate-400'}`}>
+                              {cat.desc}
+                            </p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Right Column: Active Category Form Fields */}
+                  <div className="flex-1 p-6 overflow-y-auto bg-white">
+                    {/* 1. KẾT CẤU & MẶT SÀN */}
+                    {warehouseTechActiveCategory === 'structure' && (
+                      <div className="space-y-4 max-w-2xl">
+                        <div className="border-b border-slate-100 pb-3">
+                          <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                            <span>🏗️</span> Kết Cấu Xây Dựng & Mặt Sàn Kho
+                          </h4>
+                          <p className="text-xs text-slate-500 mt-0.5">
+                            Khai báo các thông số cơ bản về độ cao, tải trọng và xử lý bề mặt sàn.
+                          </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-xs font-bold text-slate-700 block mb-1">
+                              Chiều cao thông thủy trần (Clear Height)
+                            </label>
+                            <div className="relative">
+                              <input
+                                type="number"
+                                step="0.1"
+                                min="3"
+                                max="30"
+                                value={warehouseDetailModalData.techSpecs.clearHeight || 10.5}
+                                onChange={(e) => {
+                                  const val = parseFloat(e.target.value) || 0;
+                                  setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, clearHeight: val } }) : prev);
+                                }}
+                                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                              />
+                              <span className="absolute right-3 top-2 text-xs font-bold text-slate-400">Mét (m)</span>
+                            </div>
+                            <span className="text-[10px] text-slate-400">Kho chuẩn Grade A thường từ 9.0m - 14.0m</span>
+                          </div>
+
+                          <div>
+                            <label className="text-xs font-bold text-slate-700 block mb-1">
+                              Tải trọng thiết kế mặt sàn (Floor Load)
+                            </label>
+                            <div className="relative">
+                              <input
+                                type="number"
+                                step="0.5"
+                                min="1"
+                                max="20"
+                                value={warehouseDetailModalData.techSpecs.floorLoad || 5.0}
+                                onChange={(e) => {
+                                  const val = parseFloat(e.target.value) || 0;
+                                  setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, floorLoad: val } }) : prev);
+                                }}
+                                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                              />
+                              <span className="absolute right-3 top-2 text-xs font-bold text-slate-400">Tấn / m²</span>
+                            </div>
+                            <span className="text-[10px] text-slate-400">Tiêu chuẩn lưu kho thông thường: 3 - 5 tấn/m²</span>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="text-xs font-bold text-slate-700 block mb-1">
+                            Loại hoàn thiện mặt sàn (Floor Type)
+                          </label>
+                          <select
+                            value={warehouseDetailModalData.techSpecs.floorType || 'Bê tông xoa Hardener chống bụi'}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, floorType: val } }) : prev);
+                            }}
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                          >
+                            <option value="Bê tông xoa Hardener chống bụi">Bê tông xoa phẳng phủ phụ gia Hardener (Chống bụi tiêu chuẩn)</option>
+                            <option value="Bê tông sơn phủ Epoxy chống tĩnh điện">Bê tông sơn phủ Epoxy 3 lớp (Chống ẩm, kháng khuẩn, bụi tuyệt đối)</option>
+                            <option value="Bê tông siêu phẳng Superflat chuyên dụng VNA">Bê tông siêu phẳng Superflat (Phù hợp xe nâng tầm cao VNA)</option>
+                            <option value="Bê tông thường láng xi măng">Bê tông láng xi măng thông thường</option>
+                          </select>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-xs font-bold text-slate-700 block mb-1">
+                              Khẩu độ bước cột (Column Grid)
+                            </label>
+                            <input
+                              type="text"
+                              value={warehouseDetailModalData.techSpecs.columnGrid || '12m × 18m'}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, columnGrid: val } }) : prev);
+                              }}
+                              placeholder="VD: 12m × 18m, 18m × 24m hoặc Không cột"
+                              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="text-xs font-bold text-slate-700 block mb-1">
+                              Hệ thống thông gió làm mát
+                            </label>
+                            <input
+                              type="text"
+                              value={warehouseDetailModalData.techSpecs.ventilation || 'Quả cầu xoay nhiệt & Lam gió tự nhiên'}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, ventilation: val } }) : prev);
+                              }}
+                              placeholder="VD: Quạt trần HVLS, Quả cầu xoay, Quạt hút..."
+                              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 2. GIÁ KỆ & SỨC CHỨA */}
+                    {warehouseTechActiveCategory === 'racking' && (
+                      <div className="space-y-4 max-w-2xl">
+                        <div className="border-b border-slate-100 pb-3">
+                          <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                            <span>📦</span> Hệ Thống Giá Kệ & Sức Chứa Pallet
+                          </h4>
+                          <p className="text-xs text-slate-500 mt-0.5">
+                            Chi tiết cấu hình kệ Racking, số tầng và giới hạn tải trọng mỗi vị trí pallet.
+                          </p>
+                        </div>
+
+                        <div>
+                          <label className="text-xs font-bold text-slate-700 block mb-2">
+                            Các loại kệ Racking trang bị tại cơ sở:
+                          </label>
+                          <div className="grid grid-cols-2 gap-2">
+                            {['Kệ Selective', 'Kệ Drive-in', 'Kệ Double Deep', 'Kệ Narrow Aisle (VNA)', 'Kệ Sàn Tầng Lửng (Mezzanine)', 'Sàn xếp khối Floor Block'].map((rack) => {
+                              const list = warehouseDetailModalData.techSpecs.rackingTypes || [];
+                              const isChecked = list.includes(rack);
+                              return (
+                                <label
+                                  key={rack}
+                                  className={`flex items-center gap-2.5 p-2.5 rounded-xl border cursor-pointer transition-all ${
+                                    isChecked ? 'bg-indigo-50 border-indigo-200 text-indigo-950 font-bold' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                                  }`}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={isChecked}
+                                    onChange={(e) => {
+                                      const updated = e.target.checked
+                                        ? [...list, rack]
+                                        : list.filter(r => r !== rack);
+                                      setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, rackingTypes: updated } }) : prev);
+                                    }}
+                                    className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500"
+                                  />
+                                  <span className="text-xs">{rack}</span>
+                                </label>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-xs font-bold text-slate-700 block mb-1">
+                              Số tầng kệ lưu trữ (Racking Levels)
+                            </label>
+                            <input
+                              type="number"
+                              min="1"
+                              max="15"
+                              value={warehouseDetailModalData.techSpecs.rackingLevels || 5}
+                              onChange={(e) => {
+                                const val = parseInt(e.target.value) || 1;
+                                setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, rackingLevels: val } }) : prev);
+                              }}
+                              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            />
+                            <span className="text-[10px] text-slate-400">Thường từ 4 - 7 tầng</span>
+                          </div>
+
+                          <div>
+                            <label className="text-xs font-bold text-slate-700 block mb-1">
+                              Tải trọng thiết kế tối đa mỗi Pallet
+                            </label>
+                            <div className="relative">
+                              <input
+                                type="number"
+                                step="50"
+                                min="200"
+                                max="3000"
+                                value={warehouseDetailModalData.techSpecs.palletLoadLimit || 1000}
+                                onChange={(e) => {
+                                  const val = parseInt(e.target.value) || 0;
+                                  setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, palletLoadLimit: val } }) : prev);
+                                }}
+                                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                              />
+                              <span className="absolute right-3 top-2 text-xs font-bold text-slate-400">Kg / Pallet</span>
+                            </div>
+                            <span className="text-[10px] text-slate-400">Tiêu chuẩn: 800kg - 1,200kg / pallet</span>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="text-xs font-bold text-slate-700 block mb-1">
+                            Quy cách kích thước Pallet tương thích:
+                          </label>
+                          <input
+                            type="text"
+                            value={(warehouseDetailModalData.techSpecs.compatiblePalletSizes || []).join(', ')}
+                            onChange={(e) => {
+                              const arr = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
+                              setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, compatiblePalletSizes: arr } }) : prev);
+                            }}
+                            placeholder="VD: 1.0m × 1.2m (ISO standard), 1.1m × 1.1m"
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 3. CỬA DOCK & SÂN BÃI */}
+                    {warehouseTechActiveCategory === 'dock' && (
+                      <div className="space-y-4 max-w-2xl">
+                        <div className="border-b border-slate-100 pb-3">
+                          <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                            <span>🚛</span> Cửa Dock Xuất Nhập & Sân Bãi Xe Container
+                          </h4>
+                          <p className="text-xs text-slate-500 mt-0.5">
+                            Cấu hình năng lực tiếp nhận xe tải lớn, container 20ft/40ft và cầu nâng thủy lực.
+                          </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-xs font-bold text-slate-700 block mb-1">
+                              Số lượng cửa Dock bốc xếp
+                            </label>
+                            <input
+                              type="number"
+                              min="1"
+                              max="100"
+                              value={warehouseDetailModalData.techSpecs.dockDoorsCount || 6}
+                              onChange={(e) => {
+                                const val = parseInt(e.target.value) || 1;
+                                setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, dockDoorsCount: val } }) : prev);
+                              }}
+                              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            />
+                            <span className="text-[10px] text-slate-400">Số cửa mở cùng lúc tiếp nhận xe</span>
+                          </div>
+
+                          <div className="space-y-2 pt-4">
+                            <label className="flex items-center gap-2.5 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={warehouseDetailModalData.techSpecs.hasDockLeveler ?? true}
+                                onChange={(e) => {
+                                  const checked = e.target.checked;
+                                  setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, hasDockLeveler: checked } }) : prev);
+                                }}
+                                className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500"
+                              />
+                              <span className="text-xs font-bold text-slate-800">Trang bị Cầu nâng thủy lực (Dock Leveler)</span>
+                            </label>
+
+                            <label className="flex items-center gap-2.5 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={warehouseDetailModalData.techSpecs.hasDockShelter ?? false}
+                                onChange={(e) => {
+                                  const checked = e.target.checked;
+                                  setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, hasDockShelter: checked } }) : prev);
+                                }}
+                                className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500"
+                              />
+                              <span className="text-xs font-bold text-slate-800">Trùm đệm khí cửa cont (Dock Shelter giữ nhiệt)</span>
+                            </label>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="text-xs font-bold text-slate-700 block mb-1">
+                            Không gian sân bãi quay đầu xe Container
+                          </label>
+                          <input
+                            type="text"
+                            value={warehouseDetailModalData.techSpecs.yardTurnaround || 'Sân bê tông rộng 35m, xe cont 40ft/45ft quay đầu dễ dàng 24/7'}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, yardTurnaround: val } }) : prev);
+                            }}
+                            placeholder="VD: Sân rộng 35m quay đầu cont 40ft/45ft..."
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-xs font-bold text-slate-700 block mb-1">
+                            Khung giờ tiếp nhận xe tải & Container
+                          </label>
+                          <input
+                            type="text"
+                            value={warehouseDetailModalData.techSpecs.operatingHoursTrucks || 'Tiếp nhận 24/7, không bị cấm giờ tải trọng'}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, operatingHoursTrucks: val } }) : prev);
+                            }}
+                            placeholder="VD: 24/7 không cấm giờ, hoặc Cấm giờ cao điểm 6h-8h / 16h-18h"
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 4. PCCC & AN NINH */}
+                    {warehouseTechActiveCategory === 'fire' && (
+                      <div className="space-y-4 max-w-2xl">
+                        <div className="border-b border-slate-100 pb-3">
+                          <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                            <span>🔥</span> Hệ Thống Phòng Cháy Chữa Cháy (PCCC) & An Ninh
+                          </h4>
+                          <p className="text-xs text-slate-500 mt-0.5">
+                            Tiêu chuẩn an toàn PCCC là yếu tố quyết định để doanh nghiệp FDI / Brand lớn thuê kho.
+                          </p>
+                        </div>
+
+                        <div>
+                          <label className="text-xs font-bold text-slate-700 block mb-1">
+                            Hệ thống PCCC trang bị tại kho
+                          </label>
+                          <select
+                            value={warehouseDetailModalData.techSpecs.fireProtectionSystem || 'PCCC tự động Sprinkler (Đã nghiệm thu PCCC)'}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, fireProtectionSystem: val } }) : prev);
+                            }}
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                          >
+                            <option value="PCCC tự động Sprinkler (Đã nghiệm thu PCCC)">Hệ thống PCCC tự động đầu phun Sprinkler (Chuẩn QCVN 06:2022)</option>
+                            <option value="Họng nước vách tường & Hệ thống cảnh báo khói tự động">Họng nước vách tường & Đầu báo khói báo nhiệt tự động</option>
+                            <option value="Hệ thống PCCC Foam / Khí CO2 chuyên dụng hóa chất">Hệ thống bọt Foam / Khí CO2 chuyên dụng (Kho hóa chất / Pin lithium)</option>
+                            <option value="Bình bọt xách tay & Tiêu lệnh cơ bản">Bình chữa cháy xách tay và tiêu lệnh nội bộ</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="text-xs font-bold text-slate-700 block mb-1">
+                            Số biên bản / Giấy phép nghiệm thu PCCC (Nếu có)
+                          </label>
+                          <input
+                            type="text"
+                            value={warehouseDetailModalData.techSpecs.fireProtectionApprovalNo || 'Số 148/TD-PCCC cấp bởi Cảnh sát PCCC'}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, fireProtectionApprovalNo: val } }) : prev);
+                            }}
+                            placeholder="VD: Số 148/TD-PCCC cấp bởi Cảnh sát PCCC tỉnh..."
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-xs font-bold text-slate-700 block mb-1">
+                            Camera giám sát an ninh (CCTV)
+                          </label>
+                          <input
+                            type="text"
+                            value={warehouseDetailModalData.techSpecs.cctvSurveillance || 'CCTV 24/7 phủ kín lối đi & cửa dock, lưu trữ video 60 ngày'}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, cctvSurveillance: val } }) : prev);
+                            }}
+                            placeholder="VD: CCTV AI 24/7 full kho trong & ngoài..."
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-xs font-bold text-slate-700 block mb-1">
+                            Lực lượng an ninh & Bảo vệ
+                          </label>
+                          <input
+                            type="text"
+                            value={warehouseDetailModalData.techSpecs.securityGuards || 'Bảo vệ chuyên nghiệp 2 lớp 24/7, cổng barie kiểm soát'}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, securityGuards: val } }) : prev);
+                            }}
+                            placeholder="VD: Đội bảo vệ chuyên nghiệp trực 24/7..."
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 5. WMS & CÔNG NGHỆ */}
+                    {warehouseTechActiveCategory === 'wms' && (
+                      <div className="space-y-4 max-w-2xl">
+                        <div className="border-b border-slate-100 pb-3">
+                          <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                            <span>💻</span> Hệ Thống WMS Quản Lý Kho & Công Nghệ Số Hóa
+                          </h4>
+                          <p className="text-xs text-slate-500 mt-0.5">
+                            Số hóa vận hành, quản lý SKU, hạn sử dụng (FEFO/FIFO) và cổng thông tin khách hàng.
+                          </p>
+                        </div>
+
+                        <div>
+                          <label className="text-xs font-bold text-slate-700 block mb-1">
+                            Tên phần mềm Quản lý Kho (WMS) đang ứng dụng
+                          </label>
+                          <input
+                            type="text"
+                            value={warehouseDetailModalData.techSpecs.wmsSoftwareName || 'WMS Real-time Cloud'}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, wmsSoftwareName: val } }) : prev);
+                            }}
+                            placeholder="VD: FlexGO WMS, Infor, Manhattan, SAP WM, Odoo..."
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-xs font-bold text-slate-700 block mb-2">
+                            Công nghệ quét mã & Nhận diện:
+                          </label>
+                          <div className="flex flex-wrap gap-2">
+                            {['Barcode 1D/2D', 'Mã QR Code', 'RFID UHF Tự Động', 'Pick-to-Light'].map((tech) => {
+                              const list = warehouseDetailModalData.techSpecs.scanningTechnologies || [];
+                              const isChecked = list.includes(tech);
+                              return (
+                                <label
+                                  key={tech}
+                                  className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl border text-xs cursor-pointer transition-all ${
+                                    isChecked ? 'bg-indigo-50 border-indigo-200 text-indigo-950 font-bold' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                                  }`}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={isChecked}
+                                    onChange={(e) => {
+                                      const updated = e.target.checked ? [...list, tech] : list.filter(t => t !== tech);
+                                      setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, scanningTechnologies: updated } }) : prev);
+                                    }}
+                                    className="w-3.5 h-3.5 rounded text-indigo-600 focus:ring-indigo-500"
+                                  />
+                                  <span>{tech}</span>
+                                </label>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                          <label className="flex items-start gap-3 p-3 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-white cursor-pointer transition-colors">
+                            <input
+                              type="checkbox"
+                              checked={warehouseDetailModalData.techSpecs.hasApiIntegration ?? true}
+                              onChange={(e) => {
+                                const checked = e.target.checked;
+                                setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, hasApiIntegration: checked } }) : prev);
+                              }}
+                              className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 mt-0.5"
+                            />
+                            <div>
+                              <span className="text-xs font-bold text-slate-800 block">Tích hợp API với ERP</span>
+                              <span className="text-[11px] text-slate-500">Hỗ trợ REST API đồng bộ đơn hàng với SAP, Oracle, Bravo, sàn TMĐT...</span>
+                            </div>
+                          </label>
+
+                          <label className="flex items-start gap-3 p-3 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-white cursor-pointer transition-colors">
+                            <input
+                              type="checkbox"
+                              checked={warehouseDetailModalData.techSpecs.realtimeWebPortal ?? true}
+                              onChange={(e) => {
+                                const checked = e.target.checked;
+                                setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, realtimeWebPortal: checked } }) : prev);
+                              }}
+                              className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 mt-0.5"
+                            />
+                            <div>
+                              <span className="text-xs font-bold text-slate-800 block">Web Portal cho Khách hàng</span>
+                              <span className="text-[11px] text-slate-500">Cung cấp portal riêng cho khách hàng theo dõi tồn kho real-time 24/7.</span>
+                            </div>
+                          </label>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 6. NHIỆT ĐỘ & NĂNG LƯỢNG */}
+                    {warehouseTechActiveCategory === 'temperature' && (
+                      <div className="space-y-4 max-w-2xl">
+                        <div className="border-b border-slate-100 pb-3">
+                          <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                            <span>❄️</span> Kiểm Soát Nhiệt Độ & Nguồn Điện Dự Phòng
+                          </h4>
+                          <p className="text-xs text-slate-500 mt-0.5">
+                            Đặc biệt quan trọng cho kho lạnh, kho mát thực phẩm, dược phẩm và nguyên liệu nhạy cảm nhiệt.
+                          </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-xs font-bold text-slate-700 block mb-1">
+                              Dải nhiệt độ vận hành duy trì
+                            </label>
+                            <input
+                              type="text"
+                              value={warehouseDetailModalData.techSpecs.temperatureRange || (warehouseDetailModalData.isColdStorage ? '+2°C ~ +8°C' : '+18°C ~ +25°C')}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, temperatureRange: val } }) : prev);
+                              }}
+                              placeholder="VD: +2°C ~ +8°C, -18°C ~ -25°C hoặc Nhiệt độ thường"
+                              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="text-xs font-bold text-slate-700 block mb-1">
+                              Hãng máy nén & Cụm dàn lạnh (Nếu có)
+                            </label>
+                            <input
+                              type="text"
+                              value={warehouseDetailModalData.techSpecs.coolingSystemBrand || 'Bitzer (Đức) / Dàn lạnh Guentner'}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, coolingSystemBrand: val } }) : prev);
+                              }}
+                              placeholder="VD: Bitzer, Copeland, Danfoss..."
+                              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                          <label className="flex items-start gap-3 p-3 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-white cursor-pointer transition-colors">
+                            <input
+                              type="checkbox"
+                              checked={warehouseDetailModalData.techSpecs.hasAutoDataLogger ?? true}
+                              onChange={(e) => {
+                                const checked = e.target.checked;
+                                setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, hasAutoDataLogger: checked } }) : prev);
+                              }}
+                              className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 mt-0.5"
+                            />
+                            <div>
+                              <span className="text-xs font-bold text-slate-800 block">Cảm biến nhiệt & Data Logger</span>
+                              <span className="text-[11px] text-slate-500">Tự động ghi chép biểu đồ nhiệt 24/7, gửi SMS/Email cảnh báo khi lệch nhiệt độ.</span>
+                            </div>
+                          </label>
+
+                          <label className="flex items-start gap-3 p-3 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-white cursor-pointer transition-colors">
+                            <input
+                              type="checkbox"
+                              checked={warehouseDetailModalData.techSpecs.hasBackupGeneratorAts ?? true}
+                              onChange={(e) => {
+                                const checked = e.target.checked;
+                                setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, hasBackupGeneratorAts: checked } }) : prev);
+                              }}
+                              className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 mt-0.5"
+                            />
+                            <div>
+                              <span className="text-xs font-bold text-slate-800 block">Máy phát điện tự động ATS</span>
+                              <span className="text-[11px] text-slate-500">Máy phát điện dự phòng 100% công suất, tự động đóng điện ATS trong vòng 15 giây.</span>
+                            </div>
+                          </label>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 7. GIẤY PHÉP & CHỨNG NHẬN */}
+                    {warehouseTechActiveCategory === 'cert' && (
+                      <div className="space-y-4 max-w-2xl">
+                        <div className="border-b border-slate-100 pb-3">
+                          <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                            <span>📜</span> Giấy Phép, Tiêu Chuẩn Chất Lượng & Bảo Hiểm
+                          </h4>
+                          <p className="text-xs text-slate-500 mt-0.5">
+                            Các chứng nhận quốc tế chứng minh năng lực vận hành chuyên nghiệp của cơ sở kho.
+                          </p>
+                        </div>
+
+                        <div>
+                          <label className="text-xs font-bold text-slate-700 block mb-2">
+                            Các chứng nhận tiêu chuẩn chất lượng cơ sở đạt được:
+                          </label>
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            {['ISO 9001:2015', 'HACCP', 'ISO 22000', 'GDP (Thực hành tốt bảo quản thuốc)', 'GMP', 'LEED Gold Công Trình Xanh', 'BRC Global Standard', 'GSP Dược Phẩm'].map((cert) => {
+                              const list = warehouseDetailModalData.techSpecs.certifications || [];
+                              const isChecked = list.includes(cert);
+                              return (
+                                <label
+                                  key={cert}
+                                  className={`flex items-center gap-2 p-2 rounded-xl border text-xs cursor-pointer transition-all ${
+                                    isChecked ? 'bg-indigo-50 border-indigo-200 text-indigo-950 font-bold' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                                  }`}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={isChecked}
+                                    onChange={(e) => {
+                                      const updated = e.target.checked ? [...list, cert] : list.filter(c => c !== cert);
+                                      setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, certifications: updated } }) : prev);
+                                    }}
+                                    className="w-3.5 h-3.5 rounded text-indigo-600 focus:ring-indigo-500"
+                                  />
+                                  <span>{cert}</span>
+                                </label>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        <div className="p-3.5 bg-emerald-50/70 border border-emerald-200 rounded-2xl flex items-start gap-3">
+                          <input
+                            type="checkbox"
+                            checked={warehouseDetailModalData.techSpecs.hasFullInsurance ?? true}
+                            onChange={(e) => {
+                              const checked = e.target.checked;
+                              setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, hasFullInsurance: checked } }) : prev);
+                            }}
+                            className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 mt-0.5"
+                          />
+                          <div>
+                            <span className="text-xs font-bold text-emerald-950 block">Bảo hiểm kho bãi & Trách nhiệm dân sự 100%</span>
+                            <span className="text-[11px] text-emerald-800">Cơ sở được mua bảo hiểm cháy nổ bắt buộc và bảo hiểm trách nhiệm người trông coi hàng hóa với các công ty bảo hiểm uy tín (Bảo Việt, PTI, Tokio Marine...).</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 3: PHỤ PHÍ HANDLING & LƯU KHO */}
+              {warehouseDetailActiveTab === 'surcharges' && (
+                <div className="flex-1 p-6 overflow-y-auto space-y-6">
+                  {/* Phụ phí miễn phí */}
+                  <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-bold text-slate-900 text-xs flex items-center gap-1.5 text-emerald-700">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                          Dịch Vụ & Tiện Ích Đã Bao Gồm Trong Giá Lưu Kho (Miễn Phí)
+                        </h4>
+                        <p className="text-[11px] text-slate-500 mt-0.5">
+                          Các tiện ích nhà cung cấp cam kết miễn phí 100% kèm theo hợp đồng thuê.
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const name = prompt('Nhập tên tiện ích miễn phí kèm theo:');
+                          if (name && name.trim()) {
+                            setWarehouseDetailModalData(prev => prev ? ({
+                              ...prev,
+                              freeSurcharges: [...prev.freeSurcharges, name.trim()]
+                            }) : prev);
+                          }
+                        }}
+                        className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded-xl border border-emerald-200 transition-colors cursor-pointer inline-flex items-center gap-1"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Thêm Tiện Ích</span>
+                      </button>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      {warehouseDetailModalData.freeSurcharges.map((freeItem, fIdx) => (
+                        <span
+                          key={fIdx}
+                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold group"
+                        >
+                          <Check className="w-3 h-3 text-emerald-600" />
+                          <span>{freeItem}</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setWarehouseDetailModalData(prev => prev ? ({
+                                ...prev,
+                                freeSurcharges: prev.freeSurcharges.filter((_, idx) => idx !== fIdx)
+                              }) : prev);
+                            }}
+                            className="text-emerald-500 hover:text-rose-600 ml-1 cursor-pointer"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Bảng phụ phí có tính phí (Handling Inbound / Outbound / Cont) */}
+                  <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-bold text-slate-900 text-xs flex items-center gap-1.5 text-indigo-900">
+                          <DollarSign className="w-4 h-4 text-indigo-600" />
+                          Biểu Phí Xử Lý Hàng Hóa & Phụ Phí Vận Hành (Handling Surcharges)
+                        </h4>
+                        <p className="text-[11px] text-slate-500 mt-0.5">
+                          Khai báo phí bốc xếp dỡ hàng nhập kho (Inbound), xuất kho (Outbound), rút ruột container và các phí phát sinh riêng cho kho này.
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const name = prompt('Nhập tên phụ phí mới:');
+                          if (name && name.trim()) {
+                            const price = prompt('Nhập đơn giá & đơn vị tính (VD: 40,000 ₫ / Pallet):', '35,000 ₫ / Pallet');
+                            setWarehouseDetailModalData(prev => prev ? ({
+                              ...prev,
+                              paidSurcharges: [
+                                ...prev.paidSurcharges,
+                                {
+                                  id: `pwh-cst-${Date.now()}`,
+                                  name: name.trim(),
+                                  priceText: price || 'Liên hệ',
+                                  isChecked: true
+                                }
+                              ]
+                            }) : prev);
+                          }
+                        }}
+                        className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs rounded-xl border border-indigo-200 transition-colors cursor-pointer inline-flex items-center gap-1"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Thêm Phụ Phí</span>
+                      </button>
+                    </div>
+
+                    <div className="border border-slate-200 rounded-xl overflow-hidden">
+                      <table className="w-full text-left text-xs border-collapse">
+                        <thead>
+                          <tr className="bg-slate-100/80 text-slate-700 font-bold border-b border-slate-200">
+                            <th className="py-2.5 px-3 w-10 text-center">Áp Dụng</th>
+                            <th className="py-2.5 px-3">Tên Phụ Phí / Hạng Mục Xử Lý</th>
+                            <th className="py-2.5 px-3 w-64">Đơn Giá Áp Dụng (Kèm Đơn Vị Tính)</th>
+                            <th className="py-2.5 px-2 w-16 text-center">Xóa</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {warehouseDetailModalData.paidSurcharges.map((pItem) => (
+                            <tr key={pItem.id} className={`hover:bg-slate-50/80 transition-colors ${pItem.isChecked ? 'bg-white' : 'bg-slate-50/50 opacity-60'}`}>
+                              <td className="py-2.5 px-3 text-center align-middle">
+                                <input
+                                  type="checkbox"
+                                  checked={pItem.isChecked}
+                                  onChange={(e) => {
+                                    const checked = e.target.checked;
+                                    setWarehouseDetailModalData(prev => prev ? ({
+                                      ...prev,
+                                      paidSurcharges: prev.paidSurcharges.map(p => p.id === pItem.id ? { ...p, isChecked: checked } : p)
+                                    }) : prev);
+                                  }}
+                                  className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                                />
+                              </td>
+                              <td className="py-2.5 px-3 font-semibold text-slate-800 align-middle">
+                                <input
+                                  type="text"
+                                  value={pItem.name}
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    setWarehouseDetailModalData(prev => prev ? ({
+                                      ...prev,
+                                      paidSurcharges: prev.paidSurcharges.map(p => p.id === pItem.id ? { ...p, name: val } : p)
+                                    }) : prev);
+                                  }}
+                                  className="w-full bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-500 focus:outline-none px-1 py-0.5 text-xs font-semibold text-slate-800"
+                                />
+                              </td>
+                              <td className="py-2.5 px-3 align-middle">
+                                <input
+                                  type="text"
+                                  value={pItem.priceText}
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    setWarehouseDetailModalData(prev => prev ? ({
+                                      ...prev,
+                                      paidSurcharges: prev.paidSurcharges.map(p => p.id === pItem.id ? { ...p, priceText: val } : p)
+                                    }) : prev);
+                                  }}
+                                  placeholder="VD: 35,000 ₫ / Pallet"
+                                  className="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-indigo-700 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                />
+                              </td>
+                              <td className="py-2.5 px-2 text-center align-middle">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setWarehouseDetailModalData(prev => prev ? ({
+                                      ...prev,
+                                      paidSurcharges: prev.paidSurcharges.filter(p => p.id !== pItem.id)
+                                    }) : prev);
+                                  }}
+                                  className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 4: DỊCH VỤ GIA TĂNG (VAS) */}
+              {warehouseDetailActiveTab === 'vas' && (
+                <div className="flex-1 p-6 overflow-y-auto space-y-4">
+                  <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-bold text-slate-900 text-xs flex items-center gap-1.5 text-indigo-900">
+                          <Sparkles className="w-4 h-4 text-indigo-600" />
+                          Dịch Vụ Giá Trị Gia Tăng Tại Kho (Value-Added Services - VAS)
+                        </h4>
+                        <p className="text-[11px] text-slate-500 mt-0.5">
+                          Tùy biến các dịch vụ dán tem nhãn, quấn màng co PE, đóng thùng kitting quà tặng theo từng cơ sở kho.
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const name = prompt('Nhập tên dịch vụ VAS mới:');
+                          if (name && name.trim()) {
+                            const price = prompt('Nhập đơn giá & đơn vị tính (VD: 500 ₫ / Tem):', '1,000 ₫ / Kiện');
+                            setWarehouseDetailModalData(prev => prev ? ({
+                              ...prev,
+                              vasItems: [
+                                ...prev.vasItems,
+                                {
+                                  id: `vwh-cst-${Date.now()}`,
+                                  name: name.trim(),
+                                  category: 'Đóng Gói & Xử Lý',
+                                  priceText: price || 'Liên hệ',
+                                  isChecked: true
+                                }
+                              ]
+                            }) : prev);
+                          }
+                        }}
+                        className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs rounded-xl border border-indigo-200 transition-colors cursor-pointer inline-flex items-center gap-1"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Thêm Dịch Vụ VAS</span>
+                      </button>
+                    </div>
+
+                    <div className="border border-slate-200 rounded-xl overflow-hidden">
+                      <table className="w-full text-left text-xs border-collapse">
+                        <thead>
+                          <tr className="bg-slate-100/80 text-slate-700 font-bold border-b border-slate-200">
+                            <th className="py-2.5 px-3 w-10 text-center">Cung Cấp</th>
+                            <th className="py-2.5 px-3">Tên Dịch Vụ VAS</th>
+                            <th className="py-2.5 px-3 w-40">Nhóm Phân Loại</th>
+                            <th className="py-2.5 px-3 w-60">Đơn Giá Dịch Vụ (Kèm Đơn Vị Tính)</th>
+                            <th className="py-2.5 px-2 w-16 text-center">Xóa</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {warehouseDetailModalData.vasItems.map((vas) => (
+                            <tr key={vas.id} className={`hover:bg-slate-50/80 transition-colors ${vas.isChecked ? 'bg-white' : 'bg-slate-50/50 opacity-60'}`}>
+                              <td className="py-2.5 px-3 text-center align-middle">
+                                <input
+                                  type="checkbox"
+                                  checked={vas.isChecked}
+                                  onChange={(e) => {
+                                    const checked = e.target.checked;
+                                    setWarehouseDetailModalData(prev => prev ? ({
+                                      ...prev,
+                                      vasItems: prev.vasItems.map(v => v.id === vas.id ? { ...v, isChecked: checked } : v)
+                                    }) : prev);
+                                  }}
+                                  className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                                />
+                              </td>
+                              <td className="py-2.5 px-3 font-semibold text-slate-800 align-middle">
+                                <input
+                                  type="text"
+                                  value={vas.name}
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    setWarehouseDetailModalData(prev => prev ? ({
+                                      ...prev,
+                                      vasItems: prev.vasItems.map(v => v.id === vas.id ? { ...v, name: val } : v)
+                                    }) : prev);
+                                  }}
+                                  className="w-full bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-500 focus:outline-none px-1 py-0.5 text-xs font-semibold text-slate-800"
+                                />
+                              </td>
+                              <td className="py-2.5 px-3 align-middle text-slate-500 font-medium">
+                                <span className="px-2 py-0.5 bg-slate-100 rounded-md border border-slate-200 text-[11px]">
+                                  {vas.category || 'Dịch Vụ Kho'}
+                                </span>
+                              </td>
+                              <td className="py-2.5 px-3 align-middle">
+                                <input
+                                  type="text"
+                                  value={vas.priceText}
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    setWarehouseDetailModalData(prev => prev ? ({
+                                      ...prev,
+                                      vasItems: prev.vasItems.map(v => v.id === vas.id ? { ...v, priceText: val } : v)
+                                    }) : prev);
+                                  }}
+                                  placeholder="VD: 35,000 ₫ / Pallet"
+                                  className="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-indigo-700 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                />
+                              </td>
+                              <td className="py-2.5 px-2 text-center align-middle">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setWarehouseDetailModalData(prev => prev ? ({
+                                      ...prev,
+                                      vasItems: prev.vasItems.filter(v => v.id !== vas.id)
+                                    }) : prev);
+                                  }}
+                                  className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* 4. Modal Footer */}
+            <div className="px-6 py-3.5 bg-white border-t border-slate-200 flex items-center justify-between shrink-0">
+              <div className="text-[11px] text-slate-500 flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-indigo-600 shrink-0" />
+                <span>Toàn bộ ảnh, thông số kỹ thuật, phụ phí & VAS sẽ được tự động đồng bộ vào Hồ Sơ Năng Lực của cơ sở này.</span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setWarehouseDetailModalData(null)}
+                  className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+                >
+                  Hủy Bỏ
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleSaveWarehouseDetailModal}
+                  className="inline-flex items-center gap-1.5 px-5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-md shadow-indigo-600/20 cursor-pointer"
+                >
+                  <Check className="w-4 h-4" />
+                  <span>Xác Nhận & Lưu Chi Tiết Cơ Sở Kho</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
