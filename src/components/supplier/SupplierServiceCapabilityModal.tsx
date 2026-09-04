@@ -35,7 +35,8 @@ import {
   FileUp,
   AlertTriangle,
   RefreshCw,
-  FileCheck
+  FileCheck,
+  Zap
 } from 'lucide-react';
 import { ServiceType } from '../../types';
 
@@ -109,6 +110,60 @@ export const LCL_SHIPPING_LINES = [
 
 export const LCL_PACKAGING_TYPES = LCL_SHIPPING_LINES;
 
+export const AIR_TRADE_LANE_REGIONS_LOV = [
+  'Đông Nam Á (ASEAN)',
+  'Đông Bắc Á (Nhật - Hàn - Trung - Đài)',
+  'Châu Âu (EU - UK)',
+  'Bắc Mỹ (USA - Canada)',
+  'Úc & New Zealand (Oceania)',
+  'Trung Đông & Nam Á (Middle East / India)',
+  'Nội địa Việt Nam (Trục Bắc - Trung - Nam)',
+  'Khác (Toàn cầu)...',
+];
+
+export const AIR_AIRLINES_LOV = [
+  'Vietnam Airlines (VN Cargo)',
+  'Vietjet Air Cargo (VJ Cargo)',
+  'Bamboo Airways Cargo (QH)',
+  'Singapore Airlines Cargo (SQ)',
+  'Qatar Airways Cargo (QR)',
+  'Korean Air Cargo (KE)',
+  'Cathay Cargo (CX)',
+  'Emirates SkyCargo (EK)',
+  'EVA Air Cargo (BR)',
+  'China Airlines Cargo (CI)',
+  'All Nippon Airways (ANA Cargo - NH)',
+  'Japan Airlines (JAL Cargo - JL)',
+  'Asiana Airlines Cargo (OZ)',
+  'Thai Airways Cargo (TG)',
+  'Lufthansa Cargo (LH)',
+  'Turkish Airlines Cargo (TK)',
+  'Air France - KLM Cargo (AF/KL)',
+  'Khác (Nhập hãng bay khác)...',
+];
+
+export const EXPRESS_CARRIERS_LOV = [
+  'DHL Express',
+  'FedEx Express',
+  'UPS Express',
+  'EMS (VNPost)',
+  'SF Express (Thuận Phong)',
+  'Kerry Express',
+  'J&T Express',
+  'Viettel Post Express',
+  'Khác (Nhập hãng khác)...',
+];
+
+export const AIR_CUTOFF_TIMES_LOV = [
+  { time: '18:00', label: '18:00 (Cắt hàng TCS/SCSC tiêu chuẩn)' },
+  { time: '16:00', label: '16:00 (Cắt hàng ca chiều)' },
+  { time: '12:00', label: '12:00 (Cắt hàng ca trưa - Day flight)' },
+  { time: '20:00', label: '20:00 (Cắt hàng ca tối NCTS/ASc)' },
+  { time: '22:00', label: '22:00 (Cắt hàng ca đêm - Red eye)' },
+  { time: '4h trước ETD', label: 'Trước ETD 4h (Cắt hàng khẩn AOG)' },
+  { time: '6h trước ETD', label: 'Trước ETD 6h (Cut-off tiêu chuẩn)' },
+];
+
 export interface ScheduleModalData {
   routeId: string;
   routeName: string;
@@ -118,6 +173,7 @@ export interface ScheduleModalData {
   departureTime: string;
   customNote: string;
   isLcl?: boolean;
+  isAirCargo?: boolean;
 }
 
 // =========================================================================
@@ -219,6 +275,84 @@ export const createDefaultLclPricingConfig = (
   }
 };
 
+export const createDefaultAirPricingConfig = (
+  currency: 'USD' | 'VND' = 'USD',
+  basePlus100Price: number = 4.2
+): LtlTieredPricingConfig => {
+  if (currency === 'USD') {
+    const baseVal = basePlus100Price > 0 && basePlus100Price < 100 ? basePlus100Price : 4.2;
+    return {
+      minCharge: 45,
+      pricingBasis: 'weight',
+      currency: 'USD',
+      weightTiers: [
+        { id: 'w1', rangeLabel: '-45 Kg', subLabel: 'Hàng lẻ kiện nhỏ (Min Charge)', minKg: 1, maxKg: 44, price: Number((baseVal * 1.38).toFixed(2)) },
+        { id: 'w2', rangeLabel: '+45 Kg', subLabel: 'Lô hàng kiện tiêu chuẩn', minKg: 45, maxKg: 99, price: Number((baseVal * 1.14).toFixed(2)) },
+        { id: 'w3', rangeLabel: '+100 Kg (Base)', subLabel: 'Mốc giá sàn chuẩn thị trường', minKg: 100, maxKg: 299, price: Number(baseVal.toFixed(2)) },
+        { id: 'w4', rangeLabel: '+300 Kg', subLabel: 'Lô hàng sỉ trung bình', minKg: 300, maxKg: 499, price: Number((baseVal * 0.85).toFixed(2)) },
+        { id: 'w5', rangeLabel: '+500 Kg', subLabel: 'Lô hàng tải nặng', minKg: 500, maxKg: 999, price: Number((baseVal * 0.76).toFixed(2)) },
+        { id: 'w6', rangeLabel: '+1,000 Kg (+1 Ton)', subLabel: 'Lô siêu trọng / Đóng mâm ULD', minKg: 1000, maxKg: 999999, price: Number((baseVal * 0.67).toFixed(2)) },
+      ],
+      volumeTiers: [],
+    };
+  } else {
+    const baseVnd = basePlus100Price >= 1000 ? basePlus100Price : 105000;
+    return {
+      minCharge: 1150000,
+      pricingBasis: 'weight',
+      currency: 'VND',
+      weightTiers: [
+        { id: 'w1', rangeLabel: '-45 Kg', subLabel: 'Hàng lẻ kiện nhỏ (Min Charge)', minKg: 1, maxKg: 44, price: Math.round(baseVnd * 1.38) },
+        { id: 'w2', rangeLabel: '+45 Kg', subLabel: 'Lô hàng kiện tiêu chuẩn', minKg: 45, maxKg: 99, price: Math.round(baseVnd * 1.14) },
+        { id: 'w3', rangeLabel: '+100 Kg (Base)', subLabel: 'Mốc giá sàn chuẩn thị trường', minKg: 100, maxKg: 299, price: Math.round(baseVnd) },
+        { id: 'w4', rangeLabel: '+300 Kg', subLabel: 'Lô hàng sỉ trung bình', minKg: 300, maxKg: 499, price: Math.round(baseVnd * 0.85) },
+        { id: 'w5', rangeLabel: '+500 Kg', subLabel: 'Lô hàng tải nặng', minKg: 500, maxKg: 999, price: Math.round(baseVnd * 0.76) },
+        { id: 'w6', rangeLabel: '+1,000 Kg (+1 Ton)', subLabel: 'Lô siêu trọng / Đóng mâm ULD', minKg: 1000, maxKg: 999999, price: Math.round(baseVnd * 0.67) },
+      ],
+      volumeTiers: [],
+    };
+  }
+};
+
+export const createDefaultExpressPricingConfig = (
+  currency: 'USD' | 'VND' = 'USD',
+  basePlus45Price: number = 6.5
+): LtlTieredPricingConfig => {
+  if (currency === 'USD') {
+    const baseVal = basePlus45Price > 0 && basePlus45Price < 200 ? basePlus45Price : 6.5;
+    return {
+      minCharge: 15,
+      pricingBasis: 'weight',
+      currency: 'USD',
+      weightTiers: [
+        { id: 'w1', rangeLabel: '1 – 5 Kg', subLabel: 'Kiện chứng từ / Hàng mẫu nhỏ', minKg: 1, maxKg: 5, price: Number((baseVal * 2.15).toFixed(2)) },
+        { id: 'w2', rangeLabel: '6 – 20 Kg', subLabel: 'Kiện nhỏ thông dụng', minKg: 6, maxKg: 20, price: Number((baseVal * 1.54).toFixed(2)) },
+        { id: 'w3', rangeLabel: '+21 Kg', subLabel: 'Lô hàng thương mại nhẹ', minKg: 21, maxKg: 44, price: Number((baseVal * 1.23).toFixed(2)) },
+        { id: 'w4', rangeLabel: '+45 Kg (Base)', subLabel: 'Mốc giá sàn Express chuẩn', minKg: 45, maxKg: 70, price: Number(baseVal.toFixed(2)) },
+        { id: 'w5', rangeLabel: '+71 Kg', subLabel: 'Lô hàng kiện lớn', minKg: 71, maxKg: 99, price: Number((baseVal * 0.86).toFixed(2)) },
+        { id: 'w6', rangeLabel: '+100 Kg', subLabel: 'Lô sỉ Express số lượng lớn', minKg: 100, maxKg: 999999, price: Number((baseVal * 0.75).toFixed(2)) },
+      ],
+      volumeTiers: [],
+    };
+  } else {
+    const baseVnd = basePlus45Price >= 1000 ? basePlus45Price : 165000;
+    return {
+      minCharge: 380000,
+      pricingBasis: 'weight',
+      currency: 'VND',
+      weightTiers: [
+        { id: 'w1', rangeLabel: '1 – 5 Kg', subLabel: 'Kiện chứng từ / Hàng mẫu nhỏ', minKg: 1, maxKg: 5, price: Math.round(baseVnd * 2.15) },
+        { id: 'w2', rangeLabel: '6 – 20 Kg', subLabel: 'Kiện nhỏ thông dụng', minKg: 6, maxKg: 20, price: Math.round(baseVnd * 1.54) },
+        { id: 'w3', rangeLabel: '+21 Kg', subLabel: 'Lô hàng thương mại nhẹ', minKg: 21, maxKg: 44, price: Math.round(baseVnd * 1.23) },
+        { id: 'w4', rangeLabel: '+45 Kg (Base)', subLabel: 'Mốc giá sàn Express chuẩn', minKg: 45, maxKg: 70, price: Math.round(baseVnd) },
+        { id: 'w5', rangeLabel: '+71 Kg', subLabel: 'Lô hàng kiện lớn', minKg: 71, maxKg: 99, price: Math.round(baseVnd * 0.86) },
+        { id: 'w6', rangeLabel: '+100 Kg', subLabel: 'Lô sỉ Express số lượng lớn', minKg: 100, maxKg: 999999, price: Math.round(baseVnd * 0.75) },
+      ],
+      volumeTiers: [],
+    };
+  }
+};
+
 export interface TieredPricingModalData {
   routeId: string;
   routeName: string;
@@ -226,6 +360,8 @@ export interface TieredPricingModalData {
   destination: string;
   currency: 'VND' | 'USD';
   isLcl?: boolean;
+  isAirCargo?: boolean;
+  isExpress?: boolean;
   pricingConfig: LtlTieredPricingConfig;
 }
 
@@ -1746,24 +1882,62 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             id: 'air-gen-cargo',
             name: 'Air Cargo (Bay thường / General Cargo)',
             code: 'Air Cargo',
-            defaultFleet: 'Hợp đồng Block Space Agreement (BSA) Vietnam Airlines, Singapore Airlines, EVA Air',
-            defaultOperation: 'Book tải bay hàng ngày, ưu tiên qua soi chiếu an ninh TCS/SCSC/NCTS',
-            defaultCommitment: 'Bay đúng lịch trình, đền bù 100% nếu trễ chuyến ảnh hưởng dây chuyền sản xuất',
-            vehicleLov: ['Air Cargo Tiêu Chuẩn', 'Mâm ULD PMC/PAG', 'Thùng AKE'],
-            unitLov: ['Kg', 'Tấn'],
+            defaultFleet: 'Hợp đồng Block Space Agreement (BSA) Vietnam Airlines, Singapore Airlines, EVA Air, Qatar Airways',
+            defaultOperation: 'Book tải bay hàng ngày, ưu tiên qua soi chiếu an ninh TCS/SCSC/NCTS 24/7',
+            defaultCommitment: 'Bay đúng lịch trình cam kết, đền bù 100% nếu trễ chuyến ảnh hưởng tiến độ xuất hàng',
+            vehicleLov: AIR_AIRLINES_LOV,
+            unitLov: ['Kg'],
             defaultRoutes: [
               {
                 id: 'r-air-1',
-                route: 'SGN (Tân Sơn Nhất) ⇄ NRT (Tokyo)',
-                origin: 'Sân bay Tân Sơn Nhất (TP.HCM)',
-                destination: 'Sân bay Narita (Tokyo, Nhật Bản)',
-                vehicleType: 'Air Cargo Tiêu Chuẩn',
+                routeCode: 'RC-AIR-001',
+                region: 'Đông Bắc Á (Nhật - Hàn - Trung - Đài)',
+                route: 'SGN (Tân Sơn Nhất) ⇄ NRT (Tokyo Narita)',
+                origin: 'Sân bay Tân Sơn Nhất (SGN)',
+                destination: 'Sân bay Narita Tokyo (NRT)',
+                vehicleType: 'Vietnam Airlines (VN Cargo)',
                 pricingUnit: 'Kg',
-                price: 88000,
-                currency: 'VND',
-                sla: '2 - 3 ngày',
-                pricingStyle: 'Chưa gồm phụ phí',
+                price: 4.2,
+                currency: 'USD',
+                sla: 'Hàng ngày (Cắt TCS 18:00)',
+                transitType: 'Direct',
+                validUntil: '2026-12-31',
                 promotionPercent: 10,
+                ltlPricing: createDefaultAirPricingConfig('USD', 4.2),
+              },
+              {
+                id: 'r-air-2',
+                routeCode: 'RC-AIR-002',
+                region: 'Châu Âu (EU - UK)',
+                route: 'HAN (Nội Bài) ⇄ FRA (Frankfurt Germany)',
+                origin: 'Sân bay Nội Bài (HAN)',
+                destination: 'Sân bay Frankfurt (FRA)',
+                vehicleType: 'Lufthansa Cargo (LH)',
+                pricingUnit: 'Kg',
+                price: 5.6,
+                currency: 'USD',
+                sla: 'T3, T5, T7 (Cắt NCTS 20:00)',
+                transitType: 'Direct',
+                validUntil: '2026-12-31',
+                promotionPercent: 5,
+                ltlPricing: createDefaultAirPricingConfig('USD', 5.6),
+              },
+              {
+                id: 'r-air-3',
+                routeCode: 'RC-AIR-003',
+                region: 'Đông Nam Á (ASEAN)',
+                route: 'SGN (Tân Sơn Nhất) ⇄ SIN (Singapore Changi)',
+                origin: 'Sân bay Tân Sơn Nhất (SGN)',
+                destination: 'Sân bay Singapore Changi (SIN)',
+                vehicleType: 'Singapore Airlines Cargo (SQ)',
+                pricingUnit: 'Kg',
+                price: 2.4,
+                currency: 'USD',
+                sla: 'Hàng ngày (Cắt SCSC 16:00)',
+                transitType: 'Direct',
+                validUntil: '2026-12-31',
+                promotionPercent: 0,
+                ltlPricing: createDefaultAirPricingConfig('USD', 2.4),
               },
             ],
             freeSurchargeOptions: [
@@ -3767,6 +3941,9 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
   const handleOpenScheduleModal = (route: CapabilityRouteItem) => {
     const isOcean = activeCategory?.id === 'ocean' || activeModel?.id?.startsWith('sea-');
     const isRail = activeCategory?.id === 'rail' || activeModel?.id?.startsWith('rail-');
+    const isAir = activeCategory?.id === 'air' || activeModel?.id?.startsWith('air-');
+    const isExpress = activeCategory?.id === 'air' && (activeModel?.id === 'air-gen-exp' || activeModel?.name?.includes('Express') || activeModel?.code === 'Express');
+    const isAirCargo = isAir; // Cả Air Cargo và Express đều áp dụng cấu hình lịch bay & giờ cut-off ga hàng không
     const isLclModel = (isOcean || isRail) && (activeModel?.id?.includes('lcl') || activeModel?.name?.includes('LCL') || activeModel?.code === 'LCL');
     const currentSla = route.sla || '';
     let parsedDays = DAYS_OF_WEEK_LOV.filter((d) => currentSla.includes(d.name)).map((d) => d.name);
@@ -3774,28 +3951,29 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
       parsedDays = DAYS_OF_WEEK_LOV.map((d) => d.name);
     }
 
-    // Extract time from string (e.g. 20:00 or 19:30 or 17:00)
+    // Extract time from string (e.g. 20:00 or 19:30 or 17:00 or 18:00)
     const timeMatch = currentSla.match(/(\d{1,2}:\d{2})/);
-    const departureTime = timeMatch ? timeMatch[1] : (isLclModel ? '17:00' : '20:00');
+    const departureTime = timeMatch ? timeMatch[1] : (isAirCargo ? '18:00' : (isLclModel ? '17:00' : '20:00'));
 
     setScheduleModalData({
       routeId: route.id,
       routeName: route.route,
       origin: route.origin,
       destination: route.destination,
-      selectedDays: parsedDays.length > 0 ? parsedDays : (isLclModel ? ['Thứ 4', 'Thứ 7'] : ['Thứ 2', 'Thứ 4', 'Thứ 6']),
+      selectedDays: parsedDays.length > 0 ? parsedDays : (isAirCargo ? ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ Nhật'] : (isLclModel ? ['Thứ 4', 'Thứ 7'] : ['Thứ 2', 'Thứ 4', 'Thứ 6'])),
       departureTime,
       customNote: '',
       isLcl: isLclModel,
+      isAirCargo,
     });
   };
 
   const handleSaveScheduleModal = () => {
     if (!scheduleModalData) return;
-    const { routeId, selectedDays, departureTime, customNote, isLcl } = scheduleModalData;
+    const { routeId, selectedDays, departureTime, customNote, isLcl, isAirCargo } = scheduleModalData;
 
     let formatted = '';
-    const cutOffPrefix = isLcl ? 'Cắt hàng CFS' : 'Xuất bến';
+    const cutOffPrefix = isAirCargo ? 'Cắt TCS' : (isLcl ? 'Cắt hàng CFS' : 'Xuất bến');
     if (selectedDays.length === 7) {
       formatted = `Hàng ngày${departureTime ? ` (${cutOffPrefix} ${departureTime})` : ''}`;
     } else if (selectedDays.length > 0) {
@@ -3819,13 +3997,21 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
   const handleOpenTieredPricingModal = (route: CapabilityRouteItem) => {
     const isOcean = activeCategory?.id === 'ocean' || activeModel?.id?.startsWith('sea-');
     const isRail = activeCategory?.id === 'rail' || activeModel?.id?.startsWith('rail-');
+    const isAir = activeCategory?.id === 'air' || activeModel?.id?.startsWith('air-');
+    const isExpress = activeCategory?.id === 'air' && (activeModel?.id === 'air-gen-exp' || activeModel?.name?.includes('Express') || activeModel?.code === 'Express');
+    const isAirCargo = isAir && !isExpress;
     const isLclModel = (isOcean || isRail) && (activeModel?.id?.includes('lcl') || activeModel?.name?.includes('LCL') || activeModel?.code === 'LCL');
-    const isWeightBasis = !route.pricingUnit || route.pricingUnit.toLowerCase().includes('kg') || route.pricingUnit.toLowerCase().includes('tấn');
-    const routeCurrency = route.currency || (isOcean ? 'USD' : 'VND');
+    const isWeightBasis = isAirCargo || !route.pricingUnit || route.pricingUnit.toLowerCase().includes('kg') || route.pricingUnit.toLowerCase().includes('tấn');
+    const routeCurrency = route.currency || ((isOcean || isAir) ? 'USD' : 'VND');
 
     let existingConfig = route.ltlPricing;
     if (!existingConfig) {
-      if (isLclModel) {
+      if (isAirCargo) {
+        existingConfig = createDefaultAirPricingConfig(
+          routeCurrency,
+          route.price > 0 ? route.price : (routeCurrency === 'USD' ? 4.2 : 105000)
+        );
+      } else if (isLclModel) {
         existingConfig = createDefaultLclPricingConfig(
           isWeightBasis ? 'weight' : 'volume',
           routeCurrency,
@@ -3847,18 +4033,21 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
       destination: route.destination,
       currency: routeCurrency,
       isLcl: isLclModel,
+      isAirCargo,
       pricingConfig: JSON.parse(JSON.stringify(existingConfig)),
     });
-    setTieredPricingActiveTab(isWeightBasis ? 'weight' : 'volume');
+    setTieredPricingActiveTab('weight');
   };
 
   const handleSaveTieredPricingModal = () => {
     if (!tieredPricingModalData) return;
-    const { routeId, pricingConfig, currency, isLcl } = tieredPricingModalData;
+    const { routeId, pricingConfig, currency, isLcl, isAirCargo } = tieredPricingModalData;
     const isWeight = pricingConfig.pricingBasis === 'weight';
-    const repPrice = isWeight 
-      ? (pricingConfig.weightTiers[1]?.price || pricingConfig.weightTiers[0]?.price || (currency === 'USD' ? 25 : 2000))
-      : (pricingConfig.volumeTiers[1]?.price || pricingConfig.volumeTiers[0]?.price || (currency === 'USD' ? 25 : 500000));
+    const repPrice = isAirCargo
+      ? (pricingConfig.weightTiers[2]?.price || pricingConfig.weightTiers[0]?.price || (currency === 'USD' ? 4.2 : 105000))
+      : isWeight 
+        ? (pricingConfig.weightTiers[1]?.price || pricingConfig.weightTiers[0]?.price || (currency === 'USD' ? 25 : 2000))
+        : (pricingConfig.volumeTiers[1]?.price || pricingConfig.volumeTiers[0]?.price || (currency === 'USD' ? 25 : 500000));
 
     handleUpdateRouteRowMultiple(routeId, {
       ltlPricing: pricingConfig,
@@ -4427,6 +4616,9 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
     const isTrucking = activeCategory?.id === 'trucking';
     const isOcean = activeCategory?.id === 'ocean' || activeModel?.id?.startsWith('sea-');
     const isRail = activeCategory?.id === 'rail' || activeModel?.id?.startsWith('rail-');
+    const isAir = activeCategory?.id === 'air' || activeModel?.id?.startsWith('air-');
+    const isExpress = activeCategory?.id === 'air' && (activeModel?.id === 'air-gen-exp' || activeModel?.name?.includes('Express') || activeModel?.code === 'Express');
+    const isAirCargo = isAir && !isExpress;
     const isFcl = (isOcean && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL')) || (isRail && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL')));
     const isLcl = (isOcean && (activeModel?.id?.includes('lcl') || activeModel?.name?.includes('LCL') || activeModel?.code === 'LCL')) || (isRail && (activeModel?.id?.includes('lcl') || activeModel?.name?.includes('LCL')));
     const isLtlTrucking = isTrucking && (activeModel?.id === 'trk-gen-ltl' || activeModel?.name?.includes('LTL') || activeModel?.code === 'LTL');
@@ -4437,32 +4629,85 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
     const defaultBody = bodyTypes[0];
     const defaultTonnages = getTonnagesForBodyType(defaultBody, cargoType);
     const defaultTonnage = isLtlTrucking ? defaultTonnages[2] || defaultTonnages[0] : (isHazmatTrucking ? defaultTonnages[2] || defaultTonnages[0] : (isReeferTrucking ? defaultTonnages[0] : (defaultTonnages[defaultTonnages.length - 2] || defaultTonnages[0])));
-    const defaultVehicle = isLtlTrucking ? 'Xe thùng kín 15T ghép tuyến' : (isLcl ? (isOcean ? 'LCL Hàng lẻ đóng ghép (Consolidation)' : 'Hàng lẻ toa ghép đường sắt') : (isHazmatTrucking ? 'Xe tải hóa chất 15T' : (isReeferTrucking ? 'Xe đông lạnh 5T' : (isTrucking ? 'Xe tải 15T thùng kín' : (activeModel?.vehicleLov?.[0] || (isFcl ? '40ft High Cube (40HC)' : 'Phương tiện chuẩn'))))));
-    const defaultUnit = isFcl ? 'Cont' : (isLtlTrucking ? 'Kg' : (isLcl ? (isOcean ? 'CBM' : 'Kg') : (activeModel?.unitLov?.[0] || 'Chuyến')));
+    const defaultVehicle = isAirCargo ? 'Vietnam Airlines (VN Cargo)' : (isExpress ? 'DHL Express' : (isLtlTrucking ? 'Xe thùng kín 15T ghép tuyến' : (isLcl ? (isOcean ? 'LCL Hàng lẻ đóng ghép (Consolidation)' : 'Hàng lẻ toa ghép đường sắt') : (isHazmatTrucking ? 'Xe tải hóa chất 15T' : (isReeferTrucking ? 'Xe đông lạnh 5T' : (isTrucking ? 'Xe tải 15T thùng kín' : (activeModel?.vehicleLov?.[0] || (isFcl ? '40ft High Cube (40HC)' : 'Phương tiện chuẩn'))))))));
+    const defaultUnit = (isAirCargo || isExpress) ? 'Kg' : (isFcl ? 'Cont' : (isLtlTrucking ? 'Kg' : (isLcl ? (isOcean ? 'CBM' : 'Kg') : (activeModel?.unitLov?.[0] || 'Chuyến'))));
     const modelPrefix = (activeModel?.code || activeCategory?.id || 'RC').toUpperCase().replace(/[^A-Z0-9]/g, '');
     const nextIdx = (currentData.routes || []).length + 1;
     const generatedRouteCode = `RC-${modelPrefix}-${String(nextIdx).padStart(3, '0')}`;
 
+    let defaultRoute = 'Hành Lang Tuyến Mới';
+    let defaultOrigin = 'Điểm Lấy Hàng (Kho / Cảng)';
+    let defaultDestination = 'Điểm Giao Hàng (Kho / Cảng)';
+    let defaultPrice = 15000000;
+    let defaultSla = '24 - 48 giờ';
+
+    if (isAirCargo) {
+      defaultRoute = 'SGN (Tân Sơn Nhất) ⇄ NRT (Tokyo Narita)';
+      defaultOrigin = 'Sân bay Tân Sơn Nhất (SGN)';
+      defaultDestination = 'Sân bay Narita Tokyo (NRT)';
+      defaultPrice = 4.2;
+      defaultSla = 'Hàng ngày (Cắt TCS 18:00)';
+    } else if (isExpress) {
+      defaultRoute = 'Việt Nam ⇄ Singapore';
+      defaultOrigin = 'Hà Nội / TP.HCM';
+      defaultDestination = 'Singapore';
+      defaultPrice = 6.5;
+      defaultSla = '24 - 48 giờ';
+    } else if (isLtlTrucking) {
+      defaultRoute = 'Hà Nội ⇄ TP.HCM';
+      defaultOrigin = 'Hub Thanh Trì (Hà Nội)';
+      defaultDestination = 'Hub Quận 12 (TP.HCM)';
+      defaultPrice = 1650;
+      defaultSla = 'Thứ 2, Thứ 4, Thứ 6 (Xuất bến 20:00)';
+    } else if (isOcean) {
+      defaultRoute = isFcl ? 'Cát Lái (VNCLI) ⇄ Hamburg (Đức)' : 'Cát Lái (VNCLI) ⇄ Singapore (SGSIN)';
+      defaultOrigin = isFcl ? 'Cảng Cát Lái (TP.HCM)' : 'Kho CFS Cát Lái (TP.HCM)';
+      defaultDestination = isFcl ? 'Cảng Hamburg (Germany)' : 'Cảng Singapore (SGSIN)';
+      defaultPrice = isFcl ? 2450 : 25;
+      defaultSla = isFcl ? '28 - 32 ngày' : 'Thứ 4, Thứ 7 (Cắt hàng CFS 17:00)';
+    } else if (isHazmatTrucking) {
+      defaultRoute = 'Bà Rịa - Vũng Tàu ⇄ Bình Dương';
+      defaultOrigin = 'KCN Phú Mỹ (BR-VT)';
+      defaultDestination = 'KCN VSIP 2 (Bình Dương)';
+      defaultPrice = 14500000;
+      defaultSla = '4 - 6 giờ';
+    } else if (isReeferTrucking) {
+      defaultRoute = 'Đà Lạt ⇄ TP.HCM';
+      defaultOrigin = 'Đức Trọng (Lâm Đồng)';
+      defaultDestination = 'Chợ đầu mối Thủ Đức (TP.HCM)';
+      defaultPrice = 9500000;
+      defaultSla = '7 - 9 giờ';
+    } else if (isRail) {
+      defaultRoute = isFcl ? 'Ga Sóng Thần ⇄ Ga Giáp Bát' : 'Sài Gòn ⇄ Hà Nội';
+      defaultOrigin = 'Ga Sóng Thần (Bình Dương)';
+      defaultDestination = 'Ga Giáp Bát (Hà Nội)';
+      defaultPrice = isFcl ? 21000000 : 1100;
+      defaultSla = isFcl ? '65 - 72 giờ' : 'Thứ 3, Thứ 6 (Cắt hàng bãi ga 18:00)';
+    }
+
     const newRoute: CapabilityRouteItem = {
       id: `r-new-${Date.now()}`,
       routeCode: generatedRouteCode,
-      route: isLtlTrucking ? 'Hà Nội ⇄ TP.HCM' : (isOcean ? (isFcl ? 'Cát Lái (VNCLI) ⇄ Hamburg (Đức)' : 'Cát Lái (VNCLI) ⇄ Singapore (SGSIN)') : (isHazmatTrucking ? 'Bà Rịa - Vũng Tàu ⇄ Bình Dương' : (isReeferTrucking ? 'Đà Lạt ⇄ TP.HCM' : (isRail ? (isFcl ? 'Ga Sóng Thần ⇄ Ga Giáp Bát' : 'Sài Gòn ⇄ Hà Nội') : 'Hành Lang Tuyến Mới')))),
-      origin: isLtlTrucking ? 'Hub Thanh Trì (Hà Nội)' : (isOcean ? (isFcl ? 'Cảng Cát Lái (TP.HCM)' : 'Kho CFS Cát Lái (TP.HCM)') : (isHazmatTrucking ? 'KCN Phú Mỹ (BR-VT)' : (isReeferTrucking ? 'Đức Trọng (Lâm Đồng)' : (isRail ? 'Ga Sóng Thần (Bình Dương)' : 'Điểm Lấy Hàng (Kho / Cảng)')))),
-      destination: isLtlTrucking ? 'Hub Quận 12 (TP.HCM)' : (isOcean ? (isFcl ? 'Cảng Hamburg (Germany)' : 'Cảng Singapore (SGSIN)') : (isHazmatTrucking ? 'KCN VSIP 2 (Bình Dương)' : (isReeferTrucking ? 'Chợ đầu mối Thủ Đức (TP.HCM)' : (isRail ? 'Ga Giáp Bát (Hà Nội)' : 'Điểm Giao Hàng (Kho / Cảng)')))),
+      region: isAir ? (isAirCargo ? 'Đông Bắc Á (Nhật - Hàn - Trung - Đài)' : 'Đông Nam Á (ASEAN)') : (isOcean ? 'Châu Á' : undefined),
+      route: defaultRoute,
+      origin: defaultOrigin,
+      destination: defaultDestination,
       truckBodyType: isTrucking ? defaultBody : undefined,
       truckTonnage: isTrucking ? defaultTonnage : undefined,
       vehicleType: defaultVehicle,
       pricingUnit: defaultUnit,
-      price: isLtlTrucking ? 1650 : (isOcean ? (isFcl ? 2450 : 25) : (isHazmatTrucking ? 14500000 : (isReeferTrucking ? 9500000 : (isRail ? (isFcl ? 21000000 : 1100) : 15000000)))),
-      currency: isOcean ? 'USD' : 'VND',
-      sla: isLtlTrucking ? 'Thứ 2, Thứ 4, Thứ 6 (Xuất bến 20:00)' : (isOcean ? (isFcl ? '28 - 32 ngày' : 'Thứ 4, Thứ 7 (Cắt hàng CFS 17:00)') : (isHazmatTrucking ? '4 - 6 giờ' : (isReeferTrucking ? '7 - 9 giờ' : (isRail ? (isFcl ? '65 - 72 giờ' : 'Thứ 3, Thứ 6 (Cắt hàng bãi ga 18:00)') : '24 - 48 giờ')))),
+      price: defaultPrice,
+      currency: (isOcean || isAir) ? 'USD' : 'VND',
+      sla: defaultSla,
       transitType: 'Direct',
       freeDemDetDays: isFcl ? 14 : undefined,
       validUntil: '2026-12-31',
       promotionPercent: 0,
-      ltlPricing: isLtlTrucking 
-        ? createDefaultLtlPricingConfig('weight', 2000, 500000) 
-        : (isLcl ? createDefaultLclPricingConfig(isOcean ? 'volume' : 'weight', isOcean ? 'USD' : 'VND', isOcean ? 25 : 1100) : undefined),
+      ltlPricing: isAirCargo
+        ? createDefaultAirPricingConfig('USD', 4.2)
+        : (isLtlTrucking 
+          ? createDefaultLtlPricingConfig('weight', 2000, 500000) 
+          : (isLcl ? createDefaultLclPricingConfig(isOcean ? 'volume' : 'weight', isOcean ? 'USD' : 'VND', isOcean ? 25 : 1100) : undefined)),
     };
 
     updateCurrentFormData('routes', [...(currentData.routes || []), newRoute]);
@@ -5005,6 +5250,22 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                         </div>
                       )}
 
+                      {/* Air Cargo Volumetric Conversion Rate Badge */}
+                      {(activeCategory?.id === 'air' && (activeModel?.id === 'air-gen-cargo' || activeModel?.name?.includes('Cargo') || activeModel?.code === 'Air Cargo')) && (
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-sky-50 to-blue-50 border border-sky-300 rounded-xl text-sky-900 text-xs font-bold shadow-2xs">
+                          <Plane className="w-3.5 h-3.5 text-sky-600" />
+                          <span>✈ 1 CBM = 167 Kg (Chuẩn Air Cargo: D×R×C / 6.000)</span>
+                        </div>
+                      )}
+
+                      {/* Air Express Volumetric Conversion Rate Badge */}
+                      {(activeCategory?.id === 'air' && (activeModel?.id === 'air-gen-exp' || activeModel?.name?.includes('Express') || activeModel?.code === 'Express')) && (
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-300 rounded-xl text-amber-900 text-xs font-bold shadow-2xs">
+                          <Zap className="w-3.5 h-3.5 text-amber-600 animate-pulse" />
+                          <span>⚡ 1 CBM = 200 Kg (Chuẩn Express: D×R×C / 5.000)</span>
+                        </div>
+                      )}
+
                       {/* Hidden File Input for Excel Upload */}
                       <input
                         type="file"
@@ -5055,43 +5316,58 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                       <table className="w-full text-left border-collapse text-xs">
                         <thead>
                           {(() => {
-                            const isLtlTable = activeCategory?.id === 'trucking' && (activeModel?.id === 'trk-gen-ltl' || activeModel?.name?.includes('LTL') || activeModel?.code === 'LTL');
+                            const isTruckingTable = activeCategory?.id === 'trucking';
                             const isOceanTable = activeCategory?.id === 'ocean' || activeModel?.id?.startsWith('sea-');
                             const isRailTable = activeCategory?.id === 'rail' || activeModel?.id?.startsWith('rail-');
+                            const isAirTable = activeCategory?.id === 'air' || activeModel?.id?.startsWith('air-');
+                            const isExpressTable = activeCategory?.id === 'air' && (activeModel?.id === 'air-gen-exp' || activeModel?.name?.includes('Express') || activeModel?.code === 'Express');
+                            const isAirCargoTable = isAirTable && !isExpressTable;
                             const isFclTable = (isOceanTable && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL')) || (isRailTable && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL')));
                             const isLclTable = (isOceanTable && (activeModel?.id?.includes('lcl') || activeModel?.name?.includes('LCL') || activeModel?.code === 'LCL')) || (isRailTable && (activeModel?.id?.includes('lcl') || activeModel?.name?.includes('LCL')));
+                            const isLtlTable = isTruckingTable && (activeModel?.id === 'trk-gen-ltl' || activeModel?.name?.includes('LTL') || activeModel?.code === 'LTL');
                             const isLtlOrLclTable = isLtlTable || isLclTable;
 
                             return (
                               <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
                                 <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
                                 <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-slate-100">Mã Tuyến</th>
-                                {isOceanTable && (
-                                  <th className="py-2.5 px-2.5 min-w-[130px]">Khu Vực</th>
+                                {(isOceanTable || isAirTable) && (
+                                  <th className="py-2.5 px-2.5 min-w-[140px]">Khu Vực</th>
                                 )}
-                                <th className="py-2.5 px-2.5 min-w-[135px]">Tuyến Đường</th>
-                                <th className="py-2.5 px-2.5 min-w-[130px]">{isLclTable ? 'Kho CFS / Điểm Đi' : 'Điểm Đi'}</th>
-                                <th className="py-2.5 px-2.5 min-w-[130px]">{isLclTable ? 'Kho CFS / Cảng Đến' : 'Điểm Đến'}</th>
+                                <th className="py-2.5 px-2.5 min-w-[135px]">Hành Lang Tuyến</th>
+                                <th className="py-2.5 px-2.5 min-w-[130px]">{isLclTable ? 'Kho CFS / Điểm Đi' : (isAirCargoTable ? 'Sân Bay Đi' : (isExpressTable ? 'Điểm Lấy Hàng (Đi)' : 'Điểm Đi'))}</th>
+                                <th className="py-2.5 px-2.5 min-w-[130px]">{isLclTable ? 'Kho CFS / Cảng Đến' : (isAirCargoTable ? 'Sân Bay Đến' : (isExpressTable ? 'Quốc Gia / Điểm Đến' : 'Điểm Đến'))}</th>
                                 {isOceanTable && isFclTable && (
                                   <th className="py-2.5 px-2.5 min-w-[170px]">Hãng Tàu</th>
                                 )}
-                                {activeCategory?.id === 'trucking' ? (
+                                {isAirCargoTable && (
+                                  <th className="py-2.5 px-2.5 min-w-[180px]">Hãng Bay (Airline)</th>
+                                )}
+                                {isExpressTable && (
+                                  <th className="py-2.5 px-2.5 min-w-[180px]">Hãng Chuyển Phát</th>
+                                )}
+                                {isTruckingTable && (
                                   <>
                                     <th className="py-2.5 px-2.5 min-w-[200px]">Loại Thùng Phương Tiện</th>
                                     <th className="py-2.5 px-2.5 min-w-[210px]">Phân Khúc Tải Trọng</th>
                                   </>
-                                ) : (
+                                )}
+                                {!isAirTable && !isOceanTable && !isTruckingTable && (
                                   <th className="py-2.5 px-2.5 min-w-[190px]">
                                     {isFclTable ? 'Loại Vỏ Container' : (isLclTable ? 'Hãng Tàu' : 'Loại Phương Tiện')}
                                   </th>
                                 )}
                                 <th className="py-2.5 px-2 w-20 min-w-[80px] text-center">ĐVT</th>
                                 <th className="py-2.5 px-2 w-20 min-w-[80px] text-center">Tiền Tệ</th>
-                                <th className="py-2.5 px-2.5 min-w-[155px] text-right">Đơn Giá</th>
-                                <th className={`py-2.5 px-2 text-center ${isLtlOrLclTable ? 'min-w-[160px]' : 'min-w-[90px]'}`}>
-                                  {isLtlOrLclTable ? 'Lịch Chạy & Cut-off' : 'SLA'}
+                                <th className="py-2.5 px-2.5 min-w-[160px] text-right">
+                                  {isAirCargoTable ? 'Đơn Giá (+100kg Base)' : (isExpressTable ? 'Đơn Giá (+45kg Base)' : 'Đơn Giá')}
                                 </th>
-                                <th className="py-2.5 px-2.5 min-w-[135px] text-center">Loại Tuyến</th>
+                                <th className={`py-2.5 px-2 text-center ${(isAirCargoTable || isExpressTable) ? 'min-w-[165px]' : (isLtlOrLclTable ? 'min-w-[160px]' : 'min-w-[90px]')}`}>
+                                  {(isAirCargoTable || isExpressTable) ? 'Lịch Bay & Cut-off' : (isLtlOrLclTable ? 'Lịch Chạy & Cut-off' : 'SLA')}
+                                </th>
+                                {!isExpressTable && (
+                                  <th className="py-2.5 px-2.5 min-w-[135px] text-center">Loại Tuyến</th>
+                                )}
                                 {isFclTable && (
                                   <th className="py-2.5 px-2.5 min-w-[145px] text-center">Free Dem/Det</th>
                                 )}
@@ -5106,7 +5382,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                         <tbody className="divide-y divide-slate-200 bg-white">
                           {(!currentData.routes || currentData.routes.length === 0) ? (
                             <tr>
-                              <td colSpan={activeCategory?.id === 'trucking' ? 15 : ((activeCategory?.id === 'ocean') ? ((activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL') ? 17 : 15) : (((activeCategory?.id === 'rail') && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL')) ? 15 : 14))} className="py-8 text-center text-slate-400 font-medium">
+                              <td colSpan={activeCategory?.id === 'trucking' ? 15 : ((activeCategory?.id === 'ocean') ? ((activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL') ? 17 : 15) : (((activeCategory?.id === 'rail') && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL')) ? 15 : ((activeCategory?.id === 'air' && (activeModel?.id === 'air-gen-exp' || activeModel?.name?.includes('Express') || activeModel?.code === 'Express')) ? 12 : 14)))} className="py-8 text-center text-slate-400 font-medium">
                                 Chưa có tuyến đường nào. Bấm nút <strong className="text-indigo-600 font-bold">+ Thêm Tuyến Mới</strong> để khai báo bảng giá.
                               </td>
                             </tr>
@@ -5119,6 +5395,9 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                               const isTrucking = activeCategory?.id === 'trucking';
                               const isOcean = activeCategory?.id === 'ocean' || activeModel?.id?.startsWith('sea-');
                               const isRail = activeCategory?.id === 'rail' || activeModel?.id?.startsWith('rail-');
+                              const isAir = activeCategory?.id === 'air' || activeModel?.id?.startsWith('air-');
+                              const isExpress = activeCategory?.id === 'air' && (activeModel?.id === 'air-gen-exp' || activeModel?.name?.includes('Express') || activeModel?.code === 'Express');
+                              const isAirCargo = isAir && !isExpress;
                               const isFcl = (isOcean && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL')) || (isRail && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL')));
                               const isLcl = (isOcean && (activeModel?.id?.includes('lcl') || activeModel?.name?.includes('LCL') || activeModel?.code === 'LCL')) || (isRail && (activeModel?.id?.includes('lcl') || activeModel?.name?.includes('LCL')));
                               const isLtlTrucking = isTrucking && (activeModel?.id === 'trk-gen-ltl' || activeModel?.name?.includes('LTL') || activeModel?.code === 'LTL');
@@ -5148,18 +5427,23 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                     />
                                   </td>
 
-                                  {/* 2b. Khu Vực (Đường biển: FCL & LCL) */}
-                                  {isOcean && (
+                                  {/* 2b. Khu Vực (Đường biển & Hàng không) */}
+                                  {(isOcean || isAir) && (
                                     <td className="p-0 align-top">
-                                      <select
-                                        value={route.region || OCEAN_TRADE_LANE_REGIONS_LOV[0]}
-                                        onChange={(e) => handleUpdateRouteRow(route.id, 'region', e.target.value)}
-                                        className="w-full px-2.5 py-2 bg-transparent text-slate-800 text-xs cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all font-medium"
-                                      >
-                                        {OCEAN_TRADE_LANE_REGIONS_LOV.map((reg, rIdx) => (
-                                          <option key={rIdx} value={reg}>{reg}</option>
-                                        ))}
-                                      </select>
+                                      {(() => {
+                                        const regionLov = isAir ? AIR_TRADE_LANE_REGIONS_LOV : OCEAN_TRADE_LANE_REGIONS_LOV;
+                                        return (
+                                          <select
+                                            value={route.region || regionLov[0]}
+                                            onChange={(e) => handleUpdateRouteRow(route.id, 'region', e.target.value)}
+                                            className="w-full px-2.5 py-2 bg-transparent text-slate-800 text-xs cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all font-medium"
+                                          >
+                                            {regionLov.map((reg, rIdx) => (
+                                              <option key={rIdx} value={reg}>{reg}</option>
+                                            ))}
+                                          </select>
+                                        );
+                                      })()}
                                     </td>
                                   )}
 
@@ -5180,7 +5464,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                       type="text"
                                       value={route.origin}
                                       onChange={(e) => handleUpdateRouteRow(route.id, 'origin', e.target.value)}
-                                      placeholder={isLcl ? 'Kho CFS Cát Lái / Đình Vũ...' : 'Điểm đi...'}
+                                      placeholder={isAirCargo ? 'Sân bay TSN (SGN) / NBA (HAN)...' : (isExpress ? 'Kho lấy hàng nội thành...' : (isLcl ? 'Kho CFS Cát Lái / Đình Vũ...' : 'Điểm đi...'))}
                                       className="w-full px-2.5 py-2 bg-transparent text-slate-700 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
                                     />
                                   </td>
@@ -5191,7 +5475,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                       type="text"
                                       value={route.destination}
                                       onChange={(e) => handleUpdateRouteRow(route.id, 'destination', e.target.value)}
-                                      placeholder={isLcl ? 'Cảng Singapore / LA...' : 'Điểm đến...'}
+                                      placeholder={isAirCargo ? 'Sân bay Narita (NRT) / LAX / SIN...' : (isExpress ? 'Singapore / USA / Nhật Bản...' : (isLcl ? 'Cảng Singapore / LA...' : 'Điểm đến...'))}
                                       className="w-full px-2.5 py-2 bg-transparent text-slate-700 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
                                     />
                                   </td>
@@ -5213,17 +5497,10 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                               value={currentShipping}
                                               onChange={(e) => {
                                                 const val = e.target.value;
-                                                if (val === 'Khác (Nhập hãng tàu khác)...') {
-                                                  handleUpdateRouteRowMultiple(route.id, {
-                                                    shippingLine: val,
-                                                    customShippingLine: '',
-                                                  });
-                                                } else {
-                                                  handleUpdateRouteRowMultiple(route.id, {
-                                                    shippingLine: val,
-                                                    customShippingLine: '',
-                                                  });
-                                                }
+                                                handleUpdateRouteRowMultiple(route.id, {
+                                                  shippingLine: val,
+                                                  customShippingLine: '',
+                                                });
                                               }}
                                               className="w-full px-2.5 py-2 bg-transparent text-slate-800 text-xs font-semibold cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
                                             >
@@ -5247,6 +5524,114 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                                     });
                                                   }}
                                                   placeholder="Gõ tên hãng tàu..."
+                                                  className="w-full px-2 py-1 bg-white border border-amber-300 rounded text-slate-900 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-amber-500"
+                                                />
+                                              </div>
+                                            )}
+                                          </div>
+                                        );
+                                      })()}
+                                    </td>
+                                  )}
+
+                                  {/* 5c. Hãng Bay (Air Cargo) */}
+                                  {isAirCargo && (
+                                    <td className="p-0 align-top">
+                                      {(() => {
+                                        const airLov = AIR_AIRLINES_LOV;
+                                        const currentAirline = airLov.includes(route.vehicleType || '')
+                                          ? (route.vehicleType || airLov[0])
+                                          : (route.customShippingLine || route.vehicleType === 'Khác (Nhập hãng bay khác)...'
+                                            ? 'Khác (Nhập hãng bay khác)...'
+                                            : (airLov[0] || 'Vietnam Airlines (VN Cargo)'));
+
+                                        return (
+                                          <div className="flex flex-col h-full">
+                                            <select
+                                              value={currentAirline}
+                                              onChange={(e) => {
+                                                const val = e.target.value;
+                                                handleUpdateRouteRowMultiple(route.id, {
+                                                  vehicleType: val,
+                                                  customShippingLine: '',
+                                                });
+                                              }}
+                                              className="w-full px-2.5 py-2 bg-transparent text-slate-800 text-xs font-semibold cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
+                                            >
+                                              {airLov.map((line, lIdx) => (
+                                                <option key={lIdx} value={line}>{line}</option>
+                                              ))}
+                                            </select>
+
+                                            {(currentAirline === 'Khác (Nhập hãng bay khác)...'
+                                              || (!airLov.includes(route.vehicleType || '') && route.customShippingLine)) && (
+                                              <div className="p-1 bg-amber-50/90 border-t border-amber-200">
+                                                <input
+                                                  type="text"
+                                                  autoFocus
+                                                  value={route.customShippingLine || ''}
+                                                  onChange={(e) => {
+                                                    const customVal = e.target.value;
+                                                    handleUpdateRouteRowMultiple(route.id, {
+                                                      customShippingLine: customVal,
+                                                      vehicleType: customVal,
+                                                    });
+                                                  }}
+                                                  placeholder="Gõ tên hãng bay..."
+                                                  className="w-full px-2 py-1 bg-white border border-amber-300 rounded text-slate-900 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-amber-500"
+                                                />
+                                              </div>
+                                            )}
+                                          </div>
+                                        );
+                                      })()}
+                                    </td>
+                                  )}
+
+                                  {/* 5d. Hãng Chuyển Phát (Express Courier) */}
+                                  {isExpress && (
+                                    <td className="p-0 align-top">
+                                      {(() => {
+                                        const expLov = EXPRESS_CARRIERS_LOV;
+                                        const currentCarrier = expLov.includes(route.vehicleType || '')
+                                          ? (route.vehicleType || expLov[0])
+                                          : (route.customShippingLine || route.vehicleType === 'Khác (Nhập hãng khác)...'
+                                            ? 'Khác (Nhập hãng khác)...'
+                                            : (expLov[0] || 'DHL Express'));
+
+                                        return (
+                                          <div className="flex flex-col h-full">
+                                            <select
+                                              value={currentCarrier}
+                                              onChange={(e) => {
+                                                const val = e.target.value;
+                                                handleUpdateRouteRowMultiple(route.id, {
+                                                  vehicleType: val,
+                                                  customShippingLine: '',
+                                                });
+                                              }}
+                                              className="w-full px-2.5 py-2 bg-transparent text-slate-800 text-xs font-semibold cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-amber-500 transition-all"
+                                            >
+                                              {expLov.map((carrier, cIdx) => (
+                                                <option key={cIdx} value={carrier}>{carrier}</option>
+                                              ))}
+                                            </select>
+
+                                            {(currentCarrier === 'Khác (Nhập hãng khác)...'
+                                              || (!expLov.includes(route.vehicleType || '') && route.customShippingLine)) && (
+                                              <div className="p-1 bg-amber-50/90 border-t border-amber-200">
+                                                <input
+                                                  type="text"
+                                                  autoFocus
+                                                  value={route.customShippingLine || ''}
+                                                  onChange={(e) => {
+                                                    const customVal = e.target.value;
+                                                    handleUpdateRouteRowMultiple(route.id, {
+                                                      customShippingLine: customVal,
+                                                      vehicleType: customVal,
+                                                    });
+                                                  }}
+                                                  placeholder="Gõ tên hãng chuyển phát..."
                                                   className="w-full px-2 py-1 bg-white border border-amber-300 rounded text-slate-900 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-amber-500"
                                                 />
                                               </div>
@@ -5438,7 +5823,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                         );
                                       })()}
                                     </td>
-                                  ) : (
+                                  ) : !isAir ? (
                                     <td className="p-0 align-top">
                                       <select
                                         value={route.vehicleType}
@@ -5450,11 +5835,15 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                         ))}
                                       </select>
                                     </td>
-                                  )}
+                                  ) : null}
 
                                   {/* 7. Đơn vị tính (LOV) */}
                                   <td className="p-0 text-center bg-slate-50/40 align-middle">
-                                    {activeModel?.unitLov?.length === 1 ? (
+                                    {(isAirCargo || isExpress) ? (
+                                      <span className="font-bold text-sky-900 bg-sky-100/90 px-2 py-0.5 rounded text-xs border border-sky-200">
+                                        Kg
+                                      </span>
+                                    ) : activeModel?.unitLov?.length === 1 ? (
                                       <span className="font-bold text-slate-700 text-xs">
                                         {activeModel.unitLov[0]}
                                       </span>
@@ -5474,7 +5863,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                   {/* 8. Tiền Tệ (USD / VND) */}
                                   <td className="p-0 text-center bg-slate-50/30 align-middle">
                                     <select
-                                      value={route.currency || (isOcean ? 'USD' : 'VND')}
+                                      value={route.currency || ((isOcean || isAir) ? 'USD' : 'VND')}
                                       onChange={(e) => handleUpdateRouteRow(route.id, 'currency', e.target.value as 'VND' | 'USD')}
                                       className="w-full px-1.5 py-2 bg-transparent text-slate-800 text-xs font-bold text-center cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
                                     >
@@ -5483,9 +5872,123 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                     </select>
                                   </td>
 
-                                  {/* 9. Đơn giá (Nhập giá + Live currency conversion tag & Ma Trận 5 Bậc cho LTL & LCL) */}
+                                  {/* 9. Đơn giá (Nhập giá + Live currency conversion tag & Ma Trận Bậc cho Air Cargo / LTL / LCL) */}
                                   <td className="p-1.5 align-middle">
-                                    {isLtlOrLcl ? (
+                                    {isExpress ? (
+                                      <div className="flex flex-col gap-1">
+                                        <button
+                                          type="button"
+                                          onClick={() => handleOpenTieredPricingModal(route)}
+                                          className="w-full px-2.5 py-1.5 rounded-xl border border-amber-300 bg-gradient-to-r from-amber-50/90 via-white to-orange-50/70 hover:from-amber-100 hover:to-orange-100 text-slate-900 text-left transition-all cursor-pointer shadow-2xs group flex items-center justify-between gap-1.5"
+                                          title="Nhấp để cấu hình chi tiết ma trận 6 bậc giá chuyển phát nhanh Express (+45kg Base Rate)"
+                                        >
+                                          <div className="min-w-0 flex-1">
+                                            <div className="flex items-center justify-between gap-1">
+                                              <span className="font-mono font-bold text-xs text-amber-950 truncate">
+                                                {route.currency === 'USD' ? (
+                                                  `$${route.ltlPricing?.weightTiers?.[5]?.price || 4.9} – $${route.ltlPricing?.weightTiers?.[0]?.price || 14.0}`
+                                                ) : (
+                                                  `${(route.ltlPricing?.weightTiers?.[5]?.price || 120000).toLocaleString('vi-VN')} – ${(route.ltlPricing?.weightTiers?.[0]?.price || 350000).toLocaleString('vi-VN')} ₫`
+                                                )}
+                                              </span>
+                                              <span className="text-[9.5px] font-bold text-amber-800 bg-amber-100 px-1.5 py-0.2 rounded-md shrink-0 border border-amber-300/60">
+                                                6 Bậc Express
+                                              </span>
+                                            </div>
+                                            <div className="text-[10px] text-slate-500 font-medium flex items-center justify-between mt-0.5">
+                                              <span>
+                                                Base (+45): <strong className="text-amber-900 font-bold">
+                                                  {route.currency === 'USD'
+                                                    ? `$${route.ltlPricing?.weightTiers?.[3]?.price || route.price || 6.5} / Kg`
+                                                    : `${(route.ltlPricing?.weightTiers?.[3]?.price || route.price || 165000).toLocaleString('vi-VN')} ₫ / Kg`}
+                                                </strong>
+                                              </span>
+                                              <span className="text-amber-700 font-bold group-hover:underline">Chi tiết ➔</span>
+                                            </div>
+                                          </div>
+                                        </button>
+
+                                        {/* Live Currency Conversion Tag for Express */}
+                                        {(() => {
+                                          const baseVal = route.ltlPricing?.weightTiers?.[3]?.price || route.price || (route.currency === 'USD' ? 6.5 : 165000);
+                                          return (
+                                            <div className="text-[10px] font-semibold px-0.5 flex items-center justify-between">
+                                              {route.currency === 'USD' ? (
+                                                <span className="text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded border border-emerald-200/60">
+                                                  ≈ {(baseVal * USD_TO_VND_EXCHANGE_RATE).toLocaleString('vi-VN')} ₫
+                                                </span>
+                                              ) : (
+                                                <span className="text-indigo-700 bg-indigo-50 px-1 py-0.5 rounded border border-indigo-200/60">
+                                                  ≈ ${(baseVal / USD_TO_VND_EXCHANGE_RATE).toFixed(2)} USD
+                                                </span>
+                                              )}
+                                              {hasPromo && (
+                                                <span className="text-rose-600 font-bold text-[9.5px]">
+                                                  -{route.promotionPercent}%
+                                                </span>
+                                              )}
+                                            </div>
+                                          );
+                                        })()}
+                                      </div>
+                                    ) : isAirCargo ? (
+                                      <div className="flex flex-col gap-1">
+                                        <button
+                                          type="button"
+                                          onClick={() => handleOpenTieredPricingModal(route)}
+                                          className="w-full px-2.5 py-1.5 rounded-xl border border-sky-200 bg-gradient-to-r from-sky-50/90 via-white to-blue-50/70 hover:from-sky-100 hover:to-blue-100 text-slate-900 text-left transition-all cursor-pointer shadow-2xs group flex items-center justify-between gap-1.5"
+                                          title="Nhấp để cấu hình chi tiết ma trận 6 bậc giá chuẩn IATA (+100kg Base Rate)"
+                                        >
+                                          <div className="min-w-0 flex-1">
+                                            <div className="flex items-center justify-between gap-1">
+                                              <span className="font-mono font-bold text-xs text-sky-950 truncate">
+                                                {route.currency === 'USD' ? (
+                                                  `$${route.ltlPricing?.weightTiers?.[5]?.price || 2.8} – $${route.ltlPricing?.weightTiers?.[0]?.price || 5.8}`
+                                                ) : (
+                                                  `${(route.ltlPricing?.weightTiers?.[5]?.price || 70000).toLocaleString('vi-VN')} – ${(route.ltlPricing?.weightTiers?.[0]?.price || 145000).toLocaleString('vi-VN')} ₫`
+                                                )}
+                                              </span>
+                                              <span className="text-[9.5px] font-bold text-sky-800 bg-sky-100 px-1.5 py-0.2 rounded-md shrink-0 border border-sky-300/60">
+                                                6 Bậc Air
+                                              </span>
+                                            </div>
+                                            <div className="text-[10px] text-slate-500 font-medium flex items-center justify-between mt-0.5">
+                                              <span>
+                                                Base (+100): <strong className="text-sky-900 font-bold">
+                                                  {route.currency === 'USD'
+                                                    ? `$${route.ltlPricing?.weightTiers?.[2]?.price || route.price || 4.2} / Kg`
+                                                    : `${(route.ltlPricing?.weightTiers?.[2]?.price || route.price || 105000).toLocaleString('vi-VN')} ₫ / Kg`}
+                                                </strong>
+                                              </span>
+                                              <span className="text-sky-700 font-bold group-hover:underline">Chi tiết ➔</span>
+                                            </div>
+                                          </div>
+                                        </button>
+
+                                        {/* Live Currency Conversion Tag for Air Cargo */}
+                                        {(() => {
+                                          const baseVal = route.ltlPricing?.weightTiers?.[2]?.price || route.price || (route.currency === 'USD' ? 4.2 : 105000);
+                                          return (
+                                            <div className="text-[10px] font-semibold px-0.5 flex items-center justify-between">
+                                              {route.currency === 'USD' ? (
+                                                <span className="text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded border border-emerald-200/60">
+                                                  ≈ {(baseVal * USD_TO_VND_EXCHANGE_RATE).toLocaleString('vi-VN')} ₫
+                                                </span>
+                                              ) : (
+                                                <span className="text-indigo-700 bg-indigo-50 px-1 py-0.5 rounded border border-indigo-200/60">
+                                                  ≈ ${(baseVal / USD_TO_VND_EXCHANGE_RATE).toFixed(2)} USD
+                                                </span>
+                                              )}
+                                              {hasPromo && (
+                                                <span className="text-rose-600 font-bold text-[9.5px]">
+                                                  -{route.promotionPercent}%
+                                                </span>
+                                              )}
+                                            </div>
+                                          );
+                                        })()}
+                                      </div>
+                                    ) : isLtlOrLcl ? (
                                       <div className="flex flex-col gap-1">
                                         <button
                                           type="button"
@@ -5586,23 +6089,27 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                     )}
                                   </td>
 
-                                  {/* 9. SLA / Lịch Chạy Hàng & Cut-off (Multi-select Days of Week & Time for LTL & LCL) */}
+                                  {/* 10. Lịch Bay & Cut-off / SLA */}
                                   <td className="p-1 align-middle">
-                                    {isLtlOrLcl ? (
+                                    {(isAirCargo || isExpress || isLtlOrLcl) ? (
                                       <button
                                         type="button"
                                         onClick={() => handleOpenScheduleModal(route)}
                                         className={`w-full min-h-[34px] px-2.5 py-1.5 rounded-xl border text-left text-xs transition-all flex items-center justify-between gap-1.5 cursor-pointer shadow-2xs group ${
                                           route.sla
-                                            ? 'bg-indigo-50/90 border-indigo-200 text-indigo-950 font-semibold hover:bg-indigo-100 hover:border-indigo-300'
+                                            ? ((isAirCargo || isExpress) ? 'bg-sky-50/90 border-sky-200 text-sky-950 font-semibold hover:bg-sky-100 hover:border-sky-300' : 'bg-indigo-50/90 border-indigo-200 text-indigo-950 font-semibold hover:bg-indigo-100 hover:border-indigo-300')
                                             : 'bg-slate-50 border-dashed border-slate-300 text-slate-400 hover:bg-slate-100 hover:text-slate-600'
                                         }`}
-                                        title="Nhấp để thiết lập các thứ trong tuần & thời gian cắt máng / xuất bến"
+                                        title={(isAirCargo || isExpress) ? 'Nhấp để thiết lập lịch bay & giờ cắt hàng tại ga TCS/SCSC/NCTS' : 'Nhấp để thiết lập các thứ trong tuần & thời gian cắt máng / xuất bến'}
                                       >
                                         <span className="truncate block font-semibold leading-tight">
-                                          {route.sla || 'Chọn lịch & giờ chạy...'}
+                                          {route.sla || ((isAirCargo || isExpress) ? 'Chọn lịch & giờ bay...' : 'Chọn lịch & giờ chạy...')}
                                         </span>
-                                        <Calendar className="w-3.5 h-3.5 text-indigo-600 shrink-0 group-hover:scale-110 transition-transform" />
+                                        {(isAirCargo || isExpress) ? (
+                                          <Plane className="w-3.5 h-3.5 text-sky-600 shrink-0 group-hover:scale-110 transition-transform" />
+                                        ) : (
+                                          <Calendar className="w-3.5 h-3.5 text-indigo-600 shrink-0 group-hover:scale-110 transition-transform" />
+                                        )}
                                       </button>
                                     ) : (
                                       <input
@@ -5615,20 +6122,22 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                     )}
                                   </td>
 
-                                  {/* 10. Loại Tuyến (Direct / Transit) - Sau cột SLA */}
-                                  <td className="p-0 align-top">
-                                    <select
-                                      value={route.transitType || 'Direct'}
-                                      onChange={(e) => handleUpdateRouteRow(route.id, 'transitType', e.target.value as 'Direct' | 'Transit')}
-                                      className={`w-full px-2 py-2 bg-transparent text-xs font-bold cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all ${
-                                        route.transitType === 'Transit' ? 'text-amber-700' : 'text-slate-800'
-                                      }`}
-                                    >
-                                      {TRANSIT_TYPE_LOV.map((opt) => (
-                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
-                                      ))}
-                                    </select>
-                                  </td>
+                                  {/* 10. Loại Tuyến (Direct / Transit) - Sau cột SLA (ẩn đối với Express) */}
+                                  {!isExpress && (
+                                    <td className="p-0 align-top">
+                                      <select
+                                        value={route.transitType || 'Direct'}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'transitType', e.target.value as 'Direct' | 'Transit')}
+                                        className={`w-full px-2 py-2 bg-transparent text-xs font-bold cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all ${
+                                          route.transitType === 'Transit' ? 'text-amber-700' : 'text-slate-800'
+                                        }`}
+                                      >
+                                        {TRANSIT_TYPE_LOV.map((opt) => (
+                                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                        ))}
+                                      </select>
+                                    </td>
+                                  )}
 
                                   {/* 11. Free Dem/Det (Dành cho Container / FCL) */}
                                   {isFcl && (
@@ -6416,20 +6925,25 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
       {/* =========================================================================
           MODAL: THIẾT LẬP LỊCH CHẠY HÀNG & THỜI GIAN XUẤT BẾN (LTL / LCL)
       ========================================================================= */}
+      {/* =========================================================================
+          MODAL: THIẾT LẬP LỊCH CHẠY HÀNG & THỜI GIAN XUẤT BẾN / BAY (LTL / LCL / AIR)
+      ========================================================================= */}
       {scheduleModalData && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
           <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 max-w-lg w-full overflow-hidden flex flex-col animate-in zoom-in-95 duration-150">
             {/* Modal Header */}
             <div className="px-5 py-4 bg-gradient-to-r from-indigo-50 via-white to-indigo-50/40 border-b border-slate-200 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-600/20 shrink-0">
-                  <Calendar className="w-5 h-5" />
+                <div className={`w-10 h-10 rounded-2xl ${scheduleModalData.isAirCargo ? 'bg-sky-600 shadow-sky-600/20' : 'bg-indigo-600 shadow-indigo-600/20'} text-white flex items-center justify-center shadow-md shrink-0`}>
+                  {scheduleModalData.isAirCargo ? <Plane className="w-5 h-5" /> : <Calendar className="w-5 h-5" />}
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-slate-900">
-                    {scheduleModalData.isLcl
-                      ? 'Cấu Hình Lịch Gom Hàng & Cắt Máng CFS (LCL)'
-                      : 'Cấu Hình Lịch Chạy & Giờ Xuất Bến (LTL)'}
+                    {scheduleModalData.isAirCargo
+                      ? 'Cấu Hình Lịch Bay & Giờ Cắt Hàng Ga (Air / Express)'
+                      : (scheduleModalData.isLcl
+                        ? 'Cấu Hình Lịch Gom Hàng & Cắt Máng CFS (LCL)'
+                        : 'Cấu Hình Lịch Chạy & Giờ Xuất Bến (LTL)')}
                   </h3>
                   <p className="text-[11px] text-slate-500 font-medium">
                     Tuyến: <strong className="text-indigo-700">{scheduleModalData.routeName}</strong> ({scheduleModalData.origin} ⇄ {scheduleModalData.destination})
@@ -6468,7 +6982,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                         }}
                         className={`px-3 py-1.5 text-xs rounded-xl border font-bold transition-all cursor-pointer ${
                           isSelected
-                            ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs'
+                            ? (scheduleModalData.isAirCargo ? 'bg-sky-600 border-sky-600 text-white shadow-xs' : 'bg-indigo-600 border-indigo-600 text-white shadow-xs')
                             : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-800'
                         }`}
                       >
@@ -6483,7 +6997,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <label className="block text-xs font-bold text-slate-800 uppercase tracking-wide">
-                    2. Các thứ trong tuần ({scheduleModalData.selectedDays.length}/7 ngày)
+                    2. Các ngày bay trong tuần ({scheduleModalData.selectedDays.length}/7 ngày)
                   </label>
                   <button
                     type="button"
@@ -6508,7 +7022,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                         key={day.id}
                         className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs font-bold cursor-pointer transition-all select-none ${
                           isChecked 
-                            ? 'bg-indigo-50 border-indigo-400 text-indigo-950 shadow-2xs ring-1 ring-indigo-500/20' 
+                            ? (scheduleModalData.isAirCargo ? 'bg-sky-50 border-sky-400 text-sky-950 shadow-2xs ring-1 ring-sky-500/20' : 'bg-indigo-50 border-indigo-400 text-indigo-950 shadow-2xs ring-1 ring-indigo-500/20') 
                             : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 hover:border-slate-300'
                         }`}
                       >
@@ -6534,17 +7048,19 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                 </div>
               </div>
 
-              {/* 3. Thời Gian Cắt Hàng CFS / Xuất Bến */}
+              {/* 3. Thời Gian Cắt Hàng Ga / CFS / Xuất Bến */}
               <div className="space-y-2 pt-2 border-t border-slate-100">
                 <label className="block text-xs font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
                   <Clock className="w-3.5 h-3.5 text-indigo-600" />
-                  {scheduleModalData.isLcl
-                    ? '3. Thời gian cắt hàng CFS / Cut-off time'
-                    : '3. Thời gian xe xuất bến'}
+                  {scheduleModalData.isAirCargo
+                    ? '3. Thời gian cắt hàng tại ga TCS / SCSC / NCTS (Cut-off time)'
+                    : (scheduleModalData.isLcl
+                      ? '3. Thời gian cắt hàng CFS / Cut-off time'
+                      : '3. Thời gian xe xuất bến')}
                 </label>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
-                  {(scheduleModalData.isLcl ? LCL_DEPARTURE_TIMES_LOV : DEPARTURE_TIMES_LOV).map((dt, dtIdx) => {
+                  {(scheduleModalData.isAirCargo ? AIR_CUTOFF_TIMES_LOV : (scheduleModalData.isLcl ? LCL_DEPARTURE_TIMES_LOV : DEPARTURE_TIMES_LOV)).map((dt, dtIdx) => {
                     const isChosen = scheduleModalData.departureTime === dt.time;
                     return (
                       <button
@@ -6558,12 +7074,12 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                         }}
                         className={`px-2.5 py-1.5 text-left rounded-xl border text-xs transition-all cursor-pointer ${
                           isChosen
-                            ? 'bg-indigo-600 border-indigo-600 text-white font-bold shadow-2xs'
+                            ? (scheduleModalData.isAirCargo ? 'bg-sky-600 border-sky-600 text-white font-bold shadow-2xs' : 'bg-indigo-600 border-indigo-600 text-white font-bold shadow-2xs')
                             : 'bg-slate-50 border-slate-200 text-slate-700 font-medium hover:bg-slate-100 hover:border-slate-300'
                         }`}
                       >
                         <span className="block font-bold">{dt.time}</span>
-                        <span className={`text-[10px] block truncate ${isChosen ? 'text-indigo-100' : 'text-slate-500'}`}>
+                        <span className={`text-[10px] block truncate ${isChosen ? 'text-sky-100' : 'text-slate-500'}`}>
                           {dt.label.replace(`${dt.time} `, '')}
                         </span>
                       </button>
@@ -6573,11 +7089,11 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
 
                 <div className="flex items-center gap-2 pt-1">
                   <span className="text-xs font-semibold text-slate-600 whitespace-nowrap">
-                    {scheduleModalData.isLcl ? 'Hoặc nhập giờ Cut-off khác:' : 'Hoặc nhập giờ khác:'}
+                    {scheduleModalData.isAirCargo ? 'Hoặc nhập giờ Cut-off ga khác:' : (scheduleModalData.isLcl ? 'Hoặc nhập giờ Cut-off khác:' : 'Hoặc nhập giờ khác:')}
                   </span>
                   <input
                     type="time"
-                    value={scheduleModalData.departureTime || (scheduleModalData.isLcl ? '17:00' : '20:00')}
+                    value={scheduleModalData.departureTime || (scheduleModalData.isAirCargo ? '18:00' : (scheduleModalData.isLcl ? '17:00' : '20:00'))}
                     onChange={(e) => setScheduleModalData({ ...scheduleModalData, departureTime: e.target.value })}
                     className="px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:bg-white focus:outline-none focus:border-indigo-500 cursor-pointer"
                   />
@@ -6589,13 +7105,13 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                 <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
                   Xem trước hiển thị trên biểu giá:
                 </span>
-                <div className="text-xs font-bold text-indigo-900 bg-white border border-indigo-200 rounded-xl px-3 py-2 flex items-center gap-2 shadow-2xs">
-                  <Calendar className="w-4 h-4 text-indigo-600 shrink-0" />
+                <div className={`text-xs font-bold ${scheduleModalData.isAirCargo ? 'text-sky-900 border-sky-200' : 'text-indigo-900 border-indigo-200'} bg-white border rounded-xl px-3 py-2 flex items-center gap-2 shadow-2xs`}>
+                  {scheduleModalData.isAirCargo ? <Plane className="w-4 h-4 text-sky-600 shrink-0" /> : <Calendar className="w-4 h-4 text-indigo-600 shrink-0" />}
                   <span>
                     {(() => {
                       const days = scheduleModalData.selectedDays;
                       const time = scheduleModalData.departureTime;
-                      const prefix = scheduleModalData.isLcl ? 'Cắt CFS' : 'Xuất bến';
+                      const prefix = scheduleModalData.isAirCargo ? 'Cắt TCS' : (scheduleModalData.isLcl ? 'Cắt CFS' : 'Xuất bến');
                       if (days.length === 7) return `Hàng ngày${time ? ` (${prefix} ${time})` : ''}`;
                       if (days.length > 0) return `${days.join(', ')}${time ? ` (${prefix} ${time})` : ''}`;
                       if (time) return `${prefix} ${time}`;
@@ -6619,10 +7135,10 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
               <button
                 type="button"
                 onClick={handleSaveScheduleModal}
-                className="inline-flex items-center gap-1.5 px-5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-md shadow-indigo-600/20 cursor-pointer"
+                className={`inline-flex items-center gap-1.5 px-5 py-2 text-xs font-bold text-white ${scheduleModalData.isAirCargo ? 'bg-sky-600 hover:bg-sky-700 shadow-sky-600/20' : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/20'} rounded-xl transition-all shadow-md cursor-pointer`}
               >
                 <Check className="w-4 h-4" />
-                <span>Xác Nhận & Lưu Lịch {scheduleModalData.isLcl ? 'CFS' : 'Chạy'}</span>
+                <span>Xác Nhận & Lưu Lịch {scheduleModalData.isAirCargo ? 'Bay' : (scheduleModalData.isLcl ? 'CFS' : 'Chạy')}</span>
               </button>
             </div>
           </div>
@@ -6630,30 +7146,34 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
       )}
 
       {/* =========================================================================
-          MODAL: CẤU HÌNH MA TRẬN 5 BẬC GIÁ CHUẨN LTL / LCL (KG, CBM / RT)
+          MODAL: CẤU HÌNH MA TRẬN BẬC GIÁ CHUẨN (EXPRESS / AIR CARGO / LTL / LCL)
       ========================================================================= */}
       {tieredPricingModalData && (
         <div className="fixed inset-0 z-[130] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
           <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 max-w-2xl w-full overflow-hidden flex flex-col animate-in zoom-in-95 duration-150 max-h-[90vh]">
             {/* Modal Header */}
-            <div className="px-6 py-4 bg-gradient-to-r from-indigo-50 via-white to-purple-50/30 border-b border-slate-200 flex items-center justify-between">
+            <div className={`px-6 py-4 ${tieredPricingModalData.isExpress ? 'bg-gradient-to-r from-amber-50 via-white to-orange-50/30' : (tieredPricingModalData.isAirCargo ? 'bg-gradient-to-r from-sky-50 via-white to-blue-50/30' : 'bg-gradient-to-r from-indigo-50 via-white to-purple-50/30')} border-b border-slate-200 flex items-center justify-between`}>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-600/20 shrink-0">
-                  <DollarSign className="w-5 h-5" />
+                <div className={`w-10 h-10 rounded-2xl ${tieredPricingModalData.isExpress ? 'bg-amber-600 shadow-amber-600/20' : (tieredPricingModalData.isAirCargo ? 'bg-sky-600 shadow-sky-600/20' : 'bg-indigo-600 shadow-indigo-600/20')} text-white flex items-center justify-center shadow-md shrink-0`}>
+                  {tieredPricingModalData.isExpress ? <Zap className="w-5 h-5" /> : (tieredPricingModalData.isAirCargo ? <Plane className="w-5 h-5" /> : <DollarSign className="w-5 h-5" />)}
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                     <span>
-                      {tieredPricingModalData.isLcl
-                        ? 'Ma Trận 5 Bậc Giá Hàng Lẻ CFS / Đóng Ghép (LCL)'
-                        : 'Ma Trận 5 Bậc Giá Chuẩn Thị Trường (LTL)'}
+                      {tieredPricingModalData.isExpress
+                        ? 'Ma Trận 6 Bậc Đơn Giá Chuyển Phát Nhanh Express (+45kg Base)'
+                        : (tieredPricingModalData.isAirCargo
+                          ? 'Ma Trận 6 Bậc Đơn Giá Hàng Không Chuẩn IATA (+100kg Base)'
+                          : (tieredPricingModalData.isLcl
+                            ? 'Ma Trận 5 Bậc Giá Hàng Lẻ CFS / Đóng Ghép (LCL)'
+                            : 'Ma Trận 5 Bậc Giá Chuẩn Thị Trường (LTL)'))}
                     </span>
-                    <span className="px-2 py-0.5 text-[10px] font-bold bg-indigo-100 text-indigo-800 rounded-full">
+                    <span className={`px-2 py-0.5 text-[10px] font-bold ${tieredPricingModalData.isExpress ? 'bg-amber-100 text-amber-900 border border-amber-300/60' : (tieredPricingModalData.isAirCargo ? 'bg-sky-100 text-sky-900 border border-sky-300/60' : 'bg-indigo-100 text-indigo-800')} rounded-full`}>
                       {tieredPricingModalData.currency === 'USD' ? 'USD ($)' : 'VND (₫)'}
                     </span>
                   </h3>
                   <p className="text-[11px] text-slate-500 font-medium">
-                    Tuyến: <strong className="text-indigo-700">{tieredPricingModalData.routeName}</strong> ({tieredPricingModalData.origin} ⇄ {tieredPricingModalData.destination})
+                    Tuyến: <strong className={tieredPricingModalData.isExpress ? 'text-amber-700' : (tieredPricingModalData.isAirCargo ? 'text-sky-700' : 'text-indigo-700')}>{tieredPricingModalData.routeName}</strong> ({tieredPricingModalData.origin} ⇄ {tieredPricingModalData.destination})
                   </p>
                 </div>
               </div>
@@ -6668,70 +7188,108 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
 
             {/* Modal Body */}
             <div className="p-6 space-y-5 overflow-y-auto">
-              {/* Basis Switch & Tabs */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-1.5 bg-slate-100/80 rounded-2xl border border-slate-200">
-                <div className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={() => setTieredPricingActiveTab('weight')}
-                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                      tieredPricingActiveTab === 'weight'
-                        ? 'bg-white text-indigo-900 shadow-xs ring-1 ring-slate-200/80'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    <span>
-                      {tieredPricingModalData.currency === 'USD'
-                        ? 'Biểu Giá Trọng Lượng ($ / Kg)'
-                        : 'Biểu Giá Theo Trọng Lượng (Kg)'}
-                    </span>
-                    {tieredPricingModalData.pricingConfig.pricingBasis === 'weight' && (
-                      <span className="w-2 h-2 rounded-full bg-emerald-500" title="Đang là đơn vị mặc định của tuyến" />
-                    )}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setTieredPricingActiveTab('volume')}
-                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                      tieredPricingActiveTab === 'volume'
-                        ? 'bg-white text-indigo-900 shadow-xs ring-1 ring-slate-200/80'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    <span>
-                      {tieredPricingModalData.currency === 'USD'
-                        ? 'Biểu Giá Thể Tích ($ / CBM hoặc RT)'
-                        : 'Biểu Giá Theo Thể Tích (CBM)'}
-                    </span>
-                    {tieredPricingModalData.pricingConfig.pricingBasis === 'volume' && (
-                      <span className="w-2 h-2 rounded-full bg-emerald-500" title="Đang là đơn vị mặc định của tuyến" />
-                    )}
-                  </button>
+              {/* Express Volumetric Conversion Rate Banner */}
+              {tieredPricingModalData.isExpress && (
+                <div className="p-3.5 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-300 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-amber-950 font-bold">
+                  <div className="flex items-center gap-2">
+                    <Zap className="w-4 h-4 text-amber-600 shrink-0" />
+                    <span>Tỷ lệ quy đổi thể tích Express: 1 CBM = 200 Kg (D × R × C / 5.000)</span>
+                  </div>
+                  <span className="text-amber-800 bg-white/80 px-2.5 py-1 rounded-lg border border-amber-200 text-[11px] shrink-0">
+                    Tính cước theo Chargeable Weight (CW)
+                  </span>
                 </div>
+              )}
 
-                <div className="flex items-center gap-2 pr-2 text-xs">
-                  <span className="text-slate-500 font-medium">Đơn vị chính:</span>
-                  <select
-                    value={tieredPricingModalData.pricingConfig.pricingBasis}
-                    onChange={(e) => {
-                      const newBasis = e.target.value as 'weight' | 'volume';
-                      setTieredPricingModalData({
-                        ...tieredPricingModalData,
-                        pricingConfig: {
-                          ...tieredPricingModalData.pricingConfig,
-                          pricingBasis: newBasis,
-                        },
-                      });
-                      setTieredPricingActiveTab(newBasis);
-                    }}
-                    className="px-2.5 py-1 bg-white border border-slate-300 rounded-lg text-xs font-bold text-indigo-900 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
-                  >
-                    <option value="volume">Tính theo {tieredPricingModalData.isLcl ? 'CBM / RT' : 'CBM'}</option>
-                    <option value="weight">Tính theo Kg</option>
-                  </select>
+              {/* Air Cargo Volumetric Conversion Rate Banner */}
+              {tieredPricingModalData.isAirCargo && (
+                <div className="p-3.5 bg-gradient-to-r from-sky-50 to-blue-50 border border-sky-300 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-sky-950 font-bold">
+                  <div className="flex items-center gap-2">
+                    <Plane className="w-4 h-4 text-sky-600 shrink-0" />
+                    <span>Tỷ lệ quy đổi thể tích Air Cargo: 1 CBM = 167 Kg (D × R × C / 6.000)</span>
+                  </div>
+                  <span className="text-sky-800 bg-white/80 px-2.5 py-1 rounded-lg border border-sky-200 text-[11px] shrink-0">
+                    Tính cước theo Chargeable Weight (CW)
+                  </span>
                 </div>
-              </div>
+              )}
+
+              {/* Basis Switch & Tabs (Only if not Air / Express) */}
+              {(!tieredPricingModalData.isAirCargo && !tieredPricingModalData.isExpress) ? (
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-1.5 bg-slate-100/80 rounded-2xl border border-slate-200">
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setTieredPricingActiveTab('weight')}
+                      className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                        tieredPricingActiveTab === 'weight'
+                          ? 'bg-white text-indigo-900 shadow-xs ring-1 ring-slate-200/80'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      <span>
+                        {tieredPricingModalData.currency === 'USD'
+                          ? 'Biểu Giá Trọng Lượng ($ / Kg)'
+                          : 'Biểu Giá Theo Trọng Lượng (Kg)'}
+                      </span>
+                      {tieredPricingModalData.pricingConfig.pricingBasis === 'weight' && (
+                        <span className="w-2 h-2 rounded-full bg-emerald-500" title="Đang là đơn vị mặc định của tuyến" />
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setTieredPricingActiveTab('volume')}
+                      className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                        tieredPricingActiveTab === 'volume'
+                          ? 'bg-white text-indigo-900 shadow-xs ring-1 ring-slate-200/80'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      <span>
+                        {tieredPricingModalData.currency === 'USD'
+                          ? 'Biểu Giá Thể Tích ($ / CBM hoặc RT)'
+                          : 'Biểu Giá Theo Thể Tích (CBM)'}
+                      </span>
+                      {tieredPricingModalData.pricingConfig.pricingBasis === 'volume' && (
+                        <span className="w-2 h-2 rounded-full bg-emerald-500" title="Đang là đơn vị mặc định của tuyến" />
+                      )}
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-2 pr-2 text-xs">
+                    <span className="text-slate-500 font-medium">Đơn vị chính:</span>
+                    <select
+                      value={tieredPricingModalData.pricingConfig.pricingBasis}
+                      onChange={(e) => {
+                        const newBasis = e.target.value as 'weight' | 'volume';
+                        setTieredPricingModalData({
+                          ...tieredPricingModalData,
+                          pricingConfig: {
+                            ...tieredPricingModalData.pricingConfig,
+                            pricingBasis: newBasis,
+                          },
+                        });
+                        setTieredPricingActiveTab(newBasis);
+                      }}
+                      className="px-2.5 py-1 bg-white border border-slate-300 rounded-lg text-xs font-bold text-indigo-900 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                    >
+                      <option value="volume">Tính theo {tieredPricingModalData.isLcl ? 'CBM / RT' : 'CBM'}</option>
+                      <option value="weight">Tính theo Kg</option>
+                    </select>
+                  </div>
+                </div>
+              ) : (
+                <div className={`flex items-center justify-between p-2.5 ${tieredPricingModalData.isExpress ? 'bg-amber-50/70 border-amber-200' : 'bg-sky-50/70 border-sky-200'} rounded-2xl border text-xs`}>
+                  <div className={`flex items-center gap-2 font-bold ${tieredPricingModalData.isExpress ? 'text-amber-950' : 'text-sky-950'}`}>
+                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                    <span>Đơn vị tính cước tiêu chuẩn: <strong>Kilogram (Kg) / Chargeable Weight</strong></span>
+                  </div>
+                  <span className={`text-[11px] font-bold ${tieredPricingModalData.isExpress ? 'text-amber-800 border-amber-300' : 'text-sky-700 border-sky-200'} bg-white px-2 py-0.5 rounded-md border`}>
+                    {tieredPricingModalData.isExpress ? '6 Bậc Express (+45kg Base)' : '6 Bậc Tiêu Chuẩn (+100kg Base)'}
+                  </span>
+                </div>
+              )}
 
               {/* Min Charge Setting */}
               <div className="p-3.5 bg-amber-50/70 border border-amber-200 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -6744,9 +7302,13 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                       Cước Sàn Tối Thiểu (Min Charge)
                     </span>
                     <span className="text-[11px] text-amber-800 font-medium">
-                      {tieredPricingModalData.isLcl
-                        ? 'Áp dụng cho mỗi House Bill (HBL) / Lô hàng nhỏ hơn ngưỡng min'
-                        : 'Áp dụng khi kiện hàng siêu nhỏ / tổng cước theo đơn giá thấp hơn mức sàn'}
+                      {tieredPricingModalData.isExpress
+                        ? 'Áp dụng cho kiện hàng tài liệu/hàng mẫu nhỏ dưới 1kg (Cước sàn tối thiểu)'
+                        : (tieredPricingModalData.isAirCargo
+                          ? 'Áp dụng cho lô hàng kiện nhỏ dưới 45kg (Mức cước tối thiểu mỗi e-AWB)'
+                          : (tieredPricingModalData.isLcl
+                            ? 'Áp dụng cho mỗi House Bill (HBL) / Lô hàng nhỏ hơn ngưỡng min'
+                            : 'Áp dụng khi kiện hàng siêu nhỏ / tổng cước theo đơn giá thấp hơn mức sàn'))}
                     </span>
                   </div>
                 </div>
@@ -6765,46 +7327,104 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                         },
                       });
                     }}
-                    placeholder={tieredPricingModalData.currency === 'USD' ? '25' : '100000'}
+                    placeholder={tieredPricingModalData.currency === 'USD' ? (tieredPricingModalData.isExpress ? '15' : (tieredPricingModalData.isAirCargo ? '45' : '25')) : '100000'}
                     className="w-32 px-3 py-1.5 bg-white border border-amber-300 rounded-xl text-right text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
                   />
                   <span className="text-xs font-bold text-amber-900">
-                    {tieredPricingModalData.currency === 'USD' ? '$ / HBL' : '₫ / Lô'}
+                    {tieredPricingModalData.currency === 'USD' ? (tieredPricingModalData.isExpress ? '$ / Lô' : (tieredPricingModalData.isAirCargo ? '$ / AWB' : '$ / HBL')) : '₫ / Lô'}
                   </span>
                 </div>
               </div>
 
               {/* Tab 1: Weight Tiers (Kg) */}
-              {tieredPricingActiveTab === 'weight' && (
+              {(tieredPricingActiveTab === 'weight' || tieredPricingModalData.isAirCargo || tieredPricingModalData.isExpress) && (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-slate-800 uppercase tracking-wide">
-                      Bảng 5 Khung Bậc Trọng Lượng Chuẩn ({tieredPricingModalData.currency === 'USD' ? '$/Kg' : '₫/Kg'})
+                      {tieredPricingModalData.isExpress
+                        ? `Bảng 6 Khung Bậc Trọng Lượng Chuyển Phát Nhanh Express (${tieredPricingModalData.currency === 'USD' ? '$/Kg' : '₫/Kg'})`
+                        : (tieredPricingModalData.isAirCargo
+                          ? `Bảng 6 Khung Bậc Trọng Lượng Chuẩn IATA (${tieredPricingModalData.currency === 'USD' ? '$/Kg' : '₫/Kg'})`
+                          : `Bảng 5 Khung Bậc Trọng Lượng Chuẩn (${tieredPricingModalData.currency === 'USD' ? '$/Kg' : '₫/Kg'})`)}
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const isUsd = tieredPricingModalData.currency === 'USD';
-                        const base = tieredPricingModalData.pricingConfig.weightTiers[1]?.price || (isUsd ? 0.15 : 2000);
-                        const newTiers = [
-                          { ...tieredPricingModalData.pricingConfig.weightTiers[0], price: isUsd ? Number((base * 1.35).toFixed(2)) : Math.round(base * 1.25) },
-                          { ...tieredPricingModalData.pricingConfig.weightTiers[1], price: base },
-                          { ...tieredPricingModalData.pricingConfig.weightTiers[2], price: isUsd ? Number((base * 0.8).toFixed(2)) : Math.round(base * 0.825) },
-                          { ...tieredPricingModalData.pricingConfig.weightTiers[3], price: isUsd ? Number((base * 0.65).toFixed(2)) : Math.round(base * 0.675) },
-                          { ...tieredPricingModalData.pricingConfig.weightTiers[4], price: isUsd ? Number((base * 0.5).toFixed(2)) : Math.round(base * 0.55) },
-                        ];
-                        setTieredPricingModalData({
-                          ...tieredPricingModalData,
-                          pricingConfig: {
-                            ...tieredPricingModalData.pricingConfig,
-                            weightTiers: newTiers,
-                          },
-                        });
-                      }}
-                      className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer"
-                    >
-                      ⚡ Tự động tính giảm dần từ bậc 2
-                    </button>
+                    {tieredPricingModalData.isExpress ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const isUsd = tieredPricingModalData.currency === 'USD';
+                          const base = tieredPricingModalData.pricingConfig.weightTiers[3]?.price || (isUsd ? 6.5 : 165000);
+                          const newTiers = [
+                            { ...tieredPricingModalData.pricingConfig.weightTiers[0], price: isUsd ? Number((base * 2.15).toFixed(2)) : Math.round(base * 2.15) },
+                            { ...tieredPricingModalData.pricingConfig.weightTiers[1], price: isUsd ? Number((base * 1.54).toFixed(2)) : Math.round(base * 1.54) },
+                            { ...tieredPricingModalData.pricingConfig.weightTiers[2], price: isUsd ? Number((base * 1.23).toFixed(2)) : Math.round(base * 1.23) },
+                            { ...tieredPricingModalData.pricingConfig.weightTiers[3], price: base },
+                            { ...tieredPricingModalData.pricingConfig.weightTiers[4], price: isUsd ? Number((base * 0.86).toFixed(2)) : Math.round(base * 0.86) },
+                            { ...tieredPricingModalData.pricingConfig.weightTiers[5], price: isUsd ? Number((base * 0.75).toFixed(2)) : Math.round(base * 0.75) },
+                          ];
+                          setTieredPricingModalData({
+                            ...tieredPricingModalData,
+                            pricingConfig: {
+                              ...tieredPricingModalData.pricingConfig,
+                              weightTiers: newTiers,
+                            },
+                          });
+                        }}
+                        className="text-[11px] font-bold text-amber-600 hover:text-amber-800 hover:underline cursor-pointer"
+                      >
+                        ⚡ Tự động tính 6 bậc từ mốc +45kg Base
+                      </button>
+                    ) : tieredPricingModalData.isAirCargo ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const isUsd = tieredPricingModalData.currency === 'USD';
+                          const base = tieredPricingModalData.pricingConfig.weightTiers[2]?.price || (isUsd ? 4.2 : 105000);
+                          const newTiers = [
+                            { ...tieredPricingModalData.pricingConfig.weightTiers[0], price: isUsd ? Number((base * 1.38).toFixed(2)) : Math.round(base * 1.38) },
+                            { ...tieredPricingModalData.pricingConfig.weightTiers[1], price: isUsd ? Number((base * 1.14).toFixed(2)) : Math.round(base * 1.14) },
+                            { ...tieredPricingModalData.pricingConfig.weightTiers[2], price: base },
+                            { ...tieredPricingModalData.pricingConfig.weightTiers[3], price: isUsd ? Number((base * 0.85).toFixed(2)) : Math.round(base * 0.85) },
+                            { ...tieredPricingModalData.pricingConfig.weightTiers[4], price: isUsd ? Number((base * 0.76).toFixed(2)) : Math.round(base * 0.76) },
+                            { ...tieredPricingModalData.pricingConfig.weightTiers[5], price: isUsd ? Number((base * 0.67).toFixed(2)) : Math.round(base * 0.67) },
+                          ];
+                          setTieredPricingModalData({
+                            ...tieredPricingModalData,
+                            pricingConfig: {
+                              ...tieredPricingModalData.pricingConfig,
+                              weightTiers: newTiers,
+                            },
+                          });
+                        }}
+                        className="text-[11px] font-bold text-sky-600 hover:text-sky-800 hover:underline cursor-pointer"
+                      >
+                        ✈ Tự động tính 6 bậc từ mốc +100kg Base
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const isUsd = tieredPricingModalData.currency === 'USD';
+                          const base = tieredPricingModalData.pricingConfig.weightTiers[1]?.price || (isUsd ? 0.15 : 2000);
+                          const newTiers = [
+                            { ...tieredPricingModalData.pricingConfig.weightTiers[0], price: isUsd ? Number((base * 1.35).toFixed(2)) : Math.round(base * 1.25) },
+                            { ...tieredPricingModalData.pricingConfig.weightTiers[1], price: base },
+                            { ...tieredPricingModalData.pricingConfig.weightTiers[2], price: isUsd ? Number((base * 0.8).toFixed(2)) : Math.round(base * 0.825) },
+                            { ...tieredPricingModalData.pricingConfig.weightTiers[3], price: isUsd ? Number((base * 0.65).toFixed(2)) : Math.round(base * 0.675) },
+                            { ...tieredPricingModalData.pricingConfig.weightTiers[4], price: isUsd ? Number((base * 0.5).toFixed(2)) : Math.round(base * 0.55) },
+                          ];
+                          setTieredPricingModalData({
+                            ...tieredPricingModalData,
+                            pricingConfig: {
+                              ...tieredPricingModalData.pricingConfig,
+                              weightTiers: newTiers,
+                            },
+                          });
+                        }}
+                        className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer"
+                      >
+                        ⚡ Tự động tính giảm dần từ bậc 2
+                      </button>
+                    )}
                   </div>
 
                   <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-2xs bg-white">
@@ -6826,7 +7446,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                               #{tIdx + 1}
                             </td>
                             <td className="py-2.5 px-3 font-bold text-slate-900">
-                              <span className="px-2 py-0.5 bg-slate-100 rounded-lg text-slate-800 border border-slate-200">
+                              <span className={`px-2 py-0.5 rounded-lg border ${tier.rangeLabel.includes('Base') ? (tieredPricingModalData.isExpress ? 'bg-amber-100 text-amber-900 border-amber-300 font-extrabold' : 'bg-sky-100 text-sky-900 border-sky-300 font-extrabold') : 'bg-slate-100 text-slate-800 border-slate-200'}`}>
                                 {tier.rangeLabel}
                               </span>
                             </td>
@@ -6867,8 +7487,8 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                 </div>
               )}
 
-              {/* Tab 2: Volume Tiers (CBM / RT) */}
-              {tieredPricingActiveTab === 'volume' && (
+              {/* Tab 2: Volume Tiers (CBM / RT) - Not shown for Air Cargo & Express */}
+              {!tieredPricingModalData.isAirCargo && !tieredPricingModalData.isExpress && tieredPricingActiveTab === 'volume' && (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-slate-800 uppercase tracking-wide">
@@ -6976,7 +7596,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
               <button
                 type="button"
                 onClick={handleSaveTieredPricingModal}
-                className="inline-flex items-center gap-1.5 px-5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-md shadow-indigo-600/20 cursor-pointer"
+                className={`inline-flex items-center gap-1.5 px-5 py-2 text-xs font-bold text-white ${tieredPricingModalData.isExpress ? 'bg-amber-600 hover:bg-amber-700 shadow-amber-600/20' : (tieredPricingModalData.isAirCargo ? 'bg-sky-600 hover:bg-sky-700 shadow-sky-600/20' : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/20')} rounded-xl transition-all shadow-md cursor-pointer`}
               >
                 <Check className="w-4 h-4" />
                 <span>Xác Nhận & Lưu Ma Trận Bậc Giá</span>
