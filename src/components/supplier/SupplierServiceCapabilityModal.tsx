@@ -5545,7 +5545,9 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                         <span>{activeCategory?.id === 'warehousing' ? 'Danh Sách Cơ Sở Kho & Biểu Phí Lưu Kho' : 'Các Tuyến Đường & Biểu Giá Tham Chiếu'} ({currentData.routes?.length || 0})</span>
                       </h4>
                       <p className="text-[11px] text-slate-500 mt-0.5">
-                        Chỉnh sửa trực tiếp trên bảng biểu giá hoặc tải template Excel để nhập liệu hàng loạt.
+                        {activeCategory?.id === 'warehousing'
+                          ? 'Khai báo thông số kỹ thuật, album ảnh, phụ phí và VAS chi tiết cho từng cơ sở kho.'
+                          : 'Chỉnh sửa trực tiếp trên bảng biểu giá hoặc tải template Excel để nhập liệu hàng loạt.'}
                       </p>
                     </div>
 
@@ -5583,28 +5585,33 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                         className="hidden"
                       />
 
-                      {/* Download Excel Template Button */}
-                      <button
-                        type="button"
-                        onClick={handleDownloadExcelTemplate}
-                        disabled={isExportingTemplate}
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 rounded-xl transition-all cursor-pointer shadow-2xs hover:border-slate-400"
-                        title="Tải file Excel mẫu chuẩn hóa kèm danh mục LOV tra cứu"
-                      >
-                        <Download className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>Tải Mẫu Excel</span>
-                      </button>
+                      {/* Excel Template & Import buttons (Hidden for Warehousing / Kho bãi 3PL) */}
+                      {activeCategory?.id !== 'warehousing' && (
+                        <>
+                          {/* Download Excel Template Button */}
+                          <button
+                            type="button"
+                            onClick={handleDownloadExcelTemplate}
+                            disabled={isExportingTemplate}
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 rounded-xl transition-all cursor-pointer shadow-2xs hover:border-slate-400"
+                            title="Tải file Excel mẫu chuẩn hóa kèm danh mục LOV tra cứu"
+                          >
+                            <Download className="w-3.5 h-3.5 text-emerald-600" />
+                            <span>Tải Mẫu Excel</span>
+                          </button>
 
-                      {/* Upload Excel Button */}
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded-xl transition-all cursor-pointer shadow-2xs"
-                        title="Upload file Excel bảng giá tuyến đường để nhập hàng loạt"
-                      >
-                        <Upload className="w-3.5 h-3.5 text-emerald-700" />
-                        <span>Nhập Từ Excel</span>
-                      </button>
+                          {/* Upload Excel Button */}
+                          <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded-xl transition-all cursor-pointer shadow-2xs"
+                            title="Upload file Excel bảng giá tuyến đường để nhập hàng loạt"
+                          >
+                            <Upload className="w-3.5 h-3.5 text-emerald-700" />
+                            <span>Nhập Từ Excel</span>
+                          </button>
+                        </>
+                      )}
 
                       {/* Add Single Route Button */}
                       <button
