@@ -66,6 +66,49 @@ export const DEPARTURE_TIMES_LOV = [
   { time: '06:00', label: '06:00 (Xuất bến ca sáng sớm)' },
 ];
 
+export const LCL_DEPARTURE_TIMES_LOV = [
+  { time: '17:00', label: '17:00 (Cắt hàng CFS - Closing Time)' },
+  { time: '12:00', label: '12:00 (Cắt hàng CFS ca trưa)' },
+  { time: '09:00', label: '09:00 (Cắt hàng CFS ca sáng)' },
+  { time: '20:00', label: '20:00 (Tàu chạy / Xuất bến ca tối)' },
+  { time: 'Trước ETD 24h', label: 'Trước ETD 24h (Cut-off 24h)' },
+  { time: 'Trước ETD 48h', label: 'Trước ETD 48h (Cut-off 48h)' },
+];
+
+export const OCEAN_TRADE_LANE_REGIONS_LOV = [
+  'Bắc Mỹ',
+  'Châu Á',
+  'Châu Âu',
+  'Châu Đại Dương',
+  'Châu Phi',
+  'Mỹ La Tinh & Caribê',
+  'Trung Đông',
+  'Tuyến Nội Địa',
+];
+
+export const LCL_SHIPPING_LINES = [
+  'Maersk (Maersk Line)',
+  'ONE (Ocean Network Express)',
+  'MSC (Mediterranean Shipping Co)',
+  'COSCO Shipping',
+  'CMA CGM',
+  'Evergreen Marine',
+  'Hapag-Lloyd',
+  'Yang Ming Line',
+  'Wanhai Lines',
+  'SITC Container Lines',
+  'OOCL',
+  'ZIM Integrated Shipping',
+  'KMTC Line',
+  'Sinokor Merchant Marine',
+  'Vanguard Logistics (Co-loader)',
+  'ECU Worldwide (Co-loader)',
+  'Đường Sắt Việt Nam (VNR / Ratraco)',
+  'Khác (Nhập hãng tàu khác)...',
+];
+
+export const LCL_PACKAGING_TYPES = LCL_SHIPPING_LINES;
+
 export interface ScheduleModalData {
   routeId: string;
   routeName: string;
@@ -74,10 +117,11 @@ export interface ScheduleModalData {
   selectedDays: string[];
   departureTime: string;
   customNote: string;
+  isLcl?: boolean;
 }
 
 // =========================================================================
-// LTL TIERED PRICING DEFINITIONS (KHUNG BẬC GIÁ CHUẨN THỊ TRƯỜNG CỐ ĐỊNH)
+// LTL & LCL TIERED PRICING DEFINITIONS (KHUNG BẬC GIÁ CHUẨN THỊ TRƯỜNG CỐ ĐỊNH)
 // =========================================================================
 export interface LtlWeightTier {
   id: string;
@@ -85,7 +129,7 @@ export interface LtlWeightTier {
   subLabel: string;
   minKg: number;
   maxKg: number;
-  price: number; // VND per Kg
+  price: number; // VND per Kg or USD per Kg
 }
 
 export interface LtlVolumeTier {
@@ -94,12 +138,13 @@ export interface LtlVolumeTier {
   subLabel: string;
   minCbm: number;
   maxCbm: number;
-  price: number; // VND per CBM
+  price: number; // VND per CBM or USD per CBM/RT
 }
 
 export interface LtlTieredPricingConfig {
-  minCharge: number; // Cước tối thiểu (VND)
+  minCharge: number; // Cước tối thiểu (VND or USD)
   pricingBasis: 'weight' | 'volume'; // Đơn vị tính chính
+  currency?: 'VND' | 'USD';
   weightTiers: LtlWeightTier[];
   volumeTiers: LtlVolumeTier[];
 }
@@ -124,6 +169,7 @@ export const createDefaultLtlPricingConfig = (basis: 'weight' | 'volume' = 'weig
   return {
     minCharge: basis === 'weight' ? 100000 : 150000,
     pricingBasis: basis,
+    currency: 'VND',
     weightTiers: [
       { id: 'w1', rangeLabel: '1 – 50 Kg', subLabel: 'Hàng lẻ kiện nhỏ', minKg: 1, maxKg: 50, price: Math.round(baseKgPrice * 1.25) },
       { id: 'w2', rangeLabel: '51 – 200 Kg', subLabel: 'Hàng lẻ thông dụng', minKg: 51, maxKg: 200, price: baseKgPrice },
@@ -141,11 +187,45 @@ export const createDefaultLtlPricingConfig = (basis: 'weight' | 'volume' = 'weig
   };
 };
 
+export const createDefaultLclPricingConfig = (
+  basis: 'volume' | 'weight' = 'volume', 
+  currency: 'USD' | 'VND' = 'USD', 
+  basePrice: number = 25
+): LtlTieredPricingConfig => {
+  if (currency === 'USD') {
+    const baseVal = basePrice > 0 && basePrice < 1000 ? basePrice : 25;
+    return {
+      minCharge: 25,
+      pricingBasis: basis,
+      currency: 'USD',
+      weightTiers: [
+        { id: 'w1', rangeLabel: '< 500 Kg', subLabel: 'Kiện lẻ nhỏ (Min 0.5 Tấn)', minKg: 1, maxKg: 500, price: Math.round(baseVal * 1.4) },
+        { id: 'w2', rangeLabel: '501 – 1,000 Kg', subLabel: 'Lô hàng trung (0.5 – 1 Tấn)', minKg: 501, maxKg: 1000, price: baseVal },
+        { id: 'w3', rangeLabel: '1,001 – 3,000 Kg', subLabel: 'Lô hàng nặng (1 – 3 Tấn)', minKg: 1001, maxKg: 3000, price: Math.round(baseVal * 0.8) },
+        { id: 'w4', rangeLabel: '3,001 – 5,000 Kg', subLabel: 'Lô hàng tải nặng (3 – 5 Tấn)', minKg: 3001, maxKg: 5000, price: Math.round(baseVal * 0.68) },
+        { id: 'w5', rangeLabel: '> 5,000 Kg', subLabel: 'Lô siêu trọng (> 5 Tấn)', minKg: 5001, maxKg: 999999, price: Math.round(baseVal * 0.56) },
+      ],
+      volumeTiers: [
+        { id: 'v1', rangeLabel: '< 1.0 CBM / RT', subLabel: 'Kiện hàng lẻ nhỏ (Min 1 CBM)', minCbm: 0.1, maxCbm: 1.0, price: Math.round(baseVal * 1.4) },
+        { id: 'v2', rangeLabel: '1.0 – 3.0 CBM / RT', subLabel: 'Lô hàng thể tích tiêu chuẩn', minCbm: 1.0, maxCbm: 3.0, price: baseVal },
+        { id: 'v3', rangeLabel: '3.1 – 6.0 CBM / RT', subLabel: 'Lô hàng thể tích trung bình', minCbm: 3.1, maxCbm: 6.0, price: Math.round(baseVal * 0.8) },
+        { id: 'v4', rangeLabel: '6.1 – 10.0 CBM / RT', subLabel: 'Lô hàng gom thể tích lớn', minCbm: 6.1, maxCbm: 10.0, price: Math.round(baseVal * 0.68) },
+        { id: 'v5', rangeLabel: '> 10.0 CBM / RT', subLabel: 'Lô hàng siêu khối tích (> 10 m³)', minCbm: 10.1, maxCbm: 999999, price: Math.round(baseVal * 0.56) },
+      ],
+    };
+  } else {
+    const baseVnd = basePrice >= 1000 ? basePrice : 500000;
+    return createDefaultLtlPricingConfig(basis, 2000, baseVnd);
+  }
+};
+
 export interface TieredPricingModalData {
   routeId: string;
   routeName: string;
   origin: string;
   destination: string;
+  currency: 'VND' | 'USD';
+  isLcl?: boolean;
   pricingConfig: LtlTieredPricingConfig;
 }
 
@@ -352,6 +432,7 @@ export const getTonnagesForBodyType = (
 export interface CapabilityRouteItem {
   id: string;
   routeCode?: string; // Mã tuyến tự sinh (VD: RC-FTL-001)
+  region?: string; // Phân vùng thương mại hàng hải (Bắc Mỹ, Châu Á, Châu Âu...)
   route: string;
   origin: string;
   destination: string;
@@ -360,6 +441,9 @@ export interface CapabilityRouteItem {
   truckTonnage?: string;
   customTruckTonnage?: string;
   vehicleType: string;
+  shippingLine?: string;
+  customPackagingType?: string;
+  customShippingLine?: string;
   pricingUnit: string;
   price: number;
   currency: 'VND' | 'USD';
@@ -1458,21 +1542,42 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             defaultFleet: 'Kho CFS gom hàng lẻ trực tiếp tại Cát Lái, Tân Cảng, Đình Vũ',
             defaultOperation: 'Đóng hàng đóng ghép chuyên tuyến hàng tuần, giảm thiểu rủi ro va đập',
             defaultCommitment: 'Bảng giá cước minh bạch, không phát sinh chi phí ẩn tại cảng đến',
-            vehicleLov: ['LCL Hàng lẻ đóng ghép', 'Pallet tiêu chuẩn CFS'],
-            unitLov: ['CBM (USD)', 'RT (Revenue Ton)'],
+            vehicleLov: LCL_SHIPPING_LINES,
+            unitLov: ['CBM', 'RT (Revenue Ton)', 'Kg', 'Pallet'],
             defaultRoutes: [
               {
                 id: 'r-sea-lcl-1',
+                routeCode: 'RC-LCL-001',
                 route: 'Cát Lái ⇄ Singapore (SGSIN)',
                 origin: 'Kho CFS Cát Lái (TP.HCM)',
-                destination: 'Cảng Singapore',
-                vehicleType: 'LCL Hàng lẻ đóng ghép',
-                pricingUnit: 'CBM (USD)',
+                destination: 'Cảng Singapore (SGSIN)',
+                vehicleType: 'Maersk (Maersk Line)',
+                pricingUnit: 'CBM',
                 price: 25,
                 currency: 'USD',
-                sla: '3 - 5 ngày',
+                sla: 'Thứ 4, Thứ 7 (Cắt hàng CFS 17:00)',
+                transitType: 'Direct',
                 pricingStyle: 'Chưa gồm phụ phí',
+                validUntil: '2026-12-31',
                 promotionPercent: 20,
+                ltlPricing: createDefaultLclPricingConfig('volume', 'USD', 25),
+              },
+              {
+                id: 'r-sea-lcl-2',
+                routeCode: 'RC-LCL-002',
+                route: 'Hải Phòng ⇄ Thượng Hải (CNSHA)',
+                origin: 'Kho CFS Đình Vũ (Hải Phòng)',
+                destination: 'Cảng Thượng Hải (China)',
+                vehicleType: 'ONE (Ocean Network Express)',
+                pricingUnit: 'CBM',
+                price: 22,
+                currency: 'USD',
+                sla: 'Thứ 3, Thứ 6 (Cắt hàng CFS 12:00)',
+                transitType: 'Direct',
+                pricingStyle: 'Chưa gồm phụ phí',
+                validUntil: '2026-12-31',
+                promotionPercent: 10,
+                ltlPricing: createDefaultLclPricingConfig('volume', 'USD', 22),
               },
             ],
             freeSurchargeOptions: [
@@ -1923,11 +2028,17 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             defaultFleet: 'Toa xe hàng ghép liên tỉnh',
             defaultOperation: 'Gom hàng tại kho bãi ga, giao nhận tại các ga dọc tuyến Bắc Nam',
             defaultCommitment: 'Cước phí rẻ nhất cho hàng nặng, không sợ tắc đường',
-            vehicleLov: ['Hàng lẻ toa ghép đường sắt'],
-            unitLov: ['Kg', 'Tấn', 'CBM'],
+            vehicleLov: [
+              'Hàng lẻ toa ghép đường sắt',
+              'Pallet tiêu chuẩn đường sắt',
+              'Kiện hàng đóng thùng gỗ / Khung sắt',
+              'Khác (Nhập tùy chọn)...',
+            ],
+            unitLov: ['Kg', 'CBM', 'Tấn'],
             defaultRoutes: [
               {
                 id: 'r-rail-lcl-1',
+                routeCode: 'RC-RAIL-LCL-001',
                 route: 'Sài Gòn ⇄ Hà Nội',
                 origin: 'Ga Sóng Thần (TP.HCM / Bình Dương)',
                 destination: 'Ga Giáp Bát (Hà Nội)',
@@ -1935,9 +2046,12 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
                 pricingUnit: 'Kg',
                 price: 1100,
                 currency: 'VND',
-                sla: '4 - 5 ngày',
+                sla: 'Thứ 3, Thứ 6 (Cắt hàng bãi ga 18:00)',
+                transitType: 'Direct',
                 pricingStyle: 'All-in',
-                promotionPercent: 0,
+                validUntil: '2026-12-31',
+                promotionPercent: 5,
+                ltlPricing: createDefaultLtlPricingConfig('weight', 1100, 320000),
               },
             ],
             freeSurchargeOptions: [
@@ -3651,39 +3765,44 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
   const [scheduleModalData, setScheduleModalData] = useState<ScheduleModalData | null>(null);
 
   const handleOpenScheduleModal = (route: CapabilityRouteItem) => {
+    const isOcean = activeCategory?.id === 'ocean' || activeModel?.id?.startsWith('sea-');
+    const isRail = activeCategory?.id === 'rail' || activeModel?.id?.startsWith('rail-');
+    const isLclModel = (isOcean || isRail) && (activeModel?.id?.includes('lcl') || activeModel?.name?.includes('LCL') || activeModel?.code === 'LCL');
     const currentSla = route.sla || '';
     let parsedDays = DAYS_OF_WEEK_LOV.filter((d) => currentSla.includes(d.name)).map((d) => d.name);
     if (currentSla.includes('Hàng ngày') || currentSla.includes('hàng ngày') || currentSla.includes('T2 - CN')) {
       parsedDays = DAYS_OF_WEEK_LOV.map((d) => d.name);
     }
 
-    // Extract time from string (e.g. 20:00 or 19:30)
+    // Extract time from string (e.g. 20:00 or 19:30 or 17:00)
     const timeMatch = currentSla.match(/(\d{1,2}:\d{2})/);
-    const departureTime = timeMatch ? timeMatch[1] : '20:00';
+    const departureTime = timeMatch ? timeMatch[1] : (isLclModel ? '17:00' : '20:00');
 
     setScheduleModalData({
       routeId: route.id,
       routeName: route.route,
       origin: route.origin,
       destination: route.destination,
-      selectedDays: parsedDays.length > 0 ? parsedDays : ['Thứ 2', 'Thứ 4', 'Thứ 6'],
+      selectedDays: parsedDays.length > 0 ? parsedDays : (isLclModel ? ['Thứ 4', 'Thứ 7'] : ['Thứ 2', 'Thứ 4', 'Thứ 6']),
       departureTime,
       customNote: '',
+      isLcl: isLclModel,
     });
   };
 
   const handleSaveScheduleModal = () => {
     if (!scheduleModalData) return;
-    const { routeId, selectedDays, departureTime, customNote } = scheduleModalData;
+    const { routeId, selectedDays, departureTime, customNote, isLcl } = scheduleModalData;
 
     let formatted = '';
+    const cutOffPrefix = isLcl ? 'Cắt hàng CFS' : 'Xuất bến';
     if (selectedDays.length === 7) {
-      formatted = `Hàng ngày${departureTime ? ` (Xuất bến ${departureTime})` : ''}`;
+      formatted = `Hàng ngày${departureTime ? ` (${cutOffPrefix} ${departureTime})` : ''}`;
     } else if (selectedDays.length > 0) {
       const sortedDays = DAYS_OF_WEEK_LOV.filter((d) => selectedDays.includes(d.name)).map((d) => d.name);
-      formatted = `${sortedDays.join(', ')}${departureTime ? ` (Xuất bến ${departureTime})` : ''}`;
+      formatted = `${sortedDays.join(', ')}${departureTime ? ` (${cutOffPrefix} ${departureTime})` : ''}`;
     } else if (departureTime) {
-      formatted = `Xuất bến ${departureTime}`;
+      formatted = `${cutOffPrefix} ${departureTime}`;
     }
 
     if (customNote && customNote.trim()) {
@@ -3698,18 +3817,36 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
   const [tieredPricingActiveTab, setTieredPricingActiveTab] = useState<'weight' | 'volume'>('weight');
 
   const handleOpenTieredPricingModal = (route: CapabilityRouteItem) => {
-    const isWeightBasis = !route.pricingUnit || route.pricingUnit.toLowerCase().includes('kg');
-    const existingConfig = route.ltlPricing || createDefaultLtlPricingConfig(
-      isWeightBasis ? 'weight' : 'volume',
-      route.price > 0 ? (isWeightBasis ? route.price : Math.round(route.price / 250)) : 2000,
-      route.price > 0 ? (!isWeightBasis ? route.price : Math.round(route.price * 250)) : 500000
-    );
+    const isOcean = activeCategory?.id === 'ocean' || activeModel?.id?.startsWith('sea-');
+    const isRail = activeCategory?.id === 'rail' || activeModel?.id?.startsWith('rail-');
+    const isLclModel = (isOcean || isRail) && (activeModel?.id?.includes('lcl') || activeModel?.name?.includes('LCL') || activeModel?.code === 'LCL');
+    const isWeightBasis = !route.pricingUnit || route.pricingUnit.toLowerCase().includes('kg') || route.pricingUnit.toLowerCase().includes('tấn');
+    const routeCurrency = route.currency || (isOcean ? 'USD' : 'VND');
+
+    let existingConfig = route.ltlPricing;
+    if (!existingConfig) {
+      if (isLclModel) {
+        existingConfig = createDefaultLclPricingConfig(
+          isWeightBasis ? 'weight' : 'volume',
+          routeCurrency,
+          route.price > 0 ? route.price : (routeCurrency === 'USD' ? 25 : 500000)
+        );
+      } else {
+        existingConfig = createDefaultLtlPricingConfig(
+          isWeightBasis ? 'weight' : 'volume',
+          route.price > 0 ? (isWeightBasis ? route.price : Math.round(route.price / 250)) : 2000,
+          route.price > 0 ? (!isWeightBasis ? route.price : Math.round(route.price * 250)) : 500000
+        );
+      }
+    }
 
     setTieredPricingModalData({
       routeId: route.id,
       routeName: route.route,
       origin: route.origin,
       destination: route.destination,
+      currency: routeCurrency,
+      isLcl: isLclModel,
       pricingConfig: JSON.parse(JSON.stringify(existingConfig)),
     });
     setTieredPricingActiveTab(isWeightBasis ? 'weight' : 'volume');
@@ -3717,15 +3854,15 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
 
   const handleSaveTieredPricingModal = () => {
     if (!tieredPricingModalData) return;
-    const { routeId, pricingConfig } = tieredPricingModalData;
+    const { routeId, pricingConfig, currency, isLcl } = tieredPricingModalData;
     const isWeight = pricingConfig.pricingBasis === 'weight';
     const repPrice = isWeight 
-      ? (pricingConfig.weightTiers[2]?.price || pricingConfig.weightTiers[0]?.price || 1650)
-      : (pricingConfig.volumeTiers[2]?.price || pricingConfig.volumeTiers[0]?.price || 420000);
+      ? (pricingConfig.weightTiers[1]?.price || pricingConfig.weightTiers[0]?.price || (currency === 'USD' ? 25 : 2000))
+      : (pricingConfig.volumeTiers[1]?.price || pricingConfig.volumeTiers[0]?.price || (currency === 'USD' ? 25 : 500000));
 
     handleUpdateRouteRowMultiple(routeId, {
       ltlPricing: pricingConfig,
-      pricingUnit: isWeight ? 'Kg' : 'CBM',
+      pricingUnit: isWeight ? 'Kg' : (isLcl ? 'CBM' : 'CBM'),
       price: repPrice,
     });
     setTieredPricingModalData(null);
@@ -4291,6 +4428,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
     const isOcean = activeCategory?.id === 'ocean' || activeModel?.id?.startsWith('sea-');
     const isRail = activeCategory?.id === 'rail' || activeModel?.id?.startsWith('rail-');
     const isFcl = (isOcean && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL')) || (isRail && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL')));
+    const isLcl = (isOcean && (activeModel?.id?.includes('lcl') || activeModel?.name?.includes('LCL') || activeModel?.code === 'LCL')) || (isRail && (activeModel?.id?.includes('lcl') || activeModel?.name?.includes('LCL')));
     const isLtlTrucking = isTrucking && (activeModel?.id === 'trk-gen-ltl' || activeModel?.name?.includes('LTL') || activeModel?.code === 'LTL');
     const isReeferTrucking = isTrucking && !isLtlTrucking && (activeCargoGroup?.name?.includes('lạnh') || activeModel?.name?.includes('lạnh') || activeModel?.id?.includes('ref'));
     const isHazmatTrucking = isTrucking && !isLtlTrucking && (activeCargoGroup?.name?.includes('nguy hiểm') || activeModel?.name?.includes('nguy hiểm') || activeModel?.id?.includes('haz') || activeModel?.id?.includes('dg'));
@@ -4299,8 +4437,8 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
     const defaultBody = bodyTypes[0];
     const defaultTonnages = getTonnagesForBodyType(defaultBody, cargoType);
     const defaultTonnage = isLtlTrucking ? defaultTonnages[2] || defaultTonnages[0] : (isHazmatTrucking ? defaultTonnages[2] || defaultTonnages[0] : (isReeferTrucking ? defaultTonnages[0] : (defaultTonnages[defaultTonnages.length - 2] || defaultTonnages[0])));
-    const defaultVehicle = isLtlTrucking ? 'Xe thùng kín 15T ghép tuyến' : (isHazmatTrucking ? 'Xe tải hóa chất 15T' : (isReeferTrucking ? 'Xe đông lạnh 5T' : (isTrucking ? 'Xe tải 15T thùng kín' : (activeModel?.vehicleLov?.[0] || (isFcl ? '40ft High Cube (40HC)' : 'Phương tiện chuẩn')))));
-    const defaultUnit = isFcl ? 'Cont' : (isLtlTrucking ? 'Kg' : (activeModel?.unitLov?.[0] || 'Chuyến'));
+    const defaultVehicle = isLtlTrucking ? 'Xe thùng kín 15T ghép tuyến' : (isLcl ? (isOcean ? 'LCL Hàng lẻ đóng ghép (Consolidation)' : 'Hàng lẻ toa ghép đường sắt') : (isHazmatTrucking ? 'Xe tải hóa chất 15T' : (isReeferTrucking ? 'Xe đông lạnh 5T' : (isTrucking ? 'Xe tải 15T thùng kín' : (activeModel?.vehicleLov?.[0] || (isFcl ? '40ft High Cube (40HC)' : 'Phương tiện chuẩn'))))));
+    const defaultUnit = isFcl ? 'Cont' : (isLtlTrucking ? 'Kg' : (isLcl ? (isOcean ? 'CBM' : 'Kg') : (activeModel?.unitLov?.[0] || 'Chuyến')));
     const modelPrefix = (activeModel?.code || activeCategory?.id || 'RC').toUpperCase().replace(/[^A-Z0-9]/g, '');
     const nextIdx = (currentData.routes || []).length + 1;
     const generatedRouteCode = `RC-${modelPrefix}-${String(nextIdx).padStart(3, '0')}`;
@@ -4308,21 +4446,23 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
     const newRoute: CapabilityRouteItem = {
       id: `r-new-${Date.now()}`,
       routeCode: generatedRouteCode,
-      route: isLtlTrucking ? 'Hà Nội ⇄ TP.HCM' : (isOcean ? (isFcl ? 'Cát Lái (VNCLI) ⇄ Hamburg (Đức)' : 'Kho CFS Cát Lái ⇄ Singapore') : (isHazmatTrucking ? 'Bà Rịa - Vũng Tàu ⇄ Bình Dương' : (isReeferTrucking ? 'Đà Lạt ⇄ TP.HCM' : (isRail ? 'Ga Sóng Thần ⇄ Ga Giáp Bát' : 'Hành Lang Tuyến Mới')))),
-      origin: isLtlTrucking ? 'Hub Thanh Trì (Hà Nội)' : (isOcean ? 'Cảng Cát Lái (TP.HCM)' : (isHazmatTrucking ? 'KCN Phú Mỹ (BR-VT)' : (isReeferTrucking ? 'Đức Trọng (Lâm Đồng)' : (isRail ? 'Ga Sóng Thần (Bình Dương)' : 'Điểm Lấy Hàng (Kho / Cảng)')))),
-      destination: isLtlTrucking ? 'Hub Quận 12 (TP.HCM)' : (isOcean ? (isFcl ? 'Cảng Hamburg (Germany)' : 'Cảng Singapore') : (isHazmatTrucking ? 'KCN VSIP 2 (Bình Dương)' : (isReeferTrucking ? 'Chợ đầu mối Thủ Đức (TP.HCM)' : (isRail ? 'Ga Giáp Bát (Hà Nội)' : 'Điểm Giao Hàng (Kho / Cảng)')))),
+      route: isLtlTrucking ? 'Hà Nội ⇄ TP.HCM' : (isOcean ? (isFcl ? 'Cát Lái (VNCLI) ⇄ Hamburg (Đức)' : 'Cát Lái (VNCLI) ⇄ Singapore (SGSIN)') : (isHazmatTrucking ? 'Bà Rịa - Vũng Tàu ⇄ Bình Dương' : (isReeferTrucking ? 'Đà Lạt ⇄ TP.HCM' : (isRail ? (isFcl ? 'Ga Sóng Thần ⇄ Ga Giáp Bát' : 'Sài Gòn ⇄ Hà Nội') : 'Hành Lang Tuyến Mới')))),
+      origin: isLtlTrucking ? 'Hub Thanh Trì (Hà Nội)' : (isOcean ? (isFcl ? 'Cảng Cát Lái (TP.HCM)' : 'Kho CFS Cát Lái (TP.HCM)') : (isHazmatTrucking ? 'KCN Phú Mỹ (BR-VT)' : (isReeferTrucking ? 'Đức Trọng (Lâm Đồng)' : (isRail ? 'Ga Sóng Thần (Bình Dương)' : 'Điểm Lấy Hàng (Kho / Cảng)')))),
+      destination: isLtlTrucking ? 'Hub Quận 12 (TP.HCM)' : (isOcean ? (isFcl ? 'Cảng Hamburg (Germany)' : 'Cảng Singapore (SGSIN)') : (isHazmatTrucking ? 'KCN VSIP 2 (Bình Dương)' : (isReeferTrucking ? 'Chợ đầu mối Thủ Đức (TP.HCM)' : (isRail ? 'Ga Giáp Bát (Hà Nội)' : 'Điểm Giao Hàng (Kho / Cảng)')))),
       truckBodyType: isTrucking ? defaultBody : undefined,
       truckTonnage: isTrucking ? defaultTonnage : undefined,
       vehicleType: defaultVehicle,
       pricingUnit: defaultUnit,
       price: isLtlTrucking ? 1650 : (isOcean ? (isFcl ? 2450 : 25) : (isHazmatTrucking ? 14500000 : (isReeferTrucking ? 9500000 : (isRail ? (isFcl ? 21000000 : 1100) : 15000000)))),
       currency: isOcean ? 'USD' : 'VND',
-      sla: isLtlTrucking ? 'Thứ 2, Thứ 4, Thứ 6' : (isOcean ? (isFcl ? '28 - 32 ngày' : '3 - 5 ngày') : (isHazmatTrucking ? '4 - 6 giờ' : (isReeferTrucking ? '7 - 9 giờ' : (isRail ? '65 - 72 giờ' : '24 - 48 giờ')))),
+      sla: isLtlTrucking ? 'Thứ 2, Thứ 4, Thứ 6 (Xuất bến 20:00)' : (isOcean ? (isFcl ? '28 - 32 ngày' : 'Thứ 4, Thứ 7 (Cắt hàng CFS 17:00)') : (isHazmatTrucking ? '4 - 6 giờ' : (isReeferTrucking ? '7 - 9 giờ' : (isRail ? (isFcl ? '65 - 72 giờ' : 'Thứ 3, Thứ 6 (Cắt hàng bãi ga 18:00)') : '24 - 48 giờ')))),
       transitType: 'Direct',
       freeDemDetDays: isFcl ? 14 : undefined,
       validUntil: '2026-12-31',
       promotionPercent: 0,
-      ltlPricing: isLtlTrucking ? createDefaultLtlPricingConfig('weight', 2000, 500000) : undefined,
+      ltlPricing: isLtlTrucking 
+        ? createDefaultLtlPricingConfig('weight', 2000, 500000) 
+        : (isLcl ? createDefaultLclPricingConfig(isOcean ? 'volume' : 'weight', isOcean ? 'USD' : 'VND', isOcean ? 25 : 1100) : undefined),
     };
 
     updateCurrentFormData('routes', [...(currentData.routes || []), newRoute]);
@@ -4919,27 +5059,37 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                             const isOceanTable = activeCategory?.id === 'ocean' || activeModel?.id?.startsWith('sea-');
                             const isRailTable = activeCategory?.id === 'rail' || activeModel?.id?.startsWith('rail-');
                             const isFclTable = (isOceanTable && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL')) || (isRailTable && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL')));
+                            const isLclTable = (isOceanTable && (activeModel?.id?.includes('lcl') || activeModel?.name?.includes('LCL') || activeModel?.code === 'LCL')) || (isRailTable && (activeModel?.id?.includes('lcl') || activeModel?.name?.includes('LCL')));
+                            const isLtlOrLclTable = isLtlTable || isLclTable;
 
                             return (
                               <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
                                 <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
                                 <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-slate-100">Mã Tuyến</th>
+                                {isOceanTable && (
+                                  <th className="py-2.5 px-2.5 min-w-[130px]">Khu Vực</th>
+                                )}
                                 <th className="py-2.5 px-2.5 min-w-[135px]">Tuyến Đường</th>
-                                <th className="py-2.5 px-2.5 min-w-[130px]">Điểm Đi</th>
-                                <th className="py-2.5 px-2.5 min-w-[130px]">Điểm Đến</th>
+                                <th className="py-2.5 px-2.5 min-w-[130px]">{isLclTable ? 'Kho CFS / Điểm Đi' : 'Điểm Đi'}</th>
+                                <th className="py-2.5 px-2.5 min-w-[130px]">{isLclTable ? 'Kho CFS / Cảng Đến' : 'Điểm Đến'}</th>
+                                {isOceanTable && isFclTable && (
+                                  <th className="py-2.5 px-2.5 min-w-[170px]">Hãng Tàu</th>
+                                )}
                                 {activeCategory?.id === 'trucking' ? (
                                   <>
                                     <th className="py-2.5 px-2.5 min-w-[200px]">Loại Thùng Phương Tiện</th>
                                     <th className="py-2.5 px-2.5 min-w-[210px]">Phân Khúc Tải Trọng</th>
                                   </>
                                 ) : (
-                                  <th className="py-2.5 px-2.5 min-w-[180px]">{isFclTable ? 'Loại Vỏ Container' : 'Loại Phương Tiện'}</th>
+                                  <th className="py-2.5 px-2.5 min-w-[190px]">
+                                    {isFclTable ? 'Loại Vỏ Container' : (isLclTable ? 'Hãng Tàu' : 'Loại Phương Tiện')}
+                                  </th>
                                 )}
-                                <th className="py-2.5 px-2 w-20 min-w-[75px] text-center">ĐVT</th>
+                                <th className="py-2.5 px-2 w-20 min-w-[80px] text-center">ĐVT</th>
                                 <th className="py-2.5 px-2 w-20 min-w-[80px] text-center">Tiền Tệ</th>
-                                <th className="py-2.5 px-2.5 min-w-[150px] text-right">Đơn Giá</th>
-                                <th className={`py-2.5 px-2 text-center ${isLtlTable ? 'min-w-[150px]' : 'min-w-[90px]'}`}>
-                                  {isLtlTable ? 'Lịch Chạy Hàng' : 'SLA'}
+                                <th className="py-2.5 px-2.5 min-w-[155px] text-right">Đơn Giá</th>
+                                <th className={`py-2.5 px-2 text-center ${isLtlOrLclTable ? 'min-w-[160px]' : 'min-w-[90px]'}`}>
+                                  {isLtlOrLclTable ? 'Lịch Chạy & Cut-off' : 'SLA'}
                                 </th>
                                 <th className="py-2.5 px-2.5 min-w-[135px] text-center">Loại Tuyến</th>
                                 {isFclTable && (
@@ -4956,7 +5106,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                         <tbody className="divide-y divide-slate-200 bg-white">
                           {(!currentData.routes || currentData.routes.length === 0) ? (
                             <tr>
-                              <td colSpan={activeCategory?.id === 'trucking' ? 15 : (((activeCategory?.id === 'ocean' || activeCategory?.id === 'rail') && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL')) ? 15 : 14)} className="py-8 text-center text-slate-400 font-medium">
+                              <td colSpan={activeCategory?.id === 'trucking' ? 15 : ((activeCategory?.id === 'ocean') ? ((activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL') ? 17 : 15) : (((activeCategory?.id === 'rail') && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL')) ? 15 : 14))} className="py-8 text-center text-slate-400 font-medium">
                                 Chưa có tuyến đường nào. Bấm nút <strong className="text-indigo-600 font-bold">+ Thêm Tuyến Mới</strong> để khai báo bảng giá.
                               </td>
                             </tr>
@@ -4970,7 +5120,9 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                               const isOcean = activeCategory?.id === 'ocean' || activeModel?.id?.startsWith('sea-');
                               const isRail = activeCategory?.id === 'rail' || activeModel?.id?.startsWith('rail-');
                               const isFcl = (isOcean && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL')) || (isRail && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL')));
+                              const isLcl = (isOcean && (activeModel?.id?.includes('lcl') || activeModel?.name?.includes('LCL') || activeModel?.code === 'LCL')) || (isRail && (activeModel?.id?.includes('lcl') || activeModel?.name?.includes('LCL')));
                               const isLtlTrucking = isTrucking && (activeModel?.id === 'trk-gen-ltl' || activeModel?.name?.includes('LTL') || activeModel?.code === 'LTL');
+                              const isLtlOrLcl = isLtlTrucking || isLcl;
                               const isReeferTrucking = isTrucking && !isLtlTrucking && (activeCargoGroup?.name?.includes('lạnh') || activeModel?.name?.includes('lạnh') || activeModel?.id?.includes('ref'));
                               const isHazmatTrucking = isTrucking && !isLtlTrucking && (activeCargoGroup?.name?.includes('nguy hiểm') || activeModel?.name?.includes('nguy hiểm') || activeModel?.id?.includes('haz') || activeModel?.id?.includes('dg'));
                               const cargoType: 'general' | 'reefer' | 'hazmat' | 'ltl' = isLtlTrucking ? 'ltl' : (isHazmatTrucking ? 'hazmat' : (isReeferTrucking ? 'reefer' : 'general'));
@@ -4996,6 +5148,21 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                     />
                                   </td>
 
+                                  {/* 2b. Khu Vực (Đường biển: FCL & LCL) */}
+                                  {isOcean && (
+                                    <td className="p-0 align-top">
+                                      <select
+                                        value={route.region || OCEAN_TRADE_LANE_REGIONS_LOV[0]}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'region', e.target.value)}
+                                        className="w-full px-2.5 py-2 bg-transparent text-slate-800 text-xs cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all font-medium"
+                                      >
+                                        {OCEAN_TRADE_LANE_REGIONS_LOV.map((reg, rIdx) => (
+                                          <option key={rIdx} value={reg}>{reg}</option>
+                                        ))}
+                                      </select>
+                                    </td>
+                                  )}
+
                                   {/* 3. Tuyến Đường */}
                                   <td className="p-0 align-top">
                                     <input
@@ -5013,7 +5180,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                       type="text"
                                       value={route.origin}
                                       onChange={(e) => handleUpdateRouteRow(route.id, 'origin', e.target.value)}
-                                      placeholder="Điểm đi..."
+                                      placeholder={isLcl ? 'Kho CFS Cát Lái / Đình Vũ...' : 'Điểm đi...'}
                                       className="w-full px-2.5 py-2 bg-transparent text-slate-700 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
                                     />
                                   </td>
@@ -5024,12 +5191,73 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                       type="text"
                                       value={route.destination}
                                       onChange={(e) => handleUpdateRouteRow(route.id, 'destination', e.target.value)}
-                                      placeholder="Điểm đến..."
+                                      placeholder={isLcl ? 'Cảng Singapore / LA...' : 'Điểm đến...'}
                                       className="w-full px-2.5 py-2 bg-transparent text-slate-700 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
                                     />
                                   </td>
 
-                                  {/* 6. Loại Thùng + Tải Trọng (Trucking) hoặc Loại Phương Tiện / Cont (Phi Trucking) */}
+                                  {/* 5b. Hãng Tàu (Ocean FCL: Hàng thường, Hàng lạnh, Hàng nguy hiểm) */}
+                                  {isOcean && isFcl && (
+                                    <td className="p-0 align-top">
+                                      {(() => {
+                                        const shippingLov = LCL_SHIPPING_LINES;
+                                        const currentShipping = shippingLov.includes(route.shippingLine || '')
+                                          ? (route.shippingLine || shippingLov[0])
+                                          : (route.customShippingLine || route.shippingLine === 'Khác (Nhập hãng tàu khác)...'
+                                            ? 'Khác (Nhập hãng tàu khác)...'
+                                            : (shippingLov[0] || route.shippingLine || 'Maersk (Maersk Line)'));
+
+                                        return (
+                                          <div className="flex flex-col h-full">
+                                            <select
+                                              value={currentShipping}
+                                              onChange={(e) => {
+                                                const val = e.target.value;
+                                                if (val === 'Khác (Nhập hãng tàu khác)...') {
+                                                  handleUpdateRouteRowMultiple(route.id, {
+                                                    shippingLine: val,
+                                                    customShippingLine: '',
+                                                  });
+                                                } else {
+                                                  handleUpdateRouteRowMultiple(route.id, {
+                                                    shippingLine: val,
+                                                    customShippingLine: '',
+                                                  });
+                                                }
+                                              }}
+                                              className="w-full px-2.5 py-2 bg-transparent text-slate-800 text-xs font-semibold cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
+                                            >
+                                              {shippingLov.map((line, lIdx) => (
+                                                <option key={lIdx} value={line}>{line}</option>
+                                              ))}
+                                            </select>
+
+                                            {(currentShipping === 'Khác (Nhập hãng tàu khác)...'
+                                              || (!shippingLov.includes(route.shippingLine || '') && route.customShippingLine)) && (
+                                              <div className="p-1 bg-amber-50/90 border-t border-amber-200">
+                                                <input
+                                                  type="text"
+                                                  autoFocus
+                                                  value={route.customShippingLine || ''}
+                                                  onChange={(e) => {
+                                                    const customVal = e.target.value;
+                                                    handleUpdateRouteRowMultiple(route.id, {
+                                                      customShippingLine: customVal,
+                                                      shippingLine: customVal,
+                                                    });
+                                                  }}
+                                                  placeholder="Gõ tên hãng tàu..."
+                                                  className="w-full px-2 py-1 bg-white border border-amber-300 rounded text-slate-900 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-amber-500"
+                                                />
+                                              </div>
+                                            )}
+                                          </div>
+                                        );
+                                      })()}
+                                    </td>
+                                  )}
+
+                                  {/* 6. Loại Thùng + Tải Trọng (Trucking) hoặc Loại Phương Tiện / Cont / Quy Cách Đóng Gói LCL */}
                                   {isTrucking ? (
                                     <>
                                       {/* 6a. Loại Thùng Phương Tiện (LOV + Custom Option) */}
@@ -5151,6 +5379,65 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                         })()}
                                       </td>
                                     </>
+                                  ) : isLcl ? (
+                                    /* 6c. Hãng Tàu / Co-loader (LCL) */
+                                    <td className="p-0 align-top">
+                                      {(() => {
+                                        const shippingLov = LCL_SHIPPING_LINES;
+                                        const currentShippingLine = shippingLov.includes(route.vehicleType)
+                                          ? route.vehicleType
+                                          : (route.customShippingLine || route.customPackagingType || route.vehicleType === 'Khác (Nhập hãng tàu khác)...' ? 'Khác (Nhập hãng tàu khác)...' : (shippingLov[0] || route.vehicleType));
+
+                                        return (
+                                          <div className="flex flex-col h-full">
+                                            <select
+                                              value={currentShippingLine}
+                                              onChange={(e) => {
+                                                const val = e.target.value;
+                                                if (val === 'Khác (Nhập hãng tàu khác)...') {
+                                                  handleUpdateRouteRowMultiple(route.id, {
+                                                    vehicleType: val,
+                                                    customShippingLine: '',
+                                                    customPackagingType: '',
+                                                  });
+                                                } else {
+                                                  handleUpdateRouteRowMultiple(route.id, {
+                                                    vehicleType: val,
+                                                    customShippingLine: '',
+                                                    customPackagingType: '',
+                                                  });
+                                                }
+                                              }}
+                                              className="w-full px-2.5 py-2 bg-transparent text-slate-800 text-xs font-semibold cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
+                                            >
+                                              {shippingLov.map((line, lIdx) => (
+                                                <option key={lIdx} value={line}>{line}</option>
+                                              ))}
+                                            </select>
+
+                                            {(currentShippingLine === 'Khác (Nhập hãng tàu khác)...' || (!shippingLov.includes(route.vehicleType) && (route.customShippingLine || route.customPackagingType))) && (
+                                              <div className="p-1 bg-amber-50/90 border-t border-amber-200">
+                                                <input
+                                                  type="text"
+                                                  autoFocus
+                                                  value={route.customShippingLine || route.customPackagingType || ''}
+                                                  onChange={(e) => {
+                                                    const customVal = e.target.value;
+                                                    handleUpdateRouteRowMultiple(route.id, {
+                                                      customShippingLine: customVal,
+                                                      customPackagingType: customVal,
+                                                      vehicleType: customVal,
+                                                    });
+                                                  }}
+                                                  placeholder="Gõ tên hãng tàu / Co-loader..."
+                                                  className="w-full px-2 py-1 bg-white border border-amber-300 rounded text-slate-900 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-amber-500"
+                                                />
+                                              </div>
+                                            )}
+                                          </div>
+                                        );
+                                      })()}
+                                    </td>
                                   ) : (
                                     <td className="p-0 align-top">
                                       <select
@@ -5177,7 +5464,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                         onChange={(e) => handleUpdateRouteRow(route.id, 'pricingUnit', e.target.value)}
                                         className="w-full px-1.5 py-2 bg-transparent text-slate-800 text-xs font-medium text-center focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all cursor-pointer"
                                       >
-                                        {(activeModel?.unitLov || ['Kg', 'CBM', 'Chuyến', 'Tấn', 'Cont', 'Pallet']).map((u: string, uIdx: number) => (
+                                        {(activeModel?.unitLov || (isLcl ? ['CBM', 'RT (Revenue Ton)', 'Kg', 'Pallet'] : ['Kg', 'CBM', 'Chuyến', 'Tấn', 'Cont', 'Pallet'])).map((u: string, uIdx: number) => (
                                           <option key={uIdx} value={u}>{u}</option>
                                         ))}
                                       </select>
@@ -5196,38 +5483,70 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                     </select>
                                   </td>
 
-                                  {/* 9. Đơn giá (Nhập giá + Live currency conversion tag & Ma Trận 5 Bậc cho LTL) */}
+                                  {/* 9. Đơn giá (Nhập giá + Live currency conversion tag & Ma Trận 5 Bậc cho LTL & LCL) */}
                                   <td className="p-1.5 align-middle">
-                                    {isLtlTrucking ? (
+                                    {isLtlOrLcl ? (
                                       <div className="flex flex-col gap-1">
                                         <button
                                           type="button"
                                           onClick={() => handleOpenTieredPricingModal(route)}
                                           className="w-full px-2.5 py-1.5 rounded-xl border border-indigo-200 bg-gradient-to-r from-indigo-50/90 via-white to-indigo-50/70 hover:from-indigo-100 hover:to-indigo-50 text-indigo-950 text-left transition-all cursor-pointer shadow-2xs group flex items-center justify-between gap-1.5"
-                                          title="Nhấp để cấu hình chi tiết ma trận 5 bậc giá chuẩn thị trường (Kg / CBM)"
+                                          title="Nhấp để cấu hình chi tiết ma trận 5 bậc giá chuẩn thị trường (CBM / RT / Kg)"
                                         >
                                           <div className="min-w-0 flex-1">
                                             <div className="flex items-center justify-between gap-1">
                                               <span className="font-mono font-bold text-xs text-indigo-900 truncate">
-                                                {route.ltlPricing?.pricingBasis === 'volume'
-                                                  ? `${(route.ltlPricing.volumeTiers[4]?.price || 320000).toLocaleString('vi-VN')} – ${(route.ltlPricing.volumeTiers[0]?.price || 600000).toLocaleString('vi-VN')} ₫`
-                                                  : `${(route.ltlPricing?.weightTiers[4]?.price || 1100).toLocaleString('vi-VN')} – ${(route.ltlPricing?.weightTiers[0]?.price || 2500).toLocaleString('vi-VN')} ₫`}
+                                                {route.currency === 'USD' ? (
+                                                  route.ltlPricing?.pricingBasis === 'weight'
+                                                    ? `$${route.ltlPricing.weightTiers[4]?.price || 14} – $${route.ltlPricing.weightTiers[0]?.price || 35}`
+                                                    : `$${route.ltlPricing?.volumeTiers[4]?.price || 14} – $${route.ltlPricing?.volumeTiers[0]?.price || 35}`
+                                                ) : (
+                                                  route.ltlPricing?.pricingBasis === 'volume'
+                                                    ? `${(route.ltlPricing.volumeTiers[4]?.price || 320000).toLocaleString('vi-VN')} – ${(route.ltlPricing.volumeTiers[0]?.price || 600000).toLocaleString('vi-VN')} ₫`
+                                                    : `${(route.ltlPricing?.weightTiers[4]?.price || 1100).toLocaleString('vi-VN')} – ${(route.ltlPricing?.weightTiers[0]?.price || 2500).toLocaleString('vi-VN')} ₫`
+                                                )}
                                               </span>
                                               <span className="text-[9.5px] font-bold text-indigo-700 bg-indigo-100/90 px-1.5 py-0.2 rounded-md shrink-0">
                                                 5 Bậc
                                               </span>
                                             </div>
                                             <div className="text-[10px] text-slate-500 font-medium flex items-center justify-between mt-0.5">
-                                              <span>Sàn (Min): <strong className="text-slate-800">{((route.ltlPricing?.minCharge) || (route.pricingUnit === 'CBM' ? 150000 : 100000)).toLocaleString('vi-VN')} ₫</strong></span>
+                                              <span>
+                                                Sàn: <strong className="text-slate-800">
+                                                  {route.currency === 'USD'
+                                                    ? `$${route.ltlPricing?.minCharge || 25} USD`
+                                                    : `${(route.ltlPricing?.minCharge || (route.pricingUnit === 'CBM' ? 150000 : 100000)).toLocaleString('vi-VN')} ₫`}
+                                                </strong>
+                                              </span>
                                               <span className="text-indigo-600 font-semibold group-hover:underline">Chi tiết ➔</span>
                                             </div>
                                           </div>
                                         </button>
-                                        {hasPromo && (
-                                          <div className="text-[10px] text-emerald-600 font-bold text-right px-1 whitespace-nowrap">
-                                            Giảm cước: -{route.promotionPercent}%
-                                          </div>
-                                        )}
+                                        
+                                        {/* Live Currency Conversion Tag */}
+                                        {(() => {
+                                          const repPrice = route.currency === 'USD'
+                                            ? (route.ltlPricing?.pricingBasis === 'weight' ? (route.ltlPricing?.weightTiers[1]?.price || 25) : (route.ltlPricing?.volumeTiers[1]?.price || 25))
+                                            : (route.ltlPricing?.pricingBasis === 'weight' ? (route.ltlPricing?.weightTiers[1]?.price || 2000) : (route.ltlPricing?.volumeTiers[1]?.price || 500000));
+                                          return (
+                                            <div className="text-[10px] font-semibold px-0.5 flex items-center justify-between">
+                                              {route.currency === 'USD' ? (
+                                                <span className="text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded border border-emerald-200/60">
+                                                  ≈ {(repPrice * USD_TO_VND_EXCHANGE_RATE).toLocaleString('vi-VN')} ₫
+                                                </span>
+                                              ) : (
+                                                <span className="text-indigo-700 bg-indigo-50 px-1 py-0.5 rounded border border-indigo-200/60">
+                                                  ≈ ${Math.round(repPrice / USD_TO_VND_EXCHANGE_RATE).toLocaleString('en-US')} USD
+                                                </span>
+                                              )}
+                                              {hasPromo && (
+                                                <span className="text-rose-600 font-bold text-[9.5px]">
+                                                  -{route.promotionPercent}%
+                                                </span>
+                                              )}
+                                            </div>
+                                          );
+                                        })()}
                                       </div>
                                     ) : (
                                       <div className="flex flex-col gap-1">
@@ -5267,9 +5586,9 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                     )}
                                   </td>
 
-                                  {/* 9. SLA / Lịch Chạy Hàng (Multi-select Days of Week & Time for LTL) */}
+                                  {/* 9. SLA / Lịch Chạy Hàng & Cut-off (Multi-select Days of Week & Time for LTL & LCL) */}
                                   <td className="p-1 align-middle">
-                                    {isLtlTrucking ? (
+                                    {isLtlOrLcl ? (
                                       <button
                                         type="button"
                                         onClick={() => handleOpenScheduleModal(route)}
@@ -5278,7 +5597,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                             ? 'bg-indigo-50/90 border-indigo-200 text-indigo-950 font-semibold hover:bg-indigo-100 hover:border-indigo-300'
                                             : 'bg-slate-50 border-dashed border-slate-300 text-slate-400 hover:bg-slate-100 hover:text-slate-600'
                                         }`}
-                                        title="Nhấp để thiết lập các thứ trong tuần & thời gian xuất bến"
+                                        title="Nhấp để thiết lập các thứ trong tuần & thời gian cắt máng / xuất bến"
                                       >
                                         <span className="truncate block font-semibold leading-tight">
                                           {route.sla || 'Chọn lịch & giờ chạy...'}
@@ -6095,7 +6414,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
       )}
 
       {/* =========================================================================
-          MODAL: THIẾT LẬP LỊCH CHẠY HÀNG & THỜI GIAN XUẤT BẾN (LTL)
+          MODAL: THIẾT LẬP LỊCH CHẠY HÀNG & THỜI GIAN XUẤT BẾN (LTL / LCL)
       ========================================================================= */}
       {scheduleModalData && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
@@ -6108,7 +6427,9 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-slate-900">
-                    Cấu Hình Lịch Chạy & Giờ Xuất Bến
+                    {scheduleModalData.isLcl
+                      ? 'Cấu Hình Lịch Gom Hàng & Cắt Máng CFS (LCL)'
+                      : 'Cấu Hình Lịch Chạy & Giờ Xuất Bến (LTL)'}
                   </h3>
                   <p className="text-[11px] text-slate-500 font-medium">
                     Tuyến: <strong className="text-indigo-700">{scheduleModalData.routeName}</strong> ({scheduleModalData.origin} ⇄ {scheduleModalData.destination})
@@ -6213,15 +6534,17 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                 </div>
               </div>
 
-              {/* 3. Thời Gian Xuất Bến (Departure Time LOV) */}
+              {/* 3. Thời Gian Cắt Hàng CFS / Xuất Bến */}
               <div className="space-y-2 pt-2 border-t border-slate-100">
                 <label className="block text-xs font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
                   <Clock className="w-3.5 h-3.5 text-indigo-600" />
-                  3. Thời gian xe xuất bến
+                  {scheduleModalData.isLcl
+                    ? '3. Thời gian cắt hàng CFS / Cut-off time'
+                    : '3. Thời gian xe xuất bến'}
                 </label>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
-                  {DEPARTURE_TIMES_LOV.map((dt, dtIdx) => {
+                  {(scheduleModalData.isLcl ? LCL_DEPARTURE_TIMES_LOV : DEPARTURE_TIMES_LOV).map((dt, dtIdx) => {
                     const isChosen = scheduleModalData.departureTime === dt.time;
                     return (
                       <button
@@ -6249,10 +6572,12 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                 </div>
 
                 <div className="flex items-center gap-2 pt-1">
-                  <span className="text-xs font-semibold text-slate-600 whitespace-nowrap">Hoặc nhập giờ khác:</span>
+                  <span className="text-xs font-semibold text-slate-600 whitespace-nowrap">
+                    {scheduleModalData.isLcl ? 'Hoặc nhập giờ Cut-off khác:' : 'Hoặc nhập giờ khác:'}
+                  </span>
                   <input
                     type="time"
-                    value={scheduleModalData.departureTime || '20:00'}
+                    value={scheduleModalData.departureTime || (scheduleModalData.isLcl ? '17:00' : '20:00')}
                     onChange={(e) => setScheduleModalData({ ...scheduleModalData, departureTime: e.target.value })}
                     className="px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:bg-white focus:outline-none focus:border-indigo-500 cursor-pointer"
                   />
@@ -6270,9 +6595,10 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                     {(() => {
                       const days = scheduleModalData.selectedDays;
                       const time = scheduleModalData.departureTime;
-                      if (days.length === 7) return `Hàng ngày${time ? ` (Xuất bến ${time})` : ''}`;
-                      if (days.length > 0) return `${days.join(', ')}${time ? ` (Xuất bến ${time})` : ''}`;
-                      if (time) return `Xuất bến ${time}`;
+                      const prefix = scheduleModalData.isLcl ? 'Cắt CFS' : 'Xuất bến';
+                      if (days.length === 7) return `Hàng ngày${time ? ` (${prefix} ${time})` : ''}`;
+                      if (days.length > 0) return `${days.join(', ')}${time ? ` (${prefix} ${time})` : ''}`;
+                      if (time) return `${prefix} ${time}`;
                       return 'Chưa chọn lịch chạy';
                     })()}
                   </span>
@@ -6296,7 +6622,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                 className="inline-flex items-center gap-1.5 px-5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-md shadow-indigo-600/20 cursor-pointer"
               >
                 <Check className="w-4 h-4" />
-                <span>Xác Nhận & Lưu Lịch Chạy</span>
+                <span>Xác Nhận & Lưu Lịch {scheduleModalData.isLcl ? 'CFS' : 'Chạy'}</span>
               </button>
             </div>
           </div>
@@ -6304,7 +6630,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
       )}
 
       {/* =========================================================================
-          MODAL: CẤU HÌNH MA TRẬN 5 BẬC GIÁ CHUẨN LTL (KG & CBM)
+          MODAL: CẤU HÌNH MA TRẬN 5 BẬC GIÁ CHUẨN LTL / LCL (KG, CBM / RT)
       ========================================================================= */}
       {tieredPricingModalData && (
         <div className="fixed inset-0 z-[130] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
@@ -6317,8 +6643,14 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                    <span>Ma Trận 5 Bậc Giá Chuẩn Thị Trường (LTL)</span>
-                    <span className="px-2 py-0.5 text-[10px] font-bold bg-indigo-100 text-indigo-800 rounded-full">Khung Cố Định</span>
+                    <span>
+                      {tieredPricingModalData.isLcl
+                        ? 'Ma Trận 5 Bậc Giá Hàng Lẻ CFS / Đóng Ghép (LCL)'
+                        : 'Ma Trận 5 Bậc Giá Chuẩn Thị Trường (LTL)'}
+                    </span>
+                    <span className="px-2 py-0.5 text-[10px] font-bold bg-indigo-100 text-indigo-800 rounded-full">
+                      {tieredPricingModalData.currency === 'USD' ? 'USD ($)' : 'VND (₫)'}
+                    </span>
                   </h3>
                   <p className="text-[11px] text-slate-500 font-medium">
                     Tuyến: <strong className="text-indigo-700">{tieredPricingModalData.routeName}</strong> ({tieredPricingModalData.origin} ⇄ {tieredPricingModalData.destination})
@@ -6348,7 +6680,11 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                         : 'text-slate-600 hover:text-slate-900'
                     }`}
                   >
-                    <span>Biểu Giá Theo Trọng Lượng (Kg)</span>
+                    <span>
+                      {tieredPricingModalData.currency === 'USD'
+                        ? 'Biểu Giá Trọng Lượng ($ / Kg)'
+                        : 'Biểu Giá Theo Trọng Lượng (Kg)'}
+                    </span>
                     {tieredPricingModalData.pricingConfig.pricingBasis === 'weight' && (
                       <span className="w-2 h-2 rounded-full bg-emerald-500" title="Đang là đơn vị mặc định của tuyến" />
                     )}
@@ -6363,7 +6699,11 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                         : 'text-slate-600 hover:text-slate-900'
                     }`}
                   >
-                    <span>Biểu Giá Theo Thể Tích (CBM)</span>
+                    <span>
+                      {tieredPricingModalData.currency === 'USD'
+                        ? 'Biểu Giá Thể Tích ($ / CBM hoặc RT)'
+                        : 'Biểu Giá Theo Thể Tích (CBM)'}
+                    </span>
                     {tieredPricingModalData.pricingConfig.pricingBasis === 'volume' && (
                       <span className="w-2 h-2 rounded-full bg-emerald-500" title="Đang là đơn vị mặc định của tuyến" />
                     )}
@@ -6387,8 +6727,8 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                     }}
                     className="px-2.5 py-1 bg-white border border-slate-300 rounded-lg text-xs font-bold text-indigo-900 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
                   >
+                    <option value="volume">Tính theo {tieredPricingModalData.isLcl ? 'CBM / RT' : 'CBM'}</option>
                     <option value="weight">Tính theo Kg</option>
-                    <option value="volume">Tính theo CBM</option>
                   </select>
                 </div>
               </div>
@@ -6400,8 +6740,14 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                     Min
                   </div>
                   <div>
-                    <span className="text-xs font-bold text-amber-950 block">Cước Sàn Tối Thiểu (Min Charge)</span>
-                    <span className="text-[11px] text-amber-800 font-medium">Áp dụng khi kiện hàng siêu nhỏ / tổng cước theo đơn giá thấp hơn mức sàn</span>
+                    <span className="text-xs font-bold text-amber-950 block">
+                      Cước Sàn Tối Thiểu (Min Charge)
+                    </span>
+                    <span className="text-[11px] text-amber-800 font-medium">
+                      {tieredPricingModalData.isLcl
+                        ? 'Áp dụng cho mỗi House Bill (HBL) / Lô hàng nhỏ hơn ngưỡng min'
+                        : 'Áp dụng khi kiện hàng siêu nhỏ / tổng cước theo đơn giá thấp hơn mức sàn'}
+                    </span>
                   </div>
                 </div>
 
@@ -6419,10 +6765,12 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                         },
                       });
                     }}
-                    placeholder="100000"
+                    placeholder={tieredPricingModalData.currency === 'USD' ? '25' : '100000'}
                     className="w-32 px-3 py-1.5 bg-white border border-amber-300 rounded-xl text-right text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
                   />
-                  <span className="text-xs font-bold text-amber-900">₫ / Lô</span>
+                  <span className="text-xs font-bold text-amber-900">
+                    {tieredPricingModalData.currency === 'USD' ? '$ / HBL' : '₫ / Lô'}
+                  </span>
                 </div>
               </div>
 
@@ -6431,18 +6779,19 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-slate-800 uppercase tracking-wide">
-                      Bảng 5 Khung Bậc Trọng Lượng Chuẩn (₫/Kg)
+                      Bảng 5 Khung Bậc Trọng Lượng Chuẩn ({tieredPricingModalData.currency === 'USD' ? '$/Kg' : '₫/Kg'})
                     </span>
                     <button
                       type="button"
                       onClick={() => {
-                        const base = tieredPricingModalData.pricingConfig.weightTiers[1]?.price || 2000;
+                        const isUsd = tieredPricingModalData.currency === 'USD';
+                        const base = tieredPricingModalData.pricingConfig.weightTiers[1]?.price || (isUsd ? 0.15 : 2000);
                         const newTiers = [
-                          { ...tieredPricingModalData.pricingConfig.weightTiers[0], price: Math.round(base * 1.25) },
+                          { ...tieredPricingModalData.pricingConfig.weightTiers[0], price: isUsd ? Number((base * 1.35).toFixed(2)) : Math.round(base * 1.25) },
                           { ...tieredPricingModalData.pricingConfig.weightTiers[1], price: base },
-                          { ...tieredPricingModalData.pricingConfig.weightTiers[2], price: Math.round(base * 0.825) },
-                          { ...tieredPricingModalData.pricingConfig.weightTiers[3], price: Math.round(base * 0.675) },
-                          { ...tieredPricingModalData.pricingConfig.weightTiers[4], price: Math.round(base * 0.55) },
+                          { ...tieredPricingModalData.pricingConfig.weightTiers[2], price: isUsd ? Number((base * 0.8).toFixed(2)) : Math.round(base * 0.825) },
+                          { ...tieredPricingModalData.pricingConfig.weightTiers[3], price: isUsd ? Number((base * 0.65).toFixed(2)) : Math.round(base * 0.675) },
+                          { ...tieredPricingModalData.pricingConfig.weightTiers[4], price: isUsd ? Number((base * 0.5).toFixed(2)) : Math.round(base * 0.55) },
                         ];
                         setTieredPricingModalData({
                           ...tieredPricingModalData,
@@ -6465,7 +6814,9 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                           <th className="py-2.5 px-3 w-12 text-center">Bậc</th>
                           <th className="py-2.5 px-3 min-w-[140px]">Khoảng Trọng Lượng</th>
                           <th className="py-2.5 px-3 min-w-[150px]">Loại Hàng Khuyên Dùng</th>
-                          <th className="py-2.5 px-3 min-w-[150px] text-right">Đơn Giá (₫ / Kg)</th>
+                          <th className="py-2.5 px-3 min-w-[150px] text-right">
+                            Đơn Giá ({tieredPricingModalData.currency === 'USD' ? '$ / Kg' : '₫ / Kg'})
+                          </th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
@@ -6486,6 +6837,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                               <div className="inline-flex items-center gap-1.5 justify-end">
                                 <input
                                   type="number"
+                                  step={tieredPricingModalData.currency === 'USD' ? '0.01' : '100'}
                                   value={tier.price || ''}
                                   onChange={(e) => {
                                     const val = parseFloat(e.target.value) || 0;
@@ -6502,7 +6854,9 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                   placeholder="0"
                                   className="w-28 px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-right text-xs font-bold text-indigo-950 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 />
-                                <span className="font-semibold text-slate-500">₫</span>
+                                <span className="font-semibold text-slate-500">
+                                  {tieredPricingModalData.currency === 'USD' ? '$' : '₫'}
+                                </span>
                               </div>
                             </td>
                           </tr>
@@ -6513,23 +6867,26 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                 </div>
               )}
 
-              {/* Tab 2: Volume Tiers (CBM) */}
+              {/* Tab 2: Volume Tiers (CBM / RT) */}
               {tieredPricingActiveTab === 'volume' && (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-slate-800 uppercase tracking-wide">
-                      Bảng 5 Khung Bậc Thể Tích Chuẩn (₫/CBM)
+                      {tieredPricingModalData.currency === 'USD'
+                        ? 'Bảng 5 Khung Bậc Thể Tích / RT Chuẩn ($ / CBM hoặc RT)'
+                        : 'Bảng 5 Khung Bậc Thể Tích Chuẩn (₫ / CBM)'}
                     </span>
                     <button
                       type="button"
                       onClick={() => {
-                        const base = tieredPricingModalData.pricingConfig.volumeTiers[1]?.price || 500000;
+                        const isUsd = tieredPricingModalData.currency === 'USD';
+                        const base = tieredPricingModalData.pricingConfig.volumeTiers[1]?.price || (isUsd ? 25 : 500000);
                         const newTiers = [
-                          { ...tieredPricingModalData.pricingConfig.volumeTiers[0], price: Math.round(base * 1.2) },
+                          { ...tieredPricingModalData.pricingConfig.volumeTiers[0], price: isUsd ? Number((base * 1.4).toFixed(2)) : Math.round(base * 1.2) },
                           { ...tieredPricingModalData.pricingConfig.volumeTiers[1], price: base },
-                          { ...tieredPricingModalData.pricingConfig.volumeTiers[2], price: Math.round(base * 0.84) },
-                          { ...tieredPricingModalData.pricingConfig.volumeTiers[3], price: Math.round(base * 0.76) },
-                          { ...tieredPricingModalData.pricingConfig.volumeTiers[4], price: Math.round(base * 0.64) },
+                          { ...tieredPricingModalData.pricingConfig.volumeTiers[2], price: isUsd ? Number((base * 0.8).toFixed(2)) : Math.round(base * 0.84) },
+                          { ...tieredPricingModalData.pricingConfig.volumeTiers[3], price: isUsd ? Number((base * 0.68).toFixed(2)) : Math.round(base * 0.76) },
+                          { ...tieredPricingModalData.pricingConfig.volumeTiers[4], price: isUsd ? Number((base * 0.56).toFixed(2)) : Math.round(base * 0.64) },
                         ];
                         setTieredPricingModalData({
                           ...tieredPricingModalData,
@@ -6552,7 +6909,9 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                           <th className="py-2.5 px-3 w-12 text-center">Bậc</th>
                           <th className="py-2.5 px-3 min-w-[140px]">Khoảng Thể Tích</th>
                           <th className="py-2.5 px-3 min-w-[150px]">Loại Hàng Khuyên Dùng</th>
-                          <th className="py-2.5 px-3 min-w-[150px] text-right">Đơn Giá (₫ / CBM)</th>
+                          <th className="py-2.5 px-3 min-w-[150px] text-right">
+                            Đơn Giá ({tieredPricingModalData.currency === 'USD' ? '$ / CBM (RT)' : '₫ / CBM'})
+                          </th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
@@ -6573,6 +6932,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                               <div className="inline-flex items-center gap-1.5 justify-end">
                                 <input
                                   type="number"
+                                  step={tieredPricingModalData.currency === 'USD' ? '0.01' : '1000'}
                                   value={tier.price || ''}
                                   onChange={(e) => {
                                     const val = parseFloat(e.target.value) || 0;
@@ -6589,7 +6949,9 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                   placeholder="0"
                                   className="w-28 px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-right text-xs font-bold text-indigo-950 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 />
-                                <span className="font-semibold text-slate-500">₫</span>
+                                <span className="font-semibold text-slate-500">
+                                  {tieredPricingModalData.currency === 'USD' ? '$' : '₫'}
+                                </span>
                               </div>
                             </td>
                           </tr>
@@ -6626,3 +6988,4 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
     </div>
   );
 };
+
