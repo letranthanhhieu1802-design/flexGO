@@ -8462,7 +8462,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
       ========================================================================= */}
       {warehouseDetailModalData && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-150">
+          <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-5xl h-[85vh] min-h-[600px] max-h-[820px] flex flex-col overflow-hidden animate-in zoom-in-95 duration-150">
             {/* 1. Modal Header */}
             <div className="px-6 py-4 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex items-center justify-between border-b border-slate-800 shrink-0">
               <div className="flex items-center gap-3.5">
@@ -8579,7 +8579,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
             </div>
 
             {/* 3. Modal Body */}
-            <div className="flex-1 overflow-hidden flex flex-col bg-slate-50/40">
+            <div className="flex-1 min-h-0 overflow-hidden flex flex-col bg-slate-50/40">
               {/* TAB 1: ALBUM ẢNH KHO THEO TỪNG PHÂN LOẠI GÓC ẢNH GỢI Ý SẴN */}
               {warehouseDetailActiveTab === 'photos' && (() => {
                 const currentPhotoSlots = getWarehousePhotoSlots(warehouseDetailModalData.modelId || activeModel?.id, activeCargoGroup?.id);
@@ -8588,7 +8588,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                 ).length;
 
                 return (
-                  <div className="flex-1 p-6 overflow-y-auto space-y-5">
+                  <div className="flex-1 min-h-0 p-6 overflow-y-auto space-y-5">
                     <input
                       type="file"
                       ref={warehousePhotoUploadRef}
@@ -8744,7 +8744,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                   : (techCategories[0]?.id || 'structure');
 
                 return (
-                  <div className="flex-1 flex overflow-hidden">
+                  <div className="flex-1 min-h-0 flex overflow-hidden">
                     {/* Left Column: Category Navigation (Tailored for this warehouse type) */}
                     <div className="w-64 shrink-0 bg-slate-50/90 border-r border-slate-200 p-3 overflow-y-auto space-y-1.5">
                       <div className="px-2 pb-1 flex items-center justify-between">
@@ -10278,7 +10278,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
 
               {/* TAB 3: PHỤ PHÍ HANDLING & LƯU KHO */}
               {warehouseDetailActiveTab === 'surcharges' && (
-                <div className="flex-1 p-6 overflow-y-auto space-y-6">
+                <div className="flex-1 min-h-0 p-6 overflow-y-auto space-y-6">
                   {/* Phụ phí miễn phí */}
                   <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs space-y-3">
                     <div className="flex items-center justify-between">
@@ -10456,7 +10456,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
 
               {/* TAB 4: DỊCH VỤ GIA TĂNG (VAS) */}
               {warehouseDetailActiveTab === 'vas' && (
-                <div className="flex-1 p-6 overflow-y-auto space-y-4">
+                <div className="flex-1 min-h-0 p-6 overflow-y-auto space-y-4">
                   <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs space-y-3">
                     <div className="flex items-center justify-between">
                       <div>
