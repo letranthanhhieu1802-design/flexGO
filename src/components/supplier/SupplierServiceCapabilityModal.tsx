@@ -4596,7 +4596,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
     const isExpress = activeCategory?.id === 'air' && (activeModel?.id === 'air-gen-exp' || activeModel?.name?.includes('Express') || activeModel?.code === 'Express');
     const isAirCargo = isAir; // Cả Air Cargo và Express đều áp dụng cấu hình lịch bay & giờ cut-off ga hàng không
     const isLclModel = (isOcean || isRail) && (activeModel?.id?.includes('lcl') || activeModel?.name?.includes('LCL') || activeModel?.code === 'LCL');
-    const currentSla = route.sla || '';
+    const currentSla = route.departureSchedule || route.sla || '';
     let parsedDays = DAYS_OF_WEEK_LOV.filter((d) => currentSla.includes(d.name)).map((d) => d.name);
     if (currentSla.includes('Hàng ngày') || currentSla.includes('hàng ngày') || currentSla.includes('T2 - CN')) {
       parsedDays = DAYS_OF_WEEK_LOV.map((d) => d.name);
@@ -4638,7 +4638,10 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
       formatted += ` - ${customNote.trim()}`;
     }
 
-    handleUpdateRouteRow(routeId, 'sla', formatted);
+    handleUpdateRouteRowMultiple(routeId, {
+      sla: formatted,
+      departureSchedule: formatted,
+    });
     setScheduleModalData(null);
   };
 
@@ -6647,16 +6650,22 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                     </td>
 
                                     {/* 13. Lịch Chạy / Tần Suất */}
-                                    <td className="p-1 align-middle text-center bg-blue-50/30">
-                                      <select
-                                        value={effSchedule}
-                                        onChange={(e) => handleUpdateRouteRow(route.id, 'departureSchedule', e.target.value)}
-                                        className="w-full px-1.5 py-1.5 text-center font-bold text-blue-950 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 rounded text-xs cursor-pointer"
+                                    <td className="p-1 align-middle text-center bg-blue-50/20">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleOpenScheduleModal(route)}
+                                        className={`w-full min-h-[34px] px-2.5 py-1.5 rounded-xl border text-left text-xs transition-all flex items-center justify-between gap-1.5 cursor-pointer shadow-2xs group ${
+                                          route.departureSchedule || route.sla
+                                            ? 'bg-blue-50/90 border-blue-200 text-blue-950 font-semibold hover:bg-blue-100 hover:border-blue-300'
+                                            : 'bg-slate-50 border-dashed border-slate-300 text-slate-400 hover:bg-slate-100 hover:text-slate-600'
+                                        }`}
+                                        title="Nhấp để cấu hình chi tiết các thứ chạy trong tuần & thời gian xe xuất bến"
                                       >
-                                        {CROSS_BORDER_LTL_SCHEDULE_LOV.map((s) => (
-                                          <option key={s} value={s}>{s}</option>
-                                        ))}
-                                      </select>
+                                        <span className="truncate block font-semibold leading-tight text-blue-950">
+                                          {route.departureSchedule || 'Chọn lịch & giờ chạy...'}
+                                        </span>
+                                        <Calendar className="w-3.5 h-3.5 text-blue-600 shrink-0 group-hover:scale-110 transition-transform" />
+                                      </button>
                                     </td>
 
                                     {/* 14. Hạn Giá */}
@@ -9729,7 +9738,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <label className="block text-xs font-bold text-slate-800 uppercase tracking-wide">
-                    2. Các ngày bay trong tuần ({scheduleModalData.selectedDays.length}/7 ngày)
+                    2. {scheduleModalData.isAirCargo ? 'Các ngày bay trong tuần' : 'Các ngày chạy trong tuần'} ({scheduleModalData.selectedDays.length}/7 ngày)
                   </label>
                   <button
                     type="button"
