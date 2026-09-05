@@ -676,12 +676,12 @@ export const getWarehousePhotoSlots = (modelId?: string, cargoGroupId?: string):
   // 5. Kho Tự Quản (Self-Storage)
   if (modelId?.includes('self') || modelId?.includes('tự quản')) {
     return [
-      { key: 'facade', icon: '🏢', label: 'Mặt tiền & Lối vào kiểm soát thẻ từ/vân tay', description: 'Cửa ra vào tự do 24/7 cho khách hàng' },
-      { key: 'storage_units', icon: '🚪', label: 'Dãy khoang chứa cá nhân (Locker / Room)', description: 'Các khoang chứa mini có cửa cuốn và khóa riêng' },
-      { key: 'inside_unit', icon: '📦', label: 'Bên trong khoang lưu trữ cá nhân', description: 'Không gian bên trong, sàn sạch sẽ, thoáng mát' },
-      { key: 'clean_aisle', icon: '🧹', label: 'Hành lang & Lối đi nội bộ rộng rãi', description: 'Lối đi có xe đẩy hàng, ánh sáng đầy đủ' },
-      { key: 'security_cctv', icon: '📹', label: 'Hệ thống Camera an ninh & Khóa độc lập', description: 'Camera 24/7 quan sát mọi góc hành lang' },
-      { key: 'packing_tools', icon: '✂️', label: 'Khu vực Xe đẩy & Vật tư đóng gói', description: 'Xe đẩy bốc dỡ nội bộ, băng keo, thùng carton' },
+      { key: 'facade', icon: '🏢', label: 'Mặt Tiền & Cổng Kiểm Soát Ra Vào', description: 'Cổng ra vào tòa nhà kho, khu vực tiếp nhận xe tải/xe dọn đồ của khách hàng' },
+      { key: 'storage_units', icon: '🚪', label: 'Dãy Hành Lang Khoang Phân Lô', description: 'Hành lang các dãy khoang chứa cửa cuốn/cửa sắt sạch sẽ, đèn LED cảm ứng' },
+      { key: 'inside_unit', icon: '📦', label: 'Bên Trong Khoang Sàn Tự Quản', description: 'Không gian bên trong khoang (vách tôn thép chống cháy, sàn sạch, pát khóa độc lập)' },
+      { key: 'security_cctv', icon: '🔑', label: 'Kiểm Soát Thẻ Từ & Camera 24/7', description: 'Đầu đọc thẻ từ RFID / Vân tay vào cửa 24/7 và camera an ninh hành lang' },
+      { key: 'packing_tools', icon: '🛒', label: 'Xe Đẩy Hàng & Vật Tư Tại Chỗ', description: 'Xe đẩy hàng 4 bánh, xe nâng tay cơ khí miễn phí và quầy vật tư đóng gói' },
+      { key: 'fire_climate', icon: '🔥', label: 'PCCC Sprinkler & Máy Hút Ẩm', description: 'PCCC Sprinkler tự động từng khoang, máy hút ẩm công nghiệp chống ẩm mốc' },
     ];
   }
 
@@ -753,10 +753,10 @@ export const getWarehouseTechSpecCategories = (modelId?: string, cargoGroupId?: 
   // 5. Kho Tự Quản (wh-gen-self, wh-ref-self)
   if (modelId?.includes('self') || modelId?.includes('tự quản')) {
     return [
-      { id: 'self_units', icon: '🚪', label: 'Quy Cách Khoang Chứa Cá Nhân', desc: 'Dải thể tích 1-30m³, cửa cuốn khóa riêng, chống ẩm' },
-      { id: 'self_access', icon: '🔑', label: 'Ra Vào Tự Do 24/7 & Khóa Độc Lập', desc: 'Thẻ từ/vân tay 24/7, camera hành lang, khách giữ chìa' },
-      { id: 'self_amenities', icon: '🧹', label: 'Tiện Ích Nội Bộ & Vật Tư Đóng Gói', desc: 'Xe đẩy bốc dỡ miễn phí, thùng carton, máy hút ẩm' },
-      { id: 'self_fire', icon: '🔥', label: 'PCCC & Bảo Hiểm Tài Sản Cá Nhân', desc: 'PCCC Sprinkler từng khoang, bảo hiểm mất mát' },
+      { id: 'self_units', icon: '🚪', label: 'Quy Cách Khoang Sàn Phân Lô', desc: 'Dải diện tích/thể tích 1-30m³, vách tôn thép, cửa cuốn khóa riêng' },
+      { id: 'self_access', icon: '🔑', label: 'Ra Vào Tự Do 24/7 & An Ninh', desc: 'Thẻ từ/vân tay 24/7, camera CCTV hành lang, khách giữ chìa' },
+      { id: 'self_amenities', icon: '🛒', label: 'Tiện Ích Xe Đẩy & Máy Hút Ẩm', desc: 'Xe đẩy bốc dỡ miễn phí, máy hút ẩm < 60%, thùng carton' },
+      { id: 'self_fire', icon: '🔥', label: 'PCCC & Bảo Hiểm Khoang Chứa', desc: 'PCCC Sprinkler từng khoang, bảo hiểm tài sản cá nhân 100%' },
     ];
   }
 
@@ -932,6 +932,7 @@ export interface CapabilityRouteItem {
   pickPackPrice?: number;
   extraItemPrice?: number;
   bufferStoragePrice?: number;
+  storageUnitsCount?: number;
 }
 
 export interface PaidSurchargeItem {
@@ -2894,16 +2895,28 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             defaultRoutes: [
               {
                 id: 'r-wh-self-1',
-                route: 'Self-Storage Quận 7 (TP.HCM)',
-                origin: 'Quận 7 (TP.HCM)',
-                destination: 'Lưu trữ cá nhân/doanh nghiệp',
-                vehicleType: 'Khoang tự quản Mini Storage',
-                pricingUnit: 'm³ / Tháng',
-                price: 450000,
+                routeCode: 'SELF-HCM-01',
+                warehouseCode: 'SELF-HCM-01',
+                route: 'Kho Tự Quản Tân Bình (TP.HCM)',
+                warehouseName: 'Kho Tự Quản Tân Bình (TP.HCM)',
+                origin: 'TP. Hồ Chí Minh',
+                warehouseProvince: 'TP. Hồ Chí Minh',
+                destination: 'KCN Tân Bình, P. Tây Thạnh, Q. Tân Phú',
+                warehouseAddress: 'KCN Tân Bình, P. Tây Thạnh, Q. Tân Phú',
+                vehicleType: 'Khoang sàn tự quản',
+                pricingUnit: 'm² / Tháng',
+                price: 180000,
+                pricePerArea: 180000,
+                pricePerVolume: 75000,
+                capacityArea: 800,
+                capacityVolume: 2400,
+                storageUnitsCount: 45,
+                minChargeMonthly: 1000000,
                 currency: 'VND',
-                sla: 'Truy cập 24/7',
+                sla: 'Ra vào tự do 24/7 (Thẻ từ)',
                 pricingStyle: 'All-in',
-                promotionPercent: 20,
+                validUntil: '2026-12-31',
+                promotionPercent: 10,
               },
             ],
             freeSurchargeOptions: [
@@ -5970,6 +5983,31 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                 );
                               }
 
+                              const isSelfStorage = activeModel?.id === 'wh-gen-self' || activeModel?.id?.includes('self') || activeModel?.name?.toLowerCase().includes('tự quản') || activeModel?.code?.toLowerCase().includes('tự quản');
+                              if (isSelfStorage) {
+                                return (
+                                  <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
+                                    <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
+                                    <th className="py-2.5 px-2.5 min-w-[115px] text-center bg-amber-50/80 text-amber-950 font-black">Mã Kho TQ</th>
+                                    <th className="py-2.5 px-2.5 min-w-[185px]">Tên Cơ Sở Kho Tự Quản</th>
+                                    <th className="py-2.5 px-2.5 min-w-[130px]">Tỉnh / Thành Phố</th>
+                                    <th className="py-2.5 px-2.5 min-w-[185px]">KCN / Địa Chỉ Chi Tiết</th>
+                                    <th className="py-2.5 px-2 text-right min-w-[125px] bg-blue-50/70 text-blue-950 font-bold">Diện Tích Sàn (m²)</th>
+                                    <th className="py-2.5 px-2 text-right min-w-[115px] bg-blue-50/70 text-blue-950">Thể Tích (m³)</th>
+                                    <th className="py-2.5 px-2 text-right min-w-[125px] bg-blue-50/70 text-blue-950">Số Khoang Phân Lô</th>
+                                    <th className="py-2.5 px-2 text-right min-w-[140px] bg-emerald-50/90 text-emerald-950 font-black">Giá m² (/Tháng)</th>
+                                    <th className="py-2.5 px-2 text-right min-w-[140px] bg-emerald-50/70 text-emerald-950">Giá m³ (/Tháng)</th>
+                                    <th className="py-2.5 px-2 text-right min-w-[145px] bg-amber-50/80 text-amber-950">Cước Sàn (Min/Tháng)</th>
+                                    <th className="py-2.5 px-2 w-20 min-w-[80px] text-center">Tiền Tệ</th>
+                                    <th className="py-2.5 px-2.5 min-w-[145px] text-center">Giờ Ra Vào & Truy Cập</th>
+                                    <th className="py-2.5 px-2.5 min-w-[130px] text-center">Hạn Giá</th>
+                                    <th className="py-2.5 px-2 min-w-[85px] text-center">Promotion</th>
+                                    <th className="py-2.5 px-2.5 min-w-[170px] text-center bg-amber-50/70 text-amber-950 font-black">Chi Tiết (Specs, Ảnh, Tiện Ích)</th>
+                                    <th className="py-2.5 px-2 text-center w-16 min-w-[65px]">Action</th>
+                                  </tr>
+                                );
+                              }
+
                               return (
                                 <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
                                   <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
@@ -6553,6 +6591,220 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                             onClick={() => handleDeleteRouteRow(route.id)}
                                             className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors cursor-pointer"
                                             title="Xóa trung tâm fulfillment này"
+                                          >
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                          </button>
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  );
+                                }
+                                const isSelfStorageRow = activeModel?.id === 'wh-gen-self' || activeModel?.id?.includes('self') || activeModel?.name?.toLowerCase().includes('tự quản') || activeModel?.code?.toLowerCase().includes('tự quản');
+                                if (isSelfStorageRow) {
+                                  const effWhCode = route.warehouseCode || route.routeCode || `SELF-HCM-${String(idx + 1).padStart(2, '0')}`;
+                                  const effWhName = route.warehouseName || route.route || `Kho Tự Quản Tân Bình #${idx + 1}`;
+                                  const effProvince = route.warehouseProvince || route.origin || 'TP. Hồ Chí Minh';
+                                  const effAddress = route.warehouseAddress || route.destination || 'KCN Tân Bình, P. Tây Thạnh, Q. Tân Phú';
+                                  const effCapArea = route.capacityArea ?? 800;
+                                  const effCapVolume = route.capacityVolume ?? 2400;
+                                  const effUnitsCount = route.storageUnitsCount ?? 45;
+                                  const effPriceArea = route.pricePerArea ?? (route.price || 180000);
+                                  const effPriceVolume = route.pricePerVolume ?? 75000;
+                                  const effMinCharge = route.minChargeMonthly ?? 1000000;
+                                  const effCurrency = route.currency || 'VND';
+                                  const effSla = route.sla || 'Ra vào tự do 24/7 (Thẻ từ)';
+                                  const effValidUntil = route.validUntil || '2026-12-31';
+                                  const effPromotionPercent = route.promotionPercent || 0;
+
+                                  return (
+                                    <tr key={route.id} className="hover:bg-amber-50/20 transition-colors divide-x divide-slate-100 text-xs">
+                                      {/* 1. STT */}
+                                      <td className="p-1 text-center font-bold text-slate-500 w-9 bg-slate-50/50">
+                                        {idx + 1}
+                                      </td>
+
+                                      {/* 2. Mã Kho TQ */}
+                                      <td className="p-1 text-center font-mono font-bold text-amber-800 bg-amber-50/30">
+                                        <input
+                                          type="text"
+                                          value={effWhCode}
+                                          onChange={(e) => handleUpdateRouteRowMultiple(route.id, { warehouseCode: e.target.value, routeCode: e.target.value })}
+                                          className="w-full text-center bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 rounded px-1 py-1 font-bold text-amber-800 text-xs"
+                                        />
+                                      </td>
+
+                                      {/* 3. Tên Cơ Sở Kho Tự Quản */}
+                                      <td className="p-1 align-middle">
+                                        <input
+                                          type="text"
+                                          value={effWhName}
+                                          onChange={(e) => handleUpdateRouteRowMultiple(route.id, { warehouseName: e.target.value, route: e.target.value })}
+                                          placeholder="Tên cơ sở kho tự quản..."
+                                          className="w-full px-2 py-1.5 font-bold text-slate-900 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 rounded text-xs"
+                                        />
+                                      </td>
+
+                                      {/* 4. Tỉnh / Thành Phố */}
+                                      <td className="p-1 align-middle">
+                                        <input
+                                          type="text"
+                                          value={effProvince}
+                                          onChange={(e) => handleUpdateRouteRowMultiple(route.id, { warehouseProvince: e.target.value, origin: e.target.value })}
+                                          placeholder="TP.HCM, Bình Dương..."
+                                          className="w-full px-2 py-1.5 font-semibold text-slate-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 rounded text-xs"
+                                        />
+                                      </td>
+
+                                      {/* 5. KCN / Địa Chỉ Chi Tiết */}
+                                      <td className="p-1 align-middle">
+                                        <input
+                                          type="text"
+                                          value={effAddress}
+                                          onChange={(e) => handleUpdateRouteRowMultiple(route.id, { warehouseAddress: e.target.value, destination: e.target.value })}
+                                          placeholder="Địa chỉ, đường, phường/xã..."
+                                          className="w-full px-2 py-1.5 text-slate-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 rounded text-xs"
+                                        />
+                                      </td>
+
+                                      {/* 6. Diện Tích Sàn (m²) */}
+                                      <td className="p-1 align-middle text-right bg-blue-50/20">
+                                        <input
+                                          type="number"
+                                          value={effCapArea || ''}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'capacityArea', parseFloat(e.target.value) || 0)}
+                                          placeholder="800"
+                                          className="w-full px-2 py-1.5 text-right font-black text-blue-900 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 rounded text-xs"
+                                        />
+                                      </td>
+
+                                      {/* 7. Thể Tích (m³) */}
+                                      <td className="p-1 align-middle text-right bg-blue-50/20">
+                                        <input
+                                          type="number"
+                                          value={effCapVolume || ''}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'capacityVolume', parseFloat(e.target.value) || 0)}
+                                          placeholder="2400"
+                                          className="w-full px-2 py-1.5 text-right font-semibold text-slate-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 rounded text-xs"
+                                        />
+                                      </td>
+
+                                      {/* 8. Số Khoang Phân Lô */}
+                                      <td className="p-1 align-middle text-right bg-blue-50/20">
+                                        <input
+                                          type="number"
+                                          value={effUnitsCount || ''}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'storageUnitsCount', parseInt(e.target.value) || 0)}
+                                          placeholder="45"
+                                          className="w-full px-2 py-1.5 text-right font-semibold text-slate-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 rounded text-xs"
+                                        />
+                                      </td>
+
+                                      {/* 9. Giá m² (/Tháng) */}
+                                      <td className="p-1 align-middle text-right bg-emerald-50/30">
+                                        <input
+                                          type="number"
+                                          value={effPriceArea || ''}
+                                          onChange={(e) => {
+                                            const val = parseFloat(e.target.value) || 0;
+                                            handleUpdateRouteRowMultiple(route.id, { pricePerArea: val, price: val });
+                                          }}
+                                          placeholder="180000"
+                                          className="w-full px-2 py-1.5 text-right font-black text-emerald-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 rounded text-xs"
+                                        />
+                                      </td>
+
+                                      {/* 10. Giá m³ (/Tháng) */}
+                                      <td className="p-1 align-middle text-right bg-emerald-50/20">
+                                        <input
+                                          type="number"
+                                          value={effPriceVolume || ''}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'pricePerVolume', parseFloat(e.target.value) || 0)}
+                                          placeholder="75000"
+                                          className="w-full px-2 py-1.5 text-right font-bold text-emerald-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 rounded text-xs"
+                                        />
+                                      </td>
+
+                                      {/* 11. Cước Sàn (Min/Tháng) */}
+                                      <td className="p-1 align-middle text-right bg-amber-50/30">
+                                        <input
+                                          type="number"
+                                          value={effMinCharge || ''}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'minChargeMonthly', parseFloat(e.target.value) || 0)}
+                                          placeholder="1000000"
+                                          className="w-full px-2 py-1.5 text-right font-bold text-amber-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 rounded text-xs"
+                                        />
+                                      </td>
+
+                                      {/* 12. Tiền Tệ */}
+                                      <td className="p-1 align-middle text-center">
+                                        <span className="font-bold text-slate-800 text-xs">{effCurrency}</span>
+                                      </td>
+
+                                      {/* 13. Giờ Ra Vào & Truy Cập */}
+                                      <td className="p-1 align-middle text-center">
+                                        <input
+                                          type="text"
+                                          value={effSla}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'sla', e.target.value)}
+                                          placeholder="Tự do 24/7 (Thẻ từ)..."
+                                          className="w-full px-2 py-1.5 text-center font-medium text-slate-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 rounded text-xs"
+                                        />
+                                      </td>
+
+                                      {/* 14. Hạn Giá */}
+                                      <td className="p-1 align-middle text-center">
+                                        <input
+                                          type="date"
+                                          value={effValidUntil}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'validUntil', e.target.value)}
+                                          className="w-full px-1 py-1.5 text-center text-slate-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 rounded text-xs"
+                                        />
+                                      </td>
+
+                                      {/* 15. Promotion */}
+                                      <td className="p-1 align-middle text-center">
+                                        <input
+                                          type="number"
+                                          min="0"
+                                          max="100"
+                                          value={effPromotionPercent || ''}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'promotionPercent', Math.min(100, Math.max(0, parseInt(e.target.value) || 0)))}
+                                          placeholder="0%"
+                                          className="w-full px-1 py-1.5 text-center font-bold text-rose-600 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 rounded text-xs"
+                                        />
+                                      </td>
+
+                                      {/* 16. Chi Tiết (Specs, Ảnh, Tiện Ích) */}
+                                      <td className="p-1 align-middle text-center bg-amber-50/40">
+                                        <button
+                                          type="button"
+                                          onClick={() => handleOpenWarehouseDetailModal(route)}
+                                          className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-black text-amber-800 bg-amber-100 hover:bg-amber-200 border border-amber-300 rounded-lg shadow-2xs hover:shadow-xs transition-all cursor-pointer"
+                                        >
+                                          <Sliders className="w-3.5 h-3.5 text-amber-800" />
+                                          <span>Chi Tiết</span>
+                                          <span className="ml-1 px-1.5 py-0.2 bg-amber-800 text-white rounded-full text-[10px] font-bold">
+                                            {(route.warehousePhotos?.length || 0) + (route.warehousePaidSurcharges?.length || 0) + (route.warehouseVasItems?.length || 0)}
+                                          </span>
+                                        </button>
+                                      </td>
+
+                                      {/* 17. Action */}
+                                      <td className="p-1 text-center align-middle w-16">
+                                        <div className="flex items-center justify-center gap-1">
+                                          <button
+                                            type="button"
+                                            onClick={() => handleDuplicateRouteRow(route.id)}
+                                            className="p-1 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors cursor-pointer"
+                                            title="Nhân bản cơ sở kho tự quản này"
+                                          >
+                                            <Copy className="w-3.5 h-3.5" />
+                                          </button>
+                                          <button
+                                            type="button"
+                                            onClick={() => handleDeleteRouteRow(route.id)}
+                                            className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors cursor-pointer"
+                                            title="Xóa cơ sở kho tự quản này"
                                           >
                                             <Trash2 className="w-3.5 h-3.5" />
                                           </button>
@@ -10707,18 +10959,18 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                         <div className="space-y-4 max-w-2xl">
                           <div className="border-b border-slate-100 pb-3">
                             <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
-                              <span>🚪</span> Quy Cách Khoang Chứa Cá Nhân
+                              <span>🚪</span> Quy Cách Khoang Sàn Phân Lô
                             </h4>
                             <p className="text-xs text-slate-500 mt-0.5">
-                              Dải thể tích khoang mini cá nhân và hệ thống cửa khóa riêng.
+                              Dải diện tích & thể tích khoang sàn tự quản và hệ thống cửa khóa riêng.
                             </p>
                           </div>
 
                           <div>
-                            <label className="text-xs font-bold text-slate-700 block mb-2">Các kích thước khoang mini có sẵn:</label>
+                            <label className="text-xs font-bold text-slate-700 block mb-2">Các kích thước khoang phân lô có sẵn:</label>
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                              {['Khoang 1m³ (Locker)', 'Khoang 3m³ (Small)', 'Khoang 6m³ (Medium)', 'Khoang 12m³ (Large)', 'Khoang 20m³ (X-Large)', 'Khoang 30m³ (Doanh nghiệp)'].map((vol) => {
-                                const list = warehouseDetailModalData.techSpecs.unitVolumeRanges || ['Khoang 1m³ (Locker)', 'Khoang 3m³ (Small)', 'Khoang 6m³ (Medium)', 'Khoang 12m³ (Large)'];
+                              {['Khoang 1m³ (Mini)', 'Khoang 3m³ (Nhỏ)', 'Khoang 6m³ (Vừa)', 'Khoang 12m³ (Lớn)', 'Khoang 20m³ (Đại)', 'Khoang 30m³ (Doanh nghiệp)'].map((vol) => {
+                                const list = warehouseDetailModalData.techSpecs.unitVolumeRanges || ['Khoang 1m³ (Mini)', 'Khoang 3m³ (Nhỏ)', 'Khoang 6m³ (Vừa)', 'Khoang 12m³ (Lớn)'];
                                 const isChecked = list.includes(vol);
                                 return (
                                   <label
