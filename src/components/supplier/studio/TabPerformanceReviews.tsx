@@ -1,19 +1,18 @@
 import React, { useState } from 'react';
 import { 
   Star, 
-  TrendingUp, 
-  Clock, 
-  CheckCircle2, 
   MessageSquare, 
-  Award, 
-  ShieldCheck, 
   Eye, 
   FileText, 
-  Plus, 
-  Trash2, 
-  CornerDownRight,
-  ThumbsUp,
-  Filter
+  Send, 
+  Trophy, 
+  DollarSign, 
+  Users, 
+  Activity, 
+  Filter, 
+  CornerDownRight, 
+  ThumbsUp, 
+  ArrowUpRight 
 } from 'lucide-react';
 import { StudioTemplateConfig, THEME_COLOR_OPTIONS } from './studioTypes';
 
@@ -37,6 +36,26 @@ interface TabPerformanceReviewsProps {
 export const TabPerformanceReviews: React.FC<TabPerformanceReviewsProps> = ({ config }) => {
   const theme = THEME_COLOR_OPTIONS[config.themeColor];
 
+  // 1. Weekly views data
+  const weeklyViewsData = [
+    { day: 'T2', fullDay: 'Thứ Hai', views: 390, height: 'h-14', isPeak: false },
+    { day: 'T3', fullDay: 'Thứ Ba', views: 420, height: 'h-15', isPeak: false },
+    { day: 'T4', fullDay: 'Thứ Tư', views: 430, height: 'h-15', isPeak: false },
+    { day: 'T5', fullDay: 'Thứ Năm', views: 470, height: 'h-16', isPeak: false },
+    { day: 'T6', fullDay: 'Thứ Sáu (Đỉnh điểm)', views: 680, height: 'h-20', isPeak: true },
+    { day: 'T7', fullDay: 'Thứ Bảy', views: 380, height: 'h-14', isPeak: false },
+    { day: 'CN', fullDay: 'Chủ Nhật', views: 240, height: 'h-10', isPeak: false },
+  ];
+
+  // 2. Industry distribution data
+  const industryDistribution = [
+    { name: 'FDI & Thiết bị điện tử', percentage: 38, color: 'bg-blue-600', textColor: 'text-blue-700' },
+    { name: 'Nông sản & Thủy hải sản lạnh', percentage: 27, color: 'bg-sky-500', textColor: 'text-sky-700' },
+    { name: 'FMCG & Bán lẻ đa kênh', percentage: 21, color: 'bg-amber-500', textColor: 'text-amber-700' },
+    { name: 'Dệt may, Gỗ & Cơ khí', percentage: 14, color: 'bg-purple-600', textColor: 'text-purple-700' },
+  ];
+
+  // 3. Testimonials Data
   const [testimonials, setTestimonials] = useState<TestimonialItem[]>([
     {
       id: 'test-1',
@@ -99,77 +118,240 @@ export const TabPerformanceReviews: React.FC<TabPerformanceReviewsProps> = ({ co
   );
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-150">
+    <div className="space-y-6 animate-in fade-in duration-200">
       
-      {/* 1. TOP HEADER: Operational KPIs Dashboard (Platform Auto-generated) */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
-          <div>
-            <span className="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase rounded-md tracking-wider">
-              Hệ Thống FlexGO Tự Động Đo Lường
-            </span>
-            <h2 className="text-lg font-black text-slate-900 mt-1">Chỉ Số Hiệu Suất Vận Hành & Cam Kết SLA</h2>
-            <p className="text-xs text-slate-500">
-              Các chỉ số này được tính toán khách quan từ các đơn hàng, báo giá RFQ và hợp đồng thực hiện trên sàn.
-            </p>
+      {/* =========================================================================
+          SECTION 1: HỆ THỐNG CHỈ SỐ HOẠT ĐỘNG TRÊN HỆ THỐNG (AS IN REFERENCE)
+      ========================================================================= */}
+      <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200 shadow-xs space-y-6">
+        
+        {/* Header with verified badge & real-time update dot */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-start sm:items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center shrink-0 shadow-2xs">
+              <Activity className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center flex-wrap gap-2.5">
+                <h2 className="text-lg font-black text-slate-900 tracking-tight">
+                  Hệ Thống Chỉ Số Hoạt Động Trên Hệ Thống
+                </h2>
+                <span className="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-bold rounded-full flex items-center gap-1 shadow-2xs">
+                  <ArrowUpRight className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Xác thực Real-time</span>
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Hiệu suất xử lý yêu cầu, điều phối cước và mức độ tín nhiệm từ cộng đồng chủ hàng doanh nghiệp
+              </p>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2 text-xs font-semibold text-slate-600 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200">
-            <ShieldCheck className="w-4 h-4 text-emerald-600" />
-            <span>Xác thực bởi FlexGO Audit 2025</span>
+          <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 shrink-0 self-start md:self-auto bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse" />
+            <span>Cập nhật liên tục từ hệ thống sàn flexGO</span>
           </div>
         </div>
 
-        {/* 4 Core KPIs Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+        {/* Row of 6 Distinct Activity Metric Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
+          
+          {/* Card 1: PROFILE VIEWS */}
+          <div className="rounded-2xl border border-indigo-100 bg-white p-4 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase text-slate-400">Thời Gian Phản Hồi RFQ</span>
-              <Clock className="w-4 h-4 text-indigo-600" />
+              <span className="text-[10px] font-black uppercase tracking-wider text-indigo-600">
+                PROFILE VIEWS
+              </span>
+              <Eye className="w-4 h-4 text-indigo-500" />
             </div>
-            <div className="text-2xl font-black text-slate-900 mt-2">12 Phút</div>
-            <span className="text-[11px] text-emerald-600 font-bold flex items-center gap-1 mt-1">
-              <TrendingUp className="w-3 h-3" /> Nhanh hơn 85% thị trường
-            </span>
+            <div className="my-2.5">
+              <div className="text-2xl font-black text-slate-900 tracking-tight">
+                12.390
+              </div>
+            </div>
+            <div className="flex items-center justify-between text-[11px] pt-1">
+              <span className="text-slate-500 font-medium">Lượt xem hồ sơ</span>
+              <span className="font-bold text-emerald-600">+22.7%</span>
+            </div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+          {/* Card 2: INQUIRIES */}
+          <div className="rounded-2xl border border-blue-100 bg-white p-4 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase text-slate-400">Tỷ Lệ Giao Hàng Đúng Giờ</span>
-              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              <span className="text-[10px] font-black uppercase tracking-wider text-blue-600">
+                INQUIRIES
+              </span>
+              <Send className="w-4 h-4 text-blue-500" />
             </div>
-            <div className="text-2xl font-black text-slate-900 mt-2">99.6%</div>
-            <span className="text-[11px] text-slate-500 mt-1 block">
-              Dựa trên 2,450 chuyến hoàn tất
-            </span>
+            <div className="my-2.5">
+              <div className="text-2xl font-black text-slate-900 tracking-tight">
+                210
+              </div>
+            </div>
+            <div className="flex items-center justify-between text-[11px] pt-1">
+              <span className="text-slate-500 font-medium">Yêu cầu RFQ đã nhận</span>
+              <span className="font-bold text-blue-600">&lt; 20 Phút</span>
+            </div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+          {/* Card 3: QUOTES */}
+          <div className="rounded-2xl border border-amber-200/80 bg-white p-4 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase text-slate-400">Tỷ Lệ Giữ Chỗ Tàu/Xe (Space)</span>
-              <Award className="w-4 h-4 text-blue-600" />
+              <span className="text-[10px] font-black uppercase tracking-wider text-amber-700">
+                QUOTES
+              </span>
+              <FileText className="w-4 h-4 text-amber-600" />
             </div>
-            <div className="text-2xl font-black text-slate-900 mt-2">99.2%</div>
-            <span className="text-[11px] text-slate-500 mt-1 block">
-              Không phát sinh hoãn chuyến
-            </span>
+            <div className="my-2.5">
+              <div className="text-2xl font-black text-slate-900 tracking-tight">
+                263
+              </div>
+            </div>
+            <div className="flex items-center justify-between text-[11px] pt-1">
+              <span className="text-slate-500 font-medium">Báo giá đã phát hành</span>
+              <span className="font-bold text-amber-700">Độ chuẩn 99.8%</span>
+            </div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+          {/* Card 4: AWARDED */}
+          <div className="rounded-2xl border border-emerald-200/80 bg-white p-4 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase text-slate-400">Điểm Đánh Giá Bình Quân</span>
-              <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+              <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700">
+                AWARDED
+              </span>
+              <Trophy className="w-4 h-4 text-emerald-600" />
             </div>
-            <div className="text-2xl font-black text-slate-900 mt-2">4.9 / 5.0</div>
-            <span className="text-[11px] text-amber-600 font-bold mt-1 block">
-              Từ 142 Đánh giá khách hàng
-            </span>
+            <div className="my-2.5">
+              <div className="text-2xl font-black text-slate-900 tracking-tight">
+                189
+              </div>
+            </div>
+            <div className="flex items-center justify-between text-[11px] pt-1">
+              <span className="text-slate-500 font-medium">Đơn hàng trúng thầu</span>
+              <span className="font-bold text-emerald-700">Win rate ~72%</span>
+            </div>
+          </div>
+
+          {/* Card 5: REVENUE */}
+          <div className="rounded-2xl border border-purple-200/80 bg-white p-4 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black uppercase tracking-wider text-purple-700">
+                REVENUE
+              </span>
+              <DollarSign className="w-4 h-4 text-purple-600" />
+            </div>
+            <div className="my-2.5">
+              <div className="text-2xl font-black text-slate-900 tracking-tight">
+                145 Tỷ
+              </div>
+            </div>
+            <div className="flex items-center justify-between text-[11px] pt-1">
+              <span className="text-slate-500 font-medium">Doanh số điều phối</span>
+              <span className="font-bold text-purple-700">Tổng giá trị cước</span>
+            </div>
+          </div>
+
+          {/* Card 6: NO. CUSTOMER */}
+          <div className="rounded-2xl border border-teal-200/80 bg-white p-4 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black uppercase tracking-wider text-teal-700">
+                NO. CUSTOMER
+              </span>
+              <Users className="w-4 h-4 text-teal-600" />
+            </div>
+            <div className="my-2.5">
+              <div className="text-2xl font-black text-slate-900 tracking-tight">
+                65 DN
+              </div>
+            </div>
+            <div className="flex items-center justify-between text-[11px] pt-1">
+              <span className="text-slate-500 font-medium">Khách hàng định kỳ</span>
+              <span className="font-bold text-teal-700">Tái ký 98.2%</span>
+            </div>
           </div>
         </div>
+
+        {/* Bottom 2 Analytical Columns: Trend 7-Days Chart & Industry Breakdown */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-2">
+          
+          {/* Panel Left: Xu Hướng Lượt Xem Hồ Sơ & Quan Tâm 7 Ngày Gần Nhất */}
+          <div className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-5 flex flex-col justify-between">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xs font-black text-slate-900">
+                Xu Hướng Lượt Xem Hồ Sơ & Quan Tâm 7 Ngày Gần Nhất
+              </h3>
+              <span className="text-xs text-slate-500 font-medium">
+                Trung bình ~420 lượt/ngày
+              </span>
+            </div>
+
+            {/* 7-Day Bar Chart */}
+            <div className="h-32 flex items-end justify-between gap-2 pt-4 px-2">
+              {weeklyViewsData.map((item) => (
+                <div key={item.day} className="flex-1 flex flex-col items-center gap-2 group">
+                  {/* Tooltip on hover */}
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity text-[10px] font-black bg-slate-900 text-white px-1.5 py-0.5 rounded shadow-sm pointer-events-none whitespace-nowrap">
+                    {item.views} lượt
+                  </div>
+                  
+                  {/* Bar */}
+                  <div className="w-full max-w-[34px] flex items-end justify-center h-20">
+                    <div 
+                      className={`w-full rounded-t-lg transition-all duration-300 ${
+                        item.isPeak 
+                          ? 'bg-blue-600 shadow-md ring-2 ring-blue-400/30' 
+                          : 'bg-blue-200 hover:bg-blue-300'
+                      } ${item.height}`}
+                    />
+                  </div>
+
+                  {/* Day Label */}
+                  <span className={`text-[11px] font-bold ${
+                    item.isPeak ? 'text-blue-700 font-extrabold' : 'text-slate-500'
+                  }`}>
+                    {item.day}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Panel Right: Phân Bố Ngành Hàng Chủ Hàng Hợp Tác */}
+          <div className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-5 flex flex-col justify-between">
+            <div className="mb-4">
+              <h3 className="text-xs font-black text-slate-900">
+                Phân Bố Ngành Hàng Chủ Hàng Hợp Tác
+              </h3>
+            </div>
+
+            {/* Progress Bars List */}
+            <div className="space-y-4">
+              {industryDistribution.map((ind) => (
+                <div key={ind.name} className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-slate-700">{ind.name}</span>
+                    <span className="font-black text-slate-900">{ind.percentage}%</span>
+                  </div>
+                  {/* Progress bar container */}
+                  <div className="w-full h-2 bg-slate-200/80 rounded-full overflow-hidden">
+                    <div 
+                      className={`h-full rounded-full transition-all duration-500 ${ind.color}`}
+                      style={{ width: `${ind.percentage}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </div>
+
       </div>
 
-      {/* 2. REVIEWS & TESTIMONIALS MANAGEMENT */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-6">
+      {/* =========================================================================
+          SECTION 2: REVIEWS & TESTIMONIALS MANAGEMENT
+      ========================================================================= */}
+      <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200 shadow-xs space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
           <div>
             <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
@@ -323,3 +505,4 @@ export const TabPerformanceReviews: React.FC<TabPerformanceReviewsProps> = ({ co
     </div>
   );
 };
+

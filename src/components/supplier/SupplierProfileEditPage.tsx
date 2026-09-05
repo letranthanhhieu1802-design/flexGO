@@ -431,6 +431,9 @@ export const SupplierProfileEditPage: React.FC<SupplierProfileEditPageProps> = (
         <SupplierProfileDetailPage
           specialistId={profile.id}
           overrideProfile={profile}
+          salemanProfile={salemanProfile}
+          companyProfile={companyProfile}
+          studioConfig={studioConfig}
           onBackToDirectory={() => setViewMode('edit')}
           onSelectSpecialist={() => {}}
           onOpenCreateInquiry={() => {}}
@@ -480,6 +483,7 @@ export const SupplierProfileEditPage: React.FC<SupplierProfileEditPageProps> = (
         onPreview={() => setViewMode('preview')}
         onSave={() => handleSaveProfile()}
         onReset={handleReset}
+        activeEditorTab={activeEditorTab}
       />
 
       {/* Editor Navigation Tabs (4 Core Studio Tabs) */}
@@ -565,9 +569,14 @@ export const SupplierProfileEditPage: React.FC<SupplierProfileEditPageProps> = (
       <TemplateSelectorModal
         isOpen={isTemplateModalOpen}
         onClose={() => setIsTemplateModalOpen(false)}
+        activeTab={activeEditorTab === 'company' ? 'company' : 'profile'}
         selectedTemplateId={studioConfig.activeTemplateId}
         onSelectTemplate={(tplId) => {
           setStudioConfig((prev) => ({ ...prev, activeTemplateId: tplId }));
+        }}
+        selectedCompanyTemplateId={studioConfig.activeCompanyTemplateId || 'corporate-flagship'}
+        onSelectCompanyTemplate={(cTplId) => {
+          setStudioConfig((prev) => ({ ...prev, activeCompanyTemplateId: cTplId }));
         }}
         selectedThemeColor={studioConfig.themeColor}
         onSelectThemeColor={(cId) => {

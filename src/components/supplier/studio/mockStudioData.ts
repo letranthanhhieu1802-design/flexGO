@@ -1,7 +1,7 @@
-import { 
-  SalemanPersonalProfile, 
-  CompanyInfoProfile, 
-  StudioTemplateConfig 
+import {
+  SalemanPersonalProfile,
+  CompanyInfoProfile,
+  StudioTemplateConfig
 } from './studioTypes';
 
 export const initialSalemanProfile: SalemanPersonalProfile = {
@@ -149,7 +149,61 @@ export const initialCompanyProfile: CompanyInfoProfile = {
     youtube: 'https://youtube.com/@vinatranslogistics',
   },
 
-  // 1. Thước đo quy mô & năng lực
+  // 1. Về chúng tôi & Dấu mốc lịch sử
+  milestones: [
+    {
+      id: 'ms-1',
+      year: '2008',
+      title: 'Khởi đầu với dịch vụ thông quan & vận tải bộ',
+      description: 'Thành lập tại TP.HCM với đội xe ban đầu 12 chiếc, tập trung khai báo hải quan cảng Cát Lái.'
+    },
+    {
+      id: 'ms-2',
+      year: '2014',
+      title: 'Mở rộng mạng lưới Forwarding quốc tế',
+      description: 'Gia nhập FIATA, VLA & WCA; mở tuyến cước tàu biển FCL trực tiếp đi US West Coast và Đông Nam Á.'
+    },
+    {
+      id: 'ms-3',
+      year: '2019',
+      title: 'Khánh thành Trung tâm Kho vận Sóng Thần',
+      description: 'Đưa vào vận hành cụm kho 35,000m² đạt chuẩn CFS & Kho lạnh GDP, tích hợp hệ thống WMS Barcode/RFID.'
+    },
+    {
+      id: 'ms-4',
+      year: '2023 - Nay',
+      title: 'Chuyển đổi số toàn diện & Cán mốc 120,000 TEUs',
+      description: 'Triển khai nền tảng TMS định vị GPS 24/7, liên kết đối tác hơn 20 hãng tàu và hãng hàng không quốc tế.'
+    }
+  ],
+
+  // 2. Tầm nhìn, Sứ mệnh & Giá trị cốt lõi
+  vision: 'Trở thành Top 5 tập đoàn logistics tích hợp 3PL/4PL uy tín hàng đầu Việt Nam và vươn tầm khu vực Đông Nam Á vào năm 2030, tiên phong ứng dụng công nghệ chuỗi cung ứng xanh.',
+  mission: 'Đơn giản hóa dòng chảy hàng hóa toàn cầu, đồng hành tối ưu hóa chi phí logistics trên từng container và cam kết độ tin cậy SLA cao nhất cho mọi doanh nghiệp xuất nhập khẩu.',
+  coreValues: [
+    {
+      id: 'cv-1',
+      title: 'Uy Tín Cam Kết (Integrity)',
+      description: 'Luôn giữ chữ tín về tiến độ, giá cước minh bạch và an toàn hàng hóa 100%.'
+    },
+    {
+      id: 'cv-2',
+      title: 'Tốc Độ & Linh Hoạt (Agility)',
+      description: 'Phản hồi RFQ dưới 15 phút, giải quyết thủ tục thông quan và biến động cảng biển nhanh chóng.'
+    },
+    {
+      id: 'cv-3',
+      title: 'Khách Hàng Là Trọng Tâm (Customer-Centric)',
+      description: 'Thiết kế giải pháp chuyên biệt may đo theo từng đặc thù ngành hàng (FMCG, Điện tử, Chuỗi lạnh).'
+    },
+    {
+      id: 'cv-4',
+      title: 'Ứng Dụng Công Nghệ (Innovation)',
+      description: 'Quản trị bằng TMS, WMS hiện đại, tra cứu hành trình real-time và tự động hóa EDI hải quan.'
+    }
+  ],
+
+  // 3. Thước đo quy mô & năng lực
   companyStats: [
     { id: 'cs-1', label: 'Thâm Niên Hoạt Động', value: '16+ Năm', subtext: 'Từ năm 2008' },
     { id: 'cs-2', label: 'Quy Mô Nhân Sự', value: '450+ Người', subtext: 'Chuyên viên toàn quốc' },
@@ -239,9 +293,10 @@ export const initialCompanyProfile: CompanyInfoProfile = {
   ],
 
   // Trường tương thích ngược
-  taxId: '0301456789',
   employeeCount: '450+ Nhân viên',
+  employeeSubtext: 'Văn phòng & Hub toàn quốc',
   annualVolume: '120,000+ TEUs & 850,000 Tấn hàng',
+  volumeSubtext: 'Thường niên cam kết',
   truckFleetCount: '240+ Đầu xe (Xe tải 1.5T - 15T & Đầu kéo Container)',
   warehouseArea: '65,000 m² (Kho thường, Kho lạnh & Kho Ngoại quan)',
   licenses: [
@@ -260,6 +315,7 @@ export const initialCompanyProfile: CompanyInfoProfile = {
 
 export const initialStudioConfig: StudioTemplateConfig = {
   activeTemplateId: 'executive-elite',
+  activeCompanyTemplateId: 'corporate-flagship',
   themeColor: 'navy',
   fontFamily: 'Inter',
   visibleSections: {
@@ -276,6 +332,8 @@ export const initialStudioConfig: StudioTemplateConfig = {
       hobbies: true,
     },
     myCompany: {
+      about: true,
+      visionMission: true,
       highlights: true,
       branches: true,
       affiliations: true,

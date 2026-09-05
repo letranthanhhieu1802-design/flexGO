@@ -1,6 +1,18 @@
 // Studio Types for Supplier & Saleman Profile Builder (TopCV Style)
 
-export type TemplateId = 'executive-elite' | 'modern-bento' | 'minimalist' | 'bold-compact';
+export type TemplateId = 
+  | 'executive-elite' 
+  | 'modern-bento' 
+  | 'minimalist' 
+  | 'bold-compact'
+  | 'classic-prestige'
+  | 'prime-experience'
+  | 'grand-banner'
+  | 'clean-elegance'
+  | 'modular-matrix'
+  | 'speed-hunter';
+
+export type CompanyTemplateId = 'corporate-flagship' | 'modern-bento' | 'minimalist' | 'industrial-impact';
 
 export type ThemeColorId = 'navy' | 'emerald' | 'crimson' | 'amber' | 'slate';
 
@@ -179,6 +191,23 @@ export interface CompanyServicePillarItem {
   description: string;
 }
 
+export interface CompanyMilestoneItem {
+  id: string;
+  year: string;
+  title: string;
+  description?: string;
+}
+
+export interface CompanyCoreValueItem {
+  id: string;
+  title: string;
+  description?: string;
+}
+
+// Type aliases cho tương thích ngược
+export type AffiliationItem = CompanyAffiliationItem;
+export type ServicePillarItem = CompanyServicePillarItem;
+
 export interface CompanyInfoProfile {
   companyName: string;
   companyNameEn: string;
@@ -196,34 +225,44 @@ export interface CompanyInfoProfile {
     facebook?: string;
     youtube?: string;
   };
+
+  // Block 1: Về chúng tôi & Dấu mốc lịch sử
+  milestones?: CompanyMilestoneItem[];
+
+  // Block 2: Tầm nhìn, Sứ mệnh & Giá trị cốt lõi
+  vision?: string;
+  mission?: string;
+  coreValues?: CompanyCoreValueItem[];
   
-  // 1. Thước đo quy mô & năng lực cốt lõi (Có thể thêm/sửa/xóa từng chỉ số)
+  // Block 3: Thước đo quy mô & năng lực cốt lõi (Có thể thêm/sửa/xóa từng chỉ số)
   companyStats: CompanyStatItem[];
   
   // Hệ thống công nghệ quản trị (TMS, WMS, EDI...)
   softwareSystems: string[];
   
-  // 2. Mạng lưới chi nhánh & văn phòng (Thêm/sửa/xóa)
+  // Block 7: Mạng lưới chi nhánh & văn phòng (Thêm/sửa/xóa)
   branches: BranchOfficeItem[];
   
-  // 3. Thành viên hiệp hội & Mạng lưới toàn cầu (Thêm/sửa/xóa)
+  // Block 6: Thành viên hiệp hội & Mạng lưới toàn cầu (Thêm/sửa/xóa)
   affiliations: CompanyAffiliationItem[];
   
-  // 4. Hệ sinh thái dịch vụ & Ngành hàng thế mạnh (Thêm/sửa/xóa)
+  // Block 4: Hệ sinh thái dịch vụ & Ngành hàng thế mạnh (Thêm/sửa/xóa)
   servicePillars: CompanyServicePillarItem[];
   targetIndustries: string[];
   
-  // 5. Đối tác chiến lược & Khách hàng tiêu biểu (Thêm/sửa/xóa)
+  // Block 5: Đối tác chiến lược & Khách hàng tiêu biểu (Thêm/sửa/xóa)
   carrierPartners: string[];
   clientLogos: string[];
   
-  // 6. Dự án & Case studies thành công (Thêm/sửa/xóa)
+  // Block 8: Dự án & Case studies thành công (Thêm/sửa/xóa)
   caseStudies: CaseStudyItem[];
 
-  // Trường tương thích ngược
+  // Trường tương thích ngược & Bổ sung
   taxId?: string;
   employeeCount?: string;
+  employeeSubtext?: string;
   annualVolume?: string;
+  volumeSubtext?: string;
   truckFleetCount?: string;
   warehouseArea?: string;
   licenses?: string[];
@@ -232,6 +271,7 @@ export interface CompanyInfoProfile {
 
 export interface StudioTemplateConfig {
   activeTemplateId: TemplateId;
+  activeCompanyTemplateId?: CompanyTemplateId;
   themeColor: ThemeColorId;
   fontFamily: 'Inter' | 'Roboto' | 'Montserrat';
   visibleSections: {
@@ -248,6 +288,8 @@ export interface StudioTemplateConfig {
       hobbies?: boolean;
     };
     myCompany: {
+      about?: boolean;
+      visionMission?: boolean;
       highlights: boolean;
       branches: boolean;
       affiliations: boolean;

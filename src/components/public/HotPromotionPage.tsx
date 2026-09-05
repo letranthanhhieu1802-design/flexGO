@@ -331,6 +331,9 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
         let comp = 0;
         if (sortField === 'discount') {
           comp = a.discountPercent - b.discountPercent;
+          if (comp === 0) {
+            comp = (a.isFeatured ? 1 : 0) - (b.isFeatured ? 1 : 0);
+          }
         } else if (sortField === 'price') {
           comp = a.promotionalPriceVND - b.promotionalPriceVND;
         } else if (sortField === 'views') {

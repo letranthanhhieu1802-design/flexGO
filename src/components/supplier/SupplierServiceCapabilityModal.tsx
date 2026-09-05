@@ -6829,6 +6829,12 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                         placeholder="180"
                                         className="w-full px-2 py-1.5 text-right font-black text-emerald-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-purple-500 rounded text-xs"
                                       />
+                                    
+                                      {effPromotionPercent > 0 && effPriceKg > 0 && (
+    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
+      Giảm còn: {Math.round(effPriceKg * (1 - effPromotionPercent / 100)).toLocaleString('vi-VN')} {effCurrency}
+    </div>
+  )}
                                     </td>
 
                                     {/* 8. Đơn Giá CBM */}
@@ -6840,6 +6846,12 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                         placeholder="45000"
                                         className="w-full px-2 py-1.5 text-right font-bold text-emerald-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-purple-500 rounded text-xs"
                                       />
+                                    
+                                      {effPromotionPercent > 0 && effPriceCbm > 0 && (
+    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
+      Giảm còn: {Math.round(effPriceCbm * (1 - effPromotionPercent / 100)).toLocaleString('vi-VN')} {effCurrency}
+    </div>
+  )}
                                     </td>
 
                                     {/* 9. Đơn Giá Pallet */}
@@ -6851,6 +6863,12 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                         placeholder="35000"
                                         className="w-full px-2 py-1.5 text-right font-bold text-emerald-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-purple-500 rounded text-xs"
                                       />
+                                    
+                                      {effPromotionPercent > 0 && effPricePallet > 0 && (
+    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
+      Giảm còn: {Math.round(effPricePallet * (1 - effPromotionPercent / 100)).toLocaleString('vi-VN')} {effCurrency}
+    </div>
+  )}
                                     </td>
 
                                     {/* 10. Cước Sàn Min Charge */}
@@ -6862,6 +6880,12 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                         placeholder="150000"
                                         className="w-full px-2 py-1.5 text-right font-bold text-amber-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-purple-500 rounded text-xs"
                                       />
+                                    
+                                      {effPromotionPercent > 0 && effMinCharge > 0 && (
+    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
+      Giảm còn: {Math.round(effMinCharge * (1 - effPromotionPercent / 100)).toLocaleString('vi-VN')} {effCurrency}
+    </div>
+  )}
                                     </td>
 
                                     {/* 11. Tiền Tệ */}
@@ -7028,6 +7052,12 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                         placeholder="1200000"
                                         className="w-full px-2 py-1.5 text-right font-black text-emerald-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-sky-500 rounded text-xs"
                                       />
+                                    
+                                      {effPromotionPercent > 0 && effShuttle20 > 0 && (
+    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
+      Giảm còn: {Math.round(effShuttle20 * (1 - effPromotionPercent / 100)).toLocaleString('vi-VN')} {effCurrency}
+    </div>
+  )}
                                     </td>
 
                                     {/* 8. Shuttle Cont 40ft */}
@@ -7039,6 +7069,12 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                         placeholder="1800000"
                                         className="w-full px-2 py-1.5 text-right font-bold text-emerald-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-sky-500 rounded text-xs"
                                       />
+                                    
+                                      {effPromotionPercent > 0 && effShuttle40 > 0 && (
+    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
+      Giảm còn: {Math.round(effShuttle40 * (1 - effPromotionPercent / 100)).toLocaleString('vi-VN')} {effCurrency}
+    </div>
+  )}
                                     </td>
 
                                     {/* 9. Nâng Hạ (Lift On/Off) */}
@@ -7050,6 +7086,12 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                         placeholder="350000"
                                         className="w-full px-2 py-1.5 text-right font-bold text-amber-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-sky-500 rounded text-xs"
                                       />
+                                    
+                                      {effPromotionPercent > 0 && effLiftOnOff > 0 && (
+    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
+      Giảm còn: {Math.round(effLiftOnOff * (1 - effPromotionPercent / 100)).toLocaleString('vi-VN')} {effCurrency}
+    </div>
+  )}
                                     </td>
 
                                     {/* 10. Tiền Tệ */}
@@ -7265,6 +7307,12 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                         placeholder="3500"
                                         className="w-full px-2 py-1.5 text-right font-black text-emerald-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 rounded text-xs"
                                       />
+                                    
+                                      {effPromotionPercent > 0 && effPricePerKg > 0 && (
+    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
+      Giảm còn: {Math.round(effPricePerKg * (1 - effPromotionPercent / 100)).toLocaleString('vi-VN')} {effCurrency}
+    </div>
+  )}
                                     </td>
 
                                     {/* 9. Đơn Giá CBM (/CBM) */}
@@ -7276,6 +7324,12 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                         placeholder="750000"
                                         className="w-full px-2 py-1.5 text-right font-black text-emerald-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 rounded text-xs"
                                       />
+                                    
+                                      {effPromotionPercent > 0 && effPricePerCbm > 0 && (
+    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
+      Giảm còn: {Math.round(effPricePerCbm * (1 - effPromotionPercent / 100)).toLocaleString('vi-VN')} {effCurrency}
+    </div>
+  )}
                                     </td>
 
                                     {/* 10. Cước Sàn Min Charge (/Lô) */}
@@ -7287,6 +7341,12 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                         placeholder="350000"
                                         className="w-full px-2 py-1.5 text-right font-black text-amber-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 rounded text-xs"
                                       />
+                                    
+                                      {effPromotionPercent > 0 && effMinCharge > 0 && (
+    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
+      Giảm còn: {Math.round(effMinCharge * (1 - effPromotionPercent / 100)).toLocaleString('vi-VN')} {effCurrency}
+    </div>
+  )}
                                     </td>
 
                                     {/* 11. Tiền Tệ */}
@@ -7565,6 +7625,12 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                         placeholder="18500000"
                                         className="w-full px-2 py-1.5 text-right font-black text-emerald-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 rounded text-xs"
                                       />
+                                    
+                                      {effPromotionPercent > 0 && effPrice > 0 && (
+    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
+      Giảm còn: {Math.round(effPrice * (1 - effPromotionPercent / 100)).toLocaleString('vi-VN')} {effCurrency}
+    </div>
+  )}
                                     </td>
 
                                     {/* 13. SLA Vận Chuyển */}
@@ -7736,6 +7802,12 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                         placeholder="850000"
                                         className="w-full px-2 py-1.5 text-right font-black text-emerald-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 rounded text-xs"
                                       />
+                                    
+                                      {effPromotionPercent > 0 && effBasePrice > 0 && (
+    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
+      Giảm còn: {Math.round(effBasePrice * (1 - effPromotionPercent / 100)).toLocaleString('vi-VN')} {effCurrency}
+    </div>
+  )}
                                     </td>
 
                                     {/* 9. Phí Tờ Khai Phụ (/Tờ) */}
@@ -7747,6 +7819,12 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                         placeholder="250000"
                                         className="w-full px-2 py-1.5 text-right font-bold text-emerald-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 rounded text-xs"
                                       />
+                                    
+                                      {effPromotionPercent > 0 && effExtraPrice > 0 && (
+    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
+      Giảm còn: {Math.round(effExtraPrice * (1 - effPromotionPercent / 100)).toLocaleString('vi-VN')} {effCurrency}
+    </div>
+  )}
                                     </td>
 
                                     {/* 10. Phí Kiểm Hóa Luồng Đỏ (/Lô) */}
@@ -7758,6 +7836,12 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                         placeholder="600000"
                                         className="w-full px-2 py-1.5 text-right font-bold text-rose-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 rounded text-xs"
                                       />
+                                    
+                                      {effPromotionPercent > 0 && effRedChannelPrice > 0 && (
+    <div className="text-[9.5px] text-rose-600 font-bold text-right px-1 mt-0.5">
+      Giảm còn: {Math.round(effRedChannelPrice * (1 - effPromotionPercent / 100)).toLocaleString('vi-VN')} {effCurrency}
+    </div>
+  )}
                                     </td>
 
                                     {/* 11. SLA Thông Quan */}
@@ -7967,6 +8051,12 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                           placeholder="0.35"
                                           className="w-full px-2 py-1.5 text-right font-black text-emerald-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
                                         />
+                                      
+                                        {(route.promotionPercent || 0) > 0 && effPriceVolume > 0 && (
+    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
+      Giảm còn: {effCurrency === 'USD' ? +(effPriceVolume * (1 - (route.promotionPercent || 0) / 100)).toFixed(2) : Math.round(effPriceVolume * (1 - (route.promotionPercent || 0) / 100)).toLocaleString('vi-VN')} {effCurrency}
+    </div>
+  )}
                                       </td>
 
                                       {/* 11. Giá Pallet (/ Ngày) */}
@@ -7979,6 +8069,12 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                           placeholder="0.45"
                                           className="w-full px-2 py-1.5 text-right font-bold text-emerald-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
                                         />
+                                      
+                                        {(route.promotionPercent || 0) > 0 && effPricePallet > 0 && (
+    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
+      Giảm còn: {effCurrency === 'USD' ? +(effPricePallet * (1 - (route.promotionPercent || 0) / 100)).toFixed(2) : Math.round(effPricePallet * (1 - (route.promotionPercent || 0) / 100)).toLocaleString('vi-VN')} {effCurrency}
+    </div>
+  )}
                                       </td>
 
                                       {/* 12. Giá m² (/ Tháng) */}
@@ -7991,6 +8087,12 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                           placeholder="6.5"
                                           className="w-full px-2 py-1.5 text-right font-bold text-emerald-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
                                         />
+                                      
+                                        {(route.promotionPercent || 0) > 0 && effPriceArea > 0 && (
+    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
+      Giảm còn: {effCurrency === 'USD' ? +(effPriceArea * (1 - (route.promotionPercent || 0) / 100)).toFixed(2) : Math.round(effPriceArea * (1 - (route.promotionPercent || 0) / 100)).toLocaleString('vi-VN')} {effCurrency}
+    </div>
+  )}
                                       </td>
 
                                       {/* 13. Cước Sàn (Min Charge / Lô hàng) */}
@@ -8003,6 +8105,12 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                           placeholder="45"
                                           className="w-full px-2 py-1.5 text-right font-bold text-amber-900 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
                                         />
+                                      
+                                        {(route.promotionPercent || 0) > 0 && effMinCharge > 0 && (
+    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
+      Giảm còn: {effCurrency === 'USD' ? +(effMinCharge * (1 - (route.promotionPercent || 0) / 100)).toFixed(0) : Math.round(effMinCharge * (1 - (route.promotionPercent || 0) / 100)).toLocaleString('vi-VN')} {effCurrency}
+    </div>
+  )}
                                       </td>
 
                                       {/* 14. Tiền Tệ */}
@@ -8208,6 +8316,12 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                           placeholder="8500"
                                           className="w-full px-2 py-1.5 text-right font-black text-emerald-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-purple-500 rounded text-xs"
                                         />
+                                      
+                                        {(route.promotionPercent || 0) > 0 && effPickPackPrice > 0 && (
+    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
+      Giảm còn: {Math.round(effPickPackPrice * (1 - (route.promotionPercent || 0) / 100)).toLocaleString('vi-VN')} {effCurrency}
+    </div>
+  )}
                                       </td>
 
                                       {/* 10. Phí Thêm Item (/Item) */}
@@ -8219,6 +8333,12 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                           placeholder="1500"
                                           className="w-full px-2 py-1.5 text-right font-bold text-emerald-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-purple-500 rounded text-xs"
                                         />
+                                      
+                                        {(route.promotionPercent || 0) > 0 && effExtraItemPrice > 0 && (
+    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
+      Giảm còn: {Math.round(effExtraItemPrice * (1 - (route.promotionPercent || 0) / 100)).toLocaleString('vi-VN')} {effCurrency}
+    </div>
+  )}
                                       </td>
 
                                       {/* 11. Lưu Kho Đệm (/Tháng) */}
@@ -8230,6 +8350,12 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                           placeholder="120000"
                                           className="w-full px-2 py-1.5 text-right font-bold text-emerald-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-purple-500 rounded text-xs"
                                         />
+                                      
+                                        {(route.promotionPercent || 0) > 0 && effBufferStoragePrice > 0 && (
+    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
+      Giảm còn: {Math.round(effBufferStoragePrice * (1 - (route.promotionPercent || 0) / 100)).toLocaleString('vi-VN')} {effCurrency}
+    </div>
+  )}
                                       </td>
 
                                       {/* 12. Cước Sàn (Min/Tháng) */}
@@ -8241,6 +8367,12 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                           placeholder="5000000"
                                           className="w-full px-2 py-1.5 text-right font-bold text-amber-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-purple-500 rounded text-xs"
                                         />
+                                      
+                                        {(route.promotionPercent || 0) > 0 && effMinCharge > 0 && (
+    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
+      Giảm còn: {Math.round(effMinCharge * (1 - (route.promotionPercent || 0) / 100)).toLocaleString('vi-VN')} {effCurrency}
+    </div>
+  )}
                                       </td>
 
                                       {/* 13. Tiền Tệ */}
@@ -8433,6 +8565,12 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                           placeholder="180000"
                                           className="w-full px-2 py-1.5 text-right font-black text-emerald-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 rounded text-xs"
                                         />
+                                      
+                                        {(route.promotionPercent || 0) > 0 && effPriceArea > 0 && (
+    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
+      Giảm còn: {Math.round(effPriceArea * (1 - (route.promotionPercent || 0) / 100)).toLocaleString('vi-VN')} {effCurrency}
+    </div>
+  )}
                                       </td>
 
                                       {/* 10. Giá m³ (/Tháng) */}
@@ -8444,6 +8582,12 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                           placeholder="75000"
                                           className="w-full px-2 py-1.5 text-right font-bold text-emerald-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 rounded text-xs"
                                         />
+                                      
+                                        {(route.promotionPercent || 0) > 0 && effPriceVolume > 0 && (
+    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
+      Giảm còn: {Math.round(effPriceVolume * (1 - (route.promotionPercent || 0) / 100)).toLocaleString('vi-VN')} {effCurrency}
+    </div>
+  )}
                                       </td>
 
                                       {/* 11. Cước Sàn (Min/Tháng) */}
@@ -8455,6 +8599,12 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                           placeholder="1000000"
                                           className="w-full px-2 py-1.5 text-right font-bold text-amber-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 rounded text-xs"
                                         />
+                                      
+                                        {(route.promotionPercent || 0) > 0 && effMinCharge > 0 && (
+    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
+      Giảm còn: {Math.round(effMinCharge * (1 - (route.promotionPercent || 0) / 100)).toLocaleString('vi-VN')} {effCurrency}
+    </div>
+  )}
                                       </td>
 
                                       {/* 12. Tiền Tệ */}
@@ -8642,6 +8792,12 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                         placeholder="95000"
                                         className="w-full px-2 py-1.5 text-right font-bold text-emerald-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
                                       />
+                                    
+                                      {(route.promotionPercent || 0) > 0 && effPriceArea > 0 && (
+    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
+      Giảm còn: {Math.round(effPriceArea * (1 - (route.promotionPercent || 0) / 100)).toLocaleString('vi-VN')} {route.currency || 'VND'}
+    </div>
+  )}
                                     </td>
 
                                     {/* 10. Giá Pallet (/Tháng) */}
@@ -8653,6 +8809,12 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                         placeholder="110000"
                                         className="w-full px-2 py-1.5 text-right font-bold text-emerald-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
                                       />
+                                    
+                                      {(route.promotionPercent || 0) > 0 && effPricePallet > 0 && (
+    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
+      Giảm còn: {Math.round(effPricePallet * (1 - (route.promotionPercent || 0) / 100)).toLocaleString('vi-VN')} {route.currency || 'VND'}
+    </div>
+  )}
                                     </td>
 
                                     {/* 11. Giá m³ (/Tháng) */}
@@ -8664,6 +8826,12 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                         placeholder="120000"
                                         className="w-full px-2 py-1.5 text-right font-bold text-emerald-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
                                       />
+                                    
+                                      {(route.promotionPercent || 0) > 0 && effPriceVolume > 0 && (
+    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
+      Giảm còn: {Math.round(effPriceVolume * (1 - (route.promotionPercent || 0) / 100)).toLocaleString('vi-VN')} {route.currency || 'VND'}
+    </div>
+  )}
                                     </td>
 
                                     {/* 12. Cước Sàn (Min Charge / Tháng) */}
@@ -8675,6 +8843,12 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                         placeholder="3000000"
                                         className="w-full px-2 py-1.5 text-right font-bold text-amber-900 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
                                       />
+                                    
+                                      {(route.promotionPercent || 0) > 0 && effMinCharge > 0 && (
+    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
+      Giảm còn: {Math.round(effMinCharge * (1 - (route.promotionPercent || 0) / 100)).toLocaleString('vi-VN')} {route.currency || 'VND'}
+    </div>
+  )}
                                     </td>
 
                                     {/* 13. Tiền Tệ */}
@@ -9314,6 +9488,15 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                             </div>
                                           );
                                         })()}
+                                        {hasPromo && (() => {
+                                          const baseVal = route.ltlPricing?.weightTiers?.[3]?.price || route.price || (route.currency === 'USD' ? 6.5 : 165000);
+                                          const discBase = route.currency === 'USD' ? +(baseVal * (1 - route.promotionPercent / 100)).toFixed(2) : Math.round(baseVal * (1 - route.promotionPercent / 100));
+                                          return (
+                                            <div className="text-[10px] text-emerald-600 font-bold text-right px-1">
+                                              Giảm còn: {route.currency === 'USD' ? `${discBase}` : `${discBase.toLocaleString('vi-VN')} ₫`} / Kg
+                                            </div>
+                                          );
+                                        })()}
                                       </div>
                                     ) : isAirCargo ? (
                                       <div className="flex flex-col gap-1">
@@ -9368,6 +9551,15 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                                   -{route.promotionPercent}%
                                                 </span>
                                               )}
+                                            </div>
+                                          );
+                                        })()}
+                                        {hasPromo && (() => {
+                                          const baseVal = route.ltlPricing?.weightTiers?.[2]?.price || route.price || (route.currency === 'USD' ? 4.2 : 105000);
+                                          const discBase = route.currency === 'USD' ? +(baseVal * (1 - route.promotionPercent / 100)).toFixed(2) : Math.round(baseVal * (1 - route.promotionPercent / 100));
+                                          return (
+                                            <div className="text-[10px] text-emerald-600 font-bold text-right px-1">
+                                              Giảm còn: {route.currency === 'USD' ? `${discBase}` : `${discBase.toLocaleString('vi-VN')} ₫`} / Kg
                                             </div>
                                           );
                                         })()}
@@ -9431,6 +9623,22 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                                   -{route.promotionPercent}%
                                                 </span>
                                               )}
+                                            </div>
+                                          );
+                                        })()}
+                                        {hasPromo && (() => {
+                                          const isWeight = route.ltlPricing?.pricingBasis === 'weight';
+                                          const minP = route.currency === 'USD' 
+                                            ? (isWeight ? (route.ltlPricing?.weightTiers?.[4]?.price || 14) : (route.ltlPricing?.volumeTiers?.[4]?.price || 14))
+                                            : (isWeight ? (route.ltlPricing?.weightTiers?.[4]?.price || 1100) : (route.ltlPricing?.volumeTiers?.[4]?.price || 320000));
+                                          const maxP = route.currency === 'USD'
+                                            ? (isWeight ? (route.ltlPricing?.weightTiers?.[0]?.price || 35) : (route.ltlPricing?.volumeTiers?.[0]?.price || 35))
+                                            : (isWeight ? (route.ltlPricing?.weightTiers?.[0]?.price || 2500) : (route.ltlPricing?.volumeTiers?.[0]?.price || 600000));
+                                          const discMin = route.currency === 'USD' ? +(minP * (1 - route.promotionPercent / 100)).toFixed(1) : Math.round(minP * (1 - route.promotionPercent / 100));
+                                          const discMax = route.currency === 'USD' ? +(maxP * (1 - route.promotionPercent / 100)).toFixed(1) : Math.round(maxP * (1 - route.promotionPercent / 100));
+                                          return (
+                                            <div className="text-[10px] text-emerald-600 font-bold text-right px-1">
+                                              Giảm còn: {route.currency === 'USD' ? `${discMin} – ${discMax}` : `${discMin.toLocaleString('vi-VN')} – ${discMax.toLocaleString('vi-VN')} ₫`}
                                             </div>
                                           );
                                         })()}

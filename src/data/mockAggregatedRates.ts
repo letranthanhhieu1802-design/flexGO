@@ -1,5 +1,6 @@
 import { HotPromotionItem, PromotionCategory, PromotionBadgeType, ServiceType } from '../types';
 import { mockSalesSpecialists } from './mockSalesSpecialists';
+import { FULL_MOCK_CAPABILITY_SERVICES } from './mockDeclaredServices';
 
 // Helper function to synthesize all rate cards declared by verified supplier sales specialists into Hot Promotions / Rate Card listings
 export function generateAggregatedSpecialistRates(): HotPromotionItem[] {
@@ -132,4 +133,104 @@ export function generateAggregatedSpecialistRates(): HotPromotionItem[] {
   return aggregated;
 }
 
-export const allAggregatedPromotions: HotPromotionItem[] = generateAggregatedSpecialistRates();
+// Synthesize all routes with promotion declared by suppliers in capability tree into Hot Promotions listings
+export function generateAggregatedDeclaredPromotions(): HotPromotionItem[] {
+  const declaredPromoItems: HotPromotionItem[] = [];
+
+  FULL_MOCK_CAPABILITY_SERVICES.forEach((model) => {
+    model.routes.forEach((r, rIdx) => {
+      const promo = r.promotionPercent || 0;
+      if (promo <= 0) return;
+
+      let category: PromotionCategory = 'Trucking';
+      let serviceType: ServiceType = 'Trucking';
+
+      if (model.id.startsWith('trk-')) {
+        category = 'Trucking';
+        serviceType = 'Trucking';
+      } else if (model.id.startsWith('ocn-')) {
+        category = 'Sea Freight';
+        serviceType = model.id.includes('lcl') ? 'Sea Freight (LCL)' : 'Sea Freight (FCL)';
+      } else if (model.id.startsWith('air-')) {
+        category = 'Air Freight';
+        serviceType = 'Air Freight';
+      } else if (model.id.startsWith('cst-')) {
+        category = 'Customs';
+        serviceType = 'Customs Clearance';
+      } else if (model.id.startsWith('wh-')) {
+        category = 'Warehousing';
+        serviceType = 'Warehousing';
+      } else if (model.id.startsWith('cb-')) {
+        category = 'Cross-border';
+        serviceType = 'Cross-border';
+      } else if (model.id.startsWith('prj-')) {
+        category = 'Trucking';
+        serviceType = 'Trucking';
+      }
+
+      const origPrice = r.price || (r.pricePerPallet ? r.pricePerPallet * 50 : 18500000);
+      const promoPrice = Math.round(origPrice * (1 - promo / 100));
+
+      const item: HotPromotionItem = {
+        id: `declared-promo-${model.id}-${r.id || rIdx}`,
+        code: r.routeCode || `PRM-${category.toUpperCase().slice(0, 3)}-${String(200 + rIdx * 5).padStart(3, '0')}`,
+        title: `${r.route || r.warehouseName || model.title} (Giảm ${promo}%)`,
+        badgeType: promo >= 10 ? 'EXCLUSIVE_FLEXGO' : 'HOT_ROUTE',
+        badgeLabel: promo >= 10 ? `HOT DEAL -${promo}%` : `ƯU ĐÃI -${promo}%`,
+        discountPercent: promo,
+        originalPriceVND: origPrice,
+        originalPriceDisplay: `${origPrice.toLocaleString('vi-VN')} ₫`,
+        promotionalPriceVND: promoPrice,
+        promotionalPriceDisplay: `${promoPrice.toLocaleString('vi-VN')} ₫`,
+        pricingUnit: r.pricingUnit ? `VND / ${r.pricingUnit}` : 'VND / Chuyến',
+        serviceType,
+        category,
+        origin: r.origin || r.warehouseProvince || 'Toàn quốc',
+        destination: r.destination || r.warehouseAddress || 'Toàn quốc',
+        routeDisplay: r.route || `${r.origin || 'Xuất phát'} → ${r.destination || 'Điểm đến'}`,
+        transitTime: r.sla || '24 - 48 Giờ',
+        vehicleOrUnit: r.vehicleType || r.truckBodyType || 'Chuẩn Logistics flexGO',
+        cargoSuitability: 'Hàng tiêu dùng, bao bì, máy móc, linh kiện, nông sản',
+        availableCapacity: `Sẵn sàng phục vụ (Đang có khuyến mãi -${promo}%)`,
+        specialistId: 'sales-minh-tran',
+        specialistName: 'Minh Tran',
+        specialistVietnameseName: 'Trần Văn Minh',
+        specialistTitle: 'Senior Key Account Manager & Freight Solutions Director',
+        specialistAvatarInitial: 'TM',
+        specialistPhone: '+84 (0) 908 123 456',
+        specialistRating: 4.95,
+        specialistReviewsCount: 184,
+        companyId: 'supp-01',
+        companyName: 'VinaTrans Logistics JSC',
+        companyLogo: 'VT',
+        validFrom: '2026-08-01',
+        validUntil: r.validUntil || '2026-12-31',
+        daysRemaining: 30,
+        slotsRemaining: 8,
+        totalSlots: 20,
+        minOrderQuantity: '1 Lô / Chuyến',
+        paymentTerms: 'Công nợ Net 30/45 ngày (Doanh nghiệp thẩm định)',
+        highlights: [
+          `Tuyến được áp dụng chính sách khuyến mãi trực tiếp -${promo}% từ nhà cung cấp`,
+          'Cam kết an toàn hàng hóa 100%, bảo hiểm lên đến 5 Tỷ VND',
+          'Đội ngũ chuyên viên hỗ trợ trực tiếp 24/7'
+        ],
+        includedPerks: ['GPS Real-time', 'Bảo hiểm hàng hóa', 'Hóa đơn VAT điện tử'],
+        notes: 'Áp dụng biểu giá niêm yết từ Cây Năng Lực Dịch Vụ flexGO',
+        viewsCount: 1250 + rIdx * 70,
+        interestedCount: 45 + rIdx * 4,
+        bookedCount: 8 + (rIdx % 5),
+        isFeatured: true
+      };
+
+      declaredPromoItems.push(item);
+    });
+  });
+
+  return declaredPromoItems;
+}
+
+export const allAggregatedPromotions: HotPromotionItem[] = [
+  ...generateAggregatedDeclaredPromotions(),
+  ...generateAggregatedSpecialistRates()
+];

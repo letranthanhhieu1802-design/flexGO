@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Layers, Plus, X, ChevronDown, Sparkles } from 'lucide-react';
-import { 
-  LOGISTICS_INDUSTRY_LOV, 
-  IndustryOption 
+import {
+  LOGISTICS_INDUSTRY_LOV,
+  IndustryOption
 } from '../../customer/CreateInquiryModal';
 import { ThemeColorOption } from './studioTypes';
 
@@ -180,11 +180,10 @@ export const IndustryVerticalsSection: React.FC<IndustryVerticalsSectionProps> =
               type="button"
               onClick={handleAddFromLov}
               disabled={!selectedLovId}
-              className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shrink-0 transition-all cursor-pointer ${
-                selectedLovId
-                  ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs'
-                  : 'bg-slate-200 text-slate-400 cursor-not-allowed'
-              }`}
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shrink-0 transition-all cursor-pointer ${selectedLovId
+                ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs'
+                : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                }`}
               style={selectedLovId ? { backgroundColor: theme.primary } : undefined}
             >
               <Plus className="w-3.5 h-3.5" />
@@ -213,11 +212,10 @@ export const IndustryVerticalsSection: React.FC<IndustryVerticalsSectionProps> =
                 type="button"
                 onClick={handleAddCustom}
                 disabled={!customInput.trim()}
-                className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                  customInput.trim()
-                    ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs'
-                    : 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                }`}
+                className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${customInput.trim()
+                  ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs'
+                  : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                  }`}
                 style={customInput.trim() ? { backgroundColor: theme.primary } : undefined}
               >
                 <Plus className="w-3.5 h-3.5" />

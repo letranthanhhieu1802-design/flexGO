@@ -3,30 +3,47 @@ import {
   ArrowLeft, 
   User, 
   Building2, 
-  DollarSign, 
+  Truck, 
+  TrendingUp, 
   Share2, 
-  ChevronRight, 
   X, 
   Check, 
-  Sparkles,
-  PhoneCall,
-  Mail,
-  Send,
-  Calendar,
-  Layers,
-  Activity,
+  Sparkles, 
+  PhoneCall, 
+  Mail, 
+  Send, 
+  Calendar, 
+  ShieldCheck, 
+  Zap, 
+  ExternalLink,
+  MessageSquare,
   Receipt
 } from 'lucide-react';
 import { CurrentView, SalesSpecialistProfile } from '../../types';
 import { mockSalesSpecialists } from '../../data/mockSalesSpecialists';
-import { SupplierProfileHero } from './supplier-profile/SupplierProfileHero';
-import { SupplierProfileIntroTab } from './supplier-profile/SupplierProfileIntroTab';
-import { SupplierProfileCompanyTab } from './supplier-profile/SupplierProfileCompanyTab';
+import { 
+  SalemanPersonalProfile, 
+  CompanyInfoProfile, 
+  StudioTemplateConfig, 
+  THEME_COLOR_OPTIONS 
+} from '../supplier/studio/studioTypes';
+import { 
+  initialSalemanProfile, 
+  initialCompanyProfile, 
+  initialStudioConfig 
+} from '../supplier/studio/mockStudioData';
+import { TabProfileTemplateRenderer } from '../supplier/studio/TabProfileTemplateRenderer';
+import { TabCompanyView } from '../supplier/studio/TabCompanyView';
+import { TabPerformanceReviews } from '../supplier/studio/TabPerformanceReviews';
+import { SupplierDeclaredServicesView } from './supplier-profile/SupplierDeclaredServicesView';
 import { SupplierProfilePricingTab } from './supplier-profile/SupplierProfilePricingTab';
 
 interface SupplierProfileDetailPageProps {
   specialistId: string;
   overrideProfile?: SalesSpecialistProfile;
+  salemanProfile?: SalemanPersonalProfile;
+  companyProfile?: CompanyInfoProfile;
+  studioConfig?: StudioTemplateConfig;
   onBackToDirectory: () => void;
   onSelectSpecialist: (id: string) => void;
   onOpenCreateInquiry: () => void;
@@ -36,16 +53,20 @@ interface SupplierProfileDetailPageProps {
 export const SupplierProfileDetailPage: React.FC<SupplierProfileDetailPageProps> = ({
   specialistId,
   overrideProfile,
+  salemanProfile,
+  companyProfile,
+  studioConfig,
   onBackToDirectory,
   onSelectSpecialist,
   onOpenCreateInquiry,
   onNavigate,
 }) => {
-  // 3 Primary Profile Tabs requested by user:
-  // 1. 'intro' (Giới thiệu)
-  // 2. 'company' (Company)
-  // 3. 'pricing' (Bảng giá)
-  const [activeMainTab, setActiveMainTab] = useState<'intro' | 'company' | 'pricing'>('intro');
+  // 4 Primary Profile Tabs declared by Saleman:
+  // 1. 'profile' (1. Hồ Sơ Chuyên Viên)
+  // 2. 'company' (2. Pháp Nhân & Doanh Nghiệp)
+  // 3. 'services' (3. Danh Mục Dịch Vụ & Bảng Cước)
+  // 4. 'performance' (4. Chỉ Số Hiệu Suất & Đánh Giá)
+  const [activeMainTab, setActiveMainTab] = useState<'profile' | 'company' | 'services' | 'performance'>('profile');
 
   // Modals & Interactive RFQ
   const [isDirectRFQModalOpen, setIsDirectRFQModalOpen] = useState<boolean>(false);
@@ -60,6 +81,30 @@ export const SupplierProfileDetailPage: React.FC<SupplierProfileDetailPageProps>
     if (overrideProfile) return overrideProfile;
     return mockSalesSpecialists.find((s) => s.id === specialistId) || mockSalesSpecialists[0];
   }, [specialistId, overrideProfile]);
+
+  // Synchronize with Saleman Studio Data if available, fallback to defaults
+  const effectiveSalemanProfile = useMemo(() => {
+    if (salemanProfile) return salemanProfile;
+    return {
+      ...initialSalemanProfile,
+      vietnameseName: activeSpecialist.vietnameseName || initialSalemanProfile.vietnameseName,
+      name: activeSpecialist.name || initialSalemanProfile.name,
+      title: activeSpecialist.title || initialSalemanProfile.title,
+      phone: activeSpecialist.contactPhone || initialSalemanProfile.phone,
+      email: activeSpecialist.contactEmail || initialSalemanProfile.email,
+    };
+  }, [salemanProfile, activeSpecialist]);
+
+  const effectiveCompanyProfile = useMemo(() => {
+    if (companyProfile) return companyProfile;
+    return {
+      ...initialCompanyProfile,
+      companyName: activeSpecialist.companyName || initialCompanyProfile.companyName,
+    };
+  }, [companyProfile, activeSpecialist]);
+
+  const effectiveStudioConfig = studioConfig || initialStudioConfig;
+  const activeTheme = THEME_COLOR_OPTIONS[effectiveStudioConfig.themeColor];
 
   // Copy to clipboard helper
   const handleCopy = (text: string, label: string) => {
@@ -111,10 +156,10 @@ export const SupplierProfileDetailPage: React.FC<SupplierProfileDetailPageProps>
             <button
               onClick={onBackToDirectory}
               id="back-to-directory-btn"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition-colors cursor-pointer"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
-              <span>Danh Bạ Chuyên Viên</span>
+              <span>Quay Lại</span>
             </button>
 
             <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-400">
@@ -125,26 +170,32 @@ export const SupplierProfileDetailPage: React.FC<SupplierProfileDetailPageProps>
             </div>
           </div>
 
-          {/* Quick Specialist Switcher & Share */}
+          {/* Quick Customer Action Buttons */}
           <div className="flex items-center gap-2">
-            <div className="hidden md:flex items-center gap-1.5 text-xs text-slate-500 mr-1">
-              <span>Chuyển hồ sơ:</span>
-              <select
-                value={activeSpecialist.id}
-                onChange={(e) => onSelectSpecialist(e.target.value)}
-                className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-semibold text-slate-800 focus:outline-none cursor-pointer"
-              >
-                {mockSalesSpecialists.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.vietnameseName} ({s.companyName})
-                  </option>
-                ))}
-              </select>
-            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedRateItemForRFQ(null);
+                setIsDirectRFQModalOpen(true);
+              }}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs transition-colors cursor-pointer"
+            >
+              <Zap className="h-3.5 w-3.5" />
+              <span>Gửi RFQ Nhanh</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsConsultModalOpen(true)}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 transition-colors cursor-pointer"
+            >
+              <PhoneCall className="h-3.5 w-3.5 text-emerald-600" />
+              <span className="hidden md:inline">Đặt Hẹn Tư Vấn</span>
+            </button>
 
             <button
               onClick={() => handleCopy(window.location.href, 'Link hồ sơ')}
-              className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+              className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
               title="Chia sẻ hồ sơ này"
             >
               <Share2 className="h-3.5 w-3.5" />
@@ -158,99 +209,124 @@ export const SupplierProfileDetailPage: React.FC<SupplierProfileDetailPageProps>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
         
         {/* =========================================================================
-            HEADER SECTION: HERO BANNER, AVATAR & INTRO SCRIPT
+            4 PRIMARY PUBLIC TABS (MATCHING 4 STUDIO DECLARATION TABS)
+            1. Hồ Sơ Chuyên Viên (Sales Specialist Profile)
+            2. Pháp Nhân & Doanh Nghiệp (Company Landing Page)
+            3. Danh Mục Dịch Vụ & Bảng Cước (Services & Benchmark Tariffs)
+            4. Chỉ Số Hiệu Suất & Đánh Giá (Platform KPIs & Reviews)
            ========================================================================= */}
-        <SupplierProfileHero
-          specialist={activeSpecialist}
-          onOpenRFQ={() => {
-            setSelectedRateItemForRFQ(null);
-            setIsDirectRFQModalOpen(true);
-          }}
-          onOpenConsult={() => setIsConsultModalOpen(true)}
-          onCopy={handleCopy}
-        />
-
-        {/* =========================================================================
-            3 PRIMARY PROFILE TABS REQUESTED BY USER:
-            1. Giới thiệu: Thông tin cá nhân, liên hệ, thế mạnh, 6 chỉ số hoạt động, feedback
-            2. Company: Công ty đang công tác, dịch vụ, giới thiệu, năng lực vận hành, showcase
-            3. Bảng giá: Dịch vụ cung cấp, giá niêm yết theo từng dịch vụ, công cụ tính giá nhanh
-           ========================================================================= */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-2 shadow-xs">
-          <div className="grid grid-cols-3 gap-2">
+        <div className="sticky top-14 z-20 bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200 p-2 shadow-xs">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
             
-            {/* Tab 1: Giới thiệu */}
+            {/* Tab 1: Hồ Sơ Chuyên Viên (My Profile) */}
             <button
-              onClick={() => setActiveMainTab('intro')}
-              id="tab-intro"
-              className={`flex items-center justify-center gap-2 rounded-xl py-3 text-xs sm:text-sm font-extrabold transition-all ${
-                activeMainTab === 'intro'
-                  ? 'bg-blue-600 text-white shadow-md'
+              onClick={() => setActiveMainTab('profile')}
+              id="tab-profile"
+              className={`flex items-center justify-center gap-2 rounded-xl py-3 px-2 text-xs sm:text-sm font-black transition-all cursor-pointer ${
+                activeMainTab === 'profile'
+                  ? 'bg-indigo-600 text-white shadow-md'
                   : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
               }`}
             >
               <User className="h-4 w-4" />
-              <span>1. Giới Thiệu Cá Nhân</span>
+              <span>1. Hồ Sơ Chuyên Viên</span>
             </button>
 
-            {/* Tab 2: Company */}
+            {/* Tab 2: Pháp Nhân & Doanh Nghiệp (My Company) */}
             <button
               onClick={() => setActiveMainTab('company')}
               id="tab-company"
-              className={`flex items-center justify-center gap-2 rounded-xl py-3 text-xs sm:text-sm font-extrabold transition-all ${
+              className={`flex items-center justify-center gap-2 rounded-xl py-3 px-2 text-xs sm:text-sm font-black transition-all cursor-pointer ${
                 activeMainTab === 'company'
                   ? 'bg-blue-600 text-white shadow-md'
                   : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
               }`}
             >
               <Building2 className="h-4 w-4" />
-              <span>2. Doanh Nghiệp (Company)</span>
+              <span>2. Pháp Nhân Doanh Nghiệp</span>
             </button>
 
-            {/* Tab 3: Bảng giá */}
+            {/* Tab 3: Danh Mục Dịch Vụ & Bảng Cước */}
             <button
-              onClick={() => setActiveMainTab('pricing')}
-              id="tab-pricing"
-              className={`flex items-center justify-center gap-2 rounded-xl py-3 text-xs sm:text-sm font-extrabold transition-all ${
-                activeMainTab === 'pricing'
-                  ? 'bg-blue-600 text-white shadow-md'
+              onClick={() => setActiveMainTab('services')}
+              id="tab-services"
+              className={`flex items-center justify-center gap-2 rounded-xl py-3 px-2 text-xs sm:text-sm font-black transition-all cursor-pointer ${
+                activeMainTab === 'services'
+                  ? 'bg-emerald-600 text-white shadow-md'
                   : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
               }`}
             >
-              <Receipt className="h-4 w-4" />
-              <span>3. Bảng Giá & Tính Cước Nhanh</span>
+              <Truck className="h-4 w-4" />
+              <span>3. Dịch Vụ & Bảng Cước</span>
+              <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+                activeMainTab === 'services' ? 'bg-emerald-800 text-emerald-100' : 'bg-slate-200 text-slate-700'
+              }`}>
+                {activeSpecialist.services?.length || 6}
+              </span>
+            </button>
+
+            {/* Tab 4: Chỉ Số & Đánh Giá */}
+            <button
+              onClick={() => setActiveMainTab('performance')}
+              id="tab-performance"
+              className={`flex items-center justify-center gap-2 rounded-xl py-3 px-2 text-xs sm:text-sm font-black transition-all cursor-pointer ${
+                activeMainTab === 'performance'
+                  ? 'bg-purple-600 text-white shadow-md'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
+            >
+              <TrendingUp className="h-4 w-4" />
+              <span>4. Chỉ Số & Đánh Giá</span>
+              <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+                activeMainTab === 'performance' ? 'bg-purple-800 text-purple-100' : 'bg-slate-200 text-slate-700'
+              }`}>
+                142
+              </span>
             </button>
 
           </div>
         </div>
 
-        {/* Tab Contents */}
+        {/* =========================================================================
+            RENDER 4 TABS IN PUBLIC VIEW MODE (READ-ONLY)
+           ========================================================================= */}
         <div className="pt-2">
-          {activeMainTab === 'intro' && (
-            <SupplierProfileIntroTab
-              specialist={activeSpecialist}
-              onOpenRFQ={() => {
-                setSelectedRateItemForRFQ(null);
-                setIsDirectRFQModalOpen(true);
-              }}
-              onOpenConsult={() => setIsConsultModalOpen(true)}
-              onCopy={handleCopy}
+          {/* TAB 1: Saleman Personal Profile (TopCV Style Template) */}
+          {activeMainTab === 'profile' && (
+            <TabProfileTemplateRenderer
+              profile={effectiveSalemanProfile}
+              onChangeProfile={() => {}}
+              config={effectiveStudioConfig}
+              isReadOnly={true}
             />
           )}
 
+          {/* TAB 2: Company Landing Page (Corporate Template) */}
           {activeMainTab === 'company' && (
-            <SupplierProfileCompanyTab
-              specialist={activeSpecialist}
-              onOpenRFQForService={handleOpenRFQForService}
+            <TabCompanyView
+              company={effectiveCompanyProfile}
+              onChangeCompany={() => {}}
+              config={effectiveStudioConfig}
+              isReadOnly={true}
             />
           )}
 
-          {activeMainTab === 'pricing' && (
-            <SupplierProfilePricingTab
-              specialist={activeSpecialist}
+          {/* TAB 3: Services & Benchmark Rates (Cây Danh Mục Năng Lực & Biểu Phí Đã Khai Báo) */}
+          {activeMainTab === 'services' && (
+            <SupplierDeclaredServicesView
+              services={activeSpecialist.services}
+              companyName={effectiveCompanyProfile.companyName || activeSpecialist.companyName}
+              specialistName={effectiveSalemanProfile.vietnameseName || activeSpecialist.vietnameseName}
               onOpenRFQForRate={handleOpenRFQForRate}
               onOpenConsult={() => setIsConsultModalOpen(true)}
               onDownloadRateSheet={handleDownloadRateSheet}
+            />
+          )}
+
+          {/* TAB 4: Platform Performance Metrics & Reviews */}
+          {activeMainTab === 'performance' && (
+            <TabPerformanceReviews
+              config={effectiveStudioConfig}
             />
           )}
         </div>
@@ -324,18 +400,20 @@ export const SupplierProfileDetailPage: React.FC<SupplierProfileDetailPageProps>
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">Địa điểm bốc hàng (Origin)</label>
                   <input
+                    key={selectedRateItemForRFQ?.origin || 'origin-default'}
                     type="text"
                     placeholder="VD: KCN Tân Bình, TP.HCM"
-                    defaultValue="KCN Tân Bình, TP. Hồ Chí Minh"
+                    defaultValue={selectedRateItemForRFQ?.origin || "KCN Tân Bình, TP. Hồ Chí Minh"}
                     className="w-full rounded-lg border border-slate-200 bg-slate-50 p-2.5 text-xs text-slate-800 focus:border-blue-500 focus:bg-white focus:outline-none"
                   />
                 </div>
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">Địa điểm giao hàng (Destination)</label>
                   <input
+                    key={selectedRateItemForRFQ?.destination || 'dest-default'}
                     type="text"
                     placeholder="VD: KCN Thăng Long, Hà Nội"
-                    defaultValue="KCN Thăng Long II, Hưng Yên"
+                    defaultValue={selectedRateItemForRFQ?.destination || "KCN Thăng Long II, Hưng Yên"}
                     className="w-full rounded-lg border border-slate-200 bg-slate-50 p-2.5 text-xs text-slate-800 focus:border-blue-500 focus:bg-white focus:outline-none"
                   />
                 </div>

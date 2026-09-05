@@ -7,6 +7,12 @@ import { ExecutiveEliteTemplate } from './templates/ExecutiveEliteTemplate';
 import { ModernBentoTemplate } from './templates/ModernBentoTemplate';
 import { MinimalistTemplate } from './templates/MinimalistTemplate';
 import { BoldCompactTemplate } from './templates/BoldCompactTemplate';
+import { ClassicPrestigeTemplate } from './templates/ClassicPrestigeTemplate';
+import { PrimeExperienceTemplate } from './templates/PrimeExperienceTemplate';
+import { GrandBannerTemplate } from './templates/GrandBannerTemplate';
+import { CleanEleganceTemplate } from './templates/CleanEleganceTemplate';
+import { ModularMatrixTemplate } from './templates/ModularMatrixTemplate';
+import { SpeedHunterTemplate } from './templates/SpeedHunterTemplate';
 
 interface TabProfileTemplateRendererProps {
   profile: SalemanPersonalProfile;
@@ -43,6 +49,60 @@ export const TabProfileTemplateRenderer: React.FC<TabProfileTemplateRendererProp
     case 'bold-compact':
       return (
         <BoldCompactTemplate
+          profile={profile}
+          onChangeProfile={onChangeProfile}
+          config={config}
+          isReadOnly={isReadOnly}
+        />
+      );
+    case 'classic-prestige':
+      return (
+        <ClassicPrestigeTemplate
+          profile={profile}
+          onChangeProfile={onChangeProfile}
+          config={config}
+          isReadOnly={isReadOnly}
+        />
+      );
+    case 'prime-experience':
+      return (
+        <PrimeExperienceTemplate
+          profile={profile}
+          onChangeProfile={onChangeProfile}
+          config={config}
+          isReadOnly={isReadOnly}
+        />
+      );
+    case 'grand-banner':
+      return (
+        <GrandBannerTemplate
+          profile={profile}
+          onChangeProfile={onChangeProfile}
+          config={config}
+          isReadOnly={isReadOnly}
+        />
+      );
+    case 'clean-elegance':
+      return (
+        <CleanEleganceTemplate
+          profile={profile}
+          onChangeProfile={onChangeProfile}
+          config={config}
+          isReadOnly={isReadOnly}
+        />
+      );
+    case 'modular-matrix':
+      return (
+        <ModularMatrixTemplate
+          profile={profile}
+          onChangeProfile={onChangeProfile}
+          config={config}
+          isReadOnly={isReadOnly}
+        />
+      );
+    case 'speed-hunter':
+      return (
+        <SpeedHunterTemplate
           profile={profile}
           onChangeProfile={onChangeProfile}
           config={config}
