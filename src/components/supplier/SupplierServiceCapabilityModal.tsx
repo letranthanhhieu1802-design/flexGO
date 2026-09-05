@@ -672,6 +672,24 @@ export const CROSS_BORDER_CUSTOMS_SCOPES_LOV = [
   'Chỉ cước vận chuyển (Chủ hàng tự làm HQ)',
 ];
 
+export const CROSS_BORDER_LTL_CUSTOMS_MODES_LOV = [
+  'Trọn gói Bao thuế Door-to-Door (Phổ biến)',
+  'Mở tờ khai ghép chính ngạch',
+  'Chủ hàng tự mở tờ khai',
+];
+
+export const CROSS_BORDER_LTL_SCHEDULE_LOV = [
+  'Hàng ngày (Daily - T2 đến CN)',
+  'Thứ 2, 4, 6 (Mon - Wed - Fri)',
+  'Thứ 3, 5, 7 (Tue - Thu - Sat)',
+  'Thứ 2, 3, 4, 5, 6 (T2 - T6)',
+  'Thứ 2 & Thứ 5 hàng tuần',
+  'Thứ 3 & Thứ 6 hàng tuần',
+  'Thứ 7 hàng tuần (Weekend)',
+  '2 - 3 chuyến / tuần (Theo lịch)',
+  'Khác (Nhập tùy chọn)...',
+];
+
 export const getTonnagesForBodyType = (
   bodyType?: string, 
   cargoTypeOrIsReefer?: 'general' | 'reefer' | 'hazmat' | 'ltl' | boolean
@@ -1048,6 +1066,11 @@ export interface CapabilityRouteItem {
   borderGate?: string;
   transitMode?: string;
   customsScope?: string;
+  pricePerKg?: number;
+  pricePerCbm?: number;
+  minChargeShipment?: number;
+  customsLtlMode?: string;
+  departureSchedule?: string;
 }
 
 export interface PaidSurchargeItem {
@@ -3714,46 +3737,79 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             id: 'cb-gen-ltl',
             name: 'LTL (Ghép hàng lẻ xuyên biên giới)',
             code: 'LTL',
-            defaultFleet: 'Tuyến xe gom hàng lẻ định kỳ hàng ngày đi Campuchia & Trung Quốc',
-            defaultOperation: 'Gom hàng tại kho trung tâm Hà Nội & TP.HCM, giao tận tay người nhận ở nước ngoài',
-            defaultCommitment: 'Giao hàng Door-to-Door, đối soát thu hộ tiền hàng tại Phnom Penh',
-            vehicleLov: ['Tuyến gom hàng lẻ biên giới'],
-            unitLov: ['Kg', 'CBM', 'Kiện'],
+            defaultFleet: 'Tuyến xe gom hàng lẻ định kỳ hàng ngày đi Campuchia, Trung Quốc, Lào (Quy đổi 1 CBM = 250 Kg)',
+            defaultOperation: 'Gom hàng tại kho Hub trung tâm Hà Nội & TP.HCM, giao tận tay người nhận ở nước ngoài',
+            defaultCommitment: 'Giao hàng Door-to-Door, đối soát thu hộ COD ngoại tệ, lịch xe cố định hàng ngày',
+            vehicleLov: ['Tuyến gom hàng lẻ biên giới (LTL)'],
+            unitLov: ['Kg / CBM', 'Kg', 'CBM', 'Lô hàng'],
             defaultRoutes: [
               {
                 id: 'r-cb-ltl-1',
-                route: 'TP.HCM ⇄ Phnom Penh',
-                origin: 'Kho trung tâm TP.HCM',
-                destination: 'Thủ đô Phnom Penh (Campuchia)',
-                vehicleType: 'Tuyến gom hàng lẻ biên giới',
-                pricingUnit: 'Kg',
+                routeCode: 'CB-LTL-CAM01',
+                route: 'TP.HCM ⇄ Phnom Penh (Campuchia)',
+                borderGate: 'Mộc Bài / Xa Mát (Tây Ninh VN ↔ Bavet / Phnom Penh Campuchia)',
+                origin: 'Kho Hub Tân Bình (TP.HCM)',
+                destination: 'Kho Hub Phnom Penh (Campuchia)',
+                customsLtlMode: 'Trọn gói Bao thuế Door-to-Door (Phổ biến)',
+                pricePerKg: 3500,
+                pricePerCbm: 750000,
+                minChargeShipment: 350000,
+                pricingUnit: 'Kg / CBM',
                 price: 3500,
                 currency: 'VND',
                 sla: '24 - 36 giờ',
+                departureSchedule: 'Hàng ngày (Daily - T2 đến CN)',
                 pricingStyle: 'All-in',
+                validUntil: '2026-12-31',
                 promotionPercent: 10,
+              },
+              {
+                id: 'r-cb-ltl-2',
+                routeCode: 'CB-LTL-CHN01',
+                route: 'Hà Nội ⇄ Bằng Tường / Quảng Châu (TQ)',
+                borderGate: 'Hữu Nghị / Tân Thanh (Lạng Sơn VN ↔ Bằng Tường / Hữu Nghị Quan TQ)',
+                origin: 'Kho Hub Mỹ Đình / Gia Lâm (Hà Nội)',
+                destination: 'Kho Hub Bằng Tường / Bạch Vân (Quảng Châu TQ)',
+                customsLtlMode: 'Trọn gói Bao thuế Door-to-Door (Phổ biến)',
+                pricePerKg: 8500,
+                pricePerCbm: 1850000,
+                minChargeShipment: 500000,
+                pricingUnit: 'Kg / CBM',
+                price: 8500,
+                currency: 'VND',
+                sla: '48 - 72 giờ',
+                departureSchedule: 'Thứ 2, 4, 6 (Mon - Wed - Fri)',
+                pricingStyle: 'All-in',
+                validUntil: '2026-12-31',
+                promotionPercent: 5,
               },
             ],
             freeSurchargeOptions: [
-              'Cập nhật trạng thái giao nhận trực tuyến qua App',
-              'Quấn màng co bảo vệ kiện hàng',
+              'Quấn màng co PE bảo vệ kiện hàng lẻ',
+              'Cập nhật trạng thái lộ trình trực tuyến qua App/SMS',
+              'Miễn phí lưu kho gom hàng 48h tại Hub xuất',
             ],
             defaultFreeSurcharges: [
-              'Cập nhật trạng thái giao nhận trực tuyến qua App',
+              'Quấn màng co PE bảo vệ kiện hàng lẻ',
+              'Cập nhật trạng thái lộ trình trực tuyến qua App/SMS',
             ],
             paidSurchargeOptions: [
-              { id: 'pcb-ltl-1', name: 'Phí thu hộ tiền hàng ngoại tệ (COD tại Phnom Penh)', priceText: '1.5% giá trị thu hộ', isChecked: true },
-              { id: 'pcb-ltl-2', name: 'Phí giao hàng vùng sâu vùng xa Campuchia', priceText: '200,000 ₫ / Kiện', isChecked: false },
+              { id: 'pcb-ltl-1', name: 'Phí dịch vụ thu hộ tiền hàng ngoại tệ (COD tại Campuchia / TQ)', priceText: '1.5% giá trị thu hộ', isChecked: true },
+              { id: 'pcb-ltl-2', name: 'Phí giao hàng vùng sâu vùng xa nội địa nước bạn (Out-of-Area)', priceText: '250,000 ₫ / Lô', isChecked: false },
+              { id: 'pcb-ltl-3', name: 'Phí bốc dỡ nâng hạ kiện siêu nặng (> 300 Kg/kiện) tại kho Hub', priceText: '300,000 ₫ / Kiện', isChecked: false },
+              { id: 'pcb-ltl-4', name: 'Phí dán tem phụ tiếng bản địa (Khmer / Trung / Lào)', priceText: '2,000 ₫ / Tem', isChecked: false },
             ],
             vasOptions: [
-              'Giao hàng Door-to-Door tại Phnom Penh / Quảng Châu',
-              'Dịch vụ thu hộ tiền hàng ngoại tệ (COD)',
-              'Dán tem nhãn tiếng bản địa theo luật sở tại',
-              'Bọc màng co bảo vệ kiện lẻ',
+              'Giao nhận tận nơi Door-to-Door tại Phnom Penh / Quảng Châu / Viêng Chăn',
+              'Dịch vụ thu hộ tiền hàng ngoại tệ (COD) và đối soát tài khoản nhanh',
+              'Dán tem nhãn phụ tiếng bản địa theo quy chuẩn nước sở tại',
+              'Đóng kiện gỗ / Chèn lót chống sốc hàng dễ vỡ cho chặng quốc tế',
+              'Bảo hiểm hàng hóa quốc tế toàn trình theo giá trị khai báo',
             ],
             defaultVas: [
-              'Giao hàng Door-to-Door tại Phnom Penh / Quảng Châu',
-              'Dịch vụ thu hộ tiền hàng ngoại tệ (COD)',
+              'Giao nhận tận nơi Door-to-Door tại Phnom Penh / Quảng Châu / Viêng Chăn',
+              'Dịch vụ thu hộ tiền hàng ngoại tệ (COD) và đối soát tài khoản nhanh',
+              'Dán tem nhãn phụ tiếng bản địa theo quy chuẩn nước sở tại',
             ],
           },
         ],
@@ -6137,7 +6193,8 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                           {(() => {
                             const isWarehousingTable = activeCategory?.id === 'warehousing';
                             const isCustomsTable = activeCategory?.id === 'customs' || activeCategory?.serviceType === 'Customs Clearance';
-                            const isCrossBorderFtl = (activeCategory?.id === 'cross-border' || activeCategory?.serviceType === 'Cross-border') && (activeModel?.id?.includes('ftl') || activeModel?.name?.includes('FTL') || activeModel?.code === 'FTL' || !activeModel?.id?.includes('ltl'));
+                            const isCrossBorderLtl = (activeCategory?.id === 'cross-border' || activeCategory?.serviceType === 'Cross-border') && (activeModel?.id?.includes('ltl') || activeModel?.name?.includes('LTL') || activeModel?.code === 'LTL');
+                            const isCrossBorderFtl = (activeCategory?.id === 'cross-border' || activeCategory?.serviceType === 'Cross-border') && !isCrossBorderLtl;
                             const isTruckingTable = activeCategory?.id === 'trucking';
                             const isOceanTable = activeCategory?.id === 'ocean' || activeModel?.id?.startsWith('sea-');
                             const isRailTable = activeCategory?.id === 'rail' || activeModel?.id?.startsWith('rail-');
@@ -6250,6 +6307,29 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                   <th className="py-2.5 px-2.5 min-w-[130px] text-center">Hạn Giá</th>
                                   <th className="py-2.5 px-2 min-w-[85px] text-center">Promotion</th>
                                   <th className="py-2.5 px-2.5 min-w-[170px] text-center bg-indigo-50/70 text-indigo-950">Chi Tiết (Specs, Ảnh, VAS)</th>
+                                  <th className="py-2.5 px-2 text-center w-16 min-w-[65px]">Action</th>
+                                </tr>
+                              );
+                            }
+
+                            if (isCrossBorderLtl) {
+                              return (
+                                <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
+                                  <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
+                                  <th className="py-2.5 px-2.5 min-w-[105px] text-center bg-orange-50/80 text-orange-950 font-black">Mã Tuyến LTL</th>
+                                  <th className="py-2.5 px-2.5 min-w-[195px]">Hành Lang Tuyến Ghép XBG</th>
+                                  <th className="py-2.5 px-2.5 min-w-[200px] bg-amber-50/80 text-amber-950 font-black">Cửa Khẩu Biên Giới (Border Gate)</th>
+                                  <th className="py-2.5 px-2.5 min-w-[150px]">Kho Gom Hàng (Origin Hub)</th>
+                                  <th className="py-2.5 px-2.5 min-w-[150px]">Kho Phân Phối / Đích (Dest Hub)</th>
+                                  <th className="py-2.5 px-2.5 min-w-[170px] text-center">Hình Thức Thông Quan LTL</th>
+                                  <th className="py-2.5 px-2 text-right min-w-[110px] bg-emerald-50/90 text-emerald-950 font-black">Đơn Giá Kg (/Kg)</th>
+                                  <th className="py-2.5 px-2 text-right min-w-[125px] bg-emerald-50/90 text-emerald-950 font-black">Đơn Giá CBM (/CBM)</th>
+                                  <th className="py-2.5 px-2 text-right min-w-[120px] bg-amber-50/80 text-amber-950 font-black">Cước Sàn (Min/Lô)</th>
+                                  <th className="py-2.5 px-2 w-20 min-w-[80px] text-center">Tiền Tệ</th>
+                                  <th className="py-2.5 px-2.5 min-w-[115px] text-center">SLA Giao Hàng</th>
+                                  <th className="py-2.5 px-2.5 min-w-[170px] text-center bg-blue-50/80 text-blue-950 font-black">Lịch Chạy / Tần Suất</th>
+                                  <th className="py-2.5 px-2.5 min-w-[125px] text-center">Hạn Giá</th>
+                                  <th className="py-2.5 px-2 min-w-[85px] text-center">Promotion</th>
                                   <th className="py-2.5 px-2 text-center w-16 min-w-[65px]">Action</th>
                                 </tr>
                               );
@@ -6380,7 +6460,252 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                 : route.price;
                               const isWarehousingRow = activeCategory?.id === 'warehousing';
                               const isCustomsRow = activeCategory?.id === 'customs' || activeCategory?.serviceType === 'Customs Clearance';
-                              const isCrossBorderFtlRow = (activeCategory?.id === 'cross-border' || activeCategory?.serviceType === 'Cross-border') && (activeModel?.id?.includes('ftl') || activeModel?.name?.includes('FTL') || activeModel?.code === 'FTL' || !activeModel?.id?.includes('ltl'));
+                              const isCrossBorderLtlRow = (activeCategory?.id === 'cross-border' || activeCategory?.serviceType === 'Cross-border') && (activeModel?.id?.includes('ltl') || activeModel?.name?.includes('LTL') || activeModel?.code === 'LTL');
+                              const isCrossBorderFtlRow = (activeCategory?.id === 'cross-border' || activeCategory?.serviceType === 'Cross-border') && !isCrossBorderLtlRow;
+
+                              if (isCrossBorderLtlRow) {
+                                const effCode = route.routeCode || `CB-LTL-${String(idx + 1).padStart(2, '0')}`;
+                                const effRoute = route.route || 'TP.HCM ⇄ Phnom Penh (Campuchia)';
+                                
+                                const getInferredGate = () => {
+                                  if (route.borderGate) return route.borderGate;
+                                  const text = `${route.route || ''} ${route.origin || ''} ${route.destination || ''}`.toLowerCase();
+                                  if (text.includes('trung quốc') || text.includes('tq') || text.includes('quảng châu') || text.includes('bằng tường') || text.includes('hà nội') || text.includes('bắc ninh')) {
+                                    if (text.includes('móng cái') || text.includes('đông hưng') || text.includes('quảng ninh')) {
+                                      return 'Móng Cái / Cầu Bắc Luân II (Quảng Ninh VN ↔ Đông Hưng Quảng Tây TQ)';
+                                    }
+                                    if (text.includes('lào cai') || text.includes('hà khẩu')) {
+                                      return 'Kim Thành (Lào Cai VN ↔ Hà Khẩu Vân Nam TQ)';
+                                    }
+                                    return 'Hữu Nghị / Tân Thanh (Lạng Sơn VN ↔ Bằng Tường / Hữu Nghị Quan TQ)';
+                                  }
+                                  if (text.includes('lào') || text.includes('viêng chăn') || text.includes('thái lan') || text.includes('bangkok')) {
+                                    if (text.includes('lao bảo') || text.includes('quảng trị') || text.includes('thái lan')) {
+                                      return 'Lao Bảo (Quảng Trị VN ↔ Savannakhet Lào ↔ Mukdahan Thái Lan)';
+                                    }
+                                    return 'Cầu Treo (Hà Tĩnh VN ↔ Namphao Lào ↔ Viêng Chăn)';
+                                  }
+                                  if (text.includes('campuchia') || text.includes('phnom penh') || text.includes('bavet') || text.includes('hcm') || text.includes('sài gòn')) {
+                                    return 'Mộc Bài / Xa Mát (Tây Ninh VN ↔ Bavet / Phnom Penh Campuchia)';
+                                  }
+                                  return CROSS_BORDER_GATES_LOV[0];
+                                };
+                                const effGate = getInferredGate();
+                                const effOrigin = route.origin || 'Kho Hub Tân Bình (TP.HCM)';
+                                const effDestination = route.destination || 'Kho Hub Phnom Penh (Campuchia)';
+                                const effCustomsLtlMode = route.customsLtlMode || CROSS_BORDER_LTL_CUSTOMS_MODES_LOV[0];
+                                const effPricePerKg = route.pricePerKg ?? (route.price && route.price < 50000 ? route.price : 3500);
+                                const effPricePerCbm = route.pricePerCbm ?? 750000;
+                                const effMinCharge = route.minChargeShipment ?? 350000;
+                                const effCurrency = route.currency || 'VND';
+                                const effSla = route.sla || '24 - 36 giờ';
+                                const effSchedule = route.departureSchedule || CROSS_BORDER_LTL_SCHEDULE_LOV[0];
+                                const effValidUntil = route.validUntil || '2026-12-31';
+                                const effPromotionPercent = route.promotionPercent || 0;
+
+                                return (
+                                  <tr key={route.id} className="hover:bg-orange-50/20 transition-colors divide-x divide-slate-100 text-xs">
+                                    {/* 1. STT */}
+                                    <td className="p-1 text-center font-bold text-slate-500 w-9 bg-slate-50/50">
+                                      {idx + 1}
+                                    </td>
+
+                                    {/* 2. Mã Tuyến LTL */}
+                                    <td className="p-1 text-center font-mono font-bold text-orange-800 bg-orange-50/30">
+                                      <input
+                                        type="text"
+                                        value={effCode}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'routeCode', e.target.value)}
+                                        className="w-full text-center bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 rounded px-1 py-1 font-bold text-orange-800 text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 3. Hành Lang Tuyến Ghép XBG */}
+                                    <td className="p-1 align-middle">
+                                      <input
+                                        type="text"
+                                        value={effRoute}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'route', e.target.value)}
+                                        placeholder="TP.HCM ⇄ Phnom Penh (Campuchia)..."
+                                        className="w-full px-2 py-1.5 font-bold text-slate-900 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 4. Cửa Khẩu Biên Giới */}
+                                    <td className="p-1 align-middle bg-amber-50/30">
+                                      <select
+                                        value={effGate}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'borderGate', e.target.value)}
+                                        className="w-full px-2 py-1.5 font-bold text-amber-950 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 rounded text-xs cursor-pointer"
+                                        title={effGate}
+                                      >
+                                        {CROSS_BORDER_GATE_GROUPS.map((grp) => (
+                                          <optgroup key={grp.group} label={grp.group}>
+                                            {grp.gates.map((gate) => (
+                                              <option key={gate} value={gate}>
+                                                {gate}
+                                              </option>
+                                            ))}
+                                          </optgroup>
+                                        ))}
+                                      </select>
+                                    </td>
+
+                                    {/* 5. Kho Gom Hàng (Origin Hub) */}
+                                    <td className="p-1 align-middle">
+                                      <input
+                                        type="text"
+                                        value={effOrigin}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'origin', e.target.value)}
+                                        placeholder="Kho Hub Tân Bình (TP.HCM)..."
+                                        className="w-full px-2 py-1.5 font-semibold text-slate-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 6. Kho Phân Phối / Đích (Dest Hub) */}
+                                    <td className="p-1 align-middle">
+                                      <input
+                                        type="text"
+                                        value={effDestination}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'destination', e.target.value)}
+                                        placeholder="Kho Hub Phnom Penh (Campuchia)..."
+                                        className="w-full px-2 py-1.5 font-semibold text-slate-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 7. Hình Thức Thông Quan LTL */}
+                                    <td className="p-1 align-middle text-center">
+                                      <select
+                                        value={effCustomsLtlMode}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'customsLtlMode', e.target.value)}
+                                        className="w-full px-1.5 py-1.5 text-center font-semibold text-slate-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 rounded text-xs cursor-pointer"
+                                      >
+                                        {CROSS_BORDER_LTL_CUSTOMS_MODES_LOV.map((m) => (
+                                          <option key={m} value={m}>{m}</option>
+                                        ))}
+                                      </select>
+                                    </td>
+
+                                    {/* 8. Đơn Giá Kg (/Kg) */}
+                                    <td className="p-1 align-middle text-right bg-emerald-50/30">
+                                      <input
+                                        type="number"
+                                        value={effPricePerKg || ''}
+                                        onChange={(e) => {
+                                          const val = parseFloat(e.target.value) || 0;
+                                          handleUpdateRouteRow(route.id, 'pricePerKg', val);
+                                          handleUpdateRouteRow(route.id, 'price', val);
+                                        }}
+                                        placeholder="3500"
+                                        className="w-full px-2 py-1.5 text-right font-black text-emerald-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 9. Đơn Giá CBM (/CBM) */}
+                                    <td className="p-1 align-middle text-right bg-emerald-50/30">
+                                      <input
+                                        type="number"
+                                        value={effPricePerCbm || ''}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'pricePerCbm', parseFloat(e.target.value) || 0)}
+                                        placeholder="750000"
+                                        className="w-full px-2 py-1.5 text-right font-black text-emerald-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 10. Cước Sàn Min Charge (/Lô) */}
+                                    <td className="p-1 align-middle text-right bg-amber-50/30">
+                                      <input
+                                        type="number"
+                                        value={effMinCharge || ''}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'minChargeShipment', parseFloat(e.target.value) || 0)}
+                                        placeholder="350000"
+                                        className="w-full px-2 py-1.5 text-right font-black text-amber-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 11. Tiền Tệ */}
+                                    <td className="p-1 align-middle text-center">
+                                      <select
+                                        value={effCurrency}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'currency', e.target.value as 'VND' | 'USD')}
+                                        className="w-full px-1 py-1.5 text-center font-bold text-slate-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 rounded text-xs cursor-pointer"
+                                      >
+                                        <option value="VND">VND</option>
+                                        <option value="USD">USD</option>
+                                      </select>
+                                    </td>
+
+                                    {/* 12. SLA Giao Hàng */}
+                                    <td className="p-1 align-middle text-center">
+                                      <input
+                                        type="text"
+                                        value={effSla}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'sla', e.target.value)}
+                                        placeholder="24 - 36 giờ..."
+                                        className="w-full px-2 py-1.5 text-center font-medium text-slate-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 13. Lịch Chạy / Tần Suất */}
+                                    <td className="p-1 align-middle text-center bg-blue-50/30">
+                                      <select
+                                        value={effSchedule}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'departureSchedule', e.target.value)}
+                                        className="w-full px-1.5 py-1.5 text-center font-bold text-blue-950 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 rounded text-xs cursor-pointer"
+                                      >
+                                        {CROSS_BORDER_LTL_SCHEDULE_LOV.map((s) => (
+                                          <option key={s} value={s}>{s}</option>
+                                        ))}
+                                      </select>
+                                    </td>
+
+                                    {/* 14. Hạn Giá */}
+                                    <td className="p-1 align-middle text-center">
+                                      <input
+                                        type="date"
+                                        value={effValidUntil}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'validUntil', e.target.value)}
+                                        className="w-full px-1 py-1.5 text-center text-slate-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 15. Promotion */}
+                                    <td className="p-1 align-middle text-center">
+                                      <input
+                                        type="number"
+                                        min="0"
+                                        max="100"
+                                        value={effPromotionPercent || ''}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'promotionPercent', Math.min(100, Math.max(0, parseInt(e.target.value) || 0)))}
+                                        placeholder="0%"
+                                        className="w-full px-1 py-1.5 text-center font-bold text-rose-600 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 16. Action */}
+                                    <td className="p-1 text-center align-middle w-16">
+                                      <div className="flex items-center justify-center gap-1">
+                                        <button
+                                          type="button"
+                                          onClick={() => handleDuplicateRouteRow(route.id)}
+                                          className="p-1 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors cursor-pointer"
+                                          title="Nhân bản tuyến ghép LTL này"
+                                        >
+                                          <Copy className="w-3.5 h-3.5" />
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleDeleteRouteRow(route.id)}
+                                          className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors cursor-pointer"
+                                          title="Xóa tuyến này"
+                                        >
+                                          <Trash2 className="w-3.5 h-3.5" />
+                                        </button>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                );
+                              }
 
                               if (isCrossBorderFtlRow) {
                                 const effCode = route.routeCode || `CB-FTL-${String(idx + 1).padStart(2, '0')}`;
