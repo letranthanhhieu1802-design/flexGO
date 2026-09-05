@@ -611,6 +611,43 @@ export const CUSTOMS_SERVICE_FORMS_LOV = [
   'Khai thuê dịch vụ',
 ];
 
+export const CROSS_BORDER_GATES_LOV = [
+  'Mộc Bài / Xa Mát (Tây Ninh VN ↔ Bavet / Phnom Penh Campuchia)',
+  'Hoa Lư (Bình Phước VN ↔ Trapeang Sre / Kratie Campuchia)',
+  'Bình Hiệp (Long An VN ↔ Prey Vo / Svay Rieng Campuchia)',
+  'Tịnh Biên / Vĩnh Xương (An Giang VN ↔ Phnom Den / Kandal Campuchia)',
+  'Hữu Nghị / Tân Thanh (Lạng Sơn VN ↔ Bằng Tường / Hữu Nghị Quan TQ)',
+  'Móng Cái / Cầu Bắc Luân II (Quảng Ninh VN ↔ Đông Hưng Quảng Tây TQ)',
+  'Kim Thành (Lào Cai VN ↔ Hà Khẩu Vân Nam TQ)',
+  'Trà Lĩnh (Cao Bằng VN ↔ Long Bang Quảng Tây TQ)',
+  'Lao Bảo (Quảng Trị VN ↔ Savannakhet Lào ↔ Mukdahan Thái Lan)',
+  'Cha Lo (Quảng Bình VN ↔ Na Phao Lào ↔ Nakhon Phanom Thái Lan)',
+  'Cầu Treo (Hà Tĩnh VN ↔ Namphao Lào ↔ Viêng Chăn)',
+  'Bờ Y (Kon Tum VN ↔ Phouvong Nam Lào)',
+  'Khác (Nhập tùy chọn)...',
+];
+
+export const CROSS_BORDER_FTL_VEHICLES_LOV = [
+  'Đầu Kéo Container 40ft High Cube (40HC)',
+  'Đầu Kéo Container Lạnh 40ft Reefer (40RF)',
+  'Đầu Kéo Container 20ft (20GP / 20RF)',
+  'Xe Tải Thùng Kín 15.0T (3 Chân liên vận GMS)',
+  'Xe Tải Mui Bạt 15.0T - 18.0T (3-4 Chân)',
+  'Đầu Kéo Sơ-mi Rơ-moóc Sàn / Lùn (Flatbed / Lowbed)',
+  'Khác (Nhập tùy chọn)...',
+];
+
+export const CROSS_BORDER_TRANSIT_MODES_LOV = [
+  'Xe liên vận chạy thẳng (Direct GMS)',
+  'Sang tải / Đổi đầu kéo (Transshipment)',
+];
+
+export const CROSS_BORDER_CUSTOMS_SCOPES_LOV = [
+  'Trọn gói 2 đầu (VN + Nước bạn)',
+  'Chỉ HQ đầu VN',
+  'Chỉ cước vận chuyển (Chủ hàng tự làm HQ)',
+];
+
 export const getTonnagesForBodyType = (
   bodyType?: string, 
   cargoTypeOrIsReefer?: 'general' | 'reefer' | 'hazmat' | 'ltl' | boolean
@@ -984,6 +1021,9 @@ export interface CapabilityRouteItem {
   customsServiceForm?: string;
   customsExtraItemPrice?: number;
   customsRedChannelPrice?: number;
+  borderGate?: string;
+  transitMode?: string;
+  customsScope?: string;
 }
 
 export interface PaidSurchargeItem {
@@ -3585,28 +3625,38 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             defaultRoutes: [
               {
                 id: 'r-cb-1',
+                routeCode: 'CB-CHN-01',
                 route: 'Hà Nội ⇄ Bằng Tường / Quảng Châu (TQ)',
-                origin: 'KCN Bắc Ninh / Hà Nội',
-                destination: 'Quảng Châu (Trung Quốc)',
-                vehicleType: 'Xe tải liên vận 15T',
+                borderGate: 'Hữu Nghị / Tân Thanh (Lạng Sơn VN ↔ Bằng Tường / Hữu Nghị Quan TQ)',
+                origin: 'KCN Bắc Ninh / Hà Nội (Door)',
+                destination: 'Quảng Châu (Trung Quốc) (Door)',
+                vehicleType: 'Đầu Kéo Container 40ft High Cube (40HC)',
+                transitMode: 'Xe liên vận chạy thẳng (Direct GMS)',
+                customsScope: 'Trọn gói 2 đầu (VN + Nước bạn)',
                 pricingUnit: 'Chuyến',
                 price: 42000000,
                 currency: 'VND',
                 sla: '36 - 48 giờ',
                 pricingStyle: 'All-in',
+                validUntil: '2026-12-31',
                 promotionPercent: 10,
               },
               {
                 id: 'r-cb-2',
+                routeCode: 'CB-CAM-01',
                 route: 'TP.HCM ⇄ Phnom Penh (Campuchia)',
-                origin: 'KCN Tân Bình (TP.HCM)',
-                destination: 'Phnom Penh (Cambodia)',
-                vehicleType: 'Xe tải liên vận 15T',
+                borderGate: 'Mộc Bài / Xa Mát (Tây Ninh VN ↔ Bavet / Phnom Penh Campuchia)',
+                origin: 'KCN Tân Bình (TP.HCM) (Door)',
+                destination: 'Phnom Penh SEZ (Campuchia) (Door)',
+                vehicleType: 'Xe Tải Thùng Kín 15.0T (3 Chân liên vận GMS)',
+                transitMode: 'Xe liên vận chạy thẳng (Direct GMS)',
+                customsScope: 'Trọn gói 2 đầu (VN + Nước bạn)',
                 pricingUnit: 'Chuyến',
                 price: 18500000,
                 currency: 'VND',
                 sla: '18 - 24 giờ',
                 pricingStyle: 'All-in',
+                validUntil: '2026-12-31',
                 promotionPercent: 15,
               },
             ],
@@ -3700,15 +3750,20 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             defaultRoutes: [
               {
                 id: 'r-cb-ref-1',
+                routeCode: 'CB-REF-01',
                 route: 'Tiền Giang ⇄ Bằng Tường / Gia Hưng (TQ)',
-                origin: 'Cái Bè (Tiền Giang)',
-                destination: 'Chợ đầu mối Bằng Tường (Trung Quốc)',
-                vehicleType: 'Đầu kéo Cont lạnh liên vận',
+                borderGate: 'Hữu Nghị / Tân Thanh (Lạng Sơn VN ↔ Bằng Tường / Hữu Nghị Quan TQ)',
+                origin: 'Cái Bè (Tiền Giang) (Door)',
+                destination: 'Chợ đầu mối Bằng Tường (Trung Quốc) (Door)',
+                vehicleType: 'Đầu Kéo Container Lạnh 40ft Reefer (40RF)',
+                transitMode: 'Xe liên vận chạy thẳng (Direct GMS)',
+                customsScope: 'Trọn gói 2 đầu (VN + Nước bạn)',
                 pricingUnit: 'Chuyến',
                 price: 65000000,
                 currency: 'VND',
                 sla: '48 - 60 giờ',
                 pricingStyle: 'All-in',
+                validUntil: '2026-12-31',
                 promotionPercent: 0,
               },
             ],
@@ -3755,15 +3810,20 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             defaultRoutes: [
               {
                 id: 'r-cb-haz-1',
+                routeCode: 'CB-HAZ-01',
                 route: 'Hà Nội ⇄ Viêng Chăn (Lào)',
-                origin: 'Hà Nội',
-                destination: 'Thủ đô Viêng Chăn (Lào)',
-                vehicleType: 'Xe chuyên dụng hóa chất liên vận',
+                borderGate: 'Cầu Treo (Hà Tĩnh VN ↔ Namphao Lào ↔ Viêng Chăn)',
+                origin: 'Hà Nội (Door)',
+                destination: 'Thủ đô Viêng Chăn (Lào) (Door)',
+                vehicleType: 'Đầu Kéo Container 20ft (20GP / 20RF)',
+                transitMode: 'Xe liên vận chạy thẳng (Direct GMS)',
+                customsScope: 'Trọn gói 2 đầu (VN + Nước bạn)',
                 pricingUnit: 'Chuyến',
                 price: 75000000,
                 currency: 'VND',
                 sla: '3 - 5 ngày',
                 pricingStyle: 'All-in',
+                validUntil: '2026-12-31',
                 promotionPercent: 0,
               },
             ],
@@ -6053,6 +6113,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                           {(() => {
                             const isWarehousingTable = activeCategory?.id === 'warehousing';
                             const isCustomsTable = activeCategory?.id === 'customs' || activeCategory?.serviceType === 'Customs Clearance';
+                            const isCrossBorderFtl = (activeCategory?.id === 'cross-border' || activeCategory?.serviceType === 'Cross-border') && (activeModel?.id?.includes('ftl') || activeModel?.name?.includes('FTL') || activeModel?.code === 'FTL' || !activeModel?.id?.includes('ltl'));
                             const isTruckingTable = activeCategory?.id === 'trucking';
                             const isOceanTable = activeCategory?.id === 'ocean' || activeModel?.id?.startsWith('sea-');
                             const isRailTable = activeCategory?.id === 'rail' || activeModel?.id?.startsWith('rail-');
@@ -6170,6 +6231,29 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                               );
                             }
 
+                            if (isCrossBorderFtl) {
+                              return (
+                                <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
+                                  <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
+                                  <th className="py-2.5 px-2.5 min-w-[100px] text-center bg-orange-50/80 text-orange-950 font-black">Mã Tuyến XBG</th>
+                                  <th className="py-2.5 px-2.5 min-w-[200px]">Hành Lang Tuyến Xuyên Biên Giới</th>
+                                  <th className="py-2.5 px-2.5 min-w-[210px] bg-amber-50/80 text-amber-950 font-black">Cửa Khẩu Biên Giới (Border Gate)</th>
+                                  <th className="py-2.5 px-2.5 min-w-[150px]">Điểm Đi (Origin)</th>
+                                  <th className="py-2.5 px-2.5 min-w-[150px]">Điểm Đến (Destination)</th>
+                                  <th className="py-2.5 px-2.5 min-w-[185px]">Loại Phương Tiện / Cont</th>
+                                  <th className="py-2.5 px-2.5 min-w-[160px] text-center">Phương Thức Vượt Biên</th>
+                                  <th className="py-2.5 px-2.5 min-w-[160px] text-center">Phạm Vi Hải Quan</th>
+                                  <th className="py-2.5 px-2 w-20 min-w-[80px] text-center">ĐVT</th>
+                                  <th className="py-2.5 px-2 w-20 min-w-[80px] text-center">Tiền Tệ</th>
+                                  <th className="py-2.5 px-2 text-right min-w-[145px] bg-emerald-50/90 text-emerald-950 font-black">Giá Cước FTL</th>
+                                  <th className="py-2.5 px-2.5 min-w-[125px] text-center">SLA Vận Chuyển</th>
+                                  <th className="py-2.5 px-2.5 min-w-[130px] text-center">Hạn Giá</th>
+                                  <th className="py-2.5 px-2 min-w-[85px] text-center">Promotion</th>
+                                  <th className="py-2.5 px-2 text-center w-16 min-w-[65px]">Action</th>
+                                </tr>
+                              );
+                            }
+
                             if (isCustomsTable) {
                               return (
                                 <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
@@ -6254,7 +6338,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                         <tbody className="divide-y divide-slate-200 bg-white">
                           {(!currentData.routes || currentData.routes.length === 0) ? (
                             <tr>
-                              <td colSpan={activeCategory?.id === 'warehousing' ? ((activeModel?.id === 'wh-gen-bon' || activeModel?.name?.toLowerCase().includes('ngoại quan')) ? 19 : (activeModel?.id === 'wh-gen-self' ? 17 : 18)) : (activeCategory?.id === 'customs' ? 15 : (activeCategory?.id === 'trucking' ? 15 : ((activeCategory?.id === 'ocean') ? ((activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL') ? 17 : 15) : (((activeCategory?.id === 'rail') && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL')) ? 15 : ((activeCategory?.id === 'air' && (activeModel?.id === 'air-gen-exp' || activeModel?.name?.includes('Express') || activeModel?.code === 'Express')) ? 13 : 15)))))} className="py-8 text-center text-slate-400 font-medium">
+                              <td colSpan={activeCategory?.id === 'warehousing' ? ((activeModel?.id === 'wh-gen-bon' || activeModel?.name?.toLowerCase().includes('ngoại quan')) ? 19 : (activeModel?.id === 'wh-gen-self' ? 17 : 18)) : (((activeCategory?.id === 'cross-border' || activeCategory?.serviceType === 'Cross-border') && (activeModel?.id?.includes('ftl') || activeModel?.name?.includes('FTL') || activeModel?.code === 'FTL' || !activeModel?.id?.includes('ltl'))) ? 16 : activeCategory?.id === 'customs' ? 15 : (activeCategory?.id === 'trucking' ? 15 : ((activeCategory?.id === 'ocean') ? ((activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL') ? 17 : 15) : (((activeCategory?.id === 'rail') && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL')) ? 15 : ((activeCategory?.id === 'air' && (activeModel?.id === 'air-gen-exp' || activeModel?.name?.includes('Express') || activeModel?.code === 'Express')) ? 13 : 15)))))} className="py-8 text-center text-slate-400 font-medium">
                                 {activeCategory?.id === 'warehousing' ? (
                                   <>Chưa có cơ sở kho nào. Bấm nút <strong className="text-indigo-600 font-bold">+ Thêm Kho Mới</strong> để khai báo năng lực & biểu phí lưu kho.</>
                                 ) : activeCategory?.id === 'customs' ? (
@@ -6272,6 +6356,228 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                 : route.price;
                               const isWarehousingRow = activeCategory?.id === 'warehousing';
                               const isCustomsRow = activeCategory?.id === 'customs' || activeCategory?.serviceType === 'Customs Clearance';
+                              const isCrossBorderFtlRow = (activeCategory?.id === 'cross-border' || activeCategory?.serviceType === 'Cross-border') && (activeModel?.id?.includes('ftl') || activeModel?.name?.includes('FTL') || activeModel?.code === 'FTL' || !activeModel?.id?.includes('ltl'));
+
+                              if (isCrossBorderFtlRow) {
+                                const effCode = route.routeCode || `CB-FTL-${String(idx + 1).padStart(2, '0')}`;
+                                const effRoute = route.route || 'TP.HCM ⇄ Phnom Penh (Campuchia)';
+                                const effGate = route.borderGate || CROSS_BORDER_GATES_LOV[0];
+                                const effOrigin = route.origin || 'KCN Tân Bình (TP.HCM) (Door)';
+                                const effDestination = route.destination || 'Phnom Penh SEZ (Campuchia) (Door)';
+                                const effVehicle = route.vehicleType || CROSS_BORDER_FTL_VEHICLES_LOV[0];
+                                const effTransitMode = route.transitMode || CROSS_BORDER_TRANSIT_MODES_LOV[0];
+                                const effCustomsScope = route.customsScope || CROSS_BORDER_CUSTOMS_SCOPES_LOV[0];
+                                const effUnit = route.pricingUnit || 'Chuyến';
+                                const effCurrency = route.currency || 'VND';
+                                const effPrice = route.price ?? 18500000;
+                                const effSla = route.sla || '24 - 36 giờ';
+                                const effValidUntil = route.validUntil || '2026-12-31';
+                                const effPromotionPercent = route.promotionPercent || 0;
+
+                                return (
+                                  <tr key={route.id} className="hover:bg-orange-50/20 transition-colors divide-x divide-slate-100 text-xs">
+                                    {/* 1. STT */}
+                                    <td className="p-1 text-center font-bold text-slate-500 w-9 bg-slate-50/50">
+                                      {idx + 1}
+                                    </td>
+
+                                    {/* 2. Mã Tuyến XBG */}
+                                    <td className="p-1 text-center font-mono font-bold text-orange-800 bg-orange-50/30">
+                                      <input
+                                        type="text"
+                                        value={effCode}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'routeCode', e.target.value)}
+                                        className="w-full text-center bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 rounded px-1 py-1 font-bold text-orange-800 text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 3. Hành Lang Tuyến Xuyên Biên Giới */}
+                                    <td className="p-1 align-middle">
+                                      <input
+                                        type="text"
+                                        value={effRoute}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'route', e.target.value)}
+                                        placeholder="TP.HCM ⇄ Phnom Penh (Campuchia)..."
+                                        className="w-full px-2 py-1.5 font-bold text-slate-900 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 4. Cửa Khẩu Biên Giới */}
+                                    <td className="p-1 align-middle bg-amber-50/30">
+                                      <div className="relative">
+                                        <input
+                                          type="text"
+                                          list={`cross-border-gates-${route.id}`}
+                                          value={effGate}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'borderGate', e.target.value)}
+                                          placeholder="Chọn hoặc nhập Cửa khẩu..."
+                                          className="w-full px-2 py-1.5 font-bold text-amber-950 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 rounded text-xs"
+                                        />
+                                        <datalist id={`cross-border-gates-${route.id}`}>
+                                          {CROSS_BORDER_GATES_LOV.map((gate) => (
+                                            <option key={gate} value={gate} />
+                                          ))}
+                                        </datalist>
+                                      </div>
+                                    </td>
+
+                                    {/* 5. Điểm Đi (Origin) */}
+                                    <td className="p-1 align-middle">
+                                      <input
+                                        type="text"
+                                        value={effOrigin}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'origin', e.target.value)}
+                                        placeholder="KCN VSIP, Bình Dương (Door)..."
+                                        className="w-full px-2 py-1.5 font-semibold text-slate-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 6. Điểm Đến (Destination) */}
+                                    <td className="p-1 align-middle">
+                                      <input
+                                        type="text"
+                                        value={effDestination}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'destination', e.target.value)}
+                                        placeholder="Phnom Penh SEZ (Door)..."
+                                        className="w-full px-2 py-1.5 font-semibold text-slate-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 7. Loại Phương Tiện / Cont */}
+                                    <td className="p-1 align-middle">
+                                      <select
+                                        value={effVehicle}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'vehicleType', e.target.value)}
+                                        className="w-full px-2 py-1.5 font-medium text-slate-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 rounded text-xs cursor-pointer"
+                                      >
+                                        {CROSS_BORDER_FTL_VEHICLES_LOV.map((v) => (
+                                          <option key={v} value={v}>{v}</option>
+                                        ))}
+                                      </select>
+                                    </td>
+
+                                    {/* 8. Phương Thức Vượt Biên */}
+                                    <td className="p-1 align-middle text-center">
+                                      <select
+                                        value={effTransitMode}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'transitMode', e.target.value)}
+                                        className="w-full px-1.5 py-1.5 text-center font-semibold text-slate-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 rounded text-xs cursor-pointer"
+                                      >
+                                        {CROSS_BORDER_TRANSIT_MODES_LOV.map((m) => (
+                                          <option key={m} value={m}>{m}</option>
+                                        ))}
+                                      </select>
+                                    </td>
+
+                                    {/* 9. Phạm Vi Hải Quan */}
+                                    <td className="p-1 align-middle text-center">
+                                      <select
+                                        value={effCustomsScope}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'customsScope', e.target.value)}
+                                        className="w-full px-1.5 py-1.5 text-center font-semibold text-slate-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 rounded text-xs cursor-pointer"
+                                      >
+                                        {CROSS_BORDER_CUSTOMS_SCOPES_LOV.map((s) => (
+                                          <option key={s} value={s}>{s}</option>
+                                        ))}
+                                      </select>
+                                    </td>
+
+                                    {/* 10. ĐVT */}
+                                    <td className="p-1 align-middle text-center">
+                                      <select
+                                        value={effUnit}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'pricingUnit', e.target.value)}
+                                        className="w-full px-1 py-1.5 text-center font-bold text-slate-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 rounded text-xs cursor-pointer"
+                                      >
+                                        <option value="Chuyến">Chuyến</option>
+                                        <option value="Cont 40ft">Cont 40ft</option>
+                                        <option value="Cont 20ft">Cont 20ft</option>
+                                        <option value="Xe 15T">Xe 15T</option>
+                                        <option value="Tấn">Tấn</option>
+                                      </select>
+                                    </td>
+
+                                    {/* 11. Tiền Tệ */}
+                                    <td className="p-1 align-middle text-center">
+                                      <select
+                                        value={effCurrency}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'currency', e.target.value as 'VND' | 'USD')}
+                                        className="w-full px-1 py-1.5 text-center font-bold text-slate-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 rounded text-xs cursor-pointer"
+                                      >
+                                        <option value="VND">VND</option>
+                                        <option value="USD">USD</option>
+                                      </select>
+                                    </td>
+
+                                    {/* 12. Giá Cước FTL */}
+                                    <td className="p-1 align-middle text-right bg-emerald-50/30">
+                                      <input
+                                        type="number"
+                                        value={effPrice || ''}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'price', parseFloat(e.target.value) || 0)}
+                                        placeholder="18500000"
+                                        className="w-full px-2 py-1.5 text-right font-black text-emerald-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 13. SLA Vận Chuyển */}
+                                    <td className="p-1 align-middle text-center">
+                                      <input
+                                        type="text"
+                                        value={effSla}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'sla', e.target.value)}
+                                        placeholder="24 - 36 giờ..."
+                                        className="w-full px-2 py-1.5 text-center font-medium text-slate-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 14. Hạn Giá */}
+                                    <td className="p-1 align-middle text-center">
+                                      <input
+                                        type="date"
+                                        value={effValidUntil}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'validUntil', e.target.value)}
+                                        className="w-full px-1 py-1.5 text-center text-slate-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 15. Promotion */}
+                                    <td className="p-1 align-middle text-center">
+                                      <input
+                                        type="number"
+                                        min="0"
+                                        max="100"
+                                        value={effPromotionPercent || ''}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'promotionPercent', Math.min(100, Math.max(0, parseInt(e.target.value) || 0)))}
+                                        placeholder="0%"
+                                        className="w-full px-1 py-1.5 text-center font-bold text-rose-600 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 16. Action */}
+                                    <td className="p-1 text-center align-middle w-16">
+                                      <div className="flex items-center justify-center gap-1">
+                                        <button
+                                          type="button"
+                                          onClick={() => handleDuplicateRouteRow(route.id)}
+                                          className="p-1 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors cursor-pointer"
+                                          title="Nhân bản tuyến xuyên biên giới này"
+                                        >
+                                          <Copy className="w-3.5 h-3.5" />
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleDeleteRouteRow(route.id)}
+                                          className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors cursor-pointer"
+                                          title="Xóa tuyến này"
+                                        >
+                                          <Trash2 className="w-3.5 h-3.5" />
+                                        </button>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                );
+                              }
 
                               if (isCustomsRow) {
                                 const effCode = route.routeCode || `CUS-CL-${String(idx + 1).padStart(2, '0')}`;
