@@ -681,48 +681,162 @@ export const getWarehousePhotoSlots = (modelId?: string, cargoGroupId?: string):
   ];
 };
 
+
+export interface WarehouseTechCategoryDef {
+  id: string;
+  icon: string;
+  label: string;
+  desc: string;
+}
+
+export const getWarehouseTechSpecCategories = (modelId?: string, cargoGroupId?: string): WarehouseTechCategoryDef[] => {
+  // 1. Kho Lạnh & Kho Mát (wh-ref-cold, wh-ref-bon, wh-ref-self)
+  if (modelId?.includes('ref') || cargoGroupId?.includes('ref') || modelId?.includes('cold')) {
+    return [
+      { id: 'cold_temperature', icon: '❄️', label: 'Dải Nhiệt Độ & Cụm Máy Lạnh', desc: 'Dải nhiệt âm/dương, máy nén Bitzer, ATS' },
+      { id: 'cold_structure', icon: '🏗️', label: 'Kết Cấu Panel & Mặt Sàn Lạnh', desc: 'Panel cách nhiệt PIR/PU, sưởi chống đông sàn' },
+      { id: 'cold_racking', icon: '📦', label: 'Giá Kệ Lạnh & Quản Lý FIFO/FEFO', desc: 'Kệ lạnh chuyên dụng, quản lý date/hạn dùng' },
+      { id: 'cold_dock', icon: '🚛', label: 'Cửa Dock Lạnh & Đệm Khí Shelter', desc: 'Đệm khí trùm cont, cầu nâng cách nhiệt, Reefer plug' },
+      { id: 'cold_fire', icon: '🔥', label: 'PCCC Kho Lạnh & An Toàn Vận Hành', desc: 'PCCC Sprinkler khô, thoát hiểm buồng lạnh' },
+      { id: 'cold_cert', icon: '📜', label: 'Chứng Nhận ATTP & Dược Phẩm', desc: 'HACCP, ISO 22000, BRC, GDP Dược phẩm' },
+    ];
+  }
+
+  // 2. Kho Hàng Nguy Hiểm & Hóa Chất (wh-haz-std)
+  if (modelId?.includes('haz') || cargoGroupId?.includes('haz') || modelId?.includes('nguy hiểm')) {
+    return [
+      { id: 'haz_license', icon: '☣️', label: 'Giấy Phép & Phân Nhóm Hóa Chất', desc: 'Giấy phép Sở Công Thương, Class nguy hiểm, MSDS' },
+      { id: 'haz_structure', icon: '🏗️', label: 'Kết Cấu Cách Ly & Rãnh Chống Tràn', desc: 'Sàn kháng axit, rãnh gom tràn, tường chống cháy' },
+      { id: 'haz_fire', icon: '🔥', label: 'PCCC Chuyên Dụng Bọt Foam / Khí', desc: 'Sprinkler bọt Foam/CO2, quạt hút phòng nổ' },
+      { id: 'haz_ppe', icon: '🦺', label: 'Ứng Phó Sự Cố & Bảo Hộ (PPE)', desc: 'Bồn rửa mắt khẩn cấp, Spill kit, chứng chỉ NĐ 113' },
+      { id: 'haz_security', icon: '📜', label: 'An Ninh & Bảo Hiểm Môi Trường', desc: 'CCTV phòng nổ, bảo hiểm ô nhiễm môi trường' },
+    ];
+  }
+
+  // 3. Kho Ngoại Quan (wh-gen-bon, wh-ref-bon)
+  if (modelId?.includes('bon') || modelId?.includes('ngoại quan')) {
+    return [
+      { id: 'bon_customs', icon: '🏛️', label: 'Tiêu Chuẩn Hải Quan & Khu Biệt Lập', desc: 'Chi cục HQ quản lý, QĐ thành lập, niêm chì HQ' },
+      { id: 'bon_structure', icon: '🏗️', label: 'Kết Cấu Kho & Sân Bãi Container', desc: 'Chiều cao, tải trọng sàn, cự ly cảng biển' },
+      { id: 'bon_racking', icon: '📦', label: 'Quản Lý Lưu Trữ Theo Tờ Khai', desc: 'Phân lô theo tờ khai/vận đơn, bàn kiểm hóa HQ' },
+      { id: 'bon_cctv', icon: '📹', label: 'Camera Hải Quan & Dữ Liệu VASSCM', desc: 'CCTV 3 lớp lưu 12 tháng, kết nối Chi cục HQ & VASSCM' },
+      { id: 'bon_fire', icon: '🔥', label: 'PCCC & An Ninh Kiểm Soát Ra Vào', desc: 'PCCC nghiệm thu, bảo vệ barie 2 lớp 24/7' },
+    ];
+  }
+
+  // 4. Kho TMĐT / Fulfillment (wh-gen-ful)
+  if (modelId?.includes('ful') || modelId?.includes('fulfillment') || modelId?.includes('tmđt')) {
+    return [
+      { id: 'ful_capacity', icon: '⚡', label: 'Năng Lực Xử Lý Đơn & Pick-Pack', desc: 'Công suất đơn/ngày, bàn đóng gói, SLA < 12h' },
+      { id: 'ful_tech', icon: '💻', label: 'Tích Hợp Sàn TMĐT & WMS/OMS', desc: 'Tự động API Shopee/TikTok/Lazada, Barcode SKU' },
+      { id: 'ful_reverse', icon: '🔄', label: 'Xử Lý Hàng Hoàn (Reverse Logistics)', desc: 'Bàn kiểm tra hàng hoàn, tỷ lệ sai sót < 0.05%' },
+      { id: 'ful_dock', icon: '🚛', label: 'Cửa Giao Nhận Nhanh ĐVVC', desc: 'Tiếp nhận xe van/shipper, khung giờ cut-off ca' },
+      { id: 'ful_fire', icon: '🔥', label: 'PCCC & Giám Sát Bàn Đóng Gói', desc: 'PCCC tự động, camera soi từng gói hàng' },
+    ];
+  }
+
+  // 5. Kho Tự Quản (wh-gen-self, wh-ref-self)
+  if (modelId?.includes('self') || modelId?.includes('tự quản')) {
+    return [
+      { id: 'self_units', icon: '🚪', label: 'Quy Cách Khoang Chứa Cá Nhân', desc: 'Dải thể tích 1-30m³, cửa cuốn khóa riêng, chống ẩm' },
+      { id: 'self_access', icon: '🔑', label: 'Ra Vào Tự Do 24/7 & Khóa Độc Lập', desc: 'Thẻ từ/vân tay 24/7, camera hành lang, khách giữ chìa' },
+      { id: 'self_amenities', icon: '🧹', label: 'Tiện Ích Nội Bộ & Vật Tư Đóng Gói', desc: 'Xe đẩy bốc dỡ miễn phí, thùng carton, máy hút ẩm' },
+      { id: 'self_fire', icon: '🔥', label: 'PCCC & Bảo Hiểm Tài Sản Cá Nhân', desc: 'PCCC Sprinkler từng khoang, bảo hiểm mất mát' },
+    ];
+  }
+
+  // 6. Kho Thường Tiêu Chuẩn (Standard General Warehouse - Default)
+  return [
+    { id: 'structure', icon: '🏗️', label: 'Kết Cấu & Mặt Sàn', desc: 'Chiều cao, tải trọng sàn, nền' },
+    { id: 'racking', icon: '📦', label: 'Giá Kệ & Sức Chứa', desc: 'Loại kệ, tầng kệ, tải Pallet' },
+    { id: 'dock', icon: '🚛', label: 'Cửa Dock & Sân Bãi', desc: 'Cửa xuất nhập, dock leveler, sân cont' },
+    { id: 'fire', icon: '🔥', label: 'PCCC & An Ninh', desc: 'Sprinkler, nghiệm thu, camera 24/7' },
+    { id: 'wms', icon: '💻', label: 'WMS & Công Nghệ', desc: 'Phần mềm quản lý, Barcode, API' },
+    { id: 'cert', icon: '📜', label: 'Giấy Phép & Chứng Nhận', desc: 'ISO, LEED, Bảo hiểm kho bãi' },
+  ];
+};
+
 export interface WarehouseTechSpecs {
-  // Nhom 1: Ket Cau & Mat San
+  // General & Structure
   clearHeight?: number; // m
   floorLoad?: number; // tan/m2
   floorType?: string; // Hardener / Epoxy / Be tong sieu phang
   columnGrid?: string; // Khau do buoc cot (VD: 12m x 18m)
   ventilation?: string; // Thong gio tu nhien / cuong buc
 
-  // Nhom 2: Gia Ke & Luu Chua
+  // Racking
   rackingTypes?: string[]; // Selective, Drive-in, VNA, Double Deep...
   rackingLevels?: number; // So tang ke (VD: 5)
   palletLoadLimit?: number; // kg / pallet
   compatiblePalletSizes?: string[]; // 1m x 1.2m, 1.1m x 1.1m...
 
-  // Nhom 3: Cua Dock & San Bai
+  // Dock & Yard
   dockDoorsCount?: number; // So cua dock
   hasDockLeveler?: boolean; // Cau nang tu dong
   hasDockShelter?: boolean; // Dem khi dock shelter
   yardTurnaround?: string; // San bai quay dau xe cont
   operatingHoursTrucks?: string; // Khung gio tiep nhan xe cont
 
-  // Nhom 4: PCCC & An Ninh
+  // Fire & Safety
   fireProtectionSystem?: string; // Sprinkler tu dong, hong nuoc...
   fireProtectionApprovalNo?: string; // So giay nghiem thu PCCC
   cctvSurveillance?: string; // Camera 24/7
   securityGuards?: string; // Bao ve chuyen nghiep
 
-  // Nhom 5: WMS & Cong Nghe
+  // WMS & Tech
   wmsSoftwareName?: string; // Ten phan mem WMS
   scanningTechnologies?: string[]; // Barcode, QR, RFID
   hasApiIntegration?: boolean; // Tich hop API da san / ERP
   realtimeWebPortal?: boolean; // Web portal bao cao ton kho
 
-  // Nhom 6: Nhiet Do & Nang Luong (Kho Lanh/Mat)
-  temperatureRange?: string; // Dai nhiet do
-  coolingSystemBrand?: string; // Hang may lanh
-  hasAutoDataLogger?: boolean; // Data logger ghi nhiet 24/7
-  hasBackupGeneratorAts?: boolean; // May phat dien du phong ATS < 15s
-
-  // Nhom 7: Giay Phep & Chung Nhan
+  // Cert & Insurance
   certifications?: string[]; // ISO 9001, HACCP, ISO 22000, GDP, LEED...
   hasFullInsurance?: boolean; // Bao hiem kho bai 100%
+
+  // Cold Storage Specs
+  temperatureRange?: string; // Dai nhiet do
+  coolingSystemBrand?: string; // Hang may lanh / dan lanh
+  hasAutoDataLogger?: boolean; // Data logger ghi nhiet 24/7
+  hasBackupGeneratorAts?: boolean; // May phat dien du phong ATS < 15s
+  hasAnteroomFastDoor?: boolean; // Phong dem giu nhiet & Cua cuon nhanh
+  insulationPanelType?: string; // Panel PIR/PU do day
+  hasUnderfloorHeating?: boolean; // Suoi nen chong dong bang
+  hasFefoFifoWms?: boolean; // WMS quan ly date FIFO/FEFO
+  hasEmergencyChamberRelease?: boolean; // Chot thoat hiem buong lanh co suoi
+
+  // Hazmat Storage Specs
+  hazmatLicenseNo?: string; // Giay phep kho hoa chat
+  permittedHazmatClasses?: string[]; // Class 2, 3, 4, 5, 8, 9
+  hasMsdsManagement?: boolean; // Quan ly MSDS 100%
+  hasSpillContainment?: boolean; // Ranh va ho ga chong tran
+  hasExplosionProofFans?: boolean; // Quat thong gio chong chay no
+  hasEmergencyEyewashShower?: boolean; // Bon rua mat & Tam khan cap
+  hasCertifiedHazmatStaff?: boolean; // Nhan vien co chung chi ND 113
+  hasEnvironmentalInsurance?: boolean; // Bao hiem o nhiem moi truong
+
+  // Bonded Warehouse Specs
+  customsAuthorityName?: string; // Chi cuc Hai quan quan ly
+  bondedDecisionNo?: string; // So QD thanh lap kho ngoai quan
+  distanceToPortKm?: number; // Cu ly toi cang bien / cua khau (km)
+  hasCustomsSealingArea?: boolean; // Khu biet lap & niem chi HQ
+  hasVasscmConnected?: boolean; // Ket noi VASSCM Hai quan
+  hasCustomsDirectCctvFeed?: boolean; // Truyen hinh anh CCTV truc tiep toi Chi cuc HQ
+
+  // Fulfillment Specs
+  dailyOrderCapacity?: number; // Cong suat don / ngay
+  fulfillmentSlaHours?: string; // Cam ket dong goi < 12h hoac < 24h
+  connectedEcommercePlatforms?: string[]; // Shopee, TikTok, Lazada...
+  hasItemBarcodeVerification?: boolean; // Quet barcode tung san pham
+  hasReverseLogisticsArea?: boolean; // Khu xu ly hang hoan
+  packingStationCount?: number; // So ban dong goi
+
+  // Self Storage Specs
+  unitVolumeRanges?: string[]; // 1m3, 3m3, 5m3, 10m3...
+  has247CardAccess?: boolean; // Ra vao 24/7 the tu
+  hasIndependentKeyLock?: boolean; // Khach tu giu chia khoa rieng
+  hasFreeHandlingTrolleys?: boolean; // Xe day hang noi bo mien phi
+  hasOnsitePackagingSupplies?: boolean; // Vat tu dong goi tai cho
+  hasDehumidifierClimateControl?: boolean; // May hut am chong am moc
 }
 
 export interface WarehousePhotoItem {
@@ -736,6 +850,7 @@ export interface WarehousePhotoItem {
 
 export interface WarehouseDetailModalData {
   routeId: string;
+  modelId?: string;
   warehouseCode: string;
   warehouseName: string;
   province: string;
@@ -751,6 +866,7 @@ export interface WarehouseDetailModalData {
 
 export interface CapabilityRouteItem {
   id: string;
+  modelId?: string;
   routeCode?: string; // Mã tuyến tự sinh (VD: RC-FTL-001)
   region?: string; // Phân vùng thương mại hàng hải (Bắc Mỹ, Châu Á, Châu Âu...)
   route: string;
@@ -4208,6 +4324,11 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
   const warehousePhotoUploadRef = useRef<HTMLInputElement>(null);
 
   const handleOpenWarehouseDetailModal = (route: CapabilityRouteItem) => {
+    const currentModelId = route.modelId || activeModel?.id;
+    const initialCategories = getWarehouseTechSpecCategories(currentModelId, activeCargoGroup?.id);
+    if (initialCategories.length > 0) {
+      setWarehouseTechActiveCategory(initialCategories[0].id);
+    }
     const isColdStorage = activeModel?.id?.includes('ref') || activeCargoGroup?.id?.includes('ref') || activeModel?.name?.includes('lạnh');
     const isChemicalStorage = activeModel?.id?.includes('haz') || activeCargoGroup?.id?.includes('nguy hiểm') || activeModel?.name?.includes('nguy hiểm');
 
@@ -4301,6 +4422,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
 
     setWarehouseDetailModalData({
       routeId: route.id,
+      modelId: currentModelId,
       warehouseCode: route.warehouseCode || route.routeCode || 'WH-001',
       warehouseName: route.warehouseName || route.route || 'Kho Phân Phối DC',
       province: route.warehouseProvince || route.origin || 'Bình Dương',
@@ -4314,7 +4436,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
       vasItems: existingVas,
     });
     setWarehouseDetailActiveTab('photos');
-    setWarehouseTechActiveCategory('structure');
+    setWarehouseTechActiveCategory(initialCategories[0]?.id || 'structure');
   };
 
   const handleSaveWarehouseDetailModal = () => {
@@ -8414,7 +8536,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                   <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
                     warehouseDetailActiveTab === 'techSpecs' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
                   }`}>
-                    7 Nhóm
+                    {getWarehouseTechSpecCategories(warehouseDetailModalData.modelId || activeModel?.id, activeCargoGroup?.id).length} Nhóm
                   </span>
                 </button>
 
@@ -8613,640 +8735,826 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                 );
               })()}
 
-              {/* TAB 2: 2-COLUMN MASTER-DETAIL TECH SPECS */}
-              {warehouseDetailActiveTab === 'techSpecs' && (
-                <div className="flex-1 flex overflow-hidden">
-                  {/* Left Column: Category Navigation */}
-                  <div className="w-64 shrink-0 bg-slate-50/90 border-r border-slate-200 p-3 overflow-y-auto space-y-1.5">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 block mb-1">
-                      Nhóm Thông Số Kỹ Thuật
-                    </span>
+              {/* TAB 2: 2-COLUMN MASTER-DETAIL TECH SPECS (CHỈ HIỂN THỊ CÁC THÔNG SỐ TƯƠNG ỨNG VỚI LOẠI KHO) */}
+              {warehouseDetailActiveTab === 'techSpecs' && (() => {
+                const currentModelId = warehouseDetailModalData.modelId || activeModel?.id;
+                const techCategories = getWarehouseTechSpecCategories(currentModelId, activeCargoGroup?.id);
+                const activeCatId = techCategories.some(c => c.id === warehouseTechActiveCategory)
+                  ? warehouseTechActiveCategory
+                  : (techCategories[0]?.id || 'structure');
 
-                    {[
-                      { id: 'structure', icon: '🏗️', label: 'Kết Cấu & Mặt Sàn', desc: 'Chiều cao, tải trọng sàn, nền' },
-                      { id: 'racking', icon: '📦', label: 'Giá Kệ & Sức Chứa', desc: 'Loại kệ, tầng kệ, tải Pallet' },
-                      { id: 'dock', icon: '🚛', label: 'Cửa Dock & Sân Bãi', desc: 'Cửa xuất nhập, dock leveler' },
-                      { id: 'fire', icon: '🔥', label: 'PCCC & An Ninh', desc: 'Sprinkler, nghiệm thu, camera' },
-                      { id: 'wms', icon: '💻', label: 'WMS & Công Nghệ', desc: 'Phần mềm quản lý, Barcode, API' },
-                      { id: 'temperature', icon: '❄️', label: 'Nhiệt Độ & Năng Lượng', desc: 'Dải nhiệt, máy nén, ATS' },
-                      { id: 'cert', icon: '📜', label: 'Giấy Phép & Chứng Nhận', desc: 'ISO, HACCP, GDP, Bảo hiểm' },
-                    ].map((cat) => {
-                      const isActive = warehouseTechActiveCategory === cat.id;
-                      return (
-                        <button
-                          key={cat.id}
-                          type="button"
-                          onClick={() => setWarehouseTechActiveCategory(cat.id)}
-                          className={`w-full text-left p-2.5 rounded-xl transition-all cursor-pointer flex items-start gap-2.5 ${
-                            isActive
-                              ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
-                              : 'hover:bg-slate-200/70 text-slate-700'
-                          }`}
-                        >
-                          <span className="text-base mt-0.5">{cat.icon}</span>
-                          <div className="min-w-0 flex-1">
-                            <p className={`text-xs font-bold truncate ${isActive ? 'text-white' : 'text-slate-900'}`}>
-                              {cat.label}
-                            </p>
-                            <p className={`text-[10px] truncate ${isActive ? 'text-indigo-100' : 'text-slate-400'}`}>
-                              {cat.desc}
+                return (
+                  <div className="flex-1 flex overflow-hidden">
+                    {/* Left Column: Category Navigation (Tailored for this warehouse type) */}
+                    <div className="w-64 shrink-0 bg-slate-50/90 border-r border-slate-200 p-3 overflow-y-auto space-y-1.5">
+                      <div className="px-2 pb-1 flex items-center justify-between">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                          Nhóm Thông Số Kỹ Thuật
+                        </span>
+                        <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded-md border border-indigo-200">
+                          {techCategories.length} Nhóm
+                        </span>
+                      </div>
+
+                      {techCategories.map((cat) => {
+                        const isActive = activeCatId === cat.id;
+                        return (
+                          <button
+                            key={cat.id}
+                            type="button"
+                            onClick={() => setWarehouseTechActiveCategory(cat.id)}
+                            className={`w-full text-left p-2.5 rounded-xl transition-all cursor-pointer flex items-start gap-2.5 ${
+                              isActive
+                                ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
+                                : 'hover:bg-slate-200/70 text-slate-700'
+                            }`}
+                          >
+                            <span className="text-base mt-0.5">{cat.icon}</span>
+                            <div className="min-w-0 flex-1">
+                              <p className={`text-xs font-bold truncate ${isActive ? 'text-white' : 'text-slate-900'}`}>
+                                {cat.label}
+                              </p>
+                              <p className={`text-[10px] truncate ${isActive ? 'text-indigo-100' : 'text-slate-400'}`}>
+                                {cat.desc}
+                              </p>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Right Column: Active Category Form Fields */}
+                    <div className="flex-1 p-6 overflow-y-auto bg-white">
+                      {/* =========================================================================
+                          A. KHO THƯỜNG TIÊU CHUẨN (STANDARD GENERAL WAREHOUSE)
+                      ========================================================================= */}
+                      {activeCatId === 'structure' && (
+                        <div className="space-y-4 max-w-2xl">
+                          <div className="border-b border-slate-100 pb-3">
+                            <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                              <span>🏗️</span> Kết Cấu Xây Dựng & Mặt Sàn Kho
+                            </h4>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              Khai báo các thông số cơ bản về độ cao, tải trọng và xử lý bề mặt sàn.
                             </p>
                           </div>
-                        </button>
-                      );
-                    })}
-                  </div>
 
-                  {/* Right Column: Active Category Form Fields */}
-                  <div className="flex-1 p-6 overflow-y-auto bg-white">
-                    {/* 1. KẾT CẤU & MẶT SÀN */}
-                    {warehouseTechActiveCategory === 'structure' && (
-                      <div className="space-y-4 max-w-2xl">
-                        <div className="border-b border-slate-100 pb-3">
-                          <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
-                            <span>🏗️</span> Kết Cấu Xây Dựng & Mặt Sàn Kho
-                          </h4>
-                          <p className="text-xs text-slate-500 mt-0.5">
-                            Khai báo các thông số cơ bản về độ cao, tải trọng và xử lý bề mặt sàn.
-                          </p>
-                        </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-xs font-bold text-slate-700 block mb-1">
+                                Chiều cao thông thủy trần (Clear Height)
+                              </label>
+                              <div className="relative">
+                                <input
+                                  type="number"
+                                  step="0.1"
+                                  min="3"
+                                  max="30"
+                                  value={warehouseDetailModalData.techSpecs.clearHeight || 10.5}
+                                  onChange={(e) => {
+                                    const val = parseFloat(e.target.value) || 0;
+                                    setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, clearHeight: val } }) : prev);
+                                  }}
+                                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                />
+                                <span className="absolute right-3 top-2 text-xs font-bold text-slate-400">Mét (m)</span>
+                              </div>
+                              <span className="text-[10px] text-slate-400">Kho chuẩn Grade A thường từ 9.0m - 14.0m</span>
+                            </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-xs font-bold text-slate-700 block mb-1">
+                                Tải trọng thiết kế mặt sàn (Floor Load)
+                              </label>
+                              <div className="relative">
+                                <input
+                                  type="number"
+                                  step="0.5"
+                                  min="1"
+                                  max="20"
+                                  value={warehouseDetailModalData.techSpecs.floorLoad || 5.0}
+                                  onChange={(e) => {
+                                    const val = parseFloat(e.target.value) || 0;
+                                    setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, floorLoad: val } }) : prev);
+                                  }}
+                                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                />
+                                <span className="absolute right-3 top-2 text-xs font-bold text-slate-400">Tấn / m²</span>
+                              </div>
+                              <span className="text-[10px] text-slate-400">Tiêu chuẩn lưu kho thông thường: 3 - 5 tấn/m²</span>
+                            </div>
+                          </div>
+
                           <div>
                             <label className="text-xs font-bold text-slate-700 block mb-1">
-                              Chiều cao thông thủy trần (Clear Height)
+                              Loại hoàn thiện mặt sàn (Floor Type)
                             </label>
-                            <div className="relative">
+                            <select
+                              value={warehouseDetailModalData.techSpecs.floorType || 'Bê tông xoa Hardener chống bụi'}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, floorType: val } }) : prev);
+                              }}
+                              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                            >
+                              <option value="Bê tông xoa Hardener chống bụi">Bê tông xoa phẳng phủ phụ gia Hardener (Chống bụi tiêu chuẩn)</option>
+                              <option value="Bê tông sơn phủ Epoxy chống tĩnh điện">Bê tông sơn phủ Epoxy 3 lớp (Chống ẩm, kháng khuẩn, bụi tuyệt đối)</option>
+                              <option value="Bê tông siêu phẳng Superflat chuyên dụng VNA">Bê tông siêu phẳng Superflat (Phù hợp xe nâng tầm cao VNA)</option>
+                              <option value="Bê tông thường láng xi măng">Bê tông láng xi măng thông thường</option>
+                            </select>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-xs font-bold text-slate-700 block mb-1">
+                                Khẩu độ bước cột (Column Grid)
+                              </label>
                               <input
-                                type="number"
-                                step="0.1"
-                                min="3"
-                                max="30"
-                                value={warehouseDetailModalData.techSpecs.clearHeight || 10.5}
+                                type="text"
+                                value={warehouseDetailModalData.techSpecs.columnGrid || '12m × 18m'}
                                 onChange={(e) => {
-                                  const val = parseFloat(e.target.value) || 0;
-                                  setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, clearHeight: val } }) : prev);
+                                  const val = e.target.value;
+                                  setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, columnGrid: val } }) : prev);
                                 }}
+                                placeholder="VD: 12m × 18m, 18m × 24m hoặc Không cột"
                                 className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                               />
-                              <span className="absolute right-3 top-2 text-xs font-bold text-slate-400">Mét (m)</span>
                             </div>
-                            <span className="text-[10px] text-slate-400">Kho chuẩn Grade A thường từ 9.0m - 14.0m</span>
+
+                            <div>
+                              <label className="text-xs font-bold text-slate-700 block mb-1">
+                                Hệ thống thông gió làm mát
+                              </label>
+                              <input
+                                type="text"
+                                value={warehouseDetailModalData.techSpecs.ventilation || 'Quả cầu hút nhiệt & Lam gió tự nhiên'}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, ventilation: val } }) : prev);
+                                }}
+                                placeholder="VD: Quạt trần HVLS, Quả cầu xoay, Quạt hút..."
+                                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {activeCatId === 'racking' && (
+                        <div className="space-y-4 max-w-2xl">
+                          <div className="border-b border-slate-100 pb-3">
+                            <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                              <span>📦</span> Hệ Thống Giá Kệ & Sức Chứa Pallet
+                            </h4>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              Chi tiết cấu hình kệ Racking, số tầng và giới hạn tải trọng mỗi vị trí pallet.
+                            </p>
                           </div>
 
                           <div>
-                            <label className="text-xs font-bold text-slate-700 block mb-1">
-                              Tải trọng thiết kế mặt sàn (Floor Load)
+                            <label className="text-xs font-bold text-slate-700 block mb-2">
+                              Các loại kệ Racking trang bị tại cơ sở:
                             </label>
-                            <div className="relative">
+                            <div className="grid grid-cols-2 gap-2">
+                              {['Kệ Selective', 'Kệ Drive-in', 'Kệ Double Deep', 'Kệ Narrow Aisle (VNA)', 'Kệ Sàn Tầng Lửng (Mezzanine)', 'Sàn xếp khối Floor Block'].map((rack) => {
+                                const list = warehouseDetailModalData.techSpecs.rackingTypes || [];
+                                const isChecked = list.includes(rack);
+                                return (
+                                  <label
+                                    key={rack}
+                                    className={`flex items-center gap-2.5 p-2.5 rounded-xl border cursor-pointer transition-all ${
+                                      isChecked ? 'bg-indigo-50 border-indigo-200 text-indigo-950 font-bold' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                                    }`}
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={isChecked}
+                                      onChange={(e) => {
+                                        const updated = e.target.checked
+                                          ? [...list, rack]
+                                          : list.filter(r => r !== rack);
+                                        setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, rackingTypes: updated } }) : prev);
+                                      }}
+                                      className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500"
+                                    />
+                                    <span className="text-xs">{rack}</span>
+                                  </label>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-xs font-bold text-slate-700 block mb-1">
+                                Số tầng kệ lưu trữ (Racking Levels)
+                              </label>
                               <input
                                 type="number"
-                                step="0.5"
                                 min="1"
-                                max="20"
-                                value={warehouseDetailModalData.techSpecs.floorLoad || 5.0}
+                                max="15"
+                                value={warehouseDetailModalData.techSpecs.rackingLevels || 5}
                                 onChange={(e) => {
-                                  const val = parseFloat(e.target.value) || 0;
-                                  setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, floorLoad: val } }) : prev);
+                                  const val = parseInt(e.target.value) || 1;
+                                  setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, rackingLevels: val } }) : prev);
                                 }}
                                 className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                               />
-                              <span className="absolute right-3 top-2 text-xs font-bold text-slate-400">Tấn / m²</span>
                             </div>
-                            <span className="text-[10px] text-slate-400">Tiêu chuẩn lưu kho thông thường: 3 - 5 tấn/m²</span>
+
+                            <div>
+                              <label className="text-xs font-bold text-slate-700 block mb-1">
+                                Tải trọng thiết kế tối đa mỗi Pallet
+                              </label>
+                              <div className="relative">
+                                <input
+                                  type="number"
+                                  step="50"
+                                  min="200"
+                                  max="3000"
+                                  value={warehouseDetailModalData.techSpecs.palletLoadLimit || 1000}
+                                  onChange={(e) => {
+                                    const val = parseInt(e.target.value) || 0;
+                                    setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, palletLoadLimit: val } }) : prev);
+                                  }}
+                                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                />
+                                <span className="absolute right-3 top-2 text-xs font-bold text-slate-400">Kg / Pallet</span>
+                              </div>
+                            </div>
                           </div>
-                        </div>
 
-                        <div>
-                          <label className="text-xs font-bold text-slate-700 block mb-1">
-                            Loại hoàn thiện mặt sàn (Floor Type)
-                          </label>
-                          <select
-                            value={warehouseDetailModalData.techSpecs.floorType || 'Bê tông xoa Hardener chống bụi'}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, floorType: val } }) : prev);
-                            }}
-                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
-                          >
-                            <option value="Bê tông xoa Hardener chống bụi">Bê tông xoa phẳng phủ phụ gia Hardener (Chống bụi tiêu chuẩn)</option>
-                            <option value="Bê tông sơn phủ Epoxy chống tĩnh điện">Bê tông sơn phủ Epoxy 3 lớp (Chống ẩm, kháng khuẩn, bụi tuyệt đối)</option>
-                            <option value="Bê tông siêu phẳng Superflat chuyên dụng VNA">Bê tông siêu phẳng Superflat (Phù hợp xe nâng tầm cao VNA)</option>
-                            <option value="Bê tông thường láng xi măng">Bê tông láng xi măng thông thường</option>
-                          </select>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
                             <label className="text-xs font-bold text-slate-700 block mb-1">
-                              Khẩu độ bước cột (Column Grid)
+                              Quy cách kích thước Pallet tương thích:
                             </label>
                             <input
                               type="text"
-                              value={warehouseDetailModalData.techSpecs.columnGrid || '12m × 18m'}
+                              value={(warehouseDetailModalData.techSpecs.compatiblePalletSizes || []).join(', ')}
                               onChange={(e) => {
-                                const val = e.target.value;
-                                setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, columnGrid: val } }) : prev);
+                                const arr = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
+                                setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, compatiblePalletSizes: arr } }) : prev);
                               }}
-                              placeholder="VD: 12m × 18m, 18m × 24m hoặc Không cột"
-                              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="text-xs font-bold text-slate-700 block mb-1">
-                              Hệ thống thông gió làm mát
-                            </label>
-                            <input
-                              type="text"
-                              value={warehouseDetailModalData.techSpecs.ventilation || 'Quả cầu xoay nhiệt & Lam gió tự nhiên'}
-                              onChange={(e) => {
-                                const val = e.target.value;
-                                setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, ventilation: val } }) : prev);
-                              }}
-                              placeholder="VD: Quạt trần HVLS, Quả cầu xoay, Quạt hút..."
+                              placeholder="VD: 1.0m × 1.2m (ISO standard), 1.1m × 1.1m"
                               className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                             />
                           </div>
                         </div>
-                      </div>
-                    )}
+                      )}
 
-                    {/* 2. GIÁ KỆ & SỨC CHỨA */}
-                    {warehouseTechActiveCategory === 'racking' && (
-                      <div className="space-y-4 max-w-2xl">
-                        <div className="border-b border-slate-100 pb-3">
-                          <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
-                            <span>📦</span> Hệ Thống Giá Kệ & Sức Chứa Pallet
-                          </h4>
-                          <p className="text-xs text-slate-500 mt-0.5">
-                            Chi tiết cấu hình kệ Racking, số tầng và giới hạn tải trọng mỗi vị trí pallet.
-                          </p>
-                        </div>
-
-                        <div>
-                          <label className="text-xs font-bold text-slate-700 block mb-2">
-                            Các loại kệ Racking trang bị tại cơ sở:
-                          </label>
-                          <div className="grid grid-cols-2 gap-2">
-                            {['Kệ Selective', 'Kệ Drive-in', 'Kệ Double Deep', 'Kệ Narrow Aisle (VNA)', 'Kệ Sàn Tầng Lửng (Mezzanine)', 'Sàn xếp khối Floor Block'].map((rack) => {
-                              const list = warehouseDetailModalData.techSpecs.rackingTypes || [];
-                              const isChecked = list.includes(rack);
-                              return (
-                                <label
-                                  key={rack}
-                                  className={`flex items-center gap-2.5 p-2.5 rounded-xl border cursor-pointer transition-all ${
-                                    isChecked ? 'bg-indigo-50 border-indigo-200 text-indigo-950 font-bold' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
-                                  }`}
-                                >
-                                  <input
-                                    type="checkbox"
-                                    checked={isChecked}
-                                    onChange={(e) => {
-                                      const updated = e.target.checked
-                                        ? [...list, rack]
-                                        : list.filter(r => r !== rack);
-                                      setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, rackingTypes: updated } }) : prev);
-                                    }}
-                                    className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500"
-                                  />
-                                  <span className="text-xs">{rack}</span>
-                                </label>
-                              );
-                            })}
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div>
-                            <label className="text-xs font-bold text-slate-700 block mb-1">
-                              Số tầng kệ lưu trữ (Racking Levels)
-                            </label>
-                            <input
-                              type="number"
-                              min="1"
-                              max="15"
-                              value={warehouseDetailModalData.techSpecs.rackingLevels || 5}
-                              onChange={(e) => {
-                                const val = parseInt(e.target.value) || 1;
-                                setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, rackingLevels: val } }) : prev);
-                              }}
-                              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                            />
-                            <span className="text-[10px] text-slate-400">Thường từ 4 - 7 tầng</span>
+                      {activeCatId === 'dock' && (
+                        <div className="space-y-4 max-w-2xl">
+                          <div className="border-b border-slate-100 pb-3">
+                            <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                              <span>🚛</span> Cửa Dock Xuất Nhập & Sân Bãi Xe Container
+                            </h4>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              Cấu hình năng lực tiếp nhận xe tải lớn, container 20ft/40ft và cầu nâng thủy lực.
+                            </p>
                           </div>
 
-                          <div>
-                            <label className="text-xs font-bold text-slate-700 block mb-1">
-                              Tải trọng thiết kế tối đa mỗi Pallet
-                            </label>
-                            <div className="relative">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-xs font-bold text-slate-700 block mb-1">
+                                Số lượng cửa Dock bốc xếp
+                              </label>
                               <input
                                 type="number"
-                                step="50"
-                                min="200"
-                                max="3000"
-                                value={warehouseDetailModalData.techSpecs.palletLoadLimit || 1000}
+                                min="1"
+                                max="100"
+                                value={warehouseDetailModalData.techSpecs.dockDoorsCount || 6}
                                 onChange={(e) => {
-                                  const val = parseInt(e.target.value) || 0;
-                                  setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, palletLoadLimit: val } }) : prev);
+                                  const val = parseInt(e.target.value) || 1;
+                                  setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, dockDoorsCount: val } }) : prev);
                                 }}
                                 className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                               />
-                              <span className="absolute right-3 top-2 text-xs font-bold text-slate-400">Kg / Pallet</span>
                             </div>
-                            <span className="text-[10px] text-slate-400">Tiêu chuẩn: 800kg - 1,200kg / pallet</span>
+
+                            <div className="space-y-2 pt-4">
+                              <label className="flex items-center gap-2.5 cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={warehouseDetailModalData.techSpecs.hasDockLeveler ?? true}
+                                  onChange={(e) => {
+                                    const checked = e.target.checked;
+                                    setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, hasDockLeveler: checked } }) : prev);
+                                  }}
+                                  className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500"
+                                />
+                                <span className="text-xs font-bold text-slate-800">Trang bị Cầu nâng thủy lực (Dock Leveler)</span>
+                              </label>
+                            </div>
                           </div>
-                        </div>
 
-                        <div>
-                          <label className="text-xs font-bold text-slate-700 block mb-1">
-                            Quy cách kích thước Pallet tương thích:
-                          </label>
-                          <input
-                            type="text"
-                            value={(warehouseDetailModalData.techSpecs.compatiblePalletSizes || []).join(', ')}
-                            onChange={(e) => {
-                              const arr = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
-                              setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, compatiblePalletSizes: arr } }) : prev);
-                            }}
-                            placeholder="VD: 1.0m × 1.2m (ISO standard), 1.1m × 1.1m"
-                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    {/* 3. CỬA DOCK & SÂN BÃI */}
-                    {warehouseTechActiveCategory === 'dock' && (
-                      <div className="space-y-4 max-w-2xl">
-                        <div className="border-b border-slate-100 pb-3">
-                          <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
-                            <span>🚛</span> Cửa Dock Xuất Nhập & Sân Bãi Xe Container
-                          </h4>
-                          <p className="text-xs text-slate-500 mt-0.5">
-                            Cấu hình năng lực tiếp nhận xe tải lớn, container 20ft/40ft và cầu nâng thủy lực.
-                          </p>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
                             <label className="text-xs font-bold text-slate-700 block mb-1">
-                              Số lượng cửa Dock bốc xếp
-                            </label>
-                            <input
-                              type="number"
-                              min="1"
-                              max="100"
-                              value={warehouseDetailModalData.techSpecs.dockDoorsCount || 6}
-                              onChange={(e) => {
-                                const val = parseInt(e.target.value) || 1;
-                                setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, dockDoorsCount: val } }) : prev);
-                              }}
-                              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                            />
-                            <span className="text-[10px] text-slate-400">Số cửa mở cùng lúc tiếp nhận xe</span>
-                          </div>
-
-                          <div className="space-y-2 pt-4">
-                            <label className="flex items-center gap-2.5 cursor-pointer">
-                              <input
-                                type="checkbox"
-                                checked={warehouseDetailModalData.techSpecs.hasDockLeveler ?? true}
-                                onChange={(e) => {
-                                  const checked = e.target.checked;
-                                  setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, hasDockLeveler: checked } }) : prev);
-                                }}
-                                className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500"
-                              />
-                              <span className="text-xs font-bold text-slate-800">Trang bị Cầu nâng thủy lực (Dock Leveler)</span>
-                            </label>
-
-                            <label className="flex items-center gap-2.5 cursor-pointer">
-                              <input
-                                type="checkbox"
-                                checked={warehouseDetailModalData.techSpecs.hasDockShelter ?? false}
-                                onChange={(e) => {
-                                  const checked = e.target.checked;
-                                  setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, hasDockShelter: checked } }) : prev);
-                                }}
-                                className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500"
-                              />
-                              <span className="text-xs font-bold text-slate-800">Trùm đệm khí cửa cont (Dock Shelter giữ nhiệt)</span>
-                            </label>
-                          </div>
-                        </div>
-
-                        <div>
-                          <label className="text-xs font-bold text-slate-700 block mb-1">
-                            Không gian sân bãi quay đầu xe Container
-                          </label>
-                          <input
-                            type="text"
-                            value={warehouseDetailModalData.techSpecs.yardTurnaround || 'Sân bê tông rộng 35m, xe cont 40ft/45ft quay đầu dễ dàng 24/7'}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, yardTurnaround: val } }) : prev);
-                            }}
-                            placeholder="VD: Sân rộng 35m quay đầu cont 40ft/45ft..."
-                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="text-xs font-bold text-slate-700 block mb-1">
-                            Khung giờ tiếp nhận xe tải & Container
-                          </label>
-                          <input
-                            type="text"
-                            value={warehouseDetailModalData.techSpecs.operatingHoursTrucks || 'Tiếp nhận 24/7, không bị cấm giờ tải trọng'}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, operatingHoursTrucks: val } }) : prev);
-                            }}
-                            placeholder="VD: 24/7 không cấm giờ, hoặc Cấm giờ cao điểm 6h-8h / 16h-18h"
-                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    {/* 4. PCCC & AN NINH */}
-                    {warehouseTechActiveCategory === 'fire' && (
-                      <div className="space-y-4 max-w-2xl">
-                        <div className="border-b border-slate-100 pb-3">
-                          <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
-                            <span>🔥</span> Hệ Thống Phòng Cháy Chữa Cháy (PCCC) & An Ninh
-                          </h4>
-                          <p className="text-xs text-slate-500 mt-0.5">
-                            Tiêu chuẩn an toàn PCCC là yếu tố quyết định để doanh nghiệp FDI / Brand lớn thuê kho.
-                          </p>
-                        </div>
-
-                        <div>
-                          <label className="text-xs font-bold text-slate-700 block mb-1">
-                            Hệ thống PCCC trang bị tại kho
-                          </label>
-                          <select
-                            value={warehouseDetailModalData.techSpecs.fireProtectionSystem || 'PCCC tự động Sprinkler (Đã nghiệm thu PCCC)'}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, fireProtectionSystem: val } }) : prev);
-                            }}
-                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
-                          >
-                            <option value="PCCC tự động Sprinkler (Đã nghiệm thu PCCC)">Hệ thống PCCC tự động đầu phun Sprinkler (Chuẩn QCVN 06:2022)</option>
-                            <option value="Họng nước vách tường & Hệ thống cảnh báo khói tự động">Họng nước vách tường & Đầu báo khói báo nhiệt tự động</option>
-                            <option value="Hệ thống PCCC Foam / Khí CO2 chuyên dụng hóa chất">Hệ thống bọt Foam / Khí CO2 chuyên dụng (Kho hóa chất / Pin lithium)</option>
-                            <option value="Bình bọt xách tay & Tiêu lệnh cơ bản">Bình chữa cháy xách tay và tiêu lệnh nội bộ</option>
-                          </select>
-                        </div>
-
-                        <div>
-                          <label className="text-xs font-bold text-slate-700 block mb-1">
-                            Số biên bản / Giấy phép nghiệm thu PCCC (Nếu có)
-                          </label>
-                          <input
-                            type="text"
-                            value={warehouseDetailModalData.techSpecs.fireProtectionApprovalNo || 'Số 148/TD-PCCC cấp bởi Cảnh sát PCCC'}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, fireProtectionApprovalNo: val } }) : prev);
-                            }}
-                            placeholder="VD: Số 148/TD-PCCC cấp bởi Cảnh sát PCCC tỉnh..."
-                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="text-xs font-bold text-slate-700 block mb-1">
-                            Camera giám sát an ninh (CCTV)
-                          </label>
-                          <input
-                            type="text"
-                            value={warehouseDetailModalData.techSpecs.cctvSurveillance || 'CCTV 24/7 phủ kín lối đi & cửa dock, lưu trữ video 60 ngày'}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, cctvSurveillance: val } }) : prev);
-                            }}
-                            placeholder="VD: CCTV AI 24/7 full kho trong & ngoài..."
-                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="text-xs font-bold text-slate-700 block mb-1">
-                            Lực lượng an ninh & Bảo vệ
-                          </label>
-                          <input
-                            type="text"
-                            value={warehouseDetailModalData.techSpecs.securityGuards || 'Bảo vệ chuyên nghiệp 2 lớp 24/7, cổng barie kiểm soát'}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, securityGuards: val } }) : prev);
-                            }}
-                            placeholder="VD: Đội bảo vệ chuyên nghiệp trực 24/7..."
-                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    {/* 5. WMS & CÔNG NGHỆ */}
-                    {warehouseTechActiveCategory === 'wms' && (
-                      <div className="space-y-4 max-w-2xl">
-                        <div className="border-b border-slate-100 pb-3">
-                          <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
-                            <span>💻</span> Hệ Thống WMS Quản Lý Kho & Công Nghệ Số Hóa
-                          </h4>
-                          <p className="text-xs text-slate-500 mt-0.5">
-                            Số hóa vận hành, quản lý SKU, hạn sử dụng (FEFO/FIFO) và cổng thông tin khách hàng.
-                          </p>
-                        </div>
-
-                        <div>
-                          <label className="text-xs font-bold text-slate-700 block mb-1">
-                            Tên phần mềm Quản lý Kho (WMS) đang ứng dụng
-                          </label>
-                          <input
-                            type="text"
-                            value={warehouseDetailModalData.techSpecs.wmsSoftwareName || 'WMS Real-time Cloud'}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, wmsSoftwareName: val } }) : prev);
-                            }}
-                            placeholder="VD: FlexGO WMS, Infor, Manhattan, SAP WM, Odoo..."
-                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="text-xs font-bold text-slate-700 block mb-2">
-                            Công nghệ quét mã & Nhận diện:
-                          </label>
-                          <div className="flex flex-wrap gap-2">
-                            {['Barcode 1D/2D', 'Mã QR Code', 'RFID UHF Tự Động', 'Pick-to-Light'].map((tech) => {
-                              const list = warehouseDetailModalData.techSpecs.scanningTechnologies || [];
-                              const isChecked = list.includes(tech);
-                              return (
-                                <label
-                                  key={tech}
-                                  className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl border text-xs cursor-pointer transition-all ${
-                                    isChecked ? 'bg-indigo-50 border-indigo-200 text-indigo-950 font-bold' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
-                                  }`}
-                                >
-                                  <input
-                                    type="checkbox"
-                                    checked={isChecked}
-                                    onChange={(e) => {
-                                      const updated = e.target.checked ? [...list, tech] : list.filter(t => t !== tech);
-                                      setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, scanningTechnologies: updated } }) : prev);
-                                    }}
-                                    className="w-3.5 h-3.5 rounded text-indigo-600 focus:ring-indigo-500"
-                                  />
-                                  <span>{tech}</span>
-                                </label>
-                              );
-                            })}
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                          <label className="flex items-start gap-3 p-3 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-white cursor-pointer transition-colors">
-                            <input
-                              type="checkbox"
-                              checked={warehouseDetailModalData.techSpecs.hasApiIntegration ?? true}
-                              onChange={(e) => {
-                                const checked = e.target.checked;
-                                setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, hasApiIntegration: checked } }) : prev);
-                              }}
-                              className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 mt-0.5"
-                            />
-                            <div>
-                              <span className="text-xs font-bold text-slate-800 block">Tích hợp API với ERP</span>
-                              <span className="text-[11px] text-slate-500">Hỗ trợ REST API đồng bộ đơn hàng với SAP, Oracle, Bravo, sàn TMĐT...</span>
-                            </div>
-                          </label>
-
-                          <label className="flex items-start gap-3 p-3 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-white cursor-pointer transition-colors">
-                            <input
-                              type="checkbox"
-                              checked={warehouseDetailModalData.techSpecs.realtimeWebPortal ?? true}
-                              onChange={(e) => {
-                                const checked = e.target.checked;
-                                setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, realtimeWebPortal: checked } }) : prev);
-                              }}
-                              className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 mt-0.5"
-                            />
-                            <div>
-                              <span className="text-xs font-bold text-slate-800 block">Web Portal cho Khách hàng</span>
-                              <span className="text-[11px] text-slate-500">Cung cấp portal riêng cho khách hàng theo dõi tồn kho real-time 24/7.</span>
-                            </div>
-                          </label>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* 6. NHIỆT ĐỘ & NĂNG LƯỢNG */}
-                    {warehouseTechActiveCategory === 'temperature' && (
-                      <div className="space-y-4 max-w-2xl">
-                        <div className="border-b border-slate-100 pb-3">
-                          <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
-                            <span>❄️</span> Kiểm Soát Nhiệt Độ & Nguồn Điện Dự Phòng
-                          </h4>
-                          <p className="text-xs text-slate-500 mt-0.5">
-                            Đặc biệt quan trọng cho kho lạnh, kho mát thực phẩm, dược phẩm và nguyên liệu nhạy cảm nhiệt.
-                          </p>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div>
-                            <label className="text-xs font-bold text-slate-700 block mb-1">
-                              Dải nhiệt độ vận hành duy trì
+                              Không gian sân bãi quay đầu xe Container
                             </label>
                             <input
                               type="text"
-                              value={warehouseDetailModalData.techSpecs.temperatureRange || (warehouseDetailModalData.isColdStorage ? '+2°C ~ +8°C' : '+18°C ~ +25°C')}
+                              value={warehouseDetailModalData.techSpecs.yardTurnaround || 'Sân bê tông rộng 35m, xe cont 40ft/45ft quay đầu dễ dàng 24/7'}
                               onChange={(e) => {
                                 const val = e.target.value;
-                                setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, temperatureRange: val } }) : prev);
+                                setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, yardTurnaround: val } }) : prev);
                               }}
-                              placeholder="VD: +2°C ~ +8°C, -18°C ~ -25°C hoặc Nhiệt độ thường"
                               className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                             />
                           </div>
 
                           <div>
                             <label className="text-xs font-bold text-slate-700 block mb-1">
-                              Hãng máy nén & Cụm dàn lạnh (Nếu có)
+                              Khung giờ tiếp nhận xe tải & Container
                             </label>
                             <input
                               type="text"
-                              value={warehouseDetailModalData.techSpecs.coolingSystemBrand || 'Bitzer (Đức) / Dàn lạnh Guentner'}
+                              value={warehouseDetailModalData.techSpecs.operatingHoursTrucks || 'Tiếp nhận 24/7, không bị cấm giờ tải trọng'}
                               onChange={(e) => {
                                 const val = e.target.value;
-                                setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, coolingSystemBrand: val } }) : prev);
+                                setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, operatingHoursTrucks: val } }) : prev);
                               }}
-                              placeholder="VD: Bitzer, Copeland, Danfoss..."
                               className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                             />
                           </div>
                         </div>
+                      )}
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                          <label className="flex items-start gap-3 p-3 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-white cursor-pointer transition-colors">
+                      {activeCatId === 'fire' && (
+                        <div className="space-y-4 max-w-2xl">
+                          <div className="border-b border-slate-100 pb-3">
+                            <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                              <span>🔥</span> Hệ Thống Phòng Cháy Chữa Cháy (PCCC) & An Ninh
+                            </h4>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              Tiêu chuẩn an toàn PCCC và camera an ninh 24/7.
+                            </p>
+                          </div>
+
+                          <div>
+                            <label className="text-xs font-bold text-slate-700 block mb-1">
+                              Hệ thống PCCC trang bị tại kho
+                            </label>
+                            <select
+                              value={warehouseDetailModalData.techSpecs.fireProtectionSystem || 'PCCC tự động Sprinkler (Đã nghiệm thu PCCC)'}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, fireProtectionSystem: val } }) : prev);
+                              }}
+                              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                            >
+                              <option value="PCCC tự động Sprinkler (Đã nghiệm thu PCCC)">Hệ thống PCCC tự động đầu phun Sprinkler (Chuẩn QCVN 06:2022)</option>
+                              <option value="Họng nước vách tường & Hệ thống cảnh báo khói tự động">Họng nước vách tường & Đầu báo khói báo nhiệt tự động</option>
+                              <option value="Bình bọt xách tay & Tiêu lệnh cơ bản">Bình chữa cháy xách tay và tiêu lệnh nội bộ</option>
+                            </select>
+                          </div>
+
+                          <div>
+                            <label className="text-xs font-bold text-slate-700 block mb-1">
+                              Số biên bản / Giấy phép nghiệm thu PCCC (Nếu có)
+                            </label>
+                            <input
+                              type="text"
+                              value={warehouseDetailModalData.techSpecs.fireProtectionApprovalNo || 'Số 148/TD-PCCC cấp bởi Cảnh sát PCCC'}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, fireProtectionApprovalNo: val } }) : prev);
+                              }}
+                              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="text-xs font-bold text-slate-700 block mb-1">
+                              Camera giám sát an ninh (CCTV)
+                            </label>
+                            <input
+                              type="text"
+                              value={warehouseDetailModalData.techSpecs.cctvSurveillance || 'CCTV 24/7 phủ kín lối đi & cửa dock, lưu trữ video 60 ngày'}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, cctvSurveillance: val } }) : prev);
+                              }}
+                              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="text-xs font-bold text-slate-700 block mb-1">
+                              Lực lượng an ninh & Bảo vệ
+                            </label>
+                            <input
+                              type="text"
+                              value={warehouseDetailModalData.techSpecs.securityGuards || 'Bảo vệ chuyên nghiệp 2 lớp 24/7, cổng barie kiểm soát'}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, securityGuards: val } }) : prev);
+                              }}
+                              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {activeCatId === 'wms' && (
+                        <div className="space-y-4 max-w-2xl">
+                          <div className="border-b border-slate-100 pb-3">
+                            <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                              <span>💻</span> Hệ Thống WMS Quản Lý Kho & Công Nghệ Số Hóa
+                            </h4>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              Số hóa vận hành, quản lý SKU và cổng thông tin khách hàng.
+                            </p>
+                          </div>
+
+                          <div>
+                            <label className="text-xs font-bold text-slate-700 block mb-1">
+                              Tên phần mềm Quản lý Kho (WMS) đang ứng dụng
+                            </label>
+                            <input
+                              type="text"
+                              value={warehouseDetailModalData.techSpecs.wmsSoftwareName || 'WMS Real-time Cloud'}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, wmsSoftwareName: val } }) : prev);
+                              }}
+                              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="text-xs font-bold text-slate-700 block mb-2">
+                              Công nghệ quét mã & Nhận diện:
+                            </label>
+                            <div className="flex flex-wrap gap-2">
+                              {['Barcode 1D/2D', 'Mã QR Code', 'RFID UHF Tự Động', 'Pick-to-Light'].map((tech) => {
+                                const list = warehouseDetailModalData.techSpecs.scanningTechnologies || [];
+                                const isChecked = list.includes(tech);
+                                return (
+                                  <label
+                                    key={tech}
+                                    className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl border text-xs cursor-pointer transition-all ${
+                                      isChecked ? 'bg-indigo-50 border-indigo-200 text-indigo-950 font-bold' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                                    }`}
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={isChecked}
+                                      onChange={(e) => {
+                                        const updated = e.target.checked ? [...list, tech] : list.filter(t => t !== tech);
+                                        setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, scanningTechnologies: updated } }) : prev);
+                                      }}
+                                      className="w-3.5 h-3.5 rounded text-indigo-600 focus:ring-indigo-500"
+                                    />
+                                    <span>{tech}</span>
+                                  </label>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                            <label className="flex items-start gap-3 p-3 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-white cursor-pointer transition-colors">
+                              <input
+                                type="checkbox"
+                                checked={warehouseDetailModalData.techSpecs.hasApiIntegration ?? true}
+                                onChange={(e) => {
+                                  const checked = e.target.checked;
+                                  setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, hasApiIntegration: checked } }) : prev);
+                                }}
+                                className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 mt-0.5"
+                              />
+                              <div>
+                                <span className="text-xs font-bold text-slate-800 block">Tích hợp API với ERP</span>
+                                <span className="text-[11px] text-slate-500">Hỗ trợ REST API đồng bộ đơn hàng với SAP, Oracle, Odoo...</span>
+                              </div>
+                            </label>
+
+                            <label className="flex items-start gap-3 p-3 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-white cursor-pointer transition-colors">
+                              <input
+                                type="checkbox"
+                                checked={warehouseDetailModalData.techSpecs.realtimeWebPortal ?? true}
+                                onChange={(e) => {
+                                  const checked = e.target.checked;
+                                  setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, realtimeWebPortal: checked } }) : prev);
+                                }}
+                                className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 mt-0.5"
+                              />
+                              <div>
+                                <span className="text-xs font-bold text-slate-800 block">Web Portal cho Khách hàng</span>
+                                <span className="text-[11px] text-slate-500">Theo dõi tồn kho real-time 24/7.</span>
+                              </div>
+                            </label>
+                          </div>
+                        </div>
+                      )}
+
+                      {activeCatId === 'cert' && (
+                        <div className="space-y-4 max-w-2xl">
+                          <div className="border-b border-slate-100 pb-3">
+                            <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                              <span>📜</span> Giấy Phép, Tiêu Chuẩn Chất Lượng & Bảo Hiểm
+                            </h4>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              Các chứng nhận quốc tế chứng minh năng lực vận hành.
+                            </p>
+                          </div>
+
+                          <div>
+                            <label className="text-xs font-bold text-slate-700 block mb-2">
+                              Các chứng nhận tiêu chuẩn chất lượng cơ sở đạt được:
+                            </label>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                              {['ISO 9001:2015', 'ISO 14001', 'LEED Gold', 'OHSAS 18001'].map((cert) => {
+                                const list = warehouseDetailModalData.techSpecs.certifications || [];
+                                const isChecked = list.includes(cert);
+                                return (
+                                  <label
+                                    key={cert}
+                                    className={`flex items-center gap-2 p-2 rounded-xl border text-xs cursor-pointer transition-all ${
+                                      isChecked ? 'bg-indigo-50 border-indigo-200 text-indigo-950 font-bold' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                                    }`}
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={isChecked}
+                                      onChange={(e) => {
+                                        const updated = e.target.checked ? [...list, cert] : list.filter(c => c !== cert);
+                                        setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, certifications: updated } }) : prev);
+                                      }}
+                                      className="w-3.5 h-3.5 rounded text-indigo-600 focus:ring-indigo-500"
+                                    />
+                                    <span>{cert}</span>
+                                  </label>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          <div className="p-3.5 bg-emerald-50/70 border border-emerald-200 rounded-2xl flex items-start gap-3">
                             <input
                               type="checkbox"
-                              checked={warehouseDetailModalData.techSpecs.hasAutoDataLogger ?? true}
+                              checked={warehouseDetailModalData.techSpecs.hasFullInsurance ?? true}
                               onChange={(e) => {
                                 const checked = e.target.checked;
-                                setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, hasAutoDataLogger: checked } }) : prev);
+                                setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, hasFullInsurance: checked } }) : prev);
                               }}
+                              className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 mt-0.5"
+                            />
+                            <div>
+                              <span className="text-xs font-bold text-emerald-950 block">Bảo hiểm kho bãi & Trách nhiệm dân sự 100%</span>
+                              <span className="text-[11px] text-emerald-800">Cơ sở được mua bảo hiểm cháy nổ bắt buộc và bảo hiểm trách nhiệm trông coi hàng hóa 100%.</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* =========================================================================
+                          B. KHO LẠNH & KHO MÁT (COLD STORAGE)
+                      ========================================================================= */}
+                      {activeCatId === 'cold_temperature' && (
+                        <div className="space-y-4 max-w-2xl">
+                          <div className="border-b border-slate-100 pb-3">
+                            <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                              <span>❄️</span> Kiểm Soát Dải Nhiệt Độ & Cụm Máy Lạnh
+                            </h4>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              Dải nhiệt độ, dàn lạnh, cảm biến IoT và máy phát điện dự phòng ATS.
+                            </p>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-xs font-bold text-slate-700 block mb-1">Dải nhiệt độ duy trì</label>
+                              <input
+                                type="text"
+                                value={warehouseDetailModalData.techSpecs.temperatureRange || '-25°C ~ -18°C (Đông) / +2°C ~ +8°C (Mát)'}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, temperatureRange: val } }) : prev);
+                                }}
+                                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="text-xs font-bold text-slate-700 block mb-1">Thương hiệu máy nén & dàn lạnh</label>
+                              <input
+                                type="text"
+                                value={warehouseDetailModalData.techSpecs.coolingSystemBrand || 'Bitzer (Đức) / Dàn lạnh Guentner'}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, coolingSystemBrand: val } }) : prev);
+                                }}
+                                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                            <label className="flex items-start gap-3 p-3 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-white cursor-pointer transition-colors">
+                              <input
+                                type="checkbox"
+                                checked={warehouseDetailModalData.techSpecs.hasAutoDataLogger ?? true}
+                                onChange={(e) => setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, hasAutoDataLogger: e.target.checked } }) : prev)}
+                                className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 mt-0.5"
+                              />
+                              <div>
+                                <span className="text-xs font-bold text-slate-800 block">Cảm biến IoT & Data Logger</span>
+                                <span className="text-[11px] text-slate-500">Tự động ghi biểu đồ nhiệt độ và gửi cảnh báo SMS/Email 24/7.</span>
+                              </div>
+                            </label>
+
+                            <label className="flex items-start gap-3 p-3 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-white cursor-pointer transition-colors">
+                              <input
+                                type="checkbox"
+                                checked={warehouseDetailModalData.techSpecs.hasBackupGeneratorAts ?? true}
+                                onChange={(e) => setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, hasBackupGeneratorAts: e.target.checked } }) : prev)}
+                                className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 mt-0.5"
+                              />
+                              <div>
+                                <span className="text-xs font-bold text-slate-800 block">Máy phát điện tự động ATS</span>
+                                <span className="text-[11px] text-slate-500">Tự động đóng điện ATS trong vòng 15 giây khi mất điện lưới.</span>
+                              </div>
+                            </label>
+                          </div>
+                        </div>
+                      )}
+
+                      {activeCatId === 'cold_structure' && (
+                        <div className="space-y-4 max-w-2xl">
+                          <div className="border-b border-slate-100 pb-3">
+                            <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                              <span>🏗️</span> Kết Cấu Panel & Vỏ Kho Cách Nhiệt
+                            </h4>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              Panel PIR/PU, sưởi nền chống đông cứng và phòng đệm giữ nhiệt Anteroom.
+                            </p>
+                          </div>
+
+                          <div>
+                            <label className="text-xs font-bold text-slate-700 block mb-1">Loại Panel cách nhiệt vỏ kho</label>
+                            <input
+                              type="text"
+                              value={warehouseDetailModalData.techSpecs.insulationPanelType || 'Panel PIR chống cháy độ dày 125mm - 150mm'}
+                              onChange={(e) => setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, insulationPanelType: e.target.value } }) : prev)}
+                              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                            <label className="flex items-start gap-3 p-3 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-white cursor-pointer transition-colors">
+                              <input
+                                type="checkbox"
+                                checked={warehouseDetailModalData.techSpecs.hasUnderfloorHeating ?? true}
+                                onChange={(e) => setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, hasUnderfloorHeating: e.target.checked } }) : prev)}
+                                className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 mt-0.5"
+                              />
+                              <div>
+                                <span className="text-xs font-bold text-slate-800 block">Sưởi nền chống đông băng</span>
+                                <span className="text-[11px] text-slate-500">Hệ thống sưởi dưới đáy bê tông chống phù nề nứt sàn lạnh.</span>
+                              </div>
+                            </label>
+
+                            <label className="flex items-start gap-3 p-3 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-white cursor-pointer transition-colors">
+                              <input
+                                type="checkbox"
+                                checked={warehouseDetailModalData.techSpecs.hasAnteroomFastDoor ?? true}
+                                onChange={(e) => setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, hasAnteroomFastDoor: e.target.checked } }) : prev)}
+                                className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 mt-0.5"
+                              />
+                              <div>
+                                <span className="text-xs font-bold text-slate-800 block">Phòng đệm & Cửa cuốn nhanh</span>
+                                <span className="text-[11px] text-slate-500">Phòng đệm Anteroom và cửa trượt cách nhiệt tốc độ cao.</span>
+                              </div>
+                            </label>
+                          </div>
+                        </div>
+                      )}
+
+                      {activeCatId === 'cold_racking' && (
+                        <div className="space-y-4 max-w-2xl">
+                          <div className="border-b border-slate-100 pb-3">
+                            <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                              <span>📦</span> Giá Kệ Kho Lạnh & Quản Lý FIFO/FEFO
+                            </h4>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              Giá kệ chuyên dụng âm nhiệt và phần mềm quản lý hạn dùng hàng thực phẩm/nông sản.
+                            </p>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-xs font-bold text-slate-700 block mb-1">Số tầng kệ kho lạnh</label>
+                              <input
+                                type="number"
+                                value={warehouseDetailModalData.techSpecs.rackingLevels || 6}
+                                onChange={(e) => setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, rackingLevels: parseInt(e.target.value) || 1 } }) : prev)}
+                                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="text-xs font-bold text-slate-700 block mb-1">Tải trọng pallet kho lạnh (kg)</label>
+                              <input
+                                type="number"
+                                value={warehouseDetailModalData.techSpecs.palletLoadLimit || 1200}
+                                onChange={(e) => setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, palletLoadLimit: parseInt(e.target.value) || 0 } }) : prev)}
+                                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                              />
+                            </div>
+                          </div>
+
+                          <label className="flex items-start gap-3 p-3.5 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-white cursor-pointer transition-colors">
+                            <input
+                              type="checkbox"
+                              checked={warehouseDetailModalData.techSpecs.hasFefoFifoWms ?? true}
+                              onChange={(e) => setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, hasFefoFifoWms: e.target.checked } }) : prev)}
                               className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 mt-0.5"
                             />
                             <div>
-                              <span className="text-xs font-bold text-slate-800 block">Cảm biến nhiệt & Data Logger</span>
-                              <span className="text-[11px] text-slate-500">Tự động ghi chép biểu đồ nhiệt 24/7, gửi SMS/Email cảnh báo khi lệch nhiệt độ.</span>
+                              <span className="text-xs font-bold text-slate-800 block">WMS quản lý hạn sử dụng FEFO / FIFO tự động</span>
+                              <span className="text-[11px] text-slate-500">Tự động cảnh báo cận date, ưu tiên xuất hàng theo hạn sử dụng và số lô sản xuất (Batch/Lot).</span>
                             </div>
                           </label>
+                        </div>
+                      )}
 
-                          <label className="flex items-start gap-3 p-3 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-white cursor-pointer transition-colors">
+                      {activeCatId === 'cold_dock' && (
+                        <div className="space-y-4 max-w-2xl">
+                          <div className="border-b border-slate-100 pb-3">
+                            <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                              <span>🚛</span> Cửa Dock Lạnh & Đệm Khí Dock Shelter
+                            </h4>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              Tiếp nhận xe cont lạnh không bị thoát nhiệt ra môi trường ngoài.
+                            </p>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-xs font-bold text-slate-700 block mb-1">Số lượng cửa Dock lạnh</label>
+                              <input
+                                type="number"
+                                value={warehouseDetailModalData.techSpecs.dockDoorsCount || 8}
+                                onChange={(e) => setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, dockDoorsCount: parseInt(e.target.value) || 1 } }) : prev)}
+                                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                              />
+                            </div>
+
+                            <div className="pt-4 space-y-2">
+                              <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={warehouseDetailModalData.techSpecs.hasDockShelter ?? true}
+                                  onChange={(e) => setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, hasDockShelter: e.target.checked } }) : prev)}
+                                  className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500"
+                                />
+                                <span className="text-xs font-bold text-slate-800">Trùm đệm khí cửa cont (Dock Shelter)</span>
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {activeCatId === 'cold_fire' && (
+                        <div className="space-y-4 max-w-2xl">
+                          <div className="border-b border-slate-100 pb-3">
+                            <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                              <span>🔥</span> PCCC Kho Lạnh & An Toàn Vận Hành
+                            </h4>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              PCCC Sprinkler đường ống khô và chốt mở cửa thoát hiểm khẩn cấp.
+                            </p>
+                          </div>
+
+                          <label className="flex items-start gap-3 p-3.5 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-white cursor-pointer transition-colors">
                             <input
                               type="checkbox"
-                              checked={warehouseDetailModalData.techSpecs.hasBackupGeneratorAts ?? true}
-                              onChange={(e) => {
-                                const checked = e.target.checked;
-                                setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, hasBackupGeneratorAts: checked } }) : prev);
-                              }}
+                              checked={warehouseDetailModalData.techSpecs.hasEmergencyChamberRelease ?? true}
+                              onChange={(e) => setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, hasEmergencyChamberRelease: e.target.checked } }) : prev)}
                               className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 mt-0.5"
                             />
                             <div>
-                              <span className="text-xs font-bold text-slate-800 block">Máy phát điện tự động ATS</span>
-                              <span className="text-[11px] text-slate-500">Máy phát điện dự phòng 100% công suất, tự động đóng điện ATS trong vòng 15 giây.</span>
+                              <span className="text-xs font-bold text-slate-800 block">Chốt an toàn mở cửa từ bên trong có sưởi nhiệt</span>
+                              <span className="text-[11px] text-slate-500">Bảo đảm an toàn tuyệt đối cho nhân viên vận hành bên trong buồng lạnh âm sâu.</span>
                             </div>
                           </label>
                         </div>
-                      </div>
-                    )}
+                      )}
 
-                    {/* 7. GIẤY PHÉP & CHỨNG NHẬN */}
-                    {warehouseTechActiveCategory === 'cert' && (
-                      <div className="space-y-4 max-w-2xl">
-                        <div className="border-b border-slate-100 pb-3">
-                          <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
-                            <span>📜</span> Giấy Phép, Tiêu Chuẩn Chất Lượng & Bảo Hiểm
-                          </h4>
-                          <p className="text-xs text-slate-500 mt-0.5">
-                            Các chứng nhận quốc tế chứng minh năng lực vận hành chuyên nghiệp của cơ sở kho.
-                          </p>
-                        </div>
+                      {activeCatId === 'cold_cert' && (
+                        <div className="space-y-4 max-w-2xl">
+                          <div className="border-b border-slate-100 pb-3">
+                            <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                              <span>📜</span> Chứng Nhận An Toàn Thực Phẩm & Dược Phẩm
+                            </h4>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              HACCP, ISO 22000, GDP Dược phẩm và bảo hiểm suy giảm chất lượng.
+                            </p>
+                          </div>
 
-                        <div>
-                          <label className="text-xs font-bold text-slate-700 block mb-2">
-                            Các chứng nhận tiêu chuẩn chất lượng cơ sở đạt được:
-                          </label>
                           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                            {['ISO 9001:2015', 'HACCP', 'ISO 22000', 'GDP (Thực hành tốt bảo quản thuốc)', 'GMP', 'LEED Gold Công Trình Xanh', 'BRC Global Standard', 'GSP Dược Phẩm'].map((cert) => {
+                            {['HACCP', 'ISO 22000', 'BRC Global Standard', 'GDP Dược Phẩm', 'GSP', 'VietGAP'].map((cert) => {
                               const list = warehouseDetailModalData.techSpecs.certifications || [];
                               const isChecked = list.includes(cert);
                               return (
@@ -9271,27 +9579,702 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                             })}
                           </div>
                         </div>
+                      )}
 
-                        <div className="p-3.5 bg-emerald-50/70 border border-emerald-200 rounded-2xl flex items-start gap-3">
-                          <input
-                            type="checkbox"
-                            checked={warehouseDetailModalData.techSpecs.hasFullInsurance ?? true}
-                            onChange={(e) => {
-                              const checked = e.target.checked;
-                              setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, hasFullInsurance: checked } }) : prev);
-                            }}
-                            className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 mt-0.5"
-                          />
+                      {/* =========================================================================
+                          C. KHO HÀNG NGUY HIỂM & HÓA CHẤT (HAZMAT STORAGE)
+                      ========================================================================= */}
+                      {activeCatId === 'haz_license' && (
+                        <div className="space-y-4 max-w-2xl">
+                          <div className="border-b border-slate-100 pb-3">
+                            <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                              <span>☣️</span> Giấy Phép & Phân Nhóm Hóa Chất Được Lưu Kho
+                            </h4>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              Giấy phép Sở Công Thương / Cục Hóa Chất và các Class nguy hiểm.
+                            </p>
+                          </div>
+
                           <div>
-                            <span className="text-xs font-bold text-emerald-950 block">Bảo hiểm kho bãi & Trách nhiệm dân sự 100%</span>
-                            <span className="text-[11px] text-emerald-800">Cơ sở được mua bảo hiểm cháy nổ bắt buộc và bảo hiểm trách nhiệm người trông coi hàng hóa với các công ty bảo hiểm uy tín (Bảo Việt, PTI, Tokio Marine...).</span>
+                            <label className="text-xs font-bold text-slate-700 block mb-1">Số Giấy phép lưu trữ hóa chất</label>
+                            <input
+                              type="text"
+                              value={warehouseDetailModalData.techSpecs.hazmatLicenseNo || 'Số 89/GP-HC do Sở Công Thương cấp'}
+                              onChange={(e) => setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, hazmatLicenseNo: e.target.value } }) : prev)}
+                              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="text-xs font-bold text-slate-700 block mb-2">Các Class nguy hiểm được phép lưu kho:</label>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                              {['Class 2 (Khí gas)', 'Class 3 (Chất lỏng dễ cháy)', 'Class 4 (Chất rắn dễ cháy)', 'Class 5 (Chất oxy hóa)', 'Class 8 (Chất ăn mòn)', 'Class 9 (Hàng nguy hiểm khác)'].map((cls) => {
+                                const list = warehouseDetailModalData.techSpecs.permittedHazmatClasses || [];
+                                const isChecked = list.includes(cls);
+                                return (
+                                  <label
+                                    key={cls}
+                                    className={`flex items-center gap-2 p-2 rounded-xl border text-xs cursor-pointer transition-all ${
+                                      isChecked ? 'bg-amber-50 border-amber-200 text-amber-950 font-bold' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                                    }`}
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={isChecked}
+                                      onChange={(e) => {
+                                        const updated = e.target.checked ? [...list, cls] : list.filter(c => c !== cls);
+                                        setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, permittedHazmatClasses: updated } }) : prev);
+                                      }}
+                                      className="w-3.5 h-3.5 rounded text-amber-600 focus:ring-amber-500"
+                                    />
+                                    <span>{cls}</span>
+                                  </label>
+                                );
+                              })}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    )}
+                      )}
+
+                      {activeCatId === 'haz_structure' && (
+                        <div className="space-y-4 max-w-2xl">
+                          <div className="border-b border-slate-100 pb-3">
+                            <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                              <span>🏗️</span> Kết Cấu Cách Ly & Rãnh Chống Tràn Hóa Chất
+                            </h4>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              Sàn kháng axit/kiềm, rãnh gom sự cố và tường ngăn cách ly chống cháy.
+                            </p>
+                          </div>
+
+                          <div className="space-y-3">
+                            <label className="flex items-start gap-3 p-3.5 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-white cursor-pointer transition-colors">
+                              <input
+                                type="checkbox"
+                                checked={warehouseDetailModalData.techSpecs.hasSpillContainment ?? true}
+                                onChange={(e) => setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, hasSpillContainment: e.target.checked } }) : prev)}
+                                className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 mt-0.5"
+                              />
+                              <div>
+                                <span className="text-xs font-bold text-slate-800 block">Rãnh thu gom hóa chất và hố ga sự cố (Spill containment)</span>
+                                <span className="text-[11px] text-slate-500">Ngăn chặn 100% rủi ro hóa chất tràn đổ ra cống thoát nước và môi trường xung quanh.</span>
+                              </div>
+                            </label>
+                          </div>
+                        </div>
+                      )}
+
+                      {activeCatId === 'haz_fire' && (
+                        <div className="space-y-4 max-w-2xl">
+                          <div className="border-b border-slate-100 pb-3">
+                            <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                              <span>🔥</span> PCCC Chuyên Dụng Bọt Foam / Khí CO2
+                            </h4>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              Hệ thống chữa cháy chuyên dụng cho hóa chất và quạt thông gió chống nổ.
+                            </p>
+                          </div>
+
+                          <label className="flex items-start gap-3 p-3.5 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-white cursor-pointer transition-colors">
+                            <input
+                              type="checkbox"
+                              checked={warehouseDetailModalData.techSpecs.hasExplosionProofFans ?? true}
+                              onChange={(e) => setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, hasExplosionProofFans: e.target.checked } }) : prev)}
+                              className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 mt-0.5"
+                            />
+                            <div>
+                              <span className="text-xs font-bold text-slate-800 block">Quạt thông gió chống cháy nổ (Explosion-proof) 24/7</span>
+                              <span className="text-[11px] text-slate-500">Hút khí độc và hơi dung môi liên tục, ngăn ngừa tạo môi trường nổ.</span>
+                            </div>
+                          </label>
+                        </div>
+                      )}
+
+                      {activeCatId === 'haz_ppe' && (
+                        <div className="space-y-4 max-w-2xl">
+                          <div className="border-b border-slate-100 pb-3">
+                            <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                              <span>🦺</span> Ứng Phó Sự Cố & Trang Bị Bảo Hộ (PPE)
+                            </h4>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              Trạm rửa mắt khẩn cấp, bộ Spill kit và nhân sự có chứng chỉ an toàn hóa chất.
+                            </p>
+                          </div>
+
+                          <div className="space-y-3">
+                            <label className="flex items-start gap-3 p-3.5 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-white cursor-pointer transition-colors">
+                              <input
+                                type="checkbox"
+                                checked={warehouseDetailModalData.techSpecs.hasEmergencyEyewashShower ?? true}
+                                onChange={(e) => setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, hasEmergencyEyewashShower: e.target.checked } }) : prev)}
+                                className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 mt-0.5"
+                              />
+                              <div>
+                                <span className="text-xs font-bold text-slate-800 block">Bồn rửa mắt & Vòi tắm khẩn cấp (Emergency Eyewash)</span>
+                                <span className="text-[11px] text-slate-500">Sẵn sàng tại các vị trí lối thoát hiểm kho hóa chất.</span>
+                              </div>
+                            </label>
+
+                            <label className="flex items-start gap-3 p-3.5 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-white cursor-pointer transition-colors">
+                              <input
+                                type="checkbox"
+                                checked={warehouseDetailModalData.techSpecs.hasCertifiedHazmatStaff ?? true}
+                                onChange={(e) => setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, hasCertifiedHazmatStaff: e.target.checked } }) : prev)}
+                                className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 mt-0.5"
+                              />
+                              <div>
+                                <span className="text-xs font-bold text-slate-800 block">100% Nhân sự có Chứng chỉ Huấn luyện An toàn Hóa chất</span>
+                                <span className="text-[11px] text-slate-500">Đào tạo định kỳ theo Nghị định 113/2017/NĐ-CP.</span>
+                              </div>
+                            </label>
+                          </div>
+                        </div>
+                      )}
+
+                      {activeCatId === 'haz_security' && (
+                        <div className="space-y-4 max-w-2xl">
+                          <div className="border-b border-slate-100 pb-3">
+                            <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                              <span>📜</span> An Ninh & Bảo Hiểm Ô Nhiễm Môi Trường
+                            </h4>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              Bảo hiểm trách nhiệm bồi thường sự cố môi trường và camera an ninh 24/7.
+                            </p>
+                          </div>
+
+                          <label className="flex items-start gap-3 p-3.5 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-white cursor-pointer transition-colors">
+                            <input
+                              type="checkbox"
+                              checked={warehouseDetailModalData.techSpecs.hasEnvironmentalInsurance ?? true}
+                              onChange={(e) => setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, hasEnvironmentalInsurance: e.target.checked } }) : prev)}
+                              className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 mt-0.5"
+                            />
+                            <div>
+                              <span className="text-xs font-bold text-slate-800 block">Bảo hiểm trách nhiệm ô nhiễm môi trường & Cháy nổ hóa chất</span>
+                              <span className="text-[11px] text-slate-500">Bồi thường thiệt hại bên thứ ba và xử lý sự cố tràn đổ hóa chất.</span>
+                            </div>
+                          </label>
+                        </div>
+                      )}
+
+                      {/* =========================================================================
+                          D. KHO NGOẠI QUAN (BONDED WAREHOUSE)
+                      ========================================================================= */}
+                      {activeCatId === 'bon_customs' && (
+                        <div className="space-y-4 max-w-2xl">
+                          <div className="border-b border-slate-100 pb-3">
+                            <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                              <span>🏛️</span> Tiêu Chuẩn Hải Quan & Khu Biệt Lập
+                            </h4>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              Chi cục Hải quan quản lý, số quyết định thành lập và niêm phong biệt lập.
+                            </p>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-xs font-bold text-slate-700 block mb-1">Chi cục Hải quan quản lý trực tiếp</label>
+                              <input
+                                type="text"
+                                value={warehouseDetailModalData.techSpecs.customsAuthorityName || 'Chi cục Hải quan Cửa khẩu Cảng Cát Lái'}
+                                onChange={(e) => setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, customsAuthorityName: e.target.value } }) : prev)}
+                                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="text-xs font-bold text-slate-700 block mb-1">Số QĐ thành lập kho ngoại quan</label>
+                              <input
+                                type="text"
+                                value={warehouseDetailModalData.techSpecs.bondedDecisionNo || 'Số 1205/QĐ-TCHQ'}
+                                onChange={(e) => setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, bondedDecisionNo: e.target.value } }) : prev)}
+                                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                              />
+                            </div>
+                          </div>
+
+                          <label className="flex items-start gap-3 p-3.5 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-white cursor-pointer transition-colors">
+                            <input
+                              type="checkbox"
+                              checked={warehouseDetailModalData.techSpecs.hasCustomsSealingArea ?? true}
+                              onChange={(e) => setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, hasCustomsSealingArea: e.target.checked } }) : prev)}
+                              className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 mt-0.5"
+                            />
+                            <div>
+                              <span className="text-xs font-bold text-slate-800 block">Hàng rào cách ly kiên cố & Cửa niêm chì Hải quan</span>
+                              <span className="text-[11px] text-slate-500">Đạt chuẩn giám sát theo quy định của Tổng cục Hải quan.</span>
+                            </div>
+                          </label>
+                        </div>
+                      )}
+
+                      {activeCatId === 'bon_structure' && (
+                        <div className="space-y-4 max-w-2xl">
+                          <div className="border-b border-slate-100 pb-3">
+                            <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                              <span>🏗️</span> Kết Cấu Kho & Sân Bãi Container Ngoại Quan
+                            </h4>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              Chiều cao, tải trọng sàn và khoảng cách kết nối tới cảng biển/cửa khẩu.
+                            </p>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-xs font-bold text-slate-700 block mb-1">Cự ly tới Cảng biển / Cửa khẩu (km)</label>
+                              <input
+                                type="number"
+                                value={warehouseDetailModalData.techSpecs.distanceToPortKm || 3.5}
+                                onChange={(e) => setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, distanceToPortKm: parseFloat(e.target.value) || 0 } }) : prev)}
+                                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="text-xs font-bold text-slate-700 block mb-1">Chiều cao trần (m)</label>
+                              <input
+                                type="number"
+                                value={warehouseDetailModalData.techSpecs.clearHeight || 11.5}
+                                onChange={(e) => setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, clearHeight: parseFloat(e.target.value) || 0 } }) : prev)}
+                                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {activeCatId === 'bon_racking' && (
+                        <div className="space-y-4 max-w-2xl">
+                          <div className="border-b border-slate-100 pb-3">
+                            <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                              <span>📦</span> Quản Lý Lưu Trữ Theo Tờ Khai Hải Quan
+                            </h4>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              Phân chia khu vực lưu trữ theo từng tờ khai và bàn kiểm hóa HQ.
+                            </p>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-xs font-bold text-slate-700 block mb-1">Số tầng kệ Racking</label>
+                              <input
+                                type="number"
+                                value={warehouseDetailModalData.techSpecs.rackingLevels || 5}
+                                onChange={(e) => setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, rackingLevels: parseInt(e.target.value) || 1 } }) : prev)}
+                                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="text-xs font-bold text-slate-700 block mb-1">Tải trọng pallet (kg)</label>
+                              <input
+                                type="number"
+                                value={warehouseDetailModalData.techSpecs.palletLoadLimit || 1000}
+                                onChange={(e) => setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, palletLoadLimit: parseInt(e.target.value) || 0 } }) : prev)}
+                                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {activeCatId === 'bon_cctv' && (
+                        <div className="space-y-4 max-w-2xl">
+                          <div className="border-b border-slate-100 pb-3">
+                            <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                              <span>📹</span> Camera Giám Sát Hải Quan & Dữ Liệu VASSCM
+                            </h4>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              Camera 3 lớp lưu trữ tối thiểu 12 tháng và kết nối hệ thống VASSCM.
+                            </p>
+                          </div>
+
+                          <div className="space-y-3">
+                            <label className="flex items-start gap-3 p-3.5 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-white cursor-pointer transition-colors">
+                              <input
+                                type="checkbox"
+                                checked={warehouseDetailModalData.techSpecs.hasCustomsDirectCctvFeed ?? true}
+                                onChange={(e) => setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, hasCustomsDirectCctvFeed: e.target.checked } }) : prev)}
+                                className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 mt-0.5"
+                              />
+                              <div>
+                                <span className="text-xs font-bold text-slate-800 block">Truyền luồng hình ảnh Camera 24/7 trực tiếp về Chi cục HQ</span>
+                                <span className="text-[11px] text-slate-500">Camera 3 lớp bao quát 100% cổng ra vào, cửa kho và từng dãy kệ hàng.</span>
+                              </div>
+                            </label>
+
+                            <label className="flex items-start gap-3 p-3.5 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-white cursor-pointer transition-colors">
+                              <input
+                                type="checkbox"
+                                checked={warehouseDetailModalData.techSpecs.hasVasscmConnected ?? true}
+                                onChange={(e) => setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, hasVasscmConnected: e.target.checked } }) : prev)}
+                                className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 mt-0.5"
+                              />
+                              <div>
+                                <span className="text-xs font-bold text-slate-800 block">WMS kết nối Hệ thống Giám sát Tự động Hải quan (VASSCM)</span>
+                                <span className="text-[11px] text-slate-500">Tự động đồng bộ trạng thái thông quan và trừ lùi tờ khai điện tử.</span>
+                              </div>
+                            </label>
+                          </div>
+                        </div>
+                      )}
+
+                      {activeCatId === 'bon_fire' && (
+                        <div className="space-y-4 max-w-2xl">
+                          <div className="border-b border-slate-100 pb-3">
+                            <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                              <span>🔥</span> PCCC & An Ninh Bảo Vệ Kho Ngoại Quan
+                            </h4>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              PCCC nghiệm thu và cổng kiểm soát bảo vệ barie 2 lớp 24/7.
+                            </p>
+                          </div>
+
+                          <div>
+                            <label className="text-xs font-bold text-slate-700 block mb-1">Hệ thống PCCC</label>
+                            <input
+                              type="text"
+                              value={warehouseDetailModalData.techSpecs.fireProtectionSystem || 'PCCC tự động Sprinkler (Đã nghiệm thu PCCC)'}
+                              onChange={(e) => setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, fireProtectionSystem: e.target.value } }) : prev)}
+                              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* =========================================================================
+                          E. KHO TMĐT / FULFILLMENT
+                      ========================================================================= */}
+                      {activeCatId === 'ful_capacity' && (
+                        <div className="space-y-4 max-w-2xl">
+                          <div className="border-b border-slate-100 pb-3">
+                            <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                              <span>⚡</span> Năng Lực Xử Lý Đơn Hàng & Pick-Pack
+                            </h4>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              Công suất xử lý đơn/ngày, số bàn đóng gói và SLA bàn giao đơn vị vận chuyển.
+                            </p>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-xs font-bold text-slate-700 block mb-1">Công suất xử lý tối đa (Đơn / Ngày)</label>
+                              <input
+                                type="number"
+                                value={warehouseDetailModalData.techSpecs.dailyOrderCapacity || 12000}
+                                onChange={(e) => setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, dailyOrderCapacity: parseInt(e.target.value) || 0 } }) : prev)}
+                                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="text-xs font-bold text-slate-700 block mb-1">Số lượng bàn đóng gói (Packing Stations)</label>
+                              <input
+                                type="number"
+                                value={warehouseDetailModalData.techSpecs.packingStationCount || 16}
+                                onChange={(e) => setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, packingStationCount: parseInt(e.target.value) || 1 } }) : prev)}
+                                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="text-xs font-bold text-slate-700 block mb-1">Cam kết SLA bàn giao đơn hàng</label>
+                            <input
+                              type="text"
+                              value={warehouseDetailModalData.techSpecs.fulfillmentSlaHours || 'Đóng gói & Bàn giao ĐVVC trong vòng 12 giờ'}
+                              onChange={(e) => setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, fulfillmentSlaHours: e.target.value } }) : prev)}
+                              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {activeCatId === 'ful_tech' && (
+                        <div className="space-y-4 max-w-2xl">
+                          <div className="border-b border-slate-100 pb-3">
+                            <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                              <span>💻</span> Tích Hợp Đa Sàn TMĐT & WMS/OMS
+                            </h4>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              Tự động kết nối API Shopee, TikTok Shop, Lazada và quét mã từng sản phẩm.
+                            </p>
+                          </div>
+
+                          <div>
+                            <label className="text-xs font-bold text-slate-700 block mb-2">Các sàn TMĐT đã tích hợp sẵn API:</label>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                              {['Shopee', 'TikTok Shop', 'Lazada', 'Tiki', 'Shopify', 'WooCommerce'].map((platform) => {
+                                const list = warehouseDetailModalData.techSpecs.connectedEcommercePlatforms || ['Shopee', 'TikTok Shop', 'Lazada'];
+                                const isChecked = list.includes(platform);
+                                return (
+                                  <label
+                                    key={platform}
+                                    className={`flex items-center gap-2 p-2 rounded-xl border text-xs cursor-pointer transition-all ${
+                                      isChecked ? 'bg-indigo-50 border-indigo-200 text-indigo-950 font-bold' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                                    }`}
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={isChecked}
+                                      onChange={(e) => {
+                                        const updated = e.target.checked ? [...list, platform] : list.filter(p => p !== platform);
+                                        setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, connectedEcommercePlatforms: updated } }) : prev);
+                                      }}
+                                      className="w-3.5 h-3.5 rounded text-indigo-600 focus:ring-indigo-500"
+                                    />
+                                    <span>{platform}</span>
+                                  </label>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          <label className="flex items-start gap-3 p-3.5 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-white cursor-pointer transition-colors">
+                            <input
+                              type="checkbox"
+                              checked={warehouseDetailModalData.techSpecs.hasItemBarcodeVerification ?? true}
+                              onChange={(e) => setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, hasItemBarcodeVerification: e.target.checked } }) : prev)}
+                              className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 mt-0.5"
+                            />
+                            <div>
+                              <span className="text-xs font-bold text-slate-800 block">Quét Barcode kiểm tra từng món hàng (Item-level Scan)</span>
+                              <span className="text-[11px] text-slate-500">Giảm tỷ lệ đóng nhầm hàng xuống dưới 0.05%.</span>
+                            </div>
+                          </label>
+                        </div>
+                      )}
+
+                      {activeCatId === 'ful_reverse' && (
+                        <div className="space-y-4 max-w-2xl">
+                          <div className="border-b border-slate-100 pb-3">
+                            <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                              <span>🔄</span> Xử Lý Hàng Hoàn Trả (Reverse Logistics)
+                            </h4>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              Khu vực kiểm tra ngoại quan, phân loại và nhập lại tồn kho hàng hoàn.
+                            </p>
+                          </div>
+
+                          <label className="flex items-start gap-3 p-3.5 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-white cursor-pointer transition-colors">
+                            <input
+                              type="checkbox"
+                              checked={warehouseDetailModalData.techSpecs.hasReverseLogisticsArea ?? true}
+                              onChange={(e) => setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, hasReverseLogisticsArea: e.target.checked } }) : prev)}
+                              className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 mt-0.5"
+                            />
+                            <div>
+                              <span className="text-xs font-bold text-slate-800 block">Bàn chuyên trách kiểm tra hàng hoàn & Nhập lại kho</span>
+                              <span className="text-[11px] text-slate-500">Chụp ảnh đối soát bưu phẩm hư hỏng, cập nhật tồn kho real-time.</span>
+                            </div>
+                          </label>
+                        </div>
+                      )}
+
+                      {activeCatId === 'ful_dock' && (
+                        <div className="space-y-4 max-w-2xl">
+                          <div className="border-b border-slate-100 pb-3">
+                            <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                              <span>🚛</span> Cửa Giao Nhận Nhanh Đơn Vị Vận Chuyển
+                            </h4>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              Khu vực tiếp nhận xe tải nhỏ, xe van và nhân viên lấy hàng hỏa tốc.
+                            </p>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-xs font-bold text-slate-700 block mb-1">Số lượng cửa giao nhận xe van/xe tải</label>
+                              <input
+                                type="number"
+                                value={warehouseDetailModalData.techSpecs.dockDoorsCount || 6}
+                                onChange={(e) => setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, dockDoorsCount: parseInt(e.target.value) || 1 } }) : prev)}
+                                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {activeCatId === 'ful_fire' && (
+                        <div className="space-y-4 max-w-2xl">
+                          <div className="border-b border-slate-100 pb-3">
+                            <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                              <span>🔥</span> PCCC & Giám Sát An Ninh Bàn Đóng Gói
+                            </h4>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              Hệ thống camera soi từng bàn đóng hàng và PCCC tự động.
+                            </p>
+                          </div>
+
+                          <div>
+                            <label className="text-xs font-bold text-slate-700 block mb-1">Camera soi bàn đóng gói (CCTV Packing)</label>
+                            <input
+                              type="text"
+                              value={warehouseDetailModalData.techSpecs.cctvSurveillance || 'Camera Full HD soi 100% từng bàn đóng gói, lưu trữ 60 ngày'}
+                              onChange={(e) => setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, cctvSurveillance: e.target.value } }) : prev)}
+                              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* =========================================================================
+                          F. KHO TỰ QUẢN (SELF-STORAGE)
+                      ========================================================================= */}
+                      {activeCatId === 'self_units' && (
+                        <div className="space-y-4 max-w-2xl">
+                          <div className="border-b border-slate-100 pb-3">
+                            <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                              <span>🚪</span> Quy Cách Khoang Chứa Cá Nhân
+                            </h4>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              Dải thể tích khoang mini cá nhân và hệ thống cửa khóa riêng.
+                            </p>
+                          </div>
+
+                          <div>
+                            <label className="text-xs font-bold text-slate-700 block mb-2">Các kích thước khoang mini có sẵn:</label>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                              {['Khoang 1m³ (Locker)', 'Khoang 3m³ (Small)', 'Khoang 6m³ (Medium)', 'Khoang 12m³ (Large)', 'Khoang 20m³ (X-Large)', 'Khoang 30m³ (Doanh nghiệp)'].map((vol) => {
+                                const list = warehouseDetailModalData.techSpecs.unitVolumeRanges || ['Khoang 1m³ (Locker)', 'Khoang 3m³ (Small)', 'Khoang 6m³ (Medium)', 'Khoang 12m³ (Large)'];
+                                const isChecked = list.includes(vol);
+                                return (
+                                  <label
+                                    key={vol}
+                                    className={`flex items-center gap-2 p-2 rounded-xl border text-xs cursor-pointer transition-all ${
+                                      isChecked ? 'bg-indigo-50 border-indigo-200 text-indigo-950 font-bold' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                                    }`}
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={isChecked}
+                                      onChange={(e) => {
+                                        const updated = e.target.checked ? [...list, vol] : list.filter(v => v !== vol);
+                                        setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, unitVolumeRanges: updated } }) : prev);
+                                      }}
+                                      className="w-3.5 h-3.5 rounded text-indigo-600 focus:ring-indigo-500"
+                                    />
+                                    <span>{vol}</span>
+                                  </label>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {activeCatId === 'self_access' && (
+                        <div className="space-y-4 max-w-2xl">
+                          <div className="border-b border-slate-100 pb-3">
+                            <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                              <span>🔑</span> Ra Vào Tự Do 24/7 & Khóa Độc Lập
+                            </h4>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              Kiểm soát vào ra bằng thẻ từ/vân tay và khách hàng tự giữ khóa riêng.
+                            </p>
+                          </div>
+
+                          <div className="space-y-3">
+                            <label className="flex items-start gap-3 p-3.5 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-white cursor-pointer transition-colors">
+                              <input
+                                type="checkbox"
+                                checked={warehouseDetailModalData.techSpecs.has247CardAccess ?? true}
+                                onChange={(e) => setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, has247CardAccess: e.target.checked } }) : prev)}
+                                className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 mt-0.5"
+                              />
+                              <div>
+                                <span className="text-xs font-bold text-slate-800 block">Cổng kiểm soát ra vào 24/7 bằng Thẻ từ / Vân tay / Mã PIN</span>
+                                <span className="text-[11px] text-slate-500">Khách hàng chủ động đến lấy/cất đồ bất kỳ lúc nào kể cả ngày lễ, ban đêm.</span>
+                              </div>
+                            </label>
+
+                            <label className="flex items-start gap-3 p-3.5 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-white cursor-pointer transition-colors">
+                              <input
+                                type="checkbox"
+                                checked={warehouseDetailModalData.techSpecs.hasIndependentKeyLock ?? true}
+                                onChange={(e) => setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, hasIndependentKeyLock: e.target.checked } }) : prev)}
+                                className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 mt-0.5"
+                              />
+                              <div>
+                                <span className="text-xs font-bold text-slate-800 block">Khách hàng giữ chìa khóa/mã số độc lập 100%</span>
+                                <span className="text-[11px] text-slate-500">Nhân viên kho không giữ khóa, đảm bảo tính riêng tư tuyệt đối.</span>
+                              </div>
+                            </label>
+                          </div>
+                        </div>
+                      )}
+
+                      {activeCatId === 'self_amenities' && (
+                        <div className="space-y-4 max-w-2xl">
+                          <div className="border-b border-slate-100 pb-3">
+                            <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                              <span>🧹</span> Tiện Ích Nội Bộ & Vật Tư Đóng Gói
+                            </h4>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              Xe đẩy bốc dỡ nội bộ miễn phí và máy hút ẩm chống ẩm mốc.
+                            </p>
+                          </div>
+
+                          <div className="space-y-3">
+                            <label className="flex items-start gap-3 p-3.5 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-white cursor-pointer transition-colors">
+                              <input
+                                type="checkbox"
+                                checked={warehouseDetailModalData.techSpecs.hasFreeHandlingTrolleys ?? true}
+                                onChange={(e) => setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, hasFreeHandlingTrolleys: e.target.checked } }) : prev)}
+                                className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 mt-0.5"
+                              />
+                              <div>
+                                <span className="text-xs font-bold text-slate-800 block">Xe đẩy hàng 4 bánh & Xe nâng tay miễn phí</span>
+                                <span className="text-[11px] text-slate-500">Sẵn sàng tại lối vào để khách hàng di chuyển đồ đạc dễ dàng.</span>
+                              </div>
+                            </label>
+
+                            <label className="flex items-start gap-3 p-3.5 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-white cursor-pointer transition-colors">
+                              <input
+                                type="checkbox"
+                                checked={warehouseDetailModalData.techSpecs.hasDehumidifierClimateControl ?? true}
+                                onChange={(e) => setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, hasDehumidifierClimateControl: e.target.checked } }) : prev)}
+                                className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 mt-0.5"
+                              />
+                              <div>
+                                <span className="text-xs font-bold text-slate-800 block">Hệ thống máy hút ẩm & Kiểm soát không khí sạch</span>
+                                <span className="text-[11px] text-slate-500">Bảo vệ tài sản, sách vở, hồ sơ và đồ gia dụng không bị ẩm mốc.</span>
+                              </div>
+                            </label>
+                          </div>
+                        </div>
+                      )}
+
+                      {activeCatId === 'self_fire' && (
+                        <div className="space-y-4 max-w-2xl">
+                          <div className="border-b border-slate-100 pb-3">
+                            <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                              <span>🔥</span> PCCC & Bảo Hiểm Tài Sản Khoang Tự Quản
+                            </h4>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              PCCC tự động Sprinkler tại từng khoang và bảo hiểm tài sản cá nhân.
+                            </p>
+                          </div>
+
+                          <label className="flex items-start gap-3 p-3.5 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-white cursor-pointer transition-colors">
+                            <input
+                              type="checkbox"
+                              checked={warehouseDetailModalData.techSpecs.hasFullInsurance ?? true}
+                              onChange={(e) => setWarehouseDetailModalData(prev => prev ? ({ ...prev, techSpecs: { ...prev.techSpecs, hasFullInsurance: e.target.checked } }) : prev)}
+                              className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 mt-0.5"
+                            />
+                            <div>
+                              <span className="text-xs font-bold text-slate-800 block">Bảo hiểm cháy nổ & Mất mát tài sản khoang tự quản</span>
+                              <span className="text-[11px] text-slate-500">Được bảo hiểm 100% theo hợp đồng thuê khoang.</span>
+                            </div>
+                          </label>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
 
               {/* TAB 3: PHỤ PHÍ HANDLING & LƯU KHO */}
               {warehouseDetailActiveTab === 'surcharges' && (
