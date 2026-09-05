@@ -169,6 +169,21 @@ export const EXPRESS_CARRIERS_LOV = [
   'Khác (Nhập hãng khác)...',
 ];
 
+
+export const CUSTOMS_AUTHORITIES_LOV = [
+  'Chi cục HQ KCN Sóng Thần (Bình Dương)',
+  'Chi cục HQ Cửa khẩu Cảng Sài Gòn KV4 (Cát Lái / ICD Phước Long)',
+  'Chi cục HQ Cửa khẩu Cảng Hải Phòng KV3 (Đình Vũ)',
+  'Chi cục HQ ICD Mỹ Đình / Gia Lâm (Hà Nội)',
+  'Chi cục HQ Bắc Ninh (KCN Yên Phong / VSIP)',
+  'Chi cục HQ Cửa khẩu Cảng Cái Mép (Bà Rịa - Vũng Tàu)',
+  'Chi cục HQ KCN Biên Hòa / Long Bình (Đồng Nai)',
+  'Chi cục HQ Cửa khẩu Quốc tế Hữu Nghị / Tân Thanh (Lạng Sơn)',
+  'Chi cục HQ Chuyển Phát Nhanh / Tân Sơn Nhất',
+  'Chi cục HQ Cửa khẩu Sân bay Quốc tế Nội Bài',
+  'Khác (Nhập chi cục khác)...',
+];
+
 export const AIR_CUTOFF_TIMES_LOV = [
   { time: '18:00', label: '18:00 (Cắt hàng TCS/SCSC tiêu chuẩn)' },
   { time: '16:00', label: '16:00 (Cắt hàng ca chiều)' },
@@ -5964,7 +5979,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                         <tbody className="divide-y divide-slate-200 bg-white">
                           {(!currentData.routes || currentData.routes.length === 0) ? (
                             <tr>
-                              <td colSpan={activeCategory?.id === 'warehousing' ? 18 : (activeCategory?.id === 'trucking' ? 15 : ((activeCategory?.id === 'ocean') ? ((activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL') ? 17 : 15) : (((activeCategory?.id === 'rail') && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL')) ? 15 : ((activeCategory?.id === 'air' && (activeModel?.id === 'air-gen-exp' || activeModel?.name?.includes('Express') || activeModel?.code === 'Express')) ? 13 : 15))))} className="py-8 text-center text-slate-400 font-medium">
+                              <td colSpan={activeCategory?.id === 'warehousing' ? ((activeModel?.id === 'wh-gen-bon' || activeModel?.name?.toLowerCase().includes('ngoại quan')) ? 19 : 18) : (activeCategory?.id === 'trucking' ? 15 : ((activeCategory?.id === 'ocean') ? ((activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL') ? 17 : 15) : (((activeCategory?.id === 'rail') && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL')) ? 15 : ((activeCategory?.id === 'air' && (activeModel?.id === 'air-gen-exp' || activeModel?.name?.includes('Express') || activeModel?.code === 'Express')) ? 13 : 15))))} className="py-8 text-center text-slate-400 font-medium">
                                 {activeCategory?.id === 'warehousing' ? (
                                   <>Chưa có cơ sở kho nào. Bấm nút <strong className="text-indigo-600 font-bold">+ Thêm Kho Mới</strong> để khai báo năng lực & biểu phí lưu kho.</>
                                 ) : (
