@@ -611,21 +611,45 @@ export const CUSTOMS_SERVICE_FORMS_LOV = [
   'Khai thuê dịch vụ',
 ];
 
-export const CROSS_BORDER_GATES_LOV = [
-  'Mộc Bài / Xa Mát (Tây Ninh VN ↔ Bavet / Phnom Penh Campuchia)',
-  'Hoa Lư (Bình Phước VN ↔ Trapeang Sre / Kratie Campuchia)',
-  'Bình Hiệp (Long An VN ↔ Prey Vo / Svay Rieng Campuchia)',
-  'Tịnh Biên / Vĩnh Xương (An Giang VN ↔ Phnom Den / Kandal Campuchia)',
-  'Hữu Nghị / Tân Thanh (Lạng Sơn VN ↔ Bằng Tường / Hữu Nghị Quan TQ)',
-  'Móng Cái / Cầu Bắc Luân II (Quảng Ninh VN ↔ Đông Hưng Quảng Tây TQ)',
-  'Kim Thành (Lào Cai VN ↔ Hà Khẩu Vân Nam TQ)',
-  'Trà Lĩnh (Cao Bằng VN ↔ Long Bang Quảng Tây TQ)',
-  'Lao Bảo (Quảng Trị VN ↔ Savannakhet Lào ↔ Mukdahan Thái Lan)',
-  'Cha Lo (Quảng Bình VN ↔ Na Phao Lào ↔ Nakhon Phanom Thái Lan)',
-  'Cầu Treo (Hà Tĩnh VN ↔ Namphao Lào ↔ Viêng Chăn)',
-  'Bờ Y (Kon Tum VN ↔ Phouvong Nam Lào)',
-  'Khác (Nhập tùy chọn)...',
+export const CROSS_BORDER_GATE_GROUPS = [
+  {
+    group: '🇰🇭 Tuyến Cửa Khẩu Campuchia (Cambodia Route)',
+    gates: [
+      'Mộc Bài / Xa Mát (Tây Ninh VN ↔ Bavet / Phnom Penh Campuchia)',
+      'Hoa Lư (Bình Phước VN ↔ Trapeang Sre / Kratie Campuchia)',
+      'Bình Hiệp (Long An VN ↔ Prey Vo / Svay Rieng Campuchia)',
+      'Tịnh Biên / Vĩnh Xương (An Giang VN ↔ Phnom Den / Kandal Campuchia)',
+      'Hà Tiên (Kiên Giang VN ↔ Prek Chak / Kampot Campuchia)',
+      'Lệ Thanh (Gia Lai VN ↔ Oyadav / Ratanakiri Campuchia)',
+    ],
+  },
+  {
+    group: '🇨🇳 Tuyến Cửa Khẩu Trung Quốc (China Route)',
+    gates: [
+      'Hữu Nghị / Tân Thanh (Lạng Sơn VN ↔ Bằng Tường / Hữu Nghị Quan TQ)',
+      'Móng Cái / Cầu Bắc Luân II (Quảng Ninh VN ↔ Đông Hưng Quảng Tây TQ)',
+      'Kim Thành (Lào Cai VN ↔ Hà Khẩu Vân Nam TQ)',
+      'Trà Lĩnh (Cao Bằng VN ↔ Long Bang Quảng Tây TQ)',
+      'Tà Lùng (Cao Bằng VN ↔ Thủy Khẩu Quảng Tây TQ)',
+      'Chi Ma (Lạng Sơn VN ↔ Ái Điểm Quảng Tây TQ)',
+      'Thanh Thủy (Hà Giang VN ↔ Thiên Bảo Vân Nam TQ)',
+    ],
+  },
+  {
+    group: '🇱🇦 🇹🇭 Tuyến Cửa Khẩu Lào & Thái Lan (Laos & Thailand Route)',
+    gates: [
+      'Lao Bảo (Quảng Trị VN ↔ Savannakhet Lào ↔ Mukdahan Thái Lan)',
+      'Cha Lo (Quảng Bình VN ↔ Na Phao Lào ↔ Nakhon Phanom Thái Lan)',
+      'Cầu Treo (Hà Tĩnh VN ↔ Namphao Lào ↔ Viêng Chăn)',
+      'Bờ Y (Kon Tum VN ↔ Phouvong Nam Lào ↔ Attapeu)',
+      'Nậm Cắn (Nghệ An VN ↔ Namkan Xiengkhouang Lào)',
+      'Tây Trang (Điện Biên VN ↔ Pang Hok Phongsaly Lào)',
+      'La Lay (Quảng Trị VN ↔ Lalay Saravane Lào)',
+    ],
+  },
 ];
+
+export const CROSS_BORDER_GATES_LOV = CROSS_BORDER_GATE_GROUPS.flatMap(g => g.gates);
 
 export const CROSS_BORDER_FTL_VEHICLES_LOV = [
   'Đầu Kéo Container 40ft High Cube (40HC)',
@@ -6361,7 +6385,32 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                               if (isCrossBorderFtlRow) {
                                 const effCode = route.routeCode || `CB-FTL-${String(idx + 1).padStart(2, '0')}`;
                                 const effRoute = route.route || 'TP.HCM ⇄ Phnom Penh (Campuchia)';
-                                const effGate = route.borderGate || CROSS_BORDER_GATES_LOV[0];
+                                
+                                // Smart gate inference if not set
+                                const getInferredGate = () => {
+                                  if (route.borderGate) return route.borderGate;
+                                  const text = `${route.route || ''} ${route.origin || ''} ${route.destination || ''}`.toLowerCase();
+                                  if (text.includes('trung quốc') || text.includes('tq') || text.includes('quảng châu') || text.includes('bằng tường') || text.includes('hà nội') || text.includes('bắc ninh')) {
+                                    if (text.includes('móng cái') || text.includes('đông hưng') || text.includes('quảng ninh')) {
+                                      return 'Móng Cái / Cầu Bắc Luân II (Quảng Ninh VN ↔ Đông Hưng Quảng Tây TQ)';
+                                    }
+                                    if (text.includes('lào cai') || text.includes('hà khẩu')) {
+                                      return 'Kim Thành (Lào Cai VN ↔ Hà Khẩu Vân Nam TQ)';
+                                    }
+                                    return 'Hữu Nghị / Tân Thanh (Lạng Sơn VN ↔ Bằng Tường / Hữu Nghị Quan TQ)';
+                                  }
+                                  if (text.includes('lào') || text.includes('viêng chăn') || text.includes('thái lan') || text.includes('bangkok')) {
+                                    if (text.includes('lao bảo') || text.includes('quảng trị') || text.includes('thái lan')) {
+                                      return 'Lao Bảo (Quảng Trị VN ↔ Savannakhet Lào ↔ Mukdahan Thái Lan)';
+                                    }
+                                    return 'Cầu Treo (Hà Tĩnh VN ↔ Namphao Lào ↔ Viêng Chăn)';
+                                  }
+                                  if (text.includes('campuchia') || text.includes('phnom penh') || text.includes('bavet') || text.includes('hcm') || text.includes('sài gòn')) {
+                                    return 'Mộc Bài / Xa Mát (Tây Ninh VN ↔ Bavet / Phnom Penh Campuchia)';
+                                  }
+                                  return CROSS_BORDER_GATES_LOV[0];
+                                };
+                                const effGate = getInferredGate();
                                 const effOrigin = route.origin || 'KCN Tân Bình (TP.HCM) (Door)';
                                 const effDestination = route.destination || 'Phnom Penh SEZ (Campuchia) (Door)';
                                 const effVehicle = route.vehicleType || CROSS_BORDER_FTL_VEHICLES_LOV[0];
@@ -6404,21 +6453,22 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
 
                                     {/* 4. Cửa Khẩu Biên Giới */}
                                     <td className="p-1 align-middle bg-amber-50/30">
-                                      <div className="relative">
-                                        <input
-                                          type="text"
-                                          list={`cross-border-gates-${route.id}`}
-                                          value={effGate}
-                                          onChange={(e) => handleUpdateRouteRow(route.id, 'borderGate', e.target.value)}
-                                          placeholder="Chọn hoặc nhập Cửa khẩu..."
-                                          className="w-full px-2 py-1.5 font-bold text-amber-950 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 rounded text-xs"
-                                        />
-                                        <datalist id={`cross-border-gates-${route.id}`}>
-                                          {CROSS_BORDER_GATES_LOV.map((gate) => (
-                                            <option key={gate} value={gate} />
-                                          ))}
-                                        </datalist>
-                                      </div>
+                                      <select
+                                        value={effGate}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'borderGate', e.target.value)}
+                                        className="w-full px-2 py-1.5 font-bold text-amber-950 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 rounded text-xs cursor-pointer"
+                                        title={effGate}
+                                      >
+                                        {CROSS_BORDER_GATE_GROUPS.map((grp) => (
+                                          <optgroup key={grp.group} label={grp.group}>
+                                            {grp.gates.map((gate) => (
+                                              <option key={gate} value={gate}>
+                                                {gate}
+                                              </option>
+                                            ))}
+                                          </optgroup>
+                                        ))}
+                                      </select>
                                     </td>
 
                                     {/* 5. Điểm Đi (Origin) */}
