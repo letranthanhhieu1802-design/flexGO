@@ -566,6 +566,51 @@ export const ALL_DEFAULT_LTL_TONNAGES = [
   'Đầu Kéo + Rơ-mooc lồng mui bạt (Ghép siêu khối tích) —— (~75 – 85 CBM)',
 ];
 
+export const CUSTOMS_BRANCHES_LOV = [
+  'Chi cục HQ Cửa khẩu Cảng Sài Gòn KV1 (Cát Lái)',
+  'Chi cục HQ Cửa khẩu Sân bay Quốc tế Tân Sơn Nhất',
+  'Chi cục HQ Cửa khẩu Cảng Sài Gòn KV4 (ICD Phước Long / Transimex)',
+  'Chi cục HQ Cửa khẩu Cảng Hiệp Phước (TP.HCM)',
+  'Chi cục HQ Cửa khẩu Cảng Cái Mép (Bà Rịa - Vũng Tàu)',
+  'Chi cục HQ Quản lý Hàng Đầu tư Gia công (TP.HCM)',
+  'Chi cục HQ KCN VSIP (Bình Dương)',
+  'Chi cục HQ KCN Sóng Thần (Bình Dương)',
+  'Chi cục HQ Long Thành / Nhơn Trạch (Đồng Nai)',
+  'Chi cục HQ Cửa khẩu Cảng Hải Phòng KV1 (Cảng Hoàng Diệu)',
+  'Chi cục HQ Cửa khẩu Cảng Hải Phòng KV3 (Cảng Đình Vũ / Nam Hải Đình Vũ)',
+  'Chi cục HQ Cửa khẩu Cảng Đình Vũ (Hải Phòng)',
+  'Chi cục HQ Cửa khẩu Cảng Lạch Huyện (Hải Phòng - TC-HICT)',
+  'Chi cục HQ Cửa khẩu Sân bay Quốc tế Nội Bài (Hà Nội)',
+  'Chi cục HQ Quản lý Hàng Đầu tư Gia công (Hà Nội)',
+  'Chi cục HQ KCN Tiên Sơn / Yên Phong (Bắc Ninh)',
+  'Chi cục HQ KCN Thái Nguyên (Samsung Thái Nguyên)',
+  'Chi cục HQ Cửa khẩu Quốc tế Hữu Nghị (Lạng Sơn)',
+  'Chi cục HQ Cửa khẩu Quốc tế Móng Cái (Quảng Ninh)',
+  'Chi cục HQ Cửa khẩu Quốc tế Tân Thanh (Lạng Sơn)',
+  'Chi cục HQ Cửa khẩu Quốc tế Mộc Bài (Tây Ninh)',
+  'Chi cục HQ Cửa khẩu Quốc tế Hoa Lư (Bình Phước)',
+  'Khác (Nhập tùy chọn)...',
+];
+
+export const CUSTOMS_DECLARATION_TYPES_LOV = [
+  'Tất cả loại hình (A11, E21, E31, B11...)',
+  'Nhập khẩu kinh doanh (A11, A12)',
+  'Xuất khẩu kinh doanh (B11, B12, B13)',
+  'Nhập nguyên liệu gia công (E21)',
+  'Xuất sản phẩm gia công (E52)',
+  'Nhập nguyên liệu SXXK (E31)',
+  'Xuất sản phẩm SXXK (E62)',
+  'Doanh nghiệp chế xuất EPE (E11, E15, E42)',
+  'Tạm nhập tái xuất (G11, G21)',
+  'Phi mậu dịch (H11, H21)',
+  'Khác (Nhập tùy chọn)...',
+];
+
+export const CUSTOMS_SERVICE_FORMS_LOV = [
+  'Đại lý Hải quan chính thức',
+  'Khai thuê dịch vụ',
+];
+
 export const getTonnagesForBodyType = (
   bodyType?: string, 
   cargoTypeOrIsReefer?: 'general' | 'reefer' | 'hazmat' | 'ltl' | boolean
@@ -933,6 +978,12 @@ export interface CapabilityRouteItem {
   extraItemPrice?: number;
   bufferStoragePrice?: number;
   storageUnitsCount?: number;
+  customsBranchName?: string;
+  customsAreaName?: string;
+  customsDeclarationType?: string;
+  customsServiceForm?: string;
+  customsExtraItemPrice?: number;
+  customsRedChannelPrice?: number;
 }
 
 export interface PaidSurchargeItem {
@@ -3263,28 +3314,44 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             defaultRoutes: [
               {
                 id: 'r-cus-1',
-                route: 'Chi cục HQ Cửa khẩu Cảng Cát Lái',
-                origin: 'Cảng Cát Lái (TP.HCM)',
-                destination: 'Thông quan hàng hóa',
-                vehicleType: 'Tờ khai Xuất/Nhập Kinh Doanh',
+                routeCode: 'CUS-CL-01',
+                route: 'Chi cục HQ Cửa khẩu Cảng Sài Gòn KV1 (Cát Lái)',
+                customsBranchName: 'Chi cục HQ Cửa khẩu Cảng Sài Gòn KV1 (Cát Lái)',
+                origin: 'Chi cục HQ Cửa khẩu Cảng Sài Gòn KV1 (Cát Lái)',
+                customsAreaName: 'Cảng Cát Lái (TP.HCM)',
+                destination: 'Cảng Cát Lái (TP.HCM)',
+                customsDeclarationType: 'Tất cả loại hình (A11, E21, E31, B11...)',
+                vehicleType: 'Tất cả loại hình (A11, E21, E31, B11...)',
                 pricingUnit: 'Tờ khai',
                 price: 850000,
+                customsExtraItemPrice: 250000,
+                customsRedChannelPrice: 600000,
+                customsServiceForm: 'Đại lý Hải quan chính thức',
                 currency: 'VND',
-                sla: '4 - 8 giờ',
+                sla: 'Luồng Vàng 2-4h',
                 pricingStyle: 'Chưa gồm phụ phí',
+                validUntil: '2026-12-31',
                 promotionPercent: 15,
               },
               {
                 id: 'r-cus-2',
-                route: 'Chi cục HQ Sân bay Tân Sơn Nhất',
-                origin: 'Sân bay Tân Sơn Nhất (TP.HCM)',
-                destination: 'Thông quan hàng không',
-                vehicleType: 'Tờ khai Xuất/Nhập Kinh Doanh',
+                routeCode: 'CUS-TSN-01',
+                route: 'Chi cục HQ Cửa khẩu Sân bay Quốc tế Tân Sơn Nhất',
+                customsBranchName: 'Chi cục HQ Cửa khẩu Sân bay Quốc tế Tân Sơn Nhất',
+                origin: 'Chi cục HQ Cửa khẩu Sân bay Quốc tế Tân Sơn Nhất',
+                customsAreaName: 'Sân bay Tân Sơn Nhất (TP.HCM)',
+                destination: 'Sân bay Tân Sơn Nhất (TP.HCM)',
+                customsDeclarationType: 'Tất cả loại hình (A11, E21, E31, B11...)',
+                vehicleType: 'Tất cả loại hình (A11, E21, E31, B11...)',
                 pricingUnit: 'Tờ khai',
                 price: 950000,
+                customsExtraItemPrice: 250000,
+                customsRedChannelPrice: 700000,
+                customsServiceForm: 'Đại lý Hải quan chính thức',
                 currency: 'VND',
-                sla: '2 - 4 giờ',
+                sla: 'Luồng Vàng 1-2h',
                 pricingStyle: 'Chưa gồm phụ phí',
+                validUntil: '2026-12-31',
                 promotionPercent: 10,
               },
             ],
@@ -5825,11 +5892,13 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                     <div>
                       <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
                         <span className="w-5 h-5 rounded-full bg-indigo-50 text-indigo-700 flex items-center justify-center text-[10.5px] font-bold">2</span>
-                        <span>{activeCategory?.id === 'warehousing' ? 'Danh Sách Cơ Sở Kho & Biểu Phí Lưu Kho' : 'Các Tuyến Đường & Biểu Giá Tham Chiếu'} ({currentData.routes?.length || 0})</span>
+                        <span>{activeCategory?.id === 'warehousing' ? 'Danh Sách Cơ Sở Kho & Biểu Phí Lưu Kho' : (activeCategory?.id === 'customs' ? 'Danh Sách Chi Cục Hải Quan & Biểu Phí Khai Báo' : 'Các Tuyến Đường & Biểu Giá Tham Chiếu')} ({currentData.routes?.length || 0})</span>
                       </h4>
                       <p className="text-[11px] text-slate-500 mt-0.5">
                         {activeCategory?.id === 'warehousing'
                           ? 'Khai báo thông số kỹ thuật, album ảnh, phụ phí và VAS chi tiết cho từng cơ sở kho.'
+                          : activeCategory?.id === 'customs'
+                          ? 'Khai báo biểu phí mở tờ khai chuẩn, tờ khai phụ và phí hỗ trợ kiểm hóa luồng đỏ theo từng Chi cục Hải quan.'
                           : 'Chỉnh sửa trực tiếp trên bảng biểu giá hoặc tải template Excel để nhập liệu hàng loạt.'}
                       </p>
                     </div>
@@ -5903,7 +5972,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                         className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl transition-all cursor-pointer shadow-2xs"
                       >
                         <Plus className="w-3.5 h-3.5" />
-                        <span>{activeCategory?.id === 'warehousing' ? 'Thêm Kho Mới' : 'Thêm Tuyến'}</span>
+                        <span>{activeCategory?.id === 'warehousing' ? 'Thêm Kho Mới' : (activeCategory?.id === 'customs' ? 'Thêm Chi Cục / Dịch Vụ' : 'Thêm Tuyến')}</span>
                       </button>
                     </div>
                   </div>
@@ -5915,6 +5984,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                         <thead>
                           {(() => {
                             const isWarehousingTable = activeCategory?.id === 'warehousing';
+                            const isCustomsTable = activeCategory?.id === 'customs' || activeCategory?.serviceType === 'Customs Clearance';
                             const isTruckingTable = activeCategory?.id === 'trucking';
                             const isOceanTable = activeCategory?.id === 'ocean' || activeModel?.id?.startsWith('sea-');
                             const isRailTable = activeCategory?.id === 'rail' || activeModel?.id?.startsWith('rail-');
@@ -6032,6 +6102,28 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                               );
                             }
 
+                            if (isCustomsTable) {
+                              return (
+                                <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
+                                  <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
+                                  <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-amber-50/80 text-amber-950 font-black">Mã Dịch Vụ</th>
+                                  <th className="py-2.5 px-2.5 min-w-[230px] bg-amber-50/70 text-amber-950 font-black">Chi Cục Hải Quan Mở Tờ Khai</th>
+                                  <th className="py-2.5 px-2.5 min-w-[175px]">Khu Vực / Cửa Khẩu / Cảng / KCN</th>
+                                  <th className="py-2.5 px-2.5 min-w-[200px]">Loại Hình Tờ Khai Áp Dụng</th>
+                                  <th className="py-2.5 px-2 w-20 min-w-[80px] text-center">ĐVT</th>
+                                  <th className="py-2.5 px-2 w-20 min-w-[80px] text-center">Tiền Tệ</th>
+                                  <th className="py-2.5 px-2 text-right min-w-[160px] bg-emerald-50/90 text-emerald-950 font-black">Phí Khai Chuẩn (Xanh/Vàng)</th>
+                                  <th className="py-2.5 px-2 text-right min-w-[145px] bg-emerald-50/70 text-emerald-950">Phí Tờ Khai Phụ (/Tờ)</th>
+                                  <th className="py-2.5 px-2 text-right min-w-[160px] bg-rose-50/80 text-rose-950 font-bold">Phí Kiểm Hóa Luồng Đỏ (/Lô)</th>
+                                  <th className="py-2.5 px-2.5 min-w-[130px] text-center">SLA Thông Quan</th>
+                                  <th className="py-2.5 px-2.5 min-w-[155px] text-center">Hình Thức Khai Báo</th>
+                                  <th className="py-2.5 px-2.5 min-w-[130px] text-center">Hạn Giá</th>
+                                  <th className="py-2.5 px-2 min-w-[85px] text-center">Promotion</th>
+                                  <th className="py-2.5 px-2 text-center w-16 min-w-[65px]">Action</th>
+                                </tr>
+                              );
+                            }
+
                             return (
                               <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
                                 <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
@@ -6094,9 +6186,11 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                         <tbody className="divide-y divide-slate-200 bg-white">
                           {(!currentData.routes || currentData.routes.length === 0) ? (
                             <tr>
-                              <td colSpan={activeCategory?.id === 'warehousing' ? ((activeModel?.id === 'wh-gen-bon' || activeModel?.name?.toLowerCase().includes('ngoại quan')) ? 19 : 18) : (activeCategory?.id === 'trucking' ? 15 : ((activeCategory?.id === 'ocean') ? ((activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL') ? 17 : 15) : (((activeCategory?.id === 'rail') && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL')) ? 15 : ((activeCategory?.id === 'air' && (activeModel?.id === 'air-gen-exp' || activeModel?.name?.includes('Express') || activeModel?.code === 'Express')) ? 13 : 15))))} className="py-8 text-center text-slate-400 font-medium">
+                              <td colSpan={activeCategory?.id === 'warehousing' ? ((activeModel?.id === 'wh-gen-bon' || activeModel?.name?.toLowerCase().includes('ngoại quan')) ? 19 : (activeModel?.id === 'wh-gen-self' ? 17 : 18)) : (activeCategory?.id === 'customs' ? 15 : (activeCategory?.id === 'trucking' ? 15 : ((activeCategory?.id === 'ocean') ? ((activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL') ? 17 : 15) : (((activeCategory?.id === 'rail') && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL')) ? 15 : ((activeCategory?.id === 'air' && (activeModel?.id === 'air-gen-exp' || activeModel?.name?.includes('Express') || activeModel?.code === 'Express')) ? 13 : 15)))))} className="py-8 text-center text-slate-400 font-medium">
                                 {activeCategory?.id === 'warehousing' ? (
                                   <>Chưa có cơ sở kho nào. Bấm nút <strong className="text-indigo-600 font-bold">+ Thêm Kho Mới</strong> để khai báo năng lực & biểu phí lưu kho.</>
+                                ) : activeCategory?.id === 'customs' ? (
+                                  <>Chưa có dịch vụ hải quan nào. Bấm nút <strong className="text-indigo-600 font-bold">+ Thêm Chi Cục / Dịch Vụ</strong> để khai báo biểu phí thủ tục.</>
                                 ) : (
                                   <>Chưa có tuyến đường nào. Bấm nút <strong className="text-indigo-600 font-bold">+ Thêm Tuyến Mới</strong> để khai báo bảng giá.</>
                                 )}
@@ -6109,6 +6203,213 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                 ? Math.round(route.price * (1 - route.promotionPercent / 100)) 
                                 : route.price;
                               const isWarehousingRow = activeCategory?.id === 'warehousing';
+                              const isCustomsRow = activeCategory?.id === 'customs' || activeCategory?.serviceType === 'Customs Clearance';
+
+                              if (isCustomsRow) {
+                                const effCode = route.routeCode || `CUS-CL-${String(idx + 1).padStart(2, '0')}`;
+                                const effBranch = route.customsBranchName || route.route || route.origin || CUSTOMS_BRANCHES_LOV[0];
+                                const effArea = route.customsAreaName || route.destination || 'Cảng Cát Lái (TP.HCM)';
+                                const effDeclType = route.customsDeclarationType || route.vehicleType || CUSTOMS_DECLARATION_TYPES_LOV[0];
+                                const effUnit = route.pricingUnit || 'Tờ khai';
+                                const effCurrency = route.currency || 'VND';
+                                const effBasePrice = route.price ?? 850000;
+                                const effExtraPrice = route.customsExtraItemPrice ?? 250000;
+                                const effRedChannelPrice = route.customsRedChannelPrice ?? 600000;
+                                const effSla = route.sla || 'Luồng Vàng 2-4h';
+                                const effServiceForm = route.customsServiceForm || CUSTOMS_SERVICE_FORMS_LOV[0];
+                                const effValidUntil = route.validUntil || '2026-12-31';
+                                const effPromotionPercent = route.promotionPercent || 0;
+
+                                return (
+                                  <tr key={route.id} className="hover:bg-amber-50/20 transition-colors divide-x divide-slate-100 text-xs">
+                                    {/* 1. STT */}
+                                    <td className="p-1 text-center font-bold text-slate-500 w-9 bg-slate-50/50">
+                                      {idx + 1}
+                                    </td>
+
+                                    {/* 2. Mã Dịch Vụ */}
+                                    <td className="p-1 text-center font-mono font-bold text-amber-800 bg-amber-50/30">
+                                      <input
+                                        type="text"
+                                        value={effCode}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'routeCode', e.target.value)}
+                                        className="w-full text-center bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 rounded px-1 py-1 font-bold text-amber-800 text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 3. Chi Cục Hải Quan Mở Tờ Khai */}
+                                    <td className="p-1 align-middle">
+                                      <div className="relative">
+                                        <input
+                                          type="text"
+                                          list={`customs-branches-${route.id}`}
+                                          value={effBranch}
+                                          onChange={(e) => handleUpdateRouteRowMultiple(route.id, { customsBranchName: e.target.value, route: e.target.value, origin: e.target.value })}
+                                          placeholder="Chọn hoặc nhập Chi cục Hải quan..."
+                                          className="w-full px-2 py-1.5 font-bold text-slate-900 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 rounded text-xs"
+                                        />
+                                        <datalist id={`customs-branches-${route.id}`}>
+                                          {CUSTOMS_BRANCHES_LOV.map((branch) => (
+                                            <option key={branch} value={branch} />
+                                          ))}
+                                        </datalist>
+                                      </div>
+                                    </td>
+
+                                    {/* 4. Khu Vực / Cửa Khẩu / Cảng / KCN */}
+                                    <td className="p-1 align-middle">
+                                      <input
+                                        type="text"
+                                        value={effArea}
+                                        onChange={(e) => handleUpdateRouteRowMultiple(route.id, { customsAreaName: e.target.value, destination: e.target.value })}
+                                        placeholder="Cát Lái, Tân Sơn Nhất, Cái Mép..."
+                                        className="w-full px-2 py-1.5 font-semibold text-slate-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 5. Loại Hình Tờ Khai Áp Dụng */}
+                                    <td className="p-1 align-middle">
+                                      <select
+                                        value={effDeclType}
+                                        onChange={(e) => handleUpdateRouteRowMultiple(route.id, { customsDeclarationType: e.target.value, vehicleType: e.target.value })}
+                                        className="w-full px-2 py-1.5 font-medium text-slate-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 rounded text-xs cursor-pointer"
+                                      >
+                                        {CUSTOMS_DECLARATION_TYPES_LOV.map((type) => (
+                                          <option key={type} value={type}>{type}</option>
+                                        ))}
+                                      </select>
+                                    </td>
+
+                                    {/* 6. ĐVT */}
+                                    <td className="p-1 align-middle text-center">
+                                      <select
+                                        value={effUnit}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'pricingUnit', e.target.value)}
+                                        className="w-full px-1 py-1.5 text-center font-bold text-slate-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 rounded text-xs cursor-pointer"
+                                      >
+                                        <option value="Tờ khai">Tờ khai</option>
+                                        <option value="Lô hàng">Lô hàng</option>
+                                        <option value="Bộ chứng từ">Bộ chứng từ</option>
+                                        <option value="Cont">Cont</option>
+                                      </select>
+                                    </td>
+
+                                    {/* 7. Tiền Tệ */}
+                                    <td className="p-1 align-middle text-center">
+                                      <select
+                                        value={effCurrency}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'currency', e.target.value as 'VND' | 'USD')}
+                                        className="w-full px-1 py-1.5 text-center font-bold text-slate-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 rounded text-xs cursor-pointer"
+                                      >
+                                        <option value="VND">VND</option>
+                                        <option value="USD">USD</option>
+                                      </select>
+                                    </td>
+
+                                    {/* 8. Phí Khai Chuẩn (Xanh/Vàng) */}
+                                    <td className="p-1 align-middle text-right bg-emerald-50/30">
+                                      <input
+                                        type="number"
+                                        value={effBasePrice || ''}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'price', parseFloat(e.target.value) || 0)}
+                                        placeholder="850000"
+                                        className="w-full px-2 py-1.5 text-right font-black text-emerald-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 9. Phí Tờ Khai Phụ (/Tờ) */}
+                                    <td className="p-1 align-middle text-right bg-emerald-50/20">
+                                      <input
+                                        type="number"
+                                        value={effExtraPrice || ''}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'customsExtraItemPrice', parseFloat(e.target.value) || 0)}
+                                        placeholder="250000"
+                                        className="w-full px-2 py-1.5 text-right font-bold text-emerald-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 10. Phí Kiểm Hóa Luồng Đỏ (/Lô) */}
+                                    <td className="p-1 align-middle text-right bg-rose-50/30">
+                                      <input
+                                        type="number"
+                                        value={effRedChannelPrice || ''}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'customsRedChannelPrice', parseFloat(e.target.value) || 0)}
+                                        placeholder="600000"
+                                        className="w-full px-2 py-1.5 text-right font-bold text-rose-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 11. SLA Thông Quan */}
+                                    <td className="p-1 align-middle text-center">
+                                      <input
+                                        type="text"
+                                        value={effSla}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'sla', e.target.value)}
+                                        placeholder="4 - 8 giờ..."
+                                        className="w-full px-2 py-1.5 text-center font-medium text-slate-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 12. Hình Thức Khai Báo */}
+                                    <td className="p-1 align-middle text-center">
+                                      <select
+                                        value={effServiceForm}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'customsServiceForm', e.target.value)}
+                                        className="w-full px-1.5 py-1.5 text-center font-semibold text-slate-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 rounded text-xs cursor-pointer"
+                                      >
+                                        {CUSTOMS_SERVICE_FORMS_LOV.map((form) => (
+                                          <option key={form} value={form}>{form}</option>
+                                        ))}
+                                      </select>
+                                    </td>
+
+                                    {/* 13. Hạn Giá */}
+                                    <td className="p-1 align-middle text-center">
+                                      <input
+                                        type="date"
+                                        value={effValidUntil}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'validUntil', e.target.value)}
+                                        className="w-full px-1 py-1.5 text-center text-slate-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 14. Promotion */}
+                                    <td className="p-1 align-middle text-center">
+                                      <input
+                                        type="number"
+                                        min="0"
+                                        max="100"
+                                        value={effPromotionPercent || ''}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'promotionPercent', Math.min(100, Math.max(0, parseInt(e.target.value) || 0)))}
+                                        placeholder="0%"
+                                        className="w-full px-1 py-1.5 text-center font-bold text-rose-600 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 15. Action */}
+                                    <td className="p-1 text-center align-middle w-16">
+                                      <div className="flex items-center justify-center gap-1">
+                                        <button
+                                          type="button"
+                                          onClick={() => handleDuplicateRouteRow(route.id)}
+                                          className="p-1 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors cursor-pointer"
+                                          title="Nhân bản dịch vụ hải quan này"
+                                        >
+                                          <Copy className="w-3.5 h-3.5" />
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleDeleteRouteRow(route.id)}
+                                          className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors cursor-pointer"
+                                          title="Xóa dịch vụ hải quan này"
+                                        >
+                                          <Trash2 className="w-3.5 h-3.5" />
+                                        </button>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                );
+                              }
                               if (isWarehousingRow) {
                                 const isBondedRow = activeModel?.id === 'wh-gen-bon' || activeModel?.id?.includes('bon') || activeModel?.name?.toLowerCase().includes('ngoại quan') || activeModel?.code?.toLowerCase().includes('ngoại quan');
 
