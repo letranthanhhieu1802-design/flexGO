@@ -729,6 +729,69 @@ export interface WarehousePhotoSlotDef {
 }
 
 export const getWarehousePhotoSlots = (modelId?: string, cargoGroupId?: string): WarehousePhotoSlotDef[] => {
+  // 0A. Cross-Dock (proj-gen-xdock, proj-ref-xdock, proj-haz-xdock)
+  if (modelId?.includes('xdock') || modelId?.includes('cross-dock') || modelId?.includes('x-dock')) {
+    if (modelId?.includes('ref') || cargoGroupId?.includes('ref')) {
+      return [
+        { key: 'facade', icon: '🏢', label: 'Mặt Tiền & Sân Bãi Tiếp Nhận Xe Lạnh', description: 'Khu vực sân đỗ tiếp nhận xe tải đông lạnh Inbound/Outbound' },
+        { key: 'anteroom', icon: '🚪', label: 'Buồng Đệm Anteroom & Cửa Cuốn Nhanh', description: 'Khu vực đệm duy trì nhiệt độ mát (+15°C) khi sang xe' },
+        { key: 'dock_shelter', icon: '🚛', label: 'Cửa Dock Đệm Khí Trùm Kín (Dock Shelter)', description: 'Cửa xuất nhập hàng có trùm đệm khí chống thất thoát nhiệt' },
+        { key: 'temp_control', icon: '🌡️', label: 'Bảng Điều Khiển & Cảm Biến IoT Buồng Đệm', description: 'Đồng hồ theo dõi nhiệt độ sàn đệm lạnh liên tục 24/7' },
+        { key: 'ice_station', icon: '🧊', label: 'Trạm Bảo Quản Đá Gel & Đá Khô Bổ Sung', description: 'Tủ cấp đông đá gel và khu vực chèn lót giữ lạnh khi sang xe' },
+        { key: 'cctv_ops', icon: '📹', label: 'Camera An Ninh & Quy Trình Sang Xe Lạnh', description: 'CCTV giám sát quy trình sang xe hỏa tốc trong 2 giờ' },
+      ];
+    }
+    if (modelId?.includes('haz') || cargoGroupId?.includes('haz')) {
+      return [
+        { key: 'facade', icon: '🏢', label: 'Mặt Tiền & Khoảng Cách Ly An Toàn PCCC', description: 'Cổng vào khu bãi sang tải hóa chất biệt lập có rào chắn' },
+        { key: 'haz_pad', icon: '☣️', label: 'Bãi Cách Ly Ngoài Trời & Rãnh Gom Tràn', description: 'Sàn bê tông chuyên dụng có rãnh thu gom hóa chất rò rỉ' },
+        { key: 'spill_kit', icon: '🚨', label: 'Đội Phản Ứng Nhanh & Xe Spill-Kit', description: 'Trạm vật tư ứng phó sự cố hóa chất Spill-Kit túc trực 24/7' },
+        { key: 'ppe_station', icon: '🦺', label: 'Bồn Rửa Mắt Khẩn Cấp & Tủ Đồ Bảo Hộ PPE', description: 'Trạm vòi tắm/rửa mắt khẩn cấp và trang bị bảo hộ chuyên dụng' },
+        { key: 'foam_pccc', icon: '🔥', label: 'Hệ Thống PCCC Bọt Foam Áp Lực Cao', description: 'Hệ thống chữa cháy chuyên dụng cho hóa chất lỏng & dung môi' },
+        { key: 'cctv_haz', icon: '📹', label: 'Camera Giám Sát An Toàn Hóa Chất 24/7', description: 'CCTV phòng nổ theo dõi toàn bộ khu vực sang tải' },
+      ];
+    }
+    return [
+      { key: 'facade', icon: '🏢', label: 'Mặt Tiền & Sân Bãi Tiếp Nhận Xe In/Out', description: 'Sân bê tông rộng rãi cho xe tải nặng và cont 40ft quay đầu' },
+      { key: 'dock_doors', icon: '🚛', label: 'Dãy Cửa Dock Xuất Nhập & Dock Leveler', description: 'Cửa Dock nâng tự động tiếp nhận hàng đồng thời 2 chiều' },
+      { key: 'sorting_conveyor', icon: '⚙️', label: 'Sàn Chia Chọn & Băng Chuyền Con Lăn', description: 'Hệ thống băng chuyền phân tuyến và phân loại theo Store Code' },
+      { key: 'store_barcode', icon: '🏷️', label: 'Bàn Dán Mã Store Code & Quét Barcode', description: 'Khu vực quét mã vạch DWS và in tem phân tuyến siêu thị' },
+      { key: 'staging_pallet', icon: '🪵', label: 'Khu Đóng Gộp Pallet & Quấn Màng PE Outbound', description: 'Khu vực tập kết pallet theo từng đơn hàng siêu thị trước khi xuất bến' },
+      { key: 'fire_cctv', icon: '🔥', label: 'PCCC Sprinkler & Camera Soi Kiện Hàng', description: 'PCCC tự động và camera an ninh giám sát tiến độ giải phóng sàn' },
+    ];
+  }
+
+  // 0B. Cảng & Cảng Cạn ICD (proj-gen-port, proj-ref-port, proj-haz-port)
+  if (modelId?.includes('port') || modelId?.includes('cảng') || modelId?.includes('icd')) {
+    if (modelId?.includes('ref') || cargoGroupId?.includes('ref')) {
+      return [
+        { key: 'facade', icon: '⚓', label: 'Bến Cầu Cảng & Bãi Chuyên Dụng Cont Lạnh', description: 'Toàn cảnh cầu bến tiếp nhận sà lan và bãi cont lạnh' },
+        { key: 'reefer_plugs', icon: '🔌', label: 'Giàn Cắm Điện Cont Lạnh (Reefer Plugs)', description: 'Hệ thống trụ điện 380V/32A cắm điện buồng lạnh liên tục 24/7' },
+        { key: 'data_logger', icon: '🌡️', label: 'Trạm Đo & Data Logger Giám Sát Nhiệt', description: 'Bảng ghi nhận nhiệt độ và biên bản kiểm tra kỹ thuật PTI' },
+        { key: 'genset_trucks', icon: '🚛', label: 'Đội Xe Đầu Kéo Trang Bị Cụm Genset', description: 'Đầu kéo gắn máy phát điện Genset chuyên tuyến Cảng - Nhà máy' },
+        { key: 'cranes', icon: '🏗️', label: 'Hệ Thống Cẩu RTG & Reach Stacker Nâng Hạ', description: 'Thiết bị nâng hạ chuyên dụng bốc dỡ container lạnh an toàn' },
+        { key: 'cctv_port', icon: '📹', label: 'Camera Giám Sát Bãi Cont Lạnh 24/7', description: 'CCTV theo dõi giàn cắm điện và phương tiện ra vào bãi' },
+      ];
+    }
+    if (modelId?.includes('haz') || cargoGroupId?.includes('haz')) {
+      return [
+        { key: 'facade', icon: '⚓', label: 'Cổng Kiểm Soát An Ninh Hàng Nguy Hiểm Cảng', description: 'Trạm kiểm soát an ninh hàng DG theo quy chuẩn Cảng vụ' },
+        { key: 'dg_yard', icon: '☣️', label: 'Bãi Cách Ly Container Nguy Hiểm DG', description: 'Khu bãi biệt lập có đê bao và khoảng cách an toàn hàng hải' },
+        { key: 'fire_truck', icon: '🔥', label: 'Xe Chữa Cháy Thường Trực Hiện Trường', description: 'Phương tiện chữa cháy chuyên dụng túc trực khi nâng hạ cont DG' },
+        { key: 'spill_drain', icon: '🚨', label: 'Hố Thu Gom Rò Rỉ Hóa Chất Bến Cảng', description: 'Hệ thống thu gom sự cố rò rỉ hóa chất và phao quây cảng biển' },
+        { key: 'warning_ghs', icon: '🦺', label: 'Biển Báo Nguy Hiểm Chuẩn IMO / GHS', description: 'Hệ thống biển cảnh báo phân nhóm Class nguy hiểm tại bãi' },
+        { key: 'cctv_port', icon: '📹', label: 'Camera An Ninh Giám Sát Bãi DG 24/7', description: 'CCTV phòng nổ kết nối trực tiếp với Trung tâm điều hành Cảng vụ' },
+      ];
+    }
+    return [
+      { key: 'facade', icon: '⚓', label: 'Bến Cầu Cảng Tiếp Nhận Sà Lan & Tàu Biển', description: 'Chiều dài cầu bến, mớn nước và năng lực tiếp nhận phương tiện' },
+      { key: 'cont_yard', icon: '📦', label: 'Bãi Chứa Container & Depot Bãi Vỏ Rỗng', description: 'Bãi chứa container hàng và bãi depot vỏ rỗng tiêu chuẩn IICL' },
+      { key: 'cranes_sts', icon: '🏗️', label: 'Hệ Thống Cẩu Bờ STS & Cẩu Bãi RTG', description: 'Hệ thống cẩu giàn bờ STS và cẩu bãi RTG năng suất cao' },
+      { key: 'reach_stacker', icon: '🚜', label: 'Đội Xe Nâng Chụp Reach Stacker 45T', description: 'Xe nâng gắp cont 45T và xe nâng vỏ cont rỗng chuyên dụng' },
+      { key: 'gate_ocr', icon: '🚛', label: 'Cổng Trạm Gate-In/Out Cân Điện Tử & OCR', description: 'Cổng kiểm soát tự động quét OCR số cont và cân xe 80T' },
+      { key: 'tos_cctv', icon: '💻', label: 'Trung Tâm Điều Hành TOS & Camera Cảng', description: 'Phòng điều hành phần mềm TOS kết nối VASSCM Hải quan và E-Port' },
+    ];
+  }
   // 1. Kho lạnh & Kho mát (Cold / Refrigerated)
   if (modelId?.includes('ref') || cargoGroupId?.includes('ref') || modelId?.includes('cold')) {
     if (modelId?.includes('bon')) {
@@ -829,6 +892,65 @@ export interface WarehouseTechCategoryDef {
 }
 
 export const getWarehouseTechSpecCategories = (modelId?: string, cargoGroupId?: string): WarehouseTechCategoryDef[] => {
+  // 0A. Cross-Dock (proj-gen-xdock, proj-ref-xdock, proj-haz-xdock)
+  if (modelId?.includes('xdock') || modelId?.includes('cross-dock') || modelId?.includes('x-dock')) {
+    if (modelId?.includes('ref') || cargoGroupId?.includes('ref')) {
+      return [
+        { id: 'xdock_cold_temp', icon: '❄️', label: 'Buồng Đệm Lạnh & Dải Nhiệt', desc: 'Dải nhiệt độ +2°C~+8°C / +15°C~+25°C, giàn lạnh' },
+        { id: 'xdock_cold_dock', icon: '🚛', label: 'Cửa Dock Lạnh & Đệm Khí Shelter', desc: 'Dock shelter trùm kín cont, dock leveler cách nhiệt' },
+        { id: 'xdock_cold_ops', icon: '⏱️', label: 'Quy Trình Sang Xe & Đá Gel Bổ Sung', desc: 'SLA sang xe < 2h, tủ đá gel/đá khô, chèn lót' },
+        { id: 'xdock_cold_iot', icon: '💻', label: 'Cảm Biến IoT & Giám Sát Nhiệt Độ', desc: 'Data logger 24/7, cảnh báo nhiệt độ qua App' },
+        { id: 'xdock_cold_fire', icon: '🔥', label: 'PCCC & An Ninh Vận Hành', desc: 'PCCC nghiệm thu, camera giám sát 24/7' },
+        { id: 'xdock_cold_cert', icon: '📜', label: 'Chứng Nhận ATTP & Chuỗi Lạnh', desc: 'HACCP, ISO 22000, GDP chuỗi lạnh' },
+      ];
+    }
+    if (modelId?.includes('haz') || cargoGroupId?.includes('haz')) {
+      return [
+        { id: 'xdock_haz_license', icon: '☣️', label: 'Giấy Phép & Phân Nhóm Hóa Chất', desc: 'Giấy phép Sở Công Thương, Class 2-9, MSDS' },
+        { id: 'xdock_haz_isolation', icon: '🏗️', label: 'Bãi Cách Ly & Rãnh Chống Tràn', desc: 'Khoảng cách an toàn, sàn rãnh gom tràn hóa chất' },
+        { id: 'xdock_haz_fire', icon: '🔥', label: 'PCCC Bọt Foam & Xe Chữa Cháy', desc: 'Hệ thống bọt Foam, xe chữa cháy túc trực' },
+        { id: 'xdock_haz_spill', icon: '🚨', label: 'Ứng Phó Sự Cố Spill-Kit & PPE', desc: 'Spill-Kit 24/7, bồn rửa mắt, chứng chỉ NĐ 113' },
+        { id: 'xdock_haz_security', icon: '📜', label: 'An Ninh & Bảo Hiểm Môi Trường', desc: 'CCTV phòng nổ, bảo hiểm ô nhiễm môi trường' },
+      ];
+    }
+    return [
+      { id: 'xdock_structure', icon: '🏗️', label: 'Kết Cấu Sàn & Cửa Dock Xuất Nhập', desc: 'Diện tích sàn, số cửa dock In/Out, Dock Leveler' },
+      { id: 'xdock_sorting', icon: '⚙️', label: 'Thiết Bị Chia Chọn & Băng Chuyền', desc: 'Băng tải con lăn, DWS cân đo tự động, xe nâng' },
+      { id: 'xdock_retail', icon: '🏪', label: 'Kết Nối Chuỗi Siêu Thị / Đại Lý', desc: 'Tích hợp GO!, WinMart, AEON, Co.opmart, BHX...' },
+      { id: 'xdock_timing', icon: '⏱️', label: 'Khung Giờ Nhận & SLA Xuất Bến', desc: 'Giờ xe cập sàn, SLA giải phóng sàn < 4h - 8h' },
+      { id: 'xdock_wms', icon: '💻', label: 'Phần Mềm WMS X-Dock & API', desc: 'Quét Store Code, Scan e-POD, tích hợp ERP' },
+      { id: 'xdock_fire', icon: '🔥', label: 'PCCC & An Ninh Sàn Chia Chọn', desc: 'PCCC Sprinkler, camera soi từng kiện hàng 24/7' },
+    ];
+  }
+
+  // 0B. Cảng & Cảng Cạn ICD (proj-gen-port, proj-ref-port, proj-haz-port)
+  if (modelId?.includes('port') || modelId?.includes('cảng') || modelId?.includes('icd')) {
+    if (modelId?.includes('ref') || cargoGroupId?.includes('ref')) {
+      return [
+        { id: 'port_cold_plugs', icon: '🔌', label: 'Giàn Cắm Điện Reefer Plugs', desc: 'Số lượng ổ cắm, công suất máy phát ATS dự phòng' },
+        { id: 'port_cold_temp', icon: '🌡️', label: 'Giám Sát Nhiệt Độ & Trạm Đo PTI', desc: 'Data logger 24/7, kiểm tra kỹ thuật giàn lạnh PTI' },
+        { id: 'port_cold_fleet', icon: '🚛', label: 'Đội Xe Kéo Gắn Cụm Genset', desc: 'Đầu kéo gắn máy phát Genset chuyên tuyến Cảng - Kho' },
+        { id: 'port_cold_berth', icon: '⚓', label: 'Cầu Bến & Thiết Bị Nâng Hạ Cont Lạnh', desc: 'Bến tiếp nhận sà lan lạnh, cẩu RTG/Reach Stacker' },
+        { id: 'port_cold_cert', icon: '📜', label: 'Chứng Nhận An Toàn & Bảo Hiểm', desc: 'Chứng chỉ bến bãi, bảo hiểm cont lạnh 100%' },
+      ];
+    }
+    if (modelId?.includes('haz') || cargoGroupId?.includes('haz')) {
+      return [
+        { id: 'port_haz_license', icon: '📜', label: 'Phê Duyệt Tiếp Nhận Cảng Vụ', desc: 'Quyết định cấp phép của Cảng vụ hàng hải' },
+        { id: 'port_haz_yard', icon: '☣️', label: 'Bãi Cách Ly Container DG', desc: 'Khu bãi biệt lập, khoảng cách an toàn hàng hải' },
+        { id: 'port_haz_fire', icon: '🔥', label: 'Hệ Thống PCCC Foam & Xe Chữa Cháy', desc: 'Vòi phun bọt Foam, xe chữa cháy thường trực' },
+        { id: 'port_haz_spill', icon: '🚨', label: 'Ứng Phó Sự Cố Tràn Đổ Hóa Chất', desc: 'Hố thu gom sự cố, phao quây hóa chất cảng biển' },
+        { id: 'port_haz_security', icon: '⚓', label: 'An Ninh Cảng ISPS & Bảo Hiểm', desc: 'Chứng chỉ an ninh ISPS, bảo hiểm bến cảng' },
+      ];
+    }
+    return [
+      { id: 'port_berth', icon: '⚓', label: 'Cầu Bến & Tiếp Nhận Sà Lan/Tàu', desc: 'Chiều dài bến, mớn nước, tải trọng sà lan tiếp nhận' },
+      { id: 'port_cranes', icon: '🏗️', label: 'Thiết Bị Cẩu Nâng Hạ & Bãi Cont', desc: 'Cẩu bờ STS, cẩu bãi RTG, Reach Stacker 45T' },
+      { id: 'port_gate', icon: '🚛', label: 'Cổng Trạm Gate-In/Out & OCR', desc: 'Cân điện tử 80T, camera OCR quét số cont tự động' },
+      { id: 'port_tos', icon: '💻', label: 'Phần Mềm TOS & VASSCM Hải Quan', desc: 'Hệ thống TOS điều hành, kết nối E-Port & Hải quan' },
+      { id: 'port_isps', icon: '📜', label: 'Chứng Chỉ An Ninh ISPS & Giấy Phép', desc: 'Quyết định Bộ GTVT, chứng chỉ ISPS, bảo hiểm 100%' },
+    ];
+  }
   // 1. Kho Lạnh & Kho Mát (wh-ref-cold, wh-ref-bon, wh-ref-self)
   if (modelId?.includes('ref') || cargoGroupId?.includes('ref') || modelId?.includes('cold')) {
     return [
@@ -1071,6 +1193,21 @@ export interface CapabilityRouteItem {
   minChargeShipment?: number;
   customsLtlMode?: string;
   departureSchedule?: string;
+  // Truong thong tin chuyen biet cho Cross-dock & Port (Project Cargo)
+  xdockCode?: string;
+  xdockName?: string;
+  xdockProvince?: string;
+  xdockAddress?: string;
+  floorProcessingCapacity?: string;
+  minChargeXdock?: number;
+  portIcdCode?: string;
+  portIcdName?: string;
+  portIcdProvince?: string;
+  portIcdAddress?: string;
+  yardCapacityTeu?: number;
+  priceShuttle20ft?: number;
+  priceShuttle40ft?: number;
+  priceLiftOnOff?: number;
 }
 
 export interface PaidSurchargeItem {
@@ -4001,20 +4138,61 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             defaultOperation: 'Tiếp nhận hàng từ nhà máy, chia chọn theo tuyến và sang xe xuất bến trong 4 - 6 giờ',
             defaultCommitment: 'Tối ưu vòng quay hàng tồn kho, giảm 40% chi phí lưu kho',
             vehicleLov: ['Sàn trung chuyển Cross-dock'],
-            unitLov: ['Tấn', 'Pallet'],
+            unitLov: ['Kg', 'CBM', 'Pallet', 'Lô hàng'],
             defaultRoutes: [
               {
                 id: 'r-proj-xdock-1',
-                route: 'Hub Cross-dock TP.HCM ⇄ Các tỉnh Miền Tây',
-                origin: 'Hub Bình Chánh (TP.HCM)',
-                destination: '13 tỉnh Đồng Bằng Sông Cửu Long',
-                vehicleType: 'Sàn trung chuyển Cross-dock',
-                pricingUnit: 'Tấn',
-                price: 85000,
+                xdockCode: 'XD-BD-01',
+                routeCode: 'XD-BD-01',
+                xdockName: 'Trạm X-Dock Sóng Thần (Bình Dương)',
+                warehouseName: 'Trạm X-Dock Sóng Thần (Bình Dương)',
+                route: 'Trạm X-Dock Sóng Thần (Bình Dương)',
+                xdockProvince: 'Bình Dương',
+                warehouseProvince: 'Bình Dương',
+                origin: 'Bình Dương',
+                xdockAddress: 'KCN Sóng Thần 1, TP. Dĩ An',
+                warehouseAddress: 'KCN Sóng Thần 1, TP. Dĩ An',
+                destination: 'KCN Sóng Thần 1, TP. Dĩ An',
+                floorProcessingCapacity: '150 Tấn / Ngày',
+                pricePerKg: 180,
+                pricePerCbm: 45000,
+                pricePerPallet: 35000,
+                minChargeXdock: 150000,
+                minChargeMonthly: 150000,
+                price: 180,
+                pricingUnit: 'Kg / CBM / Pallet',
                 currency: 'VND',
-                sla: '4 - 6 giờ',
-                pricingStyle: 'All-in',
-                promotionPercent: 15,
+                sla: '< 4 giờ (Xuất bến ngay)',
+                pricingStyle: 'Chưa gồm phụ phí',
+                validUntil: '2026-12-31',
+                promotionPercent: 10,
+              },
+              {
+                id: 'r-proj-xdock-2',
+                xdockCode: 'XD-HN-01',
+                routeCode: 'XD-HN-01',
+                xdockName: 'Trạm X-Dock Gia Lâm (Hà Nội)',
+                warehouseName: 'Trạm X-Dock Gia Lâm (Hà Nội)',
+                route: 'Trạm X-Dock Gia Lâm (Hà Nội)',
+                xdockProvince: 'Hà Nội',
+                warehouseProvince: 'Hà Nội',
+                origin: 'Hà Nội',
+                xdockAddress: 'Khu công nghiệp Đài Tư, Q. Long Biên',
+                warehouseAddress: 'Khu công nghiệp Đài Tư, Q. Long Biên',
+                destination: 'Khu công nghiệp Đài Tư, Q. Long Biên',
+                floorProcessingCapacity: '120 Tấn / Ngày',
+                pricePerKg: 190,
+                pricePerCbm: 48000,
+                pricePerPallet: 38000,
+                minChargeXdock: 150000,
+                minChargeMonthly: 150000,
+                price: 190,
+                pricingUnit: 'Kg / CBM / Pallet',
+                currency: 'VND',
+                sla: '< 4 giờ (Xuất bến ngay)',
+                pricingStyle: 'Chưa gồm phụ phí',
+                validUntil: '2026-12-31',
+                promotionPercent: 5,
               },
             ],
             freeSurchargeOptions: [
@@ -4047,20 +4225,57 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             defaultOperation: 'Rút ruột container, nâng hạ máy móc thiết bị nặng và giải phóng cont trong 12h',
             defaultCommitment: 'Không để phát sinh phí lưu bãi lưu cont của hãng tàu',
             vehicleLov: ['Xe đầu kéo bãi cảng', 'Cẩu chuyên dụng rút ruột cont'],
-            unitLov: ['Cont', 'Chuyến'],
+            unitLov: ['Cont 20ft', 'Cont 40ft', 'Chuyến'],
             defaultRoutes: [
               {
                 id: 'r-proj-port-1',
-                route: 'Cảng Cái Mép ⇄ KCN Phú Mỹ / KCN Nhơn Trạch',
-                origin: 'Cảng Cái Mép (BR-VT)',
-                destination: 'Các KCN lân cận',
-                vehicleType: 'Xe đầu kéo bãi cảng',
+                portIcdCode: 'ICD-ST-01',
+                routeCode: 'ICD-ST-01',
+                portIcdName: 'Cảng Cạn ICD Sóng Thần (Bình Dương)',
+                warehouseName: 'Cảng Cạn ICD Sóng Thần (Bình Dương)',
+                route: 'Cảng Cạn ICD Sóng Thần (Bình Dương)',
+                portIcdProvince: 'Bình Dương',
+                warehouseProvince: 'Bình Dương',
+                origin: 'Bình Dương',
+                portIcdAddress: 'TX. Dĩ An, Tỉnh Bình Dương',
+                warehouseAddress: 'TX. Dĩ An, Tỉnh Bình Dương',
+                destination: 'TX. Dĩ An, Tỉnh Bình Dương',
+                yardCapacityTeu: 15000,
+                priceShuttle20ft: 1200000,
+                priceShuttle40ft: 1800000,
+                priceLiftOnOff: 350000,
+                price: 1200000,
                 pricingUnit: 'Cont',
-                price: 3200000,
                 currency: 'VND',
-                sla: '6 - 12 giờ',
-                pricingStyle: 'All-in',
+                sla: '< 6 giờ (Shuttle Cảng - ICD)',
+                pricingStyle: 'Chưa gồm phụ phí',
+                validUntil: '2026-12-31',
                 promotionPercent: 10,
+              },
+              {
+                id: 'r-proj-port-2',
+                portIcdCode: 'PORT-CM-01',
+                routeCode: 'PORT-CM-01',
+                portIcdName: 'Cảng Quốc Tế Cái Mép (TCIT / CMIT)',
+                warehouseName: 'Cảng Quốc Tế Cái Mép (TCIT / CMIT)',
+                route: 'Cảng Quốc Tế Cái Mép (TCIT / CMIT)',
+                portIcdProvince: 'Bà Rịa - Vũng Tàu',
+                warehouseProvince: 'Bà Rịa - Vũng Tàu',
+                origin: 'Bà Rịa - Vũng Tàu',
+                portIcdAddress: 'Khu bến Cái Mép - Thị Vải, TX. Phú Mỹ',
+                warehouseAddress: 'Khu bến Cái Mép - Thị Vải, TX. Phú Mỹ',
+                destination: 'Khu bến Cái Mép - Thị Vải, TX. Phú Mỹ',
+                yardCapacityTeu: 35000,
+                priceShuttle20ft: 1650000,
+                priceShuttle40ft: 2400000,
+                priceLiftOnOff: 450000,
+                price: 1650000,
+                pricingUnit: 'Cont',
+                currency: 'VND',
+                sla: 'Nâng hạ < 15 phút/xe',
+                pricingStyle: 'Chưa gồm phụ phí',
+                validUntil: '2026-12-31',
+                promotionPercent: 5,
               },
             ],
             freeSurchargeOptions: [
@@ -6103,11 +6318,15 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                     <div>
                       <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
                         <span className="w-5 h-5 rounded-full bg-indigo-50 text-indigo-700 flex items-center justify-center text-[10.5px] font-bold">2</span>
-                        <span>{activeCategory?.id === 'warehousing' ? 'Danh Sách Cơ Sở Kho & Biểu Phí Lưu Kho' : (activeCategory?.id === 'customs' ? 'Danh Sách Chi Cục Hải Quan & Biểu Phí Khai Báo' : 'Các Tuyến Đường & Biểu Giá Tham Chiếu')} ({currentData.routes?.length || 0})</span>
+                        <span>{activeCategory?.id === 'warehousing' ? 'Danh Sách Cơ Sở Kho & Biểu Phí Lưu Kho' : ((activeCategory?.id === 'project' && (activeModel?.id?.includes('xdock') || activeModel?.name?.toLowerCase().includes('cross-dock') || activeModel?.name?.toLowerCase().includes('x-dock'))) ? 'Danh Sách Trạm Cross-Dock & Biểu Phí Xử Lý Sàn' : ((activeCategory?.id === 'project' && (activeModel?.id?.includes('port') || activeModel?.name?.toLowerCase().includes('cảng') || activeModel?.code?.toLowerCase().includes('port'))) ? 'Danh Sách Cảng / ICD / Depot & Biểu Phí Khai Thác' : (activeCategory?.id === 'customs' ? 'Danh Sách Chi Cục Hải Quan & Biểu Phí Khai Báo' : 'Các Tuyến Đường & Biểu Giá Tham Chiếu')))} ({currentData.routes?.length || 0})</span>
                       </h4>
                       <p className="text-[11px] text-slate-500 mt-0.5">
                         {activeCategory?.id === 'warehousing'
                           ? 'Khai báo thông số kỹ thuật, album ảnh, phụ phí và VAS chi tiết cho từng cơ sở kho.'
+                          : (activeCategory?.id === 'project' && (activeModel?.id?.includes('xdock') || activeModel?.name?.toLowerCase().includes('cross-dock') || activeModel?.name?.toLowerCase().includes('x-dock')))
+                          ? 'Khai báo mặt sàn, công suất xử lý, album ảnh, phụ phí và VAS chi tiết cho từng trạm Cross-Dock.'
+                          : (activeCategory?.id === 'project' && (activeModel?.id?.includes('port') || activeModel?.name?.toLowerCase().includes('cảng') || activeModel?.code?.toLowerCase().includes('port')))
+                          ? 'Khai báo năng lực cầu bến, bãi chứa container, cẩu nâng hạ, phụ phí và VAS chi tiết cho từng Cảng / ICD.'
                           : activeCategory?.id === 'customs'
                           ? 'Khai báo biểu phí mở tờ khai chuẩn, tờ khai phụ và phí hỗ trợ kiểm hóa luồng đỏ theo từng Chi cục Hải quan.'
                           : 'Chỉnh sửa trực tiếp trên bảng biểu giá hoặc tải template Excel để nhập liệu hàng loạt.'}
@@ -6198,6 +6417,8 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                             const isCustomsTable = activeCategory?.id === 'customs' || activeCategory?.serviceType === 'Customs Clearance';
                             const isCrossBorderLtl = (activeCategory?.id === 'cross-border' || activeCategory?.serviceType === 'Cross-border') && (activeModel?.id?.includes('ltl') || activeModel?.name?.includes('LTL') || activeModel?.code === 'LTL');
                             const isCrossBorderFtl = (activeCategory?.id === 'cross-border' || activeCategory?.serviceType === 'Cross-border') && !isCrossBorderLtl;
+                            const isXdockTable = activeCategory?.id === 'project' && (activeModel?.id?.includes('xdock') || activeModel?.name?.toLowerCase().includes('cross-dock') || activeModel?.name?.toLowerCase().includes('x-dock'));
+                            const isPortTable = activeCategory?.id === 'project' && (activeModel?.id?.includes('port') || activeModel?.name?.toLowerCase().includes('cảng') || activeModel?.code?.toLowerCase().includes('port'));
                             const isTruckingTable = activeCategory?.id === 'trucking';
                             const isOceanTable = activeCategory?.id === 'ocean' || activeModel?.id?.startsWith('sea-');
                             const isRailTable = activeCategory?.id === 'rail' || activeModel?.id?.startsWith('rail-');
@@ -6310,6 +6531,51 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                   <th className="py-2.5 px-2.5 min-w-[130px] text-center">Hạn Giá</th>
                                   <th className="py-2.5 px-2 min-w-[85px] text-center">Promotion</th>
                                   <th className="py-2.5 px-2.5 min-w-[170px] text-center bg-indigo-50/70 text-indigo-950">Chi Tiết (Specs, Ảnh, VAS)</th>
+                                  <th className="py-2.5 px-2 text-center w-16 min-w-[65px]">Action</th>
+                                </tr>
+                              );
+                            }
+
+                            if (isXdockTable) {
+                              return (
+                                <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
+                                  <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
+                                  <th className="py-2.5 px-2.5 min-w-[105px] text-center bg-purple-50/80 text-purple-950 font-black">Mã Trạm X-Dock</th>
+                                  <th className="py-2.5 px-2.5 min-w-[195px]">Tên Trạm Cross-Dock / Hub</th>
+                                  <th className="py-2.5 px-2.5 min-w-[130px]">Tỉnh / Thành Phố</th>
+                                  <th className="py-2.5 px-2.5 min-w-[150px]">KCN / Vị Trí Trạm</th>
+                                  <th className="py-2.5 px-2.5 min-w-[140px] text-right bg-blue-50/70 text-blue-950 font-black">Công Suất Sàn</th>
+                                  <th className="py-2.5 px-2 text-right min-w-[110px] bg-emerald-50/90 text-emerald-950 font-black">Đơn Giá Kg</th>
+                                  <th className="py-2.5 px-2 text-right min-w-[115px] bg-emerald-50/90 text-emerald-950 font-black">Đơn Giá CBM</th>
+                                  <th className="py-2.5 px-2 text-right min-w-[120px] bg-emerald-50/90 text-emerald-950 font-black">Đơn Giá Pallet</th>
+                                  <th className="py-2.5 px-2 text-right min-w-[125px] bg-amber-50/80 text-amber-950 font-black">Cước Sàn (Min/Lô)</th>
+                                  <th className="py-2.5 px-2 w-20 min-w-[80px] text-center">Tiền Tệ</th>
+                                  <th className="py-2.5 px-2.5 min-w-[130px] text-center">SLA Giải Phóng</th>
+                                  <th className="py-2.5 px-2.5 min-w-[125px] text-center">Hạn Giá</th>
+                                  <th className="py-2.5 px-2 min-w-[85px] text-center">Promotion</th>
+                                  <th className="py-2.5 px-2.5 text-center min-w-[140px] bg-indigo-50/80 text-indigo-950 font-black">Chi Tiết (Specs, Ảnh, VAS)</th>
+                                  <th className="py-2.5 px-2 text-center w-16 min-w-[65px]">Action</th>
+                                </tr>
+                              );
+                            }
+
+                            if (isPortTable) {
+                              return (
+                                <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
+                                  <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
+                                  <th className="py-2.5 px-2.5 min-w-[105px] text-center bg-sky-50/80 text-sky-950 font-black">Mã Cảng / ICD</th>
+                                  <th className="py-2.5 px-2.5 min-w-[200px]">Tên Cảng / Cảng Cạn ICD / Depot</th>
+                                  <th className="py-2.5 px-2.5 min-w-[135px]">Tỉnh / Thành Phố</th>
+                                  <th className="py-2.5 px-2.5 min-w-[160px]">Vị Trí / Khu Bến Cảng</th>
+                                  <th className="py-2.5 px-2.5 min-w-[130px] text-right bg-blue-50/70 text-blue-950 font-black">Sức Chứa Bãi (TEU)</th>
+                                  <th className="py-2.5 px-2 text-right min-w-[135px] bg-emerald-50/90 text-emerald-950 font-black">Shuttle Cont 20ft</th>
+                                  <th className="py-2.5 px-2 text-right min-w-[135px] bg-emerald-50/90 text-emerald-950 font-black">Shuttle Cont 40ft</th>
+                                  <th className="py-2.5 px-2 text-right min-w-[130px] bg-amber-50/80 text-amber-950 font-black">Nâng Hạ (Lift On/Off)</th>
+                                  <th className="py-2.5 px-2 w-20 min-w-[80px] text-center">Tiền Tệ</th>
+                                  <th className="py-2.5 px-2.5 min-w-[135px] text-center">SLA Luân Chuyển</th>
+                                  <th className="py-2.5 px-2.5 min-w-[125px] text-center">Hạn Giá</th>
+                                  <th className="py-2.5 px-2 min-w-[85px] text-center">Promotion</th>
+                                  <th className="py-2.5 px-2.5 text-center min-w-[140px] bg-indigo-50/80 text-indigo-950 font-black">Chi Tiết (Specs, Ảnh, VAS)</th>
                                   <th className="py-2.5 px-2 text-center w-16 min-w-[65px]">Action</th>
                                 </tr>
                               );
@@ -6445,7 +6711,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                         <tbody className="divide-y divide-slate-200 bg-white">
                           {(!currentData.routes || currentData.routes.length === 0) ? (
                             <tr>
-                              <td colSpan={activeCategory?.id === 'warehousing' ? ((activeModel?.id === 'wh-gen-bon' || activeModel?.name?.toLowerCase().includes('ngoại quan')) ? 19 : (activeModel?.id === 'wh-gen-self' ? 17 : 18)) : (((activeCategory?.id === 'cross-border' || activeCategory?.serviceType === 'Cross-border') && (activeModel?.id?.includes('ftl') || activeModel?.name?.includes('FTL') || activeModel?.code === 'FTL' || !activeModel?.id?.includes('ltl'))) ? 16 : activeCategory?.id === 'customs' ? 15 : (activeCategory?.id === 'trucking' ? 15 : ((activeCategory?.id === 'ocean') ? ((activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL') ? 17 : 15) : (((activeCategory?.id === 'rail') && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL')) ? 15 : ((activeCategory?.id === 'air' && (activeModel?.id === 'air-gen-exp' || activeModel?.name?.includes('Express') || activeModel?.code === 'Express')) ? 13 : 15)))))} className="py-8 text-center text-slate-400 font-medium">
+                              <td colSpan={activeCategory?.id === 'warehousing' ? ((activeModel?.id === 'wh-gen-bon' || activeModel?.name?.toLowerCase().includes('ngoại quan')) ? 19 : (activeModel?.id === 'wh-gen-self' ? 17 : 18)) : ((activeCategory?.id === 'project' && (activeModel?.id?.includes('xdock') || activeModel?.name?.toLowerCase().includes('cross-dock') || activeModel?.name?.toLowerCase().includes('x-dock'))) ? 16 : ((activeCategory?.id === 'project' && (activeModel?.id?.includes('port') || activeModel?.name?.toLowerCase().includes('cảng') || activeModel?.code?.toLowerCase().includes('port'))) ? 15 : (((activeCategory?.id === 'cross-border' || activeCategory?.serviceType === 'Cross-border') && (activeModel?.id?.includes('ftl') || activeModel?.name?.includes('FTL') || activeModel?.code === 'FTL' || !activeModel?.id?.includes('ltl'))) ? 16 : activeCategory?.id === 'customs' ? 15 : (activeCategory?.id === 'trucking' ? 15 : ((activeCategory?.id === 'ocean') ? ((activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL') ? 17 : 15) : (((activeCategory?.id === 'rail') && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL')) ? 15 : ((activeCategory?.id === 'air' && (activeModel?.id === 'air-gen-exp' || activeModel?.name?.includes('Express') || activeModel?.code === 'Express')) ? 13 : 15)))))))} className="py-8 text-center text-slate-400 font-medium">
                                 {activeCategory?.id === 'warehousing' ? (
                                   <>Chưa có cơ sở kho nào. Bấm nút <strong className="text-indigo-600 font-bold">+ Thêm Kho Mới</strong> để khai báo năng lực & biểu phí lưu kho.</>
                                 ) : activeCategory?.id === 'customs' ? (
@@ -6465,6 +6731,396 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                               const isCustomsRow = activeCategory?.id === 'customs' || activeCategory?.serviceType === 'Customs Clearance';
                               const isCrossBorderLtlRow = (activeCategory?.id === 'cross-border' || activeCategory?.serviceType === 'Cross-border') && (activeModel?.id?.includes('ltl') || activeModel?.name?.includes('LTL') || activeModel?.code === 'LTL');
                               const isCrossBorderFtlRow = (activeCategory?.id === 'cross-border' || activeCategory?.serviceType === 'Cross-border') && !isCrossBorderLtlRow;
+                              const isXdockRow = activeCategory?.id === 'project' && (activeModel?.id?.includes('xdock') || activeModel?.name?.toLowerCase().includes('cross-dock') || activeModel?.name?.toLowerCase().includes('x-dock'));
+                              const isPortRow = activeCategory?.id === 'project' && (activeModel?.id?.includes('port') || activeModel?.name?.toLowerCase().includes('cảng') || activeModel?.code?.toLowerCase().includes('port'));
+
+                              if (isXdockRow) {
+                                const effXdockCode = route.xdockCode || route.routeCode || `XD-${String(idx + 1).padStart(2, '0')}`;
+                                const effXdockName = route.xdockName || route.warehouseName || route.route || `Trạm Cross-Dock #${idx + 1}`;
+                                const effProvince = route.xdockProvince || route.warehouseProvince || route.origin || 'Bình Dương';
+                                const effAddress = route.xdockAddress || route.warehouseAddress || route.destination || 'KCN Sóng Thần 1, Dĩ An';
+                                const effCap = route.floorProcessingCapacity || '150 Tấn / Ngày';
+                                const effPriceKg = route.pricePerKg ?? (route.price || 180);
+                                const effPriceCbm = route.pricePerCbm ?? 45000;
+                                const effPricePallet = route.pricePerPallet ?? 35000;
+                                const effMinCharge = route.minChargeXdock ?? (route.minChargeMonthly ?? 150000);
+                                const effCurrency = route.currency || 'VND';
+                                const effSla = route.sla || '< 4 giờ (Xuất bến ngay)';
+                                const effValidUntil = route.validUntil || '2026-12-31';
+                                const effPromotionPercent = route.promotionPercent || 0;
+
+                                return (
+                                  <tr key={route.id} className="hover:bg-purple-50/20 transition-colors divide-x divide-slate-100 text-xs">
+                                    {/* 1. STT */}
+                                    <td className="p-1 text-center font-bold text-slate-500 w-9 bg-slate-50/50">
+                                      {idx + 1}
+                                    </td>
+
+                                    {/* 2. Mã Trạm X-Dock */}
+                                    <td className="p-1 text-center font-mono font-bold text-purple-700 bg-purple-50/20">
+                                      <input
+                                        type="text"
+                                        value={effXdockCode}
+                                        onChange={(e) => handleUpdateRouteRowMultiple(route.id, { xdockCode: e.target.value, routeCode: e.target.value })}
+                                        className="w-full text-center bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-purple-500 rounded px-1 py-1 font-bold text-purple-700 text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 3. Tên Trạm Cross-Dock */}
+                                    <td className="p-1 align-middle">
+                                      <input
+                                        type="text"
+                                        value={effXdockName}
+                                        onChange={(e) => handleUpdateRouteRowMultiple(route.id, { xdockName: e.target.value, warehouseName: e.target.value, route: e.target.value })}
+                                        placeholder="Trạm X-Dock Sóng Thần..."
+                                        className="w-full px-2 py-1.5 font-bold text-slate-900 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-purple-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 4. Tỉnh / Thành Phố */}
+                                    <td className="p-1 align-middle">
+                                      <input
+                                        type="text"
+                                        value={effProvince}
+                                        onChange={(e) => handleUpdateRouteRowMultiple(route.id, { xdockProvince: e.target.value, warehouseProvince: e.target.value, origin: e.target.value })}
+                                        placeholder="Bình Dương, TP.HCM..."
+                                        className="w-full px-2 py-1.5 font-semibold text-slate-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-purple-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 5. KCN / Vị Trí Trạm */}
+                                    <td className="p-1 align-middle">
+                                      <input
+                                        type="text"
+                                        value={effAddress}
+                                        onChange={(e) => handleUpdateRouteRowMultiple(route.id, { xdockAddress: e.target.value, warehouseAddress: e.target.value, destination: e.target.value })}
+                                        placeholder="KCN, Phường/Xã..."
+                                        className="w-full px-2 py-1.5 text-slate-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-purple-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 6. Công Suất Sàn */}
+                                    <td className="p-1 align-middle text-right bg-blue-50/20">
+                                      <input
+                                        type="text"
+                                        value={effCap}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'floorProcessingCapacity', e.target.value)}
+                                        placeholder="150 Tấn / Ngày"
+                                        className="w-full px-2 py-1.5 text-right font-black text-blue-900 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-purple-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 7. Đơn Giá Kg */}
+                                    <td className="p-1 align-middle text-right bg-emerald-50/30">
+                                      <input
+                                        type="number"
+                                        value={effPriceKg || ''}
+                                        onChange={(e) => {
+                                          const val = parseFloat(e.target.value) || 0;
+                                          handleUpdateRouteRowMultiple(route.id, { pricePerKg: val, price: val });
+                                        }}
+                                        placeholder="180"
+                                        className="w-full px-2 py-1.5 text-right font-black text-emerald-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-purple-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 8. Đơn Giá CBM */}
+                                    <td className="p-1 align-middle text-right bg-emerald-50/20">
+                                      <input
+                                        type="number"
+                                        value={effPriceCbm || ''}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'pricePerCbm', parseFloat(e.target.value) || 0)}
+                                        placeholder="45000"
+                                        className="w-full px-2 py-1.5 text-right font-bold text-emerald-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-purple-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 9. Đơn Giá Pallet */}
+                                    <td className="p-1 align-middle text-right bg-emerald-50/20">
+                                      <input
+                                        type="number"
+                                        value={effPricePallet || ''}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'pricePerPallet', parseFloat(e.target.value) || 0)}
+                                        placeholder="35000"
+                                        className="w-full px-2 py-1.5 text-right font-bold text-emerald-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-purple-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 10. Cước Sàn Min Charge */}
+                                    <td className="p-1 align-middle text-right bg-amber-50/30">
+                                      <input
+                                        type="number"
+                                        value={effMinCharge || ''}
+                                        onChange={(e) => handleUpdateRouteRowMultiple(route.id, { minChargeXdock: parseFloat(e.target.value) || 0, minChargeMonthly: parseFloat(e.target.value) || 0 })}
+                                        placeholder="150000"
+                                        className="w-full px-2 py-1.5 text-right font-bold text-amber-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-purple-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 11. Tiền Tệ */}
+                                    <td className="p-1 align-middle text-center">
+                                      <span className="font-bold text-slate-800 text-xs">{effCurrency}</span>
+                                    </td>
+
+                                    {/* 12. SLA Giải Phóng Sàn */}
+                                    <td className="p-1 align-middle text-center">
+                                      <input
+                                        type="text"
+                                        value={effSla}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'sla', e.target.value)}
+                                        placeholder="< 4 giờ..."
+                                        className="w-full px-2 py-1.5 text-center font-medium text-slate-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-purple-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 13. Hạn Giá */}
+                                    <td className="p-1 align-middle text-center">
+                                      <input
+                                        type="date"
+                                        value={effValidUntil}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'validUntil', e.target.value)}
+                                        className="w-full px-1 py-1.5 text-center text-slate-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-purple-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 14. Promotion */}
+                                    <td className="p-1 align-middle text-center">
+                                      <input
+                                        type="number"
+                                        min="0"
+                                        max="100"
+                                        value={effPromotionPercent || ''}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'promotionPercent', Math.min(100, Math.max(0, parseInt(e.target.value) || 0)))}
+                                        placeholder="0%"
+                                        className="w-full px-1 py-1.5 text-center font-bold text-rose-600 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-purple-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 15. Chi Tiết (Specs, Ảnh, VAS) Button */}
+                                    <td className="p-1 text-center align-middle bg-indigo-50/40">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleOpenWarehouseDetailModal(route)}
+                                        className="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold shadow-2xs transition-all flex items-center justify-center gap-1 mx-auto cursor-pointer"
+                                        title="Khai báo thông số kỹ thuật sàn, thiết bị chia chọn, album ảnh, phụ phí & VAS cho trạm này"
+                                      >
+                                        <Sliders className="w-3.5 h-3.5" />
+                                        <span>Chi Tiết</span>
+                                      </button>
+                                    </td>
+
+                                    {/* 16. Action */}
+                                    <td className="p-1 text-center align-middle w-16">
+                                      <div className="flex items-center justify-center gap-1">
+                                        <button
+                                          type="button"
+                                          onClick={() => handleDuplicateRouteRow(route.id)}
+                                          className="p-1 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors cursor-pointer"
+                                          title="Nhân bản trạm X-Dock này"
+                                        >
+                                          <Copy className="w-3.5 h-3.5" />
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleDeleteRouteRow(route.id)}
+                                          className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors cursor-pointer"
+                                          title="Xóa trạm này"
+                                        >
+                                          <Trash2 className="w-3.5 h-3.5" />
+                                        </button>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                );
+                              }
+
+                              if (isPortRow) {
+                                const effPortCode = route.portIcdCode || route.routeCode || `ICD-${String(idx + 1).padStart(2, '0')}`;
+                                const effPortName = route.portIcdName || route.warehouseName || route.route || `Cảng / Cảng Cạn ICD #${idx + 1}`;
+                                const effProvince = route.portIcdProvince || route.warehouseProvince || route.origin || 'Bình Dương';
+                                const effAddress = route.portIcdAddress || route.warehouseAddress || route.destination || 'TX. Dĩ An, Tỉnh Bình Dương';
+                                const effYardTeu = route.yardCapacityTeu ?? 15000;
+                                const effShuttle20 = route.priceShuttle20ft ?? (route.price || 1200000);
+                                const effShuttle40 = route.priceShuttle40ft ?? 1800000;
+                                const effLiftOnOff = route.priceLiftOnOff ?? 350000;
+                                const effCurrency = route.currency || 'VND';
+                                const effSla = route.sla || '< 6 giờ (Shuttle Cảng - ICD)';
+                                const effValidUntil = route.validUntil || '2026-12-31';
+                                const effPromotionPercent = route.promotionPercent || 0;
+
+                                return (
+                                  <tr key={route.id} className="hover:bg-sky-50/20 transition-colors divide-x divide-slate-100 text-xs">
+                                    {/* 1. STT */}
+                                    <td className="p-1 text-center font-bold text-slate-500 w-9 bg-slate-50/50">
+                                      {idx + 1}
+                                    </td>
+
+                                    {/* 2. Mã Cảng / ICD */}
+                                    <td className="p-1 text-center font-mono font-bold text-sky-700 bg-sky-50/20">
+                                      <input
+                                        type="text"
+                                        value={effPortCode}
+                                        onChange={(e) => handleUpdateRouteRowMultiple(route.id, { portIcdCode: e.target.value, routeCode: e.target.value })}
+                                        className="w-full text-center bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-sky-500 rounded px-1 py-1 font-bold text-sky-700 text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 3. Tên Cảng / Cảng Cạn ICD */}
+                                    <td className="p-1 align-middle">
+                                      <input
+                                        type="text"
+                                        value={effPortName}
+                                        onChange={(e) => handleUpdateRouteRowMultiple(route.id, { portIcdName: e.target.value, warehouseName: e.target.value, route: e.target.value })}
+                                        placeholder="Cảng Cạn ICD Sóng Thần..."
+                                        className="w-full px-2 py-1.5 font-bold text-slate-900 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-sky-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 4. Tỉnh / Thành Phố */}
+                                    <td className="p-1 align-middle">
+                                      <input
+                                        type="text"
+                                        value={effProvince}
+                                        onChange={(e) => handleUpdateRouteRowMultiple(route.id, { portIcdProvince: e.target.value, warehouseProvince: e.target.value, origin: e.target.value })}
+                                        placeholder="Bình Dương, Bà Rịa - Vũng Tàu..."
+                                        className="w-full px-2 py-1.5 font-semibold text-slate-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-sky-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 5. Vị Trí / Khu Bến Cảng */}
+                                    <td className="p-1 align-middle">
+                                      <input
+                                        type="text"
+                                        value={effAddress}
+                                        onChange={(e) => handleUpdateRouteRowMultiple(route.id, { portIcdAddress: e.target.value, warehouseAddress: e.target.value, destination: e.target.value })}
+                                        placeholder="TX. Dĩ An, TX. Phú Mỹ..."
+                                        className="w-full px-2 py-1.5 text-slate-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-sky-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 6. Sức Chứa Bãi (TEU) */}
+                                    <td className="p-1 align-middle text-right bg-blue-50/20">
+                                      <input
+                                        type="number"
+                                        value={effYardTeu || ''}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'yardCapacityTeu', parseInt(e.target.value) || 0)}
+                                        placeholder="15000"
+                                        className="w-full px-2 py-1.5 text-right font-black text-blue-900 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-sky-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 7. Shuttle Cont 20ft */}
+                                    <td className="p-1 align-middle text-right bg-emerald-50/30">
+                                      <input
+                                        type="number"
+                                        value={effShuttle20 || ''}
+                                        onChange={(e) => {
+                                          const val = parseFloat(e.target.value) || 0;
+                                          handleUpdateRouteRowMultiple(route.id, { priceShuttle20ft: val, price: val });
+                                        }}
+                                        placeholder="1200000"
+                                        className="w-full px-2 py-1.5 text-right font-black text-emerald-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-sky-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 8. Shuttle Cont 40ft */}
+                                    <td className="p-1 align-middle text-right bg-emerald-50/20">
+                                      <input
+                                        type="number"
+                                        value={effShuttle40 || ''}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'priceShuttle40ft', parseFloat(e.target.value) || 0)}
+                                        placeholder="1800000"
+                                        className="w-full px-2 py-1.5 text-right font-bold text-emerald-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-sky-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 9. Nâng Hạ (Lift On/Off) */}
+                                    <td className="p-1 align-middle text-right bg-amber-50/30">
+                                      <input
+                                        type="number"
+                                        value={effLiftOnOff || ''}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'priceLiftOnOff', parseFloat(e.target.value) || 0)}
+                                        placeholder="350000"
+                                        className="w-full px-2 py-1.5 text-right font-bold text-amber-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-sky-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 10. Tiền Tệ */}
+                                    <td className="p-1 align-middle text-center">
+                                      <span className="font-bold text-slate-800 text-xs">{effCurrency}</span>
+                                    </td>
+
+                                    {/* 11. SLA Luân Chuyển */}
+                                    <td className="p-1 align-middle text-center">
+                                      <input
+                                        type="text"
+                                        value={effSla}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'sla', e.target.value)}
+                                        placeholder="< 6 giờ..."
+                                        className="w-full px-2 py-1.5 text-center font-medium text-slate-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-sky-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 12. Hạn Giá */}
+                                    <td className="p-1 align-middle text-center">
+                                      <input
+                                        type="date"
+                                        value={effValidUntil}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'validUntil', e.target.value)}
+                                        className="w-full px-1 py-1.5 text-center text-slate-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-sky-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 13. Promotion */}
+                                    <td className="p-1 align-middle text-center">
+                                      <input
+                                        type="number"
+                                        min="0"
+                                        max="100"
+                                        value={effPromotionPercent || ''}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'promotionPercent', Math.min(100, Math.max(0, parseInt(e.target.value) || 0)))}
+                                        placeholder="0%"
+                                        className="w-full px-1 py-1.5 text-center font-bold text-rose-600 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-sky-500 rounded text-xs"
+                                      />
+                                    </td>
+
+                                    {/* 14. Chi Tiết (Specs, Ảnh, VAS) Button */}
+                                    <td className="p-1 text-center align-middle bg-indigo-50/40">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleOpenWarehouseDetailModal(route)}
+                                        className="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold shadow-2xs transition-all flex items-center justify-center gap-1 mx-auto cursor-pointer"
+                                        title="Khai báo năng lực cầu bến, bãi container, cẩu nâng hạ, album ảnh, phụ phí & VAS cho Cảng/ICD này"
+                                      >
+                                        <Sliders className="w-3.5 h-3.5" />
+                                        <span>Chi Tiết</span>
+                                      </button>
+                                    </td>
+
+                                    {/* 15. Action */}
+                                    <td className="p-1 text-center align-middle w-16">
+                                      <div className="flex items-center justify-center gap-1">
+                                        <button
+                                          type="button"
+                                          onClick={() => handleDuplicateRouteRow(route.id)}
+                                          className="p-1 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors cursor-pointer"
+                                          title="Nhân bản Cảng/ICD này"
+                                        >
+                                          <Copy className="w-3.5 h-3.5" />
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleDeleteRouteRow(route.id)}
+                                          className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors cursor-pointer"
+                                          title="Xóa Cảng/ICD này"
+                                        >
+                                          <Trash2 className="w-3.5 h-3.5" />
+                                        </button>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                );
+                              }
 
                               if (isCrossBorderLtlRow) {
                                 const effCode = route.routeCode || `CB-LTL-${String(idx + 1).padStart(2, '0')}`;
