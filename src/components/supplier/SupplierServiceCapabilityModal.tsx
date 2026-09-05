@@ -1137,7 +1137,7 @@ export interface CapabilityRouteItem {
   customTruckBodyType?: string;
   truckTonnage?: string;
   customTruckTonnage?: string;
-  vehicleType: string;
+  vehicleType?: string;
   shippingLine?: string;
   customPackagingType?: string;
   customShippingLine?: string;
@@ -4720,17 +4720,19 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
 ];
 
 interface SupplierServiceCapabilityModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+  isOpen?: boolean;
+  onClose?: () => void;
   onSave: (declaredServices: any[]) => void;
   existingServices?: any[];
+  isInline?: boolean;
 }
 
 export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityModalProps> = ({
-  isOpen,
+  isOpen = false,
   onClose,
   onSave,
   existingServices = [],
+  isInline = false,
 }) => {
   // Tree expansion state
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({
@@ -5129,7 +5131,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
     return initial;
   });
 
-  if (!isOpen) return null;
+  if (!isOpen && !isInline) return null;
 
   // Find currently active model details
   let activeModel: any = null;
@@ -6032,13 +6034,15 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
     });
 
     onSave(declaredList);
-    onClose();
+    if (!isInline && onClose) {
+      onClose();
+    }
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 overflow-y-auto animate-in fade-in duration-150">
+    <div className={isInline ? "w-full relative" : "fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 overflow-y-auto animate-in fade-in duration-150"}>
       <div 
-        className="bg-white w-full max-w-7xl rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[94vh] text-slate-800"
+        className={isInline ? "bg-white w-full rounded-3xl shadow-xs border border-slate-200 overflow-hidden flex flex-col text-slate-800" : "bg-white w-full max-w-7xl rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[94vh] text-slate-800"}
         onClick={(e) => e.stopPropagation()}
       >
         {/* =========================================================================
@@ -6046,8 +6050,9 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
         ========================================================================= */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50/80 shrink-0">
           <div>
-            <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
-              Khai Báo Danh Mục Dịch Vụ Supplier
+            <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
+              {isInline && <Truck className="w-5 h-5 text-indigo-600" />}
+              <span>{isInline ? "Khai Báo Danh Mục Dịch Vụ & Năng Lực Cung Ứng" : "Khai Báo Danh Mục Dịch Vụ Supplier"}</span>
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
               Tick chọn các dịch vụ có thể cung ứng và thiết lập năng lực & biểu giá tham chiếu.
@@ -6064,20 +6069,22 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
               <span>Lưu Dữ Liệu</span>
             </button>
 
-            <button
-              type="button"
-              onClick={onClose}
-              className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 rounded-full transition-colors cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            {!isInline && onClose && (
+              <button
+                type="button"
+                onClick={onClose}
+                className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 rounded-full transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            )}
           </div>
         </div>
 
         {/* =========================================================================
             SPLIT VIEW BODY (Left: Tree, Right: 4 Structured Sections)
         ========================================================================= */}
-        <div className="grid grid-cols-1 md:grid-cols-12 flex-1 overflow-hidden min-h-[550px]">
+        <div className={`grid grid-cols-1 md:grid-cols-12 flex-1 overflow-hidden ${isInline ? 'min-h-[620px] h-[820px]' : 'min-h-[550px]'}`}>
           
           {/* 🌿 LEFT: CÂY DANH MỤC DỊCH VỤ (MASTER TREE) - 3.5 cols */}
           <div className="md:col-span-4 lg:col-span-3 border-r border-slate-200 bg-slate-50/40 p-3.5 overflow-y-auto space-y-2 select-none">
