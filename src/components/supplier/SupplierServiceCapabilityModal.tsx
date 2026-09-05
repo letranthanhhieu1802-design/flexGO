@@ -9618,23 +9618,16 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                   </div>
                 </div>
 
-                {activeCategory?.id === 'warehousing' ? (
-                  <div className="p-4 bg-gradient-to-r from-blue-50/80 via-indigo-50/60 to-blue-50/80 border border-indigo-200 rounded-2xl flex items-center justify-between gap-3 text-xs shadow-2xs">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-sm">
-                        <Building2 className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-indigo-950 text-xs">
-                          Quản lý Phụ Phí, Dịch Vụ VAS & Thông Số Kỹ Thuật Theo Từng Kho
-                        </h4>
-                        <p className="text-[11px] text-slate-600 mt-0.5">
-                          Đối với dịch vụ Kho bãi 3PL, mỗi cơ sở kho có chính sách phụ phí handling (In/Out, rút ruột cont), dịch vụ gia tăng và thông số kỹ thuật khác biệt. Vui lòng bấm vào cột <strong>"Chi Tiết"</strong> trên từng dòng kho ở bảng trên để cấu hình.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
+                {activeCategory?.id === 'warehousing' ||
+                 (activeCategory?.id === 'project' && (
+                   activeModel?.id?.includes('xdock') ||
+                   activeModel?.id?.includes('port') ||
+                   activeModel?.name?.toLowerCase().includes('cross-dock') ||
+                   activeModel?.name?.toLowerCase().includes('x-dock') ||
+                   activeModel?.name?.toLowerCase().includes('cảng') ||
+                   activeModel?.code?.toLowerCase().includes('port') ||
+                   activeModel?.code?.toLowerCase().includes('cross-dock')
+                 )) ? null : (
                   <>
                 {/* =========================================================================
                     PHẦN 3: CÁC PHỤ PHÍ MIỄN PHÍ & CÓ PHÍ (HỖ TRỢ THÊM / BỚT TÙY Ý)
