@@ -923,6 +923,8 @@ export interface CapabilityRouteItem {
   warehouseFreeSurcharges?: string[];
   warehousePaidSurcharges?: PaidSurchargeItem[];
   warehouseVasItems?: CapabilityVasItem[];
+  customsAuthority?: string;
+  customsWarehouseCode?: string;
 }
 
 export interface PaidSurchargeItem {
@@ -5893,6 +5895,34 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                             const isLtlOrLclTable = isLtlTable || isLclTable;
 
                             if (isWarehousingTable) {
+                              const isBonded = activeModel?.id === 'wh-gen-bon' || activeModel?.id?.includes('bon') || activeModel?.name?.toLowerCase().includes('ngoại quan') || activeModel?.code?.toLowerCase().includes('ngoại quan');
+                              
+                              if (isBonded) {
+                                return (
+                                  <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
+                                    <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
+                                    <th className="py-2.5 px-2.5 min-w-[125px] text-center bg-indigo-50/80 text-indigo-950 font-black">Mã Kho HQ</th>
+                                    <th className="py-2.5 px-2.5 min-w-[185px]">Tên Kho Ngoại Quan / CFS</th>
+                                    <th className="py-2.5 px-2.5 min-w-[220px] bg-amber-50/80 text-amber-950 font-black">Chi Cục Hải Quan Quản Lý</th>
+                                    <th className="py-2.5 px-2.5 min-w-[130px]">Tỉnh / TP</th>
+                                    <th className="py-2.5 px-2.5 min-w-[185px]">Cổng Cảng / KCN / Địa Chỉ</th>
+                                    <th className="py-2.5 px-2 text-right min-w-[110px] bg-blue-50/70 text-blue-950">Diện Tích (m²)</th>
+                                    <th className="py-2.5 px-2 text-right min-w-[115px] bg-blue-50/70 text-blue-950 font-bold">Sức Chứa CBM (m³)</th>
+                                    <th className="py-2.5 px-2 text-right min-w-[115px] bg-blue-50/70 text-blue-950">Số Pallet (Vị Trí)</th>
+                                    <th className="py-2.5 px-2 text-right min-w-[150px] bg-emerald-50/90 text-emerald-950 font-black">Giá CBM (/ CBM / Ngày)</th>
+                                    <th className="py-2.5 px-2 text-right min-w-[140px] bg-emerald-50/70 text-emerald-950">Giá Pallet (/ Ngày)</th>
+                                    <th className="py-2.5 px-2 text-right min-w-[135px] bg-emerald-50/70 text-emerald-950">Giá m² (/ Tháng)</th>
+                                    <th className="py-2.5 px-2 text-right min-w-[155px] bg-amber-50/80 text-amber-950">Cước Sàn (Min/Lô)</th>
+                                    <th className="py-2.5 px-2 w-20 min-w-[80px] text-center">Tiền Tệ</th>
+                                    <th className="py-2.5 px-2.5 min-w-[145px] text-center">Giờ Xe & Giám Sát HQ</th>
+                                    <th className="py-2.5 px-2.5 min-w-[130px] text-center">Hạn Giá</th>
+                                    <th className="py-2.5 px-2 min-w-[85px] text-center">Promotion</th>
+                                    <th className="py-2.5 px-2.5 min-w-[170px] text-center bg-indigo-50/70 text-indigo-950">Chi Tiết (Specs, HQ, VAS)</th>
+                                    <th className="py-2.5 px-2 text-center w-16 min-w-[65px]">Action</th>
+                                  </tr>
+                                );
+                              }
+
                               return (
                                 <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
                                   <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
@@ -5995,6 +6025,269 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                 : route.price;
                               const isWarehousingRow = activeCategory?.id === 'warehousing';
                               if (isWarehousingRow) {
+                                const isBondedRow = activeModel?.id === 'wh-gen-bon' || activeModel?.id?.includes('bon') || activeModel?.name?.toLowerCase().includes('ngoại quan') || activeModel?.code?.toLowerCase().includes('ngoại quan');
+
+                                if (isBondedRow) {
+                                  const effWhCode = route.customsWarehouseCode || route.warehouseCode || route.routeCode || `02B1B${String(idx + 1).padStart(2, '0')}`;
+                                  const effWhName = route.warehouseName || route.route || `Kho Ngoại Quan CFS #${idx + 1}`;
+                                  const effCustomsAuth = route.customsAuthority || CUSTOMS_AUTHORITIES_LOV[0];
+                                  const effProvince = route.warehouseProvince || route.origin || 'TP. Hồ Chí Minh';
+                                  const effAddress = route.warehouseAddress || route.destination || 'Khu thương mại Cát Lái, P. Cát Lái, TP. Thủ Đức';
+                                  const effCapArea = route.capacityArea ?? 5000;
+                                  const effCapVolume = route.capacityVolume ?? 8000;
+                                  const effCapPallet = route.capacityPallets ?? 4200;
+                                  const effPriceVolume = route.pricePerVolume ?? 0.35;
+                                  const effPricePallet = route.pricePerPallet ?? 0.45;
+                                  const effPriceArea = route.pricePerArea ?? 6.5;
+                                  const effMinCharge = route.minChargeMonthly ?? 45;
+                                  const effCurrency = route.currency || 'USD';
+                                  const effSla = route.sla || 'Tiếp nhận cont 24/7 (HQ 8h-17h)';
+
+                                  return (
+                                    <tr key={route.id} className="hover:bg-indigo-50/20 transition-colors divide-x divide-slate-100 text-xs">
+                                      {/* 1. STT */}
+                                      <td className="p-1 text-center font-bold text-slate-500 w-9 bg-slate-50/50">
+                                        {idx + 1}
+                                      </td>
+
+                                      {/* 2. Mã Kho Hải Quan */}
+                                      <td className="p-1 text-center font-mono font-bold text-indigo-700 bg-indigo-50/20">
+                                        <input
+                                          type="text"
+                                          value={effWhCode}
+                                          onChange={(e) => handleUpdateRouteRowMultiple(route.id, { 
+                                            customsWarehouseCode: e.target.value, 
+                                            warehouseCode: e.target.value, 
+                                            routeCode: e.target.value 
+                                          })}
+                                          placeholder="VD: 02B1B01"
+                                          className="w-full text-center bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded px-1 py-1 font-bold text-indigo-700 text-xs"
+                                        />
+                                      </td>
+
+                                      {/* 3. Tên Kho Ngoại Quan / CFS */}
+                                      <td className="p-1 align-middle">
+                                        <input
+                                          type="text"
+                                          value={effWhName}
+                                          onChange={(e) => handleUpdateRouteRowMultiple(route.id, { warehouseName: e.target.value, route: e.target.value })}
+                                          placeholder="Tên kho ngoại quan / CFS..."
+                                          className="w-full px-2 py-1.5 font-bold text-slate-900 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
+                                        />
+                                      </td>
+
+                                      {/* 4. Chi Cục Hải Quan Quản Lý */}
+                                      <td className="p-0 align-middle bg-amber-50/20">
+                                        <select
+                                          value={CUSTOMS_AUTHORITIES_LOV.includes(effCustomsAuth) ? effCustomsAuth : 'Khác (Nhập chi cục khác)...'}
+                                          onChange={(e) => {
+                                            const val = e.target.value;
+                                            handleUpdateRouteRow(route.id, 'customsAuthority', val === 'Khác (Nhập chi cục khác)...' ? '' : val);
+                                          }}
+                                          className="w-full px-2 py-1.5 bg-transparent font-semibold text-amber-950 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer"
+                                        >
+                                          {CUSTOMS_AUTHORITIES_LOV.map((auth, aIdx) => (
+                                            <option key={aIdx} value={auth}>{auth}</option>
+                                          ))}
+                                        </select>
+                                      </td>
+
+                                      {/* 5. Tỉnh / TP */}
+                                      <td className="p-1 align-middle">
+                                        <input
+                                          type="text"
+                                          value={effProvince}
+                                          onChange={(e) => handleUpdateRouteRowMultiple(route.id, { warehouseProvince: e.target.value, origin: e.target.value })}
+                                          placeholder="TP.HCM, Hải Phòng..."
+                                          className="w-full px-2 py-1.5 font-semibold text-slate-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
+                                        />
+                                      </td>
+
+                                      {/* 6. Cổng Cảng / KCN / Địa Chỉ */}
+                                      <td className="p-1 align-middle">
+                                        <input
+                                          type="text"
+                                          value={effAddress}
+                                          onChange={(e) => handleUpdateRouteRowMultiple(route.id, { warehouseAddress: e.target.value, destination: e.target.value })}
+                                          placeholder="KCN, Cổng cảng, Khu CFS..."
+                                          className="w-full px-2 py-1.5 text-slate-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
+                                        />
+                                      </td>
+
+                                      {/* 7. Diện Tích Kho (m²) */}
+                                      <td className="p-1 align-middle text-right bg-blue-50/20">
+                                        <input
+                                          type="number"
+                                          value={effCapArea || ''}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'capacityArea', parseFloat(e.target.value) || 0)}
+                                          placeholder="5000"
+                                          className="w-full px-2 py-1.5 text-right font-semibold text-slate-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
+                                        />
+                                      </td>
+
+                                      {/* 8. Sức Chứa CBM (m³) */}
+                                      <td className="p-1 align-middle text-right bg-blue-50/30">
+                                        <input
+                                          type="number"
+                                          value={effCapVolume || ''}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'capacityVolume', parseFloat(e.target.value) || 0)}
+                                          placeholder="8000"
+                                          className="w-full px-2 py-1.5 text-right font-bold text-blue-900 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
+                                        />
+                                      </td>
+
+                                      {/* 9. Số Pallet (Vị Trí) */}
+                                      <td className="p-1 align-middle text-right bg-blue-50/20">
+                                        <input
+                                          type="number"
+                                          value={effCapPallet || ''}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'capacityPallets', parseFloat(e.target.value) || 0)}
+                                          placeholder="4200"
+                                          className="w-full px-2 py-1.5 text-right font-semibold text-slate-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
+                                        />
+                                      </td>
+
+                                      {/* 10. Giá CBM (/ CBM / Ngày) - Trọng tâm */}
+                                      <td className="p-1 align-middle text-right bg-emerald-50/30">
+                                        <input
+                                          type="number"
+                                          step="0.01"
+                                          value={effPriceVolume || ''}
+                                          onChange={(e) => {
+                                            const v = parseFloat(e.target.value) || 0;
+                                            handleUpdateRouteRowMultiple(route.id, { pricePerVolume: v, price: v });
+                                          }}
+                                          placeholder="0.35"
+                                          className="w-full px-2 py-1.5 text-right font-black text-emerald-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
+                                        />
+                                      </td>
+
+                                      {/* 11. Giá Pallet (/ Ngày) */}
+                                      <td className="p-1 align-middle text-right bg-emerald-50/20">
+                                        <input
+                                          type="number"
+                                          step="0.01"
+                                          value={effPricePallet || ''}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'pricePerPallet', parseFloat(e.target.value) || 0)}
+                                          placeholder="0.45"
+                                          className="w-full px-2 py-1.5 text-right font-bold text-emerald-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
+                                        />
+                                      </td>
+
+                                      {/* 12. Giá m² (/ Tháng) */}
+                                      <td className="p-1 align-middle text-right bg-emerald-50/20">
+                                        <input
+                                          type="number"
+                                          step="0.1"
+                                          value={effPriceArea || ''}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'pricePerArea', parseFloat(e.target.value) || 0)}
+                                          placeholder="6.5"
+                                          className="w-full px-2 py-1.5 text-right font-bold text-emerald-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
+                                        />
+                                      </td>
+
+                                      {/* 13. Cước Sàn (Min Charge / Lô hàng) */}
+                                      <td className="p-1 align-middle text-right bg-amber-50/30">
+                                        <input
+                                          type="number"
+                                          step="1"
+                                          value={effMinCharge || ''}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'minChargeMonthly', parseFloat(e.target.value) || 0)}
+                                          placeholder="45"
+                                          className="w-full px-2 py-1.5 text-right font-bold text-amber-900 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
+                                        />
+                                      </td>
+
+                                      {/* 14. Tiền Tệ */}
+                                      <td className="p-0 text-center bg-slate-50/30 align-middle">
+                                        <select
+                                          value={effCurrency}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'currency', e.target.value as 'VND' | 'USD')}
+                                          className="w-full px-1.5 py-2 bg-transparent text-slate-800 text-xs font-bold text-center focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                                        >
+                                          <option value="USD">USD ($)</option>
+                                          <option value="VND">VND (₫)</option>
+                                        </select>
+                                      </td>
+
+                                      {/* 15. Giờ Tiếp Nhận Xe & Giám Sát HQ */}
+                                      <td className="p-1 align-middle">
+                                        <input
+                                          type="text"
+                                          value={effSla}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'sla', e.target.value)}
+                                          placeholder="24/7 (HQ 8h-17h)..."
+                                          className="w-full px-2 py-1.5 text-center text-slate-800 font-medium bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
+                                        />
+                                      </td>
+
+                                      {/* 16. Hạn Giá */}
+                                      <td className="p-0 text-center align-middle">
+                                        <input
+                                          type="date"
+                                          value={route.validUntil || '2026-12-31'}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'validUntil', e.target.value)}
+                                          className="w-full px-1.5 py-2 bg-transparent text-slate-700 text-xs font-medium text-center focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                                        />
+                                      </td>
+
+                                      {/* 17. Promotion (%) */}
+                                      <td className="p-0 text-center align-middle">
+                                        <select
+                                          value={route.promotionPercent || 0}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'promotionPercent', parseInt(e.target.value) || 0)}
+                                          className="w-full px-1.5 py-2 bg-transparent text-slate-800 text-xs font-semibold text-center focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                                        >
+                                          <option value={0}>0%</option>
+                                          <option value={5}>5%</option>
+                                          <option value={10}>10%</option>
+                                          <option value={15}>15%</option>
+                                          <option value={20}>20%</option>
+                                        </select>
+                                      </td>
+
+                                      {/* 18. Chi Tiết (Specs, HQ, VAS) Button */}
+                                      <td className="p-1 text-center align-middle bg-indigo-50/20">
+                                        <button
+                                          type="button"
+                                          onClick={() => handleOpenWarehouseDetailModal(route)}
+                                          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold text-xs shadow-2xs transition-all cursor-pointer hover:shadow-indigo-600/30"
+                                          title="Thiết lập thông số kỹ thuật, tải ảnh thực tế, biểu phí và VAS kho ngoại quan"
+                                        >
+                                          <Sliders className="w-3.5 h-3.5" />
+                                          <span>Chi tiết (Specs & HQ)</span>
+                                          {(route.warehousePhotos?.length || 0) > 0 && (
+                                            <span className="bg-indigo-400 text-white text-[10px] px-1 py-0.2 rounded-full font-bold">
+                                              {route.warehousePhotos?.length}📸
+                                            </span>
+                                          )}
+                                        </button>
+                                      </td>
+
+                                      {/* 19. Action Buttons */}
+                                      <td className="p-1 text-center align-middle">
+                                        <div className="flex items-center justify-center gap-1">
+                                          <button
+                                            type="button"
+                                            onClick={() => handleDuplicateRouteRow(route.id)}
+                                            className="p-1 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors cursor-pointer"
+                                            title="Nhân bản cơ sở kho ngoại quan này"
+                                          >
+                                            <Copy className="w-3.5 h-3.5" />
+                                          </button>
+                                          <button
+                                            type="button"
+                                            onClick={() => handleDeleteRouteRow(route.id)}
+                                            className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors cursor-pointer"
+                                            title="Xóa cơ sở kho ngoại quan này"
+                                          >
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                          </button>
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  );
+                                }
                                 const effWhCode = route.warehouseCode || route.routeCode || `WH-DC-${String(idx + 1).padStart(3, '0')}`;
                                 const effWhName = route.warehouseName || route.route || `Kho Phân Phối DC #${idx + 1}`;
                                 const effProvince = route.warehouseProvince || route.origin || 'Bình Dương';
