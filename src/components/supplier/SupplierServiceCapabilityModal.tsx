@@ -581,6 +581,106 @@ export const getTonnagesForBodyType = (
   return [...allDefaults, 'Khác (Nhập tùy chọn)...'];
 };
 
+
+export interface WarehousePhotoSlotDef {
+  key: string;
+  icon: string;
+  label: string;
+  description: string;
+}
+
+export const getWarehousePhotoSlots = (modelId?: string, cargoGroupId?: string): WarehousePhotoSlotDef[] => {
+  // 1. Kho lạnh & Kho mát (Cold / Refrigerated)
+  if (modelId?.includes('ref') || cargoGroupId?.includes('ref') || modelId?.includes('cold')) {
+    if (modelId?.includes('bon')) {
+      return [
+        { key: 'facade', icon: '🏢', label: 'Mặt tiền & Cổng kiểm soát Hải quan', description: 'Toàn cảnh cổng kho ngoại quan, trạm kiểm soát HQ' },
+        { key: 'cold_chamber', icon: '❄️', label: 'Hệ thống Buồng lạnh & Dàn lạnh bảo quản', description: 'Bên trong buồng lạnh, dải nhiệt độ, dàn lạnh' },
+        { key: 'racking', icon: '📦', label: 'Hệ thống Giá kệ Racking kho lạnh', description: 'Dãy kệ Drive-in, Selective chuyên dụng hàng lạnh' },
+        { key: 'dock_shelter', icon: '🚛', label: 'Cửa Dock đệm khí giữ nhiệt (Dock Shelter)', description: 'Cửa bốc dỡ cont lạnh có trùm đệm khí cách nhiệt' },
+        { key: 'quarantine', icon: '🔬', label: 'Khu vực Lấy mẫu & Kiểm dịch Hải quan', description: 'Bàn lấy mẫu, kiểm tra ATTP / kiểm dịch động thực vật' },
+        { key: 'power_backup', icon: '⚡', label: 'Máy phát điện dự phòng & Cụm máy nén', description: 'Máy phát ATS tự động, cụm máy nén Bitzer/Guentner' },
+      ];
+    }
+    if (modelId?.includes('self')) {
+      return [
+        { key: 'facade', icon: '🏢', label: 'Lối vào & Cổng kiểm soát thẻ từ/vân tay', description: 'Khu vực check-in ra vào tự do 24/7' },
+        { key: 'locker_aisle', icon: '🚪', label: 'Dãy khoang lạnh cá nhân (Locker lạnh)', description: 'Hành lang dãy khoang lạnh cá nhân độc lập' },
+        { key: 'inside_locker', icon: '❄️', label: 'Bên trong khoang lưu trữ lạnh', description: 'Không gian bên trong khoang, khay kệ, nhiệt kế' },
+        { key: 'temp_control', icon: '🌡️', label: 'Bảng đồng hồ nhiệt độ & Cảm biến IoT', description: 'Màn hình theo dõi nhiệt độ từng khoang' },
+        { key: 'cctv_security', icon: '📹', label: 'Hệ thống Camera an ninh & Khóa số', description: 'CCTV 24/7 lối đi, khóa số bảo mật từng tủ' },
+        { key: 'power_backup', icon: '⚡', label: 'Hệ thống điện dự phòng chuyển mạch ATS', description: 'Máy phát điện tự động duy trì lạnh liên tục' },
+      ];
+    }
+    return [
+      { key: 'facade', icon: '🏢', label: 'Mặt tiền & Sân bãi bốc dỡ xe container lạnh', description: 'Toàn cảnh kho, sân bê tông tiếp nhận xe cont lạnh' },
+      { key: 'anteroom', icon: '🚪', label: 'Phòng đệm giữ nhiệt (Anteroom) & Cửa cuốn nhanh', description: 'Khu vực đệm duy trì nhiệt khi bốc dỡ hàng' },
+      { key: 'cold_chamber', icon: '❄️', label: 'Buồng trữ lạnh & Hệ thống Dàn lạnh', description: 'Không gian buồng lạnh, dải nhiệt âm/dương' },
+      { key: 'racking', icon: '📦', label: 'Hệ thống Giá kệ Racking kho lạnh', description: 'Kệ Selective / Drive-in chuyên dụng' },
+      { key: 'dock_shelter', icon: '🚛', label: 'Cửa Dock có đệm khí trùm kín (Dock Shelter)', description: 'Cửa xuất nhập hàng chống thất thoát nhiệt' },
+      { key: 'compressor_iot', icon: '💻', label: 'Cụm máy nén & Bảng điều khiển nhiệt độ IoT', description: 'Cụm máy nén công nghiệp, màn hình giám sát' },
+    ];
+  }
+
+  // 2. Kho Hàng Nguy Hiểm / Hóa Chất (Hazmat / Chemical)
+  if (modelId?.includes('haz') || cargoGroupId?.includes('haz') || modelId?.includes('nguy hiểm')) {
+    return [
+      { key: 'facade', icon: '🏢', label: 'Mặt tiền & Khoảng cách ly an toàn PCCC', description: 'Khu vực cổng, biển báo nguy hiểm, khoảng cách an toàn' },
+      { key: 'haz_storage', icon: '☣️', label: 'Khu vực Lưu trữ hóa chất & Rãnh thu gom tràn', description: 'Sàn kho chuyên dụng, rãnh gom hóa chất tràn đổ' },
+      { key: 'foam_fire', icon: '🔥', label: 'Hệ thống PCCC chuyên dụng (Bọt Foam / Khí CO2)', description: 'Đầu phun bọt Foam, tủ chữa cháy tự động' },
+      { key: 'explosion_vent', icon: '💨', label: 'Hệ thống Quạt thông gió chống cháy nổ', description: 'Quạt hút chống tia lửa, cảm biến rò rỉ khí/hóa chất' },
+      { key: 'ppe_eyewash', icon: '🦺', label: 'Bồn rửa mắt khẩn cấp & Thiết bị bảo hộ PPE', description: 'Trạm ứng phó sự cố hóa chất, vòi tắm khẩn cấp' },
+      { key: 'security_cctv', icon: '📹', label: 'Hệ thống Camera & Cảnh báo an ninh 24/7', description: 'CCTV giám sát chuyên biệt, biển cảnh báo liên bộ' },
+    ];
+  }
+
+  // 3. Kho Ngoại Quan thường (Bonded Warehouse)
+  if (modelId?.includes('bon') || modelId?.includes('ngoại quan')) {
+    return [
+      { key: 'facade', icon: '🏢', label: 'Mặt tiền & Cổng kiểm soát Hải quan', description: 'Cổng vào kho ngoại quan, chốt trực hải quan' },
+      { key: 'customs_area', icon: '🏛️', label: 'Khu vực Biệt lập & Niêm phong Hải quan', description: 'Hàng rào ngăn cách biệt lập, cửa có niêm chì' },
+      { key: 'racking', icon: '📦', label: 'Hệ thống Giá kệ & Lưu trữ hàng ngoại quan', description: 'Kệ chứa hàng theo từng tờ khai hải quan' },
+      { key: 'inspection', icon: '🔍', label: 'Khu vực Kiểm hóa & Phân loại hàng hóa', description: 'Bàn kiểm hóa thực tế của cán bộ hải quan' },
+      { key: 'cctv_3layer', icon: '📹', label: 'Hệ thống Camera CCTV 3 lớp theo dõi 24/7', description: 'Camera kết nối dữ liệu trực tiếp với Chi cục HQ' },
+      { key: 'fire_safety', icon: '🔥', label: 'Hệ thống PCCC Sprinkler & An ninh kho', description: 'Đầu phun PCCC tự động, hệ thống an toàn' },
+    ];
+  }
+
+  // 4. Kho TMĐT / Fulfillment
+  if (modelId?.includes('ful') || modelId?.includes('fulfillment') || modelId?.includes('tmđt')) {
+    return [
+      { key: 'facade', icon: '🏢', label: 'Mặt tiền & Khu vực Tiếp nhận xe tải / xe van', description: 'Khu vực giao nhận xe giao hàng hỏa tốc' },
+      { key: 'pick_pack', icon: '🛒', label: 'Khu vực Kệ chia chọn Pick & Pack', description: 'Dãy kệ nhặt hàng nhiều tầng, phân loại SKU' },
+      { key: 'packing_station', icon: '📦', label: 'Băng chuyền & Bàn đóng gói đơn hàng', description: 'Bàn đóng hàng, máy in vận đơn, máy dán tem' },
+      { key: 'storage_area', icon: '🏗️', label: 'Khu vực Lưu trữ SKU & Hàng nhặt nhanh', description: 'Kệ hàng lưu trữ số lượng lớn, lối đi xe nâng' },
+      { key: 'reverse_logistics', icon: '🔄', label: 'Khu vực Tiếp nhận hàng hoàn (Reverse Logistics)', description: 'Bàn phân loại kiểm tra hàng đổi trả / hoàn về' },
+      { key: 'wms_cctv', icon: '💻', label: 'Hệ thống Quét Barcode & Camera an ninh', description: 'Máy quét mã vạch, CCTV theo dõi từng bàn đóng' },
+    ];
+  }
+
+  // 5. Kho Tự Quản (Self-Storage)
+  if (modelId?.includes('self') || modelId?.includes('tự quản')) {
+    return [
+      { key: 'facade', icon: '🏢', label: 'Mặt tiền & Lối vào kiểm soát thẻ từ/vân tay', description: 'Cửa ra vào tự do 24/7 cho khách hàng' },
+      { key: 'storage_units', icon: '🚪', label: 'Dãy khoang chứa cá nhân (Locker / Room)', description: 'Các khoang chứa mini có cửa cuốn và khóa riêng' },
+      { key: 'inside_unit', icon: '📦', label: 'Bên trong khoang lưu trữ cá nhân', description: 'Không gian bên trong, sàn sạch sẽ, thoáng mát' },
+      { key: 'clean_aisle', icon: '🧹', label: 'Hành lang & Lối đi nội bộ rộng rãi', description: 'Lối đi có xe đẩy hàng, ánh sáng đầy đủ' },
+      { key: 'security_cctv', icon: '📹', label: 'Hệ thống Camera an ninh & Khóa độc lập', description: 'Camera 24/7 quan sát mọi góc hành lang' },
+      { key: 'packing_tools', icon: '✂️', label: 'Khu vực Xe đẩy & Vật tư đóng gói', description: 'Xe đẩy bốc dỡ nội bộ, băng keo, thùng carton' },
+    ];
+  }
+
+  // 6. Kho Thường Tiêu Chuẩn (Standard General Warehouse - Default)
+  return [
+    { key: 'facade', icon: '🏢', label: 'Mặt tiền & Sân bãi bốc dỡ xe container', description: 'Toàn cảnh cổng kho, sân bê tông tiếp nhận cont 40ft/45ft' },
+    { key: 'racking', icon: '📦', label: 'Hệ thống Giá kệ Racking chứa hàng', description: 'Dãy kệ Selective / Drive-in nhiều tầng thực tế' },
+    { key: 'floor_ceiling', icon: '🏗️', label: 'Mặt sàn bê tông & Trần thông thủy', description: 'Mặt sàn Hardener/Epoxy chống bụi và độ cao trần' },
+    { key: 'dock_leveler', icon: '🚛', label: 'Cửa Dock & Cầu nâng thủy lực', description: 'Dãy cửa xuất nhập hàng, cầu nâng bốc dỡ cont' },
+    { key: 'fire_security', icon: '🔥', label: 'Hệ thống PCCC & Camera An ninh (CCTV)', description: 'Đầu phun Sprinkler, hộp chữa cháy, camera 24/7' },
+    { key: 'vas_area', icon: '✨', label: 'Khu vực Bàn phân loại / Đóng gói VAS', description: 'Bàn dán tem phụ, máy quấn màng co pallet' },
+  ];
+};
+
 export interface WarehouseTechSpecs {
   // Nhom 1: Ket Cau & Mat San
   clearHeight?: number; // m
@@ -630,6 +730,7 @@ export interface WarehousePhotoItem {
   url: string;
   name?: string;
   tag?: string;
+  slotKey?: string;
   isCover?: boolean;
 }
 
@@ -4101,6 +4202,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
 
   // STATE & HANDLERS CHO MODAL CHI TIET CO SO KHO (TECH SPECS, PHOTOS, PHU PHI, VAS)
   const [warehouseDetailModalData, setWarehouseDetailModalData] = useState<WarehouseDetailModalData | null>(null);
+  const [activePhotoUploadSlot, setActivePhotoUploadSlot] = useState<{ key: string; label: string } | null>(null);
   const [warehouseDetailActiveTab, setWarehouseDetailActiveTab] = useState<'photos' | 'techSpecs' | 'surcharges' | 'vas'>('photos');
   const [warehouseTechActiveCategory, setWarehouseTechActiveCategory] = useState<string>('structure');
   const warehousePhotoUploadRef = useRef<HTMLInputElement>(null);
@@ -4232,32 +4334,40 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
     const files = e.target.files;
     if (!files || files.length === 0 || !warehouseDetailModalData) return;
 
-    Array.from(files).forEach((file: File, fIdx: number) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const res = event.target?.result as string;
-        if (res) {
-          setWarehouseDetailModalData((prev) => {
-            if (!prev) return prev;
-            const isFirst = prev.photos.length === 0 && fIdx === 0;
-            return {
-              ...prev,
-              photos: [
-                ...prev.photos,
-                {
-                  id: `wh-img-${Date.now()}-${fIdx}`,
-                  url: res,
-                  name: file.name,
-                  tag: 'Ảnh thực tế',
-                  isCover: isFirst,
-                },
-              ],
-            };
-          });
-        }
-      };
-      reader.readAsDataURL(file);
-    });
+    const targetSlot = activePhotoUploadSlot;
+    const file = files[0]; // 1 ảnh cho mỗi slot cụ thể
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const res = event.target?.result as string;
+      if (res) {
+        setWarehouseDetailModalData((prev) => {
+          if (!prev) return prev;
+          const slotTag = targetSlot?.label || 'Ảnh thực tế';
+          const slotKey = targetSlot?.key || 'custom';
+          
+          // Xóa ảnh cũ của slot này nếu có và thay bằng ảnh mới
+          const filteredPhotos = prev.photos.filter((p) => p.tag !== slotTag && p.slotKey !== slotKey);
+          
+          return {
+            ...prev,
+            photos: [
+              ...filteredPhotos,
+              {
+                id: `wh-img-${Date.now()}`,
+                url: res,
+                name: targetSlot ? targetSlot.label : file.name,
+                tag: slotTag,
+                slotKey: slotKey,
+              },
+            ],
+          };
+        });
+      }
+    };
+    reader.readAsDataURL(file);
+    e.target.value = ''; // Reset input để cho phép chọn lại cùng file
   };
 
   const [tieredPricingModalData, setTieredPricingModalData] = useState<TieredPricingModalData | null>(null);
@@ -8348,193 +8458,160 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
 
             {/* 3. Modal Body */}
             <div className="flex-1 overflow-hidden flex flex-col bg-slate-50/40">
-              {/* TAB 1: ALBUM ẢNH KHO */}
-              {warehouseDetailActiveTab === 'photos' && (
-                <div className="flex-1 p-6 overflow-y-auto space-y-4">
-                  <input
-                    type="file"
-                    ref={warehousePhotoUploadRef}
-                    multiple
-                    accept="image/*"
-                    onChange={handleUploadWarehousePhotos}
-                    className="hidden"
-                  />
+              {/* TAB 1: ALBUM ẢNH KHO THEO TỪNG PHÂN LOẠI GÓC ẢNH GỢI Ý SẴN */}
+              {warehouseDetailActiveTab === 'photos' && (() => {
+                const currentPhotoSlots = getWarehousePhotoSlots(warehouseDetailModalData.modelId || activeModel?.id, activeCargoGroup?.id);
+                const uploadedCount = currentPhotoSlots.filter(s => 
+                  warehouseDetailModalData.photos.some(p => p.tag === s.label || p.slotKey === s.key)
+                ).length;
 
-                  {/* Actions bar for photos */}
-                  <div className="flex items-center justify-between flex-wrap gap-3 p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs">
-                    <div>
-                      <h4 className="font-bold text-slate-900 text-xs flex items-center gap-2">
-                        <Camera className="w-4 h-4 text-indigo-600" />
-                        Hình Ảnh Thực Tế Cơ Sở Kho ({warehouseDetailModalData.photos.length} ảnh)
-                      </h4>
-                      <p className="text-[11px] text-slate-500 mt-0.5">
-                        Tải lên ảnh mặt tiền, kệ hàng, cửa dock, sàn kho, hệ thống PCCC. Ảnh có huy hiệu <span className="font-bold text-amber-700">Ảnh Bìa</span> sẽ được chọn làm ảnh hiển thị chính.
-                      </p>
-                    </div>
+                return (
+                  <div className="flex-1 p-6 overflow-y-auto space-y-5">
+                    <input
+                      type="file"
+                      ref={warehousePhotoUploadRef}
+                      accept="image/*"
+                      onChange={handleUploadWarehousePhotos}
+                      className="hidden"
+                    />
 
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => warehousePhotoUploadRef.current?.click()}
-                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
-                      >
-                        <Upload className="w-3.5 h-3.5" />
-                        <span>Tải Thêm Ảnh Từ Thiết Bị</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const sampleTags = ['Mặt tiền kho', 'Kệ Selective', 'Sàn Bê tông Epoxy', 'Cửa Dock & Sân cont', 'Hệ thống PCCC Sprinkler'];
-                          const sampleUrls = [
-                            'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800&auto=format&fit=crop&q=80',
-                            'https://images.unsplash.com/photo-1553413077-190dd305871c?w=800&auto=format&fit=crop&q=80',
-                            'https://images.unsplash.com/photo-1616401784845-180882ba9ba8?w=800&auto=format&fit=crop&q=80',
-                            'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&auto=format&fit=crop&q=80',
-                            'https://images.unsplash.com/photo-1578575437130-527eed3abbec?w=800&auto=format&fit=crop&q=80'
-                          ];
-                          const randomIdx = Math.floor(Math.random() * sampleUrls.length);
-                          setWarehouseDetailModalData(prev => {
-                            if (!prev) return prev;
-                            return {
-                              ...prev,
-                              photos: [
-                                ...prev.photos,
-                                {
-                                  id: `wh-samp-${Date.now()}`,
-                                  url: sampleUrls[randomIdx],
-                                  name: sampleTags[randomIdx],
-                                  tag: sampleTags[randomIdx],
-                                  isCover: prev.photos.length === 0,
-                                }
-                              ]
-                            };
-                          });
-                        }}
-                        className="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl border border-slate-300 transition-all cursor-pointer"
-                      >
-                        <Plus className="w-3.5 h-3.5" />
-                        <span>+ Thêm Ảnh Mẫu Nhanh</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Photo Cards Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {warehouseDetailModalData.photos.map((photo, pIdx) => (
-                      <div
-                        key={photo.id || pIdx}
-                        className={`group relative bg-white rounded-2xl border overflow-hidden shadow-2xs transition-all ${
-                          photo.isCover ? 'border-indigo-500 ring-2 ring-indigo-500/20' : 'border-slate-200 hover:border-indigo-300'
-                        }`}
-                      >
-                        {/* Image preview */}
-                        <div className="relative aspect-video w-full bg-slate-100 overflow-hidden">
-                          <img
-                            src={photo.url}
-                            alt={photo.name || 'Ảnh kho'}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                          {photo.isCover && (
-                            <span className="absolute top-2.5 left-2.5 inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500 text-white font-bold text-[10px] shadow-sm">
-                              <Star className="w-3 h-3 fill-white" />
-                              Ảnh Bìa Chính
-                            </span>
-                          )}
-                          <div className="absolute top-2.5 right-2.5 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            {!photo.isCover && (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setWarehouseDetailModalData(prev => {
-                                    if (!prev) return prev;
-                                    return {
-                                      ...prev,
-                                      photos: prev.photos.map(p => ({
-                                        ...p,
-                                        isCover: p.id === photo.id,
-                                      })),
-                                    };
-                                  });
-                                }}
-                                title="Đặt làm ảnh bìa"
-                                className="w-7 h-7 rounded-lg bg-white/90 hover:bg-amber-50 text-slate-700 hover:text-amber-600 shadow-sm flex items-center justify-center transition-colors cursor-pointer"
-                              >
-                                <Star className="w-3.5 h-3.5" />
-                              </button>
-                            )}
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setWarehouseDetailModalData(prev => {
-                                  if (!prev) return prev;
-                                  const updated = prev.photos.filter(p => p.id !== photo.id);
-                                  if (photo.isCover && updated.length > 0) {
-                                    updated[0].isCover = true;
-                                  }
-                                  return { ...prev, photos: updated };
-                                });
-                              }}
-                              title="Xóa ảnh này"
-                              className="w-7 h-7 rounded-lg bg-white/90 hover:bg-rose-50 text-slate-700 hover:text-rose-600 shadow-sm flex items-center justify-center transition-colors cursor-pointer"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Tag and name inputs */}
-                        <div className="p-3 space-y-2">
-                          <div>
-                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">
-                              Nhãn phân loại ảnh:
-                            </label>
-                            <select
-                              value={photo.tag || 'Mặt tiền & Sân bãi'}
-                              onChange={(e) => {
-                                const newTag = e.target.value;
-                                setWarehouseDetailModalData(prev => {
-                                  if (!prev) return prev;
-                                  return {
-                                    ...prev,
-                                    photos: prev.photos.map(p => p.id === photo.id ? { ...p, tag: newTag } : p),
-                                  };
-                                });
-                              }}
-                              className="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
-                            >
-                              <option value="Mặt tiền & Sân bãi">🏢 Mặt tiền & Sân bãi bốc dỡ</option>
-                              <option value="Kệ Racking">📦 Hệ thống Giá kệ Racking</option>
-                              <option value="Sàn & Trần kho">🏗️ Mặt sàn & Trần thông thủy</option>
-                              <option value="Cửa Dock">🚛 Cửa Dock & Cầu nâng thủy lực</option>
-                              <option value="PCCC & An ninh">🔥 Hệ thống PCCC & CCTV</option>
-                              <option value="Phòng Lạnh / Mát">❄️ Buồng lạnh & Cụm máy nén</option>
-                              <option value="Khu vực đóng gói VAS">✨ Bàn phân loại / Đóng gói VAS</option>
-                            </select>
-                          </div>
-
-                          <input
-                            type="text"
-                            value={photo.name || ''}
-                            onChange={(e) => {
-                              const newName = e.target.value;
-                              setWarehouseDetailModalData(prev => {
-                                if (!prev) return prev;
-                                return {
-                                  ...prev,
-                                  photos: prev.photos.map(p => p.id === photo.id ? { ...p, name: newName } : p),
-                                };
-                              });
-                            }}
-                            placeholder="Mô tả ngắn góc chụp..."
-                            className="w-full px-2 py-1 bg-transparent border-b border-dashed border-slate-200 text-[11px] text-slate-600 focus:outline-none focus:border-indigo-500"
-                          />
-                        </div>
+                    {/* Banner Tiêu Đề & Tiến Độ Hoàn Thiện */}
+                    <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs flex items-center justify-between flex-wrap gap-3">
+                      <div>
+                        <h4 className="font-bold text-slate-900 text-xs flex items-center gap-2">
+                          <Camera className="w-4 h-4 text-indigo-600" />
+                          <span>Hình Ảnh Thực Tế Theo Từng Phân Loại Góc Ảnh</span>
+                        </h4>
+                        <p className="text-[11px] text-slate-500 mt-0.5">
+                          Tải ảnh thực tế vào đúng từng ô phân loại bên dưới tương ứng với mô hình kho này.
+                        </p>
                       </div>
-                    ))}
+
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-slate-700 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
+                          Đã hoàn thành: <span className="text-indigo-600 font-extrabold">{uploadedCount}</span> / {currentPhotoSlots.length} góc ảnh
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Pre-defined Slot Gallery Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4.5">
+                      {currentPhotoSlots.map((slot) => {
+                        const matchingPhoto = warehouseDetailModalData.photos.find(
+                          (p) => p.tag === slot.label || p.slotKey === slot.key
+                        );
+
+                        return (
+                          <div
+                            key={slot.key}
+                            className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-2xs flex flex-col transition-all hover:border-slate-300"
+                          >
+                            {/* Slot Header / Fixed Caption */}
+                            <div className="px-3.5 py-2.5 bg-slate-50/90 border-b border-slate-100">
+                              <h5 className="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+                                <span className="text-sm">{slot.icon}</span>
+                                <span className="truncate">{slot.label}</span>
+                              </h5>
+                              <p className="text-[10px] text-slate-500 truncate mt-0.5" title={slot.description}>
+                                {slot.description}
+                              </p>
+                            </div>
+
+                            {/* Slot Upload / Preview Area */}
+                            <div className="p-3.5 flex-1 flex flex-col justify-center">
+                              {matchingPhoto ? (
+                                <div className="space-y-2">
+                                  {/* Uploaded Image Preview */}
+                                  <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-slate-100 border border-slate-200 group">
+                                    <img
+                                      src={matchingPhoto.url}
+                                      alt={slot.label}
+                                      className="w-full h-full object-cover"
+                                    />
+                                    
+                                    {/* Action buttons on hover */}
+                                    <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 p-2">
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setActivePhotoUploadSlot({ key: slot.key, label: slot.label });
+                                          warehousePhotoUploadRef.current?.click();
+                                        }}
+                                        className="px-2.5 py-1 bg-white/95 hover:bg-white text-slate-800 text-[11px] font-bold rounded-lg shadow-sm transition-all cursor-pointer inline-flex items-center gap-1"
+                                      >
+                                        <Upload className="w-3 h-3" />
+                                        <span>Đổi ảnh</span>
+                                      </button>
+
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setWarehouseDetailModalData((prev) => {
+                                            if (!prev) return prev;
+                                            return {
+                                              ...prev,
+                                              photos: prev.photos.filter((p) => p.tag !== slot.label && p.slotKey !== slot.key),
+                                            };
+                                          });
+                                        }}
+                                        className="p-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg shadow-sm transition-all cursor-pointer"
+                                        title="Xóa ảnh này"
+                                      >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                      </button>
+                                    </div>
+                                  </div>
+
+                                  {/* Note input */}
+                                  <input
+                                    type="text"
+                                    value={matchingPhoto.name === slot.label ? '' : matchingPhoto.name}
+                                    onChange={(e) => {
+                                      const newName = e.target.value;
+                                      setWarehouseDetailModalData((prev) => {
+                                        if (!prev) return prev;
+                                        return {
+                                          ...prev,
+                                          photos: prev.photos.map((p) =>
+                                            (p.tag === slot.label || p.slotKey === slot.key) ? { ...p, name: newName } : p
+                                          ),
+                                        };
+                                      });
+                                    }}
+                                    placeholder="Ghi chú chi tiết góc chụp (tùy chọn)..."
+                                    className="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-[11px] text-slate-700 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                  />
+                                </div>
+                              ) : (
+                                /* Empty Upload Dropzone Box */
+                                <div className="border-2 border-dashed border-slate-200 hover:border-indigo-300 bg-slate-50/50 hover:bg-indigo-50/20 rounded-xl p-4 text-center transition-all flex flex-col items-center justify-center min-h-[145px]">
+                                  <div className="w-9 h-9 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mb-2">
+                                    <Camera className="w-4 h-4" />
+                                  </div>
+                                  <p className="text-[11px] font-semibold text-slate-500 mb-2.5">
+                                    Chưa có ảnh cho phân loại này
+                                  </p>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setActivePhotoUploadSlot({ key: slot.key, label: slot.label });
+                                      warehousePhotoUploadRef.current?.click();
+                                    }}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-2xs transition-all cursor-pointer"
+                                  >
+                                    <Upload className="w-3.5 h-3.5" />
+                                    <span>Tải Ảnh Lên</span>
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
 
               {/* TAB 2: 2-COLUMN MASTER-DETAIL TECH SPECS */}
               {warehouseDetailActiveTab === 'techSpecs' && (
