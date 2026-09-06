@@ -1,0 +1,1535 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  X, 
+  Plus, 
+  Trash2, 
+  Truck, 
+  FileText, 
+  Save, 
+  Zap,
+  Clock,
+  ChevronLeft,
+  ChevronRight,
+  Layers,
+  Sparkles,
+  CheckCircle2,
+  Calendar,
+  AlertCircle,
+  Check
+} from 'lucide-react';
+import { CapabilityRouteItem } from './SupplierServiceCapabilityModal';
+
+export interface VehiclePricingMatrixColumn {
+  id: string;
+  truckBodyType: string;
+  customTruckBodyType?: string;
+  truckTonnage: string;
+  customTruckTonnage?: string;
+  // 1. Cước chính & phụ phí
+  baseFreight: number;
+  fuelBAF: number;
+  tollBOT: number;
+  docManagement: number;
+  totalPrice: number; // baseFreight + fuelBAF + tollBOT + docManagement
+  // 2. VAS
+  vasGps: number;
+  vasSeal: number;
+  vasPod: number;
+  vasLabor: number;
+  vasTailLift: number;
+  vasMultiDrop: number;
+  vasDetention: number; // Phí neo xe sau giờ miễn phí (VND/giờ)
+  // 3. Cam kết & Điều khoản
+  departureSchedule: string; // Lịch chạy & giờ xuất bến theo từng cấu hình xe
+  transitTimeDisplay: string;
+  freeWaitingHours: number; // Giờ chờ miễn phí (VD: 2 giờ)
+  paymentTerms: string;
+  validUntil: string;
+  notes?: string;
+}
+
+export const TRUCKING_SCHEDULE_PRESETS = [
+  'Hàng ngày (Daily - Xuất bến 20:00)',
+  'Hàng ngày 2 chuyến (11:00 & 20:00)',
+  'Hàng ngày (Xuất bến 18:00 - 22:00)',
+  'Thứ 2, 4, 6 (Xuất bến 20:00)',
+  'Thứ 3, 5, 7 (Xuất bến 20:00)',
+  'T2 đến T7 (Nghỉ Chủ Nhật)',
+  '2 Chuyến / Ngày (Sáng & Tối)',
+  '48 - 60 giờ (Cố định chuyến)',
+  '24 - 36 giờ (Cố định chuyến)',
+  '10 - 12 giờ (Hỏa tốc liên tỉnh)',
+  'Theo yêu cầu khách hàng (On-demand)',
+];
+
+export const SCHEDULE_DAYS_OF_WEEK = [
+  { id: 'mon', name: 'Thứ 2' },
+  { id: 'tue', name: 'Thứ 3' },
+  { id: 'wed', name: 'Thứ 4' },
+  { id: 'thu', name: 'Thứ 5' },
+  { id: 'fri', name: 'Thứ 6' },
+  { id: 'sat', name: 'Thứ 7' },
+  { id: 'sun', name: 'Chủ Nhật' },
+];
+
+export const SCHEDULE_FREQUENCY_PRESETS = [
+  { label: 'Hàng ngày (T2 - CN)', days: ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ Nhật'] },
+  { label: 'Thứ 2, 4, 6', days: ['Thứ 2', 'Thứ 4', 'Thứ 6'] },
+  { label: 'Thứ 3, 5, 7', days: ['Thứ 3', 'Thứ 5', 'Thứ 7'] },
+  { label: 'T2 - T6 (Nghỉ T7, CN)', days: ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6'] },
+  { label: 'T2 - T7 (Nghỉ CN)', days: ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'] },
+];
+
+export const SCHEDULE_DEPARTURE_TIMES = [
+  { time: '08:00', label: '08:00 Sáng' },
+  { time: '11:00', label: '11:00 Trưa' },
+  { time: '14:00', label: '14:00 Chiều' },
+  { time: '17:00', label: '17:00 Chiều' },
+  { time: '19:00', label: '19:00 Tối' },
+  { time: '20:00', label: '20:00 Đêm' },
+  { time: '22:00', label: '22:00 Khuya' },
+];
+
+export const TRUCKING_BODY_TYPES_LOV = [
+  'Xe Tải Thùng Kín (Dry Box Truck) - [An ninh cao / Chống ướt]',
+  'Xe Tải Mui Bạt (Tarpaulin Truck) - [Mở bạt 2 bên hông]',
+  'Xe Tải Có Bửng Nâng Thủy Lực (Tail-lift) - [Bửng nâng tự động]',
+  'Xe Tải Thùng Lửng / Mooc Sàn (Flatbed) - [Cẩu hạ từ trên nóc]',
+  'Đầu Kéo Kéo Container (Tractor Drayage) - [Kéo vỏ Cont Cảng / ICD]',
+];
+
+export const TRUCKING_TONNAGE_BY_BODY_MAP: Record<string, string[]> = {
+  'Xe Tải Thùng Kín (Dry Box Truck) - [An ninh cao / Chống ướt]': [
+    '1.0T – 1.9T (Vào phố ban ngày) —— (7 – 9 CBM)',
+    '2.5T – 3.5T (Tải nhẹ liên tỉnh) —— (14 – 16 CBM)',
+    '5.0T – 6.5T (Tải trung) —— (25 – 30 CBM)',
+    '8.0T (Tải nặng 2 chân) —— (45 – 50 CBM)',
+    '15.0T (Tải nặng 3 chân) —— (55 – 60 CBM)',
+  ],
+  'Xe Tải Mui Bạt (Tarpaulin Truck) - [Mở bạt 2 bên hông]': [
+    '2.5T – 3.5T (Mui bạt tiêu chuẩn) —— (~15 CBM)',
+    '5.0T – 7.0T (Mui bạt trung) —— (~32 CBM)',
+    '8.0T – 9.0T (2 chân thùng dài 9.8m cồng kềnh) —— (~55 CBM)',
+    '15.0T (3 chân mui bạt) —— (~58 CBM)',
+    '18.0T – 20.0T (4 chân - 5 chân tải nặng) —— (~65 CBM)',
+  ],
+  'Xe Tải Có Bửng Nâng Thủy Lực (Tail-lift) - [Bửng nâng tự động]': [
+    '1.9T – 2.5T (Bửng nâng tải 500kg) —— (9 – 12 CBM)',
+    '5.0T (Bửng nâng tải 1.0T – 1.5T) —— (~26 CBM)',
+    '8.0T – 15.0T (Bửng nâng tải nặng 2.0T) —— (45 – 55 CBM)',
+  ],
+  'Xe Tải Thùng Lửng / Mooc Sàn (Flatbed) - [Cẩu hạ từ trên nóc]': [
+    '5.0T – 8.0T (Thùng lửng cẩu hàng) —— (Không giới hạn nóc)',
+    '15.0T (Thùng lửng 3 chân) —— (Không giới hạn nóc)',
+  ],
+  'Đầu Kéo Kéo Container (Tractor Drayage) - [Kéo vỏ Cont Cảng / ICD]': [
+    'Đầu kéo + Rơ-mooc 20ft (Tải trọng 26 - 28 Tấn) —— (~33 CBM)',
+    'Đầu kéo + Rơ-mooc 40ft (Xương / Cổ cò - Tải trọng 28 - 30 Tấn) —— (~67 CBM)',
+  ],
+};
+
+export const createDefaultVehiclePricingColumn = (
+  bodyType?: string,
+  tonnage?: string,
+  basePrice?: number,
+  defaultSchedule?: string,
+  defaultSla?: string
+): VehiclePricingMatrixColumn => {
+  const chosenBody = bodyType && TRUCKING_BODY_TYPES_LOV.includes(bodyType)
+    ? bodyType
+    : TRUCKING_BODY_TYPES_LOV[0];
+
+  const availableTonnages = TRUCKING_TONNAGE_BY_BODY_MAP[chosenBody] || [];
+  const chosenTonnage = tonnage && availableTonnages.includes(tonnage)
+    ? tonnage
+    : (availableTonnages[availableTonnages.length - 1] || '15.0T (Tải nặng 3 chân) —— (55 – 60 CBM)');
+
+  const targetTotal = basePrice && basePrice > 0 ? basePrice : 18500000;
+  const base = Math.round(targetTotal * 0.85);
+  const baf = Math.round(targetTotal * 0.08);
+  const bot = Math.round(targetTotal * 0.05);
+  const doc = targetTotal - (base + baf + bot);
+
+  return {
+    id: `veh-col-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+    truckBodyType: chosenBody,
+    truckTonnage: chosenTonnage,
+    baseFreight: base,
+    fuelBAF: baf,
+    tollBOT: bot,
+    docManagement: doc > 0 ? doc : 150000,
+    totalPrice: targetTotal,
+    vasGps: 0,
+    vasSeal: 0,
+    vasPod: 0,
+    vasLabor: 0,
+    vasTailLift: 0,
+    vasMultiDrop: 0,
+    vasDetention: 150000,
+    departureSchedule: defaultSchedule || 'Hàng ngày (Daily - Xuất bến 20:00)',
+    transitTimeDisplay: defaultSla || '2 Ngày (48 Giờ cam kết)',
+    freeWaitingHours: 2,
+    paymentTerms: 'Net 45 Days',
+    validUntil: '2026-12-31',
+    notes: '',
+  };
+};
+
+interface TruckingFtlCostMatrixModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  route: CapabilityRouteItem | null;
+  onSave: (routeId: string, matrix: VehiclePricingMatrixColumn[]) => void;
+}
+
+export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProps> = ({
+  isOpen,
+  onClose,
+  route,
+  onSave,
+}) => {
+  const [columns, setColumns] = useState<VehiclePricingMatrixColumn[]>([]);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+  const [activeVehicleIndex, setActiveVehicleIndex] = useState(0);
+
+  // State cho Bảng Lựa Chọn Lịch Chạy (Schedule Picker Modal) theo xe
+  const [vehicleScheduleModal, setVehicleScheduleModal] = useState<{
+    colId: string;
+    colName: string;
+    selectedDays: string[];
+    departureTime: string;
+    applyToAll: boolean;
+  } | null>(null);
+
+  const handleOpenScheduleModalForCol = (col: VehiclePricingMatrixColumn) => {
+    const currentSchedule = col.departureSchedule || '';
+    let days: string[] = [];
+    if (currentSchedule.includes('Hàng ngày') || currentSchedule.includes('Daily')) {
+      days = SCHEDULE_DAYS_OF_WEEK.map(d => d.name);
+    } else {
+      days = SCHEDULE_DAYS_OF_WEEK.filter(d => currentSchedule.includes(d.name)).map(d => d.name);
+    }
+    if (days.length === 0) {
+      days = SCHEDULE_DAYS_OF_WEEK.map(d => d.name);
+    }
+
+    const timeMatch = currentSchedule.match(/\b(\d{1,2}:\d{2})\b/);
+    const time = timeMatch ? timeMatch[1].padStart(5, '0') : '20:00';
+
+    const colName = `${col.truckTonnage ? col.truckTonnage.split(' (')[0] : ''} - ${col.truckBodyType ? col.truckBodyType.split(' (')[0] : ''}`.trim() || 'Cấu hình xe';
+
+    setVehicleScheduleModal({
+      colId: col.id,
+      colName,
+      selectedDays: days,
+      departureTime: time,
+      applyToAll: false,
+    });
+  };
+
+  const handleSaveVehicleSchedule = () => {
+    if (!vehicleScheduleModal) return;
+    const { colId, selectedDays, departureTime, applyToAll } = vehicleScheduleModal;
+
+    const sortedDays = SCHEDULE_DAYS_OF_WEEK.filter(d => selectedDays.includes(d.name)).map(d => d.name);
+    let formatted = '';
+    if (sortedDays.length === 7) {
+      formatted = `Hàng ngày${departureTime ? ` (Xuất bến ${departureTime})` : ''}`;
+    } else if (sortedDays.length > 0) {
+      formatted = `${sortedDays.join(', ')}${departureTime ? ` (Xuất bến ${departureTime})` : ''}`;
+    } else if (departureTime) {
+      formatted = `Xuất bến ${departureTime}`;
+    } else {
+      formatted = 'Hàng ngày (Xuất bến 20:00)';
+    }
+
+    if (applyToAll) {
+      setColumns(prev => prev.map(c => ({
+        ...c,
+        departureSchedule: formatted,
+      })));
+    } else {
+      handleUpdateColField(colId, 'departureSchedule', formatted);
+    }
+
+    setVehicleScheduleModal(null);
+  };
+
+  // Initialize or reload matrix columns from route
+  useEffect(() => {
+    if (isOpen && route) {
+      if (route.vehiclePricingMatrix && route.vehiclePricingMatrix.length > 0) {
+        setColumns(
+          JSON.parse(JSON.stringify(route.vehiclePricingMatrix)).map((c: VehiclePricingMatrixColumn) => ({
+            ...c,
+            departureSchedule: c.departureSchedule || route.departureSchedule || route.sla || 'Hàng ngày (Daily - Xuất bến 20:00)',
+          }))
+        );
+      } else {
+        const col1 = createDefaultVehiclePricingColumn(
+          route.truckBodyType, 
+          route.truckTonnage, 
+          route.price,
+          route.departureSchedule || route.sla,
+          route.sla
+        );
+        setColumns([col1]);
+      }
+    }
+  }, [isOpen, route]);
+
+  // Check scroll position for left/right arrows
+  const checkScroll = () => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const { scrollLeft, scrollWidth, clientWidth } = el;
+    setCanScrollLeft(scrollLeft > 10);
+    setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 10);
+
+    const idx = Math.min(Math.max(0, Math.round(scrollLeft / 270)), columns.length - 1);
+    setActiveVehicleIndex(idx);
+  };
+
+  useEffect(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    checkScroll();
+    el.addEventListener('scroll', checkScroll, { passive: true });
+    window.addEventListener('resize', checkScroll);
+    return () => {
+      el.removeEventListener('scroll', checkScroll);
+      window.removeEventListener('resize', checkScroll);
+    };
+  }, [columns.length, isOpen]);
+
+  if (!isOpen || !route) return null;
+
+  // Add new vehicle column
+  const handleAddColumn = () => {
+    const usedTonnages = columns.map(c => c.truckTonnage);
+    let chosenBody = TRUCKING_BODY_TYPES_LOV[0];
+    let chosenTonnage = TRUCKING_TONNAGE_BY_BODY_MAP[chosenBody][0];
+
+    for (const body of TRUCKING_BODY_TYPES_LOV) {
+      const tonnages = TRUCKING_TONNAGE_BY_BODY_MAP[body] || [];
+      const unused = tonnages.find(t => !usedTonnages.includes(t));
+      if (unused) {
+        chosenBody = body;
+        chosenTonnage = unused;
+        break;
+      }
+    }
+
+    const newCol = createDefaultVehiclePricingColumn(
+      chosenBody, 
+      chosenTonnage, 
+      columns.length > 0 ? Math.round(columns[0].totalPrice * 0.8) : 15000000,
+      columns.length > 0 ? columns[0].departureSchedule : route.departureSchedule,
+      columns.length > 0 ? columns[0].transitTimeDisplay : route.sla
+    );
+    setColumns(prev => [...prev, newCol]);
+
+    // Automatically scroll right to newly added vehicle column
+    setTimeout(() => {
+      if (scrollContainerRef.current) {
+        scrollContainerRef.current.scrollTo({
+          left: scrollContainerRef.current.scrollWidth,
+          behavior: 'smooth',
+        });
+      }
+    }, 120);
+  };
+
+  // Remove vehicle column
+  const handleRemoveColumn = (colId: string) => {
+    if (columns.length <= 1) return;
+    setColumns(columns.filter(c => c.id !== colId));
+  };
+
+  // Smooth scroll left
+  const handleScrollLeft = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: -270, behavior: 'smooth' });
+    }
+  };
+
+  // Smooth scroll right
+  const handleScrollRight = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: 270, behavior: 'smooth' });
+    }
+  };
+
+  // Scroll directly to specific vehicle column
+  const handleScrollToVehicle = (index: number) => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        left: index * 270,
+        behavior: 'smooth',
+      });
+    }
+  };
+
+  // Update specific field in column
+  const handleUpdateColField = <K extends keyof VehiclePricingMatrixColumn>(
+    colId: string,
+    field: K,
+    val: VehiclePricingMatrixColumn[K]
+  ) => {
+    setColumns(prev =>
+      prev.map(c => {
+        if (c.id !== colId) return c;
+        const updated = { ...c, [field]: val };
+        if (
+          field === 'baseFreight' ||
+          field === 'fuelBAF' ||
+          field === 'tollBOT' ||
+          field === 'docManagement'
+        ) {
+          const b = field === 'baseFreight' ? Number(val) : c.baseFreight;
+          const f = field === 'fuelBAF' ? Number(val) : c.fuelBAF;
+          const t = field === 'tollBOT' ? Number(val) : c.tollBOT;
+          const d = field === 'docManagement' ? Number(val) : c.docManagement;
+          updated.totalPrice = b + f + t + d;
+        }
+        return updated;
+      })
+    );
+  };
+
+  // Update body type & reset tonnage to first available
+  const handleBodyTypeChange = (colId: string, newBody: string) => {
+    const availableTonnages = TRUCKING_TONNAGE_BY_BODY_MAP[newBody] || [];
+    const firstTonnage = availableTonnages[availableTonnages.length - 1] || availableTonnages[0] || '';
+    setColumns(prev =>
+      prev.map(c => {
+        if (c.id !== colId) return c;
+        return {
+          ...c,
+          truckBodyType: newBody,
+          truckTonnage: firstTonnage,
+        };
+      })
+    );
+  };
+
+  // Save handler
+  const handleSaveMatrix = () => {
+    onSave(route.id, columns);
+    onClose();
+  };
+
+  return (
+    <>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/80 backdrop-blur-xs overflow-hidden animate-in fade-in duration-200">
+      <style>{`
+        .custom-matrix-scroll::-webkit-scrollbar {
+          width: 10px;
+          height: 12px;
+        }
+        .custom-matrix-scroll::-webkit-scrollbar-track {
+          background: #f1f5f9;
+          border-top: 1px solid #e2e8f0;
+        }
+        .custom-matrix-scroll::-webkit-scrollbar-thumb {
+          background: #cbd5e1;
+          border-radius: 6px;
+          border: 2px solid #f1f5f9;
+        }
+        .custom-matrix-scroll::-webkit-scrollbar-thumb:hover {
+          background: #94a3b8;
+        }
+      `}</style>
+
+      <div 
+        id="trucking-ftl-cost-matrix-modal"
+        className="w-full max-w-[1520px] xl:max-w-[96vw] bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden my-auto flex flex-col h-[94vh] max-h-[96vh]"
+      >
+        {/* MODAL HEADER: SLEEK ENTERPRISE DARK INDIGO GRADIENT */}
+        <div className="px-5 py-3 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex items-center justify-between shrink-0 border-b border-indigo-900/50 select-none">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-300 shadow-inner">
+              <Truck className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.2 text-[10px] font-black bg-indigo-500/30 text-indigo-200 border border-indigo-400/40 rounded uppercase tracking-wider">
+                  Biểu Phí Chi Tiết
+                </span>
+                <span className="text-xs text-slate-300">Trucking FTL Studio</span>
+              </div>
+              <h3 className="text-base font-bold text-white flex items-center gap-2 mt-0.5">
+                <span>Bảng Khai Báo Biểu Phí Đa Phương Tiện Tuyến Vận Tải</span>
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              </h3>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={handleAddColumn}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl transition-all shadow-sm hover:shadow-indigo-500/30 cursor-pointer"
+              title="Thêm một cột cấu hình phương tiện / phân khúc tải trọng khác"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>+ Thêm Cấu Hình Xe</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
+              title="Đóng (Esc)"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* ROUTE SUMMARY BREADCRUMB BANNER */}
+        <div className="px-5 py-2 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs shrink-0 select-none">
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10.5px] font-bold text-slate-500 uppercase">Mã Tuyến:</span>
+              <span className="font-mono font-bold text-indigo-700 bg-white px-2 py-0.5 rounded-md border border-slate-200 text-xs shadow-2xs">
+                {route.routeCode || 'RC-FTL-001'}
+              </span>
+            </div>
+            <div className="h-4 w-px bg-slate-200 hidden sm:block" />
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10.5px] font-bold text-slate-500 uppercase">Hành Lang:</span>
+              <strong className="text-slate-900 font-bold">{route.route || 'Bắc - Nam'}</strong>
+            </div>
+            <div className="h-4 w-px bg-slate-200 hidden sm:block" />
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10.5px] font-bold text-slate-500 uppercase">Hành Trình:</span>
+              <span className="text-slate-800 font-semibold">{route.origin} ➔ {route.destination}</span>
+            </div>
+            <div className="h-4 w-px bg-slate-200 hidden sm:block" />
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10.5px] font-bold text-slate-500 uppercase">Lịch Chạy:</span>
+              <span className="font-semibold text-slate-700 bg-white px-2 py-0.5 rounded-md border border-slate-200 text-xs">
+                {route.departureSchedule || route.sla || 'Hàng ngày'}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 text-xs font-semibold text-slate-700 bg-white px-3 py-1 rounded-lg border border-slate-200 shadow-2xs">
+            <span>Số cấu hình:</span>
+            <strong className="text-indigo-700 font-bold">{columns.length} Loại Xe</strong>
+            <span className="text-slate-300">|</span>
+            <span className="text-slate-500 text-[11px] font-normal">Cố định Cột 1 & 2 • Cuộn ngang để xem các xe tiếp theo</span>
+          </div>
+        </div>
+
+        {/* HORIZONTAL SCROLL & QUICK JUMP TOOLBAR */}
+        <div className="px-5 py-1.5 bg-slate-100/90 border-b border-slate-200 flex items-center justify-between gap-3 text-xs shrink-0 select-none">
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Scroll buttons */}
+            <div className="flex items-center border border-slate-300 bg-white rounded-lg overflow-hidden shadow-2xs">
+              <button
+                type="button"
+                onClick={handleScrollLeft}
+                disabled={!canScrollLeft}
+                className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold transition-colors cursor-pointer ${
+                  canScrollLeft
+                    ? 'text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 active:bg-indigo-100'
+                    : 'text-slate-300 cursor-not-allowed bg-slate-50'
+                }`}
+                title="Cuộn sang trái"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+                <span>Cuộn Trái</span>
+              </button>
+              <div className="w-px h-4 bg-slate-200" />
+              <button
+                type="button"
+                onClick={handleScrollRight}
+                disabled={!canScrollRight}
+                className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold transition-colors cursor-pointer ${
+                  canScrollRight
+                    ? 'text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 active:bg-indigo-100'
+                    : 'text-slate-300 cursor-not-allowed bg-slate-50'
+                }`}
+                title="Cuộn sang phải"
+              >
+                <span>Cuộn Phải</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            {/* Quick Vehicle Tabs */}
+            <div className="flex items-center gap-1 overflow-x-auto max-w-[65vw]">
+              {columns.map((col, idx) => {
+                const isShortTonnage = col.truckTonnage.split(' ——')[0] || `Xe #${idx + 1}`;
+                return (
+                  <button
+                    key={`tab-${col.id}`}
+                    type="button"
+                    onClick={() => handleScrollToVehicle(idx)}
+                    className={`px-2.5 py-0.5 text-[11px] font-semibold rounded-md border transition-all whitespace-nowrap cursor-pointer ${
+                      activeVehicleIndex === idx
+                        ? 'bg-indigo-600 text-white border-indigo-700 shadow-xs'
+                        : 'bg-white text-slate-700 border-slate-200 hover:bg-indigo-50 hover:text-indigo-700'
+                    }`}
+                    title={`Chuyển nhanh đến Cấu hình xe #${idx + 1}`}
+                  >
+                    Xe #{idx + 1}: {isShortTonnage}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="text-[11px] text-slate-500 hidden md:block">
+            Mẹo: Dùng nút ◀ ▶ hoặc kéo thanh cuộn dưới đáy bảng
+          </div>
+        </div>
+
+        {/* UNIFIED SPREADSHEET TABLE (SEAMLESS GRID - KHÔNG TÁCH KHỐI LƠ LỬNG) */}
+        <div 
+          ref={scrollContainerRef}
+          className="custom-matrix-scroll flex-1 min-h-0 w-full overflow-x-auto overflow-y-auto bg-white relative select-text"
+          style={{ scrollbarGutter: 'stable' }}
+        >
+          <table className="border-collapse text-xs text-left border-spacing-0 w-max min-w-full table-fixed">
+            {/* COLUMN WIDTH DEFINITIONS */}
+            <colgroup>
+              {/* Col 1: Hạng mục chi phí */}
+              <col style={{ width: '320px', minWidth: '320px' }} />
+              {/* Col 2: ĐVT */}
+              <col style={{ width: '110px', minWidth: '110px' }} />
+              {/* Vehicle Columns */}
+              {columns.map(col => (
+                <col key={`col-spec-${col.id}`} style={{ width: '270px', minWidth: '270px' }} />
+              ))}
+            </colgroup>
+
+            {/* TABLE HEADERS (2-TIER WITH CLEAN FREEZE PANES) */}
+            <thead>
+              {/* ─────────────────────────────────────────────────────────────
+                  TIER 1: TÊN CỘT + LOẠI THÙNG PHƯƠNG TIỆN
+              ───────────────────────────────────────────────────────────── */}
+              <tr className="bg-slate-100/90 border-b border-slate-200">
+                {/* Frozen Corner 1: Hạng mục */}
+                <th className="sticky top-0 left-0 z-40 bg-slate-100 border-r border-b border-slate-200 px-4 py-2.5 text-slate-800 font-bold uppercase text-[11px] select-none">
+                  <div className="flex items-center gap-1.5">
+                    <FileText className="w-3.5 h-3.5 text-indigo-700" />
+                    <span>CỘT 1: HẠNG MỤC CHI PHÍ BÁO GIÁ</span>
+                  </div>
+                </th>
+
+                {/* Frozen Corner 2: ĐVT */}
+                <th className="sticky top-0 left-[320px] z-40 bg-slate-100 border-r-2 border-b border-slate-300 px-3 py-2.5 text-center text-slate-800 font-bold uppercase text-[11px] select-none shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)]">
+                  CỘT 2: ĐVT
+                </th>
+
+                {/* Vehicle Columns Tier 1 Header */}
+                {columns.map((col, idx) => (
+                  <th 
+                    key={`head-tier1-${col.id}`}
+                    className="sticky top-0 z-30 bg-indigo-50/60 border-r border-b border-slate-200 p-2.5 align-top"
+                  >
+                    <div className="flex items-center justify-between gap-1 mb-1">
+                      <span className="text-[11px] font-black uppercase text-indigo-950 tracking-wide">
+                        CẤU HÌNH XE #{idx + 1}
+                      </span>
+                      {columns.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveColumn(col.id)}
+                          className="text-slate-400 hover:text-rose-600 p-0.5 rounded hover:bg-rose-50 transition-colors cursor-pointer"
+                          title="Xóa cột xe này"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="text-[10px] text-indigo-800 font-bold mb-0.5">LOẠI THÙNG PHƯƠNG TIỆN:</div>
+                    <select
+                      value={col.truckBodyType}
+                      onChange={(e) => handleBodyTypeChange(col.id, e.target.value)}
+                      className="w-full h-8 px-2 bg-white border border-slate-300 hover:border-indigo-400 text-xs font-bold text-slate-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 cursor-pointer shadow-2xs"
+                      title={col.truckBodyType}
+                    >
+                      {TRUCKING_BODY_TYPES_LOV.map((body, bIdx) => (
+                        <option key={bIdx} value={body}>
+                          {body}
+                        </option>
+                      ))}
+                    </select>
+                  </th>
+                ))}
+              </tr>
+
+              {/* ─────────────────────────────────────────────────────────────
+                  TIER 2: PHÂN KHÚC TẢI TRỌNG (HÀNG DƯỚI LOẠI THÙNG)
+              ───────────────────────────────────────────────────────────── */}
+              <tr className="bg-slate-50 border-b-2 border-slate-300">
+                {/* Frozen Left 1: Phân khúc tải trọng */}
+                <th className="sticky top-[66px] left-0 z-40 bg-slate-50 border-r border-b-2 border-slate-300 px-4 py-2 text-slate-600 font-medium text-[11px] italic select-none">
+                  Phân khúc tải trọng tương ứng theo loại thùng:
+                </th>
+
+                {/* Frozen Left 2: Tấn / CBM */}
+                <th className="sticky top-[66px] left-[320px] z-40 bg-slate-50 border-r-2 border-b-2 border-slate-300 px-3 py-2 text-center text-slate-600 font-medium text-[11px] select-none shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)]">
+                  Tấn / CBM
+                </th>
+
+                {/* Vehicle Columns Tier 2 Header */}
+                {columns.map((col) => {
+                  const availableTonnages = TRUCKING_TONNAGE_BY_BODY_MAP[col.truckBodyType] || [];
+                  return (
+                    <th 
+                      key={`head-tier2-${col.id}`}
+                      className="sticky top-[66px] z-30 bg-indigo-50/30 border-r border-b-2 border-slate-300 p-2 align-middle"
+                    >
+                      <div className="text-[10px] text-slate-500 font-bold mb-0.5">PHÂN KHÚC TẢI TRỌNG (TONNAGE):</div>
+                      <select
+                        value={col.truckTonnage}
+                        onChange={(e) => handleUpdateColField(col.id, 'truckTonnage', e.target.value)}
+                        className="w-full h-8 px-2 bg-white border border-slate-300 hover:border-indigo-400 text-xs font-semibold text-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 cursor-pointer shadow-2xs"
+                        title={col.truckTonnage}
+                      >
+                        {availableTonnages.map((t, tIdx) => (
+                          <option key={tIdx} value={t}>
+                            {t}
+                          </option>
+                        ))}
+                      </select>
+                    </th>
+                  );
+                })}
+              </tr>
+            </thead>
+
+            {/* TABLE BODY (SEAMLESS ROWS & INTEGRATED CELLS) */}
+            <tbody className="divide-y divide-slate-200 text-xs">
+              {/* ─────────────────────────────────────────────────────────────
+                  SECTION 1: CƯỚC VẬN CHUYỂN & PHỤ PHÍ CỐ ĐỊNH TUYẾN
+              ───────────────────────────────────────────────────────────── */}
+              <tr className="bg-indigo-50/70 border-b border-indigo-200">
+                <td 
+                  colSpan={2 + columns.length} 
+                  className="py-2 px-4 text-xs font-black uppercase tracking-wider text-indigo-950 bg-indigo-50/70"
+                >
+                  <div className="sticky left-4 inline-flex items-center gap-2">
+                    <Zap className="w-3.5 h-3.5 text-indigo-600" />
+                    <span>1. CẤU TRÚC ĐƠN GIÁ CƯỚC VẬN CHUYỂN & PHỤ PHÍ CỐ ĐỊNH TUYẾN</span>
+                  </div>
+                </td>
+              </tr>
+
+              {/* DÒNG TỔNG: ĐƠN GIÁ CHÀO THẦU TỔNG (SEAMLESS ROW - KHÔNG TÁCH KHỐI PILL) */}
+              <tr className="bg-emerald-50/50 border-b-2 border-emerald-200 hover:bg-emerald-50/80 transition-colors">
+                {/* Frozen Col 1: Label */}
+                <td className="sticky left-0 z-20 bg-emerald-50/90 border-r border-slate-200 px-4 py-3 text-slate-900">
+                  <div className="text-xs font-black text-emerald-950 flex items-center gap-1.5">
+                    <span>☀️ Đơn Giá Chào Thầu Tổng (All-in Freight)</span>
+                  </div>
+                  <div className="text-[10.5px] text-slate-500 font-normal">
+                    Tự động cộng dồn: Cước chính + BAF + BOT + Chứng từ
+                  </div>
+                </td>
+
+                {/* Frozen Col 2: ĐVT */}
+                <td className="sticky left-[320px] z-20 bg-emerald-50/90 border-r-2 border-slate-300 px-3 py-3 text-center text-emerald-900 font-bold text-xs shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)]">
+                  VND / Chuyến
+                </td>
+
+                {/* Vehicle Columns: Sum value (Integrated seamlessly into the row) */}
+                {columns.map((col) => (
+                  <td 
+                    key={`total-${col.id}`} 
+                    className="border-r border-slate-200 px-4 py-3 text-right bg-emerald-50/40"
+                  >
+                    <div className="flex items-baseline justify-end gap-1.5">
+                      <span className="font-mono font-black text-base text-emerald-700 tracking-tight">
+                        {col.totalPrice.toLocaleString('vi-VN')}
+                      </span>
+                      <span className="text-xs font-bold text-emerald-600/80">₫ / Chuyến</span>
+                    </div>
+                  </td>
+                ))}
+              </tr>
+
+              {/* 1.1 Cước vận chuyển chính */}
+              <tr className="border-b border-slate-200 hover:bg-indigo-50/20 transition-colors">
+                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-medium text-slate-800">
+                  • Cước vận chuyển chính (Base Freight) *
+                </td>
+                <td className="sticky left-[320px] z-20 bg-slate-50 border-r-2 border-slate-300 px-3 py-2.5 text-center text-slate-500 font-medium shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)]">
+                  VND / Chuyến
+                </td>
+                {columns.map((col) => (
+                  <td key={`base-${col.id}`} className="border-r border-slate-200 px-3 py-1.5">
+                    <div className="relative flex items-center">
+                      <input
+                        type="number"
+                        value={col.baseFreight || ''}
+                        onChange={(e) => handleUpdateColField(col.id, 'baseFreight', parseFloat(e.target.value) || 0)}
+                        placeholder="0"
+                        className="w-full py-1.5 pl-3 pr-7 text-right font-mono font-bold text-xs text-slate-900 bg-white border border-slate-200 rounded-lg hover:border-slate-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-2xs"
+                      />
+                      <span className="absolute right-2.5 text-[11px] font-semibold text-slate-400 pointer-events-none">₫</span>
+                    </div>
+                  </td>
+                ))}
+              </tr>
+
+              {/* 1.2 Phụ phí nhiên liệu BAF */}
+              <tr className="border-b border-slate-200 hover:bg-indigo-50/20 transition-colors">
+                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-medium text-slate-800">
+                  • Phụ phí nhiên liệu (BAF Fuel Surcharge)
+                </td>
+                <td className="sticky left-[320px] z-20 bg-slate-50 border-r-2 border-slate-300 px-3 py-2.5 text-center text-slate-500 font-medium shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)]">
+                  VND / Chuyến
+                </td>
+                {columns.map((col) => (
+                  <td key={`baf-${col.id}`} className="border-r border-slate-200 px-3 py-1.5">
+                    <div className="relative flex items-center">
+                      <input
+                        type="number"
+                        value={col.fuelBAF || ''}
+                        onChange={(e) => handleUpdateColField(col.id, 'fuelBAF', parseFloat(e.target.value) || 0)}
+                        placeholder="0"
+                        className="w-full py-1.5 pl-3 pr-7 text-right font-mono font-medium text-xs text-slate-900 bg-white border border-slate-200 rounded-lg hover:border-slate-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-2xs"
+                      />
+                      <span className="absolute right-2.5 text-[11px] font-semibold text-slate-400 pointer-events-none">₫</span>
+                    </div>
+                  </td>
+                ))}
+              </tr>
+
+              {/* 1.3 Phí vé cầu đường BOT */}
+              <tr className="border-b border-slate-200 hover:bg-indigo-50/20 transition-colors">
+                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-medium text-slate-800">
+                  • Phí vé cầu đường BOT & Bốc xếp hạ tầng
+                </td>
+                <td className="sticky left-[320px] z-20 bg-slate-50 border-r-2 border-slate-300 px-3 py-2.5 text-center text-slate-500 font-medium shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)]">
+                  VND / Chuyến
+                </td>
+                {columns.map((col) => (
+                  <td key={`bot-${col.id}`} className="border-r border-slate-200 px-3 py-1.5">
+                    <div className="relative flex items-center">
+                      <input
+                        type="number"
+                        value={col.tollBOT || ''}
+                        onChange={(e) => handleUpdateColField(col.id, 'tollBOT', parseFloat(e.target.value) || 0)}
+                        placeholder="0"
+                        className="w-full py-1.5 pl-3 pr-7 text-right font-mono font-medium text-xs text-slate-900 bg-white border border-slate-200 rounded-lg hover:border-slate-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-2xs"
+                      />
+                      <span className="absolute right-2.5 text-[11px] font-semibold text-slate-400 pointer-events-none">₫</span>
+                    </div>
+                  </td>
+                ))}
+              </tr>
+
+              {/* 1.4 Phí chứng từ seal */}
+              <tr className="border-b border-slate-200 hover:bg-indigo-50/20 transition-colors">
+                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-medium text-slate-800">
+                  • Phí chứng từ, seal & quản lý đơn
+                </td>
+                <td className="sticky left-[320px] z-20 bg-slate-50 border-r-2 border-slate-300 px-3 py-2.5 text-center text-slate-500 font-medium shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)]">
+                  VND / Chuyến
+                </td>
+                {columns.map((col) => (
+                  <td key={`doc-${col.id}`} className="border-r border-slate-200 px-3 py-1.5">
+                    <div className="relative flex items-center">
+                      <input
+                        type="number"
+                        value={col.docManagement || ''}
+                        onChange={(e) => handleUpdateColField(col.id, 'docManagement', parseFloat(e.target.value) || 0)}
+                        placeholder="0"
+                        className="w-full py-1.5 pl-3 pr-7 text-right font-mono font-medium text-xs text-slate-900 bg-white border border-slate-200 rounded-lg hover:border-slate-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-2xs"
+                      />
+                      <span className="absolute right-2.5 text-[11px] font-semibold text-slate-400 pointer-events-none">₫</span>
+                    </div>
+                  </td>
+                ))}
+              </tr>
+
+              {/* ─────────────────────────────────────────────────────────────
+                  SECTION 2: DỊCH VỤ GIÁ TRỊ GIA TĂNG (VAS) & TIỆN ÍCH KÈM THEO
+              ───────────────────────────────────────────────────────────── */}
+              <tr className="bg-indigo-50/70 border-b border-indigo-200">
+                <td 
+                  colSpan={2 + columns.length} 
+                  className="py-2 px-4 text-xs font-black uppercase tracking-wider text-indigo-950 bg-indigo-50/70"
+                >
+                  <div className="sticky left-4 inline-flex items-center gap-2">
+                    <Layers className="w-3.5 h-3.5 text-indigo-600" />
+                    <span>2. BIỂU PHÍ DỊCH VỤ GIÁ TRỊ GIA TĂNG (VAS) & TIỆN ÍCH KÈM THEO</span>
+                  </div>
+                </td>
+              </tr>
+
+              {/* 2.1 GPS Live */}
+              <tr className="border-b border-slate-200 hover:bg-indigo-50/20 transition-colors">
+                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-medium text-slate-800">
+                  • Định vị GPS Real-time & Link tracking live
+                </td>
+                <td className="sticky left-[320px] z-20 bg-slate-50 border-r-2 border-slate-300 px-3 py-2.5 text-center text-slate-500 font-medium shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)]">
+                  VND / Chuyến
+                </td>
+                {columns.map((col) => (
+                  <td key={`gps-${col.id}`} className="border-r border-slate-200 px-3 py-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <div className="relative flex-1">
+                        <input
+                          type="number"
+                          value={col.vasGps || ''}
+                          onChange={(e) => handleUpdateColField(col.id, 'vasGps', parseFloat(e.target.value) || 0)}
+                          placeholder="0"
+                          className="w-full py-1 pl-2.5 pr-5 text-right font-mono text-xs text-slate-800 bg-white border border-slate-200 rounded-lg hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                        />
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none">₫</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleUpdateColField(col.id, 'vasGps', col.vasGps === 0 ? 100000 : 0)}
+                        className={`px-2 py-1 text-[10px] font-bold rounded-md border transition-all cursor-pointer shrink-0 ${
+                          col.vasGps === 0 
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' 
+                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border-slate-200'
+                        }`}
+                        title="Chuyển đổi Miễn phí / Có phí"
+                      >
+                        {col.vasGps === 0 ? 'Miễn phí' : 'Có phí'}
+                      </button>
+                    </div>
+                  </td>
+                ))}
+              </tr>
+
+              {/* 2.2 Kẹp chì seal */}
+              <tr className="border-b border-slate-200 hover:bg-indigo-50/20 transition-colors">
+                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-medium text-slate-800">
+                  • Kẹp chì Seal & Chụp ảnh biên bản giao nhận
+                </td>
+                <td className="sticky left-[320px] z-20 bg-slate-50 border-r-2 border-slate-300 px-3 py-2.5 text-center text-slate-500 font-medium shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)]">
+                  VND / Chuyến
+                </td>
+                {columns.map((col) => (
+                  <td key={`seal-${col.id}`} className="border-r border-slate-200 px-3 py-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <div className="relative flex-1">
+                        <input
+                          type="number"
+                          value={col.vasSeal || ''}
+                          onChange={(e) => handleUpdateColField(col.id, 'vasSeal', parseFloat(e.target.value) || 0)}
+                          placeholder="0"
+                          className="w-full py-1 pl-2.5 pr-5 text-right font-mono text-xs text-slate-800 bg-white border border-slate-200 rounded-lg hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                        />
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none">₫</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleUpdateColField(col.id, 'vasSeal', col.vasSeal === 0 ? 50000 : 0)}
+                        className={`px-2 py-1 text-[10px] font-bold rounded-md border transition-all cursor-pointer shrink-0 ${
+                          col.vasSeal === 0 
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' 
+                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border-slate-200'
+                        }`}
+                      >
+                        {col.vasSeal === 0 ? 'Miễn phí' : 'Có phí'}
+                      </button>
+                    </div>
+                  </td>
+                ))}
+              </tr>
+
+              {/* 2.3 Thu hồi POD */}
+              <tr className="border-b border-slate-200 hover:bg-indigo-50/20 transition-colors">
+                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-medium text-slate-800">
+                  • Thu hồi chứng từ gốc (POD) về văn phòng
+                </td>
+                <td className="sticky left-[320px] z-20 bg-slate-50 border-r-2 border-slate-300 px-3 py-2.5 text-center text-slate-500 font-medium shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)]">
+                  VND / Bộ
+                </td>
+                {columns.map((col) => (
+                  <td key={`pod-${col.id}`} className="border-r border-slate-200 px-3 py-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <div className="relative flex-1">
+                        <input
+                          type="number"
+                          value={col.vasPod || ''}
+                          onChange={(e) => handleUpdateColField(col.id, 'vasPod', parseFloat(e.target.value) || 0)}
+                          placeholder="0"
+                          className="w-full py-1 pl-2.5 pr-5 text-right font-mono text-xs text-slate-800 bg-white border border-slate-200 rounded-lg hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                        />
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none">₫</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleUpdateColField(col.id, 'vasPod', col.vasPod === 0 ? 100000 : 0)}
+                        className={`px-2 py-1 text-[10px] font-bold rounded-md border transition-all cursor-pointer shrink-0 ${
+                          col.vasPod === 0 
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' 
+                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border-slate-200'
+                        }`}
+                      >
+                        {col.vasPod === 0 ? 'Miễn phí' : 'Có phí'}
+                      </button>
+                    </div>
+                  </td>
+                ))}
+              </tr>
+
+              {/* 2.4 Nhân công bốc xếp */}
+              <tr className="border-b border-slate-200 hover:bg-indigo-50/20 transition-colors">
+                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-medium text-slate-800">
+                  • Nhân công bốc xếp 2 đầu kho
+                </td>
+                <td className="sticky left-[320px] z-20 bg-slate-50 border-r-2 border-slate-300 px-3 py-2.5 text-center text-slate-500 font-medium shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)]">
+                  VND / Lần
+                </td>
+                {columns.map((col) => (
+                  <td key={`labor-${col.id}`} className="border-r border-slate-200 px-3 py-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <div className="relative flex-1">
+                        <input
+                          type="number"
+                          value={col.vasLabor || ''}
+                          onChange={(e) => handleUpdateColField(col.id, 'vasLabor', parseFloat(e.target.value) || 0)}
+                          placeholder="0"
+                          className="w-full py-1 pl-2.5 pr-5 text-right font-mono text-xs text-slate-800 bg-white border border-slate-200 rounded-lg hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                        />
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none">₫</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleUpdateColField(col.id, 'vasLabor', col.vasLabor === 0 ? 350000 : 0)}
+                        className={`px-2 py-1 text-[10px] font-bold rounded-md border transition-all cursor-pointer shrink-0 ${
+                          col.vasLabor === 0 
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' 
+                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border-slate-200'
+                        }`}
+                      >
+                        {col.vasLabor === 0 ? 'Miễn phí' : 'Có phí'}
+                      </button>
+                    </div>
+                  </td>
+                ))}
+              </tr>
+
+              {/* 2.5 Bửng nâng */}
+              <tr className="border-b border-slate-200 hover:bg-indigo-50/20 transition-colors">
+                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-medium text-slate-800">
+                  • Xe bửng nâng thủy lực hạ pallet
+                </td>
+                <td className="sticky left-[320px] z-20 bg-slate-50 border-r-2 border-slate-300 px-3 py-2.5 text-center text-slate-500 font-medium shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)]">
+                  VND / Chuyến
+                </td>
+                {columns.map((col) => (
+                  <td key={`tail-${col.id}`} className="border-r border-slate-200 px-3 py-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <div className="relative flex-1">
+                        <input
+                          type="number"
+                          value={col.vasTailLift || ''}
+                          onChange={(e) => handleUpdateColField(col.id, 'vasTailLift', parseFloat(e.target.value) || 0)}
+                          placeholder="0"
+                          className="w-full py-1 pl-2.5 pr-5 text-right font-mono text-xs text-slate-800 bg-white border border-slate-200 rounded-lg hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                        />
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none">₫</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleUpdateColField(col.id, 'vasTailLift', col.vasTailLift === 0 ? 200000 : 0)}
+                        className={`px-2 py-1 text-[10px] font-bold rounded-md border transition-all cursor-pointer shrink-0 ${
+                          col.vasTailLift === 0 
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' 
+                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border-slate-200'
+                        }`}
+                      >
+                        {col.vasTailLift === 0 ? 'Miễn phí' : 'Có phí'}
+                      </button>
+                    </div>
+                  </td>
+                ))}
+              </tr>
+
+              {/* 2.6 Giao đa điểm */}
+              <tr className="border-b border-slate-200 hover:bg-indigo-50/20 transition-colors">
+                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-medium text-slate-800">
+                  • Phụ phí giao đa điểm (Multi-drop)
+                </td>
+                <td className="sticky left-[320px] z-20 bg-slate-50 border-r-2 border-slate-300 px-3 py-2.5 text-center text-slate-500 font-medium shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)]">
+                  VND / Điểm
+                </td>
+                {columns.map((col) => (
+                  <td key={`multi-${col.id}`} className="border-r border-slate-200 px-3 py-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <div className="relative flex-1">
+                        <input
+                          type="number"
+                          value={col.vasMultiDrop || ''}
+                          onChange={(e) => handleUpdateColField(col.id, 'vasMultiDrop', parseFloat(e.target.value) || 0)}
+                          placeholder="0"
+                          className="w-full py-1 pl-2.5 pr-5 text-right font-mono text-xs text-slate-800 bg-white border border-slate-200 rounded-lg hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                        />
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none">₫</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleUpdateColField(col.id, 'vasMultiDrop', col.vasMultiDrop === 0 ? 300000 : 0)}
+                        className={`px-2 py-1 text-[10px] font-bold rounded-md border transition-all cursor-pointer shrink-0 ${
+                          col.vasMultiDrop === 0 
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' 
+                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border-slate-200'
+                        }`}
+                      >
+                        {col.vasMultiDrop === 0 ? 'Miễn phí' : 'Có phí'}
+                      </button>
+                    </div>
+                  </td>
+                ))}
+              </tr>
+
+              {/* 2.7 Neo xe chờ hàng */}
+              <tr className="border-b border-slate-200 hover:bg-indigo-50/20 transition-colors">
+                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-medium text-slate-800">
+                  • Phí neo xe chờ bốc dỡ (sau giờ miễn phí)
+                </td>
+                <td className="sticky left-[320px] z-20 bg-slate-50 border-r-2 border-slate-300 px-3 py-2.5 text-center text-slate-500 font-medium shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)]">
+                  VND / Giờ
+                </td>
+                {columns.map((col) => (
+                  <td key={`detention-${col.id}`} className="border-r border-slate-200 px-3 py-1.5">
+                    <div className="relative flex items-center">
+                      <input
+                        type="number"
+                        value={col.vasDetention || ''}
+                        onChange={(e) => handleUpdateColField(col.id, 'vasDetention', parseFloat(e.target.value) || 0)}
+                        placeholder="150000"
+                        className="w-full py-1.5 pl-3 pr-8 text-right font-mono font-medium text-xs text-slate-900 bg-white border border-slate-200 rounded-lg hover:border-slate-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-2xs"
+                      />
+                      <span className="absolute right-2.5 text-[10.5px] font-semibold text-slate-400 pointer-events-none">₫/h</span>
+                    </div>
+                  </td>
+                ))}
+              </tr>
+
+              {/* ─────────────────────────────────────────────────────────────
+                  SECTION 3: CAM KẾT VẬN HÀNH & ĐIỀU KHOẢN THƯƠNG MẠI
+              ───────────────────────────────────────────────────────────── */}
+              <tr className="bg-indigo-50/70 border-b border-indigo-200">
+                <td 
+                  colSpan={2 + columns.length} 
+                  className="py-2 px-4 text-xs font-black uppercase tracking-wider text-indigo-950 bg-indigo-50/70"
+                >
+                  <div className="sticky left-4 inline-flex items-center gap-2">
+                    <Clock className="w-3.5 h-3.5 text-indigo-600" />
+                    <span>3. CAM KẾT VẬN HÀNH & ĐIỀU KHOẢN THƯƠNG MẠI</span>
+                  </div>
+                </td>
+              </tr>
+
+              {/* 3.1 Lịch Chạy & Tần Suất Xuất Bến (Theo từng cấu hình xe) */}
+              <tr className="border-b border-slate-200 hover:bg-indigo-50/20 transition-colors bg-indigo-50/15">
+                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-bold text-indigo-950">
+                  <div className="flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                    <span>• Lịch chạy & Tần suất xuất bến *</span>
+                  </div>
+                  <div className="text-[10px] text-slate-500 font-normal pl-5">
+                    Nhấp vào ô từng xe để thiết lập bảng lựa chọn
+                  </div>
+                </td>
+                <td className="sticky left-[320px] z-20 bg-slate-50 border-r-2 border-slate-300 px-3 py-2.5 text-center text-slate-600 font-semibold text-xs shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)]">
+                  Lịch / Giờ
+                </td>
+                {columns.map((col) => {
+                  const hasSched = !!col.departureSchedule;
+                  return (
+                    <td key={`sched-${col.id}`} className="border-r border-slate-200 px-3 py-2 bg-indigo-50/20">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenScheduleModalForCol(col)}
+                        className={`w-full min-h-[40px] px-2.5 py-1.5 rounded-xl border text-left text-xs transition-all flex items-center justify-between gap-2 cursor-pointer shadow-2xs group ${
+                          hasSched
+                            ? 'bg-white border-indigo-300 text-indigo-950 font-bold hover:border-indigo-500 hover:bg-indigo-50/50 hover:shadow-xs'
+                            : 'bg-white border-dashed border-slate-300 text-slate-400 hover:border-indigo-400 hover:text-indigo-600'
+                        }`}
+                        title="Nhấp để thiết lập bảng lựa chọn lịch chạy và giờ xuất bến"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <span className="truncate block font-bold text-[11.5px] leading-snug">
+                            {col.departureSchedule || 'Chọn lịch & giờ chạy...'}
+                          </span>
+                          <span className="text-[10px] text-slate-400 font-medium group-hover:text-indigo-600 flex items-center gap-1 mt-0.5">
+                            <span>Thiết lập bảng lựa chọn</span>
+                            <span className="text-[9px]">✎</span>
+                          </span>
+                        </div>
+                        <div className="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white flex items-center justify-center shrink-0 transition-colors">
+                          <Calendar className="w-3.5 h-3.5" />
+                        </div>
+                      </button>
+                    </td>
+                  );
+                })}
+              </tr>
+
+              {/* 3.2 SLA Thời Gian Vận Chuyển */}
+              <tr className="border-b border-slate-200 hover:bg-indigo-50/20 transition-colors">
+                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-medium text-slate-800">
+                  • Thời gian vận chuyển cam kết (SLA)
+                </td>
+                <td className="sticky left-[320px] z-20 bg-slate-50 border-r-2 border-slate-300 px-3 py-2.5 text-center text-slate-500 font-medium shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)]">
+                  Giờ / Ngày
+                </td>
+                {columns.map((col) => (
+                  <td key={`sla-${col.id}`} className="border-r border-slate-200 px-3 py-1.5">
+                    <input
+                      type="text"
+                      value={col.transitTimeDisplay || ''}
+                      onChange={(e) => handleUpdateColField(col.id, 'transitTimeDisplay', e.target.value)}
+                      placeholder="VD: 2 Ngày (48 Giờ cam kết)"
+                      className="w-full py-1.5 px-3 text-slate-900 bg-white border border-slate-200 rounded-lg hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-xs font-semibold shadow-2xs"
+                    />
+                  </td>
+                ))}
+              </tr>
+
+              {/* 3.2 Giờ neo xe miễn phí */}
+              <tr className="border-b border-slate-200 hover:bg-indigo-50/20 transition-colors">
+                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-medium text-slate-800">
+                  • Giờ neo xe chờ bốc dỡ miễn phí
+                </td>
+                <td className="sticky left-[320px] z-20 bg-slate-50 border-r-2 border-slate-300 px-3 py-2.5 text-center text-slate-500 font-medium shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)]">
+                  Giờ
+                </td>
+                {columns.map((col) => (
+                  <td key={`wait-${col.id}`} className="border-r border-slate-200 px-3 py-1.5">
+                    <select
+                      value={col.freeWaitingHours || 2}
+                      onChange={(e) => handleUpdateColField(col.id, 'freeWaitingHours', parseInt(e.target.value) || 2)}
+                      className="w-full py-1.5 px-2.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-indigo-700 hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 cursor-pointer shadow-2xs"
+                    >
+                      <option value={1}>1 Giờ miễn phí</option>
+                      <option value={2}>2 Giờ miễn phí (Chuẩn)</option>
+                      <option value={3}>3 Giờ miễn phí</option>
+                      <option value={4}>4 Giờ miễn phí</option>
+                    </select>
+                  </td>
+                ))}
+              </tr>
+
+              {/* 3.3 Điều khoản thanh toán */}
+              <tr className="border-b border-slate-200 hover:bg-indigo-50/20 transition-colors">
+                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-medium text-slate-800">
+                  • Điều khoản thanh toán (Payment Terms)
+                </td>
+                <td className="sticky left-[320px] z-20 bg-slate-50 border-r-2 border-slate-300 px-3 py-2.5 text-center text-slate-500 font-medium shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)]">
+                  Ngày
+                </td>
+                {columns.map((col) => (
+                  <td key={`pay-${col.id}`} className="border-r border-slate-200 px-3 py-1.5">
+                    <select
+                      value={col.paymentTerms || 'Net 45 Days'}
+                      onChange={(e) => handleUpdateColField(col.id, 'paymentTerms', e.target.value)}
+                      className="w-full py-1.5 px-2.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 cursor-pointer shadow-2xs"
+                    >
+                      <option value="Net 30 Days">Net 30 Days (30 Ngày sau POD)</option>
+                      <option value="Net 45 Days">Net 45 Days (45 Ngày)</option>
+                      <option value="Net 60 Days">Net 60 Days (Key Account)</option>
+                      <option value="COD">COD (Thanh toán khi giao hàng)</option>
+                    </select>
+                  </td>
+                ))}
+              </tr>
+
+              {/* 3.4 Hạn giá Valid Until */}
+              <tr className="border-b border-slate-200 hover:bg-indigo-50/20 transition-colors">
+                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-medium text-slate-800">
+                  • Báo giá có hiệu lực đến ngày (Valid Until)
+                </td>
+                <td className="sticky left-[320px] z-20 bg-slate-50 border-r-2 border-slate-300 px-3 py-2.5 text-center text-slate-500 font-medium shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)]">
+                  Ngày
+                </td>
+                {columns.map((col) => (
+                  <td key={`valid-${col.id}`} className="border-r border-slate-200 px-3 py-1.5">
+                    <input
+                      type="date"
+                      value={col.validUntil || '2026-12-31'}
+                      onChange={(e) => handleUpdateColField(col.id, 'validUntil', e.target.value)}
+                      className="w-full py-1.5 px-2.5 text-xs font-medium text-slate-800 bg-white border border-slate-200 rounded-lg hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 cursor-pointer shadow-2xs"
+                    />
+                  </td>
+                ))}
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* MODAL FOOTER */}
+        <div className="px-5 py-3 bg-white border-t border-slate-200 flex items-center justify-between gap-4 shrink-0 shadow-lg select-none">
+          <div className="flex items-center gap-3 text-xs">
+            <span className="text-slate-500 font-medium">Đã thiết lập:</span>
+            <span className="font-bold text-slate-900 bg-slate-100 px-2.5 py-0.5 rounded-lg border border-slate-200">
+              {columns.length} Cấu hình xe
+            </span>
+            <span className="text-slate-300 hidden sm:inline">|</span>
+            <span className="text-slate-500 hidden sm:inline">Khoảng giá tổng All-in:</span>
+            <strong className="text-emerald-700 font-black hidden sm:inline font-mono">
+              {Math.min(...columns.map(c => c.totalPrice)).toLocaleString('vi-VN')} – {Math.max(...columns.map(c => c.totalPrice)).toLocaleString('vi-VN')} ₫
+            </strong>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl transition-all cursor-pointer"
+            >
+              Hủy Bỏ
+            </button>
+            <button
+              type="button"
+              onClick={handleSaveMatrix}
+              className="inline-flex items-center gap-1.5 px-6 py-2 text-xs font-black text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl transition-all shadow hover:shadow-emerald-600/30 cursor-pointer"
+            >
+              <Save className="w-4 h-4" />
+              <span>Lưu Cấu Hình Biểu Phí</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+      {/* MODAL: THIẾT LẬP LỊCH CHẠY & GIỜ XUẤT BẾN THEO CẤU HÌNH XE */}
+      {vehicleScheduleModal && (
+        <div className="fixed inset-0 z-[140] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 max-w-lg w-full overflow-hidden flex flex-col animate-in zoom-in-95 duration-150">
+            {/* Modal Header */}
+            <div className="px-5 py-4 bg-gradient-to-r from-indigo-50 via-white to-indigo-50/40 border-b border-slate-200 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-indigo-600 shadow-indigo-600/20 text-white flex items-center justify-center shadow-md shrink-0">
+                  <Calendar className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">
+                    Cấu Hình Lịch Chạy & Giờ Xuất Bến (Trucking FTL)
+                  </h3>
+                  <div className="text-[11px] text-slate-500 font-medium flex items-center gap-2 flex-wrap mt-0.5">
+                    <span>Tuyến: <strong className="text-indigo-700">{route?.route || route?.name || route?.routeCode}</strong> ({route?.origin} ⇄ {route?.destination})</span>
+                    <span className="bg-indigo-100 text-indigo-800 text-[10px] font-bold px-1.5 py-0.2 rounded border border-indigo-200">
+                      Xe: {vehicleScheduleModal.colName}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setVehicleScheduleModal(null)}
+                className="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-all cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-5 space-y-4 overflow-y-auto max-h-[75vh]">
+              {/* 1. Chọn Nhanh Tần Suất */}
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-slate-800 uppercase tracking-wide">
+                  1. Chọn nhanh tần suất
+                </label>
+                <div className="flex flex-wrap gap-1.5">
+                  {SCHEDULE_FREQUENCY_PRESETS.map((preset, pIdx) => {
+                    const isSelected = preset.days.every(d => vehicleScheduleModal.selectedDays.includes(d)) && 
+                      vehicleScheduleModal.selectedDays.length === preset.days.length;
+                    return (
+                      <button
+                        key={pIdx}
+                        type="button"
+                        onClick={() => {
+                          setVehicleScheduleModal({
+                            ...vehicleScheduleModal,
+                            selectedDays: [...preset.days],
+                          });
+                        }}
+                        className={`px-3 py-1.5 text-xs rounded-xl border font-bold transition-all cursor-pointer ${
+                          isSelected
+                            ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs'
+                            : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-800'
+                        }`}
+                      >
+                        {preset.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* 2. Các Ngày Chạy Trong Tuần (7 Ngày) */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-slate-800 uppercase tracking-wide">
+                    2. Các ngày chạy trong tuần ({vehicleScheduleModal.selectedDays.length}/7 ngày)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (vehicleScheduleModal.selectedDays.length === 7) {
+                        setVehicleScheduleModal({ ...vehicleScheduleModal, selectedDays: [] });
+                      } else {
+                        setVehicleScheduleModal({ ...vehicleScheduleModal, selectedDays: SCHEDULE_DAYS_OF_WEEK.map(d => d.name) });
+                      }
+                    }}
+                    className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 cursor-pointer"
+                  >
+                    {vehicleScheduleModal.selectedDays.length === 7 ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {SCHEDULE_DAYS_OF_WEEK.map((day) => {
+                    const isChecked = vehicleScheduleModal.selectedDays.includes(day.name);
+                    return (
+                      <label
+                        key={day.id}
+                        className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs font-bold cursor-pointer transition-all select-none ${
+                          isChecked 
+                            ? 'bg-indigo-50 border-indigo-400 text-indigo-950 shadow-2xs ring-1 ring-indigo-500/20' 
+                            : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 hover:border-slate-300'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={(e) => {
+                            let current = [...vehicleScheduleModal.selectedDays];
+                            if (e.target.checked) {
+                              if (!current.includes(day.name)) current.push(day.name);
+                            } else {
+                              current = current.filter(d => d !== day.name);
+                            }
+                            const sorted = SCHEDULE_DAYS_OF_WEEK.filter(d => current.includes(d.name)).map(d => d.name);
+                            setVehicleScheduleModal({ ...vehicleScheduleModal, selectedDays: sorted });
+                          }}
+                          className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer"
+                        />
+                        <span>{day.name}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* 3. Thời Gian Xe Xuất Bến */}
+              <div className="space-y-2 pt-2 border-t border-slate-100">
+                <label className="block text-xs font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-indigo-600" />
+                  3. Thời gian xe xuất bến
+                </label>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                  {SCHEDULE_DEPARTURE_TIMES.map((dt, dtIdx) => {
+                    const isChosen = vehicleScheduleModal.departureTime === dt.time;
+                    return (
+                      <button
+                        key={dtIdx}
+                        type="button"
+                        onClick={() => {
+                          setVehicleScheduleModal({
+                            ...vehicleScheduleModal,
+                            departureTime: dt.time,
+                          });
+                        }}
+                        className={`px-2.5 py-1.5 text-left rounded-xl border text-xs transition-all cursor-pointer ${
+                          isChosen
+                            ? 'bg-indigo-600 border-indigo-600 text-white font-bold shadow-2xs'
+                            : 'bg-slate-50 border-slate-200 text-slate-700 font-medium hover:bg-slate-100 hover:border-slate-300'
+                        }`}
+                      >
+                        <span className="block font-bold">{dt.time}</span>
+                        <span className={`text-[10px] block truncate ${isChosen ? 'text-indigo-100' : 'text-slate-500'}`}>
+                          {dt.label.replace(`${dt.time} `, '')}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="flex items-center gap-2 pt-1">
+                  <span className="text-xs font-semibold text-slate-600 whitespace-nowrap">
+                    Hoặc nhập giờ xuất bến khác:
+                  </span>
+                  <input
+                    type="time"
+                    value={vehicleScheduleModal.departureTime || '20:00'}
+                    onChange={(e) => setVehicleScheduleModal({ ...vehicleScheduleModal, departureTime: e.target.value })}
+                    className="px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:bg-white focus:outline-none focus:border-indigo-500 cursor-pointer"
+                  />
+                </div>
+              </div>
+
+              {/* 4. Xem Trước Chuỗi Kết Quả (Live Preview) */}
+              <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-1">
+                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+                  Xem trước hiển thị trên biểu giá xe:
+                </span>
+                <div className="text-xs font-bold text-indigo-900 border-indigo-200 bg-white border rounded-xl px-3 py-2 flex items-center gap-2 shadow-2xs">
+                  <Calendar className="w-4 h-4 text-indigo-600 shrink-0" />
+                  <span>
+                    {(() => {
+                      const days = vehicleScheduleModal.selectedDays;
+                      const time = vehicleScheduleModal.departureTime;
+                      if (days.length === 7) return `Hàng ngày${time ? ` (Xuất bến ${time})` : ''}`;
+                      if (days.length > 0) return `${days.join(', ')}${time ? ` (Xuất bến ${time})` : ''}`;
+                      if (time) return `Xuất bến ${time}`;
+                      return 'Chưa chọn lịch chạy';
+                    })()}
+                  </span>
+                </div>
+              </div>
+
+              {/* 5. Tùy Chọn Áp Dụng Cho Toàn Bộ Cấu Hình Xe */}
+              {columns.length > 1 && (
+                <div className="p-3 bg-indigo-50/50 rounded-2xl border border-indigo-100 flex items-center gap-2.5">
+                  <input
+                    type="checkbox"
+                    id="applyToAllVehicles"
+                    checked={vehicleScheduleModal.applyToAll}
+                    onChange={(e) => setVehicleScheduleModal({ ...vehicleScheduleModal, applyToAll: e.target.checked })}
+                    className="rounded border-indigo-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer"
+                  />
+                  <label htmlFor="applyToAllVehicles" className="text-xs font-bold text-indigo-950 cursor-pointer select-none">
+                    Áp dụng lịch chạy này cho tất cả {columns.length} cấu hình xe của tuyến
+                  </label>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-5 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => setVehicleScheduleModal(null)}
+                className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-200/60 rounded-xl transition-colors cursor-pointer"
+              >
+                Hủy Bỏ
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSaveVehicleSchedule}
+                className="inline-flex items-center gap-1.5 px-5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/20 rounded-xl transition-all shadow-md cursor-pointer"
+              >
+                <Check className="w-4 h-4" />
+                <span>Xác Nhận & Lưu Lịch Chạy</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};

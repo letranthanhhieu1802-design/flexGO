@@ -46,6 +46,11 @@ import {
   ShieldAlert
 } from 'lucide-react';
 import { ServiceType } from '../../types';
+import { 
+  TruckingFtlCostMatrixModal, 
+  VehiclePricingMatrixColumn, 
+  createDefaultVehiclePricingColumn 
+} from './TruckingFtlCostMatrixModal';
 
 export const DAYS_OF_WEEK_LOV = [
   { id: 'T2', name: 'Thứ 2', short: 'T2' },
@@ -1152,6 +1157,7 @@ export interface CapabilityRouteItem {
   validUntil?: string;
   promotionPercent: number;
   ltlPricing?: LtlTieredPricingConfig;
+  vehiclePricingMatrix?: VehiclePricingMatrixColumn[];
   // Truong thong tin chuyen biet cho Kho Bai 3PL (Warehousing)
   warehouseCode?: string;
   warehouseName?: string;
@@ -4805,6 +4811,26 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
   const [isExportingTemplate, setIsExportingTemplate] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [scheduleModalData, setScheduleModalData] = useState<ScheduleModalData | null>(null);
+  const [costMatrixModalRoute, setCostMatrixModalRoute] = useState<CapabilityRouteItem | null>(null);
+
+  const handleOpenCostMatrixModal = (route: CapabilityRouteItem) => {
+    setCostMatrixModalRoute(route);
+  };
+
+  const handleSaveCostMatrix = (routeId: string, matrix: VehiclePricingMatrixColumn[]) => {
+    if (matrix.length === 0) return;
+    const primaryVehicle = matrix[0];
+    handleUpdateRouteRowMultiple(routeId, {
+      vehiclePricingMatrix: matrix,
+      price: primaryVehicle.totalPrice,
+      truckBodyType: primaryVehicle.truckBodyType,
+      truckTonnage: primaryVehicle.truckTonnage,
+      vehicleType: `${primaryVehicle.truckTonnage ? primaryVehicle.truckTonnage.split(' (')[0] : ''} ${primaryVehicle.truckBodyType ? primaryVehicle.truckBodyType.split(' (')[0] : ''}`.trim(),
+      departureSchedule: primaryVehicle.departureSchedule || 'Hàng ngày (Daily - Xuất bến 20:00)',
+      sla: primaryVehicle.transitTimeDisplay || '2 Ngày',
+      validUntil: primaryVehicle.validUntil || '2026-12-31',
+    });
+  };
 
   const handleOpenScheduleModal = (route: CapabilityRouteItem) => {
     const isOcean = activeCategory?.id === 'ocean' || activeModel?.id?.startsWith('sea-');
@@ -6438,6 +6464,23 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                             const isLclTable = isOceanLclTable || isRailLclTable;
                             const isLtlTable = isTruckingTable && (activeModel?.id === 'trk-gen-ltl' || activeModel?.name?.includes('LTL') || activeModel?.code === 'LTL');
                             const isLtlOrLclTable = isLtlTable || isLclTable;
+                            const isReeferTruckingTable = isTruckingTable && (activeCargoGroup?.name?.includes('lạnh') || activeModel?.name?.includes('lạnh') || activeModel?.id?.includes('ref'));
+                            const isHazmatTruckingTable = isTruckingTable && (activeCargoGroup?.name?.includes('nguy hiểm') || activeModel?.name?.includes('nguy hiểm') || activeModel?.id?.includes('haz') || activeModel?.id?.includes('dg'));
+                            const isTruckingFtlGeneralTable = isTruckingTable && !isLtlTable && !isReeferTruckingTable && !isHazmatTruckingTable;
+
+                            if (isTruckingFtlGeneralTable) {
+                              return (
+                                <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
+                                  <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
+                                  <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-indigo-50/70 text-indigo-950 font-black">Mã Tuyến</th>
+                                  <th className="py-2.5 px-2.5 min-w-[160px] bg-indigo-50/70 text-indigo-950 font-black">Hành Lang Tuyến</th>
+                                  <th className="py-2.5 px-2.5 min-w-[140px]">Điểm Đi</th>
+                                  <th className="py-2.5 px-2.5 min-w-[140px]">Điểm Đến</th>
+                                  <th className="py-2.5 px-2.5 min-w-[190px] text-center bg-indigo-100/80 text-indigo-950 font-black">Chi Tiết Biểu Phí</th>
+                                  <th className="py-2.5 px-2 text-center w-16 min-w-[65px]">Action</th>
+                                </tr>
+                              );
+                            }
 
                             if (isWarehousingTable) {
                               const isBonded = activeModel?.id === 'wh-gen-bon' || activeModel?.id?.includes('bon') || activeModel?.name?.toLowerCase().includes('ngoại quan') || activeModel?.code?.toLowerCase().includes('ngoại quan');
@@ -6718,7 +6761,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                         <tbody className="divide-y divide-slate-200 bg-white">
                           {(!currentData.routes || currentData.routes.length === 0) ? (
                             <tr>
-                              <td colSpan={activeCategory?.id === 'warehousing' ? ((activeModel?.id === 'wh-gen-bon' || activeModel?.name?.toLowerCase().includes('ngoại quan')) ? 19 : (activeModel?.id === 'wh-gen-self' ? 17 : 18)) : ((activeCategory?.id === 'project' && (activeModel?.id?.includes('xdock') || activeModel?.name?.toLowerCase().includes('cross-dock') || activeModel?.name?.toLowerCase().includes('x-dock'))) ? 16 : ((activeCategory?.id === 'project' && (activeModel?.id?.includes('port') || activeModel?.name?.toLowerCase().includes('cảng') || activeModel?.code?.toLowerCase().includes('port'))) ? 15 : (((activeCategory?.id === 'cross-border' || activeCategory?.serviceType === 'Cross-border') && (activeModel?.id?.includes('ftl') || activeModel?.name?.includes('FTL') || activeModel?.code === 'FTL' || !activeModel?.id?.includes('ltl'))) ? 16 : activeCategory?.id === 'customs' ? 15 : (activeCategory?.id === 'trucking' ? 15 : ((activeCategory?.id === 'ocean') ? ((activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL') ? 17 : 15) : (((activeCategory?.id === 'rail') && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL')) ? 15 : ((activeCategory?.id === 'air' && (activeModel?.id === 'air-gen-exp' || activeModel?.name?.includes('Express') || activeModel?.code === 'Express')) ? 13 : 15)))))))} className="py-8 text-center text-slate-400 font-medium">
+                              <td colSpan={activeCategory?.id === 'trucking' && !((activeModel?.id === 'trk-gen-ltl' || activeModel?.name?.includes('LTL') || activeModel?.code === 'LTL')) && !(activeCargoGroup?.name?.includes('lạnh') || activeModel?.name?.includes('lạnh') || activeModel?.id?.includes('ref')) && !(activeCargoGroup?.name?.includes('nguy hiểm') || activeModel?.name?.includes('nguy hiểm') || activeModel?.id?.includes('haz') || activeModel?.id?.includes('dg')) ? 7 : activeCategory?.id === 'warehousing' ? ((activeModel?.id === 'wh-gen-bon' || activeModel?.name?.toLowerCase().includes('ngoại quan')) ? 19 : (activeModel?.id === 'wh-gen-self' ? 17 : 18)) : ((activeCategory?.id === 'project' && (activeModel?.id?.includes('xdock') || activeModel?.name?.toLowerCase().includes('cross-dock') || activeModel?.name?.toLowerCase().includes('x-dock'))) ? 16 : ((activeCategory?.id === 'project' && (activeModel?.id?.includes('port') || activeModel?.name?.toLowerCase().includes('cảng') || activeModel?.code?.toLowerCase().includes('port'))) ? 15 : (((activeCategory?.id === 'cross-border' || activeCategory?.serviceType === 'Cross-border') && (activeModel?.id?.includes('ftl') || activeModel?.name?.includes('FTL') || activeModel?.code === 'FTL' || !activeModel?.id?.includes('ltl'))) ? 16 : activeCategory?.id === 'customs' ? 15 : (activeCategory?.id === 'trucking' ? 15 : ((activeCategory?.id === 'ocean') ? ((activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL') ? 17 : 15) : (((activeCategory?.id === 'rail') && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL')) ? 15 : ((activeCategory?.id === 'air' && (activeModel?.id === 'air-gen-exp' || activeModel?.name?.includes('Express') || activeModel?.code === 'Express')) ? 13 : 15)))))))} className="py-8 text-center text-slate-400 font-medium">
                                 {activeCategory?.id === 'warehousing' ? (
                                   <>Chưa có cơ sở kho nào. Bấm nút <strong className="text-indigo-600 font-bold">+ Thêm Kho Mới</strong> để khai báo năng lực & biểu phí lưu kho.</>
                                 ) : activeCategory?.id === 'customs' ? (
@@ -8962,6 +9005,122 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                               const cargoType: 'general' | 'reefer' | 'hazmat' | 'ltl' = isLtlTrucking ? 'ltl' : (isHazmatTrucking ? 'hazmat' : (isReeferTrucking ? 'reefer' : 'general'));
                               const currentTruckBodyTypes = isLtlTrucking ? LTL_TRUCKING_BODY_TYPES : (isHazmatTrucking ? HAZMAT_TRUCKING_BODY_TYPES : (isReeferTrucking ? REEFER_TRUCKING_BODY_TYPES : TRUCKING_BODY_TYPES));
                               const effectiveRouteCode = route.routeCode || `RC-${(activeModel?.code || activeCategory?.id || 'GEN').toUpperCase().replace(/[^A-Z0-9]/g, '')}-${String(idx + 1).padStart(3, '0')}`;
+                              const isTruckingFtlGeneralRow = isTrucking && !isLtlTrucking && !isReeferTrucking && !isHazmatTrucking;
+
+                              if (isTruckingFtlGeneralRow) {
+                                const matrixCols = (route.vehiclePricingMatrix && route.vehiclePricingMatrix.length > 0)
+                                  ? route.vehiclePricingMatrix
+                                  : [createDefaultVehiclePricingColumn(route.truckBodyType, route.truckTonnage, route.price)];
+                                const minPrice = Math.min(...matrixCols.map(c => c.totalPrice));
+                                const maxPrice = Math.max(...matrixCols.map(c => c.totalPrice));
+                                const priceDisplay = matrixCols.length > 1
+                                  ? `${minPrice.toLocaleString('vi-VN')} – ${maxPrice.toLocaleString('vi-VN')} ₫`
+                                  : `${minPrice.toLocaleString('vi-VN')} ₫`;
+
+                                return (
+                                  <tr key={route.id} className="divide-x divide-slate-200 hover:bg-indigo-50/20 transition-colors">
+                                    {/* 1. STT */}
+                                    <td className="p-0 text-center font-mono text-slate-400 font-semibold text-[11px] bg-slate-50/60 align-middle">
+                                      {idx + 1}
+                                    </td>
+
+                                    {/* 2. Mã Tuyến */}
+                                    <td className="p-0 align-top bg-slate-50/30">
+                                      <input
+                                        type="text"
+                                        value={effectiveRouteCode}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'routeCode', e.target.value)}
+                                        placeholder="RC-FTL-001"
+                                        className="w-full px-2 py-2.5 text-center font-mono font-bold text-indigo-700 text-xs bg-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all uppercase"
+                                        title="Mã tuyến đường nội bộ"
+                                      />
+                                    </td>
+
+                                    {/* 3. Hành Lang Tuyến */}
+                                    <td className="p-0 align-top">
+                                      <input
+                                        type="text"
+                                        value={route.route}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'route', e.target.value)}
+                                        placeholder="VD: Tuyến Bắc - Nam, Tuyến Đông Nam Bộ..."
+                                        className="w-full px-2.5 py-2.5 font-bold text-slate-900 text-xs bg-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
+                                        title="Hành lang tuyến vận chuyển"
+                                      />
+                                    </td>
+
+                                    {/* 4. Điểm Đi */}
+                                    <td className="p-0 align-top">
+                                      <input
+                                        type="text"
+                                        value={route.origin}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'origin', e.target.value)}
+                                        placeholder="Điểm đi (KCN, Tỉnh/TP)..."
+                                        className="w-full px-2.5 py-2.5 bg-transparent text-slate-700 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
+                                      />
+                                    </td>
+
+                                    {/* 5. Điểm Đến */}
+                                    <td className="p-0 align-top">
+                                      <input
+                                        type="text"
+                                        value={route.destination}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'destination', e.target.value)}
+                                        placeholder="Điểm đến (KCN, Tỉnh/TP)..."
+                                        className="w-full px-2.5 py-2.5 bg-transparent text-slate-700 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
+                                      />
+                                    </td>
+
+                                    {/* 6. Chi Tiết (Mở Popup Ma Trận Chi Phí & Cấu Hình Xe) */}
+                                    <td className="p-1.5 align-middle bg-indigo-50/20">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleOpenCostMatrixModal(route)}
+                                        className="w-full px-2.5 py-2 rounded-xl border border-indigo-300 bg-gradient-to-r from-indigo-50 via-white to-purple-50 hover:from-indigo-100 hover:to-purple-100 text-slate-900 text-left transition-all cursor-pointer shadow-2xs group flex items-center justify-between gap-2"
+                                        title="Nhấp để khai báo biểu phí chi tiết ma trận đa phương tiện"
+                                      >
+                                        <div className="min-w-0 flex-1">
+                                          <div className="flex items-center justify-between gap-1">
+                                            <span className="font-mono font-black text-xs text-indigo-950 truncate">
+                                              {priceDisplay}
+                                            </span>
+                                            <span className="text-[9.5px] font-black text-indigo-700 bg-indigo-100 px-1.5 py-0.5 rounded-md shrink-0 border border-indigo-200">
+                                              {matrixCols.length} loại xe
+                                            </span>
+                                          </div>
+                                          <div className="text-[10.5px] text-slate-500 font-medium flex items-center justify-between mt-0.5">
+                                            <span className="truncate text-slate-600 font-semibold">
+                                              {matrixCols[0]?.truckBodyType ? matrixCols[0].truckBodyType.split(' (')[0] : 'Xem biểu phí'}
+                                            </span>
+                                            <span className="text-indigo-600 font-bold group-hover:underline shrink-0">Chi tiết ➔</span>
+                                          </div>
+                                        </div>
+                                      </button>
+                                    </td>
+
+                                    {/* 7. Action */}
+                                    <td className="p-1 text-center align-middle">
+                                      <div className="flex items-center justify-center space-x-1">
+                                        <button
+                                          type="button"
+                                          onClick={() => handleDuplicateRouteRow(route.id)}
+                                          className="p-1.5 text-slate-400 hover:text-indigo-600 rounded-lg hover:bg-slate-100 transition-colors"
+                                          title="Nhân bản tuyến này"
+                                        >
+                                          <Copy className="w-3.5 h-3.5" />
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleDeleteRouteRow(route.id)}
+                                          className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-slate-100 transition-colors"
+                                          title="Xóa tuyến"
+                                        >
+                                          <Trash2 className="w-3.5 h-3.5" />
+                                        </button>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                );
+                              }
 
                               return (
                                 <tr key={route.id} className="divide-x divide-slate-200 hover:bg-indigo-50/20 transition-colors">
@@ -13368,6 +13527,14 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
           </div>
         </div>
       )}
+
+      {/* 5. Trucking FTL Multi-Vehicle Cost Breakdown Matrix Modal */}
+      <TruckingFtlCostMatrixModal
+        isOpen={!!costMatrixModalRoute}
+        onClose={() => setCostMatrixModalRoute(null)}
+        route={costMatrixModalRoute}
+        onSave={handleSaveCostMatrix}
+      />
     </div>
   );
 };
