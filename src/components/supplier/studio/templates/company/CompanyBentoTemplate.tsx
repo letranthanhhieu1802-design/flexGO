@@ -16,7 +16,6 @@ import {
   Mail, 
   Phone, 
   Download, 
-  Ship, 
   TrendingUp, 
   Compass, 
   Target, 
@@ -25,7 +24,10 @@ import {
   Camera, 
   Upload,
   Layers,
-  Check
+  Check,
+  Users,
+  Briefcase,
+  LayoutGrid
 } from 'lucide-react';
 import { 
   CompanyInfoProfile, 
@@ -261,11 +263,11 @@ export const CompanyBentoTemplate: React.FC<CompanyTemplateProps> = ({
     <div className="space-y-6 animate-in fade-in duration-200">
       
       {/* ========================================================= */}
-      {/* 1. BENTO ROW 1: HERO IDENTITY (8 cols) + METRICS (4 cols) */}
+      {/* 1. BENTO ROW 1: HERO (8 cols) + CAPACITY HUD (4 cols)     */}
       {/* ========================================================= */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
         
-        {/* Hero Identity Bento Box (8 cols) */}
+        {/* Main Identity Bento Box (8 cols) */}
         <div 
           className="lg:col-span-8 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden flex flex-col justify-between"
           style={{ backgroundColor: theme.primary }}
@@ -294,10 +296,10 @@ export const CompanyBentoTemplate: React.FC<CompanyTemplateProps> = ({
 
               <div className="space-y-1.5 flex-1 min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="px-2.5 py-0.5 bg-white/20 text-white text-[10px] font-black uppercase rounded-full tracking-wider border border-white/30">
-                    Modern Bento Enterprise
+                  <span className="px-2.5 py-0.5 bg-white/20 text-white text-[10px] font-black uppercase rounded-full tracking-wider border border-white/30 flex items-center gap-1">
+                    <LayoutGrid className="w-3 h-3" /> Modern Bento Layout
                   </span>
-                  <span className="text-xs text-white/80">MST: {company.taxId || '---'}</span>
+                  <span className="text-xs text-white/80 font-mono">MST: {company.taxId || '---'} • Năm: {company.yearEstablished || '---'}</span>
                 </div>
                 {isReadOnly ? (
                   <>
@@ -317,9 +319,9 @@ export const CompanyBentoTemplate: React.FC<CompanyTemplateProps> = ({
             <div className="flex items-center gap-2 text-amber-200 text-xs sm:text-sm italic">
               <Sparkles className="w-4 h-4 shrink-0" />
               {isReadOnly ? (
-                <span>"{company.companySlogan}"</span>
+                <span>"{company.companySlogan || 'Đồng hành phát triển - Giải pháp tối ưu'}"</span>
               ) : (
-                <input type="text" value={company.companySlogan} onChange={(e) => onChangeCompany({ ...company, companySlogan: e.target.value })} className="w-full bg-white/10 px-2 py-1 rounded text-xs text-white border border-white/20 outline-hidden" placeholder="Slogan" />
+                <input type="text" value={company.companySlogan || ''} onChange={(e) => onChangeCompany({ ...company, companySlogan: e.target.value })} className="w-full bg-white/10 px-2 py-1 rounded text-xs text-white border border-white/20 outline-hidden" placeholder="Slogan" />
               )}
             </div>
 
@@ -339,24 +341,42 @@ export const CompanyBentoTemplate: React.FC<CompanyTemplateProps> = ({
             <span className="text-[10px] uppercase font-black tracking-widest text-emerald-400 block flex items-center gap-1">
               <TrendingUp className="w-3.5 h-3.5" /> Thước Đo Cốt Lõi (Fast SLA)
             </span>
-            <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-2.5">
               <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
-                <span className="text-[10px] uppercase font-bold text-white/60 block">Quy Mô Nhân Sự</span>
+                <span className="text-[9px] uppercase font-bold text-white/60 block">Nhân Sự</span>
                 {isReadOnly ? (
-                  <div className="text-xl font-black text-white">{company.employeeCount || '450+ Nhân viên'}</div>
+                  <div className="text-lg font-black text-white">{company.employeeCount || '---'}</div>
                 ) : (
-                  <input type="text" value={company.employeeCount || ''} onChange={(e) => onChangeCompany({ ...company, employeeCount: e.target.value })} className="w-full text-base font-black bg-white/10 px-2 py-0.5 rounded text-white outline-hidden mt-1" />
+                  <input type="text" value={company.employeeCount || ''} onChange={(e) => onChangeCompany({ ...company, employeeCount: e.target.value })} className="w-full text-xs font-black bg-white/10 px-1.5 py-0.5 rounded text-white outline-hidden mt-0.5" />
                 )}
-                <span className="text-[10px] text-emerald-400 font-semibold">{company.employeeSubtext || 'Toàn quốc'}</span>
+                <span className="text-[9px] text-emerald-400 font-semibold">{company.employeeSubtext || 'CB-CNV'}</span>
               </div>
               <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
-                <span className="text-[10px] uppercase font-bold text-white/60 block">Sản Lượng Vận Hành</span>
+                <span className="text-[9px] uppercase font-bold text-white/60 block">Đội Xe</span>
                 {isReadOnly ? (
-                  <div className="text-xl font-black text-white">{company.annualVolume || '120,000+ TEUs'}</div>
+                  <div className="text-lg font-black text-white">{company.truckFleetCount || '---'}</div>
                 ) : (
-                  <input type="text" value={company.annualVolume || ''} onChange={(e) => onChangeCompany({ ...company, annualVolume: e.target.value })} className="w-full text-base font-black bg-white/10 px-2 py-0.5 rounded text-white outline-hidden mt-1" />
+                  <input type="text" value={company.truckFleetCount || ''} onChange={(e) => onChangeCompany({ ...company, truckFleetCount: e.target.value })} className="w-full text-xs font-black bg-white/10 px-1.5 py-0.5 rounded text-white outline-hidden mt-0.5" />
                 )}
-                <span className="text-[10px] text-amber-300 font-semibold">{company.volumeSubtext || 'Thường niên cam kết'}</span>
+                <span className="text-[9px] text-amber-300 font-semibold">{company.fleetSubtext || 'Đầu kéo'}</span>
+              </div>
+              <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
+                <span className="text-[9px] uppercase font-bold text-white/60 block">Kho Bãi</span>
+                {isReadOnly ? (
+                  <div className="text-lg font-black text-white">{company.warehouseArea || '---'}</div>
+                ) : (
+                  <input type="text" value={company.warehouseArea || ''} onChange={(e) => onChangeCompany({ ...company, warehouseArea: e.target.value })} className="w-full text-xs font-black bg-white/10 px-1.5 py-0.5 rounded text-white outline-hidden mt-0.5" />
+                )}
+                <span className="text-[9px] text-blue-300 font-semibold">{company.warehouseSubtext || 'Tiêu chuẩn'}</span>
+              </div>
+              <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
+                <span className="text-[9px] uppercase font-bold text-white/60 block">Sản Lượng</span>
+                {isReadOnly ? (
+                  <div className="text-lg font-black text-white">{company.annualVolume || '---'}</div>
+                ) : (
+                  <input type="text" value={company.annualVolume || ''} onChange={(e) => onChangeCompany({ ...company, annualVolume: e.target.value })} className="w-full text-xs font-black bg-white/10 px-1.5 py-0.5 rounded text-white outline-hidden mt-0.5" />
+                )}
+                <span className="text-[9px] text-teal-300 font-semibold">{company.volumeSubtext || 'Thường niên'}</span>
               </div>
             </div>
           </div>
@@ -365,7 +385,7 @@ export const CompanyBentoTemplate: React.FC<CompanyTemplateProps> = ({
       </div>
 
       {/* ========================================================= */}
-      {/* 2. BENTO ROW 2: SPLIT VISION & MISSION (6 cols each)      */}
+      {/* 2. BENTO ROW 2: VISION & MISSION (6 cols each)            */}
       {/* ========================================================= */}
       {visibleSections.myCompany.visionMission !== false && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -374,7 +394,7 @@ export const CompanyBentoTemplate: React.FC<CompanyTemplateProps> = ({
               <Compass className="w-4 h-4 text-blue-600" /> Tầm Nhìn Chiến Lược (Vision)
             </div>
             {isReadOnly ? (
-              <p className="text-xs sm:text-sm text-blue-950 font-medium leading-relaxed">{company.vision}</p>
+              <p className="text-xs sm:text-sm text-blue-950 font-medium leading-relaxed">{company.vision || 'Chưa cập nhật tầm nhìn.'}</p>
             ) : (
               <textarea rows={3} value={company.vision || ''} onChange={(e) => onChangeCompany({ ...company, vision: e.target.value })} className="w-full p-2.5 text-xs text-blue-950 bg-white border border-blue-200 rounded-xl outline-hidden" />
             )}
@@ -384,7 +404,7 @@ export const CompanyBentoTemplate: React.FC<CompanyTemplateProps> = ({
               <Target className="w-4 h-4 text-emerald-600" /> Sứ Mệnh Doanh Nghiệp (Mission)
             </div>
             {isReadOnly ? (
-              <p className="text-xs sm:text-sm text-emerald-950 font-medium leading-relaxed">{company.mission}</p>
+              <p className="text-xs sm:text-sm text-emerald-950 font-medium leading-relaxed">{company.mission || 'Chưa cập nhật sứ mệnh.'}</p>
             ) : (
               <textarea rows={3} value={company.mission || ''} onChange={(e) => onChangeCompany({ ...company, mission: e.target.value })} className="w-full p-2.5 text-xs text-emerald-950 bg-white border border-emerald-200 rounded-xl outline-hidden" />
             )}
@@ -432,11 +452,32 @@ export const CompanyBentoTemplate: React.FC<CompanyTemplateProps> = ({
               </div>
             ))}
           </div>
+
+          {/* Target Industries Tag Cloud */}
+          <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center gap-1.5">
+            <span className="text-[11px] font-bold text-slate-400 uppercase mr-1">Ngành hàng:</span>
+            {(company.targetIndustries || []).map((ind, idx) => (
+              <span key={idx} className="px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-800 text-xs font-semibold flex items-center gap-1 border border-slate-200">
+                <span>{ind}</span>
+                {!isReadOnly && <button type="button" onClick={() => handleRemoveTagItem('targetIndustries', idx)} className="text-slate-400 hover:text-rose-600 ml-1 cursor-pointer">×</button>}
+              </span>
+            ))}
+            {!isReadOnly && (
+              <input 
+                type="text" 
+                value={newIndustryTag} 
+                onChange={(e) => setNewIndustryTag(e.target.value)} 
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddTagItem('targetIndustries', newIndustryTag); setNewIndustryTag(''); } }}
+                placeholder="+ Thêm ngành..." 
+                className="px-2 py-0.5 text-xs bg-slate-50 border border-dashed border-slate-300 rounded-lg outline-hidden w-28"
+              />
+            )}
+          </div>
         </div>
       )}
 
       {/* ========================================================= */}
-      {/* 4. BENTO ROW 4: STORY (7 cols) + TECH & INFRA (5 cols)    */}
+      {/* 4. BENTO ROW 4: STORY (7 cols) + TECH & HUBS (5 cols)     */}
       {/* ========================================================= */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Story Bio & Timeline (7 cols) */}
@@ -459,7 +500,7 @@ export const CompanyBentoTemplate: React.FC<CompanyTemplateProps> = ({
               <textarea rows={4} value={company.companyBio} onChange={(e) => onChangeCompany({ ...company, companyBio: e.target.value })} className="w-full p-3 text-xs sm:text-sm text-slate-700 bg-slate-50 border border-slate-200 rounded-2xl outline-hidden" placeholder="Giới thiệu câu chuyện công ty..." />
             )}
 
-            {/* Ziczac Timeline cards */}
+            {/* Timeline cards */}
             <div className="space-y-2 pt-2">
               {(company.milestones || []).map((ms, idx) => (
                 <div key={ms.id || idx} className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-start gap-3 relative group">
@@ -485,23 +526,36 @@ export const CompanyBentoTemplate: React.FC<CompanyTemplateProps> = ({
           </div>
         )}
 
-        {/* Tech Stack & Branches (5 cols) */}
+        {/* Tech Stack, Branches & Compliance (5 cols) */}
         <div className="lg:col-span-5 space-y-6">
-          {/* Software systems */}
-          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-3">
-            <span className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-              <Server className="w-4 h-4 text-blue-600" /> Nền Tảng Công Nghệ & WMS/TMS
-            </span>
-            <div className="flex flex-wrap gap-1.5">
-              {(company.softwareSystems || []).map((sys, idx) => (
-                <span key={idx} className="px-2.5 py-1 rounded-lg bg-blue-50 border border-blue-200 text-xs font-bold text-blue-900 flex items-center gap-1">
-                  <CheckCircle2 className="w-3 h-3 text-emerald-600 shrink-0" />
-                  <span>{sys}</span>
-                  {!isReadOnly && <button type="button" onClick={() => handleRemoveTagItem('softwareSystems', idx)} className="text-slate-400 hover:text-rose-600 ml-0.5 cursor-pointer">×</button>}
-                </span>
-              ))}
+          
+          {/* Compliance & Licenses */}
+          {visibleSections.myCompany.compliance !== false && (
+            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-3">
+              <span className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                <ShieldCheck className="w-4 h-4 text-emerald-600" /> Giấy Phép & Tuân Thủ
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {(company.licenses || []).map((lic, idx) => (
+                  <span key={idx} className="px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-900 flex items-center gap-1">
+                    <Check className="w-3 h-3 text-emerald-600 shrink-0" />
+                    <span>{lic}</span>
+                    {!isReadOnly && <button type="button" onClick={() => handleRemoveLicense(idx)} className="text-slate-400 hover:text-rose-600 ml-0.5 cursor-pointer">×</button>}
+                  </span>
+                ))}
+                {!isReadOnly && (
+                  <input 
+                    type="text" 
+                    value={newLicenseTag} 
+                    onChange={(e) => setNewLicenseTag(e.target.value)} 
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddLicense(newLicenseTag); setNewLicenseTag(''); } }}
+                    placeholder="+ Thêm giấy phép..." 
+                    className="px-2 py-0.5 text-xs bg-slate-50 border border-dashed border-slate-300 rounded-lg outline-hidden w-28"
+                  />
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Branches Bento Mini */}
           {visibleSections.myCompany.branches !== false && (
@@ -534,6 +588,29 @@ export const CompanyBentoTemplate: React.FC<CompanyTemplateProps> = ({
               </div>
             </div>
           )}
+
+          {/* Partners & Carriers Bento */}
+          {visibleSections.myCompany.partners !== false && (
+            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-3">
+              <span className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                <Users className="w-4 h-4 text-blue-600" /> Hãng Tàu & Khách Hàng
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {(company.carrierPartners || []).map((cp, idx) => (
+                  <span key={idx} className="px-2 py-0.5 rounded-md bg-blue-50 text-blue-900 border border-blue-200 text-xs font-bold flex items-center gap-1">
+                    <span>{cp}</span>
+                    {!isReadOnly && <button type="button" onClick={() => handleRemoveTagItem('carrierPartners', idx)} className="text-slate-400 hover:text-rose-600 ml-1 cursor-pointer">×</button>}
+                  </span>
+                ))}
+                {(company.clientLogos || []).map((cl, idx) => (
+                  <span key={idx} className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-800 border border-slate-200 text-xs font-bold flex items-center gap-1">
+                    <span>{cl}</span>
+                    {!isReadOnly && <button type="button" onClick={() => handleRemoveTagItem('clientLogos', idx)} className="text-slate-400 hover:text-rose-600 ml-1 cursor-pointer">×</button>}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -544,7 +621,7 @@ export const CompanyBentoTemplate: React.FC<CompanyTemplateProps> = ({
         <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-4">
           <div className="flex items-center justify-between">
             <span className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4 text-teal-600" /> Case Studies Thực Chiến (SLA Verified)
+              <Briefcase className="w-4 h-4 text-teal-600" /> Case Studies Thực Chiến (SLA Verified)
             </span>
             {!isReadOnly && (
               <button type="button" onClick={handleAddCaseStudy} className="text-xs font-bold text-teal-600 hover:text-teal-800 flex items-center gap-1 cursor-pointer">

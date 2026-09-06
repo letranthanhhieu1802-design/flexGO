@@ -29,7 +29,7 @@ interface TemplateOption<T = string> {
   description: string;
   features: string[];
   mockupPreview: React.ReactNode;
-  category?: 'classic' | 'modern' | 'clean' | 'speed';
+  category?: 'classic' | 'modern' | 'clean' | 'speed' | 'flagship' | 'tech' | 'infra' | 'specialized' | 'editorial' | 'commercial';
 }
 
 interface TemplateSelectorModalProps {
@@ -57,6 +57,7 @@ export const TemplateSelectorModal: React.FC<TemplateSelectorModalProps> = ({
 }) => {
   const [modalTab, setModalTab] = useState<'profile' | 'company'>(activeTab);
   const [salemanCategory, setSalemanCategory] = useState<'all' | 'classic' | 'modern' | 'clean' | 'speed'>('all');
+  const [companyCategory, setCompanyCategory] = useState<'all' | 'flagship' | 'tech' | 'editorial' | 'commercial'>('all');
 
   // Sync internal tab state when activeTab changes or modal opens
   useEffect(() => {
@@ -435,19 +436,19 @@ export const TemplateSelectorModal: React.FC<TemplateSelectorModalProps> = ({
     },
   ];
 
-  // 2. COMPANY LANDING PAGE TEMPLATES (TAB 2)
+  // 2. COMPANY LANDING PAGE TEMPLATES (TAB 2 - 10 MẪU DOANH NGHIỆP ĐẲNG CẤP)
   const companyTemplates: TemplateOption<CompanyTemplateId>[] = [
     {
       id: 'corporate-flagship',
-      name: 'Corporate Flagship Portal (Cổng Doanh Nghiệp)',
+      category: 'flagship',
+      name: '1. Corporate Flagship (Cổng Doanh Nghiệp 2 Cột)',
       badge: 'Khuyên Dùng ★',
       badgeColor: 'bg-blue-600 text-white',
-      tagline: 'Bố cục 2 cột cân bằng: Cột pháp lý & Cột hạ tầng quy mô',
+      tagline: 'Bố cục 2 cột cân đối: 35% Sidebar Trụ sở & Pháp lý / 65% Năng lực & Dịch vụ',
       description: 'Chuẩn mực nhận diện doanh nghiệp B2B với Header Banner thương hiệu, 4 chỉ số sản lượng cam kết, khối hạ tầng và mạng lưới đối tác rộng lớn.',
       features: ['Banner doanh nghiệp & Logo lớn', 'Thanh 4 KPI sản lượng ấn tượng', 'Khối hạ tầng xe tải & kho bãi', 'Mạng lưới đối tác & case studies'],
       mockupPreview: (
         <div className="w-full h-36 bg-slate-100 rounded-xl overflow-hidden border border-slate-300 flex flex-col shadow-inner">
-          {/* Top Banner */}
           <div className="h-10 bg-gradient-to-r from-blue-900 via-indigo-900 to-blue-800 p-1.5 flex items-center justify-between text-white">
             <div className="flex items-center gap-1.5">
               <div className="w-6 h-6 rounded-lg bg-white border border-blue-300 flex items-center justify-center text-blue-900 font-black text-[7px] shrink-0">
@@ -459,17 +460,15 @@ export const TemplateSelectorModal: React.FC<TemplateSelectorModalProps> = ({
               </div>
             </div>
             <div className="px-1.5 py-0.5 bg-emerald-500 text-white rounded-full text-[6px] font-bold">
-              Đã Xác Thực
+              Xác Thực
             </div>
           </div>
-          {/* KPI Strip */}
           <div className="bg-blue-50 px-2 py-1 border-b border-blue-100 grid grid-cols-4 gap-1 text-[6px]">
             <div className="bg-white rounded p-0.5 text-center font-bold text-blue-900 border border-blue-200">120K TEU</div>
             <div className="bg-white rounded p-0.5 text-center font-bold text-blue-900 border border-blue-200">450+ NV</div>
             <div className="bg-white rounded p-0.5 text-center font-bold text-blue-900 border border-blue-200">240+ Xe</div>
             <div className="bg-white rounded p-0.5 text-center font-bold text-blue-900 border border-blue-200">65K m²</div>
           </div>
-          {/* 2-Column Body */}
           <div className="p-1.5 flex-1 flex gap-1.5 bg-white text-[6px]">
             <div className="w-1/3 bg-slate-50 rounded p-1 space-y-1 border border-slate-200">
               <div className="h-1 bg-slate-700 rounded-xs w-full font-bold" />
@@ -490,31 +489,113 @@ export const TemplateSelectorModal: React.FC<TemplateSelectorModalProps> = ({
       )
     },
     {
+      id: 'corporate-heritage',
+      category: 'flagship',
+      name: '2. Corporate Heritage (Trục Thời Gian Lịch Sử & ESG)',
+      badge: 'Bền Vững ★',
+      badgeColor: 'bg-amber-700 text-white',
+      tagline: 'Trục xương sống Central Spine kết nối toàn bộ lịch sử và văn hóa doanh nghiệp',
+      description: 'Dành cho doanh nghiệp lâu năm, tập đoàn chú trọng văn hóa lịch sử, bề dày uy tín và báo cáo trách nhiệm xã hội ESG.',
+      features: ['Trục xương sống thời gian Central Spine', 'Dấu mốc phát triển theo niên đại', 'Tầm nhìn, sứ mệnh & hệ giá trị', 'Mạng lưới chi nhánh & đối tác bền vững'],
+      mockupPreview: (
+        <div className="w-full h-36 bg-amber-950/20 rounded-xl overflow-hidden border border-amber-300/40 flex flex-col shadow-inner">
+          <div className="bg-amber-900 text-white px-2 py-1.5 border-b border-amber-400/40 flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <div className="w-5 h-5 rounded bg-amber-500 text-stone-950 font-black flex items-center justify-center text-[7px] shrink-0">
+                1998
+              </div>
+              <div>
+                <div className="h-1.5 bg-white rounded-xs w-20" />
+                <div className="h-1 bg-amber-200 rounded-xs w-14 mt-0.5" />
+              </div>
+            </div>
+            <div className="px-1.5 py-0.5 bg-amber-400/20 text-amber-200 border border-amber-300/40 rounded text-[5.5px] font-bold">
+              Heritage
+            </div>
+          </div>
+          <div className="p-2 flex-1 flex gap-2 bg-white text-[6px]">
+            <div className="w-1/2 space-y-1">
+              <div className="h-1 bg-amber-900 rounded-xs w-1/2" />
+              <div className="h-0.5 bg-slate-300 rounded-xs w-full" />
+              <div className="h-0.5 bg-slate-300 rounded-xs w-4/5" />
+            </div>
+            <div className="w-1/2 border-l-2 border-amber-400 pl-1.5 space-y-1.5">
+              <div className="flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-600 shrink-0" />
+                <div className="h-1 bg-slate-800 rounded-xs w-full" />
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-600 shrink-0" />
+                <div className="h-1 bg-slate-800 rounded-xs w-4/5" />
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'executive-pillar',
+      category: 'flagship',
+      name: '3. Executive Pillar (Toàn Cảnh 3 Cột Panoramic)',
+      badge: 'Toàn Cảnh',
+      badgeColor: 'bg-indigo-700 text-white',
+      tagline: 'Bố cục 3 cột đồng thời (25% Pháp lý / 50% Câu chuyện / 25% Quy mô)',
+      description: 'Tận dụng tối đa không gian màn hình rộng với góc nhìn toàn cảnh 3 cột song song, cho phép đối tác tra cứu mọi thông tin mà không cần cuộn trang nhiều.',
+      features: ['Góc nhìn toàn cảnh Panoramic 3 cột', 'Cột trái quản trị & pháp lý', 'Cột giữa câu chuyện & dịch vụ', 'Cột phải chỉ số quy mô & đối tác'],
+      mockupPreview: (
+        <div className="w-full h-36 bg-slate-100 rounded-xl overflow-hidden border border-slate-300 flex flex-col shadow-inner">
+          <div className="h-8 bg-indigo-900 p-1.5 flex items-center justify-between text-white">
+            <div className="flex items-center gap-1">
+              <div className="w-4 h-4 rounded bg-white text-indigo-900 font-bold text-[6px] flex items-center justify-center">EP</div>
+              <div className="h-1 bg-white rounded-xs w-16" />
+            </div>
+            <div className="text-[5.5px] text-indigo-200">3-Pillar Layout</div>
+          </div>
+          <div className="p-1 flex-1 grid grid-cols-4 gap-1 bg-white text-[5px]">
+            <div className="col-span-1 bg-slate-50 border border-slate-200 rounded p-1 space-y-1">
+              <div className="h-1 bg-slate-700 rounded-xs w-full" />
+              <div className="h-0.5 bg-emerald-500 rounded-xs w-3/4" />
+              <div className="h-0.5 bg-slate-300 rounded-xs w-full" />
+            </div>
+            <div className="col-span-2 bg-slate-50 border border-slate-200 rounded p-1 space-y-1">
+              <div className="h-1 bg-indigo-700 rounded-xs w-1/2" />
+              <div className="h-0.5 bg-slate-300 rounded-xs w-full" />
+              <div className="h-0.5 bg-slate-300 rounded-xs w-5/6" />
+              <div className="h-2 bg-slate-200 rounded-xs w-full mt-1" />
+            </div>
+            <div className="col-span-1 bg-slate-50 border border-slate-200 rounded p-1 space-y-1">
+              <div className="h-1 bg-amber-600 rounded-xs w-full" />
+              <div className="h-0.5 bg-slate-300 rounded-xs w-3/4" />
+              <div className="h-1.5 bg-slate-200 rounded-xs w-full" />
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
       id: 'modern-bento',
-      name: 'Modern Bento Ecosystem (Hệ Sinh Thái Tech)',
-      badge: 'Xu Hướng Mới',
+      category: 'tech',
+      name: '4. Modern Bento Grid (Lưới Thẻ Đa Tầng 12 Cột)',
+      badge: 'Xu Hướng Mới ★',
       badgeColor: 'bg-emerald-600 text-white',
-      tagline: 'Lưới Bento Box 12 cột, phân tầng nội dung trực quan sinh động',
-      description: 'Phong cách thiết kế công nghệ cao tôn vinh hệ sinh thái dịch vụ, số liệu kỷ lục và các đối tác vận tải lớn như Maersk, Cosco, Vietnam Airlines.',
+      tagline: 'Lưới Bento Box 12 cột bất đối xứng, sinh động và tràn đầy năng lượng',
+      description: 'Phong cách thiết kế công nghệ cao tôn vinh hệ sinh thái dịch vụ, số liệu kỷ lục và các đối tác vận tải lớn với các thẻ bo tròn tinh tế.',
       features: ['Lưới thẻ Bento bất đối xứng đa tầng', 'Khối Tầm nhìn & Sứ mệnh tương phản', 'Trụ cột dịch vụ logistics động', 'Lưới đối tác & chứng chỉ FIATA/IATA'],
       mockupPreview: (
         <div className="w-full h-36 bg-slate-900 rounded-xl overflow-hidden border border-slate-800 p-1.5 grid grid-cols-3 gap-1 shadow-inner">
-          {/* Bento Header */}
           <div className="col-span-2 bg-slate-800 rounded-lg p-1.5 flex items-center gap-1.5">
             <div className="w-6 h-6 rounded-lg bg-emerald-500 text-slate-950 font-black flex items-center justify-center text-[7px] shrink-0">
-              LOG
+              BTO
             </div>
             <div className="space-y-0.5">
               <div className="h-1.5 bg-white rounded-xs w-24" />
               <div className="h-1 bg-emerald-400 rounded-xs w-16" />
             </div>
           </div>
-          {/* KPI Bento Box */}
           <div className="col-span-1 bg-emerald-950/60 border border-emerald-500/30 rounded-lg p-1 flex flex-col justify-center items-center text-center">
             <div className="text-[8px] font-black text-emerald-400">120K+</div>
             <div className="text-[5px] text-emerald-200/70">TEUs / Year</div>
           </div>
-          {/* Bento Vision & Mission */}
           <div className="col-span-1 bg-slate-800/90 border border-slate-700/60 rounded-lg p-1">
             <div className="h-1 bg-indigo-400 rounded-xs w-10 mb-0.5" />
             <div className="h-0.5 bg-slate-500 rounded-xs w-full" />
@@ -524,7 +605,6 @@ export const TemplateSelectorModal: React.FC<TemplateSelectorModalProps> = ({
             <div className="h-0.5 bg-slate-400 rounded-xs w-full" />
             <div className="h-0.5 bg-slate-500 rounded-xs w-4/5" />
           </div>
-          {/* Bento Pillars Strip */}
           <div className="col-span-3 bg-slate-800/60 rounded-lg p-1 flex gap-1">
             <div className="h-3 bg-slate-700 rounded-xs flex-1 border border-slate-600" />
             <div className="h-3 bg-slate-700 rounded-xs flex-1 border border-slate-600" />
@@ -534,49 +614,191 @@ export const TemplateSelectorModal: React.FC<TemplateSelectorModalProps> = ({
       )
     },
     {
-      id: 'minimalist',
-      name: 'Minimalist Editorial (Báo Cáo Thường Niên)',
-      badge: 'Thanh Lịch',
-      badgeColor: 'bg-slate-700 text-white',
-      tagline: 'Bố cục 1 cột kiểu Annual Report, tập trung thông điệp và uy tín',
-      description: 'Tối giản các chi tiết đồ hoạ rườm rà, tập trung vào chiều sâu triết lý phát triển, bề dày lịch sử và cam kết SLA dịch vụ vận tải.',
-      features: ['Typography phong cách tạp chí kinh tế', 'Dòng thời gian cột mốc phát triển', 'Trích dẫn thông điệp ban điều hành', 'Tối ưu trải nghiệm in & lưu PDF'],
+      id: 'supply-chain-tech',
+      category: 'tech',
+      name: '5. Supply Chain Tech (Tháp Điều Hành Số Control Tower)',
+      badge: 'Công Nghệ Cao ★',
+      badgeColor: 'bg-cyan-700 text-white',
+      tagline: 'Trung tâm điều hành số (Control Tower), kết nối API và giám sát thời gian thực',
+      description: 'Phong cách Cyber Slate với đồng hồ đo chỉ số viễn thám Telemetry, tỷ lệ hoàn tất đơn hàng OTIF 99.9%, tích hợp WMS/TMS và giám sát IoT.',
+      features: ['Giao diện Control Tower trực quan', 'Đồng hồ đo SLA & Uptime', 'Thẻ hệ thống TMS, WMS & API', 'Case studies chuyển đổi số chuỗi cung ứng'],
       mockupPreview: (
-        <div className="w-full h-36 bg-white rounded-xl overflow-hidden border border-slate-300 p-2 flex flex-col justify-between shadow-inner">
-          <div className="border-b border-slate-200 pb-1 flex items-center justify-between">
-            <div className="space-y-0.5">
-              <div className="text-[7px] font-serif font-black text-slate-900 tracking-tight">CÔNG TY LOGISTICS QUỐC TẾ</div>
-              <div className="text-[5px] text-slate-500 italic">Bản cáo bạch năng lực hoạt động 2026</div>
+        <div className="w-full h-36 bg-slate-950 rounded-xl overflow-hidden border border-cyan-500/40 flex flex-col shadow-inner">
+          <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-cyan-950 px-2 py-1.5 border-b border-cyan-500/30 flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <div className="w-5 h-5 rounded bg-cyan-600 text-white font-black flex items-center justify-center text-[7px] shrink-0">
+                4PL
+              </div>
+              <div>
+                <div className="h-1.5 bg-white rounded-xs w-22" />
+                <div className="h-1 bg-cyan-300 rounded-xs w-14 mt-0.5" />
+              </div>
             </div>
-            <div className="w-5 h-5 rounded border border-slate-300 bg-slate-50 flex items-center justify-center text-[6px] font-bold text-slate-700">
-              LOGO
+            <div className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 rounded text-[5.5px] font-mono font-bold flex items-center gap-1">
+              <span className="w-1 h-1 rounded-full bg-emerald-400" />
+              LIVE NOC
             </div>
           </div>
-          {/* Quote Block */}
-          <div className="bg-slate-50 border-l-2 border-slate-800 p-1.5 my-1 space-y-0.5 text-[5.5px] italic text-slate-700">
-            "Kiến tạo mạng lưới vận tải thông suốt kết nối Việt Nam với chuỗi cung ứng toàn cầu."
+          <div className="p-1.5 grid grid-cols-4 gap-1 bg-slate-900/90 text-[6px] font-mono">
+            <div className="bg-slate-800 border border-slate-700 rounded p-1 text-center">
+              <div className="text-cyan-400 font-bold text-[7px]">350+</div>
+              <div className="text-[5px] text-slate-400">Staff</div>
+            </div>
+            <div className="bg-slate-800 border border-slate-700 rounded p-1 text-center">
+              <div className="text-emerald-400 font-bold text-[7px]">85+</div>
+              <div className="text-[5px] text-slate-400">Fleet</div>
+            </div>
+            <div className="bg-slate-800 border border-slate-700 rounded p-1 text-center">
+              <div className="text-indigo-300 font-bold text-[7px]">25K</div>
+              <div className="text-[5px] text-slate-400">Warehouse</div>
+            </div>
+            <div className="bg-slate-800 border border-slate-700 rounded p-1 text-center">
+              <div className="text-amber-300 font-bold text-[7px]">99.9%</div>
+              <div className="text-[5px] text-slate-400">SLA Rate</div>
+            </div>
           </div>
-          {/* Stats Bar */}
-          <div className="border-t border-slate-100 pt-1 flex justify-between text-[6px] text-slate-800 font-bold">
-            <div>120,000 TEU</div>
-            <div>240+ Đầu Xe</div>
-            <div>65,000 m² Kho</div>
-            <div>450+ Nhân Sự</div>
+          <div className="p-1.5 flex-1 bg-slate-950 flex items-center justify-between text-[6px] text-slate-400 font-mono">
+            <span>&gt; TMS / WMS / IoT Telematics Connected</span>
+            <span className="text-emerald-400">99.98% Uptime</span>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'staggered-cards',
+      category: 'editorial',
+      name: '6. Staggered StoryCards (Thẻ So Le Nhịp Điệu)',
+      badge: 'Sáng Tạo',
+      badgeColor: 'bg-violet-700 text-white',
+      tagline: 'Nhịp điệu Zig-Zag so le trái phải, mang đến trải nghiệm đọc mượt mà',
+      description: 'Bố cục so le luân phiên giúp từng khối dữ liệu được nổi bật độc lập, hạn chế nhàm chán thị giác và nâng cao thời gian lưu lại của khách hàng.',
+      features: ['Bố cục so le Zig-Zag nhịp nhàng', 'Thẻ khối bo góc mềm mại thanh lịch', 'Năng lực vận tải & đội xe trực quan', 'Dự án điển hình trình bày ấn tượng'],
+      mockupPreview: (
+        <div className="w-full h-36 bg-slate-100 rounded-xl overflow-hidden border border-slate-300 p-1.5 flex flex-col justify-between shadow-inner">
+          <div className="h-7 bg-violet-900 rounded-lg p-1.5 flex items-center justify-between text-white">
+            <div className="h-1 bg-white rounded-xs w-20" />
+            <div className="h-1 bg-violet-300 rounded-xs w-10" />
+          </div>
+          <div className="flex gap-1.5 items-center">
+            <div className="w-3/5 bg-white p-1 rounded-lg border border-slate-200 space-y-0.5">
+              <div className="h-1 bg-violet-700 rounded-xs w-12" />
+              <div className="h-0.5 bg-slate-300 rounded-xs w-full" />
+              <div className="h-0.5 bg-slate-300 rounded-xs w-4/5" />
+            </div>
+            <div className="w-2/5 bg-violet-50 p-1 rounded-lg border border-violet-200">
+              <div className="h-1 bg-violet-900 rounded-xs w-full" />
+              <div className="h-0.5 bg-violet-400 rounded-xs w-3/4 mt-0.5" />
+            </div>
+          </div>
+          <div className="flex gap-1.5 items-center">
+            <div className="w-2/5 bg-emerald-50 p-1 rounded-lg border border-emerald-200">
+              <div className="h-1 bg-emerald-900 rounded-xs w-full" />
+              <div className="h-0.5 bg-emerald-400 rounded-xs w-3/4 mt-0.5" />
+            </div>
+            <div className="w-3/5 bg-white p-1 rounded-lg border border-slate-200 space-y-0.5">
+              <div className="h-1 bg-slate-800 rounded-xs w-14" />
+              <div className="h-0.5 bg-slate-300 rounded-xs w-full" />
+              <div className="h-0.5 bg-slate-300 rounded-xs w-4/5" />
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'glassmorphism-luxury',
+      category: 'flagship',
+      name: '7. Glassmorphism Luxury (Kính Mờ Đẳng Cấp)',
+      badge: 'Cao Cấp Nhất ★',
+      badgeColor: 'bg-gradient-to-r from-cyan-600 to-indigo-600 text-white',
+      tagline: 'Hiệu ứng kính mờ thấu quang cao cấp, chiều sâu thị giác và sang trọng',
+      description: 'Thiết kế kính mờ đa tầng với viền phát sáng tinh tế, nền gradient chuyển sắc sâu thẳm, mang lại đẳng cấp hàng đầu cho các doanh nghiệp logistics quốc tế.',
+      features: ['Hiệu ứng kính mờ frosted glass', 'Viền bán trong suốt ánh ngọc trai', 'Card nổi khối 3D với backdrop blur', 'Màu sắc thích ứng hài hòa'],
+      mockupPreview: (
+        <div className="w-full h-36 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-xl overflow-hidden border border-white/20 p-2 flex flex-col justify-between shadow-inner relative">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/20 rounded-full blur-xl pointer-events-none" />
+          <div className="bg-white/10 backdrop-blur-md rounded-lg p-1.5 border border-white/20 flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <div className="w-5 h-5 rounded-md bg-white/20 border border-white/30 text-white font-bold text-[6px] flex items-center justify-center">GL</div>
+              <div className="space-y-0.5">
+                <div className="h-1.5 bg-white rounded-xs w-20" />
+                <div className="h-1 bg-cyan-300 rounded-xs w-12" />
+              </div>
+            </div>
+            <span className="text-[6px] text-cyan-200 font-bold">Luxury Glass</span>
+          </div>
+          <div className="grid grid-cols-3 gap-1 my-1">
+            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded p-1 text-center">
+              <div className="h-1 bg-white rounded-xs w-8 mx-auto" />
+            </div>
+            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded p-1 text-center">
+              <div className="h-1 bg-cyan-300 rounded-xs w-8 mx-auto" />
+            </div>
+            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded p-1 text-center">
+              <div className="h-1 bg-indigo-300 rounded-xs w-8 mx-auto" />
+            </div>
+          </div>
+          <div className="bg-white/10 backdrop-blur-md rounded-lg p-1 border border-white/20 flex items-center justify-between text-[6px] text-white/80">
+            <span>Glassmorphism Portal</span>
+            <span className="text-cyan-300">Premium SLA</span>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'clean-directory',
+      category: 'editorial',
+      name: '8. Clean Directory (Mục Lục Hồ Sơ 01-08)',
+      badge: 'Chuẩn Mực',
+      badgeColor: 'bg-slate-800 text-white',
+      tagline: 'Chia tách 25/75 với menu số thứ tự 01 đến 08 tra cứu nhanh chóng',
+      description: 'Phong cách mục lục hồ sơ năng lực tiêu chuẩn quốc tế. Cột trái là danh mục số hóa 01-08 giúp đối tác dễ dàng định vị nội dung cần tìm.',
+      features: ['Mục lục điều hướng 01-08', 'Dossier phân đoạn mạch lạc', 'Bố cục 25/75 chuẩn báo cáo', 'Thẻ năng lực tinh gọn tối đa'],
+      mockupPreview: (
+        <div className="w-full h-36 bg-white rounded-xl overflow-hidden border border-slate-300 flex shadow-inner">
+          <div className="w-1/4 bg-slate-50 border-r border-slate-200 p-1.5 flex flex-col justify-between text-[5.5px]">
+            <div className="font-bold text-slate-800 mb-1">MỤC LỤC</div>
+            <div className="space-y-1 text-slate-600 font-mono">
+              <div className="text-indigo-600 font-bold">01 Giới thiệu</div>
+              <div>02 Tầm nhìn</div>
+              <div>03 Năng lực</div>
+              <div>04 Dịch vụ</div>
+              <div>05 Đối tác</div>
+              <div>06 Pháp lý</div>
+              <div>07 Chi nhánh</div>
+              <div>08 Dự án</div>
+            </div>
+          </div>
+          <div className="w-3/4 p-2 flex flex-col justify-between text-[6px]">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-1">
+              <div className="flex items-center gap-1">
+                <span className="w-3.5 h-3.5 bg-slate-900 text-white font-mono rounded flex items-center justify-center text-[5px]">01</span>
+                <div className="h-1.5 bg-slate-800 rounded-xs w-20" />
+              </div>
+            </div>
+            <div className="bg-slate-50 p-1 rounded border border-slate-200 space-y-0.5 my-1">
+              <div className="h-1 bg-slate-400 rounded-xs w-full" />
+              <div className="h-1 bg-slate-400 rounded-xs w-4/5" />
+            </div>
+            <div className="grid grid-cols-3 gap-1">
+              <div className="bg-slate-100 rounded p-1 text-center font-mono">350+</div>
+              <div className="bg-slate-100 rounded p-1 text-center font-mono">85 Xe</div>
+              <div className="bg-slate-100 rounded p-1 text-center font-mono">25K m²</div>
+            </div>
           </div>
         </div>
       )
     },
     {
       id: 'industrial-impact',
-      name: 'Industrial Impact (Năng Lực Vận Tải & Hạ Tầng)',
-      badge: 'Hạ Tầng Lớn',
+      category: 'commercial',
+      name: '9. Industrial Impact (Công Nghiệp & Cơ Giới)',
+      badge: 'Cơ Giới Nặng',
       badgeColor: 'bg-amber-600 text-white',
-      tagline: 'Độ tương phản cao, tập trung đội xe tải, kho bãi & dự án lớn',
+      tagline: 'Độ tương phản cao, tập trung đội xe tải, bến bãi & vận tải dự án',
       description: 'Mẫu giao diện mang phong cách công nghiệp mạnh mẽ với gam màu than chì - hổ phách. Làm nổi bật tài sản thiết bị, hệ thống kho bãi và các case study hàng đầu.',
-      features: ['Tone màu Heavy Duty mạnh mẽ', 'Card đội xe 240+ & 65,000m² kho', 'Case studies dự án điện mặt trời & lạnh', 'Huy hiệu FMC, C-TPAT & Hải quan'],
+      features: ['Tone màu Heavy Duty mạnh mẽ', 'Thông số cơ giới & tải trọng', 'Hạ tầng bãi xe & cảng bốc dỡ', 'Case studies năng lực cẩu hạ'],
       mockupPreview: (
         <div className="w-full h-36 bg-slate-950 rounded-xl overflow-hidden border border-amber-500/40 flex flex-col shadow-inner">
-          {/* Heavy Header */}
           <div className="bg-slate-900 px-2 py-1.5 border-b border-amber-500/30 flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <div className="w-5 h-5 rounded bg-amber-500 text-slate-950 font-black flex items-center justify-center text-[7px] shrink-0">
@@ -591,27 +813,62 @@ export const TemplateSelectorModal: React.FC<TemplateSelectorModalProps> = ({
               Heavy Duty
             </div>
           </div>
-          {/* Asset Stats Bar */}
           <div className="p-1.5 grid grid-cols-2 gap-1 bg-slate-900/60">
             <div className="bg-slate-800/90 border border-amber-500/30 rounded p-1 flex items-center gap-1">
               <div className="w-3.5 h-3.5 rounded bg-amber-500/20 text-amber-400 flex items-center justify-center text-[7px] shrink-0">🚛</div>
               <div>
-                <div className="text-[6px] font-black text-amber-400">240+ Xe</div>
+                <div className="text-[6px] font-black text-amber-400">85+ Xe</div>
                 <div className="text-[5px] text-slate-400">Đầu kéo & Tải</div>
               </div>
             </div>
             <div className="bg-slate-800/90 border border-amber-500/30 rounded p-1 flex items-center gap-1">
               <div className="w-3.5 h-3.5 rounded bg-blue-500/20 text-blue-400 flex items-center justify-center text-[7px] shrink-0">🏢</div>
               <div>
-                <div className="text-[6px] font-black text-blue-300">65K m²</div>
-                <div className="text-[5px] text-slate-400">Kho thường & lạnh</div>
+                <div className="text-[6px] font-black text-blue-300">25K m²</div>
+                <div className="text-[5px] text-slate-400">Bến bãi cơ giới</div>
               </div>
             </div>
           </div>
-          {/* Case Study Strip */}
           <div className="p-1.5 flex-1 bg-slate-900 border-t border-slate-800 flex items-center justify-between text-[6px]">
-            <div className="text-amber-200/90 font-medium">✓ Dự án 600 Container Năng Lượng Mặt Trời</div>
+            <div className="text-amber-200/90 font-medium">✓ Dự án Vận Chuyển Hàng Siêu Trọng</div>
             <div className="px-1 py-0.5 bg-emerald-500/20 text-emerald-300 rounded font-bold">100% SLA</div>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'commercial-spotlight',
+      category: 'commercial',
+      name: '10. Commercial Spotlight (Thương Mại & Chuyển Đổi)',
+      badge: 'Chốt Hợp Đồng ★',
+      badgeColor: 'bg-teal-700 text-white',
+      tagline: 'Bằng chứng năng lực & Social Proof đặt lên hàng đầu, nút RFQ nổi bật',
+      description: 'Tối ưu hóa tỷ lệ chuyển đổi khách hàng tiềm năng với form yêu cầu báo giá nhanh, logo đối tác nổi bật và các case study hoàn thành 100% đúng hạn.',
+      features: ['Khối báo giá nhanh RFQ CTA', 'Hãng tàu & khách hàng ưu tiên', 'Case studies hoàn tất 100% SLA', 'Gói giải pháp tối ưu chi phí'],
+      mockupPreview: (
+        <div className="w-full h-36 bg-slate-100 rounded-xl overflow-hidden border border-slate-300 flex flex-col shadow-inner">
+          <div className="h-10 bg-gradient-to-r from-teal-900 via-slate-900 to-teal-800 p-1.5 flex items-center justify-between text-white">
+            <div className="flex items-center gap-1.5">
+              <div className="w-5 h-5 rounded bg-teal-500 text-white font-bold text-[6px] flex items-center justify-center">RFQ</div>
+              <div className="h-1.5 bg-white rounded-xs w-18" />
+            </div>
+            <div className="px-1.5 py-0.5 bg-amber-400 text-slate-950 font-bold rounded text-[5.5px]">Báo Giá 15p</div>
+          </div>
+          <div className="bg-white p-1.5 border-b border-slate-200 flex items-center gap-1">
+            <span className="text-[5.5px] text-slate-400 font-bold">ĐỐI TÁC:</span>
+            <div className="h-2 bg-blue-100 rounded px-1 text-[5px] text-blue-800 font-bold">MAERSK</div>
+            <div className="h-2 bg-slate-100 rounded px-1 text-[5px] text-slate-800 font-bold">SAMSUNG</div>
+            <div className="h-2 bg-blue-100 rounded px-1 text-[5px] text-blue-800 font-bold">COSCO</div>
+          </div>
+          <div className="p-1.5 flex-1 bg-slate-50 flex flex-col justify-between text-[6px]">
+            <div className="space-y-0.5">
+              <div className="h-1 bg-slate-800 rounded-xs w-1/2 font-bold" />
+              <div className="h-0.5 bg-slate-400 rounded-xs w-full" />
+            </div>
+            <div className="p-1 rounded bg-emerald-50 border border-emerald-200 flex items-center justify-between text-[5.5px] text-emerald-950 font-bold">
+              <span>✓ Tiết kiệm 18% chi phí vận hành</span>
+              <span className="text-emerald-700">100% Đúng Hạn</span>
+            </div>
           </div>
         </div>
       )
@@ -756,6 +1013,41 @@ export const TemplateSelectorModal: React.FC<TemplateSelectorModalProps> = ({
           </div>
         )}
 
+        {/* Category Filters (Chỉ hiển thị cho Tab 2: Mẫu Doanh Nghiệp) */}
+        {modalTab === 'company' && (
+          <div className="px-6 py-2.5 bg-white border-b border-slate-200 flex flex-wrap items-center gap-2 shrink-0">
+            <span className="text-xs font-bold text-slate-500 mr-1">Phân khúc doanh nghiệp:</span>
+            {[
+              { id: 'all', label: 'Tất Cả', count: companyTemplates.length },
+              { id: 'flagship', label: 'Tập Đoàn & Flagship', count: companyTemplates.filter(t => t.category === 'flagship').length },
+              { id: 'tech', label: 'Công Nghệ & Thẻ Khối', count: companyTemplates.filter(t => t.category === 'tech').length },
+              { id: 'editorial', label: 'Báo Cáo & Danh Mục', count: companyTemplates.filter(t => t.category === 'editorial').length },
+              { id: 'commercial', label: 'Thương Mại & Cơ Giới', count: companyTemplates.filter(t => t.category === 'commercial').length },
+            ].map((cat) => {
+              const isActive = companyCategory === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setCompanyCategory(cat.id as any)}
+                  className={`px-3 py-1 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border ${
+                    isActive
+                      ? 'bg-blue-700 border-blue-700 text-white shadow-xs'
+                      : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-600'
+                  }`}
+                >
+                  <span>{cat.label}</span>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+                    isActive ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
+                  }`}>
+                    {cat.count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         {/* Template Grid (Dynamic based on modalTab) */}
         <div className="p-6 overflow-y-auto flex-1 grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50/50">
           {modalTab === 'profile' ? (
@@ -851,7 +1143,10 @@ export const TemplateSelectorModal: React.FC<TemplateSelectorModalProps> = ({
             })
           ) : (
             // ==================== TAB 2: COMPANY TEMPLATES ====================
-            companyTemplates.map((tpl) => {
+            (companyCategory === 'all'
+              ? companyTemplates
+              : companyTemplates.filter(t => t.category === companyCategory)
+            ).map((tpl) => {
               const isSelected = selectedCompanyTemplateId === tpl.id;
               return (
                 <div

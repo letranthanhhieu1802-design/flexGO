@@ -606,9 +606,9 @@ export const SupplierDirectoryPage: React.FC<SupplierDirectoryPageProps> = ({
                       </div>
                     </div>
 
-                    {/* Middle Section: Personal Motto, Specialties & Rate Card Spotlight */}
+                    {/* Middle Section: Personal Motto, Specialties & Published Tariff Count */}
                     <div className="p-5 space-y-4">
-                      {/* Personal Motto / Cam kết cá nhân */}
+                      {/* Personal Motto / Cam kết dịch vụ cá nhân */}
                       <div className="rounded-xl bg-slate-50/80 p-3 text-xs italic text-slate-700 border border-slate-100/90 flex items-start gap-2">
                         <Sparkles className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
                         <div>
@@ -617,96 +617,66 @@ export const SupplierDirectoryPage: React.FC<SupplierDirectoryPageProps> = ({
                         </div>
                       </div>
 
-                      {/* Personal Specialties List */}
-                      <div className="space-y-1.5">
+                      {/* Personal Specialties & Strengths (Thế mạnh & Chuyên môn vận hành) */}
+                      <div className="space-y-2">
                         <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
                           Thế mạnh & Chuyên môn vận hành:
                         </span>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs text-slate-700">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                           {specialist.specialties.slice(0, 4).map((specItem, idx) => (
-                            <div key={idx} className="flex items-start gap-1.5">
-                              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                              <span className="line-clamp-1">{specItem}</span>
+                            <div 
+                              key={idx} 
+                              className="flex items-start gap-2 rounded-xl bg-slate-50/90 border border-slate-200/70 p-2.5 text-slate-700 hover:bg-white hover:border-blue-200 transition-colors"
+                            >
+                              <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
+                              <span className="font-medium leading-relaxed">{specItem}</span>
                             </div>
                           ))}
                         </div>
                       </div>
 
-                      {/* Published Rate Card preview by this Salesman */}
+                      {/* Published Tariff Count Badge (Chỉ số lượng dịch vụ có bảng cước niêm yết) */}
                       {specialist.rateCard && specialist.rateCard.length > 0 && (
-                        <div className="rounded-xl border border-blue-100 bg-blue-50/40 p-3 space-y-2">
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="font-bold text-slate-900 flex items-center gap-1">
-                              <DollarSign className="h-3.5 w-3.5 text-blue-600" />
-                              Bảng giá niêm yết bởi {specialist.vietnameseName} ({specialist.rateCard.length} tuyến)
-                            </span>
-                            <span 
-                              onClick={() => handleOpenDetail(specialist.id)}
-                              className="text-[11px] font-semibold text-blue-700 hover:underline cursor-pointer"
-                            >
-                              Xem tất cả ›
-                            </span>
+                        <div 
+                          onClick={() => handleOpenDetail(specialist.id)}
+                          className="flex items-center justify-between rounded-xl border border-blue-100 bg-gradient-to-r from-blue-50/80 via-indigo-50/50 to-blue-50/80 p-3 text-xs cursor-pointer hover:border-blue-300 hover:shadow-xs transition-all group/rate"
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-600 text-white font-bold shadow-xs shrink-0">
+                              <DollarSign className="h-4 w-4" />
+                            </div>
+                            <div>
+                              <span className="font-bold text-slate-900 block">
+                                Đã công bố {specialist.rateCard.length} bảng cước vận chuyển chuẩn
+                              </span>
+                              <span className="text-[11px] text-slate-500">
+                                Biểu phí tham chiếu minh bạch • Tra cứu trực tiếp
+                              </span>
+                            </div>
                           </div>
-                          
-                          <div className="space-y-1.5">
-                            {specialist.rateCard.slice(0, 2).map((rc) => (
-                              <div 
-                                key={rc.id}
-                                className="flex items-center justify-between rounded-lg bg-white p-2 border border-slate-100 text-xs"
-                              >
-                                <div className="min-w-0 pr-2">
-                                  <p className="font-semibold text-slate-800 truncate">{rc.routeOrService}</p>
-                                  <p className="text-[10px] text-slate-500">{rc.vehicleOrUnit} • {rc.transitTime}</p>
-                                </div>
-                                <div className="text-right shrink-0">
-                                  <span className="font-bold text-blue-700">{rc.benchmarkPriceDisplay}</span>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
+                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-700 group-hover/rate:text-blue-900 shrink-0">
+                            <span>Xem biểu phí</span>
+                            <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover/rate:translate-x-0.5" />
+                          </span>
                         </div>
                       )}
-
-                      {/* Location & Languages */}
-                      <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500 pt-1 border-t border-slate-100">
-                        <div className="flex items-center gap-1">
-                          <MapPin className="h-3.5 w-3.5 text-slate-400" />
-                          <span className="truncate max-w-[240px]">{specialist.location}</span>
-                        </div>
-                        <div className="flex items-center gap-1 text-[11px]">
-                          <Globe className="h-3.5 w-3.5 text-slate-400" />
-                          <span>{specialist.languages.join(' • ')}</span>
-                        </div>
-                      </div>
                     </div>
                   </div>
 
-                  {/* Card Action Footer: Direct contact to this Salesman */}
-                  <div className="border-t border-slate-100 p-4 bg-slate-50/60 flex flex-col sm:flex-row items-center justify-between gap-2.5">
-                    {/* Fast contact tools */}
-                    <div className="flex items-center gap-2 w-full sm:w-auto">
-                      <a
-                        href={`tel:${specialist.phone}`}
-                        className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                        title={`Gọi ngay cho ${specialist.vietnameseName}`}
-                      >
-                        <Phone className="h-3.5 w-3.5 text-emerald-600" />
-                        <span>Gọi Ngay</span>
-                      </a>
-                      <button
-                        onClick={() => handleOpenQuickRFQ(specialist)}
-                        className="inline-flex items-center gap-1 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100"
-                      >
-                        <Send className="h-3.5 w-3.5" />
-                        <span>Gửi RFQ Cho PIC</span>
-                      </button>
-                    </div>
+                  {/* Card Action Footer: Tinh gọn chỉ 2 nút chuyển đổi trọng tâm */}
+                  <div className="border-t border-slate-100 p-4 bg-slate-50/60 flex items-center justify-between gap-3">
+                    <button
+                      onClick={() => handleOpenQuickRFQ(specialist)}
+                      className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-blue-200 bg-white px-4 py-2 text-xs font-bold text-blue-700 shadow-2xs hover:bg-blue-50 hover:border-blue-300 transition-all active:scale-[0.99] cursor-pointer"
+                    >
+                      <Send className="h-3.5 w-3.5" />
+                      <span>Gửi RFQ Cho PIC</span>
+                    </button>
 
-                    {/* Primary Button: View Full Profile of this Salesman */}
                     <button
                       onClick={() => handleOpenDetail(specialist.id)}
                       id={`view-detail-btn-${specialist.id}`}
-                      className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-blue-700 transition-all active:scale-[0.99]"
+                      className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-blue-700 transition-all active:scale-[0.99] cursor-pointer"
                     >
                       <span>Xem Profile & Bảng Giá</span>
                       <ArrowRight className="h-3.5 w-3.5" />

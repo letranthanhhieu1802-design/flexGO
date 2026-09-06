@@ -321,62 +321,97 @@ export const CorporateFlagshipTemplate: React.FC<CompanyTemplateProps> = ({
             </div>
 
             {/* Corporate Name & Legal Info */}
-            <div className="space-y-2 flex-1 min-w-0">
+            <div className="space-y-3 flex-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="px-2.5 py-0.5 bg-white/20 text-white text-[10px] font-black uppercase rounded-full tracking-wider border border-white/30 flex items-center gap-1">
-                  <ShieldCheck className="w-3 h-3 text-emerald-300" />
+                <span className="px-3 py-1 bg-white/20 text-white text-[10px] font-black uppercase rounded-full tracking-wider border border-white/30 flex items-center gap-1.5 shadow-xs">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-300" />
                   <span>Cổng Pháp Nhân Doanh Nghiệp (Flagship)</span>
                 </span>
                 {isReadOnly ? (
-                  <span className="text-xs text-white/85 font-semibold">
-                    Năm thành lập: {company.yearEstablished || 2008} • Mã Số Thuế: {company.taxId || 'Chưa cập nhật'}
+                  <span className="text-xs text-white/90 font-medium">
+                    Năm thành lập: <strong className="text-white">{company.yearEstablished || 2008}</strong> • MST: <strong className="text-white font-mono">{company.taxId || 'Chưa cập nhật'}</strong>
                   </span>
                 ) : (
-                  <div className="flex items-center gap-1.5 text-xs text-white/90">
+                  <div className="flex items-center gap-2 text-xs text-white/90 bg-black/20 px-2.5 py-0.5 rounded-full border border-white/20">
                     <span>Năm TL:</span>
-                    <input type="number" value={company.yearEstablished || ''} onChange={(e) => onChangeCompany({ ...company, yearEstablished: parseInt(e.target.value) || 0 })} className="w-16 bg-white/10 px-2 py-0.5 rounded-lg border border-white/20 text-xs font-bold text-white outline-hidden" placeholder="2008" />
+                    <input type="number" value={company.yearEstablished || ''} onChange={(e) => onChangeCompany({ ...company, yearEstablished: parseInt(e.target.value) || 0 })} className="w-14 bg-transparent border-b border-white/40 text-xs font-bold text-white outline-hidden text-center" placeholder="2008" />
                     <span>• MST:</span>
-                    <input type="text" value={company.taxId || ''} onChange={(e) => onChangeCompany({ ...company, taxId: e.target.value })} className="w-28 bg-white/10 px-2 py-0.5 rounded-lg border border-white/20 text-xs font-bold text-white outline-hidden" placeholder="Mã số thuế" />
+                    <input type="text" value={company.taxId || ''} onChange={(e) => onChangeCompany({ ...company, taxId: e.target.value })} className="w-28 bg-transparent border-b border-white/40 text-xs font-bold text-white outline-hidden font-mono text-center" placeholder="Mã số thuế" />
                   </div>
                 )}
               </div>
 
               {isReadOnly ? (
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight">{company.companyName}</h1>
-                  <p className="text-sm sm:text-base text-white/80 font-semibold mt-0.5">{company.companyNameEn}</p>
+                <div className="space-y-0.5">
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight text-white drop-shadow-xs">{company.companyName}</h1>
+                  <p className="text-sm sm:text-base text-white/80 font-semibold">{company.companyNameEn}</p>
                 </div>
               ) : (
-                <div className="space-y-1.5 pt-1">
-                  <input type="text" value={company.companyName} onChange={(e) => onChangeCompany({ ...company, companyName: e.target.value })} className="w-full text-xl sm:text-2xl font-black bg-white/10 px-3 py-1.5 rounded-xl border border-white/30 text-white outline-hidden" placeholder="Tên công ty tiếng Việt" />
-                  <input type="text" value={company.companyNameEn} onChange={(e) => onChangeCompany({ ...company, companyNameEn: e.target.value })} className="w-full text-xs font-semibold bg-white/10 px-3 py-1 rounded-lg border border-white/20 text-white/90 outline-hidden" placeholder="Tên công ty tiếng Anh" />
+                <div className="space-y-1">
+                  <input type="text" value={company.companyName} onChange={(e) => onChangeCompany({ ...company, companyName: e.target.value })} className="w-full text-2xl sm:text-3xl font-black bg-transparent border-b border-white/40 focus:border-white text-white outline-hidden pb-1" placeholder="Tên công ty tiếng Việt..." />
+                  <input type="text" value={company.companyNameEn} onChange={(e) => onChangeCompany({ ...company, companyNameEn: e.target.value })} className="w-full text-xs sm:text-sm font-semibold bg-transparent border-b border-white/20 focus:border-white/60 text-white/85 outline-hidden pb-0.5" placeholder="Tên công ty tiếng Anh..." />
                 </div>
               )}
 
               {/* Slogan */}
-              <div className="pt-1 flex items-center gap-2 text-amber-200">
-                <Sparkles className="w-4 h-4 shrink-0" />
+              <div className="pt-1">
                 {isReadOnly ? (
-                  <span className="text-xs sm:text-sm font-semibold italic text-white/95">"{company.companySlogan}"</span>
+                  company.companySlogan && (
+                    <div className="inline-flex items-center gap-2 text-white/90 text-xs sm:text-sm italic font-medium bg-black/20 backdrop-blur-xs px-3.5 py-1.5 rounded-xl border border-white/20">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                      <span>"{company.companySlogan}"</span>
+                    </div>
+                  )
                 ) : (
-                  <input type="text" value={company.companySlogan} onChange={(e) => onChangeCompany({ ...company, companySlogan: e.target.value })} className="w-full bg-white/10 px-2.5 py-1 rounded-lg text-xs italic text-white border border-white/20 outline-hidden" placeholder="Khẩu hiệu / Slogan" />
+                  <div className="flex items-center gap-2 bg-black/20 backdrop-blur-xs px-3 py-1 rounded-xl border border-white/20 text-xs">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                    <input type="text" value={company.companySlogan} onChange={(e) => onChangeCompany({ ...company, companySlogan: e.target.value })} className="w-full bg-transparent text-xs italic text-white placeholder-white/50 outline-hidden" placeholder="Khẩu hiệu / Slogan doanh nghiệp..." />
+                  </div>
                 )}
               </div>
 
               {/* Quick Links & Contact Bar */}
               {isReadOnly ? (
-                <div className="pt-3 flex flex-wrap items-center gap-2 text-xs">
-                  {company.websiteUrl && <a href={company.websiteUrl} target="_blank" rel="noreferrer" className="px-3 py-1 rounded-lg bg-white/15 hover:bg-white/25 text-white font-semibold flex items-center gap-1.5 border border-white/20"><Globe className="w-3.5 h-3.5" /> Website</a>}
-                  {company.brochureUrl && <a href={company.brochureUrl} target="_blank" rel="noreferrer" className="px-3 py-1 rounded-lg bg-amber-400/30 hover:bg-amber-400/40 text-amber-100 font-semibold flex items-center gap-1.5 border border-amber-300/30"><Download className="w-3.5 h-3.5" /> Company Profile (PDF)</a>}
-                  {company.hotline && <span className="px-3 py-1 rounded-lg bg-white/10 text-white/90 font-medium flex items-center gap-1.5"><Phone className="w-3.5 h-3.5" /> {company.hotline}</span>}
-                  {company.email && <span className="px-3 py-1 rounded-lg bg-white/10 text-white/90 font-medium flex items-center gap-1.5"><Mail className="w-3.5 h-3.5" /> {company.email}</span>}
+                <div className="pt-2 flex flex-wrap items-center gap-2 text-xs">
+                  {company.websiteUrl && (
+                    <a href={company.websiteUrl} target="_blank" rel="noreferrer" className="px-3 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-white font-semibold flex items-center gap-1.5 border border-white/20 transition-colors">
+                      <Globe className="w-3.5 h-3.5" /> Website
+                    </a>
+                  )}
+                  {company.brochureUrl && (
+                    <a href={company.brochureUrl} target="_blank" rel="noreferrer" className="px-3 py-1.5 rounded-xl bg-amber-400/30 hover:bg-amber-400/40 text-amber-100 font-semibold flex items-center gap-1.5 border border-amber-300/30 transition-colors">
+                      <Download className="w-3.5 h-3.5" /> Company Profile (PDF)
+                    </a>
+                  )}
+                  {company.hotline && (
+                    <span className="px-3 py-1.5 rounded-xl bg-black/20 text-white/90 font-medium flex items-center gap-1.5 border border-white/15">
+                      <Phone className="w-3.5 h-3.5 text-amber-300" /> {company.hotline}
+                    </span>
+                  )}
+                  {company.email && (
+                    <span className="px-3 py-1.5 rounded-xl bg-black/20 text-white/90 font-medium flex items-center gap-1.5 border border-white/15">
+                      <Mail className="w-3.5 h-3.5 text-amber-300" /> {company.email}
+                    </span>
+                  )}
                 </div>
               ) : (
-                <div className="pt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 text-xs">
-                  <div className="flex items-center gap-1.5 bg-white/10 px-2 py-1 rounded-lg border border-white/20"><Globe className="w-3.5 h-3.5 text-white/80 shrink-0" /><input type="text" value={company.websiteUrl || ''} onChange={(e) => onChangeCompany({ ...company, websiteUrl: e.target.value })} placeholder="Website..." className="w-full bg-transparent text-white text-xs outline-hidden placeholder-white/50" /></div>
-                  <div className="flex items-center gap-1.5 bg-white/10 px-2 py-1 rounded-lg border border-white/20"><Download className="w-3.5 h-3.5 text-amber-200 shrink-0" /><input type="text" value={company.brochureUrl || ''} onChange={(e) => onChangeCompany({ ...company, brochureUrl: e.target.value })} placeholder="Profile PDF..." className="w-full bg-transparent text-white text-xs outline-hidden placeholder-white/50" /></div>
-                  <div className="flex items-center gap-1.5 bg-white/10 px-2 py-1 rounded-lg border border-white/20"><Phone className="w-3.5 h-3.5 text-white/80 shrink-0" /><input type="text" value={company.hotline || ''} onChange={(e) => onChangeCompany({ ...company, hotline: e.target.value })} placeholder="Hotline..." className="w-full bg-transparent text-white text-xs outline-hidden placeholder-white/50" /></div>
-                  <div className="flex items-center gap-1.5 bg-white/10 px-2 py-1 rounded-lg border border-white/20"><Mail className="w-3.5 h-3.5 text-white/80 shrink-0" /><input type="text" value={company.email || ''} onChange={(e) => onChangeCompany({ ...company, email: e.target.value })} placeholder="Email RFQ..." className="w-full bg-transparent text-white text-xs outline-hidden placeholder-white/50" /></div>
+                <div className="pt-2 flex flex-wrap items-center gap-2 text-xs">
+                  <div className="flex items-center gap-1.5 bg-black/20 px-3 py-1 rounded-xl border border-white/20">
+                    <Globe className="w-3.5 h-3.5 text-white/70 shrink-0" />
+                    <input type="text" value={company.websiteUrl || ''} onChange={(e) => onChangeCompany({ ...company, websiteUrl: e.target.value })} placeholder="Website..." className="w-28 sm:w-36 bg-transparent text-white text-xs outline-hidden placeholder-white/50" />
+                  </div>
+                  <div className="flex items-center gap-1.5 bg-black/20 px-3 py-1 rounded-xl border border-white/20">
+                    <Download className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                    <input type="text" value={company.brochureUrl || ''} onChange={(e) => onChangeCompany({ ...company, brochureUrl: e.target.value })} placeholder="Link Profile PDF..." className="w-28 sm:w-36 bg-transparent text-white text-xs outline-hidden placeholder-white/50" />
+                  </div>
+                  <div className="flex items-center gap-1.5 bg-black/20 px-3 py-1 rounded-xl border border-white/20">
+                    <Phone className="w-3.5 h-3.5 text-white/70 shrink-0" />
+                    <input type="text" value={company.hotline || ''} onChange={(e) => onChangeCompany({ ...company, hotline: e.target.value })} placeholder="Hotline..." className="w-24 sm:w-28 bg-transparent text-white text-xs outline-hidden placeholder-white/50" />
+                  </div>
+                  <div className="flex items-center gap-1.5 bg-black/20 px-3 py-1 rounded-xl border border-white/20">
+                    <Mail className="w-3.5 h-3.5 text-white/70 shrink-0" />
+                    <input type="text" value={company.email || ''} onChange={(e) => onChangeCompany({ ...company, email: e.target.value })} placeholder="Email RFQ..." className="w-28 sm:w-36 bg-transparent text-white text-xs outline-hidden placeholder-white/50" />
+                  </div>
                 </div>
               )}
             </div>
@@ -388,9 +423,9 @@ export const CorporateFlagshipTemplate: React.FC<CompanyTemplateProps> = ({
       {/* 2. HORIZONTAL STATS BAR (Flagship Headline Metrics)        */}
       {/* ========================================================= */}
       {visibleSections.myCompany.highlights !== false && (
-        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-xs">
-          <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
-            <span className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+        <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <span className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-indigo-600" /> Thước Đo Năng Lực & Tài Sản Cơ Sở Hạ Tầng
             </span>
             {!isReadOnly && (
@@ -400,9 +435,12 @@ export const CorporateFlagshipTemplate: React.FC<CompanyTemplateProps> = ({
             )}
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
             {(company.companyStats || []).map((stat, idx) => (
-              <div key={stat.id || idx} className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1 relative group hover:border-indigo-300 transition-all">
+              <div 
+                key={stat.id || idx} 
+                className="p-4 rounded-2xl bg-gradient-to-b from-white to-slate-50 border border-slate-200 shadow-2xs space-y-1 relative group hover:border-indigo-300 hover:shadow-xs transition-all text-center"
+              >
                 {!isReadOnly && (
                   <button type="button" onClick={() => handleRemoveStat(idx)} className="absolute top-2 right-2 text-slate-300 hover:text-rose-600 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
                     <Trash2 className="w-3.5 h-3.5" />
@@ -411,14 +449,14 @@ export const CorporateFlagshipTemplate: React.FC<CompanyTemplateProps> = ({
                 {isReadOnly ? (
                   <>
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block truncate">{stat.label}</span>
-                    <div className="text-lg font-black text-slate-900 tracking-tight">{stat.value}</div>
-                    {stat.subtext && <p className="text-[11px] text-indigo-600 font-medium truncate">{stat.subtext}</p>}
+                    <div className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight my-0.5" style={{ color: theme.primary }}>{stat.value}</div>
+                    {stat.subtext && <p className="text-[11px] text-indigo-600 font-semibold truncate bg-indigo-50/60 py-0.5 px-1 rounded-md">{stat.subtext}</p>}
                   </>
                 ) : (
                   <div className="space-y-1">
-                    <input type="text" value={stat.label} onChange={(e) => handleUpdateStat(idx, 'label', e.target.value)} className="w-full text-[10px] font-bold text-slate-500 uppercase tracking-wider bg-transparent border-b border-dashed border-slate-300 outline-hidden" placeholder="Tên chỉ số" />
-                    <input type="text" value={stat.value} onChange={(e) => handleUpdateStat(idx, 'value', e.target.value)} className="w-full text-sm font-black text-slate-900 bg-transparent border-b border-dashed border-slate-300 outline-hidden" placeholder="Giá trị" />
-                    <input type="text" value={stat.subtext || ''} onChange={(e) => handleUpdateStat(idx, 'subtext', e.target.value)} className="w-full text-[11px] text-indigo-600 font-medium bg-transparent border-b border-dashed border-slate-300 outline-hidden" placeholder="Ghi chú" />
+                    <input type="text" value={stat.label} onChange={(e) => handleUpdateStat(idx, 'label', e.target.value)} className="w-full text-[10px] font-bold text-slate-500 uppercase tracking-wider bg-transparent border-b border-slate-200 outline-hidden text-center" placeholder="Tên chỉ số" />
+                    <input type="text" value={stat.value} onChange={(e) => handleUpdateStat(idx, 'value', e.target.value)} className="w-full text-base font-black text-slate-900 bg-transparent border-b border-slate-200 outline-hidden text-center" placeholder="Giá trị" />
+                    <input type="text" value={stat.subtext || ''} onChange={(e) => handleUpdateStat(idx, 'subtext', e.target.value)} className="w-full text-[11px] text-indigo-600 font-semibold bg-transparent border-b border-slate-200 outline-hidden text-center" placeholder="Ghi chú" />
                   </div>
                 )}
               </div>

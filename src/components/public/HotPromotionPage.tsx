@@ -12,9 +12,10 @@ import {
   Truck, 
   Ship, 
   Plane, 
+  Train,
   Snowflake, 
   Warehouse,
-  FileCheck2,
+  FileCheck2, 
   FileText, 
   Building2, 
   Globe, 
@@ -72,6 +73,8 @@ interface ServiceTabItem {
   id: string;
   name: string;
   nameVi: string;
+  badge: string;
+  subtext: string;
   serviceType: ServiceType | 'ALL';
   icon: React.ComponentType<{ className?: string }>;
   colorClass: string;
@@ -178,22 +181,14 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
     }));
   };
 
-  // Service Tabs Configuration (8 categories, 2 lines x 4 cols, exactly matching Lead Board layout)
+  // 8 Core Logistics Services Filter Navigator (2 hàng x 4 loại hình, chuẩn hóa đồng bộ như Lead Board)
   const serviceTabs: ServiceTabItem[] = [
-    {
-      id: 'ALL',
-      name: 'All Modes',
-      nameVi: 'Tất cả dịch vụ',
-      serviceType: 'ALL',
-      icon: Layers,
-      colorClass: 'text-orange-600',
-      bgLightClass: 'bg-orange-50',
-      activeClass: 'bg-orange-600 text-white shadow-sm ring-1 ring-orange-600',
-    },
     {
       id: 'Trucking',
       name: 'Trucking',
-      nameVi: 'Vận tải đường bộ',
+      nameVi: 'Đường Bộ',
+      badge: 'LTL / FTL',
+      subtext: 'Xe tải thùng kín, bạt, đông lạnh...',
       serviceType: 'Trucking',
       icon: Truck,
       colorClass: 'text-blue-600',
@@ -201,9 +196,11 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
       activeClass: 'bg-blue-600 text-white shadow-sm ring-1 ring-blue-600',
     },
     {
-      id: 'Sea Freight (FCL)',
-      name: 'Ocean FCL',
-      nameVi: 'Đường biển FCL',
+      id: 'Sea Freight',
+      name: 'Sea Freight',
+      nameVi: 'Đường Biển',
+      badge: 'FCL / LCL',
+      subtext: 'Cảng đi - Cảng đến quốc tế & nội địa',
       serviceType: 'Sea Freight (FCL)',
       icon: Ship,
       colorClass: 'text-cyan-600',
@@ -211,19 +208,11 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
       activeClass: 'bg-cyan-600 text-white shadow-sm ring-1 ring-cyan-600',
     },
     {
-      id: 'Sea Freight (LCL)',
-      name: 'Ocean LCL',
-      nameVi: 'Đường biển LCL (CFS)',
-      serviceType: 'Sea Freight (LCL)',
-      icon: Boxes,
-      colorClass: 'text-teal-600',
-      bgLightClass: 'bg-teal-50',
-      activeClass: 'bg-teal-600 text-white shadow-sm ring-1 ring-teal-600',
-    },
-    {
       id: 'Air Freight',
       name: 'Air Freight',
-      nameVi: 'Hàng không Express',
+      nameVi: 'Hàng Không',
+      badge: 'Cargo / Express',
+      subtext: 'Chuyển phát nhanh & Air Cargo',
       serviceType: 'Air Freight',
       icon: Plane,
       colorClass: 'text-sky-600',
@@ -231,11 +220,13 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
       activeClass: 'bg-sky-600 text-white shadow-sm ring-1 ring-sky-600',
     },
     {
-      id: 'Cold Chain',
-      name: 'Cold Chain',
-      nameVi: 'Chuỗi lạnh & Nhiệt độ',
-      serviceType: 'Cold Chain',
-      icon: Snowflake,
+      id: 'Rail Freight',
+      name: 'Rail Freight',
+      nameVi: 'Đường Sắt',
+      badge: 'FCL / LCL Ga',
+      subtext: 'Tuyến Bắc Nam & Ga liên vận',
+      serviceType: 'Rail Freight',
+      icon: Train,
       colorClass: 'text-emerald-600',
       bgLightClass: 'bg-emerald-50',
       activeClass: 'bg-emerald-600 text-white shadow-sm ring-1 ring-emerald-600',
@@ -243,41 +234,66 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
     {
       id: 'Warehousing',
       name: 'Warehousing',
-      nameVi: 'Kho bãi & 3PL',
+      nameVi: 'Kho Bãi 3PL',
+      badge: '6 Loại hình kho',
+      subtext: 'Kho thường, ngoại quan, lạnh...',
       serviceType: 'Warehousing',
-      icon: Warehouse,
+      icon: Building2,
+      colorClass: 'text-purple-600',
+      bgLightClass: 'bg-purple-50',
+      activeClass: 'bg-purple-600 text-white shadow-sm ring-1 ring-purple-600',
+    },
+    {
+      id: 'Customs Clearance',
+      name: 'Customs Clearance',
+      nameVi: 'Thủ Tục Hải Quan',
+      badge: 'Khai báo & C/O',
+      subtext: 'Thông quan cảng, sân bay, cửa khẩu',
+      serviceType: 'Customs Clearance',
+      icon: FileText,
       colorClass: 'text-amber-600',
       bgLightClass: 'bg-amber-50',
       activeClass: 'bg-amber-600 text-white shadow-sm ring-1 ring-amber-600',
     },
     {
-      id: 'Customs Clearance',
-      name: 'Customs Broker',
-      nameVi: 'Thủ tục hải quan',
-      serviceType: 'Customs Clearance',
-      icon: FileCheck2,
-      colorClass: 'text-purple-600',
-      bgLightClass: 'bg-purple-50',
-      activeClass: 'bg-purple-600 text-white shadow-sm ring-1 ring-purple-600',
+      id: 'Cross-border',
+      name: 'Cross-Border',
+      nameVi: 'Cross-Border',
+      badge: 'VN ↔ GMS / TQ',
+      subtext: 'Vận tải bộ xuyên biên giới',
+      serviceType: 'Cross-border',
+      icon: Globe,
+      colorClass: 'text-orange-600',
+      bgLightClass: 'bg-orange-50',
+      activeClass: 'bg-orange-600 text-white shadow-sm ring-1 ring-orange-600',
+    },
+    {
+      id: 'Project Cargo',
+      name: 'Project Cargo',
+      nameVi: 'Integrated / Dự Án',
+      badge: 'OOG / Đa PT',
+      subtext: 'Hàng siêu trường siêu trọng, dự án',
+      serviceType: 'Project Cargo',
+      icon: Layers,
+      colorClass: 'text-indigo-600',
+      bgLightClass: 'bg-indigo-50',
+      activeClass: 'bg-indigo-600 text-white shadow-sm ring-1 ring-indigo-600',
     },
   ];
 
-  // Service count calculation
+  // Count promotions per service
   const serviceCounts = useMemo(() => {
-    const counts: Record<string, number> = { ALL: promotionsList.length };
-    serviceTabs.forEach(tab => {
-      if (tab.id !== 'ALL') {
-        counts[tab.id] = promotionsList.filter(p => {
-          if (tab.id === 'Sea Freight (FCL)') {
-            return p.serviceType === 'Sea Freight (FCL)' || p.category === 'Sea Freight';
-          }
-          if (tab.id === 'Sea Freight (LCL)') {
-            return p.serviceType === 'Sea Freight (LCL)';
-          }
-          return p.serviceType === tab.serviceType || p.category === tab.id;
-        }).length;
-      }
-    });
+    const counts: Record<string, number> = {
+      ALL: promotionsList.length,
+      Trucking: promotionsList.filter((p) => p.serviceType === 'Trucking' || p.category === 'Trucking' || p.serviceType === 'Cold Chain' || p.category === 'Cold Chain').length,
+      'Sea Freight': promotionsList.filter((p) => p.serviceType === 'Sea Freight (FCL)' || p.serviceType === 'Sea Freight (LCL)' || p.category === 'Sea Freight').length,
+      'Air Freight': promotionsList.filter((p) => p.serviceType === 'Air Freight' || p.category === 'Air Freight').length,
+      'Rail Freight': promotionsList.filter((p) => p.serviceType === 'Rail Freight' || p.category === 'Rail Freight').length,
+      Warehousing: promotionsList.filter((p) => p.serviceType === 'Warehousing' || p.category === 'Warehousing').length,
+      'Customs Clearance': promotionsList.filter((p) => p.serviceType === 'Customs Clearance' || p.category === 'Customs' || (p.category as string) === 'Customs Clearance').length,
+      'Cross-border': promotionsList.filter((p) => p.serviceType === 'Cross-border' || p.category === 'Cross-border' || (p.serviceType as string) === 'Cross-Border' || (p.category as string) === 'CrossBorder').length,
+      'Project Cargo': promotionsList.filter((p) => p.serviceType === 'Project Cargo' || p.category === 'Project Cargo').length,
+    };
     return counts;
   }, [promotionsList]);
 
@@ -315,11 +331,28 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
           promo.vehicleOrUnit.toLowerCase().includes(searchLower) ||
           promo.cargoSuitability.toLowerCase().includes(searchLower);
 
-        const matchesService = 
-          selectedService === 'ALL' || 
-          promo.serviceType === selectedService ||
-          promo.category.toLowerCase() === selectedService.toLowerCase() ||
-          (selectedService === 'Sea Freight (FCL)' && promo.category === 'Sea Freight');
+        let matchesService = true;
+        if (selectedService !== 'ALL') {
+          if (selectedService === 'Trucking') {
+            matchesService = promo.serviceType === 'Trucking' || promo.category === 'Trucking' || promo.serviceType === 'Cold Chain' || promo.category === 'Cold Chain';
+          } else if (selectedService === 'Sea Freight') {
+            matchesService = promo.serviceType === 'Sea Freight (FCL)' || promo.serviceType === 'Sea Freight (LCL)' || promo.category === 'Sea Freight';
+          } else if (selectedService === 'Air Freight') {
+            matchesService = promo.serviceType === 'Air Freight' || promo.category === 'Air Freight';
+          } else if (selectedService === 'Rail Freight') {
+            matchesService = promo.serviceType === 'Rail Freight' || promo.category === 'Rail Freight';
+          } else if (selectedService === 'Warehousing') {
+            matchesService = promo.serviceType === 'Warehousing' || promo.category === 'Warehousing';
+          } else if (selectedService === 'Customs Clearance') {
+            matchesService = promo.serviceType === 'Customs Clearance' || promo.category === 'Customs' || (promo.category as string) === 'Customs Clearance';
+          } else if (selectedService === 'Cross-border') {
+            matchesService = promo.serviceType === 'Cross-border' || promo.category === 'Cross-border' || (promo.serviceType as string) === 'Cross-Border' || (promo.category as string) === 'CrossBorder';
+          } else if (selectedService === 'Project Cargo') {
+            matchesService = promo.serviceType === 'Project Cargo' || promo.category === 'Project Cargo';
+          } else {
+            matchesService = promo.serviceType === selectedService || promo.category === selectedService;
+          }
+        }
 
         const matchesBadge = 
           selectedBadge === 'ALL' || 
@@ -495,67 +528,319 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
     }
   };
 
-  const getServiceBadgeStyle = (service: ServiceType) => {
-    switch (service) {
-      case 'Trucking':
-        return {
-          bg: 'bg-blue-50 text-blue-700 border-blue-200/80',
-          icon: <Truck className="w-3 h-3 text-blue-600 shrink-0" />,
-          label: 'Đường bộ',
-        };
-      case 'Sea Freight (FCL)':
-        return {
-          bg: 'bg-cyan-50 text-cyan-700 border-cyan-200/80',
-          icon: <Ship className="w-3 h-3 text-cyan-600 shrink-0" />,
-          label: 'Đường biển FCL',
-        };
-      case 'Sea Freight (LCL)':
-        return {
-          bg: 'bg-teal-50 text-teal-700 border-teal-200/80',
-          icon: <Boxes className="w-3 h-3 text-teal-600 shrink-0" />,
-          label: 'Đường biển LCL',
-        };
-      case 'Air Freight':
-        return {
-          bg: 'bg-sky-50 text-sky-700 border-sky-200/80',
-          icon: <Plane className="w-3 h-3 text-sky-600 shrink-0" />,
-          label: 'Hàng không',
-        };
-      case 'Cold Chain':
-        return {
-          bg: 'bg-emerald-50 text-emerald-700 border-emerald-200/80',
-          icon: <Snowflake className="w-3 h-3 text-emerald-600 shrink-0" />,
-          label: 'Chuỗi lạnh',
-        };
-      case 'Warehousing':
-        return {
-          bg: 'bg-amber-50 text-amber-800 border-amber-200/80',
-          icon: <Warehouse className="w-3 h-3 text-amber-600 shrink-0" />,
-          label: 'Kho bãi 3PL',
-        };
-      case 'Customs Clearance':
-        return {
-          bg: 'bg-purple-50 text-purple-700 border-purple-200/80',
-          icon: <FileCheck2 className="w-3 h-3 text-purple-600 shrink-0" />,
-          label: 'Hải quan',
-        };
-      case 'Cross-border':
-        return {
-          bg: 'bg-orange-50 text-orange-700 border-orange-200/80',
-          icon: <Globe className="w-3 h-3 text-orange-600 shrink-0" />,
-          label: 'Xuyên biên giới',
-        };
-      default:
-        return {
-          bg: 'bg-slate-50 text-slate-700 border-slate-200',
-          icon: <Layers className="w-3 h-3 text-slate-600 shrink-0" />,
-          label: 'Logistics',
-        };
+  const getServiceBadgeStyle = (service: ServiceType | string, serviceGroup?: string) => {
+    const target = serviceGroup || service;
+    if (target === 'Đường bộ' || target === 'Trucking' || target === 'Cold Chain') {
+      return {
+        bg: 'bg-blue-50 text-blue-700 border-blue-200/80',
+        icon: <Truck className="w-3.5 h-3.5 text-blue-600 shrink-0" />,
+        label: 'Đường bộ',
+      };
     }
+    if (target === 'Đường biển' || target === 'Sea Freight' || target === 'Sea Freight (FCL)' || target === 'Sea Freight (LCL)') {
+      return {
+        bg: 'bg-cyan-50 text-cyan-700 border-cyan-200/80',
+        icon: <Ship className="w-3.5 h-3.5 text-cyan-600 shrink-0" />,
+        label: 'Đường biển',
+      };
+    }
+    if (target === 'Hàng không' || target === 'Air Freight') {
+      return {
+        bg: 'bg-sky-50 text-sky-700 border-sky-200/80',
+        icon: <Plane className="w-3.5 h-3.5 text-sky-600 shrink-0" />,
+        label: 'Hàng không',
+      };
+    }
+    if (target === 'Đường sắt' || target === 'Rail Freight') {
+      return {
+        bg: 'bg-emerald-50 text-emerald-700 border-emerald-200/80',
+        icon: <Train className="w-3.5 h-3.5 text-emerald-600 shrink-0" />,
+        label: 'Đường sắt',
+      };
+    }
+    if (target === 'Kho bãi 3PL' || target === 'Warehousing') {
+      return {
+        bg: 'bg-purple-50 text-purple-700 border-purple-200/80',
+        icon: <Building2 className="w-3.5 h-3.5 text-purple-600 shrink-0" />,
+        label: 'Kho bãi 3PL',
+      };
+    }
+    if (target === 'Thủ tục hải quan' || target === 'Customs Clearance' || target === 'Customs') {
+      return {
+        bg: 'bg-amber-50 text-amber-800 border-amber-200/80',
+        icon: <FileText className="w-3.5 h-3.5 text-amber-600 shrink-0" />,
+        label: 'Thủ tục hải quan',
+      };
+    }
+    if (target === 'Xuyên biên giới' || target === 'Cross-border') {
+      return {
+        bg: 'bg-orange-50 text-orange-700 border-orange-200/80',
+        icon: <Globe className="w-3.5 h-3.5 text-orange-600 shrink-0" />,
+        label: 'Xuyên biên giới',
+      };
+    }
+    if (target === 'Dự án' || target === 'Project Cargo') {
+      return {
+        bg: 'bg-indigo-50 text-indigo-700 border-indigo-200/80',
+        icon: <Layers className="w-3.5 h-3.5 text-indigo-600 shrink-0" />,
+        label: 'Dự án',
+      };
+    }
+    return {
+      bg: 'bg-slate-50 text-slate-700 border-slate-200',
+      icon: <Layers className="w-3.5 h-3.5 text-slate-600 shrink-0" />,
+      label: 'Logistics',
+    };
+  };
+
+  // Standardized 10-column data resolver according to agreed business logic
+  const formatPromotionRow = (promo: HotPromotionItem, itemIndex: number) => {
+    const stt = itemIndex;
+
+    // 2. Hạn giá (Format dd/mm/yyyy - strictly without SLA or 'Còn XX ngày')
+    let validUntilDisplay = promo.validUntil || '31/12/2026';
+    if (validUntilDisplay.includes('-')) {
+      const parts = validUntilDisplay.split('-');
+      if (parts.length === 3) {
+        validUntilDisplay = `${parts[2]}/${parts[1]}/${parts[0]}`;
+      }
+    }
+
+    // 3. Mã
+    const code = promo.code;
+
+    // 4. Nhóm dịch vụ
+    let serviceGroup = promo.serviceGroup;
+    if (!serviceGroup) {
+      if (promo.category === 'Trucking' || promo.serviceType === 'Trucking' || promo.category === 'Cold Chain' || promo.serviceType === 'Cold Chain') {
+        serviceGroup = 'Đường bộ';
+      } else if (promo.category === 'Sea Freight' || promo.serviceType.includes('Sea')) {
+        serviceGroup = 'Đường biển';
+      } else if (promo.category === 'Air Freight' || promo.serviceType.includes('Air')) {
+        serviceGroup = 'Hàng không';
+      } else if (promo.category === 'Rail Freight' || promo.serviceType.includes('Rail')) {
+        serviceGroup = 'Đường sắt';
+      } else if (promo.category === 'Warehousing' || promo.serviceType === 'Warehousing') {
+        serviceGroup = 'Kho bãi 3PL';
+      } else if (promo.category === 'Customs' || promo.serviceType === 'Customs Clearance') {
+        serviceGroup = 'Thủ tục hải quan';
+      } else if (promo.category === 'Cross-border' || promo.serviceType === 'Cross-border') {
+        serviceGroup = 'Xuyên biên giới';
+      } else if (promo.category === 'Project Cargo' || promo.serviceType === 'Project Cargo') {
+        serviceGroup = 'Dự án';
+      } else {
+        serviceGroup = 'Đường bộ';
+      }
+    }
+
+    const serviceStyle = getServiceBadgeStyle(promo.serviceType, serviceGroup);
+
+    // 5. Nhóm hàng (Strictly 3 standardized values: 'Hàng thường' | 'Hàng lạnh' | 'Hàng nguy hiểm')
+    let cargoGroup: 'Hàng thường' | 'Hàng lạnh' | 'Hàng nguy hiểm' = promo.cargoGroup || 'Hàng thường';
+    if (!promo.cargoGroup) {
+      const text = `${promo.title} ${promo.cargoSuitability || ''} ${promo.vehicleOrUnit || ''} ${promo.serviceType} ${promo.category}`.toLowerCase();
+      if (text.includes('lạnh') || text.includes('cold') || text.includes('âm sâu') || text.includes('đông lạnh')) {
+        cargoGroup = 'Hàng lạnh';
+      } else if (text.includes('nguy hiểm') || text.includes('hóa chất') || text.includes('haz') || text.includes('cháy nổ') || text.includes('imo')) {
+        cargoGroup = 'Hàng nguy hiểm';
+      } else {
+        cargoGroup = 'Hàng thường';
+      }
+    }
+
+    // 6. Mô hình (Strictly standard model codes)
+    let serviceModel = promo.serviceModel;
+    if (!serviceModel) {
+      if (serviceGroup === 'Đường bộ') {
+        serviceModel = promo.vehicleOrUnit?.includes('LTL') || promo.id.includes('ltl') ? 'LTL' : 'FTL';
+      } else if (serviceGroup === 'Đường biển') {
+        serviceModel = promo.serviceType.includes('LCL') || promo.vehicleOrUnit?.includes('LCL') || promo.id.includes('lcl') ? 'LCL' : 'FCL';
+      } else if (serviceGroup === 'Hàng không') {
+        serviceModel = promo.id.includes('exp') || promo.title.toLowerCase().includes('hỏa tốc') ? 'Express' : 'Air Cargo';
+      } else if (serviceGroup === 'Đường sắt') {
+        serviceModel = promo.id.includes('lcl') ? 'LCL' : 'FCL';
+      } else if (serviceGroup === 'Kho bãi 3PL') {
+        const lower = `${promo.title} ${promo.id} ${promo.vehicleOrUnit}`.toLowerCase();
+        if (lower.includes('ngoại quan') || lower.includes('bon')) serviceModel = 'Kho ngoại quan';
+        else if (lower.includes('tmđt') || lower.includes('fulfillment') || lower.includes('ful')) serviceModel = 'Kho TMĐT';
+        else if (lower.includes('lạnh') || lower.includes('cold') || lower.includes('cld')) serviceModel = 'Kho lạnh';
+        else if (lower.includes('tự quản') || lower.includes('self')) serviceModel = 'Kho tự quản';
+        else serviceModel = 'Kho thường';
+      } else if (serviceGroup === 'Thủ tục hải quan') {
+        serviceModel = 'Cửa khẩu / ICD';
+      } else if (serviceGroup === 'Xuyên biên giới') {
+        serviceModel = promo.vehicleOrUnit?.includes('LTL') || promo.id.includes('ltl') ? 'LTL' : 'FTL';
+      } else if (serviceGroup === 'Dự án') {
+        const lower = `${promo.title} ${promo.id}`.toLowerCase();
+        if (lower.includes('xdock') || lower.includes('cross-dock')) serviceModel = 'X-dock';
+        else if (lower.includes('port') || lower.includes('cảng') || lower.includes('icd')) serviceModel = 'Cảng / ICD';
+        else serviceModel = 'Phân phối';
+      } else {
+        serviceModel = 'FTL';
+      }
+    }
+
+    // 7. Cột Mô tả: Chuẩn hóa theo đúng hành lang tuyến / địa chỉ kho / cửa khẩu gọn gàng
+    // Không ghi dài dòng, không dùng từ ngữ quảng cáo / marketing
+    let descriptionMain = '';
+    let descriptionSub = '';
+
+    if (serviceGroup === 'Đường bộ') {
+      // Tuyến đường vận chuyển = Hành lang tuyến. Subtext: Phân khúc tải trọng
+      const rawRoute = promo.routeDisplay || `${promo.origin} ↔ ${promo.destination}`;
+      descriptionMain = rawRoute.replace(/\(.*?\)/g, '').trim();
+      if (!descriptionMain || descriptionMain === 'undefined ↔ undefined') {
+        descriptionMain = 'Hà Nội ↔ TP. Hồ Chí Minh';
+      }
+
+      if (serviceModel === 'LTL') {
+        descriptionSub = 'Hàng lẻ LTL';
+      } else if (promo.vehicleOrUnit) {
+        const m = promo.vehicleOrUnit.match(/(?:Xe(?:\s+Tải)?\s+)?(\d+(?:\.\d+)?\s*Tấn)/i);
+        descriptionSub = m ? (promo.cargoGroup === 'Hàng lạnh' ? `Xe lạnh ${m[1]}` : `Xe ${m[1]}`) : (promo.cargoGroup === 'Hàng lạnh' ? 'Xe lạnh 15 Tấn' : 'Xe 15 Tấn');
+      } else {
+        descriptionSub = promo.cargoGroup === 'Hàng lạnh' ? 'Xe lạnh 15 Tấn' : 'Xe 15 Tấn';
+      }
+    } else if (serviceGroup === 'Đường biển') {
+      // Tuyến đường vận chuyển = Hành lang tuyến. Subtext: Container FCL hoặc lịch tàu LCL
+      const rawRoute = promo.routeDisplay || `${promo.origin} → ${promo.destination}`;
+      descriptionMain = rawRoute.replace(/\(.*?\)/g, '').trim();
+      if (!descriptionMain || descriptionMain === 'undefined → undefined') {
+        descriptionMain = 'Cát Lái → Singapore';
+      }
+
+      if (serviceModel === 'LCL') {
+        descriptionSub = 'Lịch tàu: Thứ 3 & Thứ 6';
+      } else {
+        descriptionSub = promo.vehicleOrUnit?.includes('20') ? 'Container 20GP' : 'Container 40HC';
+      }
+    } else if (serviceGroup === 'Hàng không') {
+      // Tuyến đường vận chuyển = Hành lang tuyến. Subtext: Lịch bay
+      const rawRoute = promo.routeDisplay || `${promo.origin} → ${promo.destination}`;
+      descriptionMain = rawRoute.replace(/\(.*?\)/g, '').trim();
+      if (!descriptionMain || descriptionMain === 'undefined → undefined') {
+        descriptionMain = 'Tân Sơn Nhất (SGN) → Narita (NRT)';
+      }
+      descriptionSub = 'Lịch bay: Hàng ngày';
+    } else if (serviceGroup === 'Đường sắt') {
+      // Tuyến đường vận chuyển = Hành lang tuyến. Subtext: Container FCL hoặc lịch tàu LCL
+      descriptionMain = promo.routeDisplay?.replace(/\(.*?\)/g, '').trim() || 'Yên Viên ↔ Sóng Thần';
+      descriptionSub = serviceModel === 'LCL' ? 'Lịch tàu: 3 chuyến/tuần' : 'Container 40HC';
+    } else if (serviceGroup === 'Kho bãi 3PL') {
+      // Địa chỉ chi tiết kho. Subtext: Diện tích hoặc Công suất xử lý (TMĐT)
+      const rawAddr = promo.origin || promo.destination || 'KCN Sóng Thần 1, Dĩ An, Bình Dương';
+      descriptionMain = rawAddr.split('/')[0].replace(/\(.*?\)/g, '').trim();
+      if (!descriptionMain || descriptionMain.toLowerCase().includes('kết nối')) {
+        descriptionMain = 'KCN Sóng Thần 1, Dĩ An, Bình Dương';
+      }
+      descriptionSub = serviceModel === 'Kho TMĐT' ? 'Công suất: 20.000 đơn/ngày' : 'Diện tích: 15.000 m²';
+    } else if (serviceGroup === 'Thủ tục hải quan') {
+      // Khu vực cửa khẩu. Subtext: Loại hình tờ khai
+      descriptionMain = 'Chi cục Hải quan Cảng Cát Lái';
+      descriptionSub = 'Tờ khai nhập kinh doanh';
+    } else if (serviceGroup === 'Xuyên biên giới') {
+      // Tuyến đường vận chuyển = Hành lang tuyến. Subtext: Loại phương tiện (FTL) hoặc Hình thức thông quan (LTL)
+      descriptionMain = 'Hà Nội / Hải Phòng ↔ Bằng Tường (TQ)';
+      descriptionSub = serviceModel === 'LTL' ? 'Thông quan chính ngạch' : 'Xe Container 40HC';
+    } else if (serviceGroup === 'Dự án') {
+      if (serviceModel === 'X-dock') {
+        descriptionMain = 'ICD Tân Cảng - Long Bình (Đồng Nai)';
+        descriptionSub = 'Cước sàn phân loại cross-dock';
+      } else if (serviceModel === 'Cảng / ICD') {
+        descriptionMain = 'Cảng Cát Lái / SP-ITC';
+        descriptionSub = 'Nâng hạ & bốc xếp cảng';
+      } else {
+        descriptionMain = 'TP. Hồ Chí Minh ↔ Miền Tây';
+        descriptionSub = 'Đội xe phân phối đa điểm';
+      }
+    } else {
+      descriptionMain = promo.routeDisplay || `${promo.origin} ↔ ${promo.destination}`;
+      descriptionSub = promo.vehicleOrUnit || 'Vận chuyển tiêu chuẩn';
+    }
+
+    // 8. Cột Đơn giá: CHỈ THỂ HIỆN ĐƠN VỊ TIỀN TỆ LÀ VNĐ (₫), KHÔNG DÙNG USD
+    // Dòng trên là số tiền VNĐ (bold), dòng dưới là ĐVT nhỏ. Không % giảm, không gạch ngang
+    let priceAmount = '';
+    let priceUnit = '';
+
+    if (promo.promotionalPriceVND && promo.promotionalPriceVND > 0) {
+      if (promo.promotionalPriceVND < 500 && serviceModel !== 'X-dock') {
+        // Quy đổi từ USD sang VNĐ nếu là giá USD nhỏ
+        const converted = promo.promotionalPriceVND * 25000;
+        priceAmount = `${converted.toLocaleString('vi-VN')} ₫`;
+      } else {
+        priceAmount = `${promo.promotionalPriceVND.toLocaleString('vi-VN')} ₫`;
+      }
+    } else if (serviceGroup === 'Đường bộ') {
+      priceAmount = serviceModel === 'LTL' ? '1.650 ₫' : '28.500.000 ₫';
+    } else if (serviceGroup === 'Đường biển') {
+      priceAmount = serviceModel === 'LCL' ? '625.000 ₫' : '11.250.000 ₫';
+    } else if (serviceGroup === 'Hàng không') {
+      priceAmount = '71.000 ₫';
+    } else if (serviceGroup === 'Đường sắt') {
+      priceAmount = serviceModel === 'LCL' ? '1.200 ₫' : '21.500.000 ₫';
+    } else if (serviceGroup === 'Kho bãi 3PL') {
+      priceAmount = serviceModel === 'Kho TMĐT' ? '5.000.000 ₫' : (serviceModel === 'Kho lạnh' ? '180.000 ₫' : '95.000 ₫');
+    } else if (serviceGroup === 'Thủ tục hải quan') {
+      priceAmount = '850.000 ₫';
+    } else if (serviceGroup === 'Xuyên biên giới') {
+      priceAmount = serviceModel === 'LTL' ? '18.000 ₫' : '32.000.000 ₫';
+    } else if (serviceGroup === 'Dự án') {
+      priceAmount = serviceModel === 'X-dock' ? '180 ₫' : (serviceModel === 'Cảng / ICD' ? '320.000 ₫' : '2.200.000 ₫');
+    } else {
+      priceAmount = '2.500.000 ₫';
+    }
+
+    // Xác định đơn vị tính (Dòng subtext dưới)
+    if (serviceGroup === 'Kho bãi 3PL') {
+      priceUnit = serviceModel === 'Kho TMĐT' ? 'Min / tháng' : '/ m² / tháng';
+    } else if (serviceGroup === 'Thủ tục hải quan') {
+      priceUnit = '/ Tờ khai';
+    } else if (
+      serviceGroup === 'Hàng không' || 
+      (serviceGroup === 'Đường bộ' && serviceModel === 'LTL') || 
+      (serviceGroup === 'Đường sắt' && serviceModel === 'LCL') || 
+      (serviceGroup === 'Xuyên biên giới' && serviceModel === 'LTL')
+    ) {
+      priceUnit = '/ kg';
+    } else if (serviceGroup === 'Đường biển') {
+      priceUnit = serviceModel === 'LCL' ? '/ CBM' : (promo.vehicleOrUnit?.includes('20') ? '/ Cont 20GP' : '/ Cont 40HC');
+    } else if (serviceGroup === 'Đường sắt') {
+      priceUnit = '/ Container';
+    } else if (serviceGroup === 'Dự án') {
+      if (serviceModel === 'X-dock') priceUnit = '/ kg (Cước sàn)';
+      else if (serviceModel === 'Cảng / ICD') priceUnit = '/ Lần nâng hạ';
+      else priceUnit = '/ Chuyến';
+    } else {
+      priceUnit = '/ Chuyến';
+    }
+
+    // 9. Số Inquiries / Xem
+    const inquiries = promo.inquiriesCount || promo.interestedCount || 12;
+    const views = promo.viewsCount || 850;
+    const inquiriesViewsDisplay = `${inquiries.toLocaleString('vi-VN')} / ${views.toLocaleString('vi-VN')}`;
+
+    return {
+      stt,
+      validUntilDisplay,
+      code,
+      serviceGroup,
+      serviceStyle,
+      cargoGroup,
+      serviceModel,
+      descriptionMain,
+      descriptionSub,
+      calculatedPriceDisplay: `${priceAmount} ${priceUnit}`.trim(),
+      priceAmount,
+      priceUnit,
+      inquiriesViewsDisplay,
+      inquiries,
+      views,
+    };
   };
 
   return (
-    <div id="hot-promotions-page" className="min-h-screen bg-slate-50/70 pb-20 space-y-6">
+    <div id="hot-promotions-page" className="w-full max-w-[1720px] mx-auto px-2 sm:px-4 lg:px-6 py-6 animate-in fade-in duration-200 space-y-5">
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 rounded-xl bg-slate-900 px-4 py-3 text-xs sm:text-sm font-medium text-white shadow-2xl animate-in fade-in slide-in-from-bottom-5">
@@ -695,14 +980,30 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
       </div>
 
       {/* =========================================================================
-          1. SERVICE TABS NAVIGATOR (2 dòng x 4 cột, y hệt như Lead Board)
+          1. SERVICE TABS NAVIGATOR (8 NHÓM DỊCH VỤ LOGISTICS & VẬN TẢI - ĐỒNG BỘ LEADBOARD)
          ========================================================================= */}
       <div className="space-y-2.5">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-            <SlidersHorizontal className="w-3.5 h-3.5 text-orange-600" />
-            <span>Phân Loại Theo Phương Thức Vận Tải & Dịch Vụ Niêm Yết</span>
-          </h2>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+              <SlidersHorizontal className="w-3.5 h-3.5 text-indigo-600" />
+              <span>Phân Loại Theo 8 Nhóm Dịch Vụ Logistics & Vận Tải</span>
+            </h2>
+            {selectedService !== 'ALL' && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedService('ALL');
+                  setCurrentPage(1);
+                }}
+                className="px-2.5 py-0.5 text-[10px] font-extrabold text-indigo-700 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 rounded-full border border-indigo-200 transition-all cursor-pointer flex items-center gap-1"
+                title="Bỏ lọc để xem toàn bộ danh sách biểu giá"
+              >
+                <span>✕ Bỏ chọn</span>
+                <span className="text-slate-400">({promotionsList.length})</span>
+              </button>
+            )}
+          </div>
           <span className="text-xs text-slate-400">
             Hiển thị <strong className="text-slate-800">{filteredAndSortedPromotions.length}</strong> / {promotionsList.length} biểu giá
           </span>
@@ -719,16 +1020,17 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
                 key={tab.id}
                 id={`promo-service-tab-${tab.id}`}
                 onClick={() => {
-                  setSelectedService(tab.id);
+                  setSelectedService(prev => prev === tab.id ? 'ALL' : tab.id);
                   setCurrentPage(1);
                 }}
-                className={`group px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center justify-between gap-2 cursor-pointer border w-full text-left ${
+                className={`group p-3 rounded-2xl text-xs font-bold transition-all flex flex-col justify-between cursor-pointer border text-left min-h-[96px] relative ${
                   isSelected
                     ? tab.activeClass
                     : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200 shadow-2xs hover:border-slate-300'
                 }`}
               >
-                <div className="flex items-center gap-2.5 min-w-0">
+                {/* Top line: Icon + Badge + Count */}
+                <div className="flex items-center justify-between gap-1 w-full mb-1.5">
                   <div
                     className={`p-1.5 rounded-xl transition-colors shrink-0 ${
                       isSelected ? 'bg-white/20 text-white' : `${tab.bgLightClass} ${tab.colorClass}`
@@ -736,20 +1038,42 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
                   >
                     <Icon className="w-4 h-4" />
                   </div>
-                  <div className="min-w-0">
-                    <div className="leading-tight truncate text-xs font-bold">{tab.nameVi}</div>
-                    <div className={`text-[10px] font-medium leading-none mt-0.5 truncate ${isSelected ? 'text-white/80' : 'text-slate-400'}`}>
-                      {tab.name}
-                    </div>
+                  <div className="flex items-center gap-1.5">
+                    {tab.badge && (
+                      <span
+                        className={`px-1.5 py-0.5 text-[9px] font-black rounded-md tracking-tight ${
+                          isSelected
+                            ? 'bg-white/20 text-white'
+                            : 'bg-slate-100 text-slate-600 border border-slate-200/80'
+                        }`}
+                      >
+                        {tab.badge}
+                      </span>
+                    )}
+                    <span
+                      className={`px-2 py-0.5 text-[10.5px] font-black rounded-full shrink-0 ${
+                        isSelected
+                          ? 'bg-white text-slate-900 shadow-2xs'
+                          : 'bg-slate-100 text-slate-700 group-hover:bg-slate-200'
+                      }`}
+                    >
+                      {count}
+                    </span>
                   </div>
                 </div>
-                <span
-                  className={`ml-1 px-2 py-0.5 text-[10.5px] font-extrabold rounded-full shrink-0 ${
-                    isSelected ? 'bg-white text-slate-900' : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
-                  }`}
-                >
-                  {count}
-                </span>
+
+                {/* Middle & Bottom: Service Title & Subtext */}
+                <div className="min-w-0 mt-auto">
+                  <div className="leading-tight truncate text-xs font-black">{tab.nameVi}</div>
+                  <div
+                    className={`text-[10px] font-medium leading-tight mt-0.5 truncate ${
+                      isSelected ? 'text-white/80' : 'text-slate-400'
+                    }`}
+                    title={tab.subtext}
+                  >
+                    {tab.subtext}
+                  </div>
+                </div>
               </button>
             );
           })}
@@ -873,86 +1197,93 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
          ========================================================================= */}
       {viewMode === 'table' ? (
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden w-full flex flex-col">
-          {/* Top Horizontal Scrollbar (Synchronized) */}
-          <div 
-            ref={topScrollRef}
-            onScroll={handleTopScroll}
-            className="w-full overflow-x-auto overflow-y-hidden bg-slate-50 border-b border-slate-200 z-30 select-none"
-            title="Thanh cuộn ngang"
-          >
-            <div style={{ width: `${tableScrollWidth}px`, height: '1px' }} />
-          </div>
-
-          {/* Scrollable Table Area with Frozen Sticky Header */}
+          {/* Scrollable Table Area: Vertical max-h-[640px], NO horizontal scrollbar */}
           <div 
             ref={tableScrollRef}
-            onScroll={handleTableScroll}
-            className="overflow-x-auto overflow-y-auto max-h-[650px] relative scroll-smooth focus:outline-none hide-horizontal-scrollbar"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            className="overflow-y-auto max-h-[640px] relative scroll-smooth focus:outline-none w-full"
             tabIndex={0}
           >
-            <table className="w-full min-w-[1020px] text-left border-collapse" id="promotions-data-table">
-              {/* Frozen Sticky Table Header */}
+            <table className="w-full text-left border-collapse table-auto" id="promotions-data-table">
+              {/* Frozen Sticky Table Header - Standardized 10 Columns */}
               <thead className="sticky top-0 z-20 bg-slate-100 shadow-xs border-b border-slate-200">
-                <tr className="bg-slate-100 text-[11px] font-bold text-slate-600 uppercase tracking-wider select-none">
-                  <th className="py-3.5 px-3 w-12 text-center sticky top-0 z-20 bg-slate-100 border-b border-slate-200">STT</th>
+                <tr className="bg-slate-100 text-[10px] font-bold text-slate-600 uppercase tracking-wider select-none">
+                  {/* 1. STT */}
+                  <th className="py-2.5 px-1.5 w-8 text-center sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
+                    STT
+                  </th>
                   
-                  {/* Cột 1: Ngày Công Bố & Hạn Áp Dụng */}
+                  {/* 2. Hạn Giá */}
                   <th 
-                    className="py-3.5 px-3 cursor-pointer hover:text-orange-600 transition-colors whitespace-nowrap min-w-[130px] sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
+                    className="py-2.5 px-2 cursor-pointer hover:text-orange-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
                     onClick={() => handleSort('createdDate')}
                   >
                     <div className="flex items-center gap-1">
-                      <span>Ngày Đăng / Hạn</span>
+                      <span>Hạn Giá</span>
                       <ArrowUpDown className="w-3 h-3 text-slate-400" />
                     </div>
                   </th>
 
-                  {/* Cột 2: Mã Biểu Giá */}
+                  {/* 3. Mã */}
                   <th 
-                    className="py-3.5 px-3 cursor-pointer hover:text-orange-600 transition-colors whitespace-nowrap min-w-[110px] sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
+                    className="py-2.5 px-2 cursor-pointer hover:text-orange-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
                     onClick={() => handleSort('code')}
                   >
                     <div className="flex items-center gap-1">
-                      <span>Mã Niêm Yết</span>
+                      <span>Mã</span>
                       <ArrowUpDown className="w-3 h-3 text-slate-400" />
                     </div>
                   </th>
 
-                  {/* Cột 3: Dịch Vụ Logistics */}
+                  {/* 4. Nhóm Dịch Vụ */}
                   <th 
-                    className="py-3.5 px-3 cursor-pointer hover:text-orange-600 transition-colors whitespace-nowrap min-w-[140px] sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
+                    className="py-2.5 px-2 cursor-pointer hover:text-orange-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
                     onClick={() => handleSort('service')}
                   >
                     <div className="flex items-center gap-1">
-                      <span>Dịch Vụ Logistics</span>
+                      <span>Nhóm Dịch Vụ</span>
                       <ArrowUpDown className="w-3 h-3 text-slate-400" />
                     </div>
                   </th>
 
-                  {/* Cột 4: Loại Ưu Đãi / Tuyến Niêm Yết */}
-                  <th className="py-3.5 px-3 whitespace-nowrap min-w-[200px] sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
-                    <span>Tuyến Đường & Loại Ưu Đãi</span>
+                  {/* 5. Nhóm Hàng */}
+                  <th className="py-2.5 px-1.5 text-center whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
+                    <span>Nhóm Hàng</span>
                   </th>
 
-                  {/* Cột 5: Chuyên Viên (PIC) Phụ Trách */}
-                  <th className="py-3.5 px-3 whitespace-nowrap min-w-[180px] sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
-                    <span>Chuyên Viên (PIC) & Nhà Xe</span>
+                  {/* 6. Mô Hình */}
+                  <th className="py-2.5 px-1.5 text-center whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
+                    <span>Mô Hình</span>
                   </th>
 
-                  {/* Cột 6: Giá Niêm Yết & % Giảm */}
+                  {/* 7. Mô Tả */}
+                  <th className="py-2.5 px-2 whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
+                    <span>Mô Tả</span>
+                  </th>
+
+                  {/* 8. Đơn Giá */}
                   <th 
-                    className="py-3.5 px-3 text-right cursor-pointer hover:text-orange-600 transition-colors whitespace-nowrap min-w-[160px] sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
+                    className="py-2.5 px-2 text-right cursor-pointer hover:text-orange-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
                     onClick={() => handleSort('price')}
                   >
                     <div className="flex items-center justify-end gap-1">
-                      <span>Giá Khuyến Mãi / Suất</span>
+                      <span>Đơn Giá</span>
                       <ArrowUpDown className="w-3 h-3 text-slate-400" />
                     </div>
                   </th>
 
-                  {/* Cột 7: Thao Tác (Chi tiết, Gọi điện, Khóa giá) */}
-                  <th className="py-3.5 px-3 text-center min-w-[140px] whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
+                  {/* 9. Số Inquiries / Xem */}
+                  <th 
+                    className="py-2.5 px-1.5 text-center cursor-pointer hover:text-orange-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
+                    onClick={() => handleSort('views')}
+                  >
+                    <div className="flex items-center justify-center gap-1">
+                      <span>INQUIRIES / XEM</span>
+                      <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                    </div>
+                  </th>
+
+                  {/* 10. Thao Tác */}
+                  <th className="py-2.5 px-2 text-center whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
                     <span>Thao Tác</span>
                   </th>
                 </tr>
@@ -962,12 +1293,12 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
               <tbody className="divide-y divide-slate-100 text-xs">
                 {filteredAndSortedPromotions.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="py-16 text-center">
+                    <td colSpan={10} className="py-16 text-center">
                       <div className="max-w-sm mx-auto space-y-3">
                         <div className="w-12 h-12 rounded-full bg-orange-50 text-orange-400 flex items-center justify-center mx-auto">
                           <Search className="w-6 h-6" />
                         </div>
-                        <h3 className="text-sm font-bold text-slate-800">Không tìm thấy biểu giá ưu đãi phù hợp</h3>
+                        <h3 className="text-sm font-bold text-slate-800">Không tìm thấy biểu giá phù hợp</h3>
                         <p className="text-xs text-slate-500 leading-relaxed">
                           Thử điều chỉnh lại từ khóa tìm kiếm hoặc chọn danh mục dịch vụ khác để tra cứu các biểu giá khả dụng.
                         </p>
@@ -987,50 +1318,42 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
                   </tr>
                 ) : (
                   paginatedPromotions.map((promo, index) => {
-                    const serviceStyle = getServiceBadgeStyle(promo.serviceType);
+                    const itemIndex = (safeCurrentPage - 1) * pageSize + index + 1;
+                    const row = formatPromotionRow(promo, itemIndex);
                     const isExpanded = !!expandedRowIds[promo.id];
                     const isBookmarked = bookmarkedDealIds.includes(promo.id);
-                    const padClass = tableDensity === 'compact' ? 'py-2 px-3' : 'py-3.5 px-3';
-                    const itemIndex = (safeCurrentPage - 1) * pageSize + index + 1;
 
                     return (
                       <React.Fragment key={promo.id}>
                         <tr
-                          id={`promo-row-${promo.code}`}
+                          id={`promo-row-${row.code}`}
                           onClick={() => toggleRowExpand(promo.id)}
                           className={`hover:bg-orange-50/40 transition-colors cursor-pointer group ${
                             isExpanded ? 'bg-orange-50/30' : index % 2 === 1 ? 'bg-slate-50/40' : 'bg-white'
                           }`}
                         >
-                          {/* Cột STT */}
-                          <td className={`${padClass} text-center font-mono text-slate-500 font-bold text-xs w-12 select-none`}>
-                            {itemIndex}
+                          {/* 1. STT */}
+                          <td className="py-2.5 px-1.5 text-center font-mono text-slate-500 font-bold text-xs select-none w-8">
+                            {row.stt}
                           </td>
 
-                          {/* Cột 1: Ngày Công Bố & Hạn Áp Dụng */}
-                          <td className={`${padClass} whitespace-nowrap`}>
-                            <div className="space-y-1 text-xs">
-                              <div className="text-slate-500 font-medium flex items-center gap-1">
-                                <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                                <span>{promo.validFrom}</span>
-                              </div>
-                              <div className="flex items-center gap-1 text-[10.5px] text-rose-600 font-bold bg-rose-50/90 px-1.5 py-0.5 rounded border border-rose-200/70 w-fit">
-                                <Hourglass className="w-2.5 h-2.5 text-rose-500 shrink-0" />
-                                <span>Còn {promo.daysRemaining} ngày</span>
-                              </div>
-                            </div>
+                          {/* 2. Hạn Giá */}
+                          <td className="py-2.5 px-2 whitespace-nowrap">
+                            <span className="text-xs font-semibold text-slate-700">
+                              {row.validUntilDisplay}
+                            </span>
                           </td>
 
-                          {/* Cột 2: Mã Niêm Yết */}
-                          <td className={`${padClass} whitespace-nowrap`}>
+                          {/* 3. Mã */}
+                          <td className="py-2.5 px-2 whitespace-nowrap">
                             <div className="flex items-center gap-1 font-mono font-bold text-slate-800 text-xs">
-                              <span className="text-orange-600 hover:underline">{promo.code}</span>
+                              <span className="text-orange-600 hover:underline">{row.code}</span>
                               <button
-                                onClick={(e) => handleCopyCode(promo.code, e)}
+                                onClick={(e) => handleCopyCode(row.code, e)}
                                 className="text-slate-400 hover:text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity p-0.5 cursor-pointer"
-                                title="Sao chép mã biểu giá"
+                                title="Sao chép mã"
                               >
-                                {copiedCode === promo.code ? (
+                                {copiedCode === row.code ? (
                                   <Check className="w-3 h-3 text-emerald-600" />
                                 ) : (
                                   <Copy className="w-3 h-3" />
@@ -1039,122 +1362,100 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
                             </div>
                           </td>
 
-                          {/* Cột 3: Dịch Vụ Logistics */}
-                          <td className={`${padClass} whitespace-nowrap`}>
+                          {/* 4. Nhóm Dịch Vụ */}
+                          <td className="py-2.5 px-2 whitespace-nowrap">
                             <span
-                              className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-[11px] font-bold border ${serviceStyle.bg}`}
-                              title={promo.serviceType}
+                              className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-bold border ${row.serviceStyle.bg}`}
                             >
-                              {serviceStyle.icon}
-                              <span>{serviceStyle.label}</span>
+                              {row.serviceGroup}
                             </span>
                           </td>
 
-                          {/* Cột 4: Tuyến Đường & Loại Ưu Đãi */}
-                          <td className={padClass}>
-                            <div className="space-y-1">
-                              <div className="flex items-center gap-1.5">
-                                <span className={`px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wider ${getBadgeStyle(promo.badgeType)}`}>
-                                  {promo.badgeLabel}
-                                </span>
-                              </div>
-                              <p className="font-bold text-slate-900 text-xs group-hover:text-orange-600 transition-colors line-clamp-1">
-                                {promo.routeDisplay}
+                          {/* 5. Nhóm Hàng */}
+                          <td className="py-2.5 px-1.5 whitespace-nowrap text-center">
+                            <span
+                              className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-bold border ${
+                                row.cargoGroup === 'Hàng lạnh'
+                                  ? 'bg-cyan-50 text-cyan-700 border-cyan-200'
+                                  : row.cargoGroup === 'Hàng nguy hiểm'
+                                  ? 'bg-amber-50 text-amber-800 border-amber-200'
+                                  : 'bg-slate-100 text-slate-700 border-slate-200'
+                              }`}
+                            >
+                              {row.cargoGroup}
+                            </span>
+                          </td>
+
+                          {/* 6. Mô Hình */}
+                          <td className="py-2.5 px-1.5 whitespace-nowrap text-center">
+                            <span className="text-xs font-bold text-slate-800">
+                              {row.serviceModel}
+                            </span>
+                          </td>
+
+                          {/* 7. Mô Tả (Dòng 1: Hành lang/Địa chỉ, Dòng 2: Subtext chi tiết) */}
+                          <td className="py-2.5 px-2 max-w-[280px]">
+                            <div className="space-y-0.5">
+                              <p className="font-bold text-slate-900 text-xs group-hover:text-orange-600 transition-colors truncate" title={row.descriptionMain}>
+                                {row.descriptionMain}
                               </p>
-                              <span className="text-[10px] text-slate-500 font-medium block truncate">
-                                {promo.vehicleOrUnit}
+                              <p className="text-[10.5px] text-slate-500 font-medium truncate" title={row.descriptionSub}>
+                                {row.descriptionSub}
+                              </p>
+                            </div>
+                          </td>
+
+                          {/* 8. Đơn Giá: Số tiền dòng trên (VNĐ), ĐVT dòng subtext dưới, không % giảm, không gạch ngang */}
+                          <td className="py-2.5 px-2 text-right whitespace-nowrap">
+                            <div className="space-y-0.5">
+                              <span className="text-xs font-black text-slate-900 block tracking-tight">
+                                {row.priceAmount}
+                              </span>
+                              <span className="text-[10px] font-medium text-slate-500 block">
+                                {row.priceUnit}
                               </span>
                             </div>
                           </td>
 
-                          {/* Cột 5: Chuyên Viên (PIC) & Nhà Xe */}
-                          <td className={padClass}>
-                            <div className="flex items-center gap-2.5">
-                              <div className="w-8 h-8 rounded-lg bg-blue-600 text-white font-bold text-xs flex items-center justify-center shrink-0">
-                                {promo.specialistAvatarInitial}
-                              </div>
-                              <div className="min-w-0">
-                                <div className="flex items-center gap-1">
-                                  <span 
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      onNavigate({ 
-                                        type: 'public', 
-                                        tab: 'supplier-profile', 
-                                        params: { specialistId: promo.specialistId, viewState: 'detail' } 
-                                      });
-                                    }}
-                                    className="font-bold text-slate-900 hover:text-indigo-600 cursor-pointer truncate block"
-                                    title="Xem trang cá nhân của Chuyên viên (PIC)"
-                                  >
-                                    {promo.specialistVietnameseName}
-                                  </span>
-                                  <BadgeCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                                </div>
-                                <span className="text-[10px] text-slate-500 font-medium block truncate">
-                                  {promo.companyName}
-                                </span>
-                              </div>
+                          {/* 9. Thống Kê Số Inquiries / Xem */}
+                          <td className="py-2.5 px-1.5 text-center whitespace-nowrap">
+                            <div className="flex flex-col items-center gap-0.5">
+                              <span className="px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/80">
+                                {row.inquiries} inquiries
+                              </span>
+                              <span className="text-[10px] text-slate-400 font-medium">
+                                {row.views.toLocaleString('vi-VN')} xem
+                              </span>
                             </div>
                           </td>
 
-                          {/* Cột 6: Giá Niêm Yết & % Giảm */}
-                          <td className={`${padClass} text-right whitespace-nowrap`}>
-                            <div className="space-y-0.5">
-                              <div className="flex items-baseline justify-end gap-1.5">
-                                <span className="text-[10.5px] text-slate-400 line-through">
-                                  {promo.originalPriceDisplay}
-                                </span>
-                                <span className="text-xs font-black text-orange-600 block">
-                                  {promo.promotionalPriceDisplay}
-                                </span>
-                              </div>
-                              <div className="flex items-center justify-end gap-1">
-                                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded text-[9.5px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                  <Percent className="w-2.5 h-2.5" />
-                                  <span>Giảm {promo.discountPercent}%</span>
-                                </span>
-                              </div>
-                            </div>
-                          </td>
-
-                          {/* Cột 7: Thao Tác (Xem chi tiết & Khóa giá) */}
-                          <td className={`${padClass} text-center whitespace-nowrap`} onClick={(e) => e.stopPropagation()}>
-                            <div className="flex items-center justify-center gap-1.5">
-                              <button
-                                id={`toggle-promo-btn-${promo.code}`}
-                                type="button"
-                                onClick={(e) => toggleRowExpand(promo.id, e)}
-                                className={`px-2.5 py-1.5 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1 cursor-pointer shadow-2xs ${
-                                  isExpanded
-                                    ? 'bg-orange-600 text-white shadow-xs'
-                                    : 'bg-white hover:bg-orange-50 text-orange-700 border border-orange-200 hover:border-orange-300'
-                                }`}
-                                title={isExpanded ? 'Thu gọn chi tiết' : 'Mở xem chi tiết thông số kỹ thuật và hồ sơ PIC'}
-                              >
-                                <span>{isExpanded ? 'Đóng' : 'Chi tiết'}</span>
-                                {isExpanded ? (
-                                  <ChevronUp className="w-3.5 h-3.5" />
-                                ) : (
-                                  <ChevronDown className="w-3.5 h-3.5" />
-                                )}
-                              </button>
-
-                              <button
-                                onClick={() => setSelectedDealForBooking(promo)}
-                                className="px-2.5 py-1.5 text-xs font-bold rounded-xl bg-orange-600 hover:bg-orange-700 text-white shadow-2xs transition-colors cursor-pointer"
-                                title="Khóa giá và liên hệ giữ chỗ ngay"
-                              >
-                                <span>Khóa Giá</span>
-                              </button>
-                            </div>
+                          {/* 10. Thao Tác (Chỉ duy nhất nút Xem chi tiết) */}
+                          <td className="py-2.5 px-2 text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                            <button
+                              id={`toggle-promo-btn-${row.code}`}
+                              type="button"
+                              onClick={(e) => toggleRowExpand(promo.id, e)}
+                              className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all inline-flex items-center justify-center gap-1 cursor-pointer shadow-2xs mx-auto ${
+                                isExpanded
+                                  ? 'bg-orange-600 text-white shadow-xs'
+                                  : 'bg-white hover:bg-orange-50 text-orange-700 border border-orange-200 hover:border-orange-300'
+                              }`}
+                              title={isExpanded ? 'Thu gọn chi tiết' : 'Xem chi tiết'}
+                            >
+                              <span>{isExpanded ? 'Thu gọn' : 'Xem chi tiết'}</span>
+                              {isExpanded ? (
+                                <ChevronUp className="w-3.5 h-3.5" />
+                              ) : (
+                                <ChevronDown className="w-3.5 h-3.5" />
+                              )}
+                            </button>
                           </td>
                         </tr>
 
                         {/* Expandable Technical Specs Row */}
                         {isExpanded && (
                           <tr className="bg-orange-50/40 border-b border-orange-100">
-                            <td colSpan={8} className="p-3 sm:p-4">
+                            <td colSpan={10} className="p-3 sm:p-4">
                               <HotPromotionRateDetailCard
                                 item={promo}
                                 onNavigate={onNavigate}

@@ -62,10 +62,16 @@ export const StudioToolbar: React.FC<StudioToolbarProps> = ({
   };
 
   const companyTemplateNames: Record<CompanyTemplateId, string> = {
-    'corporate-flagship': 'Corporate Flagship (Cổng Doanh Nghiệp)',
-    'modern-bento': 'Modern Bento (Hệ Sinh Thái Tech)',
-    'minimalist': 'Minimalist Editorial (Báo Cáo Thường Niên)',
-    'industrial-impact': 'Industrial Impact (Vận Tải & Hạ Tầng)',
+    'corporate-flagship': '1. Corporate Flagship (Cổng Doanh Nghiệp 2 Cột)',
+    'corporate-heritage': '2. Corporate Heritage (Trục Thời Gian Lịch Sử)',
+    'executive-pillar': '3. Executive Pillar (Toàn Cảnh 3 Cột)',
+    'modern-bento': '4. Modern Bento (Lưới Thẻ Đa Tầng 12 Cột)',
+    'supply-chain-tech': '5. Supply Chain Tech (Tháp Điều Hành Số)',
+    'staggered-cards': '6. Staggered Cards (Thẻ So Le Nhịp Điệu)',
+    'glassmorphism-luxury': '7. Glassmorphism Luxury (Kính Mờ Đẳng Cấp)',
+    'clean-directory': '8. Clean Directory (Mục Lục Hồ Sơ 01-08)',
+    'industrial-impact': '9. Industrial Impact (Công Nghiệp & Cơ Giới)',
+    'commercial-spotlight': '10. Commercial Spotlight (Thương Mại & Chuyển Đổi)',
   };
 
   const handleCopyLink = () => {

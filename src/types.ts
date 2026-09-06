@@ -1243,7 +1243,9 @@ export type PromotionCategory =
   | 'Air Freight'
   | 'Customs'
   | 'Warehousing'
-  | 'Cross-border';
+  | 'Cross-border'
+  | 'Rail Freight'
+  | 'Project Cargo';
 
 export type PromotionBadgeType =
   | 'FLASH_SALE'
@@ -1311,6 +1313,16 @@ export interface HotPromotionItem {
   interestedCount: number;
   bookedCount: number;
   isFeatured?: boolean;
+
+  // Standardized 10-column fields for General Listing Table
+  serviceGroup?: string;
+  cargoGroup?: 'Hàng thường' | 'Hàng lạnh' | 'Hàng nguy hiểm';
+  serviceModel?: string;
+  descriptionMain?: string;
+  descriptionSub?: string;
+  calculatedPriceDisplay?: string;
+  currency?: 'VND' | 'USD';
+  inquiriesCount?: number;
 }
 
 

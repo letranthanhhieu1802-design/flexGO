@@ -156,7 +156,12 @@ export function App() {
         }
       }
 
-      if (leadCodeParam || tabParam === 'lead-board' || tabParam === 'leads') {
+      if (tabParam === 'supplier-profile-edit' || tabParam === 'studio') {
+        setCurrentView({
+          type: 'workspace',
+          view: 'supplier-profile-edit',
+        });
+      } else if (leadCodeParam || tabParam === 'lead-board' || tabParam === 'leads') {
         if (tabParam === 'leads') {
           setCurrentView({
             type: 'workspace',

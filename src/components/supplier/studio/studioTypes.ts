@@ -12,7 +12,17 @@ export type TemplateId =
   | 'modular-matrix'
   | 'speed-hunter';
 
-export type CompanyTemplateId = 'corporate-flagship' | 'modern-bento' | 'minimalist' | 'industrial-impact';
+export type CompanyTemplateId = 
+  | 'corporate-flagship' 
+  | 'corporate-heritage'
+  | 'executive-pillar'
+  | 'modern-bento' 
+  | 'supply-chain-tech'
+  | 'staggered-cards'
+  | 'glassmorphism-luxury'
+  | 'clean-directory'
+  | 'industrial-impact'
+  | 'commercial-spotlight';
 
 export type ThemeColorId = 'navy' | 'emerald' | 'crimson' | 'amber' | 'slate';
 
