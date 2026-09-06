@@ -465,6 +465,10 @@ export function generateAggregatedDeclaredPromotions(): HotPromotionItem[] {
         descriptionMain,
         descriptionSub,
         calculatedPriceDisplay,
+
+        // Declared Capability Data from Tab 3 (Supplier Profile)
+        declaredRoute: r,
+        declaredModel: model,
       };
 
       declaredPromoItems.push(item);

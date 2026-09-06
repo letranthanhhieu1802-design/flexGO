@@ -1323,6 +1323,10 @@ export interface HotPromotionItem {
   calculatedPriceDisplay?: string;
   currency?: 'VND' | 'USD';
   inquiriesCount?: number;
+
+  // Declared Capability Data from Tab 3 (Supplier Profile)
+  declaredRoute?: any;
+  declaredModel?: any;
 }
 
 

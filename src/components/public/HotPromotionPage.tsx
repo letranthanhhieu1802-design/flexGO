@@ -64,6 +64,7 @@ interface HotPromotionPageProps {
   currentUser: UserProfile;
   onNavigate: (view: CurrentView) => void;
   onOpenCreateInquiry: () => void;
+  onIncrementPromotionViews?: (promoId: string) => void;
 }
 
 type SortField = 'discount' | 'price' | 'createdDate' | 'views' | 'daysRemaining' | 'code' | 'service';
@@ -85,7 +86,8 @@ interface ServiceTabItem {
 export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
   currentUser,
   onNavigate,
-  onOpenCreateInquiry
+  onOpenCreateInquiry,
+  onIncrementPromotionViews,
 }) => {
   // Combine custom declared promotions with the aggregated rate cards from verified supplier profiles
   const initialCombined = useMemo(() => {
@@ -173,12 +175,32 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
     setTimeout(() => setCopiedCode(null), 2000);
   };
 
+  const handleIncrementPromotionViews = (promoId: string) => {
+    if (!promoId) return;
+    if (onIncrementPromotionViews) {
+      onIncrementPromotionViews(promoId);
+    }
+    setPromotionsList(prevList =>
+      prevList.map(item =>
+        item.id === promoId
+          ? { ...item, viewsCount: (item.viewsCount || 0) + 1 }
+          : item
+      )
+    );
+  };
+
   const toggleRowExpand = (id: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
+    const willBeExpanded = !expandedRowIds[id];
     setExpandedRowIds(prev => ({
       ...prev,
-      [id]: !prev[id]
+      [id]: willBeExpanded
     }));
+
+    // Mỗi lần user click mở xem chi tiết tuyến giá -> tăng 1 lượt xem cho tuyến đó (tương tự logic ở lead board)
+    if (willBeExpanded) {
+      handleIncrementPromotionViews(id);
+    }
   };
 
   // 8 Core Logistics Services Filter Navigator (2 hàng x 4 loại hình, chuẩn hóa đồng bộ như Lead Board)
@@ -445,9 +467,27 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
     const allExpanded = paginatedPromotions.every(p => expandedRowIds[p.id]);
     const newState: Record<string, boolean> = {};
     if (!allExpanded) {
+      const newlyExpandedIds: string[] = [];
       paginatedPromotions.forEach(p => {
         newState[p.id] = true;
+        if (!expandedRowIds[p.id]) {
+          newlyExpandedIds.push(p.id);
+        }
       });
+      if (newlyExpandedIds.length > 0) {
+        newlyExpandedIds.forEach(id => {
+          if (onIncrementPromotionViews) {
+            onIncrementPromotionViews(id);
+          }
+        });
+        setPromotionsList(prevList =>
+          prevList.map(item =>
+            newlyExpandedIds.includes(item.id)
+              ? { ...item, viewsCount: (item.viewsCount || 0) + 1 }
+              : item
+          )
+        );
+      }
     }
     setExpandedRowIds(newState);
   };
@@ -817,7 +857,7 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
 
     // 9. Số Inquiries / Xem
     const inquiries = promo.inquiriesCount || promo.interestedCount || 12;
-    const views = promo.viewsCount || 850;
+    const views = typeof promo.viewsCount === 'number' ? promo.viewsCount : 850;
     const inquiriesViewsDisplay = `${inquiries.toLocaleString('vi-VN')} / ${views.toLocaleString('vi-VN')}`;
 
     return {
