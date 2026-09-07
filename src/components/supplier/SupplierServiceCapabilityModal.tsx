@@ -51,6 +51,9 @@ import {
   VehiclePricingMatrixColumn, 
   createDefaultVehiclePricingColumn 
 } from './TruckingFtlCostMatrixModal';
+import { 
+  TruckingLtlCostMatrixModal 
+} from './TruckingLtlCostMatrixModal';
 import {
   OceanFclCostMatrixModal,
   ContainerPricingMatrixColumn,
@@ -4853,9 +4856,18 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [scheduleModalData, setScheduleModalData] = useState<ScheduleModalData | null>(null);
   const [costMatrixModalRoute, setCostMatrixModalRoute] = useState<CapabilityRouteItem | null>(null);
+  const [ltlCostMatrixModalRoute, setLtlCostMatrixModalRoute] = useState<CapabilityRouteItem | null>(null);
   const [oceanFclCostMatrixModalRoute, setOceanFclCostMatrixModalRoute] = useState<CapabilityRouteItem | null>(null);
   const [railFclCostMatrixModalRoute, setRailFclCostMatrixModalRoute] = useState<CapabilityRouteItem | null>(null);
   const [crossBorderFtlCostMatrixModalRoute, setCrossBorderFtlCostMatrixModalRoute] = useState<CapabilityRouteItem | null>(null);
+
+  const handleOpenLtlCostMatrixModal = (route: CapabilityRouteItem) => {
+    setLtlCostMatrixModalRoute(route);
+  };
+
+  const handleSaveLtlCostMatrix = (routeId: string, updatedData: Partial<CapabilityRouteItem>) => {
+    handleUpdateRouteRowMultiple(routeId, updatedData);
+  };
 
   const handleOpenCostMatrixModal = (route: CapabilityRouteItem) => {
     setCostMatrixModalRoute(route);
@@ -6544,6 +6556,21 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                             const isReeferTruckingTable = isTruckingTable && (activeCargoGroup?.name?.includes('lạnh') || activeModel?.name?.includes('lạnh') || activeModel?.id?.includes('ref'));
                             const isHazmatTruckingTable = isTruckingTable && (activeCargoGroup?.name?.includes('nguy hiểm') || activeModel?.name?.includes('nguy hiểm') || activeModel?.id?.includes('haz') || activeModel?.id?.includes('dg'));
                             const isTruckingFtlTable = isTruckingTable && !isLtlTable;
+                            if (isLtlTable) {
+                              return (
+                                <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
+                                  <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
+                                  <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-indigo-50/70 text-indigo-950 font-black">Mã Tuyến</th>
+                                  <th className="py-2.5 px-2.5 min-w-[160px] bg-indigo-50/70 text-indigo-950 font-black">Hành Lang Tuyến</th>
+                                  <th className="py-2.5 px-2.5 min-w-[140px]">Điểm Đầu (Điểm Đi)</th>
+                                  <th className="py-2.5 px-2.5 min-w-[140px]">Điểm Cuối (Điểm Đến)</th>
+                                  <th className="py-2.5 px-2.5 min-w-[190px]">Loại Thùng Phương Tiện</th>
+                                  <th className="py-2.5 px-2.5 min-w-[210px]">Phân Khúc Tải Trọng</th>
+                                  <th className="py-2.5 px-2.5 min-w-[140px] text-center bg-indigo-100/80 text-indigo-950 font-black">Chi Tiết Biểu Phí</th>
+                                  <th className="py-2.5 px-2 text-center w-16 min-w-[65px]">Action</th>
+                                </tr>
+                              );
+                            }
                             if (isTruckingFtlTable) {
                               return (
                                 <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
@@ -8990,7 +9017,138 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                               const isHazmatTrucking = isTrucking && !isLtlTrucking && (activeCargoGroup?.name?.includes('nguy hiểm') || activeModel?.name?.includes('nguy hiểm') || activeModel?.id?.includes('haz') || activeModel?.id?.includes('dg'));
                               const cargoType: 'general' | 'reefer' | 'hazmat' | 'ltl' = isLtlTrucking ? 'ltl' : (isHazmatTrucking ? 'hazmat' : (isReeferTrucking ? 'reefer' : 'general'));
                               const currentTruckBodyTypes = isLtlTrucking ? LTL_TRUCKING_BODY_TYPES : (isHazmatTrucking ? HAZMAT_TRUCKING_BODY_TYPES : (isReeferTrucking ? REEFER_TRUCKING_BODY_TYPES : TRUCKING_BODY_TYPES));
-                              const effectiveRouteCode = route.routeCode || `RC-${(activeModel?.code || activeCategory?.id || 'GEN').toUpperCase().replace(/[^A-Z0-9]/g, '')}-${String(idx + 1).padStart(3, '0')}`;
+                              const effectiveRouteCode = route.routeCode || `RC-${(isLtlTrucking ? 'LTL' : (activeModel?.code || activeCategory?.id || 'GEN')).toUpperCase().replace(/[^A-Z0-9]/g, '')}-${String(idx + 1).padStart(3, '0')}`;
+                              if (isLtlTrucking) {
+                                const availableTonnages = route.truckBodyType && LTL_TRUCKING_BODY_TYPE_MAP[route.truckBodyType]
+                                  ? LTL_TRUCKING_BODY_TYPE_MAP[route.truckBodyType]
+                                  : ALL_DEFAULT_LTL_TONNAGES;
+
+                                const currentBodyType = route.truckBodyType || LTL_TRUCKING_BODY_TYPES[0];
+                                const currentTonnage = route.truckTonnage || availableTonnages[1] || availableTonnages[0];
+
+                                return (
+                                  <tr key={route.id} className="divide-x divide-slate-200 hover:bg-indigo-50/20 transition-colors">
+                                    {/* 1. STT */}
+                                    <td className="p-0 text-center font-mono text-slate-400 font-semibold text-[11px] bg-slate-50/60 align-middle">
+                                      {idx + 1}
+                                    </td>
+
+                                    {/* 2. Mã Tuyến */}
+                                    <td className="p-0 align-top bg-slate-50/30">
+                                      <input
+                                        type="text"
+                                        value={effectiveRouteCode}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'routeCode', e.target.value)}
+                                        placeholder="RC-LTL-001"
+                                        className="w-full px-2 py-2.5 text-center font-mono font-bold text-indigo-700 text-xs bg-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all uppercase"
+                                        title="Mã tuyến đường nội bộ"
+                                      />
+                                    </td>
+
+                                    {/* 3. Hành Lang Tuyến */}
+                                    <td className="p-0 align-top">
+                                      <input
+                                        type="text"
+                                        value={route.route}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'route', e.target.value)}
+                                        placeholder="VD: Hà Nội ⇄ TP.HCM..."
+                                        className="w-full px-2.5 py-2.5 font-bold text-slate-900 text-xs bg-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
+                                        title="Hành lang tuyến vận chuyển"
+                                      />
+                                    </td>
+
+                                    {/* 4. Điểm Đầu (Điểm Đi) */}
+                                    <td className="p-0 align-top">
+                                      <input
+                                        type="text"
+                                        value={route.origin}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'origin', e.target.value)}
+                                        placeholder="Điểm đầu (Điểm đi)..."
+                                        className="w-full px-2.5 py-2.5 bg-transparent text-slate-700 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
+                                      />
+                                    </td>
+
+                                    {/* 5. Điểm Cuối (Điểm Đến) */}
+                                    <td className="p-0 align-top">
+                                      <input
+                                        type="text"
+                                        value={route.destination}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'destination', e.target.value)}
+                                        placeholder="Điểm cuối (Điểm đến)..."
+                                        className="w-full px-2.5 py-2.5 bg-transparent text-slate-700 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
+                                      />
+                                    </td>
+
+                                    {/* 6. Loại Thùng Phương Tiện */}
+                                    <td className="p-0 align-top">
+                                      <select
+                                        value={currentBodyType}
+                                        onChange={(e) => {
+                                          const newBody = e.target.value;
+                                          const newAvailable = LTL_TRUCKING_BODY_TYPE_MAP[newBody] || ALL_DEFAULT_LTL_TONNAGES;
+                                          handleUpdateRouteRowMultiple(route.id, {
+                                            truckBodyType: newBody,
+                                            truckTonnage: newAvailable[0] || route.truckTonnage,
+                                          });
+                                        }}
+                                        className="w-full px-2 py-2.5 text-xs font-semibold text-slate-800 bg-transparent cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
+                                      >
+                                        {LTL_TRUCKING_BODY_TYPES.map((bt, btIdx) => (
+                                          <option key={btIdx} value={bt}>{bt}</option>
+                                        ))}
+                                      </select>
+                                    </td>
+
+                                    {/* 7. Phân Khúc Tải Trọng */}
+                                    <td className="p-0 align-top">
+                                      <select
+                                        value={currentTonnage}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'truckTonnage', e.target.value)}
+                                        className="w-full px-2 py-2.5 text-xs font-semibold text-indigo-900 bg-transparent cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all truncate"
+                                      >
+                                        {availableTonnages.map((ton, tIdx) => (
+                                          <option key={tIdx} value={ton}>{ton}</option>
+                                        ))}
+                                      </select>
+                                    </td>
+
+                                    {/* 8. Chi Tiết Biểu Phí */}
+                                    <td className="p-2 text-center align-middle bg-indigo-50/20">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleOpenLtlCostMatrixModal(route)}
+                                        className="text-xs font-bold text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer transition-colors"
+                                        title="Nhấp để mở ma trận khai báo chi tiết biểu phí LTL theo Kg & CBM song song"
+                                      >
+                                        Chi tiết
+                                      </button>
+                                    </td>
+
+                                    {/* 9. Action */}
+                                    <td className="p-1 text-center align-middle">
+                                      <div className="flex items-center justify-center space-x-1">
+                                        <button
+                                          type="button"
+                                          onClick={() => handleDuplicateRouteRow(route.id)}
+                                          className="p-1.5 text-slate-400 hover:text-indigo-600 rounded-lg hover:bg-slate-100 transition-colors"
+                                          title="Nhân bản tuyến này"
+                                        >
+                                          <Copy className="w-3.5 h-3.5" />
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleDeleteRouteRow(route.id)}
+                                          className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-slate-100 transition-colors"
+                                          title="Xóa tuyến"
+                                        >
+                                          <Trash2 className="w-3.5 h-3.5" />
+                                        </button>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                );
+                              }
+
                               const isTruckingFtlRow = isTrucking && !isLtlTrucking;
                                 if (isTruckingFtlRow) {
                                   return (
@@ -10285,6 +10443,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                   const isCrossBorderFtl = isCrossBorder && !isCrossBorderLtl;
 
                   const shouldHideBlocks3And4 = isTruckingFtl ||
+                    isLtlTrucking ||
                     (isOcean && isFcl) ||
                     (isRail && isFcl) ||
                     isCrossBorderFtl ||
@@ -13843,6 +14002,14 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
             ? 'hazmat'
             : 'general')
         }
+      />
+
+      {/* 5.1 Trucking LTL Dual-Metric (Kg & CBM) Cost Breakdown Matrix Modal */}
+      <TruckingLtlCostMatrixModal
+        isOpen={!!ltlCostMatrixModalRoute}
+        onClose={() => setLtlCostMatrixModalRoute(null)}
+        route={ltlCostMatrixModalRoute}
+        onSave={handleSaveLtlCostMatrix}
       />
 
       {/* 6. Ocean FCL Multi-Container Cost Breakdown Matrix Modal */}
