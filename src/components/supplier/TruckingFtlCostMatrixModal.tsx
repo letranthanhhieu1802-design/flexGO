@@ -19,26 +19,65 @@ import {
 } from 'lucide-react';
 import { CapabilityRouteItem } from './SupplierServiceCapabilityModal';
 
+export interface LOVItem {
+  id: string;
+  name: string;
+  unit: string;
+  defaultPrice?: number;
+  description?: string;
+}
+
+export const TRUCKING_SECTION_1_SURCHARGES_LOV: LOVItem[] = [
+  { id: 'fuelBAF', name: 'Phụ phí nhiên liệu (BAF Fuel Surcharge)', unit: 'VND / Chuyến' },
+  { id: 'tollBOT', name: 'Phí vé cầu đường BOT & Bốc xếp hạ tầng', unit: 'VND / Chuyến' },
+  { id: 'docManagement', name: 'Phí chứng từ, seal & quản lý đơn', unit: 'VND / Chuyến' },
+  { id: 'night_delivery', name: 'Phụ phí giao hàng ban đêm / giờ cấm tải', unit: 'VND / Chuyến' },
+  { id: 'narrow_road', name: 'Phụ phí trung chuyển đường hẹp (xe nhỏ / boong)', unit: 'VND / Chuyến' },
+  { id: 'ferry_terminal', name: 'Phụ phí cầu phà đặc thù, bến bãi & kiểm dịch', unit: 'VND / Chuyến' },
+  { id: 'customs_staging', name: 'Phụ phí hạ bãi chờ kiểm hóa hải quan', unit: 'VND / Chuyến' },
+  { id: 'remote_mountain', name: 'Phụ phí vùng sâu vùng xa / đường đèo dốc', unit: 'VND / Chuyến' },
+  { id: 'peak_season', name: 'Phụ phí cao điểm mùa vụ (Peak Season Surcharge)', unit: 'VND / Chuyến' },
+];
+
+export const TRUCKING_SECTION_2_VAS_LOV: LOVItem[] = [
+  { id: 'vasGps', name: 'Định vị GPS Real-time & Link tracking live', unit: 'VND / Chuyến', defaultPrice: 0 },
+  { id: 'vasSeal', name: 'Kẹp chì Seal & Chụp ảnh biên bản giao nhận', unit: 'VND / Chuyến', defaultPrice: 0 },
+  { id: 'vasPod', name: 'Thu hồi chứng từ gốc (POD) về văn phòng', unit: 'VND / Bộ', defaultPrice: 0 },
+  { id: 'vasLabor', name: 'Nhân công bốc xếp 2 đầu kho', unit: 'VND / Lần', defaultPrice: 0 },
+  { id: 'vasTailLift', name: 'Xe bửng nâng thủy lực hạ pallet', unit: 'VND / Chuyến', defaultPrice: 0 },
+  { id: 'vasMultiDrop', name: 'Phụ phí giao đa điểm (Multi-drop)', unit: 'VND / Điểm', defaultPrice: 0 },
+  { id: 'vasDetention', name: 'Phí neo xe chờ bốc dỡ (sau giờ miễn phí)', unit: 'VND / Giờ', defaultPrice: 150000 },
+  { id: 'vasInsurance', name: 'Bảo hiểm hàng hóa vận chuyển (All-Risk)', unit: 'VND / Chuyến', defaultPrice: 0 },
+  { id: 'vasPalletWrap', name: 'Quấn màng co PE & đóng nẹp pallet', unit: 'VND / Pallet', defaultPrice: 0 },
+  { id: 'vasSkuCheck', name: 'Kiểm đếm chi tiết số lượng SKU / Mã vạch', unit: 'VND / Kiện', defaultPrice: 0 },
+  { id: 'vasFloorLift', name: 'Bốc xếp lên tầng cao / vào sâu trong kho', unit: 'VND / Lần', defaultPrice: 0 },
+  { id: 'vasCod', name: 'Dịch vụ thu hộ tiền mặt (COD)', unit: 'VND / Đơn', defaultPrice: 0 },
+  { id: 'vasSpecialCrane', name: 'Hỗ trợ xe cẩu chuyên dụng nâng hạ hàng', unit: 'VND / Chuyến', defaultPrice: 0 },
+];
+
+export interface MatrixActiveItem {
+  id: string; // id from LOVItem
+  value: number; // price for this vehicle
+}
+
+export const calculateColumnTotalPrice = (col: Partial<VehiclePricingMatrixColumn>): number => {
+  const base = Number(col.baseFreight) || 0;
+  const surchargesSum = (col.activeSurcharges || []).reduce((acc, item) => acc + (Number(item.value) || 0), 0);
+  return base + surchargesSum;
+};
+
 export interface VehiclePricingMatrixColumn {
   id: string;
   truckBodyType: string;
   customTruckBodyType?: string;
   truckTonnage: string;
   customTruckTonnage?: string;
-  // 1. Cước chính & phụ phí
+  // 1. Cước chính (Bắt buộc) & phụ phí chọn từ LOV
   baseFreight: number;
-  fuelBAF: number;
-  tollBOT: number;
-  docManagement: number;
-  totalPrice: number; // baseFreight + fuelBAF + tollBOT + docManagement
-  // 2. VAS
-  vasGps: number;
-  vasSeal: number;
-  vasPod: number;
-  vasLabor: number;
-  vasTailLift: number;
-  vasMultiDrop: number;
-  vasDetention: number; // Phí neo xe sau giờ miễn phí (VND/giờ)
+  activeSurcharges: MatrixActiveItem[]; // Danh sách các phụ phí đang chọn từ LOV
+  totalPrice: number; // baseFreight + sum(activeSurcharges.value)
+  // 2. VAS chọn từ LOV
+  activeVas: MatrixActiveItem[]; // Danh sách các tiện ích VAS đang chọn từ LOV
   // 3. Cam kết & Điều khoản
   departureSchedule: string; // Lịch chạy & giờ xuất bến theo từng cấu hình xe
   transitTimeDisplay: string;
@@ -46,6 +85,20 @@ export interface VehiclePricingMatrixColumn {
   paymentTerms: string;
   validUntil: string;
   notes?: string;
+
+  // Legacy fallback properties for backward compatibility
+  fuelBAF?: number;
+  tollBOT?: number;
+  docManagement?: number;
+  customSection1?: any[];
+  customSection2?: any[];
+  vasGps?: number;
+  vasSeal?: number;
+  vasPod?: number;
+  vasLabor?: number;
+  vasTailLift?: number;
+  vasMultiDrop?: number;
+  vasDetention?: number;
 }
 
 export const TRUCKING_SCHEDULE_PRESETS = [
@@ -133,7 +186,9 @@ export const createDefaultVehiclePricingColumn = (
   tonnage?: string,
   basePrice?: number,
   defaultSchedule?: string,
-  defaultSla?: string
+  defaultSla?: string,
+  initialSurcharges?: MatrixActiveItem[],
+  initialVas?: MatrixActiveItem[]
 ): VehiclePricingMatrixColumn => {
   const chosenBody = bodyType && TRUCKING_BODY_TYPES_LOV.includes(bodyType)
     ? bodyType
@@ -150,15 +205,49 @@ export const createDefaultVehiclePricingColumn = (
   const bot = Math.round(targetTotal * 0.05);
   const doc = targetTotal - (base + baf + bot);
 
-  return {
+  const defaultSurcharges: MatrixActiveItem[] = initialSurcharges
+    ? initialSurcharges.map(s => ({
+        id: s.id,
+        value: s.id === 'fuelBAF' ? baf : s.id === 'tollBOT' ? bot : s.id === 'docManagement' ? (doc > 0 ? doc : 150000) : 0,
+      }))
+    : [
+        { id: 'fuelBAF', value: baf },
+        { id: 'tollBOT', value: bot },
+        { id: 'docManagement', value: doc > 0 ? doc : 150000 },
+      ];
+
+  const defaultVas: MatrixActiveItem[] = initialVas
+    ? initialVas.map(v => ({
+        id: v.id,
+        value: v.id === 'vasDetention' ? 150000 : 0,
+      }))
+    : [
+        { id: 'vasGps', value: 0 },
+        { id: 'vasSeal', value: 0 },
+        { id: 'vasPod', value: 0 },
+        { id: 'vasLabor', value: 0 },
+        { id: 'vasTailLift', value: 0 },
+        { id: 'vasMultiDrop', value: 0 },
+        { id: 'vasDetention', value: 150000 },
+      ];
+
+  const col: VehiclePricingMatrixColumn = {
     id: `veh-col-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
     truckBodyType: chosenBody,
     truckTonnage: chosenTonnage,
     baseFreight: base,
+    activeSurcharges: defaultSurcharges,
+    totalPrice: 0,
+    activeVas: defaultVas,
+    departureSchedule: defaultSchedule || 'Hàng ngày (Daily - Xuất bến 20:00)',
+    transitTimeDisplay: defaultSla || '2 Ngày (48 Giờ cam kết)',
+    freeWaitingHours: 2,
+    paymentTerms: 'Net 45 Days',
+    validUntil: '2026-12-31',
+    notes: '',
     fuelBAF: baf,
     tollBOT: bot,
     docManagement: doc > 0 ? doc : 150000,
-    totalPrice: targetTotal,
     vasGps: 0,
     vasSeal: 0,
     vasPod: 0,
@@ -166,13 +255,9 @@ export const createDefaultVehiclePricingColumn = (
     vasTailLift: 0,
     vasMultiDrop: 0,
     vasDetention: 150000,
-    departureSchedule: defaultSchedule || 'Hàng ngày (Daily - Xuất bến 20:00)',
-    transitTimeDisplay: defaultSla || '2 Ngày (48 Giờ cam kết)',
-    freeWaitingHours: 2,
-    paymentTerms: 'Net 45 Days',
-    validUntil: '2026-12-31',
-    notes: '',
   };
+  col.totalPrice = calculateColumnTotalPrice(col);
+  return col;
 };
 
 interface TruckingFtlCostMatrixModalProps {
@@ -262,10 +347,58 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
     if (isOpen && route) {
       if (route.vehiclePricingMatrix && route.vehiclePricingMatrix.length > 0) {
         setColumns(
-          JSON.parse(JSON.stringify(route.vehiclePricingMatrix)).map((c: VehiclePricingMatrixColumn) => ({
-            ...c,
-            departureSchedule: c.departureSchedule || route.departureSchedule || route.sla || 'Hàng ngày (Daily - Xuất bến 20:00)',
-          }))
+          JSON.parse(JSON.stringify(route.vehiclePricingMatrix)).map((c: any) => {
+            // Restore or migrate activeSurcharges from legacy or current data
+            let surcharges: MatrixActiveItem[] = [];
+            if (Array.isArray(c.activeSurcharges) && c.activeSurcharges.length > 0) {
+              surcharges = c.activeSurcharges;
+            } else {
+              // Migrate from legacy fields if present
+              if (c.fuelBAF !== undefined && c.fuelBAF !== null) {
+                surcharges.push({ id: 'fuelBAF', value: Number(c.fuelBAF) || 0 });
+              }
+              if (c.tollBOT !== undefined && c.tollBOT !== null) {
+                surcharges.push({ id: 'tollBOT', value: Number(c.tollBOT) || 0 });
+              }
+              if (c.docManagement !== undefined && c.docManagement !== null) {
+                surcharges.push({ id: 'docManagement', value: Number(c.docManagement) || 0 });
+              }
+              // If empty, initialize standard 3
+              if (surcharges.length === 0) {
+                const targetTotal = c.totalPrice || c.price || 18500000;
+                surcharges = [
+                  { id: 'fuelBAF', value: Math.round(targetTotal * 0.08) },
+                  { id: 'tollBOT', value: Math.round(targetTotal * 0.05) },
+                  { id: 'docManagement', value: 150000 },
+                ];
+              }
+            }
+
+            // Restore or migrate activeVas from legacy or current data
+            let vas: MatrixActiveItem[] = [];
+            if (Array.isArray(c.activeVas) && c.activeVas.length > 0) {
+              vas = c.activeVas;
+            } else {
+              vas = [
+                { id: 'vasGps', value: Number(c.vasGps) || 0 },
+                { id: 'vasSeal', value: Number(c.vasSeal) || 0 },
+                { id: 'vasPod', value: Number(c.vasPod) || 0 },
+                { id: 'vasLabor', value: Number(c.vasLabor) || 0 },
+                { id: 'vasTailLift', value: Number(c.vasTailLift) || 0 },
+                { id: 'vasMultiDrop', value: Number(c.vasMultiDrop) || 0 },
+                { id: 'vasDetention', value: c.vasDetention !== undefined ? Number(c.vasDetention) : 150000 },
+              ];
+            }
+
+            const col: VehiclePricingMatrixColumn = {
+              ...c,
+              activeSurcharges: surcharges,
+              activeVas: vas,
+              departureSchedule: c.departureSchedule || route.departureSchedule || route.sla || 'Hàng ngày (Daily - Xuất bến 20:00)',
+            };
+            col.totalPrice = calculateColumnTotalPrice(col);
+            return col;
+          })
         );
       } else {
         const col1 = createDefaultVehiclePricingColumn(
@@ -322,16 +455,25 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
       }
     }
 
+    const currentSurcharges = columns.length > 0 && columns[0].activeSurcharges
+      ? columns[0].activeSurcharges.map(it => ({ ...it, value: 0 }))
+      : undefined;
+    const currentVas = columns.length > 0 && columns[0].activeVas
+      ? columns[0].activeVas.map(it => ({ ...it, value: 0 }))
+      : undefined;
+
     const newCol = createDefaultVehiclePricingColumn(
       chosenBody, 
       chosenTonnage, 
       columns.length > 0 ? Math.round(columns[0].totalPrice * 0.8) : 15000000,
       columns.length > 0 ? columns[0].departureSchedule : route.departureSchedule,
-      columns.length > 0 ? columns[0].transitTimeDisplay : route.sla
+      columns.length > 0 ? columns[0].transitTimeDisplay : route.sla,
+      currentSurcharges,
+      currentVas
     );
+    newCol.totalPrice = calculateColumnTotalPrice(newCol);
     setColumns(prev => [...prev, newCol]);
 
-    // Automatically scroll right to newly added vehicle column
     setTimeout(() => {
       if (scrollContainerRef.current) {
         scrollContainerRef.current.scrollTo({
@@ -372,7 +514,7 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
     }
   };
 
-  // Update specific field in column
+  // Update field in column (such as baseFreight, transitTimeDisplay, etc.)
   const handleUpdateColField = <K extends keyof VehiclePricingMatrixColumn>(
     colId: string,
     field: K,
@@ -382,19 +524,135 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
       prev.map(c => {
         if (c.id !== colId) return c;
         const updated = { ...c, [field]: val };
-        if (
-          field === 'baseFreight' ||
-          field === 'fuelBAF' ||
-          field === 'tollBOT' ||
-          field === 'docManagement'
-        ) {
-          const b = field === 'baseFreight' ? Number(val) : c.baseFreight;
-          const f = field === 'fuelBAF' ? Number(val) : c.fuelBAF;
-          const t = field === 'tollBOT' ? Number(val) : c.tollBOT;
-          const d = field === 'docManagement' ? Number(val) : c.docManagement;
-          updated.totalPrice = b + f + t + d;
+        if (field === 'baseFreight') {
+          updated.totalPrice = calculateColumnTotalPrice(updated);
         }
         return updated;
+      })
+    );
+  };
+
+  // Thêm phụ phí từ LOV vào tất cả các cột xe
+  const handleAddSurchargeFromLOV = (lovId: string) => {
+    const lovItem = TRUCKING_SECTION_1_SURCHARGES_LOV.find(it => it.id === lovId);
+    if (!lovItem) return;
+
+    setColumns(prev =>
+      prev.map(col => {
+        const currentList = col.activeSurcharges || [];
+        if (currentList.some(it => it.id === lovId)) return col;
+        const defaultVal = lovId === 'fuelBAF' 
+          ? Math.round(col.totalPrice * 0.08) 
+          : lovId === 'tollBOT' 
+          ? Math.round(col.totalPrice * 0.05) 
+          : lovId === 'docManagement' 
+          ? 150000 
+          : (lovItem.defaultPrice || 0);
+
+        const updatedList = [...currentList, { id: lovId, value: defaultVal }];
+        const updatedCol = {
+          ...col,
+          activeSurcharges: updatedList,
+        };
+        if (lovId === 'fuelBAF') updatedCol.fuelBAF = defaultVal;
+        if (lovId === 'tollBOT') updatedCol.tollBOT = defaultVal;
+        if (lovId === 'docManagement') updatedCol.docManagement = defaultVal;
+
+        updatedCol.totalPrice = calculateColumnTotalPrice(updatedCol);
+        return updatedCol;
+      })
+    );
+  };
+
+  // Xóa phụ phí khỏi tất cả các cột xe
+  const handleDeleteSurcharge = (lovId: string) => {
+    setColumns(prev =>
+      prev.map(col => {
+        const currentList = col.activeSurcharges || [];
+        const updatedList = currentList.filter(it => it.id !== lovId);
+        const updatedCol = {
+          ...col,
+          activeSurcharges: updatedList,
+        };
+        if (lovId === 'fuelBAF') updatedCol.fuelBAF = 0;
+        if (lovId === 'tollBOT') updatedCol.tollBOT = 0;
+        if (lovId === 'docManagement') updatedCol.docManagement = 0;
+
+        updatedCol.totalPrice = calculateColumnTotalPrice(updatedCol);
+        return updatedCol;
+      })
+    );
+  };
+
+  // Cập nhật giá phụ phí cho 1 xe cụ thể
+  const handleUpdateSurchargeValue = (colId: string, lovId: string, val: number) => {
+    setColumns(prev =>
+      prev.map(col => {
+        if (col.id !== colId) return col;
+        const currentList = col.activeSurcharges || [];
+        const updatedList = currentList.map(it =>
+          it.id === lovId ? { ...it, value: val } : it
+        );
+        const updatedCol = {
+          ...col,
+          activeSurcharges: updatedList,
+        };
+        if (lovId === 'fuelBAF') updatedCol.fuelBAF = val;
+        if (lovId === 'tollBOT') updatedCol.tollBOT = val;
+        if (lovId === 'docManagement') updatedCol.docManagement = val;
+
+        updatedCol.totalPrice = calculateColumnTotalPrice(updatedCol);
+        return updatedCol;
+      })
+    );
+  };
+
+  // Thêm dịch vụ VAS từ LOV vào tất cả các cột xe
+  const handleAddVasFromLOV = (lovId: string) => {
+    const lovItem = TRUCKING_SECTION_2_VAS_LOV.find(it => it.id === lovId);
+    if (!lovItem) return;
+
+    setColumns(prev =>
+      prev.map(col => {
+        const currentList = col.activeVas || [];
+        if (currentList.some(it => it.id === lovId)) return col;
+        const defaultVal = lovItem.defaultPrice || 0;
+        const updatedList = [...currentList, { id: lovId, value: defaultVal }];
+        return {
+          ...col,
+          activeVas: updatedList,
+        };
+      })
+    );
+  };
+
+  // Xóa dịch vụ VAS khỏi tất cả các cột xe
+  const handleDeleteVas = (lovId: string) => {
+    setColumns(prev =>
+      prev.map(col => {
+        const currentList = col.activeVas || [];
+        const updatedList = currentList.filter(it => it.id !== lovId);
+        return {
+          ...col,
+          activeVas: updatedList,
+        };
+      })
+    );
+  };
+
+  // Cập nhật giá dịch vụ VAS cho 1 xe cụ thể
+  const handleUpdateVasValue = (colId: string, lovId: string, val: number) => {
+    setColumns(prev =>
+      prev.map(col => {
+        if (col.id !== colId) return col;
+        const currentList = col.activeVas || [];
+        const updatedList = currentList.map(it =>
+          it.id === lovId ? { ...it, value: val } : it
+        );
+        return {
+          ...col,
+          activeVas: updatedList,
+        };
       })
     );
   };
@@ -589,7 +847,7 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
           </div>
         </div>
 
-        {/* UNIFIED SPREADSHEET TABLE (SEAMLESS GRID - KHÔNG TÁCH KHỐI LƠ LỬNG) */}
+        {/* UNIFIED SPREADSHEET TABLE */}
         <div 
           ref={scrollContainerRef}
           className="custom-matrix-scroll flex-1 min-h-0 w-full overflow-x-auto overflow-y-auto bg-white relative select-text"
@@ -598,11 +856,8 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
           <table className="border-collapse text-xs text-left border-spacing-0 w-max min-w-full table-fixed">
             {/* COLUMN WIDTH DEFINITIONS */}
             <colgroup>
-              {/* Col 1: Hạng mục chi phí */}
               <col style={{ width: '320px', minWidth: '320px' }} />
-              {/* Col 2: ĐVT */}
               <col style={{ width: '110px', minWidth: '110px' }} />
-              {/* Vehicle Columns */}
               {columns.map(col => (
                 <col key={`col-spec-${col.id}`} style={{ width: '270px', minWidth: '270px' }} />
               ))}
@@ -610,11 +865,8 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
 
             {/* TABLE HEADERS (2-TIER WITH CLEAN FREEZE PANES) */}
             <thead>
-              {/* ─────────────────────────────────────────────────────────────
-                  TIER 1: TÊN CỘT + LOẠI THÙNG PHƯƠNG TIỆN
-              ───────────────────────────────────────────────────────────── */}
+              {/* TIER 1: TÊN CỘT + LOẠI THÙNG */}
               <tr className="bg-slate-100/90 border-b border-slate-200">
-                {/* Frozen Corner 1: Hạng mục */}
                 <th className="sticky top-0 left-0 z-40 bg-slate-100 border-r border-b border-slate-200 px-4 py-2.5 text-slate-800 font-bold uppercase text-[11px] select-none">
                   <div className="flex items-center gap-1.5">
                     <FileText className="w-3.5 h-3.5 text-indigo-700" />
@@ -622,12 +874,10 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
                   </div>
                 </th>
 
-                {/* Frozen Corner 2: ĐVT */}
                 <th className="sticky top-0 left-[320px] z-40 bg-slate-100 border-r-2 border-b border-slate-300 px-3 py-2.5 text-center text-slate-800 font-bold uppercase text-[11px] select-none shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)]">
                   CỘT 2: ĐVT
                 </th>
 
-                {/* Vehicle Columns Tier 1 Header */}
                 {columns.map((col, idx) => (
                   <th 
                     key={`head-tier1-${col.id}`}
@@ -666,21 +916,16 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
                 ))}
               </tr>
 
-              {/* ─────────────────────────────────────────────────────────────
-                  TIER 2: PHÂN KHÚC TẢI TRỌNG (HÀNG DƯỚI LOẠI THÙNG)
-              ───────────────────────────────────────────────────────────── */}
+              {/* TIER 2: PHÂN KHÚC TẢI TRỌNG */}
               <tr className="bg-slate-50 border-b-2 border-slate-300">
-                {/* Frozen Left 1: Phân khúc tải trọng */}
                 <th className="sticky top-[66px] left-0 z-40 bg-slate-50 border-r border-b-2 border-slate-300 px-4 py-2 text-slate-600 font-medium text-[11px] italic select-none">
                   Phân khúc tải trọng tương ứng theo loại thùng:
                 </th>
 
-                {/* Frozen Left 2: Tấn / CBM */}
                 <th className="sticky top-[66px] left-[320px] z-40 bg-slate-50 border-r-2 border-b-2 border-slate-300 px-3 py-2 text-center text-slate-600 font-medium text-[11px] select-none shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)]">
                   Tấn / CBM
                 </th>
 
-                {/* Vehicle Columns Tier 2 Header */}
                 {columns.map((col) => {
                   const availableTonnages = TRUCKING_TONNAGE_BY_BODY_MAP[col.truckBodyType] || [];
                   return (
@@ -707,10 +952,10 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
               </tr>
             </thead>
 
-            {/* TABLE BODY (SEAMLESS ROWS & INTEGRATED CELLS) */}
+            {/* TABLE BODY */}
             <tbody className="divide-y divide-slate-200 text-xs">
               {/* ─────────────────────────────────────────────────────────────
-                  SECTION 1: CƯỚC VẬN CHUYỂN & PHỤ PHÍ CỐ ĐỊNH TUYẾN
+                  SECTION 1: CẤU TRÚC ĐƠN GIÁ CƯỚC VẬN CHUYỂN & PHỤ PHÍ CỐ ĐỊNH TUYẾN
               ───────────────────────────────────────────────────────────── */}
               <tr className="bg-indigo-50/70 border-b border-indigo-200">
                 <td 
@@ -724,24 +969,21 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
                 </td>
               </tr>
 
-              {/* DÒNG TỔNG: ĐƠN GIÁ CHÀO THẦU TỔNG (SEAMLESS ROW - KHÔNG TÁCH KHỐI PILL) */}
+              {/* DÒNG TỔNG: ĐƠN GIÁ CHÀO THẦU TỔNG (SEAMLESS ROW) */}
               <tr className="bg-emerald-50/50 border-b-2 border-emerald-200 hover:bg-emerald-50/80 transition-colors">
-                {/* Frozen Col 1: Label */}
                 <td className="sticky left-0 z-20 bg-emerald-50/90 border-r border-slate-200 px-4 py-3 text-slate-900">
                   <div className="text-xs font-black text-emerald-950 flex items-center gap-1.5">
                     <span>☀️ Đơn Giá Chào Thầu Tổng (All-in Freight)</span>
                   </div>
                   <div className="text-[10.5px] text-slate-500 font-normal">
-                    Tự động cộng dồn: Cước chính + BAF + BOT + Chứng từ
+                    Tự động cộng dồn: Cước chính + {(columns[0]?.activeSurcharges || []).length} phụ phí tuyến đang chọn
                   </div>
                 </td>
 
-                {/* Frozen Col 2: ĐVT */}
                 <td className="sticky left-[320px] z-20 bg-emerald-50/90 border-r-2 border-slate-300 px-3 py-3 text-center text-emerald-900 font-bold text-xs shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)]">
                   VND / Chuyến
                 </td>
 
-                {/* Vehicle Columns: Sum value (Integrated seamlessly into the row) */}
                 {columns.map((col) => (
                   <td 
                     key={`total-${col.id}`} 
@@ -757,12 +999,21 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
                 ))}
               </tr>
 
-              {/* 1.1 Cước vận chuyển chính */}
-              <tr className="border-b border-slate-200 hover:bg-indigo-50/20 transition-colors">
-                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-medium text-slate-800">
-                  • Cước vận chuyển chính (Base Freight) *
+              {/* 1.1 CƯỚC VẬN CHUYỂN CHÍNH (BẮT BUỘC - KHÔNG THỂ XÓA) */}
+              <tr className="border-b border-slate-200 hover:bg-indigo-50/20 transition-colors bg-white">
+                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-bold text-slate-900">
+                  <div className="flex items-center justify-between gap-1.5">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className="text-indigo-600 font-bold">•</span>
+                      <span className="truncate">Cước vận chuyển chính (Base Freight)</span>
+                      <span className="text-rose-500 font-black">*</span>
+                    </div>
+                    <span className="text-[9.5px] font-black px-1.5 py-0.5 rounded bg-rose-50 text-rose-600 border border-rose-200 shrink-0 select-none uppercase tracking-wide">
+                      Bắt buộc
+                    </span>
+                  </div>
                 </td>
-                <td className="sticky left-[320px] z-20 bg-slate-50 border-r-2 border-slate-300 px-3 py-2.5 text-center text-slate-500 font-medium shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)]">
+                <td className="sticky left-[320px] z-20 bg-slate-50 border-r-2 border-slate-300 px-3 py-2.5 text-center text-slate-600 font-semibold text-xs shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)] select-none">
                   VND / Chuyến
                 </td>
                 {columns.map((col) => (
@@ -781,76 +1032,130 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
                 ))}
               </tr>
 
-              {/* 1.2 Phụ phí nhiên liệu BAF */}
-              <tr className="border-b border-slate-200 hover:bg-indigo-50/20 transition-colors">
-                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-medium text-slate-800">
-                  • Phụ phí nhiên liệu (BAF Fuel Surcharge)
-                </td>
-                <td className="sticky left-[320px] z-20 bg-slate-50 border-r-2 border-slate-300 px-3 py-2.5 text-center text-slate-500 font-medium shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)]">
-                  VND / Chuyến
-                </td>
-                {columns.map((col) => (
-                  <td key={`baf-${col.id}`} className="border-r border-slate-200 px-3 py-1.5">
-                    <div className="relative flex items-center">
-                      <input
-                        type="number"
-                        value={col.fuelBAF || ''}
-                        onChange={(e) => handleUpdateColField(col.id, 'fuelBAF', parseFloat(e.target.value) || 0)}
-                        placeholder="0"
-                        className="w-full py-1.5 pl-3 pr-7 text-right font-mono font-medium text-xs text-slate-900 bg-white border border-slate-200 rounded-lg hover:border-slate-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-2xs"
-                      />
-                      <span className="absolute right-2.5 text-[11px] font-semibold text-slate-400 pointer-events-none">₫</span>
-                    </div>
-                  </td>
-                ))}
-              </tr>
+              {/* CÁC PHỤ PHÍ TUYẾN CHỌN TỪ LOV (CÓ THỂ XÓA - TÊN VÀ ĐVT CỐ ĐỊNH THEO LOV) */}
+              {(columns[0]?.activeSurcharges || []).map((surcharge) => {
+                const lovItem = TRUCKING_SECTION_1_SURCHARGES_LOV.find(it => it.id === surcharge.id) || {
+                  id: surcharge.id,
+                  name: surcharge.id,
+                  unit: 'VND / Chuyến',
+                };
 
-              {/* 1.3 Phí vé cầu đường BOT */}
-              <tr className="border-b border-slate-200 hover:bg-indigo-50/20 transition-colors">
-                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-medium text-slate-800">
-                  • Phí vé cầu đường BOT & Bốc xếp hạ tầng
-                </td>
-                <td className="sticky left-[320px] z-20 bg-slate-50 border-r-2 border-slate-300 px-3 py-2.5 text-center text-slate-500 font-medium shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)]">
-                  VND / Chuyến
-                </td>
-                {columns.map((col) => (
-                  <td key={`bot-${col.id}`} className="border-r border-slate-200 px-3 py-1.5">
-                    <div className="relative flex items-center">
-                      <input
-                        type="number"
-                        value={col.tollBOT || ''}
-                        onChange={(e) => handleUpdateColField(col.id, 'tollBOT', parseFloat(e.target.value) || 0)}
-                        placeholder="0"
-                        className="w-full py-1.5 pl-3 pr-7 text-right font-mono font-medium text-xs text-slate-900 bg-white border border-slate-200 rounded-lg hover:border-slate-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-2xs"
-                      />
-                      <span className="absolute right-2.5 text-[11px] font-semibold text-slate-400 pointer-events-none">₫</span>
-                    </div>
-                  </td>
-                ))}
-              </tr>
+                return (
+                  <tr key={`surcharge-row-${surcharge.id}`} className="border-b border-slate-200 hover:bg-indigo-50/20 transition-colors">
+                    <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2 font-medium text-slate-800">
+                      <div className="flex items-center justify-between gap-1.5">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteSurcharge(surcharge.id)}
+                            className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors cursor-pointer shrink-0"
+                            title={`Xóa phụ phí "${lovItem.name}"`}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                          <span className="text-slate-400 text-xs shrink-0">•</span>
+                          <span className="text-xs font-semibold text-slate-800 truncate" title={lovItem.name}>
+                            {lovItem.name}
+                          </span>
+                        </div>
+                        <span className="text-[9.5px] font-semibold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200 shrink-0 select-none">
+                          LOV
+                        </span>
+                      </div>
+                    </td>
+                    <td className="sticky left-[320px] z-20 bg-slate-50 border-r-2 border-slate-300 px-3 py-2 text-center text-slate-600 font-medium text-xs shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)] select-none">
+                      {lovItem.unit}
+                    </td>
+                    {columns.map((col) => {
+                      const itemVal = (col.activeSurcharges || []).find(it => it.id === surcharge.id)?.value || 0;
+                      return (
+                        <td key={`surcharge-val-${surcharge.id}-${col.id}`} className="border-r border-slate-200 px-3 py-1.5">
+                          <div className="relative flex items-center">
+                            <input
+                              type="number"
+                              value={itemVal || ''}
+                              onChange={(e) => handleUpdateSurchargeValue(col.id, surcharge.id, parseFloat(e.target.value) || 0)}
+                              placeholder="0"
+                              className="w-full py-1.5 pl-3 pr-7 text-right font-mono font-medium text-xs text-slate-900 bg-white border border-slate-200 rounded-lg hover:border-slate-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-2xs"
+                            />
+                            <span className="absolute right-2.5 text-[11px] font-semibold text-slate-400 pointer-events-none">₫</span>
+                          </div>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
 
-              {/* 1.4 Phí chứng từ seal */}
-              <tr className="border-b border-slate-200 hover:bg-indigo-50/20 transition-colors">
-                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-medium text-slate-800">
-                  • Phí chứng từ, seal & quản lý đơn
+              {/* HÀNG THÊM PHỤ PHÍ TỪ DANH MỤC LOV */}
+              <tr className="bg-slate-50/80 border-b border-indigo-100 hover:bg-indigo-50/30 transition-colors">
+                <td className="sticky left-0 z-20 bg-slate-50/95 border-r border-slate-200 px-4 py-2">
+                  {(() => {
+                    const activeIds = (columns[0]?.activeSurcharges || []).map(a => a.id);
+                    const unadded = TRUCKING_SECTION_1_SURCHARGES_LOV.filter(l => !activeIds.includes(l.id));
+
+                    if (unadded.length === 0) {
+                      return (
+                        <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-700 py-1">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                          <span>Đã thêm toàn bộ phụ phí từ danh mục chuẩn</span>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div className="flex items-center gap-2">
+                        <select
+                          defaultValue=""
+                          onChange={(e) => {
+                            if (e.target.value) {
+                              handleAddSurchargeFromLOV(e.target.value);
+                              e.target.value = '';
+                            }
+                          }}
+                          className="w-full px-3 py-1.5 text-xs font-bold text-indigo-700 bg-white hover:border-indigo-400 border border-indigo-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer shadow-2xs"
+                        >
+                          <option value="" disabled>+ Chọn phụ phí thêm từ LOV ({unadded.length} mục)...</option>
+                          {unadded.map(item => (
+                            <option key={item.id} value={item.id}>
+                              + {item.name} — [{item.unit}]
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    );
+                  })()}
                 </td>
-                <td className="sticky left-[320px] z-20 bg-slate-50 border-r-2 border-slate-300 px-3 py-2.5 text-center text-slate-500 font-medium shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)]">
-                  VND / Chuyến
+                <td className="sticky left-[320px] z-20 bg-slate-50/95 border-r-2 border-slate-300 px-2 py-2 text-center text-slate-400 text-[10px] font-medium italic shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)] select-none">
+                  Theo LOV
                 </td>
-                {columns.map((col) => (
-                  <td key={`doc-${col.id}`} className="border-r border-slate-200 px-3 py-1.5">
-                    <div className="relative flex items-center">
-                      <input
-                        type="number"
-                        value={col.docManagement || ''}
-                        onChange={(e) => handleUpdateColField(col.id, 'docManagement', parseFloat(e.target.value) || 0)}
-                        placeholder="0"
-                        className="w-full py-1.5 pl-3 pr-7 text-right font-mono font-medium text-xs text-slate-900 bg-white border border-slate-200 rounded-lg hover:border-slate-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-2xs"
-                      />
-                      <span className="absolute right-2.5 text-[11px] font-semibold text-slate-400 pointer-events-none">₫</span>
-                    </div>
-                  </td>
-                ))}
+                <td colSpan={columns.length} className="px-3 py-2 text-slate-500 text-xs bg-slate-50/60">
+                  {(() => {
+                    const activeIds = (columns[0]?.activeSurcharges || []).map(a => a.id);
+                    const unadded = TRUCKING_SECTION_1_SURCHARGES_LOV.filter(l => !activeIds.includes(l.id));
+
+                    if (unadded.length === 0) {
+                      return <span className="text-[11px] text-slate-400 italic">Tất cả phụ phí chuẩn đã được hiển thị trên bảng biểu giá.</span>;
+                    }
+
+                    return (
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-[10.5px] font-bold text-slate-500 uppercase tracking-wide mr-1">Thêm nhanh:</span>
+                        {unadded.map((item) => (
+                          <button
+                            key={item.id}
+                            type="button"
+                            onClick={() => handleAddSurchargeFromLOV(item.id)}
+                            className="px-2.5 py-0.5 text-[11px] font-semibold text-slate-700 bg-white hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-300 border border-slate-200 rounded-lg transition-all cursor-pointer shadow-2xs"
+                            title={`Thêm "${item.name}" [${item.unit}]`}
+                          >
+                            + {item.name.split(' (')[0]}
+                          </button>
+                        ))}
+                      </div>
+                    );
+                  })()}
+                </td>
               </tr>
 
               {/* ─────────────────────────────────────────────────────────────
@@ -868,254 +1173,150 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
                 </td>
               </tr>
 
-              {/* 2.1 GPS Live */}
-              <tr className="border-b border-slate-200 hover:bg-indigo-50/20 transition-colors">
-                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-medium text-slate-800">
-                  • Định vị GPS Real-time & Link tracking live
-                </td>
-                <td className="sticky left-[320px] z-20 bg-slate-50 border-r-2 border-slate-300 px-3 py-2.5 text-center text-slate-500 font-medium shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)]">
-                  VND / Chuyến
-                </td>
-                {columns.map((col) => (
-                  <td key={`gps-${col.id}`} className="border-r border-slate-200 px-3 py-1.5">
-                    <div className="flex items-center gap-1.5">
-                      <div className="relative flex-1">
-                        <input
-                          type="number"
-                          value={col.vasGps || ''}
-                          onChange={(e) => handleUpdateColField(col.id, 'vasGps', parseFloat(e.target.value) || 0)}
-                          placeholder="0"
-                          className="w-full py-1 pl-2.5 pr-5 text-right font-mono text-xs text-slate-800 bg-white border border-slate-200 rounded-lg hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                        />
-                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none">₫</span>
+              {/* CÁC DỊCH VỤ VAS CHỌN TỪ LOV (CÓ THỂ XÓA - TÊN VÀ ĐVT CỐ ĐỊNH THEO LOV) */}
+              {(columns[0]?.activeVas || []).map((vas) => {
+                const lovItem = TRUCKING_SECTION_2_VAS_LOV.find(it => it.id === vas.id) || {
+                  id: vas.id,
+                  name: vas.id,
+                  unit: 'VND / Chuyến',
+                  defaultPrice: 0,
+                };
+
+                return (
+                  <tr key={`vas-row-${vas.id}`} className="border-b border-slate-200 hover:bg-indigo-50/20 transition-colors">
+                    <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2 font-medium text-slate-800">
+                      <div className="flex items-center justify-between gap-1.5">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteVas(vas.id)}
+                            className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors cursor-pointer shrink-0"
+                            title={`Xóa dịch vụ VAS "${lovItem.name}"`}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                          <span className="text-slate-400 text-xs shrink-0">•</span>
+                          <span className="text-xs font-semibold text-slate-800 truncate" title={lovItem.name}>
+                            {lovItem.name}
+                          </span>
+                        </div>
+                        <span className="text-[9.5px] font-semibold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0 select-none">
+                          VAS
+                        </span>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => handleUpdateColField(col.id, 'vasGps', col.vasGps === 0 ? 100000 : 0)}
-                        className={`px-2 py-1 text-[10px] font-bold rounded-md border transition-all cursor-pointer shrink-0 ${
-                          col.vasGps === 0 
-                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' 
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border-slate-200'
-                        }`}
-                        title="Chuyển đổi Miễn phí / Có phí"
-                      >
-                        {col.vasGps === 0 ? 'Miễn phí' : 'Có phí'}
-                      </button>
-                    </div>
-                  </td>
-                ))}
-              </tr>
+                    </td>
+                    <td className="sticky left-[320px] z-20 bg-slate-50 border-r-2 border-slate-300 px-3 py-2 text-center text-slate-600 font-medium text-xs shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)] select-none">
+                      {lovItem.unit}
+                    </td>
+                    {columns.map((col) => {
+                      const itemVal = (col.activeVas || []).find(it => it.id === vas.id)?.value || 0;
+                      const isFree = itemVal === 0;
 
-              {/* 2.2 Kẹp chì seal */}
-              <tr className="border-b border-slate-200 hover:bg-indigo-50/20 transition-colors">
-                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-medium text-slate-800">
-                  • Kẹp chì Seal & Chụp ảnh biên bản giao nhận
-                </td>
-                <td className="sticky left-[320px] z-20 bg-slate-50 border-r-2 border-slate-300 px-3 py-2.5 text-center text-slate-500 font-medium shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)]">
-                  VND / Chuyến
-                </td>
-                {columns.map((col) => (
-                  <td key={`seal-${col.id}`} className="border-r border-slate-200 px-3 py-1.5">
-                    <div className="flex items-center gap-1.5">
-                      <div className="relative flex-1">
-                        <input
-                          type="number"
-                          value={col.vasSeal || ''}
-                          onChange={(e) => handleUpdateColField(col.id, 'vasSeal', parseFloat(e.target.value) || 0)}
-                          placeholder="0"
-                          className="w-full py-1 pl-2.5 pr-5 text-right font-mono text-xs text-slate-800 bg-white border border-slate-200 rounded-lg hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                        />
-                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none">₫</span>
+                      return (
+                        <td key={`vas-val-${vas.id}-${col.id}`} className="border-r border-slate-200 px-3 py-1.5">
+                          <div className="flex items-center gap-1.5">
+                            <div className="relative flex-1">
+                              <input
+                                type="number"
+                                value={itemVal || ''}
+                                onChange={(e) => handleUpdateVasValue(col.id, vas.id, parseFloat(e.target.value) || 0)}
+                                placeholder="0"
+                                className="w-full py-1 pl-2.5 pr-5 text-right font-mono text-xs text-slate-800 bg-white border border-slate-200 rounded-lg hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-2xs"
+                              />
+                              <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none">₫</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateVasValue(col.id, vas.id, isFree ? (lovItem.defaultPrice || 100000) : 0)}
+                              className={`px-2 py-1 text-[10px] font-bold rounded-md border transition-all cursor-pointer shrink-0 ${
+                                isFree
+                                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border-slate-200'
+                              }`}
+                              title="Chuyển đổi Miễn phí / Có phí"
+                            >
+                              {isFree ? 'Miễn phí' : 'Có phí'}
+                            </button>
+                          </div>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
+
+              {/* HÀNG THÊM DỊCH VỤ VAS TỪ DANH MỤC LOV */}
+              <tr className="bg-slate-50/80 border-b border-indigo-100 hover:bg-indigo-50/30 transition-colors">
+                <td className="sticky left-0 z-20 bg-slate-50/95 border-r border-slate-200 px-4 py-2">
+                  {(() => {
+                    const activeIds = (columns[0]?.activeVas || []).map(a => a.id);
+                    const unadded = TRUCKING_SECTION_2_VAS_LOV.filter(l => !activeIds.includes(l.id));
+
+                    if (unadded.length === 0) {
+                      return (
+                        <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-700 py-1">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                          <span>Đã thêm toàn bộ dịch vụ VAS từ danh mục chuẩn</span>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div className="flex items-center gap-2">
+                        <select
+                          defaultValue=""
+                          onChange={(e) => {
+                            if (e.target.value) {
+                              handleAddVasFromLOV(e.target.value);
+                              e.target.value = '';
+                            }
+                          }}
+                          className="w-full px-3 py-1.5 text-xs font-bold text-indigo-700 bg-white hover:border-indigo-400 border border-indigo-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer shadow-2xs"
+                        >
+                          <option value="" disabled>+ Chọn tiện ích VAS thêm từ LOV ({unadded.length} dịch vụ)...</option>
+                          {unadded.map(item => (
+                            <option key={item.id} value={item.id}>
+                              + {item.name} — [{item.unit}]
+                            </option>
+                          ))}
+                        </select>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => handleUpdateColField(col.id, 'vasSeal', col.vasSeal === 0 ? 50000 : 0)}
-                        className={`px-2 py-1 text-[10px] font-bold rounded-md border transition-all cursor-pointer shrink-0 ${
-                          col.vasSeal === 0 
-                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' 
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border-slate-200'
-                        }`}
-                      >
-                        {col.vasSeal === 0 ? 'Miễn phí' : 'Có phí'}
-                      </button>
-                    </div>
-                  </td>
-                ))}
-              </tr>
+                    );
+                  })()}
+                </td>
+                <td className="sticky left-[320px] z-20 bg-slate-50/95 border-r-2 border-slate-300 px-2 py-2 text-center text-slate-400 text-[10px] font-medium italic shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)] select-none">
+                  Theo LOV
+                </td>
+                <td colSpan={columns.length} className="px-3 py-2 text-slate-500 text-xs bg-slate-50/60">
+                  {(() => {
+                    const activeIds = (columns[0]?.activeVas || []).map(a => a.id);
+                    const unadded = TRUCKING_SECTION_2_VAS_LOV.filter(l => !activeIds.includes(l.id));
 
-              {/* 2.3 Thu hồi POD */}
-              <tr className="border-b border-slate-200 hover:bg-indigo-50/20 transition-colors">
-                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-medium text-slate-800">
-                  • Thu hồi chứng từ gốc (POD) về văn phòng
-                </td>
-                <td className="sticky left-[320px] z-20 bg-slate-50 border-r-2 border-slate-300 px-3 py-2.5 text-center text-slate-500 font-medium shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)]">
-                  VND / Bộ
-                </td>
-                {columns.map((col) => (
-                  <td key={`pod-${col.id}`} className="border-r border-slate-200 px-3 py-1.5">
-                    <div className="flex items-center gap-1.5">
-                      <div className="relative flex-1">
-                        <input
-                          type="number"
-                          value={col.vasPod || ''}
-                          onChange={(e) => handleUpdateColField(col.id, 'vasPod', parseFloat(e.target.value) || 0)}
-                          placeholder="0"
-                          className="w-full py-1 pl-2.5 pr-5 text-right font-mono text-xs text-slate-800 bg-white border border-slate-200 rounded-lg hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                        />
-                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none">₫</span>
+                    if (unadded.length === 0) {
+                      return <span className="text-[11px] text-slate-400 italic">Tất cả tiện ích VAS chuẩn đã được hiển thị trên bảng biểu giá.</span>;
+                    }
+
+                    return (
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-[10.5px] font-bold text-slate-500 uppercase tracking-wide mr-1">Thêm nhanh:</span>
+                        {unadded.map((item) => (
+                          <button
+                            key={item.id}
+                            type="button"
+                            onClick={() => handleAddVasFromLOV(item.id)}
+                            className="px-2.5 py-0.5 text-[11px] font-semibold text-slate-700 bg-white hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-300 border border-slate-200 rounded-lg transition-all cursor-pointer shadow-2xs"
+                            title={`Thêm "${item.name}" [${item.unit}]`}
+                          >
+                            + {item.name.split(' (')[0]}
+                          </button>
+                        ))}
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => handleUpdateColField(col.id, 'vasPod', col.vasPod === 0 ? 100000 : 0)}
-                        className={`px-2 py-1 text-[10px] font-bold rounded-md border transition-all cursor-pointer shrink-0 ${
-                          col.vasPod === 0 
-                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' 
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border-slate-200'
-                        }`}
-                      >
-                        {col.vasPod === 0 ? 'Miễn phí' : 'Có phí'}
-                      </button>
-                    </div>
-                  </td>
-                ))}
+                    );
+                  })()}
+                </td>
               </tr>
 
-              {/* 2.4 Nhân công bốc xếp */}
-              <tr className="border-b border-slate-200 hover:bg-indigo-50/20 transition-colors">
-                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-medium text-slate-800">
-                  • Nhân công bốc xếp 2 đầu kho
-                </td>
-                <td className="sticky left-[320px] z-20 bg-slate-50 border-r-2 border-slate-300 px-3 py-2.5 text-center text-slate-500 font-medium shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)]">
-                  VND / Lần
-                </td>
-                {columns.map((col) => (
-                  <td key={`labor-${col.id}`} className="border-r border-slate-200 px-3 py-1.5">
-                    <div className="flex items-center gap-1.5">
-                      <div className="relative flex-1">
-                        <input
-                          type="number"
-                          value={col.vasLabor || ''}
-                          onChange={(e) => handleUpdateColField(col.id, 'vasLabor', parseFloat(e.target.value) || 0)}
-                          placeholder="0"
-                          className="w-full py-1 pl-2.5 pr-5 text-right font-mono text-xs text-slate-800 bg-white border border-slate-200 rounded-lg hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                        />
-                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none">₫</span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleUpdateColField(col.id, 'vasLabor', col.vasLabor === 0 ? 350000 : 0)}
-                        className={`px-2 py-1 text-[10px] font-bold rounded-md border transition-all cursor-pointer shrink-0 ${
-                          col.vasLabor === 0 
-                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' 
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border-slate-200'
-                        }`}
-                      >
-                        {col.vasLabor === 0 ? 'Miễn phí' : 'Có phí'}
-                      </button>
-                    </div>
-                  </td>
-                ))}
-              </tr>
-
-              {/* 2.5 Bửng nâng */}
-              <tr className="border-b border-slate-200 hover:bg-indigo-50/20 transition-colors">
-                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-medium text-slate-800">
-                  • Xe bửng nâng thủy lực hạ pallet
-                </td>
-                <td className="sticky left-[320px] z-20 bg-slate-50 border-r-2 border-slate-300 px-3 py-2.5 text-center text-slate-500 font-medium shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)]">
-                  VND / Chuyến
-                </td>
-                {columns.map((col) => (
-                  <td key={`tail-${col.id}`} className="border-r border-slate-200 px-3 py-1.5">
-                    <div className="flex items-center gap-1.5">
-                      <div className="relative flex-1">
-                        <input
-                          type="number"
-                          value={col.vasTailLift || ''}
-                          onChange={(e) => handleUpdateColField(col.id, 'vasTailLift', parseFloat(e.target.value) || 0)}
-                          placeholder="0"
-                          className="w-full py-1 pl-2.5 pr-5 text-right font-mono text-xs text-slate-800 bg-white border border-slate-200 rounded-lg hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                        />
-                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none">₫</span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleUpdateColField(col.id, 'vasTailLift', col.vasTailLift === 0 ? 200000 : 0)}
-                        className={`px-2 py-1 text-[10px] font-bold rounded-md border transition-all cursor-pointer shrink-0 ${
-                          col.vasTailLift === 0 
-                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' 
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border-slate-200'
-                        }`}
-                      >
-                        {col.vasTailLift === 0 ? 'Miễn phí' : 'Có phí'}
-                      </button>
-                    </div>
-                  </td>
-                ))}
-              </tr>
-
-              {/* 2.6 Giao đa điểm */}
-              <tr className="border-b border-slate-200 hover:bg-indigo-50/20 transition-colors">
-                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-medium text-slate-800">
-                  • Phụ phí giao đa điểm (Multi-drop)
-                </td>
-                <td className="sticky left-[320px] z-20 bg-slate-50 border-r-2 border-slate-300 px-3 py-2.5 text-center text-slate-500 font-medium shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)]">
-                  VND / Điểm
-                </td>
-                {columns.map((col) => (
-                  <td key={`multi-${col.id}`} className="border-r border-slate-200 px-3 py-1.5">
-                    <div className="flex items-center gap-1.5">
-                      <div className="relative flex-1">
-                        <input
-                          type="number"
-                          value={col.vasMultiDrop || ''}
-                          onChange={(e) => handleUpdateColField(col.id, 'vasMultiDrop', parseFloat(e.target.value) || 0)}
-                          placeholder="0"
-                          className="w-full py-1 pl-2.5 pr-5 text-right font-mono text-xs text-slate-800 bg-white border border-slate-200 rounded-lg hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                        />
-                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none">₫</span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleUpdateColField(col.id, 'vasMultiDrop', col.vasMultiDrop === 0 ? 300000 : 0)}
-                        className={`px-2 py-1 text-[10px] font-bold rounded-md border transition-all cursor-pointer shrink-0 ${
-                          col.vasMultiDrop === 0 
-                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' 
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border-slate-200'
-                        }`}
-                      >
-                        {col.vasMultiDrop === 0 ? 'Miễn phí' : 'Có phí'}
-                      </button>
-                    </div>
-                  </td>
-                ))}
-              </tr>
-
-              {/* 2.7 Neo xe chờ hàng */}
-              <tr className="border-b border-slate-200 hover:bg-indigo-50/20 transition-colors">
-                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-medium text-slate-800">
-                  • Phí neo xe chờ bốc dỡ (sau giờ miễn phí)
-                </td>
-                <td className="sticky left-[320px] z-20 bg-slate-50 border-r-2 border-slate-300 px-3 py-2.5 text-center text-slate-500 font-medium shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)]">
-                  VND / Giờ
-                </td>
-                {columns.map((col) => (
-                  <td key={`detention-${col.id}`} className="border-r border-slate-200 px-3 py-1.5">
-                    <div className="relative flex items-center">
-                      <input
-                        type="number"
-                        value={col.vasDetention || ''}
-                        onChange={(e) => handleUpdateColField(col.id, 'vasDetention', parseFloat(e.target.value) || 0)}
-                        placeholder="150000"
-                        className="w-full py-1.5 pl-3 pr-8 text-right font-mono font-medium text-xs text-slate-900 bg-white border border-slate-200 rounded-lg hover:border-slate-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-2xs"
-                      />
-                      <span className="absolute right-2.5 text-[10.5px] font-semibold text-slate-400 pointer-events-none">₫/h</span>
-                    </div>
-                  </td>
-                ))}
-              </tr>
-
-              {/* ─────────────────────────────────────────────────────────────
+{/* ─────────────────────────────────────────────────────────────
                   SECTION 3: CAM KẾT VẬN HÀNH & ĐIỀU KHOẢN THƯƠNG MẠI
               ───────────────────────────────────────────────────────────── */}
               <tr className="bg-indigo-50/70 border-b border-indigo-200">
