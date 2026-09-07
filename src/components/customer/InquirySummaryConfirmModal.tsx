@@ -704,7 +704,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                   : isLcl
                   ? (isMultiPoint ? `${totalPickupCount} Kho CFS Lấy ↔ ${totalDeliveryCount} Kho CFS Giao` : 'Tuyến Kho CFS - Kho CFS (CFS ↔ CFS)')
                   : isFcl
-                  ? (isMultiPoint ? `${totalPickupCount} Cảng Bốc (POL) ↔ ${totalDeliveryCount} Cảng Dỡ (POD)` : 'Tuyến Cảng - Cảng (POL - POD)')
+                  ? (isMultiPoint ? `${totalPickupCount} Cảng Bốc Hàng (POL) ↔ ${totalDeliveryCount} Cảng Dỡ Hàng (POD)` : 'Tuyến Cảng Bốc Hàng (POL) ↔ Cảng Dỡ Hàng (POD)')
                   : (isMultiPoint ? `${totalPickupCount} Điểm Lấy ↔ ${totalDeliveryCount} Điểm Giao` : 'Tuyến Trực Tiếp 1 Điểm')}
               </span>
             </div>
@@ -981,7 +981,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
 
                       <div className="p-3 rounded-xl bg-white border border-cyan-200/90 shadow-2xs">
                         <span className="text-[10px] font-extrabold text-cyan-700 uppercase tracking-wide">
-                          {isLcl ? '📦 Kho CFS Bốc Hàng:' : '⚓ Cảng Biển Bốc Hàng (POL):'}
+                          {isLcl ? '📦 Kho CFS Bốc Hàng:' : '⚓ Cảng Bốc Hàng (Port of Loading - POL):'}
                         </span>
                         <p className="font-extrabold text-slate-900 text-sm mt-0.5">
                           {ocean?.polPort || inquiry.origin || 'Cảng bốc / Kho CFS'}
@@ -1019,7 +1019,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
 
                       <div className="p-3 rounded-xl bg-white border border-teal-200/90 shadow-2xs">
                         <span className="text-[10px] font-extrabold text-teal-700 uppercase tracking-wide">
-                          {isLcl ? '📦 Kho CFS Giao Hàng:' : '⚓ Cảng Biển Dỡ Hàng (POD):'}
+                          {isLcl ? '📦 Kho CFS Giao Hàng:' : '⚓ Cảng Dỡ Hàng (Port of Discharge - POD):'}
                         </span>
                         <p className="font-extrabold text-slate-900 text-sm mt-0.5">
                           {ocean?.podPort || inquiry.destination || 'Cảng dỡ / Kho CFS'}
