@@ -51,6 +51,16 @@ import {
   VehiclePricingMatrixColumn, 
   createDefaultVehiclePricingColumn 
 } from './TruckingFtlCostMatrixModal';
+import {
+  OceanFclCostMatrixModal,
+  ContainerPricingMatrixColumn,
+  createDefaultContainerPricingColumn,
+} from './OceanFclCostMatrixModal';
+import {
+  RailFclCostMatrixModal,
+  RailContainerPricingMatrixColumn,
+  createDefaultRailContainerPricingColumn,
+} from './RailFclCostMatrixModal';
 
 export const DAYS_OF_WEEK_LOV = [
   { id: 'T2', name: 'Thứ 2', short: 'T2' },
@@ -128,6 +138,14 @@ export const RAIL_OPERATORS_LOV = [
   'Công ty CP Vận tải Đường sắt Hà Nội (Haraco)',
   'Công ty CP Vận tải Đường sắt Sài Gòn',
   'Khác (Nhập đơn vị vận hành khác)...',
+];
+
+export const RAIL_TRADE_LANE_CORRIDORS_LOV = [
+  'Tuyến Bắc - Nam (Hà Nội ⇄ TP.HCM / Bình Dương)',
+  'Tuyến Liên Vận Quốc Tế (Việt Nam ⇄ Trung Quốc / Châu Âu qua Ga Đồng Đăng)',
+  'Tuyến Phía Bắc (Hà Nội ⇄ Hải Phòng / Lào Cai / Lạng Sơn)',
+  'Tuyến Miền Trung (Đà Nẵng ⇄ Quảng Nam / Bình Định)',
+  'Khác (Nhập hành lang tuyến khác)...',
 ];
 
 export const AIR_TRADE_LANE_REGIONS_LOV = [
@@ -1136,6 +1154,7 @@ export interface CapabilityRouteItem {
   routeCode?: string; // Mã tuyến tự sinh (VD: RC-FTL-001)
   region?: string; // Phân vùng thương mại hàng hải (Bắc Mỹ, Châu Á, Châu Âu...)
   route: string;
+  customRoute?: string;
   origin: string;
   destination: string;
   truckBodyType?: string;
@@ -1158,6 +1177,9 @@ export interface CapabilityRouteItem {
   promotionPercent: number;
   ltlPricing?: LtlTieredPricingConfig;
   vehiclePricingMatrix?: VehiclePricingMatrixColumn[];
+  containerPricingMatrix?: ContainerPricingMatrixColumn[];
+  railContainerPricingMatrix?: RailContainerPricingMatrixColumn[];
+  cargoType?: 'general' | 'reefer' | 'hazmat';
   // Truong thong tin chuyen biet cho Kho Bai 3PL (Warehousing)
   warehouseCode?: string;
   warehouseName?: string;
@@ -2778,15 +2800,17 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
               {
                 id: 'r-rail-1',
                 routeCode: 'RC-RAIL-001',
-                route: 'Ga Sóng Thần ⇄ Ga Giáp Bát',
-                origin: 'Ga Sóng Thần (Bình Dương)',
+                route: 'Tuyến Bắc - Nam (Hà Nội ⇄ TP.HCM / Bình Dương)',
+                origin: 'Ga Sóng Thần (Bình Dương / TP.HCM)',
                 destination: 'Ga Giáp Bát (Hà Nội)',
-                vehicleType: 'Container 40ft',
+                shippingLine: 'Đường Sắt Việt Nam (VNR)',
+                vehicleType: 'Container 40ft GP / 40HC đường sắt —— (76 CBM / 28.5 Tấn)',
                 pricingUnit: 'Cont',
                 price: 21000000,
                 currency: 'VND',
-                sla: '65 - 72 giờ',
+                sla: '65 - 72 Giờ',
                 transitType: 'Direct',
+                departureSchedule: 'Thứ 3, Thứ 6 hàng tuần (Cắt bãi ga 18:00)',
                 freeDemDetDays: 7,
                 validUntil: '2026-12-31',
                 promotionPercent: 10,
@@ -2886,14 +2910,20 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             defaultRoutes: [
               {
                 id: 'r-rail-ref-1',
-                route: 'Sóng Thần ⇄ Đồng Đăng (Lạng Sơn)',
+                routeCode: 'RC-RAIL-REF-001',
+                route: 'Tuyến Liên Vận Quốc Tế (Việt Nam ⇄ Trung Quốc / Châu Âu qua Ga Đồng Đăng)',
                 origin: 'Ga Sóng Thần (Bình Dương)',
                 destination: 'Ga Đồng Đăng (Lạng Sơn)',
-                vehicleType: 'Container 40RF đường sắt',
+                shippingLine: 'Công ty CP Vận tải & Thương mại Đường sắt (Ratraco)',
+                vehicleType: 'Container 40RF Lạnh đường sắt —— (Kèm máy phát điện Genset -20°C)',
                 pricingUnit: 'Cont 40RF',
                 price: 34000000,
                 currency: 'VND',
-                sla: '72 giờ',
+                sla: '72 Giờ',
+                transitType: 'Direct',
+                departureSchedule: 'Thứ 2, Thứ 5 hàng tuần (Cắt bãi ga 16:00)',
+                freeDemDetDays: 5,
+                validUntil: '2026-12-31',
                 pricingStyle: 'All-in',
                 promotionPercent: 5,
               },
@@ -2939,14 +2969,20 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             defaultRoutes: [
               {
                 id: 'r-rail-haz-1',
-                route: 'Sóng Thần ⇄ Yên Viên',
+                routeCode: 'RC-RAIL-HAZ-001',
+                route: 'Tuyến Bắc - Nam (Hà Nội ⇄ TP.HCM / Bình Dương)',
                 origin: 'Ga Sóng Thần (Bình Dương)',
                 destination: 'Ga Yên Viên (Hà Nội)',
-                vehicleType: 'Container nguy hiểm đường sắt',
+                shippingLine: 'Công ty CP Vận tải Đường sắt Hà Nội (Haraco)',
+                vehicleType: 'Container 40ft IMO Hazmat đường sắt —— (Hóa chất đóng pallet/kiện)',
                 pricingUnit: 'Cont 40ft',
                 price: 38000000,
                 currency: 'VND',
-                sla: '4 - 5 ngày',
+                sla: '4 - 5 Ngày',
+                transitType: 'Direct',
+                departureSchedule: 'Thứ 4, Thứ 7 hàng tuần (Cắt bãi ga 17:00)',
+                freeDemDetDays: 5,
+                validUntil: '2026-12-31',
                 pricingStyle: 'All-in',
                 promotionPercent: 0,
               },
@@ -4812,6 +4848,8 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [scheduleModalData, setScheduleModalData] = useState<ScheduleModalData | null>(null);
   const [costMatrixModalRoute, setCostMatrixModalRoute] = useState<CapabilityRouteItem | null>(null);
+  const [oceanFclCostMatrixModalRoute, setOceanFclCostMatrixModalRoute] = useState<CapabilityRouteItem | null>(null);
+  const [railFclCostMatrixModalRoute, setRailFclCostMatrixModalRoute] = useState<CapabilityRouteItem | null>(null);
 
   const handleOpenCostMatrixModal = (route: CapabilityRouteItem) => {
     setCostMatrixModalRoute(route);
@@ -4829,6 +4867,44 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
       departureSchedule: primaryVehicle.departureSchedule || 'Hàng ngày (Daily - Xuất bến 20:00)',
       sla: primaryVehicle.transitTimeDisplay || '2 Ngày',
       validUntil: primaryVehicle.validUntil || '2026-12-31',
+    });
+  };
+
+  const handleOpenOceanFclCostMatrixModal = (route: CapabilityRouteItem) => {
+    setOceanFclCostMatrixModalRoute(route);
+  };
+
+  const handleSaveOceanFclCostMatrix = (routeId: string, matrix: ContainerPricingMatrixColumn[]) => {
+    if (matrix.length === 0) return;
+    const primaryCont = matrix[0];
+    handleUpdateRouteRowMultiple(routeId, {
+      containerPricingMatrix: matrix,
+      price: primaryCont.totalPrice,
+      vehicleType: primaryCont.containerType,
+      departureSchedule: primaryCont.departureSchedule || 'Thứ 4, Thứ 7 hàng tuần (Cut-off 17:00)',
+      sla: primaryCont.transitTimeDisplay || '28 - 32 Ngày',
+      transitType: primaryCont.transitType || 'Direct',
+      freeDemDetDays: primaryCont.freeDemDetDays ?? 14,
+      validUntil: primaryCont.validUntil || '2026-12-31',
+    });
+  };
+
+  const handleOpenRailFclCostMatrixModal = (route: CapabilityRouteItem) => {
+    setRailFclCostMatrixModalRoute(route);
+  };
+
+  const handleSaveRailFclCostMatrix = (routeId: string, matrix: RailContainerPricingMatrixColumn[]) => {
+    if (matrix.length === 0) return;
+    const primaryCont = matrix[0];
+    handleUpdateRouteRowMultiple(routeId, {
+      railContainerPricingMatrix: matrix,
+      price: primaryCont.totalPrice,
+      vehicleType: primaryCont.containerType,
+      departureSchedule: primaryCont.departureSchedule || 'Thứ 3, Thứ 6 hàng tuần (Cắt bãi ga 18:00)',
+      sla: primaryCont.transitTimeDisplay || '65 - 72 Giờ',
+      transitType: primaryCont.transitType || 'Direct',
+      freeDemDetDays: primaryCont.freeDemDetDays ?? 7,
+      validUntil: primaryCont.validUntil || '2026-12-31',
     });
   };
 
@@ -6400,34 +6476,6 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                         className="hidden"
                       />
 
-                      {/* Excel Template & Import buttons (Hidden for Warehousing / Kho bãi 3PL) */}
-                      {activeCategory?.id !== 'warehousing' && (
-                        <>
-                          {/* Download Excel Template Button */}
-                          <button
-                            type="button"
-                            onClick={handleDownloadExcelTemplate}
-                            disabled={isExportingTemplate}
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 rounded-xl transition-all cursor-pointer shadow-2xs hover:border-slate-400"
-                            title="Tải file Excel mẫu chuẩn hóa kèm danh mục LOV tra cứu"
-                          >
-                            <Download className="w-3.5 h-3.5 text-emerald-600" />
-                            <span>Tải Mẫu Excel</span>
-                          </button>
-
-                          {/* Upload Excel Button */}
-                          <button
-                            type="button"
-                            onClick={() => fileInputRef.current?.click()}
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded-xl transition-all cursor-pointer shadow-2xs"
-                            title="Upload file Excel bảng giá tuyến đường để nhập hàng loạt"
-                          >
-                            <Upload className="w-3.5 h-3.5 text-emerald-700" />
-                            <span>Nhập Từ Excel</span>
-                          </button>
-                        </>
-                      )}
-
                       {/* Add Single Route Button */}
                       <button
                         type="button"
@@ -6466,9 +6514,8 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                             const isLtlOrLclTable = isLtlTable || isLclTable;
                             const isReeferTruckingTable = isTruckingTable && (activeCargoGroup?.name?.includes('lạnh') || activeModel?.name?.includes('lạnh') || activeModel?.id?.includes('ref'));
                             const isHazmatTruckingTable = isTruckingTable && (activeCargoGroup?.name?.includes('nguy hiểm') || activeModel?.name?.includes('nguy hiểm') || activeModel?.id?.includes('haz') || activeModel?.id?.includes('dg'));
-                            const isTruckingFtlGeneralTable = isTruckingTable && !isLtlTable && !isReeferTruckingTable && !isHazmatTruckingTable;
-
-                            if (isTruckingFtlGeneralTable) {
+                            const isTruckingFtlTable = isTruckingTable && !isLtlTable;
+                            if (isTruckingFtlTable) {
                               return (
                                 <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
                                   <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
@@ -6477,6 +6524,38 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                   <th className="py-2.5 px-2.5 min-w-[140px]">Điểm Đi</th>
                                   <th className="py-2.5 px-2.5 min-w-[140px]">Điểm Đến</th>
                                   <th className="py-2.5 px-2.5 min-w-[190px] text-center bg-indigo-100/80 text-indigo-950 font-black">Chi Tiết Biểu Phí</th>
+                                  <th className="py-2.5 px-2 text-center w-16 min-w-[65px]">Action</th>
+                                </tr>
+                              );
+                            }
+
+                            const isOceanFclTable = isOceanTable && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL');
+                            if (isOceanFclTable) {
+                              return (
+                                <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
+                                  <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
+                                  <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-sky-50/70 text-sky-950 font-black">Mã Tuyến</th>
+                                  <th className="py-2.5 px-2.5 min-w-[130px] bg-sky-50/70 text-sky-950 font-black">Khu Vực</th>
+                                  <th className="py-2.5 px-2.5 min-w-[150px]">Cảng Đi (POL)</th>
+                                  <th className="py-2.5 px-2.5 min-w-[150px]">Cảng Đến (POD)</th>
+                                  <th className="py-2.5 px-2.5 min-w-[160px]">Hãng Tàu</th>
+                                  <th className="py-2.5 px-2.5 min-w-[190px] text-center bg-sky-100/80 text-sky-950 font-black">Chi Tiết Biểu Phí</th>
+                                  <th className="py-2.5 px-2 text-center w-16 min-w-[65px]">Action</th>
+                                </tr>
+                              );
+                            }
+
+                            const isRailFclTable = isRailTable && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL');
+                            if (isRailFclTable) {
+                              return (
+                                <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
+                                  <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
+                                  <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-emerald-50/70 text-emerald-950 font-black">Mã Tuyến</th>
+                                  <th className="py-2.5 px-2.5 min-w-[170px] bg-emerald-50/70 text-emerald-950 font-black">Hành Lang Tuyến</th>
+                                  <th className="py-2.5 px-2.5 min-w-[140px]">Ga Đi (POL)</th>
+                                  <th className="py-2.5 px-2.5 min-w-[140px]">Ga Đến (POD)</th>
+                                  <th className="py-2.5 px-2.5 min-w-[160px]">Đơn Vị Vận Hành</th>
+                                  <th className="py-2.5 px-2.5 min-w-[190px] text-center bg-emerald-100/80 text-emerald-950 font-black">Chi Tiết Biểu Phí</th>
                                   <th className="py-2.5 px-2 text-center w-16 min-w-[65px]">Action</th>
                                 </tr>
                               );
@@ -9005,122 +9084,417 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                               const cargoType: 'general' | 'reefer' | 'hazmat' | 'ltl' = isLtlTrucking ? 'ltl' : (isHazmatTrucking ? 'hazmat' : (isReeferTrucking ? 'reefer' : 'general'));
                               const currentTruckBodyTypes = isLtlTrucking ? LTL_TRUCKING_BODY_TYPES : (isHazmatTrucking ? HAZMAT_TRUCKING_BODY_TYPES : (isReeferTrucking ? REEFER_TRUCKING_BODY_TYPES : TRUCKING_BODY_TYPES));
                               const effectiveRouteCode = route.routeCode || `RC-${(activeModel?.code || activeCategory?.id || 'GEN').toUpperCase().replace(/[^A-Z0-9]/g, '')}-${String(idx + 1).padStart(3, '0')}`;
-                              const isTruckingFtlGeneralRow = isTrucking && !isLtlTrucking && !isReeferTrucking && !isHazmatTrucking;
+                              const isTruckingFtlRow = isTrucking && !isLtlTrucking;
+                                if (isTruckingFtlRow) {
+                                  return (
+                                    <tr key={route.id} className="divide-x divide-slate-200 hover:bg-indigo-50/20 transition-colors">
+                                      {/* 1. STT */}
+                                      <td className="p-0 text-center font-mono text-slate-400 font-semibold text-[11px] bg-slate-50/60 align-middle">
+                                        {idx + 1}
+                                      </td>
 
-                              if (isTruckingFtlGeneralRow) {
-                                const matrixCols = (route.vehiclePricingMatrix && route.vehiclePricingMatrix.length > 0)
-                                  ? route.vehiclePricingMatrix
-                                  : [createDefaultVehiclePricingColumn(route.truckBodyType, route.truckTonnage, route.price)];
-                                const minPrice = Math.min(...matrixCols.map(c => c.totalPrice));
-                                const maxPrice = Math.max(...matrixCols.map(c => c.totalPrice));
-                                const priceDisplay = matrixCols.length > 1
-                                  ? `${minPrice.toLocaleString('vi-VN')} – ${maxPrice.toLocaleString('vi-VN')} ₫`
-                                  : `${minPrice.toLocaleString('vi-VN')} ₫`;
+                                      {/* 2. Mã Tuyến */}
+                                      <td className="p-0 align-top bg-slate-50/30">
+                                        <input
+                                          type="text"
+                                          value={effectiveRouteCode}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'routeCode', e.target.value)}
+                                          placeholder="RC-FTL-001"
+                                          className="w-full px-2 py-2.5 text-center font-mono font-bold text-indigo-700 text-xs bg-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all uppercase"
+                                          title="Mã tuyến đường nội bộ"
+                                        />
+                                      </td>
 
-                                return (
-                                  <tr key={route.id} className="divide-x divide-slate-200 hover:bg-indigo-50/20 transition-colors">
-                                    {/* 1. STT */}
-                                    <td className="p-0 text-center font-mono text-slate-400 font-semibold text-[11px] bg-slate-50/60 align-middle">
-                                      {idx + 1}
-                                    </td>
+                                      {/* 3. Hành Lang Tuyến */}
+                                      <td className="p-0 align-top">
+                                        <input
+                                          type="text"
+                                          value={route.route}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'route', e.target.value)}
+                                          placeholder="VD: Tuyến Bắc - Nam, Tuyến Đông Nam Bộ..."
+                                          className="w-full px-2.5 py-2.5 font-bold text-slate-900 text-xs bg-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
+                                          title="Hành lang tuyến vận chuyển"
+                                        />
+                                      </td>
 
-                                    {/* 2. Mã Tuyến */}
-                                    <td className="p-0 align-top bg-slate-50/30">
-                                      <input
-                                        type="text"
-                                        value={effectiveRouteCode}
-                                        onChange={(e) => handleUpdateRouteRow(route.id, 'routeCode', e.target.value)}
-                                        placeholder="RC-FTL-001"
-                                        className="w-full px-2 py-2.5 text-center font-mono font-bold text-indigo-700 text-xs bg-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all uppercase"
-                                        title="Mã tuyến đường nội bộ"
-                                      />
-                                    </td>
+                                      {/* 4. Điểm Đi */}
+                                      <td className="p-0 align-top">
+                                        <input
+                                          type="text"
+                                          value={route.origin}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'origin', e.target.value)}
+                                          placeholder="Điểm đi (KCN, Tỉnh/TP)..."
+                                          className="w-full px-2.5 py-2.5 bg-transparent text-slate-700 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
+                                        />
+                                      </td>
 
-                                    {/* 3. Hành Lang Tuyến */}
-                                    <td className="p-0 align-top">
-                                      <input
-                                        type="text"
-                                        value={route.route}
-                                        onChange={(e) => handleUpdateRouteRow(route.id, 'route', e.target.value)}
-                                        placeholder="VD: Tuyến Bắc - Nam, Tuyến Đông Nam Bộ..."
-                                        className="w-full px-2.5 py-2.5 font-bold text-slate-900 text-xs bg-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
-                                        title="Hành lang tuyến vận chuyển"
-                                      />
-                                    </td>
+                                      {/* 5. Điểm Đến */}
+                                      <td className="p-0 align-top">
+                                        <input
+                                          type="text"
+                                          value={route.destination}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'destination', e.target.value)}
+                                          placeholder="Điểm đến (KCN, Tỉnh/TP)..."
+                                          className="w-full px-2.5 py-2.5 bg-transparent text-slate-700 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
+                                        />
+                                      </td>
 
-                                    {/* 4. Điểm Đi */}
-                                    <td className="p-0 align-top">
-                                      <input
-                                        type="text"
-                                        value={route.origin}
-                                        onChange={(e) => handleUpdateRouteRow(route.id, 'origin', e.target.value)}
-                                        placeholder="Điểm đi (KCN, Tỉnh/TP)..."
-                                        className="w-full px-2.5 py-2.5 bg-transparent text-slate-700 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
-                                      />
-                                    </td>
+                                      {/* 6. Chi Tiết (Mở Popup Ma Trận Biểu Phí Đa Phương Tiện) */}
+                                      <td className="p-2 text-center align-middle bg-indigo-50/20">
+                                        <button
+                                          type="button"
+                                          onClick={() => handleOpenCostMatrixModal(route)}
+                                          className="text-xs font-bold text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer transition-colors"
+                                          title="Nhấp để mở hộp thoại khai báo chi tiết biểu phí phương tiện"
+                                        >
+                                          Chi tiết
+                                        </button>
+                                      </td>
 
-                                    {/* 5. Điểm Đến */}
-                                    <td className="p-0 align-top">
-                                      <input
-                                        type="text"
-                                        value={route.destination}
-                                        onChange={(e) => handleUpdateRouteRow(route.id, 'destination', e.target.value)}
-                                        placeholder="Điểm đến (KCN, Tỉnh/TP)..."
-                                        className="w-full px-2.5 py-2.5 bg-transparent text-slate-700 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
-                                      />
-                                    </td>
-
-                                    {/* 6. Chi Tiết (Mở Popup Ma Trận Chi Phí & Cấu Hình Xe) */}
-                                    <td className="p-1.5 align-middle bg-indigo-50/20">
-                                      <button
-                                        type="button"
-                                        onClick={() => handleOpenCostMatrixModal(route)}
-                                        className="w-full px-2.5 py-2 rounded-xl border border-indigo-300 bg-gradient-to-r from-indigo-50 via-white to-purple-50 hover:from-indigo-100 hover:to-purple-100 text-slate-900 text-left transition-all cursor-pointer shadow-2xs group flex items-center justify-between gap-2"
-                                        title="Nhấp để khai báo biểu phí chi tiết ma trận đa phương tiện"
-                                      >
-                                        <div className="min-w-0 flex-1">
-                                          <div className="flex items-center justify-between gap-1">
-                                            <span className="font-mono font-black text-xs text-indigo-950 truncate">
-                                              {priceDisplay}
-                                            </span>
-                                            <span className="text-[9.5px] font-black text-indigo-700 bg-indigo-100 px-1.5 py-0.5 rounded-md shrink-0 border border-indigo-200">
-                                              {matrixCols.length} loại xe
-                                            </span>
-                                          </div>
-                                          <div className="text-[10.5px] text-slate-500 font-medium flex items-center justify-between mt-0.5">
-                                            <span className="truncate text-slate-600 font-semibold">
-                                              {matrixCols[0]?.truckBodyType ? matrixCols[0].truckBodyType.split(' (')[0] : 'Xem biểu phí'}
-                                            </span>
-                                            <span className="text-indigo-600 font-bold group-hover:underline shrink-0">Chi tiết ➔</span>
-                                          </div>
+                                      {/* 7. Action */}
+                                      <td className="p-1 text-center align-middle">
+                                        <div className="flex items-center justify-center space-x-1">
+                                          <button
+                                            type="button"
+                                            onClick={() => handleDuplicateRouteRow(route.id)}
+                                            className="p-1.5 text-slate-400 hover:text-indigo-600 rounded-lg hover:bg-slate-100 transition-colors"
+                                            title="Nhân bản tuyến này"
+                                          >
+                                            <Copy className="w-3.5 h-3.5" />
+                                          </button>
+                                          <button
+                                            type="button"
+                                            onClick={() => handleDeleteRouteRow(route.id)}
+                                            className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-slate-100 transition-colors"
+                                            title="Xóa tuyến"
+                                          >
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                          </button>
                                         </div>
-                                      </button>
-                                    </td>
+                                      </td>
+                                    </tr>
+                                  );
+                                }
 
-                                    {/* 7. Action */}
-                                    <td className="p-1 text-center align-middle">
-                                      <div className="flex items-center justify-center space-x-1">
+                                const isOceanFclRow = isOcean && isFcl;
+                                if (isOceanFclRow) {
+                                  const effectiveRouteCode = route.routeCode || `RC-FCL-${String(idx + 1).padStart(3, '0')}`;
+                                  const effectiveRegion = route.region || 'Châu Á';
+                                  const shippingLov = LCL_SHIPPING_LINES;
+                                  const currentShipping = shippingLov.includes(route.shippingLine || '')
+                                    ? (route.shippingLine || shippingLov[0])
+                                    : (route.customShippingLine || route.shippingLine === 'Khác (Nhập hãng tàu khác)...'
+                                      ? 'Khác (Nhập hãng tàu khác)...'
+                                      : (shippingLov[0] || route.shippingLine || 'Maersk (Maersk Line)'));
+
+                                  return (
+                                    <tr key={route.id} className="divide-x divide-slate-200 hover:bg-sky-50/20 transition-colors">
+                                      {/* 1. STT */}
+                                      <td className="p-0 text-center font-mono text-slate-400 font-semibold text-[11px] bg-slate-50/60 align-middle">
+                                        {idx + 1}
+                                      </td>
+
+                                      {/* 2. Mã Tuyến */}
+                                      <td className="p-0 align-top bg-slate-50/30">
+                                        <input
+                                          type="text"
+                                          value={effectiveRouteCode}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'routeCode', e.target.value)}
+                                          placeholder="RC-FCL-001"
+                                          className="w-full px-2 py-2.5 text-center font-mono font-bold text-sky-700 text-xs bg-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-sky-600 transition-all uppercase"
+                                          title="Mã tuyến đường nội bộ"
+                                        />
+                                      </td>
+
+                                      {/* 3. Khu Vực */}
+                                      <td className="p-0 align-top bg-slate-50/20">
+                                        <select
+                                          value={effectiveRegion}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'region', e.target.value)}
+                                          className="w-full px-2 py-2.5 text-xs font-semibold text-slate-800 bg-transparent cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-sky-600 transition-all"
+                                        >
+                                          {OCEAN_TRADE_LANE_REGIONS_LOV.map((r, rIdx) => (
+                                            <option key={rIdx} value={r}>{r}</option>
+                                          ))}
+                                        </select>
+                                      </td>
+
+                                      {/* 4. Cảng Đi (POL) */}
+                                      <td className="p-0 align-top">
+                                        <input
+                                          type="text"
+                                          value={route.origin}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'origin', e.target.value)}
+                                          placeholder="Cảng đi (POL: Cát Lái, Cái Mép...)..."
+                                          className="w-full px-2.5 py-2.5 bg-transparent text-slate-700 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-sky-600 transition-all"
+                                        />
+                                      </td>
+
+                                      {/* 5. Cảng Đến (POD) */}
+                                      <td className="p-0 align-top">
+                                        <input
+                                          type="text"
+                                          value={route.destination}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'destination', e.target.value)}
+                                          placeholder="Cảng đến (POD: Hamburg, LA...)..."
+                                          className="w-full px-2.5 py-2.5 bg-transparent text-slate-700 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-sky-600 transition-all"
+                                        />
+                                      </td>
+
+                                      {/* 6. Hãng Tàu */}
+                                      <td className="p-0 align-top">
+                                        <div className="flex flex-col h-full">
+                                          <select
+                                            value={currentShipping}
+                                            onChange={(e) => {
+                                              const val = e.target.value;
+                                              handleUpdateRouteRowMultiple(route.id, {
+                                                shippingLine: val,
+                                                customShippingLine: '',
+                                              });
+                                            }}
+                                            className="w-full px-2.5 py-2.5 bg-transparent text-slate-800 text-xs font-semibold cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-sky-600 transition-all"
+                                          >
+                                            {shippingLov.map((line, lIdx) => (
+                                              <option key={lIdx} value={line}>{line}</option>
+                                            ))}
+                                          </select>
+
+                                          {(currentShipping === 'Khác (Nhập hãng tàu khác)...'
+                                            || (!shippingLov.includes(route.shippingLine || '') && route.customShippingLine)) && (
+                                            <div className="p-1 bg-amber-50/90 border-t border-amber-200">
+                                              <input
+                                                type="text"
+                                                autoFocus
+                                                value={route.customShippingLine || ''}
+                                                onChange={(e) => {
+                                                  const customVal = e.target.value;
+                                                  handleUpdateRouteRowMultiple(route.id, {
+                                                    customShippingLine: customVal,
+                                                    shippingLine: customVal,
+                                                  });
+                                                }}
+                                                placeholder="Nhập tên hãng tàu..."
+                                                className="w-full px-1.5 py-1 text-xs bg-white border border-amber-300 rounded focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium"
+                                              />
+                                            </div>
+                                          )}
+                                        </div>
+                                      </td>
+
+                                      {/* 7. Chi Tiết (Mở Popup Ma Trận Chi Phí Container) */}
+                                      <td className="p-2 text-center align-middle bg-sky-50/20">
                                         <button
                                           type="button"
-                                          onClick={() => handleDuplicateRouteRow(route.id)}
-                                          className="p-1.5 text-slate-400 hover:text-indigo-600 rounded-lg hover:bg-slate-100 transition-colors"
-                                          title="Nhân bản tuyến này"
+                                          onClick={() => handleOpenOceanFclCostMatrixModal(route)}
+                                          className="text-xs font-bold text-sky-600 hover:text-sky-800 hover:underline cursor-pointer transition-colors"
+                                          title="Nhấp để mở hộp thoại khai báo chi tiết biểu phí container đường biển"
                                         >
-                                          <Copy className="w-3.5 h-3.5" />
+                                          Chi tiết
                                         </button>
+                                      </td>
+
+                                      {/* 8. Action */}
+                                      <td className="p-1 text-center align-middle">
+                                        <div className="flex items-center justify-center space-x-1">
+                                          <button
+                                            type="button"
+                                            onClick={() => handleDuplicateRouteRow(route.id)}
+                                            className="p-1.5 text-slate-400 hover:text-sky-600 rounded-lg hover:bg-slate-100 transition-colors"
+                                            title="Nhân bản tuyến này"
+                                          >
+                                            <Copy className="w-3.5 h-3.5" />
+                                          </button>
+                                          <button
+                                            type="button"
+                                            onClick={() => handleDeleteRouteRow(route.id)}
+                                            className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-slate-100 transition-colors"
+                                            title="Xóa tuyến"
+                                          >
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                          </button>
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  );
+                                }
+
+                                const isRailFclRow = isRail && isFcl;
+                                if (isRailFclRow) {
+                                  const effectiveRouteCode = route.routeCode || `RC-RAIL-${String(idx + 1).padStart(3, '0')}`;
+                                  const corridorLov = RAIL_TRADE_LANE_CORRIDORS_LOV;
+                                  const currentCorridor = corridorLov.includes(route.route || '')
+                                    ? (route.route || corridorLov[0])
+                                    : (route.customRoute || route.route === 'Khác (Nhập hành lang tuyến khác)...'
+                                      ? 'Khác (Nhập hành lang tuyến khác)...'
+                                      : (corridorLov[0] || route.route || 'Tuyến Bắc - Nam (Hà Nội ⇄ TP.HCM / Bình Dương)'));
+
+                                  const operatorLov = RAIL_OPERATORS_LOV;
+                                  const currentOperator = operatorLov.includes(route.shippingLine || '')
+                                    ? (route.shippingLine || operatorLov[0])
+                                    : (route.customShippingLine || route.shippingLine === 'Khác (Nhập đơn vị vận hành khác)...'
+                                      ? 'Khác (Nhập đơn vị vận hành khác)...'
+                                      : (operatorLov[0] || route.shippingLine || 'Đường Sắt Việt Nam (VNR)'));
+
+                                  return (
+                                    <tr key={route.id} className="divide-x divide-slate-200 hover:bg-emerald-50/20 transition-colors">
+                                      {/* 1. STT */}
+                                      <td className="p-0 text-center font-mono text-slate-400 font-semibold text-[11px] bg-slate-50/60 align-middle">
+                                        {idx + 1}
+                                      </td>
+
+                                      {/* 2. Mã Tuyến */}
+                                      <td className="p-0 align-top bg-slate-50/30">
+                                        <input
+                                          type="text"
+                                          value={effectiveRouteCode}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'routeCode', e.target.value)}
+                                          placeholder="RC-RAIL-001"
+                                          className="w-full px-2 py-2.5 text-center font-mono font-bold text-emerald-700 text-xs bg-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-emerald-600 transition-all uppercase"
+                                          title="Mã tuyến đường sắt nội bộ"
+                                        />
+                                      </td>
+
+                                      {/* 3. Hành Lang Tuyến (Dropdown LOV) */}
+                                      <td className="p-0 align-top bg-slate-50/20">
+                                        <div className="flex flex-col h-full">
+                                          <select
+                                            value={currentCorridor}
+                                            onChange={(e) => {
+                                              const val = e.target.value;
+                                              handleUpdateRouteRowMultiple(route.id, {
+                                                route: val,
+                                                customRoute: '',
+                                              });
+                                            }}
+                                            className="w-full px-2.5 py-2.5 bg-transparent text-slate-800 text-xs font-semibold cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-emerald-600 transition-all"
+                                          >
+                                            {corridorLov.map((cor, cIdx) => (
+                                              <option key={cIdx} value={cor}>{cor}</option>
+                                            ))}
+                                          </select>
+
+                                          {(currentCorridor === 'Khác (Nhập hành lang tuyến khác)...'
+                                            || (!corridorLov.includes(route.route || '') && route.customRoute)) && (
+                                            <div className="p-1 bg-amber-50/90 border-t border-amber-200">
+                                              <input
+                                                type="text"
+                                                autoFocus
+                                                value={route.customRoute || ''}
+                                                onChange={(e) => {
+                                                  const customVal = e.target.value;
+                                                  handleUpdateRouteRowMultiple(route.id, {
+                                                    customRoute: customVal,
+                                                    route: customVal,
+                                                  });
+                                                }}
+                                                placeholder="Nhập hành lang tuyến khác..."
+                                                className="w-full px-1.5 py-1 text-xs bg-white border border-amber-300 rounded focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium"
+                                              />
+                                            </div>
+                                          )}
+                                        </div>
+                                      </td>
+
+                                      {/* 4. Ga Đi (POL) */}
+                                      <td className="p-0 align-top">
+                                        <input
+                                          type="text"
+                                          value={route.origin}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'origin', e.target.value)}
+                                          placeholder="Ga đi (POL: Sóng Thần, Yên Viên...)..."
+                                          className="w-full px-2.5 py-2.5 bg-transparent text-slate-700 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-emerald-600 transition-all"
+                                        />
+                                      </td>
+
+                                      {/* 5. Ga Đến (POD) */}
+                                      <td className="p-0 align-top">
+                                        <input
+                                          type="text"
+                                          value={route.destination}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'destination', e.target.value)}
+                                          placeholder="Ga đến (POD: Giáp Bát, Đồng Đăng...)..."
+                                          className="w-full px-2.5 py-2.5 bg-transparent text-slate-700 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-emerald-600 transition-all"
+                                        />
+                                      </td>
+
+                                      {/* 6. Đơn Vị Vận Hành */}
+                                      <td className="p-0 align-top">
+                                        <div className="flex flex-col h-full">
+                                          <select
+                                            value={currentOperator}
+                                            onChange={(e) => {
+                                              const val = e.target.value;
+                                              handleUpdateRouteRowMultiple(route.id, {
+                                                shippingLine: val,
+                                                customShippingLine: '',
+                                              });
+                                            }}
+                                            className="w-full px-2.5 py-2.5 bg-transparent text-slate-800 text-xs font-semibold cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-emerald-600 transition-all"
+                                          >
+                                            {operatorLov.map((line, lIdx) => (
+                                              <option key={lIdx} value={line}>{line}</option>
+                                            ))}
+                                          </select>
+
+                                          {(currentOperator === 'Khác (Nhập đơn vị vận hành khác)...'
+                                            || (!operatorLov.includes(route.shippingLine || '') && route.customShippingLine)) && (
+                                            <div className="p-1 bg-amber-50/90 border-t border-amber-200">
+                                              <input
+                                                type="text"
+                                                autoFocus
+                                                value={route.customShippingLine || ''}
+                                                onChange={(e) => {
+                                                  const customVal = e.target.value;
+                                                  handleUpdateRouteRowMultiple(route.id, {
+                                                    customShippingLine: customVal,
+                                                    shippingLine: customVal,
+                                                  });
+                                                }}
+                                                placeholder="Nhập đơn vị vận hành..."
+                                                className="w-full px-1.5 py-1 text-xs bg-white border border-amber-300 rounded focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium"
+                                              />
+                                            </div>
+                                          )}
+                                        </div>
+                                      </td>
+
+                                      {/* 7. Chi Tiết (Mở Popup Ma Trận Chi Phí Container Đường Sắt) */}
+                                      <td className="p-2 text-center align-middle bg-emerald-50/20">
                                         <button
                                           type="button"
-                                          onClick={() => handleDeleteRouteRow(route.id)}
-                                          className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-slate-100 transition-colors"
-                                          title="Xóa tuyến"
+                                          onClick={() => handleOpenRailFclCostMatrixModal(route)}
+                                          className="text-xs font-bold text-emerald-600 hover:text-emerald-800 hover:underline cursor-pointer transition-colors"
+                                          title="Nhấp để mở hộp thoại khai báo chi tiết biểu phí container đường sắt"
                                         >
-                                          <Trash2 className="w-3.5 h-3.5" />
+                                          Chi tiết
                                         </button>
-                                      </div>
-                                    </td>
-                                  </tr>
-                                );
-                              }
+                                      </td>
+
+                                      {/* 8. Action */}
+                                      <td className="p-1 text-center align-middle">
+                                        <div className="flex items-center justify-center space-x-1">
+                                          <button
+                                            type="button"
+                                            onClick={() => handleDuplicateRouteRow(route.id)}
+                                            className="p-1.5 text-slate-400 hover:text-emerald-600 rounded-lg hover:bg-slate-100 transition-colors"
+                                            title="Nhân bản tuyến này"
+                                          >
+                                            <Copy className="w-3.5 h-3.5" />
+                                          </button>
+                                          <button
+                                            type="button"
+                                            onClick={() => handleDeleteRouteRow(route.id)}
+                                            className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-slate-100 transition-colors"
+                                            title="Xóa tuyến"
+                                          >
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                          </button>
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  );
+                                }
 
                               return (
                                 <tr key={route.id} className="divide-x divide-slate-200 hover:bg-indigo-50/20 transition-colors">
@@ -9992,16 +10366,34 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                   </div>
                 </div>
 
-                {activeCategory?.id === 'warehousing' ||
-                 (activeCategory?.id === 'project' && (
-                   activeModel?.id?.includes('xdock') ||
-                   activeModel?.id?.includes('port') ||
-                   activeModel?.name?.toLowerCase().includes('cross-dock') ||
-                   activeModel?.name?.toLowerCase().includes('x-dock') ||
-                   activeModel?.name?.toLowerCase().includes('cảng') ||
-                   activeModel?.code?.toLowerCase().includes('port') ||
-                   activeModel?.code?.toLowerCase().includes('cross-dock')
-                 )) ? null : (
+                {(() => {
+                  const isTrucking = activeCategory?.id === 'trucking';
+                  const isLtlTrucking = isTrucking && (activeModel?.id === 'trk-gen-ltl' || activeModel?.name?.includes('LTL') || activeModel?.code === 'LTL');
+                  const isTruckingFtl = isTrucking && !isLtlTrucking;
+                  const isOcean = activeCategory?.id === 'ocean' || activeModel?.id?.startsWith('sea-');
+                  const isRail = activeCategory?.id === 'rail' || activeModel?.id?.startsWith('rail-');
+                  const isFcl = (isOcean && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL')) || (isRail && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL')));
+                  const isCrossBorder = activeCategory?.id === 'cross-border' || activeCategory?.serviceType === 'Cross-border';
+                  const isCrossBorderLtl = isCrossBorder && (activeModel?.id?.includes('ltl') || activeModel?.name?.includes('LTL') || activeModel?.code === 'LTL');
+                  const isCrossBorderFtl = isCrossBorder && !isCrossBorderLtl;
+
+                  const shouldHideBlocks3And4 = isTruckingFtl ||
+                    (isOcean && isFcl) ||
+                    (isRail && isFcl) ||
+                                        activeCategory?.id === 'warehousing' ||
+                    (activeCategory?.id === 'project' && (
+                      activeModel?.id?.includes('xdock') ||
+                      activeModel?.id?.includes('port') ||
+                      activeModel?.name?.toLowerCase().includes('cross-dock') ||
+                      activeModel?.name?.toLowerCase().includes('x-dock') ||
+                      activeModel?.name?.toLowerCase().includes('cảng') ||
+                      activeModel?.code?.toLowerCase().includes('port') ||
+                      activeModel?.code?.toLowerCase().includes('cross-dock')
+                    ));
+
+                  if (shouldHideBlocks3And4) return null;
+
+                  return (
                   <>
                 {/* =========================================================================
                     PHẦN 3: CÁC PHỤ PHÍ MIỄN PHÍ & CÓ PHÍ (HỖ TRỢ THÊM / BỚT TÙY Ý)
@@ -10472,8 +10864,9 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                     );
                   })()}
                 </div>
-                  </>
-                )}
+              </>
+            );
+          })()}
 
                 {/* Bottom Actions */}
                 <div className="pt-4 border-t border-slate-100 flex items-center justify-between flex-wrap gap-2">
@@ -13534,6 +13927,46 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
         onClose={() => setCostMatrixModalRoute(null)}
         route={costMatrixModalRoute}
         onSave={handleSaveCostMatrix}
+        cargoType={
+          costMatrixModalRoute?.cargoType ||
+          (activeCargoGroup?.name?.includes('lạnh') || activeModel?.name?.includes('lạnh') || activeModel?.id?.includes('ref')
+            ? 'reefer'
+            : activeCargoGroup?.name?.includes('nguy hiểm') || activeModel?.name?.includes('nguy hiểm') || activeModel?.id?.includes('haz') || activeModel?.id?.includes('dg')
+            ? 'hazmat'
+            : 'general')
+        }
+      />
+
+      {/* 6. Ocean FCL Multi-Container Cost Breakdown Matrix Modal */}
+      <OceanFclCostMatrixModal
+        isOpen={!!oceanFclCostMatrixModalRoute}
+        onClose={() => setOceanFclCostMatrixModalRoute(null)}
+        route={oceanFclCostMatrixModalRoute}
+        onSave={handleSaveOceanFclCostMatrix}
+        cargoType={
+          oceanFclCostMatrixModalRoute?.cargoType ||
+          (activeCargoGroup?.name?.includes('lạnh') || activeModel?.name?.includes('lạnh') || activeModel?.id?.includes('ref')
+            ? 'reefer'
+            : activeCargoGroup?.name?.includes('nguy hiểm') || activeModel?.name?.includes('nguy hiểm') || activeModel?.id?.includes('haz') || activeModel?.id?.includes('dg')
+            ? 'hazmat'
+            : 'general')
+        }
+      />
+
+      {/* 7. Rail FCL Multi-Container/Wagon Cost Breakdown Matrix Modal */}
+      <RailFclCostMatrixModal
+        isOpen={!!railFclCostMatrixModalRoute}
+        onClose={() => setRailFclCostMatrixModalRoute(null)}
+        route={railFclCostMatrixModalRoute}
+        onSave={handleSaveRailFclCostMatrix}
+        cargoType={
+          railFclCostMatrixModalRoute?.cargoType ||
+          (activeCargoGroup?.name?.includes('lạnh') || activeModel?.name?.includes('lạnh') || activeModel?.id?.includes('ref')
+            ? 'reefer'
+            : activeCargoGroup?.name?.includes('nguy hiểm') || activeModel?.name?.includes('nguy hiểm') || activeModel?.id?.includes('haz') || activeModel?.id?.includes('dg')
+            ? 'hazmat'
+            : 'general')
+        }
       />
     </div>
   );

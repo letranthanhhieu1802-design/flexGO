@@ -55,6 +55,62 @@ export const TRUCKING_SECTION_2_VAS_LOV: LOVItem[] = [
   { id: 'vasSpecialCrane', name: 'Hỗ trợ xe cẩu chuyên dụng nâng hạ hàng', unit: 'VND / Chuyến', defaultPrice: 0 },
 ];
 
+// REEFER (HÀNG LẠNH) SURCHARGES & VAS LOV
+export const REEFER_SECTION_1_SURCHARGES_LOV: LOVItem[] = [
+  { id: 'fuelBAF', name: 'Phụ phí nhiên liệu (BAF Fuel Surcharge)', unit: 'VND / Chuyến' },
+  { id: 'tollBOT', name: 'Phí cầu đường BOT & Trạm kiểm soát dịch', unit: 'VND / Chuyến' },
+  { id: 'docManagement', name: 'Phí chứng từ, seal an ninh & quản lý nhiệt', unit: 'VND / Chuyến' },
+  { id: 'pref_genset', name: 'Máy phát điện Genset cắm điện dự phòng liên tục', unit: 'VND / Ca', defaultPrice: 400000 },
+  { id: 'pref_plug_park', name: 'Phí cắm điện duy trì tại bãi / lưu ca đêm', unit: 'VND / Đêm', defaultPrice: 500000 },
+  { id: 'pref_multi_store', name: 'Giao hàng đa điểm chuỗi siêu thị / đại lý lẻ', unit: 'VND / Điểm', defaultPrice: 300000 },
+  { id: 'pref_dock_seal', name: 'Bốc dỡ qua Dock trùm túi khí phòng lạnh', unit: 'VND / Điểm', defaultPrice: 250000 },
+  { id: 'pref_dry_ice', name: 'Cung cấp đá gel bảo ôn / Đá khô bổ trợ', unit: 'VND / Kiện', defaultPrice: 150000 },
+  { id: 'night_delivery', name: 'Phụ phí giao hàng ban đêm / giờ cấm tải', unit: 'VND / Chuyến', defaultPrice: 350000 },
+  { id: 'narrow_road', name: 'Phụ phí trung chuyển xe lạnh nhỏ đường hẹp', unit: 'VND / Chuyến' },
+  { id: 'peak_season', name: 'Phụ phí cao điểm mùa vụ nông thủy sản', unit: 'VND / Chuyến' },
+];
+
+export const REEFER_SECTION_2_VAS_LOV: LOVItem[] = [
+  { id: 'vas_pre_cooling', name: 'Làm lạnh trước thùng xe 30-60 phút (Pre-cooling)', unit: 'VND / Chuyến', defaultPrice: 0 },
+  { id: 'vas_iot_temp', name: 'Thiết bị IoT GPS & Cảm biến nhiệt Real-time 24/7', unit: 'VND / Chuyến', defaultPrice: 0 },
+  { id: 'vas_pdf_chart', name: 'Xuất biểu đồ dữ liệu nhiệt độ PDF toàn trình', unit: 'VND / Chuyến', defaultPrice: 0 },
+  { id: 'vas_cold_labor', name: 'Bốc dỡ & Bốc xếp kho lạnh 2 đầu gửi/nhận', unit: 'VND / Lần', defaultPrice: 300000 },
+  { id: 'vas_cold_insurance', name: 'Bảo hiểm rủi ro đứt gãy chuỗi lạnh 100%', unit: 'VND / Chuyến', defaultPrice: 0 },
+  { id: 'vas_tail_lift', name: 'Xe bửng nâng thủy lực giao hàng chuỗi siêu thị', unit: 'VND / Chuyến', defaultPrice: 200000 },
+  { id: 'vas_pod_temp', name: 'Thu hồi chứng từ gốc POD & Biên bản nghiệm thu nhiệt', unit: 'VND / Bộ', defaultPrice: 0 },
+  { id: 'vas_cold_detention', name: 'Phí neo xe chờ dỡ lạnh (sau giờ miễn phí)', unit: 'VND / Giờ', defaultPrice: 200000 },
+  { id: 'vas_pallet_wrap', name: 'Quấn màng co PE màng dày chống thoát nhiệt', unit: 'VND / Pallet', defaultPrice: 50000 },
+  { id: 'vas_sku_cold', name: 'Kiểm đếm chi tiết hạn sử dụng & SKU từng thùng hàng lạnh', unit: 'VND / Kiện', defaultPrice: 0 },
+];
+
+// HAZMAT (HÀNG NGUY HIỂM / DG) SURCHARGES & VAS LOV
+export const HAZMAT_SECTION_1_SURCHARGES_LOV: LOVItem[] = [
+  { id: 'fuelBAF', name: 'Phụ phí nhiên liệu (BAF Fuel Surcharge)', unit: 'VND / Chuyến' },
+  { id: 'tollBOT', name: 'Phí cầu đường BOT & Bến bãi an toàn DG', unit: 'VND / Chuyến' },
+  { id: 'docManagement', name: 'Phí hồ sơ an toàn hóa chất & MSDS theo xe', unit: 'VND / Chuyến' },
+  { id: 'phaz_permit', name: 'Phí xin giấy phép lưu hành hàng nguy hiểm (PCCC & BCA)', unit: 'VND / Lô', defaultPrice: 1200000 },
+  { id: 'phaz_tunnel_escort', name: 'Phí hộ tống an toàn qua hầm Hải Vân / đèo dốc đặc biệt', unit: 'VND / Chuyến', defaultPrice: 1500000 },
+  { id: 'phaz_tank_pressure', name: 'Phí kiểm tra nồng độ khí / Thử áp lực bồn xitec trước khi nạp', unit: 'VND / Lần', defaultPrice: 600000 },
+  { id: 'phaz_lashing_dunnage', name: 'Phí chèn lót túi khí & khóa tăng đơ sàn chống xô lệch phuy/IBC', unit: 'VND / Xe', defaultPrice: 250000 },
+  { id: 'phaz_spill_ppe', name: 'Bộ ứng cứu tràn đổ hóa chất Spill-Kit & Bình bọt Foam PCCC', unit: 'VND / Chuyến', defaultPrice: 0 },
+  { id: 'phaz_placard', name: 'Dán biển cảnh báo số UN & Placard IMO 4 chiều quanh xe', unit: 'VND / Chuyến', defaultPrice: 0 },
+  { id: 'night_delivery', name: 'Phụ phí giao hàng ban đêm / luồng ưu tiên hóa chất', unit: 'VND / Chuyến' },
+  { id: 'peak_season', name: 'Phụ phí cao điểm mùa vụ', unit: 'VND / Chuyến' },
+];
+
+export const HAZMAT_SECTION_2_VAS_LOV: LOVItem[] = [
+  { id: 'vas_dg_permit', name: 'Xin Giấy phép vận chuyển hàng nguy hiểm (PCCC & Bộ Công An)', unit: 'VND / Lô', defaultPrice: 1200000 },
+  { id: 'vas_dg_declaration', name: 'Khai báo hóa chất Bộ Công Thương & Kiểm tra an toàn', unit: 'VND / Lô', defaultPrice: 500000 },
+  { id: 'vas_dg_crew', name: 'Tài xế & Áp tải 100% có chứng chỉ nghiệp vụ an toàn DG', unit: 'VND / Chuyến', defaultPrice: 0 },
+  { id: 'vas_spill_kit', name: 'Bộ trang bị xử lý sự cố tràn đổ Spill Kit & Bình cứu hỏa', unit: 'VND / Chuyến', defaultPrice: 0 },
+  { id: 'vas_dg_lashing', name: 'Chằng buộc & Khóa lashing chuyên dụng Thùng phuy / IBC Tank', unit: 'VND / Xe', defaultPrice: 250000 },
+  { id: 'vas_escort_convoy', name: 'Xe hộ tống an ninh / Xe hoa tiêu dẫn đường (Escort Convoy)', unit: 'VND / Chuyến', defaultPrice: 1500000 },
+  { id: 'vas_dg_liability', name: 'Bảo hiểm trách nhiệm môi trường & Cháy nổ hóa chất (Liability)', unit: 'VND / Chuyến', defaultPrice: 0 },
+  { id: 'vas_dg_gps', name: 'Định vị GPS Real-time & Share link theo dõi lộ trình an toàn 24/7', unit: 'VND / Chuyến', defaultPrice: 0 },
+  { id: 'vas_dg_pod', name: 'Thu hồi chứng từ gốc POD & Giấy biên nhận bàn giao hóa chất', unit: 'VND / Bộ', defaultPrice: 0 },
+  { id: 'vas_dg_detention', name: 'Phí lưu xe chờ hạ bồn xitec / bơm hóa chất vào bồn chứa', unit: 'VND / Giờ', defaultPrice: 250000 },
+];
+
 export interface MatrixActiveItem {
   id: string; // id from LOVItem
   value: number; // price for this vehicle
@@ -181,6 +237,55 @@ export const TRUCKING_TONNAGE_BY_BODY_MAP: Record<string, string[]> = {
   ],
 };
 
+// REEFER BODY TYPES & TONNAGES LOV
+export const REEFER_TRUCKING_BODY_TYPES_LOV = [
+  'Xe Tải Thùng Đông Lạnh Nhỏ (City Reefer) - [Vào phố / Giao siêu thị]',
+  'Xe Tải Thùng Đông Lạnh Trung (Regional Reefer) - [Giàn lạnh Thermo King]',
+  'Xe Tải Đông Lạnh Tải Nặng 3 Chân (Long-haul Reefer) - [Trục Bắc Nam / 16-18 Pallets]',
+  'Đầu Kéo Kéo Container Lạnh (Reefer Drayage) - [Cont 20RF / 40RF + Genset]',
+];
+
+export const REEFER_TRUCKING_TONNAGE_MAP: Record<string, string[]> = {
+  'Xe Tải Thùng Đông Lạnh Nhỏ (City Reefer) - [Vào phố / Giao siêu thị]': [
+    '1.0T – 1.4T (Vào phố ban ngày) —— (6 – 7 CBM)',
+    '1.9T – 2.4T (Thùng lạnh 3-4 Pallets) —— (9 – 11 CBM)',
+  ],
+  'Xe Tải Thùng Đông Lạnh Trung (Regional Reefer) - [Giàn lạnh Thermo King]': [
+    '3.5T (Thùng dài 4.3m – 5.2m) —— (15 – 18 CBM)',
+    '5.0T – 6.5T (Thùng dài 5.8m – 6.2m) —— (24 – 28 CBM)',
+  ],
+  'Xe Tải Đông Lạnh Tải Nặng 3 Chân (Long-haul Reefer) - [Trục Bắc Nam / 16-18 Pallets]': [
+    '12.0T – 15.0T (3 Chân thùng dài 9.2m – 9.6m) —— (48 – 54 CBM)',
+  ],
+  'Đầu Kéo Kéo Container Lạnh (Reefer Drayage) - [Cont 20RF / 40RF + Genset]': [
+    'Đầu kéo + Cont 20RF Lạnh (22 – 24 Tấn) —— (~28 CBM)',
+    'Đầu kéo + Cont 40RF / 40RH Cao Lạnh (26 – 28 Tấn) —— (~67 CBM)',
+  ],
+};
+
+// HAZMAT BODY TYPES & TONNAGES LOV
+export const HAZMAT_TRUCKING_BODY_TYPES_LOV = [
+  'Xe Tải Thùng Kín Chuyên Dụng Hóa Chất (DG Dry Box) - [Sàn chống tĩnh điện / Tiếp địa]',
+  'Xe Bồn Xitec Chuyên Dụng (Chemical Tanker) - [Bồn Inox 316L / Chống tràn]',
+  'Đầu Kéo Kéo Bồn ISO Tank / Cont Hóa Chất (Hazmat Drayage) - [ISO Tank T11/T75 Quốc tế]',
+];
+
+export const HAZMAT_TRUCKING_TONNAGE_MAP: Record<string, string[]> = {
+  'Xe Tải Thùng Kín Chuyên Dụng Hóa Chất (DG Dry Box) - [Sàn chống tĩnh điện / Tiếp địa]': [
+    '1.9T – 3.5T (Hóa chất nội đô) —— (12 – 15 CBM)',
+    '5.0T – 8.0T (Hóa chất liên tỉnh) —— (28 – 40 CBM)',
+    '15.0T (3 Chân chở phuy / IBC Tank) —— (50 – 55 CBM)',
+  ],
+  'Xe Bồn Xitec Chuyên Dụng (Chemical Tanker) - [Bồn Inox 316L / Chống tràn]': [
+    '10.000 Lít – 18.000 Lít (Bồn 3-4 ngăn) —— (10 – 18 m³)',
+    '25.000 Lít – 32.000 Lít (Mooc bồn Axit/Kiềm) —— (25 – 32 m³)',
+  ],
+  'Đầu Kéo Kéo Bồn ISO Tank / Cont Hóa Chất (Hazmat Drayage) - [ISO Tank T11/T75 Quốc tế]': [
+    'Đầu kéo + Bồn ISO Tank 20ft (T11 / T50 / T75) —— (24.000 – 26.000 Lít)',
+    'Đầu kéo + Cont 20ft / 40ft chở hàng đóng phuy —— (33 – 67 CBM)',
+  ],
+};
+
 export const createDefaultVehiclePricingColumn = (
   bodyType?: string,
   tonnage?: string,
@@ -188,18 +293,31 @@ export const createDefaultVehiclePricingColumn = (
   defaultSchedule?: string,
   defaultSla?: string,
   initialSurcharges?: MatrixActiveItem[],
-  initialVas?: MatrixActiveItem[]
+  initialVas?: MatrixActiveItem[],
+  cargoType?: 'general' | 'reefer' | 'hazmat'
 ): VehiclePricingMatrixColumn => {
-  const chosenBody = bodyType && TRUCKING_BODY_TYPES_LOV.includes(bodyType)
-    ? bodyType
-    : TRUCKING_BODY_TYPES_LOV[0];
+  const bodyLov = cargoType === 'reefer'
+    ? REEFER_TRUCKING_BODY_TYPES_LOV
+    : cargoType === 'hazmat'
+    ? HAZMAT_TRUCKING_BODY_TYPES_LOV
+    : TRUCKING_BODY_TYPES_LOV;
 
-  const availableTonnages = TRUCKING_TONNAGE_BY_BODY_MAP[chosenBody] || [];
+  const tonnageMap = cargoType === 'reefer'
+    ? REEFER_TRUCKING_TONNAGE_MAP
+    : cargoType === 'hazmat'
+    ? HAZMAT_TRUCKING_TONNAGE_MAP
+    : TRUCKING_TONNAGE_BY_BODY_MAP;
+
+  const chosenBody = bodyType && bodyLov.includes(bodyType)
+    ? bodyType
+    : bodyLov[0];
+
+  const availableTonnages = tonnageMap[chosenBody] || [];
   const chosenTonnage = tonnage && availableTonnages.includes(tonnage)
     ? tonnage
-    : (availableTonnages[availableTonnages.length - 1] || '15.0T (Tải nặng 3 chân) —— (55 – 60 CBM)');
+    : (availableTonnages[availableTonnages.length - 1] || availableTonnages[0] || '15.0T (Tải nặng 3 chân)');
 
-  const targetTotal = basePrice && basePrice > 0 ? basePrice : 18500000;
+  const targetTotal = basePrice && basePrice > 0 ? basePrice : (cargoType === 'reefer' ? 22000000 : cargoType === 'hazmat' ? 25000000 : 18500000);
   const base = Math.round(targetTotal * 0.85);
   const baf = Math.round(targetTotal * 0.08);
   const bot = Math.round(targetTotal * 0.05);
@@ -208,8 +326,24 @@ export const createDefaultVehiclePricingColumn = (
   const defaultSurcharges: MatrixActiveItem[] = initialSurcharges
     ? initialSurcharges.map(s => ({
         id: s.id,
-        value: s.id === 'fuelBAF' ? baf : s.id === 'tollBOT' ? bot : s.id === 'docManagement' ? (doc > 0 ? doc : 150000) : 0,
+        value: s.id === 'fuelBAF' ? baf : s.id === 'tollBOT' ? bot : s.id === 'docManagement' ? (doc > 0 ? doc : 150000) : (s.value || 0),
       }))
+    : cargoType === 'reefer'
+    ? [
+        { id: 'fuelBAF', value: baf },
+        { id: 'tollBOT', value: bot },
+        { id: 'docManagement', value: doc > 0 ? doc : 150000 },
+        { id: 'pref_genset', value: 400000 },
+        { id: 'pref_plug_park', value: 500000 },
+      ]
+    : cargoType === 'hazmat'
+    ? [
+        { id: 'fuelBAF', value: baf },
+        { id: 'tollBOT', value: bot },
+        { id: 'docManagement', value: doc > 0 ? doc : 150000 },
+        { id: 'phaz_permit', value: 1200000 },
+        { id: 'phaz_spill_ppe', value: 0 },
+      ]
     : [
         { id: 'fuelBAF', value: baf },
         { id: 'tollBOT', value: bot },
@@ -219,8 +353,20 @@ export const createDefaultVehiclePricingColumn = (
   const defaultVas: MatrixActiveItem[] = initialVas
     ? initialVas.map(v => ({
         id: v.id,
-        value: v.id === 'vasDetention' ? 150000 : 0,
+        value: v.id === 'vasDetention' || v.id === 'vas_cold_detention' || v.id === 'vas_dg_detention' ? 150000 : (v.value || 0),
       }))
+    : cargoType === 'reefer'
+    ? [
+        { id: 'vas_pre_cooling', value: 0 },
+        { id: 'vas_iot_temp', value: 0 },
+        { id: 'vas_pdf_chart', value: 0 },
+      ]
+    : cargoType === 'hazmat'
+    ? [
+        { id: 'vas_dg_crew', value: 0 },
+        { id: 'vas_spill_kit', value: 0 },
+        { id: 'vas_dg_gps', value: 0 },
+      ]
     : [
         { id: 'vasGps', value: 0 },
         { id: 'vasSeal', value: 0 },
@@ -265,6 +411,7 @@ interface TruckingFtlCostMatrixModalProps {
   onClose: () => void;
   route: CapabilityRouteItem | null;
   onSave: (routeId: string, matrix: VehiclePricingMatrixColumn[]) => void;
+  cargoType?: 'general' | 'reefer' | 'hazmat';
 }
 
 export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProps> = ({
@@ -272,12 +419,42 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
   onClose,
   route,
   onSave,
+  cargoType,
 }) => {
+  const effectiveCargoType: 'general' | 'reefer' | 'hazmat' = 
+    cargoType || 
+    (route?.cargoType as 'general' | 'reefer' | 'hazmat') || 
+    (route?.truckBodyType?.toLowerCase().includes('lạnh') || route?.route?.toLowerCase().includes('lạnh') || route?.vehicleType?.toLowerCase().includes('lạnh')
+      ? 'reefer'
+      : route?.truckBodyType?.toLowerCase().includes('hóa chất') || route?.truckBodyType?.toLowerCase().includes('xitec') || route?.truckBodyType?.toLowerCase().includes('iso tank') || route?.route?.toLowerCase().includes('hóa chất') || route?.vehicleType?.toLowerCase().includes('hóa chất')
+      ? 'hazmat'
+      : 'general');
+
+  const activeBodyTypesLov = effectiveCargoType === 'reefer'
+    ? REEFER_TRUCKING_BODY_TYPES_LOV
+    : effectiveCargoType === 'hazmat'
+    ? HAZMAT_TRUCKING_BODY_TYPES_LOV
+    : TRUCKING_BODY_TYPES_LOV;
+
+  const activeTonnageMap = effectiveCargoType === 'reefer'
+    ? REEFER_TRUCKING_TONNAGE_MAP
+    : effectiveCargoType === 'hazmat'
+    ? HAZMAT_TRUCKING_TONNAGE_MAP
+    : TRUCKING_TONNAGE_BY_BODY_MAP;
+
+  const activeSurchargesLov = effectiveCargoType === 'reefer'
+    ? REEFER_SECTION_1_SURCHARGES_LOV
+    : effectiveCargoType === 'hazmat'
+    ? HAZMAT_SECTION_1_SURCHARGES_LOV
+    : TRUCKING_SECTION_1_SURCHARGES_LOV;
+
+  const activeVasLov = effectiveCargoType === 'reefer'
+    ? REEFER_SECTION_2_VAS_LOV
+    : effectiveCargoType === 'hazmat'
+    ? HAZMAT_SECTION_2_VAS_LOV
+    : TRUCKING_SECTION_2_VAS_LOV;
   const [columns, setColumns] = useState<VehiclePricingMatrixColumn[]>([]);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
-  const [activeVehicleIndex, setActiveVehicleIndex] = useState(0);
 
   // State cho Bảng Lựa Chọn Lịch Chạy (Schedule Picker Modal) theo xe
   const [vehicleScheduleModal, setVehicleScheduleModal] = useState<{
@@ -406,47 +583,26 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
           route.truckTonnage, 
           route.price,
           route.departureSchedule || route.sla,
-          route.sla
+          route.sla,
+          undefined,
+          undefined,
+          effectiveCargoType
         );
         setColumns([col1]);
       }
     }
   }, [isOpen, route]);
 
-  // Check scroll position for left/right arrows
-  const checkScroll = () => {
-    const el = scrollContainerRef.current;
-    if (!el) return;
-    const { scrollLeft, scrollWidth, clientWidth } = el;
-    setCanScrollLeft(scrollLeft > 10);
-    setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 10);
-
-    const idx = Math.min(Math.max(0, Math.round(scrollLeft / 270)), columns.length - 1);
-    setActiveVehicleIndex(idx);
-  };
-
-  useEffect(() => {
-    const el = scrollContainerRef.current;
-    if (!el) return;
-    checkScroll();
-    el.addEventListener('scroll', checkScroll, { passive: true });
-    window.addEventListener('resize', checkScroll);
-    return () => {
-      el.removeEventListener('scroll', checkScroll);
-      window.removeEventListener('resize', checkScroll);
-    };
-  }, [columns.length, isOpen]);
-
   if (!isOpen || !route) return null;
 
   // Add new vehicle column
   const handleAddColumn = () => {
     const usedTonnages = columns.map(c => c.truckTonnage);
-    let chosenBody = TRUCKING_BODY_TYPES_LOV[0];
-    let chosenTonnage = TRUCKING_TONNAGE_BY_BODY_MAP[chosenBody][0];
+    let chosenBody = activeBodyTypesLov[0];
+    let chosenTonnage = (activeTonnageMap[chosenBody] || [])[0] || '';
 
-    for (const body of TRUCKING_BODY_TYPES_LOV) {
-      const tonnages = TRUCKING_TONNAGE_BY_BODY_MAP[body] || [];
+    for (const body of activeBodyTypesLov) {
+      const tonnages = activeTonnageMap[body] || [];
       const unused = tonnages.find(t => !usedTonnages.includes(t));
       if (unused) {
         chosenBody = body;
@@ -469,7 +625,8 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
       columns.length > 0 ? columns[0].departureSchedule : route.departureSchedule,
       columns.length > 0 ? columns[0].transitTimeDisplay : route.sla,
       currentSurcharges,
-      currentVas
+      currentVas,
+      effectiveCargoType
     );
     newCol.totalPrice = calculateColumnTotalPrice(newCol);
     setColumns(prev => [...prev, newCol]);
@@ -488,30 +645,6 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
   const handleRemoveColumn = (colId: string) => {
     if (columns.length <= 1) return;
     setColumns(columns.filter(c => c.id !== colId));
-  };
-
-  // Smooth scroll left
-  const handleScrollLeft = () => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({ left: -270, behavior: 'smooth' });
-    }
-  };
-
-  // Smooth scroll right
-  const handleScrollRight = () => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({ left: 270, behavior: 'smooth' });
-    }
-  };
-
-  // Scroll directly to specific vehicle column
-  const handleScrollToVehicle = (index: number) => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTo({
-        left: index * 270,
-        behavior: 'smooth',
-      });
-    }
   };
 
   // Update field in column (such as baseFreight, transitTimeDisplay, etc.)
@@ -534,7 +667,7 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
 
   // Thêm phụ phí từ LOV vào tất cả các cột xe
   const handleAddSurchargeFromLOV = (lovId: string) => {
-    const lovItem = TRUCKING_SECTION_1_SURCHARGES_LOV.find(it => it.id === lovId);
+    const lovItem = activeSurchargesLov.find(it => it.id === lovId);
     if (!lovItem) return;
 
     setColumns(prev =>
@@ -609,7 +742,7 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
 
   // Thêm dịch vụ VAS từ LOV vào tất cả các cột xe
   const handleAddVasFromLOV = (lovId: string) => {
-    const lovItem = TRUCKING_SECTION_2_VAS_LOV.find(it => it.id === lovId);
+    const lovItem = activeVasLov.find(it => it.id === lovId);
     if (!lovItem) return;
 
     setColumns(prev =>
@@ -659,7 +792,7 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
 
   // Update body type & reset tonnage to first available
   const handleBodyTypeChange = (colId: string, newBody: string) => {
-    const availableTonnages = TRUCKING_TONNAGE_BY_BODY_MAP[newBody] || [];
+    const availableTonnages = activeTonnageMap[newBody] || [];
     const firstTonnage = availableTonnages[availableTonnages.length - 1] || availableTonnages[0] || '';
     setColumns(prev =>
       prev.map(c => {
@@ -774,77 +907,6 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
               </span>
             </div>
           </div>
-
-          <div className="flex items-center gap-2 text-xs font-semibold text-slate-700 bg-white px-3 py-1 rounded-lg border border-slate-200 shadow-2xs">
-            <span>Số cấu hình:</span>
-            <strong className="text-indigo-700 font-bold">{columns.length} Loại Xe</strong>
-            <span className="text-slate-300">|</span>
-            <span className="text-slate-500 text-[11px] font-normal">Cố định Cột 1 & 2 • Cuộn ngang để xem các xe tiếp theo</span>
-          </div>
-        </div>
-
-        {/* HORIZONTAL SCROLL & QUICK JUMP TOOLBAR */}
-        <div className="px-5 py-1.5 bg-slate-100/90 border-b border-slate-200 flex items-center justify-between gap-3 text-xs shrink-0 select-none">
-          <div className="flex items-center gap-2 flex-wrap">
-            {/* Scroll buttons */}
-            <div className="flex items-center border border-slate-300 bg-white rounded-lg overflow-hidden shadow-2xs">
-              <button
-                type="button"
-                onClick={handleScrollLeft}
-                disabled={!canScrollLeft}
-                className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold transition-colors cursor-pointer ${
-                  canScrollLeft
-                    ? 'text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 active:bg-indigo-100'
-                    : 'text-slate-300 cursor-not-allowed bg-slate-50'
-                }`}
-                title="Cuộn sang trái"
-              >
-                <ChevronLeft className="w-3.5 h-3.5" />
-                <span>Cuộn Trái</span>
-              </button>
-              <div className="w-px h-4 bg-slate-200" />
-              <button
-                type="button"
-                onClick={handleScrollRight}
-                disabled={!canScrollRight}
-                className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold transition-colors cursor-pointer ${
-                  canScrollRight
-                    ? 'text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 active:bg-indigo-100'
-                    : 'text-slate-300 cursor-not-allowed bg-slate-50'
-                }`}
-                title="Cuộn sang phải"
-              >
-                <span>Cuộn Phải</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
-            {/* Quick Vehicle Tabs */}
-            <div className="flex items-center gap-1 overflow-x-auto max-w-[65vw]">
-              {columns.map((col, idx) => {
-                const isShortTonnage = col.truckTonnage.split(' ——')[0] || `Xe #${idx + 1}`;
-                return (
-                  <button
-                    key={`tab-${col.id}`}
-                    type="button"
-                    onClick={() => handleScrollToVehicle(idx)}
-                    className={`px-2.5 py-0.5 text-[11px] font-semibold rounded-md border transition-all whitespace-nowrap cursor-pointer ${
-                      activeVehicleIndex === idx
-                        ? 'bg-indigo-600 text-white border-indigo-700 shadow-xs'
-                        : 'bg-white text-slate-700 border-slate-200 hover:bg-indigo-50 hover:text-indigo-700'
-                    }`}
-                    title={`Chuyển nhanh đến Cấu hình xe #${idx + 1}`}
-                  >
-                    Xe #{idx + 1}: {isShortTonnage}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="text-[11px] text-slate-500 hidden md:block">
-            Mẹo: Dùng nút ◀ ▶ hoặc kéo thanh cuộn dưới đáy bảng
-          </div>
         </div>
 
         {/* UNIFIED SPREADSHEET TABLE */}
@@ -906,7 +968,7 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
                       className="w-full h-8 px-2 bg-white border border-slate-300 hover:border-indigo-400 text-xs font-bold text-slate-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 cursor-pointer shadow-2xs"
                       title={col.truckBodyType}
                     >
-                      {TRUCKING_BODY_TYPES_LOV.map((body, bIdx) => (
+                      {activeBodyTypesLov.map((body, bIdx) => (
                         <option key={bIdx} value={body}>
                           {body}
                         </option>
@@ -927,7 +989,7 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
                 </th>
 
                 {columns.map((col) => {
-                  const availableTonnages = TRUCKING_TONNAGE_BY_BODY_MAP[col.truckBodyType] || [];
+                  const availableTonnages = activeTonnageMap[col.truckBodyType] || activeTonnageMap[activeBodyTypesLov[0]] || [];
                   return (
                     <th 
                       key={`head-tier2-${col.id}`}
@@ -1034,7 +1096,7 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
 
               {/* CÁC PHỤ PHÍ TUYẾN CHỌN TỪ LOV (CÓ THỂ XÓA - TÊN VÀ ĐVT CỐ ĐỊNH THEO LOV) */}
               {(columns[0]?.activeSurcharges || []).map((surcharge) => {
-                const lovItem = TRUCKING_SECTION_1_SURCHARGES_LOV.find(it => it.id === surcharge.id) || {
+                const lovItem = activeSurchargesLov.find(it => it.id === surcharge.id) || {
                   id: surcharge.id,
                   name: surcharge.id,
                   unit: 'VND / Chuyến',
@@ -1092,7 +1154,7 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
                 <td className="sticky left-0 z-20 bg-slate-50/95 border-r border-slate-200 px-4 py-2">
                   {(() => {
                     const activeIds = (columns[0]?.activeSurcharges || []).map(a => a.id);
-                    const unadded = TRUCKING_SECTION_1_SURCHARGES_LOV.filter(l => !activeIds.includes(l.id));
+                    const unadded = activeSurchargesLov.filter(l => !activeIds.includes(l.id));
 
                     if (unadded.length === 0) {
                       return (
@@ -1129,33 +1191,7 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
                 <td className="sticky left-[320px] z-20 bg-slate-50/95 border-r-2 border-slate-300 px-2 py-2 text-center text-slate-400 text-[10px] font-medium italic shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)] select-none">
                   Theo LOV
                 </td>
-                <td colSpan={columns.length} className="px-3 py-2 text-slate-500 text-xs bg-slate-50/60">
-                  {(() => {
-                    const activeIds = (columns[0]?.activeSurcharges || []).map(a => a.id);
-                    const unadded = TRUCKING_SECTION_1_SURCHARGES_LOV.filter(l => !activeIds.includes(l.id));
-
-                    if (unadded.length === 0) {
-                      return <span className="text-[11px] text-slate-400 italic">Tất cả phụ phí chuẩn đã được hiển thị trên bảng biểu giá.</span>;
-                    }
-
-                    return (
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="text-[10.5px] font-bold text-slate-500 uppercase tracking-wide mr-1">Thêm nhanh:</span>
-                        {unadded.map((item) => (
-                          <button
-                            key={item.id}
-                            type="button"
-                            onClick={() => handleAddSurchargeFromLOV(item.id)}
-                            className="px-2.5 py-0.5 text-[11px] font-semibold text-slate-700 bg-white hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-300 border border-slate-200 rounded-lg transition-all cursor-pointer shadow-2xs"
-                            title={`Thêm "${item.name}" [${item.unit}]`}
-                          >
-                            + {item.name.split(' (')[0]}
-                          </button>
-                        ))}
-                      </div>
-                    );
-                  })()}
-                </td>
+                <td colSpan={columns.length} className="px-3 py-2 bg-slate-50/40"></td>
               </tr>
 
               {/* ─────────────────────────────────────────────────────────────
@@ -1175,7 +1211,7 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
 
               {/* CÁC DỊCH VỤ VAS CHỌN TỪ LOV (CÓ THỂ XÓA - TÊN VÀ ĐVT CỐ ĐỊNH THEO LOV) */}
               {(columns[0]?.activeVas || []).map((vas) => {
-                const lovItem = TRUCKING_SECTION_2_VAS_LOV.find(it => it.id === vas.id) || {
+                const lovItem = activeVasLov.find(it => it.id === vas.id) || {
                   id: vas.id,
                   name: vas.id,
                   unit: 'VND / Chuyến',
@@ -1250,7 +1286,7 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
                 <td className="sticky left-0 z-20 bg-slate-50/95 border-r border-slate-200 px-4 py-2">
                   {(() => {
                     const activeIds = (columns[0]?.activeVas || []).map(a => a.id);
-                    const unadded = TRUCKING_SECTION_2_VAS_LOV.filter(l => !activeIds.includes(l.id));
+                    const unadded = activeVasLov.filter(l => !activeIds.includes(l.id));
 
                     if (unadded.length === 0) {
                       return (
@@ -1287,33 +1323,7 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
                 <td className="sticky left-[320px] z-20 bg-slate-50/95 border-r-2 border-slate-300 px-2 py-2 text-center text-slate-400 text-[10px] font-medium italic shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)] select-none">
                   Theo LOV
                 </td>
-                <td colSpan={columns.length} className="px-3 py-2 text-slate-500 text-xs bg-slate-50/60">
-                  {(() => {
-                    const activeIds = (columns[0]?.activeVas || []).map(a => a.id);
-                    const unadded = TRUCKING_SECTION_2_VAS_LOV.filter(l => !activeIds.includes(l.id));
-
-                    if (unadded.length === 0) {
-                      return <span className="text-[11px] text-slate-400 italic">Tất cả tiện ích VAS chuẩn đã được hiển thị trên bảng biểu giá.</span>;
-                    }
-
-                    return (
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="text-[10.5px] font-bold text-slate-500 uppercase tracking-wide mr-1">Thêm nhanh:</span>
-                        {unadded.map((item) => (
-                          <button
-                            key={item.id}
-                            type="button"
-                            onClick={() => handleAddVasFromLOV(item.id)}
-                            className="px-2.5 py-0.5 text-[11px] font-semibold text-slate-700 bg-white hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-300 border border-slate-200 rounded-lg transition-all cursor-pointer shadow-2xs"
-                            title={`Thêm "${item.name}" [${item.unit}]`}
-                          >
-                            + {item.name.split(' (')[0]}
-                          </button>
-                        ))}
-                      </div>
-                    );
-                  })()}
-                </td>
+                <td colSpan={columns.length} className="px-3 py-2 bg-slate-50/40"></td>
               </tr>
 
 {/* ─────────────────────────────────────────────────────────────
@@ -1470,36 +1480,22 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
         </div>
 
         {/* MODAL FOOTER */}
-        <div className="px-5 py-3 bg-white border-t border-slate-200 flex items-center justify-between gap-4 shrink-0 shadow-lg select-none">
-          <div className="flex items-center gap-3 text-xs">
-            <span className="text-slate-500 font-medium">Đã thiết lập:</span>
-            <span className="font-bold text-slate-900 bg-slate-100 px-2.5 py-0.5 rounded-lg border border-slate-200">
-              {columns.length} Cấu hình xe
-            </span>
-            <span className="text-slate-300 hidden sm:inline">|</span>
-            <span className="text-slate-500 hidden sm:inline">Khoảng giá tổng All-in:</span>
-            <strong className="text-emerald-700 font-black hidden sm:inline font-mono">
-              {Math.min(...columns.map(c => c.totalPrice)).toLocaleString('vi-VN')} – {Math.max(...columns.map(c => c.totalPrice)).toLocaleString('vi-VN')} ₫
-            </strong>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl transition-all cursor-pointer"
-            >
-              Hủy Bỏ
-            </button>
-            <button
-              type="button"
-              onClick={handleSaveMatrix}
-              className="inline-flex items-center gap-1.5 px-6 py-2 text-xs font-black text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl transition-all shadow hover:shadow-emerald-600/30 cursor-pointer"
-            >
-              <Save className="w-4 h-4" />
-              <span>Lưu Cấu Hình Biểu Phí</span>
-            </button>
-          </div>
+        <div className="px-5 py-3 bg-white border-t border-slate-200 flex items-center justify-end gap-2 shrink-0 shadow-lg select-none">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl transition-all cursor-pointer"
+          >
+            Hủy Bỏ
+          </button>
+          <button
+            type="button"
+            onClick={handleSaveMatrix}
+            className="inline-flex items-center gap-1.5 px-6 py-2 text-xs font-black text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl transition-all shadow hover:shadow-emerald-600/30 cursor-pointer"
+          >
+            <Save className="w-4 h-4" />
+            <span>Lưu Cấu Hình Biểu Phí</span>
+          </button>
         </div>
       </div>
     </div>
