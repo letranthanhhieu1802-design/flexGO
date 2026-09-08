@@ -34,7 +34,7 @@ export interface WarehouseMatrixColumn {
   isCustom?: boolean;
 }
 
-export const WAREHOUSE_FREE_UTILITIES_SUGGESTIONS = [
+export const GENERAL_FREE_UTILITIES_SUGGESTIONS = [
   'Bảo vệ 24/7 & Camera an ninh CCTV giám sát',
   'Hệ thống PCCC tự động Sprinkler đạt chuẩn',
   'Phần mềm WMS quản lý tồn kho Real-time',
@@ -45,16 +45,118 @@ export const WAREHOUSE_FREE_UTILITIES_SUGGESTIONS = [
   'Hệ thống kiểm soát nhiệt độ & độ ẩm tự động',
 ];
 
-export const PRESET_WAREHOUSE_COLUMNS: Array<{ name: string; unit: string }> = [
+export const COLD_FREE_UTILITIES_SUGGESTIONS = [
+  'Bảo vệ 24/7 & Camera an ninh CCTV buồng lạnh',
+  'Hệ thống điện 3 pha & máy phát ATS dự phòng cấp điện tức thì',
+  'Hệ thống cảm biến IoT giám sát nhiệt độ tự động Real-time',
+  'Cửa Dock lạnh có đệm khí che chắn (Dock Shelter) chống thoát nhiệt',
+  'Bảo hiểm suy giảm chất lượng chuỗi lạnh 100%',
+  'Chiếu sáng LED chuyên dụng môi trường âm sâu chống nổ',
+  'Vệ sinh diệt khuẩn buồng lạnh & xả đá định kỳ theo chuẩn HACCP',
+  'Phần mềm WMS quản lý hạn sử dụng FIFO/FEFO và xuất biểu đồ nhiệt',
+];
+
+export const HAZMAT_FREE_UTILITIES_SUGGESTIONS = [
+  'Bảo vệ 2 lớp & Camera giám sát an ninh phòng nổ Ex-proof 24/7',
+  'Hệ thống PCCC tự động bọt Foam chuyên dụng đã nghiệm thu',
+  'Sàn bê tông Epoxy kháng axit/kiềm & rãnh thu gom chống tràn độc lập',
+  'Trang bị bồn rửa mắt và vòi tắm khẩn cấp (Emergency Eyewash & Shower)',
+  'Hệ thống thông gió chống nổ cưỡng bức kiểm soát nồng độ LEL 24/7',
+  'Bộ Spill-Kit ứng phó sự cố tràn đổ hóa chất túc trực 24/7',
+  'Bảo hiểm trách nhiệm bồi thường thiệt hại môi trường 100%',
+  'Phần mềm WMS quản lý ma trận tương thích hóa chất & cảnh báo MSDS',
+];
+
+export const WAREHOUSE_FREE_UTILITIES_SUGGESTIONS = GENERAL_FREE_UTILITIES_SUGGESTIONS;
+
+export const BONDED_GENERAL_FREE_UTILITIES_SUGGESTIONS = [
+  'Hệ thống Camera an ninh CCTV kết nối trực tiếp Chi cục Hải quan 24/7 (TT 38/39/BTC)',
+  'Phần mềm WMS quản lý theo dõi tờ khai điện tử VNACCS/VCIS và thời hạn lưu kho ngoại quan',
+  'Báo cáo định kỳ tồn kho và hỗ trợ thủ tục thanh khoản tờ khai E52/E54 gửi cơ quan Hải quan',
+  'Trang bị phòng làm việc, thiết bị văn phòng và máy vi tính cho công chức Hải quan thường trực',
+  'Miễn phí lưu bãi xe container 2 giờ đầu chờ kiểm tra kẹp chì seal hải quan',
+  'Hệ thống PCCC tự động Sprinkler và biên bản nghiệm thu an ninh trật tự kho ngoại quan',
+  'Bãi đỗ xe container rộng rãi chờ làm thủ tục thông quan và tiếp nhận xe 24/7',
+  'Trang bị công cụ quét mã Barcode/QR đối chiếu Master/House Air Waybill & B/L',
+];
+
+export const BONDED_COLD_FREE_UTILITIES_SUGGESTIONS = [
+  'Hệ thống cảm biến IoT trích xuất biểu đồ nhiệt độ tự động gửi cơ quan Kiểm dịch & Hải quan',
+  'Camera buồng lạnh và cửa dock Inflatable Shelter kết nối giám sát Hải quan 24/7',
+  'Máy phát điện ATS dự phòng 100% công suất bảo đảm chuỗi lạnh không đứt gãy',
+  'Khu vực phòng đệm Antechamber kiểm tra cảm quan hàng đông lạnh phục vụ kiểm dịch',
+  'Chiếu sáng LED chuyên dụng môi trường âm sâu chống nổ',
+  'Vệ sinh diệt khuẩn buồng lạnh & xả đá định kỳ theo chuẩn HACCP kiểm dịch',
+  'Phần mềm WMS quản lý nhiệt độ âm/dương theo từng lô hàng tờ khai hải quan',
+  'Báo cáo định kỳ tồn kho hàng lạnh tạm nhập tái xuất gửi Chi cục Hải quan',
+];
+
+export const BONDED_HAZMAT_FREE_UTILITIES_SUGGESTIONS = [
+  'Camera an ninh phòng nổ Ex-proof kết nối cơ quan Hải quan & PCCC giám sát 24/7',
+  'Hệ thống PCCC tự động bọt Foam AFFF chuyên dụng dập cháy dung môi hóa chất',
+  'Phần mềm WMS quản lý danh mục hóa chất nguy hiểm, mã UN và lưu trữ hồ sơ MSDS điện tử',
+  'Trang bị trạm tắm/rửa mắt khẩn cấp và bộ Spill-Kit ứng phó sự cố hóa chất tại chỗ',
+  'Sàn bê tông Epoxy kháng axit/kiềm & rãnh thu gom chống tràn độc lập',
+  'Hệ thống thông gió chống nổ cưỡng bức kiểm soát nồng độ LEL 24/7',
+  'Bảo hiểm trách nhiệm bồi thường thiệt hại môi trường và kho ngoại quan 100%',
+  'Hỗ trợ khai báo hóa chất một cửa quốc gia NSW kết nối tờ khai Hải quan',
+];
+
+export const GENERAL_PRESET_WAREHOUSE_COLUMNS: Array<{ name: string; unit: string }> = [
   { name: 'Tải Trọng Sàn (Tấn)', unit: 'Tấn' },
   { name: 'Kệ Selective (Pallet)', unit: 'Pallet' },
   { name: 'Kệ Drive-In (Pallet)', unit: 'Pallet' },
   { name: 'Khu Vực Mezzanine (m²)', unit: 'm²' },
   { name: 'Kho Mát 18°C - 25°C (m²)', unit: 'm²' },
-  { name: 'Kho Lạnh 0°C - 5°C (Pallet)', unit: 'Pallet' },
-  { name: 'Kho Cấp Đông (-18°C) (m³)', unit: 'm³' },
   { name: 'Bãi Đỗ Xe & Kho Hở (m²)', unit: 'm²' },
 ];
+
+export const COLD_PRESET_WAREHOUSE_COLUMNS: Array<{ name: string; unit: string }> = [
+  { name: 'Kho Đông Lạnh (-18°C ~ -25°C) (Pallet)', unit: 'Pallet' },
+  { name: 'Kho Mát (+2°C ~ +8°C) (Pallet)', unit: 'Pallet' },
+  { name: 'Kho Điều Hòa (+15°C ~ +22°C) (m³)', unit: 'm³' },
+  { name: 'Kho Cấp Đông Sâu (-40°C) (Tấn)', unit: 'Tấn' },
+  { name: 'Khoang Đệm Tiền Lạnh Antechamber (m²)', unit: 'm²' },
+  { name: 'Khoang Lạnh Tự Quản (m³)', unit: 'm³' },
+];
+
+export const HAZMAT_PRESET_WAREHOUSE_COLUMNS: Array<{ name: string; unit: string }> = [
+  { name: 'Kệ Pallet Hóa Chất Chống Tràn (Pallet)', unit: 'Pallet' },
+  { name: 'Khu Bồn IBC Tank 1000L (Bồn / Tank)', unit: 'Bồn' },
+  { name: 'Khu Chứa Phuy Sắt 200L (Phuy)', unit: 'Phuy' },
+  { name: 'Sàn Khoang Chống Cháy Cách Ly (m²)', unit: 'm²' },
+  { name: 'Khu Vực Bảo Ôn Hóa Chất Bay Hơi (m³)', unit: 'm³' },
+  { name: 'Khoang Cách Ly Hóa Chất Độc Class 6.1 (Pallet)', unit: 'Pallet' },
+];
+
+export const BONDED_GENERAL_PRESET_WAREHOUSE_COLUMNS: Array<{ name: string; unit: string }> = [
+  { name: 'Thể Tích Chứa CBM (m³)', unit: 'm³' },
+  { name: 'Sức Chứa Pallet (Racking)', unit: 'Pallet' },
+  { name: 'Diện Tích Kho Lưu Trữ (m²)', unit: 'm²' },
+  { name: 'Khu Vực Đóng Ghép CFS (m²)', unit: 'm²' },
+  { name: 'Bãi Cont Ngoại Quan (Cont)', unit: 'Cont' },
+  { name: 'Khu Vực Bàn Kiểm Hóa HQ (Bàn)', unit: 'Bàn' },
+];
+
+export const BONDED_COLD_PRESET_WAREHOUSE_COLUMNS: Array<{ name: string; unit: string }> = [
+  { name: 'Kho Đông Ngoại Quan (-18°C ~ -25°C)', unit: 'Pallet' },
+  { name: 'Kho Mát Ngoại Quan (+2°C ~ +8°C)', unit: 'Pallet' },
+  { name: 'Khu Đệm Lạnh Lấy Mẫu Kiểm Dịch (m²)', unit: 'm²' },
+  { name: 'Bãi Cắm Điện Container Lạnh (Trụ)', unit: 'Trụ' },
+  { name: 'Thể Tích Bảo Quản Đông Lạnh (m³)', unit: 'm³' },
+  { name: 'Buồng Cấp Đông Tái Xuất (-40°C)', unit: 'Tấn' },
+];
+
+export const BONDED_HAZMAT_PRESET_WAREHOUSE_COLUMNS: Array<{ name: string; unit: string }> = [
+  { name: 'Kệ Pallet Chống Tràn Ngoại Quan (Pallet)', unit: 'Pallet' },
+  { name: 'Khu Bồn Ngoại Quan IBC Tank 1000L (Bồn)', unit: 'Bồn' },
+  { name: 'Khu Phuy Sắt Hóa Chất Ngoại Quan (Phuy)', unit: 'Phuy' },
+  { name: 'Khoang Cách Ly DG Khí Độc LEL (m²)', unit: 'm²' },
+  { name: 'Bãi Cách Ly Container Hóa Chất (Cont)', unit: 'Cont' },
+  { name: 'Khu Vực Kiểm Hóa Hóa Chất Phòng Nổ (m²)', unit: 'm²' },
+];
+
+export const PRESET_WAREHOUSE_COLUMNS = GENERAL_PRESET_WAREHOUSE_COLUMNS;
 
 interface WarehousePricingContinuousTableProps {
   data: WarehouseDetailModalData;
@@ -64,7 +166,7 @@ interface WarehousePricingContinuousTableProps {
 }
 
 // DANH SÁCH LOV PHỤ PHÍ CỐ ĐỊNH TIÊU CHUẨN (SECTION 1B)
-export const FIXED_SURCHARGES_LOV = [
+export const GENERAL_FIXED_SURCHARGES_LOV = [
   { code: 'FIX-WMS-ADMIN', name: 'Phí quản lý đơn hàng & báo cáo tồn kho định kỳ (WMS / Admin)', unit: 'VND / Tháng', defaultPrice: 2000000, note: 'Bao gồm phân quyền 5 tài khoản WMS' },
   { code: 'FIX-CYCLE-COUNT', name: 'Phí kiểm kê định kỳ theo chu kỳ (Cycle Count)', unit: 'VND / Lần', defaultPrice: 500000, note: 'Kiểm kê định kỳ 1 lần/tháng' },
   { code: 'FIX-PARKING-MONTHLY', name: 'Phí bến bãi đỗ xe chờ giao nhận hàng tháng', unit: 'VND / Xe / Tháng', defaultPrice: 1500000, note: 'Dành cho xe tải thường trực' },
@@ -77,18 +179,126 @@ export const FIXED_SURCHARGES_LOV = [
   { code: 'FIX-STORAGE-MAINT', name: 'Phí bảo dưỡng pallet, sàn & hệ thống giá kệ định kỳ', unit: 'VND / Tháng', defaultPrice: 600000, note: 'Kiểm định an toàn tải trọng định kỳ' },
 ];
 
+export const COLD_FIXED_SURCHARGES_LOV = [
+  { code: 'FIX-COLD-POWER', name: 'Phí duy trì nguồn điện máy phát ATS dự phòng 100% công suất 24/7', unit: 'VND / Tháng', defaultPrice: 3500000, note: 'Đảm bảo điện máy nén lạnh Bitzer không gián đoạn' },
+  { code: 'FIX-COLD-CALIB', name: 'Phí bảo dưỡng dàn lạnh & hiệu chuẩn đầu dò nhiệt độ định kỳ (Calibration)', unit: 'VND / Tháng', defaultPrice: 1500000, note: 'Hiệu chuẩn cảm biến theo tiêu chuẩn HACCP/GDP' },
+  { code: 'FIX-COLD-DEFROST', name: 'Phí vệ sinh, xả đá (Defrosting) & kiểm soát ATTP HACCP/ISO 22000', unit: 'VND / Tháng', defaultPrice: 1200000, note: 'Xử lý xả đá dàn lạnh và diệt khuẩn buồng lạnh' },
+  { code: 'FIX-COLD-PORTAL', name: 'Phí tài khoản cổng thông tin giám sát nhiệt độ Online Real-time', unit: 'VND / Tháng', defaultPrice: 800000, note: 'Theo dõi biểu đồ nhiệt độ 24/7 từ xa qua App' },
+  { code: 'FIX-COLD-WMS-FEFO', name: 'Phí phần mềm WMS chuyên dụng quản lý hạn sử dụng FIFO/FEFO', unit: 'VND / Tháng', defaultPrice: 2000000, note: 'Cảnh báo hạn sử dụng hàng tồn kho tự động' },
+  { code: 'FIX-COLD-CYCLE', name: 'Phí kiểm kê định kỳ trong buồng lạnh (Cycle Count)', unit: 'VND / Lần', defaultPrice: 700000, note: 'Kiểm kê định kỳ 1 lần/tháng' },
+  { code: 'FIX-COLD-PARKING', name: 'Phí bến bãi đỗ xe tải lạnh có trụ cấp nguồn điện lạnh', unit: 'VND / Xe / Tháng', defaultPrice: 2000000, note: 'Bãi đỗ có cấp nguồn điện lạnh thường trực' },
+  { code: 'FIX-COLD-PEST', name: 'Phí kiểm soát sinh vật gây hại chuyên dụng kho thực phẩm', unit: 'VND / Tháng', defaultPrice: 900000, note: 'Đạt chuẩn BRC / HACCP / ISO 22000' },
+];
+
+export const HAZMAT_FIXED_SURCHARGES_LOV = [
+  { code: 'FIX-HAZ-FOAM', name: 'Phí duy trì hệ thống PCCC tự động bọt Foam chữa cháy dung môi', unit: 'VND / Tháng', defaultPrice: 4500000, note: 'Kiểm tra bồn chứa bọt foam và van xả tự động định kỳ' },
+  { code: 'FIX-HAZ-SUMP', name: 'Phí bảo dưỡng hệ thống rãnh gom và bồn trung hòa nước thải hóa chất', unit: 'VND / Tháng', defaultPrice: 2500000, note: 'Bơm hút và xử lý nước thải hóa chất nguy hại' },
+  { code: 'FIX-HAZ-VENT', name: 'Phí duy trì hệ thống thông gió chống nổ cưỡng bức Ex-proof 24/7', unit: 'VND / Tháng', defaultPrice: 1800000, note: 'Đảm bảo nồng độ hơi dung môi luôn dưới ngưỡng LEL' },
+  { code: 'FIX-HAZ-INSUR', name: 'Phí bảo hiểm trách nhiệm dân sự đối với môi trường & bên thứ ba', unit: 'VND / Tháng', defaultPrice: 3000000, note: 'Bảo hiểm ô nhiễm môi trường và cháy nổ hóa chất' },
+  { code: 'FIX-HAZ-DRILL', name: 'Phí tổ chức diễn tập ứng phó sự cố hóa chất định kỳ cấp cơ sở', unit: 'VND / Quý', defaultPrice: 2000000, note: 'Phối hợp cảnh sát PCCC & cơ quan chức năng' },
+  { code: 'FIX-HAZ-WMS-DG', name: 'Phí hệ thống WMS kiểm soát ma trận tương thích hóa chất & MSDS', unit: 'VND / Tháng', defaultPrice: 2500000, note: 'Chống xếp lẫn hóa chất phản ứng xung khắc' },
+  { code: 'FIX-HAZ-EYEWASH', name: 'Phí kiểm định & duy trì trạm rửa mắt, tắm khẩn cấp Emergency Shower', unit: 'VND / Tháng', defaultPrice: 600000, note: 'Kiểm tra lưu lượng nước và khử trùng định kỳ' },
+  { code: 'FIX-HAZ-SECURITY', name: 'Phí giám sát an ninh camera phòng nổ Ex-proof & bảo vệ 2 lớp', unit: 'VND / Tháng', defaultPrice: 1200000, note: 'Tuân thủ nghiêm ngặt kiểm soát vật liệu sinh lửa' },
+];
+
+export const BONDED_GENERAL_FIXED_SURCHARGES_LOV = [
+  { code: 'FIX-BON-VASSCM', name: 'Phí kết nối dữ liệu phần mềm tự động với hệ thống VASSCM Hải quan', unit: 'VND / Tháng', defaultPrice: 2000000, note: 'Duy trì kết nối truyền số liệu tờ khai 24/7' },
+  { code: 'FIX-BON-OFFICE-HQ', name: 'Phí duy trì phòng làm việc và trang thiết bị cho công chức Hải quan', unit: 'VND / Tháng', defaultPrice: 1500000, note: 'Bao gồm điện thoại, máy in, mạng nội bộ' },
+  { code: 'FIX-BON-CCTV-HQ', name: 'Phí duy trì máy chủ truyền hình ảnh Camera CCTV trực tiếp về Chi cục Hải quan', unit: 'VND / Tháng', defaultPrice: 1200000, note: 'Lưu trữ video 12 tháng theo chuẩn TT 38/39' },
+  { code: 'FIX-BON-WMS-DECLAR', name: 'Phí phần mềm WMS theo dõi số lượng tồn kho theo số tờ khai E52/E54', unit: 'VND / Tháng', defaultPrice: 1800000, note: 'Quản lý hạn lưu kho 12 tháng tự động' },
+  { code: 'FIX-BON-CYCLE-COUNT', name: 'Phí kiểm kê định kỳ đối soát số liệu thực tế với cơ quan Hải quan', unit: 'VND / Lần', defaultPrice: 800000, note: 'Bao gồm biên bản đối chiếu liên ngành' },
+  { code: 'FIX-BON-PARKING-HQ', name: 'Phí duy trì bến bãi đỗ xe container chờ niêm chì & kiểm hóa hải quan', unit: 'VND / Xe / Tháng', defaultPrice: 1500000, note: 'Bãi đỗ thường trực có mái che' },
+];
+
+export const BONDED_COLD_FIXED_SURCHARGES_LOV = [
+  { code: 'FIX-BON-COLD-POWER', name: 'Phí duy trì nguồn điện máy phát ATS dự phòng 100% công suất kho lạnh ngoại quan', unit: 'VND / Tháng', defaultPrice: 3500000, note: 'Bảo đảm máy nén Bitzer hoạt động 24/7' },
+  { code: 'FIX-BON-COLD-IOT-HQ', name: 'Phí kết nối trạm cảm biến nhiệt độ tự động gửi dữ liệu cho Kiểm dịch & Hải quan', unit: 'VND / Tháng', defaultPrice: 1200000, note: 'Trích xuất đồ thị nhiệt độ liên tục' },
+  { code: 'FIX-BON-COLD-VASSCM', name: 'Phí kết nối dữ liệu phần mềm kho lạnh ngoại quan với hệ thống VASSCM', unit: 'VND / Tháng', defaultPrice: 2000000, note: 'Quản lý tờ khai và nhiệt độ lô hàng' },
+  { code: 'FIX-BON-COLD-DEFROST', name: 'Phí vệ sinh, xả đá buồng đệm và khử trùng tiêu độc đạt chuẩn kiểm dịch ATTP', unit: 'VND / Tháng', defaultPrice: 1500000, note: 'Tuân thủ nghiêm ngặt vệ sinh thú y' },
+  { code: 'FIX-BON-COLD-OFFICE', name: 'Phí duy trì bàn làm việc & thiết bị đo nhiệt độ kiểm dịch cho công chức chuyên ngành', unit: 'VND / Tháng', defaultPrice: 1200000, note: 'Hỗ trợ kiểm dịch động thực vật' },
+  { code: 'FIX-BON-COLD-PLUG', name: 'Phí duy trì trụ cắm điện container lạnh chờ thông quan tại bãi kho ngoại quan', unit: 'VND / Trụ / Tháng', defaultPrice: 2500000, note: 'Nguồn điện 3 pha 380V công suất cao' },
+];
+
+export const BONDED_HAZMAT_FIXED_SURCHARGES_LOV = [
+  { code: 'FIX-BON-HAZ-FOAM', name: 'Phí duy trì hệ thống PCCC tự động bọt Foam chuyên dụng kho ngoại quan hóa chất', unit: 'VND / Tháng', defaultPrice: 4500000, note: 'Kiểm định bồn Foam và van xả tự động định kỳ' },
+  { code: 'FIX-BON-HAZ-CCTV-EX', name: 'Phí duy trì camera giám sát phòng nổ Ex-proof truyền dữ liệu trực tiếp về Hải quan', unit: 'VND / Tháng', defaultPrice: 2000000, note: 'Camera chuẩn ATEX chống cháy nổ' },
+  { code: 'FIX-BON-HAZ-VASSCM', name: 'Phí kết nối hệ thống WMS phân nhóm hóa chất UN/MSDS với cổng Hải quan & NSW', unit: 'VND / Tháng', defaultPrice: 2500000, note: 'Quản lý mã UN và thời hạn lưu kho' },
+  { code: 'FIX-BON-HAZ-SUMP', name: 'Phí bảo dưỡng hệ thống rãnh gom và bồn trung hòa nước thải hóa chất nguy hại', unit: 'VND / Tháng', defaultPrice: 2500000, note: 'Xử lý nước thải hóa chất sự cố' },
+  { code: 'FIX-BON-HAZ-INSUR', name: 'Phí bảo hiểm trách nhiệm ô nhiễm môi trường kho ngoại quan hàng nguy hiểm', unit: 'VND / Tháng', defaultPrice: 3500000, note: 'Mức trách nhiệm cao nhất' },
+  { code: 'FIX-BON-HAZ-DRILL', name: 'Phí định kỳ diễn tập ứng phó sự cố hóa chất phối hợp lực lượng Hải quan & PCCC', unit: 'VND / Quý', defaultPrice: 2500000, note: 'Thực tập phương án PCCC chuyên nghiệp' },
+];
+
+export const FIXED_SURCHARGES_LOV = GENERAL_FIXED_SURCHARGES_LOV;
+
 export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuousTableProps> = ({
   data,
   setData,
   surchargesLov,
   vasLov,
 }) => {
-  // CÁC CỘT MA TRẬN LƯU TRỮ (MẶC ĐỊNH 3 CỘT THEO EXCEL + CHO PHÉP THÊM CỘT NHƯ LTL)
-  const [columns, setColumns] = useState<WarehouseMatrixColumn[]>([
-    { id: 'col_area', name: '1. Diện Tích Sàn (m²)', unit: 'm²', typeKey: 'area' },
-    { id: 'col_pallets', name: '2. Sức Chứa Pallet (Racking)', unit: 'Pallet', typeKey: 'pallets' },
-    { id: 'col_volume', name: '3. Thể Tích Chứa (m³ / CBM)', unit: 'm³', typeKey: 'volume' },
-  ]);
+  const isCold = Boolean(data.isColdStorage);
+  const isHazmat = Boolean(data.isChemicalStorage);
+  const isBonded = Boolean(data.isBondedStorage || data.modelId?.includes('bon') || data.modelId === 'wh-gen-bon');
+
+  const activeFixedLov = isBonded
+    ? (isCold
+        ? BONDED_COLD_FIXED_SURCHARGES_LOV
+        : (isHazmat ? BONDED_HAZMAT_FIXED_SURCHARGES_LOV : BONDED_GENERAL_FIXED_SURCHARGES_LOV))
+    : (isCold 
+        ? COLD_FIXED_SURCHARGES_LOV 
+        : (isHazmat ? HAZMAT_FIXED_SURCHARGES_LOV : GENERAL_FIXED_SURCHARGES_LOV));
+
+  const activePresetColumns = isBonded
+    ? (isCold
+        ? BONDED_COLD_PRESET_WAREHOUSE_COLUMNS
+        : (isHazmat ? BONDED_HAZMAT_PRESET_WAREHOUSE_COLUMNS : BONDED_GENERAL_PRESET_WAREHOUSE_COLUMNS))
+    : (isCold
+        ? COLD_PRESET_WAREHOUSE_COLUMNS
+        : (isHazmat ? HAZMAT_PRESET_WAREHOUSE_COLUMNS : GENERAL_PRESET_WAREHOUSE_COLUMNS));
+
+  // CÁC CỘT MA TRẬN LƯU TRỮ (TỰ ĐỘNG KHỞI TẠO THEO LOẠI HÌNH KHO THƯỜNG / LẠNH / NGUY HIỂM / NGOẠI QUAN)
+  const [columns, setColumns] = useState<WarehouseMatrixColumn[]>(() => {
+    if (isBonded) {
+      if (isCold) {
+        return [
+          { id: 'col_cold_pallets', name: '1. Kho Đông Ngoại Quan (-18°C ~ -25°C)', unit: 'Pallet', typeKey: 'pallets' },
+          { id: 'col_chill_pallets', name: '2. Kho Mát Ngoại Quan (+2°C ~ +8°C)', unit: 'Pallet', typeKey: 'area' },
+          { id: 'col_air_cbm', name: '3. Thể Tích Đệm Lạnh (m³)', unit: 'm³', typeKey: 'volume' },
+        ];
+      }
+      if (isHazmat) {
+        return [
+          { id: 'col_haz_pallets', name: '1. Kệ Pallet Chống Tràn Hóa Chất', unit: 'Pallet', typeKey: 'pallets' },
+          { id: 'col_haz_tank', name: '2. Khu Bồn IBC Tank 1000L', unit: 'Bồn', typeKey: 'area' },
+          { id: 'col_haz_drum', name: '3. Khu Chứa Phuy Sắt 200L', unit: 'Phuy', typeKey: 'volume' },
+        ];
+      }
+      return [
+        { id: 'col_volume', name: '1. Thể Tích Chứa CBM (m³)', unit: 'm³', typeKey: 'volume' },
+        { id: 'col_pallets', name: '2. Sức Chứa Pallet (Racking)', unit: 'Pallet', typeKey: 'pallets' },
+        { id: 'col_area', name: '3. Diện Tích Sàn (m²)', unit: 'm²', typeKey: 'area' },
+      ];
+    }
+    if (isCold) {
+      return [
+        { id: 'col_cold_pallets', name: '1. Kho Đông Lạnh (-18°C ~ -25°C)', unit: 'Pallet', typeKey: 'pallets' },
+        { id: 'col_chill_pallets', name: '2. Kho Mát (+2°C ~ +8°C)', unit: 'Pallet', typeKey: 'area' },
+        { id: 'col_air_cbm', name: '3. Kho Điều Hòa (+15°C ~ +22°C)', unit: 'm³', typeKey: 'volume' },
+      ];
+    }
+    if (isHazmat) {
+      return [
+        { id: 'col_haz_pallets', name: '1. Kệ Pallet Chống Tràn Hóa Chất', unit: 'Pallet', typeKey: 'pallets' },
+        { id: 'col_haz_tank', name: '2. Khu Bồn IBC Tank 1000L', unit: 'Bồn', typeKey: 'area' },
+        { id: 'col_haz_drum', name: '3. Khu Chứa Phuy Sắt 200L', unit: 'Phuy', typeKey: 'volume' },
+      ];
+    }
+    return [
+      { id: 'col_area', name: '1. Diện Tích Sàn (m²)', unit: 'm²', typeKey: 'area' },
+      { id: 'col_pallets', name: '2. Sức Chứa Pallet (Racking)', unit: 'Pallet', typeKey: 'pallets' },
+      { id: 'col_volume', name: '3. Thể Tích Chứa (m³ / CBM)', unit: 'm³', typeKey: 'volume' },
+    ];
+  });
 
   // Modal / popover thêm cột mới
   const [isAddColumnModalOpen, setIsAddColumnModalOpen] = useState(false);
@@ -105,12 +315,66 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
   }>>({});
 
   // Ma trận giá phụ phí biến đổi theo từng cột
-  const [surchargeColPrices, setSurchargeColPrices] = useState<Record<string, Record<string, number>>>({
-    'pwh-1': { col_area: 35000, col_pallets: 35000, col_volume: 30000 },
-    'pwh-2': { col_area: 35000, col_pallets: 35000, col_volume: 30000 },
-    'pwh-3': { col_area: 1200000, col_pallets: 1200000, col_volume: 1200000 },
-    'pwh-4': { col_area: 500, col_pallets: 500, col_volume: 500 },
-    'pwh-5': { col_area: 200000, col_pallets: 200000, col_volume: 200000 },
+  const [surchargeColPrices, setSurchargeColPrices] = useState<Record<string, Record<string, number>>>(() => {
+    if (isBonded) {
+      if (isCold) {
+        return {
+          'pwh-bon-cold-1': { col_cold_pallets: 95000, col_chill_pallets: 95000, col_air_cbm: 95000 },
+          'pwh-bon-cold-2': { col_cold_pallets: 300000, col_chill_pallets: 300000, col_air_cbm: 300000 },
+          'pwh-bon-cold-3': { col_cold_pallets: 180000, col_chill_pallets: 180000, col_air_cbm: 180000 },
+          'pwh-bon-cold-4': { col_cold_pallets: 55000, col_chill_pallets: 55000, col_air_cbm: 55000 },
+          'pwh-bon-cold-5': { col_cold_pallets: 350000, col_chill_pallets: 350000, col_air_cbm: 350000 },
+          'pwh-bon-cold-6': { col_cold_pallets: 600000, col_chill_pallets: 600000, col_air_cbm: 600000 },
+        };
+      }
+      if (isHazmat) {
+        return {
+          'pwh-bon-haz-1': { col_haz_pallets: 300000, col_haz_tank: 300000, col_haz_drum: 300000 },
+          'pwh-bon-haz-2': { col_haz_pallets: 600000, col_haz_tank: 600000, col_haz_drum: 600000 },
+          'pwh-bon-haz-3': { col_haz_pallets: 450000, col_haz_tank: 450000, col_haz_drum: 450000 },
+          'pwh-bon-haz-4': { col_haz_pallets: 95000, col_haz_tank: 95000, col_haz_drum: 90000 },
+          'pwh-bon-haz-5': { col_haz_pallets: 35000, col_haz_tank: 35000, col_haz_drum: 35000 },
+          'pwh-bon-haz-6': { col_haz_pallets: 1500000, col_haz_tank: 1500000, col_haz_drum: 1500000 },
+        };
+      }
+      return {
+        'pwh-bon-gen-1': { col_volume: 500000, col_pallets: 500000, col_area: 500000 },
+        'pwh-bon-gen-2': { col_volume: 45000, col_pallets: 45000, col_area: 45000 },
+        'pwh-bon-gen-3': { col_volume: 30000, col_pallets: 30000, col_area: 30000 },
+        'pwh-bon-gen-4': { col_volume: 850000, col_pallets: 850000, col_area: 850000 },
+        'pwh-bon-gen-5': { col_volume: 45000, col_pallets: 45000, col_area: 45000 },
+        'pwh-bon-gen-6': { col_volume: 3000, col_pallets: 3000, col_area: 3000 },
+      };
+    }
+    if (isCold) {
+      return {
+        'pwh-cold-1': { col_cold_pallets: 45000, col_chill_pallets: 45000, col_air_cbm: 40000 },
+        'pwh-cold-2': { col_cold_pallets: 45000, col_chill_pallets: 45000, col_air_cbm: 40000 },
+        'pwh-cold-3': { col_cold_pallets: 85000, col_chill_pallets: 85000, col_air_cbm: 85000 },
+        'pwh-cold-4': { col_cold_pallets: 150000, col_chill_pallets: 150000, col_air_cbm: 150000 },
+        'pwh-cold-5': { col_cold_pallets: 65000, col_chill_pallets: 65000, col_air_cbm: 65000 },
+        'pwh-cold-6': { col_cold_pallets: 1600000, col_chill_pallets: 1600000, col_air_cbm: 1600000 },
+        'pwh-cold-7': { col_cold_pallets: 300000, col_chill_pallets: 300000, col_air_cbm: 300000 },
+      };
+    }
+    if (isHazmat) {
+      return {
+        'pwh-haz-1': { col_haz_pallets: 65000, col_haz_tank: 65000, col_haz_drum: 60000 },
+        'pwh-haz-2': { col_haz_pallets: 65000, col_haz_tank: 65000, col_haz_drum: 60000 },
+        'pwh-haz-3': { col_haz_pallets: 80000, col_haz_tank: 80000, col_haz_drum: 80000 },
+        'pwh-haz-4': { col_haz_pallets: 50000, col_haz_tank: 50000, col_haz_drum: 50000 },
+        'pwh-haz-5': { col_haz_pallets: 350000, col_haz_tank: 350000, col_haz_drum: 350000 },
+        'pwh-haz-6': { col_haz_pallets: 250000, col_haz_tank: 250000, col_haz_drum: 250000 },
+        'pwh-haz-7': { col_haz_pallets: 350000, col_haz_tank: 350000, col_haz_drum: 350000 },
+      };
+    }
+    return {
+      'pwh-1': { col_area: 35000, col_pallets: 35000, col_volume: 30000 },
+      'pwh-2': { col_area: 35000, col_pallets: 35000, col_volume: 30000 },
+      'pwh-3': { col_area: 1200000, col_pallets: 1200000, col_volume: 1200000 },
+      'pwh-4': { col_area: 500, col_pallets: 500, col_volume: 500 },
+      'pwh-5': { col_area: 200000, col_pallets: 200000, col_volume: 200000 },
+    };
   });
 
   // Phụ phí cố định (Section 1B)
@@ -120,12 +384,57 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
     unit: string;
     price: number;
     note?: string;
-  }>>([
-    { id: 'fix-1', name: 'Phí quản lý đơn hàng & báo cáo tồn kho định kỳ (WMS / Admin)', unit: 'VND / Tháng', price: 2000000, note: 'Bao gồm phân quyền 5 tài khoản WMS' },
-    { id: 'fix-2', name: 'Phí kiểm kê định kỳ theo chu kỳ (Cycle Count)', unit: 'VND / Lần', price: 500000, note: 'Kiểm kê định kỳ 1 lần/tháng' },
-    { id: 'fix-3', name: 'Phí bến bãi đỗ xe chờ giao nhận hàng tháng', unit: 'VND / Xe / Tháng', price: 1500000, note: 'Dành cho xe tải thường trực' },
-    { id: 'fix-4', name: 'Phí kết nối dữ liệu API/EDI hệ thống WMS vào ERP khách hàng', unit: 'VND / Tháng', price: 0, note: 'Miễn phí tích hợp chuẩn RESTful API' },
-  ]);
+  }>>(() => {
+    if (isBonded) {
+      if (isCold) {
+        return BONDED_COLD_FIXED_SURCHARGES_LOV.slice(0, 4).map((f, i) => ({
+          id: `fix-bon-cold-${i + 1}`,
+          name: f.name,
+          unit: f.unit,
+          price: f.defaultPrice,
+          note: f.note,
+        }));
+      }
+      if (isHazmat) {
+        return BONDED_HAZMAT_FIXED_SURCHARGES_LOV.slice(0, 4).map((f, i) => ({
+          id: `fix-bon-haz-${i + 1}`,
+          name: f.name,
+          unit: f.unit,
+          price: f.defaultPrice,
+          note: f.note,
+        }));
+      }
+      return BONDED_GENERAL_FIXED_SURCHARGES_LOV.slice(0, 4).map((f, i) => ({
+        id: `fix-bon-gen-${i + 1}`,
+        name: f.name,
+        unit: f.unit,
+        price: f.defaultPrice,
+        note: f.note,
+      }));
+    }
+    if (isCold) {
+      return [
+        { id: 'fix-cold-1', name: 'Phí duy trì nguồn điện máy phát ATS dự phòng 100% công suất 24/7', unit: 'VND / Tháng', price: 3500000, note: 'Đảm bảo điện máy nén lạnh Bitzer không gián đoạn' },
+        { id: 'fix-cold-2', name: 'Phí bảo dưỡng dàn lạnh & hiệu chuẩn đầu dò nhiệt độ định kỳ (Calibration)', unit: 'VND / Tháng', price: 1500000, note: 'Hiệu chuẩn cảm biến theo tiêu chuẩn HACCP/GDP' },
+        { id: 'fix-cold-3', name: 'Phí vệ sinh, xả đá (Defrosting) & kiểm soát ATTP HACCP/ISO 22000', unit: 'VND / Tháng', price: 1200000, note: 'Xử lý xả đá dàn lạnh và diệt khuẩn buồng lạnh' },
+        { id: 'fix-cold-4', name: 'Phí tài khoản cổng thông tin giám sát nhiệt độ Online Real-time', unit: 'VND / Tháng', price: 800000, note: 'Theo dõi biểu đồ nhiệt độ 24/7 từ xa qua App' },
+      ];
+    }
+    if (isHazmat) {
+      return [
+        { id: 'fix-haz-1', name: 'Phí duy trì hệ thống PCCC tự động bọt Foam chữa cháy dung môi', unit: 'VND / Tháng', price: 4500000, note: 'Kiểm tra bồn chứa bọt foam và van xả tự động định kỳ' },
+        { id: 'fix-haz-2', name: 'Phí bảo dưỡng hệ thống rãnh gom và bồn trung hòa nước thải hóa chất', unit: 'VND / Tháng', price: 2500000, note: 'Bơm hút và xử lý nước thải hóa chất nguy hại' },
+        { id: 'fix-haz-3', name: 'Phí duy trì hệ thống thông gió chống nổ cưỡng bức Ex-proof 24/7', unit: 'VND / Tháng', price: 1800000, note: 'Đảm bảo nồng độ hơi dung môi luôn dưới ngưỡng LEL' },
+        { id: 'fix-haz-4', name: 'Phí bảo hiểm trách nhiệm dân sự đối với môi trường & bên thứ ba', unit: 'VND / Tháng', price: 3000000, note: 'Bảo hiểm ô nhiễm môi trường và cháy nổ hóa chất' },
+      ];
+    }
+    return [
+      { id: 'fix-1', name: 'Phí quản lý đơn hàng & báo cáo tồn kho định kỳ (WMS / Admin)', unit: 'VND / Tháng', price: 2000000, note: 'Bao gồm phân quyền 5 tài khoản WMS' },
+      { id: 'fix-2', name: 'Phí kiểm kê định kỳ theo chu kỳ (Cycle Count)', unit: 'VND / Lần', price: 500000, note: 'Kiểm kê định kỳ 1 lần/tháng' },
+      { id: 'fix-3', name: 'Phí bến bãi đỗ xe chờ giao nhận hàng tháng', unit: 'VND / Xe / Tháng', price: 1500000, note: 'Dành cho xe tải thường trực' },
+      { id: 'fix-4', name: 'Phí kết nối dữ liệu API/EDI hệ thống WMS vào ERP khách hàng', unit: 'VND / Tháng', price: 0, note: 'Miễn phí tích hợp chuẩn RESTful API' },
+    ];
+  });
 
   // Quản lý chọn thêm từ LOV
   const [selectedSurchargeCode, setSelectedSurchargeCode] = useState<string>('');
@@ -494,16 +803,16 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
       isOpen: true,
       type: 'variable',
       name: '',
-      unit: 'VND / Pallet',
-      price: '35000',
-      note: '',
+      unit: isCold ? 'VND / Pallet' : (isHazmat ? 'VND / Pallet' : 'VND / Pallet'),
+      price: isCold ? '45000' : (isHazmat ? '65000' : '35000'),
+      note: isCold ? 'Phụ phí bảo quản & vận hành buồng lạnh' : (isHazmat ? 'Phụ phí an toàn hóa chất nguy hiểm' : ''),
     });
   };
 
   // THÊM PHỤ PHÍ CỐ ĐỊNH TỪ LOV
   const handleAddFixedFromLov = (code: string) => {
     if (!code) return;
-    const item = FIXED_SURCHARGES_LOV.find(f => f.code === code);
+    const item = activeFixedLov.find(f => f.code === code);
     if (!item) return;
 
     if (fixedSurcharges.some(f => f.name.toLowerCase() === item.name.toLowerCase())) {
@@ -657,7 +966,7 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
     !data.paidSurcharges.some(p => p.code === s.code || p.name.toLowerCase() === s.name.toLowerCase())
   );
 
-  const availableFixedLov = FIXED_SURCHARGES_LOV.filter(f => 
+  const availableFixedLov = activeFixedLov.filter(f => 
     !fixedSurcharges.some(exist => exist.name.toLowerCase() === f.name.toLowerCase())
   );
 
@@ -1371,10 +1680,10 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
                 <td colSpan={columns.length} className="border-r border-slate-200 px-3 py-2">
                   <input
                     type="text"
-                    value={data.operatingHours || '24/7 (Không cấm giờ xe cont)'}
+                    value={data.operatingHours || (isCold ? '24/7 (Cấp nguồn điện lạnh & trực kỹ thuật 24/7)' : (isHazmat ? '07:30 - 18:00 (Khung giờ vận chuyển hóa chất)' : '24/7 (Không cấm giờ xe cont)'))}
                     onChange={(e) => setData(prev => prev ? ({ ...prev, operatingHours: e.target.value }) : prev)}
                     className="w-full font-bold text-slate-800 bg-white border border-slate-300 rounded px-2.5 py-1 text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none shadow-2xs"
-                    placeholder="24/7 (Không cấm giờ xe cont)"
+                    placeholder={isCold ? '24/7 (Cấp nguồn điện lạnh & trực kỹ thuật 24/7)' : (isHazmat ? '07:30 - 18:00 (Khung giờ vận chuyển hóa chất)' : '24/7 (Không cấm giờ xe cont)')}
                   />
                 </td>
               </tr>
@@ -1391,10 +1700,10 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
                 <td colSpan={columns.length} className="border-r border-slate-200 px-3 py-2">
                   <input
                     type="text"
-                    value={data.cutOffTime || '16:30 hàng ngày'}
+                    value={data.cutOffTime || (isCold ? '15:30 hàng ngày (bảo đảm xuất kho lạnh)' : (isHazmat ? '16:00 hàng ngày (gửi trước MSDS 2 giờ)' : '16:30 hàng ngày'))}
                     onChange={(e) => setData(prev => prev ? ({ ...prev, cutOffTime: e.target.value }) : prev)}
                     className="w-full font-bold text-slate-800 bg-white border border-slate-300 rounded px-2.5 py-1 text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none shadow-2xs"
-                    placeholder="16:30 hàng ngày"
+                    placeholder={isCold ? '15:30 hàng ngày (bảo đảm xuất kho lạnh)' : (isHazmat ? '16:00 hàng ngày (gửi trước MSDS 2 giờ)' : '16:30 hàng ngày')}
                   />
                 </td>
               </tr>
@@ -1411,10 +1720,10 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
                 <td colSpan={columns.length} className="border-r border-slate-200 px-3 py-2">
                   <input
                     type="text"
-                    value={data.sla || '2 - 4 giờ kể từ khi xe vào dock'}
+                    value={data.sla || (isCold ? '≤ 45 phút tại Dock lạnh có đệm trùm khí' : (isHazmat ? '≤ 60 phút kiểm tra niêm phong & bốc dỡ an toàn' : '2 - 4 giờ kể từ khi xe vào dock'))}
                     onChange={(e) => setData(prev => prev ? ({ ...prev, sla: e.target.value }) : prev)}
                     className="w-full font-bold text-slate-800 bg-white border border-slate-300 rounded px-2.5 py-1 text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none shadow-2xs"
-                    placeholder="2 - 4 giờ kể từ khi xe vào dock"
+                    placeholder={isCold ? '≤ 45 phút tại Dock lạnh có đệm trùm khí' : (isHazmat ? '≤ 60 phút kiểm tra niêm phong & bốc dỡ an toàn' : '2 - 4 giờ kể từ khi xe vào dock')}
                   />
                 </td>
               </tr>
@@ -1671,7 +1980,7 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
                   Chọn nhanh từ gợi ý tiêu chuẩn:
                 </label>
                 <div className="grid grid-cols-2 gap-1.5 max-h-40 overflow-y-auto pr-1">
-                  {PRESET_WAREHOUSE_COLUMNS.map((preset, idx) => (
+                  {activePresetColumns.map((preset, idx) => (
                     <button
                       key={idx}
                       type="button"

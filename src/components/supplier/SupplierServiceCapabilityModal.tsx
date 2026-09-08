@@ -44,7 +44,8 @@ import {
   Star,
   Sliders,
   Thermometer,
-  ShieldAlert
+  ShieldAlert,
+  Warehouse
 } from 'lucide-react';
 import { ServiceType } from '../../types';
 import { 
@@ -88,6 +89,11 @@ import {
 import {
   WarehousePricingContinuousTable,
   WAREHOUSE_FREE_UTILITIES_SUGGESTIONS,
+  COLD_FREE_UTILITIES_SUGGESTIONS,
+  HAZMAT_FREE_UTILITIES_SUGGESTIONS,
+  BONDED_GENERAL_FREE_UTILITIES_SUGGESTIONS,
+  BONDED_COLD_FREE_UTILITIES_SUGGESTIONS,
+  BONDED_HAZMAT_FREE_UTILITIES_SUGGESTIONS,
 } from './WarehousePricingContinuousTable';
 
 export const DAYS_OF_WEEK_LOV = [
@@ -233,6 +239,29 @@ export const CUSTOMS_AUTHORITIES_LOV = [
   'Chi cục HQ Chuyển Phát Nhanh / Tân Sơn Nhất',
   'Chi cục HQ Cửa khẩu Sân bay Quốc tế Nội Bài',
   'Khác (Nhập chi cục khác)...',
+];
+
+export const VIETNAM_PROVINCES_LOV = [
+  'TP. Hồ Chí Minh',
+  'Hà Nội',
+  'Hải Phòng',
+  'Bình Dương',
+  'Đồng Nai',
+  'Bà Rịa - Vũng Tàu',
+  'Bắc Ninh',
+  'Hưng Yên',
+  'Hải Dương',
+  'Đà Nẵng',
+  'Cần Thơ',
+  'Quảng Ninh',
+  'Lạng Sơn',
+  'Long An',
+  'Tây Ninh',
+  'Bình Phước',
+  'Vĩnh Phúc',
+  'Hà Nam',
+  'Nam Định',
+  'Khánh Hòa',
 ];
 
 export const AIR_CUTOFF_TIMES_LOV = [
@@ -676,6 +705,32 @@ export const WAREHOUSE_SUGGESTED_SURCHARGES = [
   { code: 'WH-SCH-11', name: 'Phí hủy kiện rác thải & xử lý pallet hỏng', category: 'Dịch Vụ Khác', unit: 'Pallet', defaultPrice: '25,000 ₫ / Pallet', isFree: false },
 ];
 
+export const COLD_WAREHOUSE_SUGGESTED_SURCHARGES = [
+  { code: 'COLD-SCH-01', name: 'Phí nâng hạ & dỡ hàng vào buồng lạnh (Inbound)', category: 'Bốc Xếp Kho Lạnh', unit: 'Pallet', defaultPrice: '45,000 ₫ / Pallet', isFree: false },
+  { code: 'COLD-SCH-02', name: 'Phí lấy hàng & soạn đơn xuất buồng lạnh (Outbound)', category: 'Bốc Xếp Kho Lạnh', unit: 'Pallet', defaultPrice: '45,000 ₫ / Pallet', isFree: false },
+  { code: 'COLD-SCH-03', name: 'Phí cắm điện container lạnh tại bãi (Reefer Plug-in & PTI)', category: 'Bãi Xe Cont Lạnh', unit: 'Giờ', defaultPrice: '85,000 ₫ / Giờ', isFree: false },
+  { code: 'COLD-SCH-04', name: 'Phí kiểm tra & đo nhiệt độ lõi sản phẩm (Core Temp Check)', category: 'Kiểm Định ATTP', unit: 'Lô', defaultPrice: '150,000 ₫ / Lô', isFree: false },
+  { code: 'COLD-SCH-05', name: 'Phí bọc màng co cách nhiệt & bảo ôn Pallet (Thermal Wrap)', category: 'Đóng Gói Bảo Ôn', unit: 'Pallet', defaultPrice: '65,000 ₫ / Pallet', isFree: false },
+  { code: 'COLD-SCH-06', name: 'Phí rút ruột container lạnh 40ft RF vào phòng đệm Antechamber', category: 'Rút / Đóng Cont Lạnh', unit: 'Cont 40ft', defaultPrice: '1,600,000 ₫ / Cont', isFree: false },
+  { code: 'COLD-SCH-07', name: 'Phí làm việc ngoài giờ trong buồng lạnh (Cold Overtime)', category: 'Vận Hành Ngoài Giờ', unit: 'Giờ', defaultPrice: '300,000 ₫ / Giờ', isFree: false },
+  { code: 'COLD-SCH-08', name: 'Phí cấp điện máy phát điện dự phòng ATS khi mất điện lưới', category: 'Năng Lượng Dự Phòng', unit: 'Giờ', defaultPrice: '150,000 ₫ / Giờ', isFree: false },
+  { code: 'COLD-SCH-09', name: 'Phí xả đá & làm sạch buồng lạnh chuyên sâu theo yêu cầu', category: 'Vệ Sinh & Khử Khuẩn', unit: 'Lần', defaultPrice: '800,000 ₫ / Lần', isFree: false },
+  { code: 'COLD-SCH-10', name: 'Phí cấp chứng thư nhiệt độ lưu kho theo lô (Temperature Log Certificate)', category: 'Kiểm Định ATTP', unit: 'Bộ chứng từ', defaultPrice: '100,000 ₫ / Bộ', isFree: false },
+];
+
+export const HAZMAT_WAREHOUSE_SUGGESTED_SURCHARGES = [
+  { code: 'HAZ-SCH-01', name: 'Phí nâng hạ & tiếp nhận hàng hóa chất nguy hiểm (Inbound DG)', category: 'Bốc Xếp Hóa Chất', unit: 'Pallet', defaultPrice: '65,000 ₫ / Pallet', isFree: false },
+  { code: 'HAZ-SCH-02', name: 'Phí bốc xếp & xuất kho hóa chất nguy hiểm (Outbound DG)', category: 'Bốc Xếp Hóa Chất', unit: 'Pallet', defaultPrice: '65,000 ₫ / Pallet', isFree: false },
+  { code: 'HAZ-SCH-03', name: 'Phí bốc xếp bằng xe nâng chống cháy nổ (Ex-proof forklift)', category: 'Thiết Bị Chuyên Dụng', unit: 'Pallet', defaultPrice: '80,000 ₫ / Pallet', isFree: false },
+  { code: 'HAZ-SCH-04', name: 'Phí kiểm tra rò rỉ, áp suất van & niêm phong bồn chứa', category: 'An Toàn & Kỹ Thuật', unit: 'Kiện', defaultPrice: '50,000 ₫ / Kiện', isFree: false },
+  { code: 'HAZ-SCH-05', name: 'Phí ứng trực thiết bị ứng phó sự cố tràn đổ (Spill Kit Response)', category: 'An Toàn Môi Trường', unit: 'Lô', defaultPrice: '350,000 ₫ / Lô', isFree: false },
+  { code: 'HAZ-SCH-06', name: 'Phí thẩm định hồ sơ kỹ thuật & phiếu an toàn hóa chất (MSDS Audit)', category: 'Hồ Sơ Pháp Lý', unit: 'SKU', defaultPrice: '250,000 ₫ / SKU', isFree: false },
+  { code: 'HAZ-SCH-07', name: 'Phí rút ruột container hóa chất phuy/IBC Tank kẹp chuyên dụng', category: 'Rút Cont Nguy Hiểm', unit: 'Cont', defaultPrice: '1,800,000 ₫ / Cont', isFree: false },
+  { code: 'HAZ-SCH-08', name: 'Phí trung hòa dung dịch rò rỉ & xử lý chất thải nguy hại', category: 'An Toàn Môi Trường', unit: 'Lần xử lý', defaultPrice: '1,200,000 ₫ / Lần', isFree: false },
+  { code: 'HAZ-SCH-09', name: 'Phí đo nồng độ khí cháy & hơi độc định kỳ trong kho', category: 'Quan Trắc Khí Độc', unit: 'Lần đo', defaultPrice: '500,000 ₫ / Lần', isFree: false },
+  { code: 'HAZ-SCH-10', name: 'Phí bốc dỡ hàng nguy hiểm ngoài giờ có giám sát an toàn viên', category: 'Vận Hành Ngoài Giờ', unit: 'Giờ', defaultPrice: '400,000 ₫ / Giờ', isFree: false },
+];
+
 export const WAREHOUSE_SUGGESTED_VAS = [
   { code: 'WH-VAS-01', name: 'Dán tem phụ tiếng Việt / Barcode SKU', category: 'Tem Nhãn & Barcode', unit: 'Tem', defaultPrice: '400 ₫ / Tem', isFree: false },
   { code: 'WH-VAS-02', name: 'Quấn màng co PE Pallet & Đóng đai bảo vệ', category: 'Đóng Gói & Xử Lý', unit: 'Pallet', defaultPrice: '35,000 ₫ / Pallet', isFree: false },
@@ -687,6 +742,98 @@ export const WAREHOUSE_SUGGESTED_VAS = [
   { code: 'WH-VAS-08', name: 'Kiểm tra chất lượng & Đếm ngoại quan chi tiết (AQL)', category: 'Kiểm Định & QC', unit: 'Kiện', defaultPrice: '1,500 ₫ / Kiện', isFree: false },
   { code: 'WH-VAS-09', name: 'In phiếu giao hàng (Packing List) & Bàn giao e-POD', category: 'Tem Nhãn & Barcode', unit: 'Bộ chứng từ', defaultPrice: '0 ₫ (Miễn phí)', isFree: true },
   { code: 'WH-VAS-10', name: 'Bảo quản nhiệt độ điều hòa mát (+18°C ~ +25°C)', category: 'Bảo Quản & Nhiệt Độ', unit: 'Pallet / Tháng', defaultPrice: '45,000 ₫ / Pallet', isFree: false },
+];
+
+export const COLD_WAREHOUSE_SUGGESTED_VAS = [
+  { code: 'COLD-VAS-01', name: 'Dán tem nhãn chịu nhiệt âm sâu không bong tróc (Freezer Label)', category: 'Tem Nhãn Kho Lạnh', unit: 'Tem', defaultPrice: '600 ₫ / Tem', isFree: false },
+  { code: 'COLD-VAS-02', name: 'Thay túi đá gel bảo ôn & đá khô CO2 cho thùng hàng xuất khẩu', category: 'Bảo Ôn Đóng Gói', unit: 'Hộp', defaultPrice: '12,000 ₫ / Hộp', isFree: false },
+  { code: 'COLD-VAS-03', name: 'Quấn bọc màng bạc cách nhiệt Pallet (Thermal Foil Blanket)', category: 'Bảo Ôn Đóng Gói', unit: 'Pallet', defaultPrice: '75,000 ₫ / Pallet', isFree: false },
+  { code: 'COLD-VAS-04', name: 'Bảo hiểm suy giảm phẩm chất hàng do lỗi nhiệt độ 100%', category: 'Bảo Hiểm Chuỗi Lạnh', unit: '% Giá trị hàng', defaultPrice: '0.08% Giá trị hàng', isFree: true },
+  { code: 'COLD-VAS-05', name: 'Chụp ảnh nghiệm thu nhiệt độ và ngoại quan hàng xuất nhập', category: 'Kiểm Định & QC', unit: 'Lô hàng', defaultPrice: '0 ₫ (Miễn phí)', isFree: true },
+  { code: 'COLD-VAS-06', name: 'Cung cấp thiết bị ghi nhiệt độ tự động USB Data Logger dùng 1 lần', category: 'Thiết Bị Giám Sát', unit: 'Thiết bị', defaultPrice: '120,000 ₫ / Cái', isFree: false },
+  { code: 'COLD-VAS-07', name: 'Phân loại, cân trọng lượng & kitting hàng đông lạnh theo đơn', category: 'Sơ Chế & Phân Loại', unit: 'Kg', defaultPrice: '1,800 ₫ / Kg', isFree: false },
+  { code: 'COLD-VAS-08', name: 'Cấp đông nhanh buồng gió (Blast Freezing) hạ nhiệt khẩn cấp', category: 'Cấp Đông Cưỡng Bức', unit: 'Tấn', defaultPrice: '600,000 ₫ / Tấn', isFree: false },
+  { code: 'COLD-VAS-09', name: 'Đóng thùng xốp EPS giữ nhiệt xuất buồng lạnh', category: 'Bảo Ôn Đóng Gói', unit: 'Thùng', defaultPrice: '35,000 ₫ / Thùng', isFree: false },
+  { code: 'COLD-VAS-10', name: 'Trích xuất biểu đồ nhiệt độ liên tục thời gian thực (Real-time IoT)', category: 'Dữ Liệu & Báo Cáo', unit: 'Lô hàng', defaultPrice: '0 ₫ (Miễn phí)', isFree: true },
+];
+
+export const HAZMAT_WAREHOUSE_SUGGESTED_VAS = [
+  { code: 'HAZ-VAS-01', name: 'Dán nhãn cảnh báo nguy hiểm GHS / UN DG Diamond chịu hóa chất', category: 'Nhãn Cảnh Báo Nguy Hiểm', unit: 'Tem', defaultPrice: '1,200 ₫ / Tem', isFree: false },
+  { code: 'HAZ-VAS-02', name: 'Cung cấp pallet chống tràn dung dịch (Spill Containment Pallet)', category: 'Vật Tư Chống Tràn', unit: 'Pallet / Tháng', defaultPrice: '350,000 ₫ / Pallet', isFree: false },
+  { code: 'HAZ-VAS-03', name: 'Kẹp chì niêm phong an toàn chống giả mạo van bồn hóa chất', category: 'Niêm Phong An Ninh', unit: 'Seal chì', defaultPrice: '25,000 ₫ / Seal', isFree: false },
+  { code: 'HAZ-VAS-04', name: 'Bảo hiểm trách nhiệm ô nhiễm môi trường & bên thứ ba 100%', category: 'Bảo Hiểm Trách Nhiệm', unit: '% Giá trị hàng', defaultPrice: '0.12% Giá trị hàng', isFree: true },
+  { code: 'HAZ-VAS-05', name: 'Kiểm định MSDS & dán mã QR tra cứu an toàn hóa chất', category: 'Kiểm Định An Toàn', unit: 'Lô hàng', defaultPrice: '0 ₫ (Miễn phí)', isFree: true },
+  { code: 'HAZ-VAS-06', name: 'Bơm rót san chiết dung môi hóa chất từ IBC Tank ra phuy 200L', category: 'San Chiết Sang Bồn', unit: 'Phuy', defaultPrice: '150,000 ₫ / Phuy', isFree: false },
+  { code: 'HAZ-VAS-07', name: 'Cung cấp bao cát hút dầu/hóa chất & phao thấm khẩn cấp', category: 'Vật Tư Chống Tràn', unit: 'Bộ', defaultPrice: '280,000 ₫ / Bộ', isFree: false },
+  { code: 'HAZ-VAS-08', name: 'Dán tem cảnh báo tương thích hóa chất theo bảng phân cách IMDG', category: 'Nhãn Cảnh Báo Nguy Hiểm', unit: 'Tem', defaultPrice: '2,500 ₫ / Tem', isFree: false },
+  { code: 'HAZ-VAS-09', name: 'Quấn màng PE chống tĩnh điện (Anti-static Wrap) cho kiện hàng hóa chất', category: 'Đóng Gói Chuyên Dụng', unit: 'Pallet', defaultPrice: '65,000 ₫ / Pallet', isFree: false },
+  { code: 'HAZ-VAS-10', name: 'Lập báo cáo lưu trữ hóa chất định kỳ gửi Sở Công Thương', category: 'Hồ Sơ Pháp Lý', unit: 'Báo cáo', defaultPrice: '0 ₫ (Miễn phí)', isFree: true },
+];
+
+export const BONDED_GENERAL_SUGGESTED_SURCHARGES = [
+  { code: 'BON-GEN-SCH-01', name: 'Phí giám sát hải quan ngoài giờ hành chính / ngày nghỉ lễ', category: 'Giám Sát Hải Quan', unit: 'Lô', defaultPrice: '500,000 ₫ / Lô', isFree: false },
+  { code: 'BON-GEN-SCH-02', name: 'Phí bốc xếp phục vụ kiểm hóa thực tế tại kho ngoại quan', category: 'Kiểm Hóa & Bốc Xếp', unit: 'Pallet', defaultPrice: '45,000 ₫ / Pallet', isFree: false },
+  { code: 'BON-GEN-SCH-03', name: 'Phí niêm phong, kẹp chì seal hải quan & biên bản bàn giao', category: 'Niêm Phong Hải Quan', unit: 'Seal chì', defaultPrice: '30,000 ₫ / Seal', isFree: false },
+  { code: 'BON-GEN-SCH-04', name: 'Phí rút ruột container hàng nhập kho ngoại quan (Unstuffing)', category: 'Rút / Đóng Hàng CFS', unit: 'Cont 20ft', defaultPrice: '850,000 ₫ / Cont', isFree: false },
+  { code: 'BON-GEN-SCH-05', name: 'Phí đóng ghép container hàng lẻ CFS xuất khẩu (CFS Stuffing)', category: 'Rút / Đóng Hàng CFS', unit: 'CBM', defaultPrice: '45,000 ₫ / CBM', isFree: false },
+  { code: 'BON-GEN-SCH-06', name: 'Phí phân loại hàng hóa theo Master Bill / House Bill / PO', category: 'Kiểm Đếm & Phân Loại', unit: 'Kiện', defaultPrice: '3,000 ₫ / Kiện', isFree: false },
+  { code: 'BON-GEN-SCH-07', name: 'Phí thủ tục thanh khoản, xuất kho ngoại quan vào nội địa / tái xuất', category: 'Hồ Sơ Thanh Khoản', unit: 'Bộ tờ khai', defaultPrice: '250,000 ₫ / Bộ', isFree: false },
+  { code: 'BON-GEN-SCH-08', name: 'Phí lưu bãi container chờ kiểm tra thực tế hàng hóa quá 24h', category: 'Bãi Xe & Lưu Ca', unit: 'Cont / Ngày', defaultPrice: '200,000 ₫ / Ngày', isFree: false },
+];
+
+export const BONDED_COLD_SUGGESTED_SURCHARGES = [
+  { code: 'BON-COLD-SCH-01', name: 'Phí cắm điện container lạnh tại bãi chờ thông quan (Reefer Plug-in)', category: 'Bãi Xe Cont Lạnh', unit: 'Giờ', defaultPrice: '95,000 ₫ / Giờ', isFree: false },
+  { code: 'BON-COLD-SCH-02', name: 'Phí phục vụ lấy mẫu kiểm dịch động vật / thực vật buồng lạnh', category: 'Kiểm Dịch & Lấy Mẫu', unit: 'Lô', defaultPrice: '300,000 ₫ / Lô', isFree: false },
+  { code: 'BON-COLD-SCH-03', name: 'Phí kiểm tra, đo nhiệt độ tâm sản phẩm và lập biên bản kiểm tra', category: 'Kiểm Định ATTP', unit: 'Lô', defaultPrice: '180,000 ₫ / Lô', isFree: false },
+  { code: 'BON-COLD-SCH-04', name: 'Phí bốc xếp nâng hạ đưa hàng vào buồng lạnh ngoại quan', category: 'Bốc Xếp Buồng Lạnh', unit: 'Pallet', defaultPrice: '55,000 ₫ / Pallet', isFree: false },
+  { code: 'BON-COLD-SCH-05', name: 'Phí giám sát hải quan & kiểm dịch ngoài giờ buồng lạnh', category: 'Giám Sát Chuyên Ngành', unit: 'Giờ', defaultPrice: '350,000 ₫ / Giờ', isFree: false },
+  { code: 'BON-COLD-SCH-06', name: 'Phí xả đá buồng đệm và phun khử trùng tiêu độc trước/sau kiểm hóa', category: 'Vệ Sinh Khử Khuẩn', unit: 'Lần', defaultPrice: '600,000 ₫ / Lần', isFree: false },
+  { code: 'BON-COLD-SCH-07', name: 'Phí bảo ôn màng bạc cách nhiệt Thermal Foil cho pallet tái xuất', category: 'Đóng Gói Bảo Ôn', unit: 'Pallet', defaultPrice: '85,000 ₫ / Pallet', isFree: false },
+  { code: 'BON-COLD-SCH-08', name: 'Phí cắm điện bổ sung & test kỹ thuật PTI container lạnh xuất khẩu', category: 'Kỹ Thuật PTI', unit: 'Cont', defaultPrice: '450,000 ₫ / Cont', isFree: false },
+];
+
+export const BONDED_HAZMAT_SUGGESTED_SURCHARGES = [
+  { code: 'BON-HAZ-SCH-01', name: 'Phí thẩm định hồ sơ kỹ thuật, mã UN & phân nhóm nguy hiểm cho Hải quan', category: 'Thẩm Định Hồ Sơ HQ', unit: 'SKU', defaultPrice: '300,000 ₫ / SKU', isFree: false },
+  { code: 'BON-HAZ-SCH-02', name: 'Phí giám sát an toàn đặc biệt khi mở container phuy/IBC Tank kiểm hóa', category: 'Giám Sát An Toàn DG', unit: 'Cont', defaultPrice: '600,000 ₫ / Cont', isFree: false },
+  { code: 'BON-HAZ-SCH-03', name: 'Phí lấy mẫu giám định thành phần hóa chất phục vụ khai báo chuyên ngành', category: 'Lấy Mẫu Giám Định', unit: 'Mẫu', defaultPrice: '450,000 ₫ / Mẫu', isFree: false },
+  { code: 'BON-HAZ-SCH-04', name: 'Phí bốc xếp bằng xe nâng chuyên dụng chống cháy nổ (Ex-proof forklift)', category: 'Thiết Bị Phòng Nổ', unit: 'Pallet', defaultPrice: '95,000 ₫ / Pallet', isFree: false },
+  { code: 'BON-HAZ-SCH-05', name: 'Phí kẹp chì niêm phong van bồn / đai niêm phuy hóa chất ngoại quan', category: 'Niêm Phong An Ninh', unit: 'Seal chì', defaultPrice: '35,000 ₫ / Seal', isFree: false },
+  { code: 'BON-HAZ-SCH-06', name: 'Phí trung hòa dung dịch rò rỉ & xử lý chất thải nguy hại phát sinh', category: 'An Toàn Môi Trường', unit: 'Lần xử lý', defaultPrice: '1,500,000 ₫ / Lần', isFree: false },
+  { code: 'BON-HAZ-SCH-07', name: 'Phí ứng trực thiết bị Spill-Kit và an toàn viên khi kiểm hóa hàng DG', category: 'Ứng Phó Khẩn Cấp', unit: 'Lô', defaultPrice: '500,000 ₫ / Lô', isFree: false },
+  { code: 'BON-HAZ-SCH-08', name: 'Phí đo nồng độ khí cháy nổ LEL và độc tố trước khi mở cửa khoang chứa', category: 'Quan Trắc Khí Độc', unit: 'Lần đo', defaultPrice: '400,000 ₫ / Lần', isFree: false },
+];
+
+export const BONDED_GENERAL_SUGGESTED_VAS = [
+  { code: 'BON-GEN-VAS-01', name: 'Dán nhãn phụ tiếng Việt / Barcode SKU trước khi mở tờ khai nhập khẩu', category: 'Tem Nhãn & Barcode', unit: 'Tem', defaultPrice: '500 ₫ / Tem', isFree: false },
+  { code: 'BON-GEN-VAS-02', name: 'Đóng gói lại, bao bọc màng co gia cố kiện hàng hư hỏng quốc tế', category: 'Đóng Gói & Gia Cố', unit: 'Kiện', defaultPrice: '25,000 ₫ / Kiện', isFree: false },
+  { code: 'BON-GEN-VAS-03', name: 'Đại lý dịch vụ khai thuê hải quan trọn gói kho ngoại quan', category: 'Khai Thuê Hải Quan', unit: 'Bộ tờ khai', defaultPrice: '800,000 ₫ / Bộ', isFree: false },
+  { code: 'BON-GEN-VAS-04', name: 'Cấp chứng thư hun trùng (Fumigation Certificate) cho hàng tái xuất', category: 'Kiểm Dịch & Khử Trùng', unit: 'Pallet', defaultPrice: '30,000 ₫ / Pallet', isFree: false },
+  { code: 'BON-GEN-VAS-05', name: 'Lấy mẫu gửi cơ quan giám định chuyên ngành (Vinacontrol / Quatest)', category: 'Giám Định Chất Lượng', unit: 'Lần', defaultPrice: '350,000 ₫ / Lần', isFree: false },
+  { code: 'BON-GEN-VAS-06', name: 'Đóng kiện gỗ xuất khẩu đạt tiêu chuẩn kiểm dịch ISPM 15', category: 'Đóng Kiện Xuất Khẩu', unit: 'Kiện', defaultPrice: '220,000 ₫ / Kiện', isFree: false },
+  { code: 'BON-GEN-VAS-07', name: 'Quét mã vạch kiểm tra e-Manifest đối soát danh sách cont hải quan', category: 'Dữ Liệu & Đối Soát', unit: 'Lô hàng', defaultPrice: '0 ₫ (Miễn phí)', isFree: true },
+  { code: 'BON-GEN-VAS-08', name: 'Bảo hiểm hàng hóa lưu trữ kho ngoại quan 100%', category: 'Bảo Hiểm Kho Bãi', unit: '% Giá trị hàng', defaultPrice: '0.05% Giá trị hàng', isFree: true },
+];
+
+export const BONDED_COLD_SUGGESTED_VAS = [
+  { code: 'BON-COLD-VAS-01', name: 'Cấp chứng thư nhiệt độ lưu kho phục vụ hồ sơ kiểm dịch ATTP', category: 'Chứng Từ Kiểm Dịch', unit: 'Bộ chứng từ', defaultPrice: '150,000 ₫ / Bộ', isFree: false },
+  { code: 'BON-COLD-VAS-02', name: 'Bọc màng bảo ôn cách nhiệt Thermal Foil cho pallet tạm nhập tái xuất', category: 'Bảo Ôn Chuỗi Lạnh', unit: 'Pallet', defaultPrice: '80,000 ₫ / Pallet', isFree: false },
+  { code: 'BON-COLD-VAS-03', name: 'Đóng thùng xốp EPS giữ nhiệt & cấp bù đá khô CO2 / đá gel cho mẫu', category: 'Bảo Ôn Đóng Gói', unit: 'Thùng', defaultPrice: '45,000 ₫ / Thùng', isFree: false },
+  { code: 'BON-COLD-VAS-04', name: 'Cấp đông nhanh phục hồi nhiệt (Blast Freezing) trước khi đóng cont', category: 'Cấp Đông Cưỡng Bức', unit: 'Tấn', defaultPrice: '750,000 ₫ / Tấn', isFree: false },
+  { code: 'BON-COLD-VAS-05', name: 'Dán tem nhãn chịu nhiệt âm sâu chống thấm nước (Freezer Label)', category: 'Tem Nhãn Kho Lạnh', unit: 'Tem', defaultPrice: '800 ₫ / Tem', isFree: false },
+  { code: 'BON-COLD-VAS-06', name: 'Cung cấp USB Data Logger ghi nhiệt độ liên tục cho container xuất khẩu', category: 'Thiết Bị Giám Sát', unit: 'Thiết bị', defaultPrice: '130,000 ₫ / Cái', isFree: false },
+  { code: 'BON-COLD-VAS-07', name: 'Trích xuất biểu đồ nhiệt độ tự động gửi cơ quan Kiểm dịch', category: 'Dữ Liệu & Báo Cáo', unit: 'Lô hàng', defaultPrice: '0 ₫ (Miễn phí)', isFree: true },
+  { code: 'BON-COLD-VAS-08', name: 'Bảo hiểm rủi ro suy giảm phẩm chất do nhiệt độ kho lạnh ngoại quan 100%', category: 'Bảo Hiểm Chuỗi Lạnh', unit: '% Giá trị hàng', defaultPrice: '0.08% Giá trị hàng', isFree: true },
+];
+
+export const BONDED_HAZMAT_SUGGESTED_VAS = [
+  { code: 'BON-HAZ-VAS-01', name: 'Dán nhãn cảnh báo nguy hiểm GHS / UN Diamond song ngữ theo quy định', category: 'Nhãn Cảnh Báo Nguy Hiểm', unit: 'Tem', defaultPrice: '1,500 ₫ / Tem', isFree: false },
+  { code: 'BON-HAZ-VAS-02', name: 'Thực hiện khai báo hóa chất nhập khẩu trên một cửa quốc gia NSW', category: 'Khai Báo Chuyên Ngành', unit: 'Lần khai', defaultPrice: '500,000 ₫ / Lần', isFree: false },
+  { code: 'BON-HAZ-VAS-03', name: 'Cung cấp pallet chống tràn dung dịch & quấn màng PE chống tĩnh điện', category: 'Vật Tư Chống Tràn', unit: 'Pallet / Tháng', defaultPrice: '380,000 ₫ / Pallet', isFree: false },
+  { code: 'BON-HAZ-VAS-04', name: 'Đóng gói bao bì UN chuyên dụng đạt chuẩn vận chuyển hàng nguy hiểm', category: 'Đóng Gói Chuẩn UN', unit: 'Bao bì', defaultPrice: '180,000 ₫ / Bao bì', isFree: false },
+  { code: 'BON-HAZ-VAS-05', name: 'Bơm rót sang chiết hóa chất từ bồn ISO Tank / IBC Tank sang phuy 200L', category: 'San Chiết Sang Bồn', unit: 'Phuy', defaultPrice: '200,000 ₫ / Phuy', isFree: false },
+  { code: 'BON-HAZ-VAS-06', name: 'Khảo sát MSDS và cấp phiếu an toàn hóa chất tiếng Việt đóng dấu hợp quy', category: 'Hồ Sơ An Toàn MSDS', unit: 'Bộ hồ sơ', defaultPrice: '300,000 ₫ / Bộ', isFree: false },
+  { code: 'BON-HAZ-VAS-07', name: 'Kẹp chì niêm phong van bồn an toàn chống can thiệp', category: 'Niêm Phong Hải Quan', unit: 'Seal chì', defaultPrice: '35,000 ₫ / Seal', isFree: false },
+  { code: 'BON-HAZ-VAS-08', name: 'Bảo hiểm trách nhiệm ô nhiễm môi trường & cháy nổ kho ngoại quan 100%', category: 'Bảo Hiểm Trách Nhiệm', unit: '% Giá trị hàng', defaultPrice: '0.15% Giá trị hàng', isFree: true },
 ];
 
 export const CROSS_BORDER_GATE_GROUPS = [
@@ -1208,6 +1355,9 @@ export interface WarehouseDetailModalData {
   address: string;
   isColdStorage?: boolean;
   isChemicalStorage?: boolean;
+  isBondedStorage?: boolean;
+  customsWarehouseCode?: string;
+  customsAuthority?: string;
   photos: WarehousePhotoItem[];
   techSpecs: WarehouseTechSpecs;
   freeSurcharges: string[];
@@ -3218,14 +3368,27 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             defaultRoutes: [
               {
                 id: 'r-wh-bon-1',
-                route: 'Kho Ngoại Quan Cát Lái',
-                origin: 'Khu thương mại Cát Lái (TP.HCM)',
-                destination: 'Tạm nhập tái xuất / Nhập nội địa',
+                customsWarehouseCode: '02B1B01',
+                warehouseCode: '02B1B01',
+                routeCode: '02B1B01',
+                warehouseName: 'Kho Ngoại Quan & CFS Cát Lái',
+                route: 'Kho Ngoại Quan & CFS Cát Lái',
+                customsAuthority: 'Chi cục HQ Cửa khẩu Cảng Sài Gòn KV4 (Cát Lái / ICD Phước Long)',
+                warehouseProvince: 'TP. Hồ Chí Minh',
+                origin: 'TP. Hồ Chí Minh',
+                warehouseAddress: 'Khu thương mại Cát Lái, P. Cát Lái, TP. Thủ Đức',
+                destination: 'Khu thương mại Cát Lái, P. Cát Lái, TP. Thủ Đức',
                 vehicleType: 'Kho ngoại quan gần cảng biển',
-                pricingUnit: 'm² / Tháng',
-                price: 140000,
-                currency: 'VND',
-                sla: 'Thủ tục HQ 24h',
+                pricingUnit: 'CBM / Ngày',
+                price: 0.35,
+                pricePerVolume: 0.35,
+                pricePerPallet: 0.45,
+                pricePerArea: 6.5,
+                capacityArea: 5000,
+                capacityVolume: 8000,
+                capacityPallets: 4200,
+                currency: 'USD',
+                sla: 'Tiếp nhận cont 24/7 (HQ 8h-17h)',
                 pricingStyle: 'All-in',
                 promotionPercent: 0,
               },
@@ -3445,14 +3608,27 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             defaultRoutes: [
               {
                 id: 'r-wh-ref-bon-1',
-                route: 'Kho Ngoại Quan Lạnh Hải Phòng',
-                origin: 'Đình Vũ (Hải Phòng)',
-                destination: 'Tạm nhập tái xuất',
+                customsWarehouseCode: '02B1B08-RF',
+                warehouseCode: '02B1B08-RF',
+                routeCode: '02B1B08-RF',
+                warehouseName: 'Kho Ngoại Quan Lạnh Đình Vũ - Hải Phòng',
+                route: 'Kho Ngoại Quan Lạnh Đình Vũ - Hải Phòng',
+                customsAuthority: 'Chi cục HQ Cửa khẩu Cảng Hải Phòng KV3 (Đình Vũ)',
+                warehouseProvince: 'Hải Phòng',
+                origin: 'Hải Phòng',
+                warehouseAddress: 'KCN Đình Vũ, P. Đông Hải 2, Q. Hải An, TP. Hải Phòng',
+                destination: 'KCN Đình Vũ, P. Đông Hải 2, Q. Hải An, TP. Hải Phòng',
                 vehicleType: 'Kho ngoại quan lạnh',
                 pricingUnit: 'Pallet / Ngày',
                 price: 28000,
-                currency: 'VND',
-                sla: 'Thủ tục 24h',
+                pricePerVolume: 0.55,
+                pricePerPallet: 0.75,
+                pricePerArea: 9.5,
+                capacityArea: 3500,
+                capacityVolume: 6000,
+                capacityPallets: 2800,
+                currency: 'USD',
+                sla: 'Tiếp nhận cont lạnh 24/7',
                 pricingStyle: 'All-in',
                 promotionPercent: 0,
               },
@@ -3593,14 +3769,27 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
             defaultRoutes: [
               {
                 id: 'r-wh-haz-bon-1',
-                route: 'Kho Ngoại Quan Hóa Chất Đình Vũ (Hải Phòng)',
-                origin: 'KCN Đình Vũ (Hải Phòng)',
-                destination: 'Tạm nhập tái xuất / Nhập khẩu',
+                customsWarehouseCode: '02IKB06-DG',
+                warehouseCode: '02IKB06-DG',
+                routeCode: '02IKB06-DG',
+                warehouseName: 'Kho Ngoại Quan Hóa Chất Đình Vũ (DG & Hazmat)',
+                route: 'Kho Ngoại Quan Hóa Chất Đình Vũ (DG & Hazmat)',
+                customsAuthority: 'Chi cục HQ Cửa khẩu Cảng Hải Phòng KV3 (Đình Vũ)',
+                warehouseProvince: 'Hải Phòng',
+                origin: 'Hải Phòng',
+                warehouseAddress: 'Khu Hóa Chất Chuyên Dụng Đình Vũ, Q. Hải An, TP. Hải Phòng',
+                destination: 'Khu Hóa Chất Chuyên Dụng Đình Vũ, Q. Hải An, TP. Hải Phòng',
                 vehicleType: 'Kho ngoại quan hóa chất',
                 pricingUnit: 'm² / Tháng',
                 price: 220000,
-                currency: 'VND',
-                sla: 'Thủ tục 24h',
+                pricePerVolume: 0.65,
+                pricePerPallet: 0.85,
+                pricePerArea: 11.0,
+                capacityArea: 3000,
+                capacityVolume: 5000,
+                capacityPallets: 2200,
+                currency: 'USD',
+                sla: 'Thủ tục HQ & Giám sát an toàn 24/7',
                 pricingStyle: 'All-in',
                 promotionPercent: 0,
               },
@@ -5174,11 +5363,56 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
     }
     const isColdStorage = activeModel?.id?.includes('ref') || activeCargoGroup?.id?.includes('ref') || activeModel?.name?.includes('lạnh');
     const isChemicalStorage = activeModel?.id?.includes('haz') || activeCargoGroup?.id?.includes('nguy hiểm') || activeModel?.name?.includes('nguy hiểm');
+    const isBondedStorage = Boolean(activeModel?.id === 'wh-gen-bon' || activeModel?.id?.includes('bon') || activeModel?.name?.toLowerCase().includes('ngoại quan') || activeModel?.code?.toLowerCase().includes('ngoại quan'));
 
     // Anh mau neu chua co anh
     const existingPhotos: WarehousePhotoItem[] = route.warehousePhotos && route.warehousePhotos.length > 0 
       ? JSON.parse(JSON.stringify(route.warehousePhotos))
-      : [
+      : (isColdStorage ? [
+          {
+            id: 'ph-cold-1',
+            url: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800&auto=format&fit=crop&q=80',
+            name: 'Cửa Dock lạnh có đệm trùm khí Inflatable Shelter',
+            tag: 'Cửa xuất nhập lạnh',
+            isCover: true,
+          },
+          {
+            id: 'ph-cold-2',
+            url: 'https://images.unsplash.com/photo-1553413077-190dd305871c?w=800&auto=format&fit=crop&q=80',
+            name: 'Khu vực Racking buồng lạnh âm sâu -25°C',
+            tag: 'Buồng đông lạnh',
+            isCover: false,
+          },
+          {
+            id: 'ph-cold-3',
+            url: 'https://images.unsplash.com/photo-1616401784845-180882ba9ba8?w=800&auto=format&fit=crop&q=80',
+            name: 'Phòng đệm Antechamber & Bảng điện tử hiển thị nhiệt độ',
+            tag: 'Phòng đệm & Cảm biến',
+            isCover: false,
+          },
+        ] : isChemicalStorage ? [
+          {
+            id: 'ph-haz-1',
+            url: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800&auto=format&fit=crop&q=80',
+            name: 'Kho hóa chất tiêu chuẩn PCCC Foam & Bờ bao chống tràn',
+            tag: 'Mặt tiền & Sân bãi',
+            isCover: true,
+          },
+          {
+            id: 'ph-haz-2',
+            url: 'https://images.unsplash.com/photo-1553413077-190dd305871c?w=800&auto=format&fit=crop&q=80',
+            name: 'Khu vực lưu trữ Pallet chống tràn & Bồn IBC Tank 1000L',
+            tag: 'Kệ chứa chuyên dụng',
+            isCover: false,
+          },
+          {
+            id: 'ph-haz-3',
+            url: 'https://images.unsplash.com/photo-1616401784845-180882ba9ba8?w=800&auto=format&fit=crop&q=80',
+            name: 'Hệ thống thông gió chống nổ cưỡng bức Ex-proof & Cảm biến khí',
+            tag: 'PCCC & Thông gió',
+            isCover: false,
+          },
+        ] : [
           {
             id: 'ph-1',
             url: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800&auto=format&fit=crop&q=80',
@@ -5200,68 +5434,184 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
             tag: 'Sàn & Trần kho',
             isCover: false,
           },
-        ];
+        ]);
 
     // Thong so ky thuat
     const existingSpecs: WarehouseTechSpecs = route.warehouseTechSpecs 
       ? JSON.parse(JSON.stringify(route.warehouseTechSpecs))
       : {
           clearHeight: 10.5,
-          floorLoad: 5.0,
-          floorType: 'Bê tông xoa Hardener chống bụi',
+          floorLoad: isChemicalStorage ? 7.5 : 5.0,
+          floorType: isChemicalStorage 
+            ? 'Bê tông phủ Epoxy chịu axit/hóa chất & rãnh thu dung dịch tràn' 
+            : 'Bê tông xoa Hardener chống bụi',
           columnGrid: '12m × 18m',
-          ventilation: 'Quả cầu hút nhiệt & Lam gió tự nhiên',
-          rackingTypes: ['Kệ Selective', 'Kệ Drive-in'],
-          rackingLevels: 5,
-          palletLoadLimit: 1000,
+          ventilation: isColdStorage 
+            ? 'Dàn quạt đối lưu tuần hoàn không khí lạnh tự động' 
+            : (isChemicalStorage ? 'Hệ thống thông gió chống cháy nổ Ex-proof & hút khí nặng 24/7' : 'Quả cầu hút nhiệt & Lam gió tự nhiên'),
+          rackingTypes: isChemicalStorage 
+            ? ['Kệ Pallet hóa chất', 'Kệ để phuy sắt chuyên dụng'] 
+            : ['Kệ Selective', 'Kệ Drive-in'],
+          rackingLevels: isColdStorage ? 6 : (isChemicalStorage ? 4 : 5),
+          palletLoadLimit: isChemicalStorage ? 1500 : 1000,
           compatiblePalletSizes: ['1m × 1.2m (ISO standard)', '1.1m × 1.1m'],
           dockDoorsCount: 6,
           hasDockLeveler: true,
           hasDockShelter: isColdStorage,
           yardTurnaround: 'Sân rộng 35m, xe cont 40ft/45ft quay đầu 24/7',
-          operatingHoursTrucks: '24/7 không cấm giờ',
-          fireProtectionSystem: 'PCCC tự động Sprinkler (Đã nghiệm thu PCCC)',
-          fireProtectionApprovalNo: 'Số 148/TD-PCCC',
+          operatingHoursTrucks: isChemicalStorage ? '07:30 - 18:00 xe hóa chất' : '24/7 không cấm giờ',
+          fireProtectionSystem: isChemicalStorage 
+            ? 'Hệ thống PCCC tự động bọt Foam AFFF chuyên dụng dập cháy dung môi hóa chất' 
+            : 'PCCC tự động Sprinkler (Đã nghiệm thu PCCC)',
+          fireProtectionApprovalNo: isChemicalStorage ? 'Số 216/TD-PCCC-CN' : 'Số 148/TD-PCCC',
           cctvSurveillance: 'CCTV 24/7 full kho trong & ngoài, lưu trữ 60 ngày',
           securityGuards: 'Bảo vệ chuyên nghiệp 2 lớp 24/7',
-          wmsSoftwareName: 'WMS Real-time Cloud',
+          wmsSoftwareName: isColdStorage ? 'WMS ColdChain IoT Real-time' : (isChemicalStorage ? 'WMS Hazmat & MSDS Tracker' : 'WMS Real-time Cloud'),
           scanningTechnologies: ['Barcode 1D/2D', 'QR Code', 'RFID'],
           hasApiIntegration: true,
           realtimeWebPortal: true,
-          temperatureRange: isColdStorage ? '+2°C ~ +8°C' : '+18°C ~ +25°C',
+          temperatureRange: isColdStorage ? '-18°C ~ -25°C & +2°C ~ +8°C' : '+18°C ~ +25°C',
           coolingSystemBrand: isColdStorage ? 'Bitzer (Đức) / Dàn lạnh Guentner' : undefined,
           hasAutoDataLogger: isColdStorage,
           hasBackupGeneratorAts: true,
-          certifications: ['ISO 9001:2015', 'HACCP', 'GDP'],
+          certifications: isColdStorage 
+            ? ['ISO 9001:2015', 'HACCP', 'GDP Dược Phẩm', 'Chuỗi Cung Ứng Lạnh Tiêu Chuẩn'] 
+            : (isChemicalStorage ? ['Đủ điều kiện kinh doanh hóa chất', 'ISO 14001:2015', 'Nghiệm thu PCCC phòng nổ', 'Giấy phép BVMT'] : ['ISO 9001:2015', 'HACCP', 'GDP']),
           hasFullInsurance: true,
         };
 
     const existingFree = route.warehouseFreeSurcharges && route.warehouseFreeSurcharges.length > 0
       ? [...route.warehouseFreeSurcharges]
-      : (activeModel?.defaultFreeSurcharges || [
-          'Bảo vệ 24/7 & Camera an ninh giám sát',
-          'Bảo hiểm cháy nổ kho bãi 100%',
-          'Phần mềm WMS quản lý tồn kho thời gian thực',
-        ]);
+      : (isBondedStorage
+          ? (isColdStorage
+              ? BONDED_COLD_FREE_UTILITIES_SUGGESTIONS.slice(0, 4)
+              : (isChemicalStorage
+                  ? BONDED_HAZMAT_FREE_UTILITIES_SUGGESTIONS.slice(0, 4)
+                  : BONDED_GENERAL_FREE_UTILITIES_SUGGESTIONS.slice(0, 4)))
+          : (isColdStorage
+              ? COLD_FREE_UTILITIES_SUGGESTIONS.slice(0, 4)
+              : (isChemicalStorage
+                  ? HAZMAT_FREE_UTILITIES_SUGGESTIONS.slice(0, 4)
+                  : (activeModel?.defaultFreeSurcharges || WAREHOUSE_FREE_UTILITIES_SUGGESTIONS.slice(0, 4)))));
 
     const existingPaid: PaidSurchargeItem[] = route.warehousePaidSurcharges && route.warehousePaidSurcharges.length > 0
       ? JSON.parse(JSON.stringify(route.warehousePaidSurcharges))
-      : [
-          { id: 'pwh-1', name: 'Phí nâng hạ & dỡ hàng nhập kho (Inbound)', priceText: '35,000 ₫ / Pallet', isChecked: true },
-          { id: 'pwh-2', name: 'Phí lấy hàng & bốc xếp xuất kho (Outbound)', priceText: '35,000 ₫ / Pallet', isChecked: true },
-          { id: 'pwh-3', name: 'Phí rút ruột container 40ft thủ công & lên Pallet', priceText: '1,200,000 ₫ / Cont 40ft', isChecked: true },
-          { id: 'pwh-4', name: 'Phí kiểm đếm chi tiết từng SKU lẻ', priceText: '500 ₫ / SKU', isChecked: false },
-          { id: 'pwh-5', name: 'Phí làm việc ngoài giờ hành chính', priceText: '200,000 ₫ / Giờ', isChecked: false },
-        ];
+      : (isBondedStorage
+          ? (isColdStorage
+              ? BONDED_COLD_SUGGESTED_SURCHARGES.slice(0, 6).map(s => ({
+                  id: `pwh-${s.code}`,
+                  code: s.code,
+                  name: s.name,
+                  category: s.category,
+                  unit: s.unit,
+                  priceText: s.defaultPrice,
+                  isChecked: true,
+                }))
+              : isChemicalStorage
+                ? BONDED_HAZMAT_SUGGESTED_SURCHARGES.slice(0, 6).map(s => ({
+                    id: `pwh-${s.code}`,
+                    code: s.code,
+                    name: s.name,
+                    category: s.category,
+                    unit: s.unit,
+                    priceText: s.defaultPrice,
+                    isChecked: true,
+                  }))
+                : BONDED_GENERAL_SUGGESTED_SURCHARGES.slice(0, 6).map(s => ({
+                    id: `pwh-${s.code}`,
+                    code: s.code,
+                    name: s.name,
+                    category: s.category,
+                    unit: s.unit,
+                    priceText: s.defaultPrice,
+                    isChecked: true,
+                  })))
+          : (isColdStorage
+              ? COLD_WAREHOUSE_SUGGESTED_SURCHARGES.slice(0, 6).map(s => ({
+                  id: `pwh-${s.code}`,
+                  code: s.code,
+                  name: s.name,
+                  category: s.category,
+                  unit: s.unit,
+                  priceText: s.defaultPrice,
+                  isChecked: true,
+                }))
+              : isChemicalStorage
+                ? HAZMAT_WAREHOUSE_SUGGESTED_SURCHARGES.slice(0, 6).map(s => ({
+                    id: `pwh-${s.code}`,
+                    code: s.code,
+                    name: s.name,
+                    category: s.category,
+                    unit: s.unit,
+                    priceText: s.defaultPrice,
+                    isChecked: true,
+                  }))
+                : [
+                    { id: 'pwh-1', name: 'Phí nâng hạ & dỡ hàng nhập kho (Inbound)', priceText: '35,000 ₫ / Pallet', isChecked: true },
+                    { id: 'pwh-2', name: 'Phí lấy hàng & bốc xếp xuất kho (Outbound)', priceText: '35,000 ₫ / Pallet', isChecked: true },
+                    { id: 'pwh-3', name: 'Phí rút ruột container 40ft thủ công & lên Pallet', priceText: '1,200,000 ₫ / Cont 40ft', isChecked: true },
+                    { id: 'pwh-4', name: 'Phí kiểm đếm chi tiết từng SKU lẻ', priceText: '500 ₫ / SKU', isChecked: false },
+                    { id: 'pwh-5', name: 'Phí làm việc ngoài giờ hành chính', priceText: '200,000 ₫ / Giờ', isChecked: false },
+                  ]));
 
     const existingVas: CapabilityVasItem[] = route.warehouseVasItems && route.warehouseVasItems.length > 0
       ? JSON.parse(JSON.stringify(route.warehouseVasItems))
-      : [
-          { id: 'vwh-1', name: 'Dán tem phụ tiếng Việt / Barcode SKU', category: 'Đóng Gói & Xử Lý', priceText: '400 ₫ / Tem', isChecked: true },
-          { id: 'vwh-2', name: 'Quấn màng co PE Pallet & Đóng đai bảo vệ', category: 'Đóng Gói & Xử Lý', priceText: '35,000 ₫ / Pallet', isChecked: true },
-          { id: 'vwh-3', name: 'Đóng thùng carton kitting combo / Hộp quà', category: 'Đóng Gói & Xử Lý', priceText: '5,000 ₫ / Hộp', isChecked: false },
-          { id: 'vwh-4', name: 'Bảo hiểm cháy nổ tài sản kho bãi', category: 'An Ninh & Bảo Hiểm', priceText: '0.05% giá trị hàng', isChecked: true },
-        ];
+      : (isBondedStorage
+          ? (isColdStorage
+              ? BONDED_COLD_SUGGESTED_VAS.slice(0, 5).map(v => ({
+                  id: `vwh-${v.code}`,
+                  code: v.code,
+                  name: v.name,
+                  category: v.category,
+                  unit: v.unit,
+                  priceText: v.defaultPrice,
+                  isChecked: true,
+                }))
+              : isChemicalStorage
+                ? BONDED_HAZMAT_SUGGESTED_VAS.slice(0, 5).map(v => ({
+                    id: `vwh-${v.code}`,
+                    code: v.code,
+                    name: v.name,
+                    category: v.category,
+                    unit: v.unit,
+                    priceText: v.defaultPrice,
+                    isChecked: true,
+                  }))
+                : BONDED_GENERAL_SUGGESTED_VAS.slice(0, 5).map(v => ({
+                    id: `vwh-${v.code}`,
+                    code: v.code,
+                    name: v.name,
+                    category: v.category,
+                    unit: v.unit,
+                    priceText: v.defaultPrice,
+                    isChecked: true,
+                  })))
+          : (isColdStorage
+              ? COLD_WAREHOUSE_SUGGESTED_VAS.slice(0, 5).map(v => ({
+                  id: `vwh-${v.code}`,
+                  code: v.code,
+                  name: v.name,
+                  category: v.category,
+                  unit: v.unit,
+                  priceText: v.defaultPrice,
+                  isChecked: true,
+                }))
+              : isChemicalStorage
+                ? HAZMAT_WAREHOUSE_SUGGESTED_VAS.slice(0, 5).map(v => ({
+                    id: `vwh-${v.code}`,
+                    code: v.code,
+                    name: v.name,
+                    category: v.category,
+                    unit: v.unit,
+                    priceText: v.defaultPrice,
+                    isChecked: true,
+                  }))
+                : [
+                    { id: 'vwh-1', name: 'Dán tem phụ tiếng Việt / Barcode SKU', category: 'Đóng Gói & Xử Lý', priceText: '400 ₫ / Tem', isChecked: true },
+                    { id: 'vwh-2', name: 'Quấn màng co PE Pallet & Đóng đai bảo vệ', category: 'Đóng Gói & Xử Lý', priceText: '35,000 ₫ / Pallet', isChecked: true },
+                    { id: 'vwh-3', name: 'Đóng thùng carton kitting combo / Hộp quà', category: 'Đóng Gói & Xử Lý', priceText: '5,000 ₫ / Hộp', isChecked: false },
+                    { id: 'vwh-4', name: 'Bảo hiểm cháy nổ tài sản kho bãi', category: 'An Ninh & Bảo Hiểm', priceText: '0.05% giá trị hàng', isChecked: true },
+                  ]));
 
     const capArea = route.capacityArea ?? 2500;
     const capPallet = route.capacityPallets ?? 1800;
@@ -5273,12 +5623,15 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
     setWarehouseDetailModalData({
       routeId: route.id,
       modelId: currentModelId,
-      warehouseCode: route.warehouseCode || route.routeCode || 'WH-001',
+      warehouseCode: route.customsWarehouseCode || route.warehouseCode || route.routeCode || 'WH-001',
       warehouseName: route.warehouseName || route.route || 'Kho Phân Phối DC',
       province: route.warehouseProvince || route.origin || 'Bình Dương',
       address: route.warehouseAddress || route.destination || 'KCN Sóng Thần 1, Dĩ An',
       isColdStorage,
       isChemicalStorage,
+      isBondedStorage,
+      customsWarehouseCode: route.customsWarehouseCode || route.warehouseCode || '02B1B01',
+      customsAuthority: route.customsAuthority || CUSTOMS_AUTHORITIES_LOV[0],
       photos: existingPhotos,
       techSpecs: existingSpecs,
       freeSurcharges: existingFree,
@@ -6073,7 +6426,47 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
 
     const isWarehousing = activeCategory?.id === 'warehousing';
     if (isWarehousing) {
+      const isBonded = activeModel?.id === 'wh-gen-bon' || activeModel?.id?.includes('bon') || activeModel?.name?.toLowerCase().includes('ngoại quan') || activeModel?.code?.toLowerCase().includes('ngoại quan');
+      const isCold = activeModel?.id?.includes('ref') || activeCargoGroup?.name?.includes('lạnh');
+      const isHaz = activeModel?.id?.includes('haz') || activeCargoGroup?.name?.includes('nguy hiểm') || activeCargoGroup?.name?.includes('hóa chất');
       const nextIdx = (currentData.routes || []).length + 1;
+
+      if (isBonded) {
+        const codeSuffix = isCold ? '-RF' : (isHaz ? '-DG' : '');
+        const whCode = `02B1B${String(nextIdx).padStart(2, '0')}${codeSuffix}`;
+        const newBondedRoute: CapabilityRouteItem = {
+          id: `r-wh-bon-${Date.now()}`,
+          routeCode: whCode,
+          warehouseCode: whCode,
+          customsWarehouseCode: whCode,
+          route: isCold ? `Kho Ngoại Quan Lạnh #${nextIdx}` : (isHaz ? `Kho Ngoại Quan Hóa Chất #${nextIdx}` : `Kho Ngoại Quan & CFS #${nextIdx}`),
+          warehouseName: isCold ? `Kho Ngoại Quan Lạnh #${nextIdx}` : (isHaz ? `Kho Ngoại Quan Hóa Chất #${nextIdx}` : `Kho Ngoại Quan & CFS #${nextIdx}`),
+          customsAuthority: CUSTOMS_AUTHORITIES_LOV[0],
+          origin: isCold || isHaz ? 'Hải Phòng' : 'TP. Hồ Chí Minh',
+          warehouseProvince: isCold || isHaz ? 'Hải Phòng' : 'TP. Hồ Chí Minh',
+          destination: isCold || isHaz ? 'KCN Đình Vũ, P. Đông Hải 2, Q. Hải An' : 'Khu thương mại Cát Lái, P. Cát Lái, TP. Thủ Đức',
+          warehouseAddress: isCold || isHaz ? 'KCN Đình Vũ, P. Đông Hải 2, Q. Hải An' : 'Khu thương mại Cát Lái, P. Cát Lái, TP. Thủ Đức',
+          vehicleType: isCold ? 'Kho ngoại quan lạnh' : (isHaz ? 'Kho ngoại quan hóa chất' : 'Kho ngoại quan gần cảng biển'),
+          pricingUnit: 'CBM / Ngày',
+          price: isCold ? 0.55 : (isHaz ? 0.65 : 0.35),
+          pricePerVolume: isCold ? 0.55 : (isHaz ? 0.65 : 0.35),
+          pricePerPallet: isCold ? 0.75 : (isHaz ? 0.85 : 0.45),
+          pricePerArea: isCold ? 9.5 : (isHaz ? 11.0 : 6.5),
+          capacityArea: 5000,
+          capacityVolume: 8000,
+          capacityPallets: 4200,
+          minChargeMonthly: 45,
+          currency: 'USD',
+          sla: 'Tiếp nhận cont 24/7 (HQ 8h-17h)',
+          pricingStyle: 'All-in',
+          validUntil: '2026-12-31',
+          promotionPercent: 0,
+        };
+
+        updateCurrentFormData('routes', [...(currentData.routes || []), newBondedRoute]);
+        return;
+      }
+
       const whCode = `WH-DC-${String(nextIdx).padStart(3, '0')}`;
       const newWhRoute: CapabilityRouteItem = {
         id: `r-wh-${Date.now()}`,
@@ -6916,25 +7309,14 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                               if (isBonded) {
                                 return (
                                   <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
-                                    <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
-                                    <th className="py-2.5 px-2.5 min-w-[125px] text-center bg-indigo-50/80 text-indigo-950 font-black">Mã Kho HQ</th>
-                                    <th className="py-2.5 px-2.5 min-w-[185px]">Tên Kho Ngoại Quan / CFS</th>
-                                    <th className="py-2.5 px-2.5 min-w-[220px] bg-amber-50/80 text-amber-950 font-black">Chi Cục Hải Quan Quản Lý</th>
-                                    <th className="py-2.5 px-2.5 min-w-[130px]">Tỉnh / TP</th>
-                                    <th className="py-2.5 px-2.5 min-w-[185px]">Cổng Cảng / KCN / Địa Chỉ</th>
-                                    <th className="py-2.5 px-2 text-right min-w-[110px] bg-blue-50/70 text-blue-950">Diện Tích (m²)</th>
-                                    <th className="py-2.5 px-2 text-right min-w-[115px] bg-blue-50/70 text-blue-950 font-bold">Sức Chứa CBM (m³)</th>
-                                    <th className="py-2.5 px-2 text-right min-w-[115px] bg-blue-50/70 text-blue-950">Số Pallet (Vị Trí)</th>
-                                    <th className="py-2.5 px-2 text-right min-w-[150px] bg-emerald-50/90 text-emerald-950 font-black">Giá CBM (/ CBM / Ngày)</th>
-                                    <th className="py-2.5 px-2 text-right min-w-[140px] bg-emerald-50/70 text-emerald-950">Giá Pallet (/ Ngày)</th>
-                                    <th className="py-2.5 px-2 text-right min-w-[135px] bg-emerald-50/70 text-emerald-950">Giá m² (/ Tháng)</th>
-                                    <th className="py-2.5 px-2 text-right min-w-[155px] bg-amber-50/80 text-amber-950">Cước Sàn (Min/Lô)</th>
-                                    <th className="py-2.5 px-2 w-20 min-w-[80px] text-center">Tiền Tệ</th>
-                                    <th className="py-2.5 px-2.5 min-w-[145px] text-center">Giờ Xe & Giám Sát HQ</th>
-                                    <th className="py-2.5 px-2.5 min-w-[130px] text-center">Hạn Giá</th>
-                                    <th className="py-2.5 px-2 min-w-[85px] text-center">Promotion</th>
-                                    <th className="py-2.5 px-2.5 min-w-[170px] text-center bg-indigo-50/70 text-indigo-950">Chi Tiết (Specs, HQ, VAS)</th>
-                                    <th className="py-2.5 px-2 text-center w-16 min-w-[65px]">Action</th>
+                                    <th className="py-2.5 px-2 text-center w-12 min-w-[48px] bg-slate-100">STT</th>
+                                    <th className="py-2.5 px-3 min-w-[140px] text-center bg-indigo-50/80 text-indigo-950 font-black">Mã Kho HQ</th>
+                                    <th className="py-2.5 px-3 min-w-[220px]">Tên Kho Ngoại Quan / CFS</th>
+                                    <th className="py-2.5 px-3 min-w-[240px] bg-amber-50/80 text-amber-950 font-black">Chi Cục Hải Quan Quản Lý</th>
+                                    <th className="py-2.5 px-3 min-w-[140px]">Tỉnh / TP</th>
+                                    <th className="py-2.5 px-3 min-w-[260px]">Địa Chỉ</th>
+                                    <th className="py-2.5 px-3 min-w-[200px] text-center bg-indigo-50/70 text-indigo-950 font-black">Chi Tiết</th>
+                                    <th className="py-2.5 px-2 text-center w-20 min-w-[80px]">Action</th>
                                   </tr>
                                 );
                               }
@@ -7163,7 +7545,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                             <tr>
                               <td colSpan={(() => {
                                 if (activeCategory?.id === 'warehousing') {
-                                  if (activeModel?.id === 'wh-gen-bon' || activeModel?.name?.toLowerCase().includes('ngoại quan')) return 19;
+                                  if (activeModel?.id === 'wh-gen-bon' || activeModel?.id?.includes('bon') || activeModel?.name?.toLowerCase().includes('ngoại quan') || activeModel?.code?.toLowerCase().includes('ngoại quan')) return 8;
                                   if (activeModel?.id === 'wh-gen-self') return 17;
                                   return 18;
                                 }
@@ -8156,272 +8538,138 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
 
                                 if (isBondedRow) {
                                   const effWhCode = route.customsWarehouseCode || route.warehouseCode || route.routeCode || `02B1B${String(idx + 1).padStart(2, '0')}`;
-                                  const effWhName = route.warehouseName || route.route || `Kho Ngoại Quan CFS #${idx + 1}`;
+                                  const effWhName = route.warehouseName || route.route || `Kho Ngoại Quan & CFS #${idx + 1}`;
                                   const effCustomsAuth = route.customsAuthority || CUSTOMS_AUTHORITIES_LOV[0];
                                   const effProvince = route.warehouseProvince || route.origin || 'TP. Hồ Chí Minh';
                                   const effAddress = route.warehouseAddress || route.destination || 'Khu thương mại Cát Lái, P. Cát Lái, TP. Thủ Đức';
-                                  const effCapArea = route.capacityArea ?? 5000;
-                                  const effCapVolume = route.capacityVolume ?? 8000;
-                                  const effCapPallet = route.capacityPallets ?? 4200;
-                                  const effPriceVolume = route.pricePerVolume ?? 0.35;
-                                  const effPricePallet = route.pricePerPallet ?? 0.45;
-                                  const effPriceArea = route.pricePerArea ?? 6.5;
-                                  const effMinCharge = route.minChargeMonthly ?? 45;
-                                  const effCurrency = route.currency || 'USD';
-                                  const effSla = route.sla || 'Tiếp nhận cont 24/7 (HQ 8h-17h)';
+                                  const photoCount = route.warehousePhotos?.length || 0;
+                                  const surchargeCount = ((route as any).paidSurcharges?.length || (route as any).warehousePaidSurcharges?.length || currentData.paidSurcharges?.length || 0) + ((route as any).vasServices?.length || (route as any).warehouseVasItems?.length || 0);
 
                                   return (
                                     <tr key={route.id} className="hover:bg-indigo-50/20 transition-colors divide-x divide-slate-100 text-xs">
                                       {/* 1. STT */}
-                                      <td className="p-1 text-center font-bold text-slate-500 w-9 bg-slate-50/50">
+                                      <td className="p-2 text-center font-bold text-slate-500 w-12 min-w-[48px] bg-slate-50/50">
                                         {idx + 1}
                                       </td>
 
-                                      {/* 2. Mã Kho Hải Quan */}
-                                      <td className="p-1 text-center font-mono font-bold text-indigo-700 bg-indigo-50/20">
-                                        <input
-                                          type="text"
-                                          value={effWhCode}
-                                          onChange={(e) => handleUpdateRouteRowMultiple(route.id, { 
-                                            customsWarehouseCode: e.target.value, 
-                                            warehouseCode: e.target.value, 
-                                            routeCode: e.target.value 
-                                          })}
-                                          placeholder="VD: 02B1B01"
-                                          className="w-full text-center bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded px-1 py-1 font-bold text-indigo-700 text-xs"
-                                        />
+                                      {/* 2. Mã kho HQ */}
+                                      <td className="p-2 align-middle bg-indigo-50/20">
+                                        <div className="relative">
+                                          <input
+                                            type="text"
+                                            value={effWhCode}
+                                            onChange={(e) => handleUpdateRouteRowMultiple(route.id, { 
+                                              customsWarehouseCode: e.target.value, 
+                                              warehouseCode: e.target.value, 
+                                              routeCode: e.target.value 
+                                            })}
+                                            placeholder="VD: 02B1B01"
+                                            className="w-full text-center font-mono font-black text-indigo-700 bg-white border border-indigo-300 focus:border-indigo-600 focus:ring-1 focus:ring-indigo-500 rounded-lg px-2.5 py-1.5 text-xs shadow-2xs tracking-wider"
+                                          />
+                                        </div>
                                       </td>
 
-                                      {/* 3. Tên Kho Ngoại Quan / CFS */}
-                                      <td className="p-1 align-middle">
-                                        <input
-                                          type="text"
-                                          value={effWhName}
-                                          onChange={(e) => handleUpdateRouteRowMultiple(route.id, { warehouseName: e.target.value, route: e.target.value })}
-                                          placeholder="Tên kho ngoại quan / CFS..."
-                                          className="w-full px-2 py-1.5 font-bold text-slate-900 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
-                                        />
+                                      {/* 3. Tên kho Ngoại quan/CFS */}
+                                      <td className="p-2 align-middle">
+                                        <div className="relative flex items-center">
+                                          <Warehouse className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 pointer-events-none" />
+                                          <input
+                                            type="text"
+                                            value={effWhName}
+                                            onChange={(e) => handleUpdateRouteRowMultiple(route.id, { warehouseName: e.target.value, route: e.target.value })}
+                                            placeholder="Tên kho ngoại quan / CFS..."
+                                            className="w-full pl-8 pr-2.5 py-1.5 font-bold text-slate-900 bg-white border border-slate-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg text-xs"
+                                          />
+                                        </div>
                                       </td>
 
-                                      {/* 4. Chi Cục Hải Quan Quản Lý */}
-                                      <td className="p-0 align-middle bg-amber-50/20">
-                                        <select
-                                          value={CUSTOMS_AUTHORITIES_LOV.includes(effCustomsAuth) ? effCustomsAuth : 'Khác (Nhập chi cục khác)...'}
-                                          onChange={(e) => {
-                                            const val = e.target.value;
-                                            handleUpdateRouteRow(route.id, 'customsAuthority', val === 'Khác (Nhập chi cục khác)...' ? '' : val);
-                                          }}
-                                          className="w-full px-2 py-1.5 bg-transparent font-semibold text-amber-950 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer"
-                                        >
-                                          {CUSTOMS_AUTHORITIES_LOV.map((auth, aIdx) => (
-                                            <option key={aIdx} value={auth}>{auth}</option>
-                                          ))}
-                                        </select>
+                                      {/* 4. Chi cục hải quan quản lý */}
+                                      <td className="p-2 align-middle bg-amber-50/20">
+                                        <div className="space-y-1">
+                                          <select
+                                            value={CUSTOMS_AUTHORITIES_LOV.includes(effCustomsAuth) ? effCustomsAuth : 'Khác (Nhập chi cục khác)...'}
+                                            onChange={(e) => {
+                                              const val = e.target.value;
+                                              if (val === 'Khác (Nhập chi cục khác)...') {
+                                                handleUpdateRouteRow(route.id, 'customsAuthority', 'Chi cục HQ khác...');
+                                              } else {
+                                                handleUpdateRouteRow(route.id, 'customsAuthority', val);
+                                              }
+                                            }}
+                                            className="w-full px-2.5 py-1.5 bg-white border border-amber-300 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 rounded-lg font-semibold text-amber-950 text-xs cursor-pointer truncate shadow-2xs"
+                                          >
+                                            {CUSTOMS_AUTHORITIES_LOV.map((auth, aIdx) => (
+                                              <option key={aIdx} value={auth}>{auth}</option>
+                                            ))}
+                                            <option value="Khác (Nhập chi cục khác)...">-- Chi cục khác (Tự nhập) --</option>
+                                          </select>
+                                          {(!CUSTOMS_AUTHORITIES_LOV.includes(effCustomsAuth) || effCustomsAuth === 'Chi cục HQ khác...') && (
+                                            <input
+                                              type="text"
+                                              value={effCustomsAuth === 'Chi cục HQ khác...' ? '' : effCustomsAuth}
+                                              onChange={(e) => handleUpdateRouteRow(route.id, 'customsAuthority', e.target.value)}
+                                              placeholder="Nhập tên chi cục hải quan..."
+                                              className="w-full px-2 py-1 bg-white border border-amber-400 focus:border-amber-600 focus:ring-1 focus:ring-amber-500 rounded text-[11px] font-semibold text-amber-900"
+                                            />
+                                          )}
+                                        </div>
                                       </td>
 
-                                      {/* 5. Tỉnh / TP */}
-                                      <td className="p-1 align-middle">
-                                        <input
-                                          type="text"
-                                          value={effProvince}
-                                          onChange={(e) => handleUpdateRouteRowMultiple(route.id, { warehouseProvince: e.target.value, origin: e.target.value })}
-                                          placeholder="TP.HCM, Hải Phòng..."
-                                          className="w-full px-2 py-1.5 font-semibold text-slate-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
-                                        />
+                                      {/* 5. Tỉnh/TP */}
+                                      <td className="p-2 align-middle">
+                                        <div className="relative flex items-center">
+                                          <MapPin className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 pointer-events-none" />
+                                          <input
+                                            type="text"
+                                            list={`bonded-province-list-${route.id}`}
+                                            value={effProvince}
+                                            onChange={(e) => handleUpdateRouteRowMultiple(route.id, { warehouseProvince: e.target.value, origin: e.target.value })}
+                                            placeholder="TP.HCM, Hải Phòng..."
+                                            className="w-full pl-8 pr-2.5 py-1.5 font-semibold text-slate-800 bg-white border border-slate-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg text-xs"
+                                          />
+                                          <datalist id={`bonded-province-list-${route.id}`}>
+                                            {VIETNAM_PROVINCES_LOV.map((p, pIdx) => (
+                                              <option key={pIdx} value={p} />
+                                            ))}
+                                          </datalist>
+                                        </div>
                                       </td>
 
-                                      {/* 6. Cổng Cảng / KCN / Địa Chỉ */}
-                                      <td className="p-1 align-middle">
+                                      {/* 6. Địa chỉ */}
+                                      <td className="p-2 align-middle">
                                         <input
                                           type="text"
                                           value={effAddress}
                                           onChange={(e) => handleUpdateRouteRowMultiple(route.id, { warehouseAddress: e.target.value, destination: e.target.value })}
-                                          placeholder="KCN, Cổng cảng, Khu CFS..."
-                                          className="w-full px-2 py-1.5 text-slate-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
+                                          placeholder="Khu thương mại Cát Lái, KCN Đình Vũ, KCN Sóng Thần..."
+                                          className="w-full px-2.5 py-1.5 text-slate-700 bg-white border border-slate-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg text-xs"
                                         />
                                       </td>
 
-                                      {/* 7. Diện Tích Kho (m²) */}
-                                      <td className="p-1 align-middle text-right bg-blue-50/20">
-                                        <input
-                                          type="number"
-                                          value={effCapArea || ''}
-                                          onChange={(e) => handleUpdateRouteRow(route.id, 'capacityArea', parseFloat(e.target.value) || 0)}
-                                          placeholder="5000"
-                                          className="w-full px-2 py-1.5 text-right font-semibold text-slate-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
-                                        />
-                                      </td>
-
-                                      {/* 8. Sức Chứa CBM (m³) */}
-                                      <td className="p-1 align-middle text-right bg-blue-50/30">
-                                        <input
-                                          type="number"
-                                          value={effCapVolume || ''}
-                                          onChange={(e) => handleUpdateRouteRow(route.id, 'capacityVolume', parseFloat(e.target.value) || 0)}
-                                          placeholder="8000"
-                                          className="w-full px-2 py-1.5 text-right font-bold text-blue-900 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
-                                        />
-                                      </td>
-
-                                      {/* 9. Số Pallet (Vị Trí) */}
-                                      <td className="p-1 align-middle text-right bg-blue-50/20">
-                                        <input
-                                          type="number"
-                                          value={effCapPallet || ''}
-                                          onChange={(e) => handleUpdateRouteRow(route.id, 'capacityPallets', parseFloat(e.target.value) || 0)}
-                                          placeholder="4200"
-                                          className="w-full px-2 py-1.5 text-right font-semibold text-slate-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
-                                        />
-                                      </td>
-
-                                      {/* 10. Giá CBM (/ CBM / Ngày) - Trọng tâm */}
-                                      <td className="p-1 align-middle text-right bg-emerald-50/30">
-                                        <input
-                                          type="number"
-                                          step="0.01"
-                                          value={effPriceVolume || ''}
-                                          onChange={(e) => {
-                                            const v = parseFloat(e.target.value) || 0;
-                                            handleUpdateRouteRowMultiple(route.id, { pricePerVolume: v, price: v });
-                                          }}
-                                          placeholder="0.35"
-                                          className="w-full px-2 py-1.5 text-right font-black text-emerald-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
-                                        />
-                                      
-                                        {(route.promotionPercent || 0) > 0 && effPriceVolume > 0 && (
-    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
-      Giảm còn: {effCurrency === 'USD' ? +(effPriceVolume * (1 - (route.promotionPercent || 0) / 100)).toFixed(2) : Math.round(effPriceVolume * (1 - (route.promotionPercent || 0) / 100)).toLocaleString('vi-VN')} {effCurrency}
-    </div>
-  )}
-                                      </td>
-
-                                      {/* 11. Giá Pallet (/ Ngày) */}
-                                      <td className="p-1 align-middle text-right bg-emerald-50/20">
-                                        <input
-                                          type="number"
-                                          step="0.01"
-                                          value={effPricePallet || ''}
-                                          onChange={(e) => handleUpdateRouteRow(route.id, 'pricePerPallet', parseFloat(e.target.value) || 0)}
-                                          placeholder="0.45"
-                                          className="w-full px-2 py-1.5 text-right font-bold text-emerald-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
-                                        />
-                                      
-                                        {(route.promotionPercent || 0) > 0 && effPricePallet > 0 && (
-    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
-      Giảm còn: {effCurrency === 'USD' ? +(effPricePallet * (1 - (route.promotionPercent || 0) / 100)).toFixed(2) : Math.round(effPricePallet * (1 - (route.promotionPercent || 0) / 100)).toLocaleString('vi-VN')} {effCurrency}
-    </div>
-  )}
-                                      </td>
-
-                                      {/* 12. Giá m² (/ Tháng) */}
-                                      <td className="p-1 align-middle text-right bg-emerald-50/20">
-                                        <input
-                                          type="number"
-                                          step="0.1"
-                                          value={effPriceArea || ''}
-                                          onChange={(e) => handleUpdateRouteRow(route.id, 'pricePerArea', parseFloat(e.target.value) || 0)}
-                                          placeholder="6.5"
-                                          className="w-full px-2 py-1.5 text-right font-bold text-emerald-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
-                                        />
-                                      
-                                        {(route.promotionPercent || 0) > 0 && effPriceArea > 0 && (
-    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
-      Giảm còn: {effCurrency === 'USD' ? +(effPriceArea * (1 - (route.promotionPercent || 0) / 100)).toFixed(2) : Math.round(effPriceArea * (1 - (route.promotionPercent || 0) / 100)).toLocaleString('vi-VN')} {effCurrency}
-    </div>
-  )}
-                                      </td>
-
-                                      {/* 13. Cước Sàn (Min Charge / Lô hàng) */}
-                                      <td className="p-1 align-middle text-right bg-amber-50/30">
-                                        <input
-                                          type="number"
-                                          step="1"
-                                          value={effMinCharge || ''}
-                                          onChange={(e) => handleUpdateRouteRow(route.id, 'minChargeMonthly', parseFloat(e.target.value) || 0)}
-                                          placeholder="45"
-                                          className="w-full px-2 py-1.5 text-right font-bold text-amber-900 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
-                                        />
-                                      
-                                        {(route.promotionPercent || 0) > 0 && effMinCharge > 0 && (
-    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
-      Giảm còn: {effCurrency === 'USD' ? +(effMinCharge * (1 - (route.promotionPercent || 0) / 100)).toFixed(0) : Math.round(effMinCharge * (1 - (route.promotionPercent || 0) / 100)).toLocaleString('vi-VN')} {effCurrency}
-    </div>
-  )}
-                                      </td>
-
-                                      {/* 14. Tiền Tệ */}
-                                      <td className="p-0 text-center bg-slate-50/30 align-middle">
-                                        <select
-                                          value={effCurrency}
-                                          onChange={(e) => handleUpdateRouteRow(route.id, 'currency', e.target.value as 'VND' | 'USD')}
-                                          className="w-full px-1.5 py-2 bg-transparent text-slate-800 text-xs font-bold text-center focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
-                                        >
-                                          <option value="USD">USD ($)</option>
-                                          <option value="VND">VND (₫)</option>
-                                        </select>
-                                      </td>
-
-                                      {/* 15. Giờ Tiếp Nhận Xe & Giám Sát HQ */}
-                                      <td className="p-1 align-middle">
-                                        <input
-                                          type="text"
-                                          value={effSla}
-                                          onChange={(e) => handleUpdateRouteRow(route.id, 'sla', e.target.value)}
-                                          placeholder="24/7 (HQ 8h-17h)..."
-                                          className="w-full px-2 py-1.5 text-center text-slate-800 font-medium bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
-                                        />
-                                      </td>
-
-                                      {/* 16. Hạn Giá */}
-                                      <td className="p-0 text-center align-middle">
-                                        <input
-                                          type="date"
-                                          value={route.validUntil || '2026-12-31'}
-                                          onChange={(e) => handleUpdateRouteRow(route.id, 'validUntil', e.target.value)}
-                                          className="w-full px-1.5 py-2 bg-transparent text-slate-700 text-xs font-medium text-center focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
-                                        />
-                                      </td>
-
-                                      {/* 17. Promotion (%) */}
-                                      <td className="p-0 text-center align-middle">
-                                        <select
-                                          value={route.promotionPercent || 0}
-                                          onChange={(e) => handleUpdateRouteRow(route.id, 'promotionPercent', parseInt(e.target.value) || 0)}
-                                          className="w-full px-1.5 py-2 bg-transparent text-slate-800 text-xs font-semibold text-center focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
-                                        >
-                                          <option value={0}>0%</option>
-                                          <option value={5}>5%</option>
-                                          <option value={10}>10%</option>
-                                          <option value={15}>15%</option>
-                                          <option value={20}>20%</option>
-                                        </select>
-                                      </td>
-
-                                      {/* 18. Chi Tiết (Specs, HQ, VAS) Button */}
-                                      <td className="p-1 text-center align-middle bg-indigo-50/20">
+                                      {/* 7. Chi tiết */}
+                                      <td className="p-2 text-center align-middle bg-indigo-50/10">
                                         <button
                                           type="button"
                                           onClick={() => handleOpenWarehouseDetailModal(route)}
-                                          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold text-xs shadow-2xs transition-all cursor-pointer hover:shadow-indigo-600/30"
-                                          title="Thiết lập thông số kỹ thuật, tải ảnh thực tế, biểu phí và VAS kho ngoại quan"
+                                          className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white rounded-xl font-bold text-xs shadow-xs hover:shadow-md hover:shadow-indigo-600/20 transition-all cursor-pointer group"
+                                          title="Mở Modal cấu hình chuyên sâu: Thông số pháp lý HQ, Album ảnh, Biểu giá CBM/Pallet/m², Phụ phí, VAS"
                                         >
-                                          <Sliders className="w-3.5 h-3.5" />
-                                          <span>Chi tiết (Specs & HQ)</span>
-                                          {(route.warehousePhotos?.length || 0) > 0 && (
-                                            <span className="bg-indigo-400 text-white text-[10px] px-1 py-0.2 rounded-full font-bold">
-                                              {route.warehousePhotos?.length}📸
-                                            </span>
-                                          )}
+                                          <Sliders className="w-3.5 h-3.5 text-indigo-200 group-hover:text-white transition-colors shrink-0" />
+                                          <span>Chi Tiết</span>
+                                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-white/20 rounded-md text-[10px] font-semibold text-white">
+                                            {photoCount > 0 && <span>{photoCount}📸 • </span>}
+                                            <span>{surchargeCount > 0 ? `${surchargeCount} phụ phí & VAS` : 'Cấu hình giá & VAS'}</span>
+                                          </span>
                                         </button>
                                       </td>
 
-                                      {/* 19. Action Buttons */}
-                                      <td className="p-1 text-center align-middle">
-                                        <div className="flex items-center justify-center gap-1">
+                                      {/* 8. Action */}
+                                      <td className="p-2 text-center align-middle w-20 min-w-[80px]">
+                                        <div className="flex items-center justify-center gap-1.5">
                                           <button
                                             type="button"
                                             onClick={() => handleDuplicateRouteRow(route.id)}
-                                            className="p-1 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors cursor-pointer"
+                                            className="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg border border-slate-200 hover:border-indigo-200 transition-all cursor-pointer shadow-2xs"
                                             title="Nhân bản cơ sở kho ngoại quan này"
                                           >
                                             <Copy className="w-3.5 h-3.5" />
@@ -8429,7 +8677,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                           <button
                                             type="button"
                                             onClick={() => handleDeleteRouteRow(route.id)}
-                                            className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors cursor-pointer"
+                                            className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg border border-slate-200 hover:border-rose-200 transition-all cursor-pointer shadow-2xs"
                                             title="Xóa cơ sở kho ngoại quan này"
                                           >
                                             <Trash2 className="w-3.5 h-3.5" />
@@ -14309,12 +14557,33 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                           <div>
                             <div className="flex items-center justify-between mb-2.5">
                               <h5 className="text-xs font-black text-slate-800 uppercase tracking-wider">
-                                Tiện Ích Tiêu Chuẩn 3PL Phổ Biến (Tick để bật / tắt):
+                                {warehouseDetailModalData.isBondedStorage
+                                  ? (warehouseDetailModalData.isColdStorage
+                                      ? 'Tiện Ích Miễn Phí Kho Ngoại Quan Lạnh & Kiểm Dịch (Tick để bật / tắt):'
+                                      : (warehouseDetailModalData.isChemicalStorage
+                                          ? 'Tiện Ích Miễn Phí Kho Ngoại Quan Hóa Chất (Tick để bật / tắt):'
+                                          : 'Tiện Ích Miễn Phí Kho Ngoại Quan & CFS Tiêu Chuẩn (Tick để bật / tắt):'))
+                                  : (warehouseDetailModalData.isColdStorage
+                                      ? 'Tiện Ích Tiêu Chuẩn Chuỗi Lạnh (Tick để bật / tắt):'
+                                      : (warehouseDetailModalData.isChemicalStorage
+                                          ? 'Tiện Ích An Toàn Kho Hóa Chất & Nguy Hiểm (Tick để bật / tắt):'
+                                          : 'Tiện Ích Tiêu Chuẩn 3PL Phổ Biến (Tick để bật / tắt):'))}
                               </h5>
                               <span className="text-[11px] text-slate-500">Bấm trực tiếp vào từng ô để kích hoạt nhanh</span>
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                              {WAREHOUSE_FREE_UTILITIES_SUGGESTIONS.map((utilName) => {
+                              {(warehouseDetailModalData.isBondedStorage
+                                ? (warehouseDetailModalData.isColdStorage
+                                    ? BONDED_COLD_FREE_UTILITIES_SUGGESTIONS
+                                    : (warehouseDetailModalData.isChemicalStorage
+                                        ? BONDED_HAZMAT_FREE_UTILITIES_SUGGESTIONS
+                                        : BONDED_GENERAL_FREE_UTILITIES_SUGGESTIONS))
+                                : (warehouseDetailModalData.isColdStorage
+                                    ? COLD_FREE_UTILITIES_SUGGESTIONS
+                                    : (warehouseDetailModalData.isChemicalStorage
+                                        ? HAZMAT_FREE_UTILITIES_SUGGESTIONS
+                                        : WAREHOUSE_FREE_UTILITIES_SUGGESTIONS))
+                              ).map((utilName) => {
                                 const isChecked = warehouseDetailModalData.freeSurcharges.includes(utilName);
                                 return (
                                   <label
@@ -14408,8 +14677,32 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                 <WarehousePricingContinuousTable
                   data={warehouseDetailModalData}
                   setData={setWarehouseDetailModalData}
-                  surchargesLov={WAREHOUSE_SUGGESTED_SURCHARGES}
-                  vasLov={WAREHOUSE_SUGGESTED_VAS}
+                  surchargesLov={
+                    warehouseDetailModalData.isBondedStorage
+                      ? (warehouseDetailModalData.isColdStorage
+                          ? BONDED_COLD_SUGGESTED_SURCHARGES
+                          : (warehouseDetailModalData.isChemicalStorage
+                              ? BONDED_HAZMAT_SUGGESTED_SURCHARGES
+                              : BONDED_GENERAL_SUGGESTED_SURCHARGES))
+                      : (warehouseDetailModalData.isColdStorage
+                          ? COLD_WAREHOUSE_SUGGESTED_SURCHARGES
+                          : (warehouseDetailModalData.isChemicalStorage
+                              ? HAZMAT_WAREHOUSE_SUGGESTED_SURCHARGES
+                              : WAREHOUSE_SUGGESTED_SURCHARGES))
+                  }
+                  vasLov={
+                    warehouseDetailModalData.isBondedStorage
+                      ? (warehouseDetailModalData.isColdStorage
+                          ? BONDED_COLD_SUGGESTED_VAS
+                          : (warehouseDetailModalData.isChemicalStorage
+                              ? BONDED_HAZMAT_SUGGESTED_VAS
+                              : BONDED_GENERAL_SUGGESTED_VAS))
+                      : (warehouseDetailModalData.isColdStorage
+                          ? COLD_WAREHOUSE_SUGGESTED_VAS
+                          : (warehouseDetailModalData.isChemicalStorage
+                              ? HAZMAT_WAREHOUSE_SUGGESTED_VAS
+                              : WAREHOUSE_SUGGESTED_VAS))
+                  }
                 />
               )}
             </div>
