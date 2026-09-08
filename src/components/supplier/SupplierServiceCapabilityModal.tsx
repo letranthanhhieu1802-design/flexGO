@@ -10985,8 +10985,12 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                     (isOcean && isFcl) ||
                     isLclOcean ||
                     (isRail && isFcl) ||
+                    (isRail && !isFcl) ||
                     isCrossBorderFtl ||
+                    isCrossBorderLtl ||
+                    isAir ||
                     isAirCargo ||
+                    isExpress ||
                     activeCategory?.id === 'warehousing' ||
                     (activeCategory?.id === 'project' && (
                       activeModel?.id?.includes('xdock') ||
