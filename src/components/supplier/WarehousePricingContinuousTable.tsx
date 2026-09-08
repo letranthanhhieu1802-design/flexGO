@@ -102,6 +102,39 @@ export const BONDED_HAZMAT_FREE_UTILITIES_SUGGESTIONS = [
   'Hỗ trợ khai báo hóa chất một cửa quốc gia NSW kết nối tờ khai Hải quan',
 ];
 
+export const SELF_GENERAL_FREE_UTILITIES_SUGGESTIONS = [
+  'Xe đẩy hàng 4 bánh & xe nâng tay cơ khí sử dụng miễn phí',
+  'Thang nhôm chữ A đa năng phục vụ bốc xếp đồ trên cao',
+  'Máy hút ẩm công nghiệp kiểm soát độ ẩm phòng lưu trữ < 60%',
+  'Hệ thống chiếu sáng LED cảm biến & ổ cắm điện dân dụng 220V',
+  'Mạng Wifi tốc độ cao & bàn ghế tiếp khách miễn phí tại sảnh',
+  'Khu vực bàn đóng gói, kéo băng dính & phân loại hàng miễn phí',
+  'Lễ tân/Bảo vệ hỗ trợ nhận hàng bưu tá, shipper giao hộ trong giờ hành chính',
+  'Cổng kiểm soát ra vào 24/7 bằng thẻ từ / vân tay / mã PIN cá nhân',
+];
+
+export const SELF_COLD_FREE_UTILITIES_SUGGESTIONS = [
+  'Hệ thống điện máy phát ATS dự phòng tự động chuyển mạch trong 5 giây',
+  'Trạm cấp đông & cung cấp đá gel bảo quản bổ sung miễn phí',
+  'Cảm biến nhiệt độ IoT hiển thị màn hình LED ngoài cửa khoang',
+  'Buồng đệm giữ nhiệt Anteroom chống thất thoát nhiệt khi cất/lấy đồ',
+  'Xe đẩy hàng bọc đệm cách nhiệt chuyên dụng nội bộ',
+  'Vệ sinh diệt khuẩn buồng lạnh & xả đá tự động theo chuẩn HACCP',
+  'Cổng kiểm soát thẻ từ an ninh ra vào buồng lạnh 24/7',
+  'Hệ thống cảnh báo tin nhắn SMS / App tức thì khi nhiệt độ bất thường',
+];
+
+export const SELF_HAZMAT_FREE_UTILITIES_SUGGESTIONS = [
+  'Trạm vòi tắm & bồn rửa mắt khẩn cấp (Emergency Eyewash & Shower)',
+  'Hệ thống thông gió cưỡng bức chống cháy nổ Ex-proof hoạt động 24/7',
+  'Khay/sàn hứng chống tràn hóa chất ăn mòn chuyên dụng',
+  'Tủ trang bị phương tiện bảo hộ cá nhân PPE (găng tay, kính, mặt nạ)',
+  'Bộ vật tư ứng phó sự cố hóa chất Spill-Kit túc trực tại chỗ 24/7',
+  'Tủ tài liệu lưu trữ Bảng chỉ dẫn an toàn hóa chất (MSDS) tra cứu nhanh',
+  'Hệ thống cảm biến tự động phát hiện nồng độ khí cháy nổ LEL / VOCs',
+  'Bảo hiểm trách nhiệm bồi thường thiệt hại môi trường và cháy nổ 100%',
+];
+
 export const GENERAL_PRESET_WAREHOUSE_COLUMNS: Array<{ name: string; unit: string }> = [
   { name: 'Tải Trọng Sàn (Tấn)', unit: 'Tấn' },
   { name: 'Kệ Selective (Pallet)', unit: 'Pallet' },
@@ -156,6 +189,16 @@ export const BONDED_HAZMAT_PRESET_WAREHOUSE_COLUMNS: Array<{ name: string; unit:
   { name: 'Khu Vực Kiểm Hóa Hóa Chất Phòng Nổ (m²)', unit: 'm²' },
 ];
 
+export const SELF_GENERAL_PRESET_WAREHOUSE_COLUMNS: Array<{ name: string; unit: string }> = [
+  { name: 'Khoang Mini 1m³ - 3m³ (Khoang)', unit: 'Khoang' },
+  { name: 'Khoang Trung Bình 6m³ - 12m³ (Khoang)', unit: 'Khoang' },
+  { name: 'Khoang Doanh Nghiệp 20m³ - 30m³ (Khoang)', unit: 'Khoang' },
+  { name: 'Sàn Phân Lô Khóa Riêng (m²)', unit: 'm²' },
+  { name: 'Tủ Khóa Thông Minh Smart Locker (Tủ)', unit: 'Tủ' },
+];
+
+export const SELF_PRESET_WAREHOUSE_COLUMNS = SELF_GENERAL_PRESET_WAREHOUSE_COLUMNS;
+
 export const PRESET_WAREHOUSE_COLUMNS = GENERAL_PRESET_WAREHOUSE_COLUMNS;
 
 interface WarehousePricingContinuousTableProps {
@@ -201,6 +244,28 @@ export const HAZMAT_FIXED_SURCHARGES_LOV = [
   { code: 'FIX-HAZ-SECURITY', name: 'Phí giám sát an ninh camera phòng nổ Ex-proof & bảo vệ 2 lớp', unit: 'VND / Tháng', defaultPrice: 1200000, note: 'Tuân thủ nghiêm ngặt kiểm soát vật liệu sinh lửa' },
 ];
 
+export const SELF_GENERAL_FIXED_SURCHARGES_LOV = [
+  { code: 'FIX-SELF-ACCESS', name: 'Phí dịch vụ quản lý thẻ từ, vân tay & kiểm soát an ninh 24/7', unit: 'VND / Tháng', defaultPrice: 150000, note: 'Bao gồm cấp phát thẻ từ ra vào 24/7' },
+  { code: 'FIX-SELF-CLEAN', name: 'Phí vệ sinh hành lang, kiểm soát ẩm mốc & côn trùng định kỳ', unit: 'VND / Tháng', defaultPrice: 100000, note: 'Duy trì độ ẩm < 60% và sạch sẽ' },
+  { code: 'FIX-SELF-CCTV', name: 'Phí duy trì camera an ninh CCTV 24/7 lối đi & khu vực chung', unit: 'VND / Tháng', defaultPrice: 80000, note: 'Lưu trữ hình ảnh bảo mật 60 ngày' },
+  { code: 'FIX-SELF-INSUR', name: 'Phí bảo hiểm cháy nổ tài sản cá nhân trong khoang tự quản', unit: 'VND / Tháng', defaultPrice: 120000, note: 'Hạn mức bảo hiểm cơ bản theo hợp đồng' },
+  { code: 'FIX-SELF-PARKING', name: 'Phí bến bãi đậu xe ô tô / xe tải nhỏ khi tới dọn đồ', unit: 'VND / Lần', defaultPrice: 0, note: 'Miễn phí 60 phút mỗi lượt' },
+];
+
+export const SELF_COLD_FIXED_SURCHARGES_LOV = [
+  { code: 'FIX-SELF-COLD-POWER', name: 'Phí duy trì nguồn điện máy phát ATS tự động dự phòng 24/7', unit: 'VND / Tháng', defaultPrice: 500000, note: 'Chuyển mạch tự động trong 5 giây' },
+  { code: 'FIX-SELF-COLD-CALIB', name: 'Phí bảo dưỡng máy nén & hiệu chuẩn cảm biến nhiệt độ locker', unit: 'VND / Tháng', defaultPrice: 250000, note: 'Đảm bảo dải nhiệt ổn định tuyệt đối' },
+  { code: 'FIX-SELF-COLD-DEFROST', name: 'Phí vệ sinh buồng lạnh & xả đá diệt khuẩn định kỳ theo chuẩn HACCP', unit: 'VND / Tháng', defaultPrice: 200000, note: 'Khử mùi và diệt khuẩn Ozon' },
+  { code: 'FIX-SELF-COLD-IOT', name: 'Phí tài khoản giám sát nhiệt độ trực tuyến qua Mobile App', unit: 'VND / Tháng', defaultPrice: 150000, note: 'Cảnh báo nhiệt độ vượt ngưỡng qua SMS' },
+];
+
+export const SELF_HAZMAT_FIXED_SURCHARGES_LOV = [
+  { code: 'FIX-SELF-HAZ-VENT', name: 'Phí duy trì hệ thống thông gió chống nổ cưỡng bức Ex-proof 24/7', unit: 'VND / Tháng', defaultPrice: 600000, note: 'Kiểm soát nồng độ hơi dung môi < LEL' },
+  { code: 'FIX-SELF-HAZ-SENSOR', name: 'Phí kiểm định & bảo dưỡng cảm biến phát hiện khí rò rỉ tự động', unit: 'VND / Tháng', defaultPrice: 350000, note: 'Hiệu chuẩn cảm biến định kỳ' },
+  { code: 'FIX-SELF-HAZ-INSUR', name: 'Phí bảo hiểm trách nhiệm ô nhiễm môi trường & cháy nổ hóa chất', unit: 'VND / Tháng', defaultPrice: 500000, note: 'Hạn mức trách nhiệm cao' },
+  { code: 'FIX-SELF-HAZ-SPILL', name: 'Phí duy trì trạm rửa mắt khẩn cấp & bộ Spill-Kit xử lý sự cố tại chỗ', unit: 'VND / Tháng', defaultPrice: 200000, note: 'Túc trực 24/7' },
+];
+
 export const BONDED_GENERAL_FIXED_SURCHARGES_LOV = [
   { code: 'FIX-BON-VASSCM', name: 'Phí kết nối dữ liệu phần mềm tự động với hệ thống VASSCM Hải quan', unit: 'VND / Tháng', defaultPrice: 2000000, note: 'Duy trì kết nối truyền số liệu tờ khai 24/7' },
   { code: 'FIX-BON-OFFICE-HQ', name: 'Phí duy trì phòng làm việc và trang thiết bị cho công chức Hải quan', unit: 'VND / Tháng', defaultPrice: 1500000, note: 'Bao gồm điện thoại, máy in, mạng nội bộ' },
@@ -239,25 +304,45 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
   const isCold = Boolean(data.isColdStorage);
   const isHazmat = Boolean(data.isChemicalStorage);
   const isBonded = Boolean(data.isBondedStorage || data.modelId?.includes('bon') || data.modelId === 'wh-gen-bon');
+  const isSelfStorage = Boolean(
+    data.modelId?.includes('self') ||
+    data.modelId === 'wh-gen-self' ||
+    data.warehouseName?.toLowerCase().includes('tự quản') ||
+    data.warehouseCode?.toLowerCase().includes('self')
+  );
 
   const activeFixedLov = isBonded
     ? (isCold
         ? BONDED_COLD_FIXED_SURCHARGES_LOV
         : (isHazmat ? BONDED_HAZMAT_FIXED_SURCHARGES_LOV : BONDED_GENERAL_FIXED_SURCHARGES_LOV))
-    : (isCold 
-        ? COLD_FIXED_SURCHARGES_LOV 
-        : (isHazmat ? HAZMAT_FIXED_SURCHARGES_LOV : GENERAL_FIXED_SURCHARGES_LOV));
+    : (isSelfStorage
+        ? (isCold
+            ? SELF_COLD_FIXED_SURCHARGES_LOV
+            : (isHazmat ? SELF_HAZMAT_FIXED_SURCHARGES_LOV : SELF_GENERAL_FIXED_SURCHARGES_LOV))
+        : (isCold 
+            ? COLD_FIXED_SURCHARGES_LOV 
+            : (isHazmat ? HAZMAT_FIXED_SURCHARGES_LOV : GENERAL_FIXED_SURCHARGES_LOV)));
 
   const activePresetColumns = isBonded
     ? (isCold
         ? BONDED_COLD_PRESET_WAREHOUSE_COLUMNS
         : (isHazmat ? BONDED_HAZMAT_PRESET_WAREHOUSE_COLUMNS : BONDED_GENERAL_PRESET_WAREHOUSE_COLUMNS))
-    : (isCold
-        ? COLD_PRESET_WAREHOUSE_COLUMNS
-        : (isHazmat ? HAZMAT_PRESET_WAREHOUSE_COLUMNS : GENERAL_PRESET_WAREHOUSE_COLUMNS));
+    : (isSelfStorage
+        ? SELF_PRESET_WAREHOUSE_COLUMNS
+        : (isCold
+            ? COLD_PRESET_WAREHOUSE_COLUMNS
+            : (isHazmat ? HAZMAT_PRESET_WAREHOUSE_COLUMNS : GENERAL_PRESET_WAREHOUSE_COLUMNS)));
 
-  // CÁC CỘT MA TRẬN LƯU TRỮ (TỰ ĐỘNG KHỞI TẠO THEO LOẠI HÌNH KHO THƯỜNG / LẠNH / NGUY HIỂM / NGOẠI QUAN)
+  // CÁC CỘT MA TRẬN LƯU TRỮ (TỰ ĐỘNG KHỞI TẠO THEO LOẠI HÌNH KHO THƯỜNG / LẠNH / NGUY HIỂM / NGOẠI QUAN / TỰ QUẢN)
   const [columns, setColumns] = useState<WarehouseMatrixColumn[]>(() => {
+    if (isSelfStorage) {
+      // Yêu cầu: các cột trong tab của cả 3 nhóm hàng đều là 1. Diện Tích Sàn (m²), 2. Sức Chứa Pallet (Pallet), 3. Thể Tích Chứa (m³/CBM)
+      return [
+        { id: 'col_area', name: '1. Diện Tích Sàn (m²)', unit: 'm²', typeKey: 'area' },
+        { id: 'col_pallets', name: '2. Sức Chứa Pallet (Pallet)', unit: 'Pallet', typeKey: 'pallets' },
+        { id: 'col_volume', name: '3. Thể Tích Chứa (m³/CBM)', unit: 'm³', typeKey: 'volume' },
+      ];
+    }
     if (isBonded) {
       if (isCold) {
         return [
@@ -300,6 +385,17 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
     ];
   });
 
+  // Tự động đồng bộ chuẩn 3 cột cho kho tự quản khi chuyển đổi
+  useEffect(() => {
+    if (isSelfStorage) {
+      setColumns([
+        { id: 'col_area', name: '1. Diện Tích Sàn (m²)', unit: 'm²', typeKey: 'area' },
+        { id: 'col_pallets', name: '2. Sức Chứa Pallet (Pallet)', unit: 'Pallet', typeKey: 'pallets' },
+        { id: 'col_volume', name: '3. Thể Tích Chứa (m³/CBM)', unit: 'm³', typeKey: 'volume' },
+      ]);
+    }
+  }, [isSelfStorage]);
+
   // Modal / popover thêm cột mới
   const [isAddColumnModalOpen, setIsAddColumnModalOpen] = useState(false);
   const [newColumnName, setNewColumnName] = useState('');
@@ -316,6 +412,26 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
 
   // Ma trận giá phụ phí biến đổi theo từng cột
   const [surchargeColPrices, setSurchargeColPrices] = useState<Record<string, Record<string, number>>>(() => {
+    if (isSelfStorage) {
+      if (isCold) {
+        return {
+          'pwh-self-cold-1': { col_area: 80000, col_pallets: 80000, col_volume: 80000 },
+          'pwh-self-cold-2': { col_area: 150000, col_pallets: 150000, col_volume: 150000 },
+          'pwh-self-cold-3': { col_area: 100000, col_pallets: 100000, col_volume: 100000 },
+        };
+      }
+      if (isHazmat) {
+        return {
+          'pwh-self-haz-1': { col_area: 200000, col_pallets: 200000, col_volume: 200000 },
+          'pwh-self-haz-2': { col_area: 300000, col_pallets: 300000, col_volume: 300000 },
+        };
+      }
+      return {
+        'pwh-self-gen-1': { col_area: 50000, col_pallets: 50000, col_volume: 50000 },
+        'pwh-self-gen-2': { col_area: 120000, col_pallets: 120000, col_volume: 120000 },
+        'pwh-self-gen-3': { col_area: 35000, col_pallets: 35000, col_volume: 35000 },
+      };
+    }
     if (isBonded) {
       if (isCold) {
         return {
