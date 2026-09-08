@@ -694,6 +694,32 @@ export const CUSTOMS_SERVICE_FORMS_LOV = [
   'Khai thuê dịch vụ',
 ];
 
+export const FULFILLMENT_WAREHOUSE_SUGGESTED_SURCHARGES = [
+  { code: 'FUL-SCH-01', name: 'Phí bốc dỡ & kiểm đếm hàng nhập kho chi tiết (Inbound Receiving & QC)', category: 'Nhập Kho & Kiểm Đếm', unit: 'SKU', defaultPrice: '500 ₫ / SKU', isFree: false },
+  { code: 'FUL-SCH-02', name: 'Phí nhặt hàng & đóng gói đơn hàng chuẩn (Pick & Pack Base Order)', category: 'Xử Lý Đơn Hàng', unit: 'Đơn hàng', defaultPrice: '8,500 ₫ / Đơn', isFree: false },
+  { code: 'FUL-SCH-03', name: 'Phí thêm sản phẩm trong cùng 1 đơn (Extra Item / SKU)', category: 'Xử Lý Đơn Hàng', unit: 'Sản phẩm', defaultPrice: '1,500 ₫ / Item', isFree: false },
+  { code: 'FUL-SCH-04', name: 'Phí xử lý & phân loại hàng hoàn trả (Reverse Logistics Return)', category: 'Xử Lý Hàng Hoàn', unit: 'Đơn hoàn', defaultPrice: '5,000 ₫ / Đơn hoàn', isFree: false },
+  { code: 'FUL-SCH-05', name: 'Phí đóng thùng carton kích thước lớn (Carton Box L/XL)', category: 'Vật Tư Đóng Gói', unit: 'Hộp', defaultPrice: '4,000 ₫ / Hộp', isFree: false },
+  { code: 'FUL-SCH-06', name: 'Phí quấn xốp nổ bóng khí (Bubble wrap) chống sốc hàng dễ vỡ', category: 'Vật Tư Đóng Gói', unit: 'Sản phẩm', defaultPrice: '2,500 ₫ / Món', isFree: false },
+  { code: 'FUL-SCH-07', name: 'Phí dán tem Barcode / Serial phụ cho từng SKU', category: 'Tem Nhãn & Mã Vạch', unit: 'Tem', defaultPrice: '300 ₫ / Tem', isFree: false },
+  { code: 'FUL-SCH-08', name: 'Phí chèn thiệp cảm ơn, voucher & tờ rơi quảng cáo combo', category: 'Quà Tặng & Combo', unit: 'Đơn hàng', defaultPrice: '500 ₫ / Đơn', isFree: true },
+  { code: 'FUL-SCH-09', name: 'Phí lưu kho đệm vượt định mức (Overstay Buffer Storage)', category: 'Lưu Trữ Đệm', unit: 'Pallet / Tháng', defaultPrice: '120,000 ₫ / Pallet', isFree: false },
+  { code: 'FUL-SCH-10', name: 'Phí xử lý đơn hỏa tốc ngoài giờ cắt ca (Urgent Cut-off Surcharge)', category: 'Vận Hành Hỏa Tốc', unit: 'Đơn hàng', defaultPrice: '3,000 ₫ / Đơn', isFree: false },
+];
+
+export const FULFILLMENT_WAREHOUSE_SUGGESTED_VAS = [
+  { code: 'FUL-VAS-01', name: 'Đồng bộ API tự động với sàn Shopee, TikTok Shop, Lazada, Tiki', category: 'Tích Hợp Sàn TMĐT', unit: 'Hệ thống', defaultPrice: '0 ₫ (Miễn phí)', isFree: true },
+  { code: 'FUL-VAS-02', name: 'In phiếu giao hàng (Packing Slip), tem vận chuyển bưu tá tự động', category: 'In Ấn & Tem Vận Đơn', unit: 'Đơn hàng', defaultPrice: '0 ₫ (Miễn phí)', isFree: true },
+  { code: 'FUL-VAS-03', name: 'Bảo hiểm mất mát, thất thoát hàng hóa trong kho 100%', category: 'Bảo Hiểm & An Ninh', unit: '% Giá trị hàng', defaultPrice: '0.05% Giá trị hàng', isFree: true },
+  { code: 'FUL-VAS-04', name: 'Kitting combo / Đóng set quà tặng thương hiệu (Custom Gift Set)', category: 'Kitting & Set Quà', unit: 'Set', defaultPrice: '5,000 ₫ / Set', isFree: false },
+  { code: 'FUL-VAS-05', name: 'Dán băng keo in logo / Niêm phong thương hiệu riêng của Shop', category: 'Đóng Gói Thương Hiệu', unit: 'Đơn hàng', defaultPrice: '1,000 ₫ / Đơn', isFree: false },
+  { code: 'FUL-VAS-06', name: 'Kiểm tra ngoại quan, chụp ảnh bằng chứng hàng hoàn trả khiếu nại', category: 'Xử Lý Hàng Hoàn', unit: 'Đơn hoàn', defaultPrice: '0 ₫ (Miễn phí)', isFree: true },
+  { code: 'FUL-VAS-07', name: 'Lưu trữ & trích xuất camera bàn đóng gói hỗ trợ đối soát khiếu nại sàn', category: 'Đối Soát & CCTV', unit: 'Vụ việc', defaultPrice: '0 ₫ (Miễn phí)', isFree: true },
+  { code: 'FUL-VAS-08', name: 'Cập nhật số tồn kho thực tế (Sync Stock) 24/7 chống bán vượt tồn (Overselling)', category: 'Quản Lý Tồn Kho', unit: 'Tài khoản', defaultPrice: '0 ₫ (Miễn phí)', isFree: true },
+  { code: 'FUL-VAS-09', name: 'Bàn giao đơn hỏa tốc cho Shipper / ĐVVC lấy hàng 4 khung giờ/ngày', category: 'Bàn Giao Vận Chuyển', unit: 'Khung giờ', defaultPrice: '0 ₫ (Miễn phí)', isFree: true },
+  { code: 'FUL-VAS-10', name: 'Báo cáo hiệu suất hoàn tất đơn hàng & tỷ lệ trả hàng (KPI SLA Report)', category: 'Báo Cáo & Phân Tích', unit: 'Tháng', defaultPrice: '0 ₫ (Miễn phí)', isFree: true },
+];
+
 export const WAREHOUSE_SUGGESTED_SURCHARGES = [
   { code: 'WH-SCH-01', name: 'Phí nâng hạ & dỡ hàng nhập kho (Inbound)', category: 'Bốc Xếp & Vận Hành', unit: 'Pallet', defaultPrice: '35,000 ₫ / Pallet', isFree: false },
   { code: 'WH-SCH-02', name: 'Phí lấy hàng & bốc xếp xuất kho (Outbound)', category: 'Bốc Xếp & Vận Hành', unit: 'Pallet', defaultPrice: '35,000 ₫ / Pallet', isFree: false },
@@ -1449,6 +1475,7 @@ export interface WarehouseDetailModalData {
   isChemicalStorage?: boolean;
   isBondedStorage?: boolean;
   isSelfStorage?: boolean;
+  isFulfillment?: boolean;
   customsWarehouseCode?: string;
   customsAuthority?: string;
   photos: WarehousePhotoItem[];
@@ -5457,6 +5484,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
     const isColdStorage = activeModel?.id?.includes('ref') || activeCargoGroup?.id?.includes('ref') || activeModel?.name?.includes('lạnh');
     const isChemicalStorage = activeModel?.id?.includes('haz') || activeCargoGroup?.id?.includes('nguy hiểm') || activeModel?.name?.includes('nguy hiểm');
     const isBondedStorage = Boolean(activeModel?.id === 'wh-gen-bon' || activeModel?.id?.includes('bon') || activeModel?.name?.toLowerCase().includes('ngoại quan') || activeModel?.code?.toLowerCase().includes('ngoại quan'));
+    const isFulfillment = Boolean(activeModel?.id === 'wh-gen-ful' || activeModel?.id?.includes('ful') || activeModel?.name?.toLowerCase().includes('fulfillment') || activeModel?.name?.toLowerCase().includes('tmđt') || activeModel?.code?.toLowerCase().includes('fulfillment'));
 
     // Anh mau neu chua co anh
     const existingPhotos: WarehousePhotoItem[] = route.warehousePhotos && route.warehousePhotos.length > 0 
@@ -5587,9 +5615,19 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                   ? HAZMAT_FREE_UTILITIES_SUGGESTIONS.slice(0, 4)
                   : (activeModel?.defaultFreeSurcharges || WAREHOUSE_FREE_UTILITIES_SUGGESTIONS.slice(0, 4)))));
 
-    const existingPaid: PaidSurchargeItem[] = route.warehousePaidSurcharges && route.warehousePaidSurcharges.length > 0
+        const existingPaid: PaidSurchargeItem[] = route.warehousePaidSurcharges && route.warehousePaidSurcharges.length > 0
       ? JSON.parse(JSON.stringify(route.warehousePaidSurcharges))
-      : (isBondedStorage
+      : (isFulfillment
+          ? FULFILLMENT_WAREHOUSE_SUGGESTED_SURCHARGES.slice(0, 6).map(s => ({
+              id: `pwh-${s.code}`,
+              code: s.code,
+              name: s.name,
+              category: s.category,
+              unit: s.unit,
+              priceText: s.defaultPrice,
+              isChecked: true,
+            }))
+          : (isBondedStorage
           ? (isColdStorage
               ? BONDED_COLD_SUGGESTED_SURCHARGES.slice(0, 6).map(s => ({
                   id: `pwh-${s.code}`,
@@ -5645,11 +5683,22 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                     { id: 'pwh-3', name: 'Phí rút ruột container 40ft thủ công & lên Pallet', priceText: '1,200,000 ₫ / Cont 40ft', isChecked: true },
                     { id: 'pwh-4', name: 'Phí kiểm đếm chi tiết từng SKU lẻ', priceText: '500 ₫ / SKU', isChecked: false },
                     { id: 'pwh-5', name: 'Phí làm việc ngoài giờ hành chính', priceText: '200,000 ₫ / Giờ', isChecked: false },
-                  ]));
+                  ])));
 
-    const existingVas: CapabilityVasItem[] = route.warehouseVasItems && route.warehouseVasItems.length > 0
+        const existingVas: CapabilityVasItem[] = route.warehouseVasItems && route.warehouseVasItems.length > 0
       ? JSON.parse(JSON.stringify(route.warehouseVasItems))
-      : (isBondedStorage
+      : (isFulfillment
+          ? FULFILLMENT_WAREHOUSE_SUGGESTED_VAS.slice(0, 5).map(v => ({
+              id: `vwh-${v.code}`,
+              code: v.code,
+              name: v.name,
+              category: v.category,
+              unit: v.unit,
+              priceText: v.defaultPrice,
+              isChecked: true,
+              includedInRate: v.isFree,
+            }))
+          : (isBondedStorage
           ? (isColdStorage
               ? BONDED_COLD_SUGGESTED_VAS.slice(0, 5).map(v => ({
                   id: `vwh-${v.code}`,
@@ -5704,7 +5753,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                     { id: 'vwh-2', name: 'Quấn màng co PE Pallet & Đóng đai bảo vệ', category: 'Đóng Gói & Xử Lý', priceText: '35,000 ₫ / Pallet', isChecked: true },
                     { id: 'vwh-3', name: 'Đóng thùng carton kitting combo / Hộp quà', category: 'Đóng Gói & Xử Lý', priceText: '5,000 ₫ / Hộp', isChecked: false },
                     { id: 'vwh-4', name: 'Bảo hiểm cháy nổ tài sản kho bãi', category: 'An Ninh & Bảo Hiểm', priceText: '0.05% giá trị hàng', isChecked: true },
-                  ]));
+                  ])));
 
     const capArea = route.capacityArea ?? 2500;
     const capPallet = route.capacityPallets ?? 1800;
@@ -7417,24 +7466,13 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                               if (isFulfillment) {
                                 return (
                                   <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
-                                    <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
-                                    <th className="py-2.5 px-2.5 min-w-[115px] text-center bg-purple-50/80 text-purple-950 font-black">Mã Kho FUL</th>
-                                    <th className="py-2.5 px-2.5 min-w-[185px]">Tên Trung Tâm Fulfillment</th>
-                                    <th className="py-2.5 px-2.5 min-w-[130px]">Tỉnh / Thành Phố</th>
-                                    <th className="py-2.5 px-2.5 min-w-[185px]">Địa Chỉ / KCN Trọng Điểm</th>
-                                    <th className="py-2.5 px-2 text-right min-w-[125px] bg-blue-50/70 text-blue-950 font-bold">Công Suất (Đơn/Ngày)</th>
-                                    <th className="py-2.5 px-2 text-right min-w-[115px] bg-blue-50/70 text-blue-950">Sức Chứa SKUs</th>
-                                    <th className="py-2.5 px-2 text-right min-w-[125px] bg-blue-50/70 text-blue-950">Lưu Đệm (Pallet/Bins)</th>
-                                    <th className="py-2.5 px-2 text-right min-w-[155px] bg-emerald-50/90 text-emerald-950 font-black">Phí Xử Lý Đơn (Pick&Pack)</th>
-                                    <th className="py-2.5 px-2 text-right min-w-[145px] bg-emerald-50/70 text-emerald-950">Phí Thêm Item (/Item)</th>
-                                    <th className="py-2.5 px-2 text-right min-w-[140px] bg-emerald-50/70 text-emerald-950">Lưu Kho Đệm (/Tháng)</th>
-                                    <th className="py-2.5 px-2 text-right min-w-[145px] bg-amber-50/80 text-amber-950">Cước Sàn (Min/Tháng)</th>
-                                    <th className="py-2.5 px-2 w-20 min-w-[80px] text-center">Tiền Tệ</th>
-                                    <th className="py-2.5 px-2.5 min-w-[140px] text-center">SLA & Cut-Off</th>
-                                    <th className="py-2.5 px-2.5 min-w-[130px] text-center">Hạn Giá</th>
-                                    <th className="py-2.5 px-2 min-w-[85px] text-center">Promotion</th>
-                                    <th className="py-2.5 px-2.5 min-w-[170px] text-center bg-purple-50/70 text-purple-950 font-black">Chi Tiết (WMS, Sàn, VAS)</th>
-                                    <th className="py-2.5 px-2 text-center w-16 min-w-[65px]">Action</th>
+                                    <th className="py-2.5 px-2 text-center w-12 min-w-[48px] bg-slate-100">STT</th>
+                                    <th className="py-2.5 px-3 min-w-[140px] text-center bg-purple-50/80 text-purple-950 font-black">Mã kho</th>
+                                    <th className="py-2.5 px-3 min-w-[240px]">Tên</th>
+                                    <th className="py-2.5 px-3 min-w-[140px]">Tỉnh/TP</th>
+                                    <th className="py-2.5 px-3 min-w-[260px]">Địa chỉ</th>
+                                    <th className="py-2.5 px-3 min-w-[200px] text-center bg-purple-50/70 text-purple-950 font-black">Chi tiết</th>
+                                    <th className="py-2.5 px-2 text-center w-20 min-w-[80px]">Thao tác</th>
                                   </tr>
                                 );
                               }
@@ -8776,242 +8814,102 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                   const effWhName = route.warehouseName || route.route || `Trung Tâm Fulfillment #${idx + 1}`;
                                   const effProvince = route.warehouseProvince || route.origin || 'TP. Hồ Chí Minh';
                                   const effAddress = route.warehouseAddress || route.destination || 'KCN Tân Bình, P. Tây Thạnh, Q. Tân Phú';
-                                  const effOrderCap = route.dailyOrderCapacity ?? 3500;
-                                  const effMaxSku = route.maxSkuCount ?? 5000;
-                                  const effBufferCap = route.bufferCapacity ?? 500;
-                                  const effPickPackPrice = route.pickPackPrice ?? (route.price || 8500);
-                                  const effExtraItemPrice = route.extraItemPrice ?? 1500;
-                                  const effBufferStoragePrice = route.bufferStoragePrice ?? 120000;
-                                  const effMinCharge = route.minChargeMonthly ?? 5000000;
-                                  const effCurrency = route.currency || 'VND';
-                                  const effSla = route.sla || 'Đóng gói < 2h (Cut-off 16h)';
-                                  const effValidUntil = route.validUntil || '2026-12-31';
-                                  const effPromotionPercent = route.promotionPercent || 0;
+                                  const photoCount = route.warehousePhotos?.length || 0;
+                                  const surchargeCount = ((route as any).paidSurcharges?.length || (route as any).warehousePaidSurcharges?.length || currentData.paidSurcharges?.length || 0) + ((route as any).vasServices?.length || (route as any).warehouseVasItems?.length || 0);
 
                                   return (
                                     <tr key={route.id} className="hover:bg-purple-50/20 transition-colors divide-x divide-slate-100 text-xs">
                                       {/* 1. STT */}
-                                      <td className="p-1 text-center font-bold text-slate-500 w-9 bg-slate-50/50">
+                                      <td className="p-2 text-center font-bold text-slate-500 w-12 bg-slate-50/50 align-middle">
                                         {idx + 1}
                                       </td>
 
-                                      {/* 2. Mã Kho FUL */}
-                                      <td className="p-1 text-center font-mono font-bold text-purple-700 bg-purple-50/20">
+                                      {/* 2. Mã kho */}
+                                      <td className="p-2 text-center font-mono font-bold text-purple-800 bg-purple-50/30 align-middle">
                                         <input
                                           type="text"
                                           value={effWhCode}
                                           onChange={(e) => handleUpdateRouteRowMultiple(route.id, { warehouseCode: e.target.value, routeCode: e.target.value })}
-                                          className="w-full text-center bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-purple-500 rounded px-1 py-1 font-bold text-purple-700 text-xs"
+                                          className="w-full text-center bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-purple-500 rounded px-2 py-1 font-bold text-purple-800 text-xs"
+                                          placeholder="FUL-HCM-01"
                                         />
                                       </td>
 
-                                      {/* 3. Tên Trung Tâm Fulfillment */}
-                                      <td className="p-1 align-middle">
+                                      {/* 3. Tên */}
+                                      <td className="p-2 align-middle">
                                         <input
                                           type="text"
                                           value={effWhName}
                                           onChange={(e) => handleUpdateRouteRowMultiple(route.id, { warehouseName: e.target.value, route: e.target.value })}
-                                          placeholder="Trung tâm Fulfillment..."
-                                          className="w-full px-2 py-1.5 font-bold text-slate-900 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-purple-500 rounded text-xs"
+                                          placeholder="Tên trung tâm fulfillment / kho TMĐT..."
+                                          className="w-full px-2.5 py-1.5 font-bold text-slate-900 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-purple-500 rounded-lg text-xs"
                                         />
                                       </td>
 
-                                      {/* 4. Tỉnh / Thành Phố */}
-                                      <td className="p-1 align-middle">
-                                        <input
-                                          type="text"
-                                          value={effProvince}
-                                          onChange={(e) => handleUpdateRouteRowMultiple(route.id, { warehouseProvince: e.target.value, origin: e.target.value })}
-                                          placeholder="TP.HCM, Hà Nội..."
-                                          className="w-full px-2 py-1.5 font-semibold text-slate-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-purple-500 rounded text-xs"
-                                        />
+                                      {/* 4. Tỉnh/TP */}
+                                      <td className="p-2 align-middle">
+                                        <div className="relative flex items-center">
+                                          <MapPin className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 pointer-events-none" />
+                                          <input
+                                            type="text"
+                                            list={`ful-province-list-${route.id}`}
+                                            value={effProvince}
+                                            onChange={(e) => handleUpdateRouteRowMultiple(route.id, { warehouseProvince: e.target.value, origin: e.target.value })}
+                                            placeholder="TP.HCM, Bình Dương, Hà Nội..."
+                                            className="w-full pl-8 pr-2.5 py-1.5 font-semibold text-slate-800 bg-white border border-slate-200 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 rounded-lg text-xs"
+                                          />
+                                          <datalist id={`ful-province-list-${route.id}`}>
+                                            {VIETNAM_PROVINCES_LOV.map((p, pIdx) => (
+                                              <option key={pIdx} value={p} />
+                                            ))}
+                                          </datalist>
+                                        </div>
                                       </td>
 
-                                      {/* 5. Địa Chỉ / KCN Trọng Điểm */}
-                                      <td className="p-1 align-middle">
+                                      {/* 5. Địa chỉ */}
+                                      <td className="p-2 align-middle">
                                         <input
                                           type="text"
                                           value={effAddress}
                                           onChange={(e) => handleUpdateRouteRowMultiple(route.id, { warehouseAddress: e.target.value, destination: e.target.value })}
-                                          placeholder="KCN, Phường/Xã..."
-                                          className="w-full px-2 py-1.5 text-slate-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-purple-500 rounded text-xs"
+                                          placeholder="KCN, số nhà, tên đường chi tiết..."
+                                          className="w-full px-2.5 py-1.5 text-slate-700 bg-white border border-slate-200 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 rounded-lg text-xs"
                                         />
                                       </td>
 
-                                      {/* 6. Công Suất (Đơn/Ngày) */}
-                                      <td className="p-1 align-middle text-right bg-blue-50/20">
-                                        <input
-                                          type="number"
-                                          value={effOrderCap || ''}
-                                          onChange={(e) => handleUpdateRouteRow(route.id, 'dailyOrderCapacity', parseInt(e.target.value) || 0)}
-                                          placeholder="3500"
-                                          className="w-full px-2 py-1.5 text-right font-black text-blue-900 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-purple-500 rounded text-xs"
-                                        />
-                                      </td>
-
-                                      {/* 7. Sức Chứa SKUs */}
-                                      <td className="p-1 align-middle text-right bg-blue-50/20">
-                                        <input
-                                          type="number"
-                                          value={effMaxSku || ''}
-                                          onChange={(e) => handleUpdateRouteRow(route.id, 'maxSkuCount', parseInt(e.target.value) || 0)}
-                                          placeholder="5000"
-                                          className="w-full px-2 py-1.5 text-right font-semibold text-slate-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-purple-500 rounded text-xs"
-                                        />
-                                      </td>
-
-                                      {/* 8. Lưu Đệm (Pallet/Bins) */}
-                                      <td className="p-1 align-middle text-right bg-blue-50/20">
-                                        <input
-                                          type="number"
-                                          value={effBufferCap || ''}
-                                          onChange={(e) => handleUpdateRouteRow(route.id, 'bufferCapacity', parseInt(e.target.value) || 0)}
-                                          placeholder="500"
-                                          className="w-full px-2 py-1.5 text-right font-semibold text-slate-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-purple-500 rounded text-xs"
-                                        />
-                                      </td>
-
-                                      {/* 9. Phí Xử Lý Đơn (Pick&Pack / Đơn) */}
-                                      <td className="p-1 align-middle text-right bg-emerald-50/30">
-                                        <input
-                                          type="number"
-                                          value={effPickPackPrice || ''}
-                                          onChange={(e) => {
-                                            const val = parseFloat(e.target.value) || 0;
-                                            handleUpdateRouteRowMultiple(route.id, { pickPackPrice: val, price: val });
-                                          }}
-                                          placeholder="8500"
-                                          className="w-full px-2 py-1.5 text-right font-black text-emerald-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-purple-500 rounded text-xs"
-                                        />
-                                      
-                                        {(route.promotionPercent || 0) > 0 && effPickPackPrice > 0 && (
-    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
-      Giảm còn: {Math.round(effPickPackPrice * (1 - (route.promotionPercent || 0) / 100)).toLocaleString('vi-VN')} {effCurrency}
-    </div>
-  )}
-                                      </td>
-
-                                      {/* 10. Phí Thêm Item (/Item) */}
-                                      <td className="p-1 align-middle text-right bg-emerald-50/20">
-                                        <input
-                                          type="number"
-                                          value={effExtraItemPrice || ''}
-                                          onChange={(e) => handleUpdateRouteRow(route.id, 'extraItemPrice', parseFloat(e.target.value) || 0)}
-                                          placeholder="1500"
-                                          className="w-full px-2 py-1.5 text-right font-bold text-emerald-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-purple-500 rounded text-xs"
-                                        />
-                                      
-                                        {(route.promotionPercent || 0) > 0 && effExtraItemPrice > 0 && (
-    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
-      Giảm còn: {Math.round(effExtraItemPrice * (1 - (route.promotionPercent || 0) / 100)).toLocaleString('vi-VN')} {effCurrency}
-    </div>
-  )}
-                                      </td>
-
-                                      {/* 11. Lưu Kho Đệm (/Tháng) */}
-                                      <td className="p-1 align-middle text-right bg-emerald-50/20">
-                                        <input
-                                          type="number"
-                                          value={effBufferStoragePrice || ''}
-                                          onChange={(e) => handleUpdateRouteRow(route.id, 'bufferStoragePrice', parseFloat(e.target.value) || 0)}
-                                          placeholder="120000"
-                                          className="w-full px-2 py-1.5 text-right font-bold text-emerald-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-purple-500 rounded text-xs"
-                                        />
-                                      
-                                        {(route.promotionPercent || 0) > 0 && effBufferStoragePrice > 0 && (
-    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
-      Giảm còn: {Math.round(effBufferStoragePrice * (1 - (route.promotionPercent || 0) / 100)).toLocaleString('vi-VN')} {effCurrency}
-    </div>
-  )}
-                                      </td>
-
-                                      {/* 12. Cước Sàn (Min/Tháng) */}
-                                      <td className="p-1 align-middle text-right bg-amber-50/30">
-                                        <input
-                                          type="number"
-                                          value={effMinCharge || ''}
-                                          onChange={(e) => handleUpdateRouteRow(route.id, 'minChargeMonthly', parseFloat(e.target.value) || 0)}
-                                          placeholder="5000000"
-                                          className="w-full px-2 py-1.5 text-right font-bold text-amber-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-purple-500 rounded text-xs"
-                                        />
-                                      
-                                        {(route.promotionPercent || 0) > 0 && effMinCharge > 0 && (
-    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
-      Giảm còn: {Math.round(effMinCharge * (1 - (route.promotionPercent || 0) / 100)).toLocaleString('vi-VN')} {effCurrency}
-    </div>
-  )}
-                                      </td>
-
-                                      {/* 13. Tiền Tệ */}
-                                      <td className="p-1 align-middle text-center">
-                                        <span className="font-bold text-slate-800 text-xs">{effCurrency}</span>
-                                      </td>
-
-                                      {/* 14. SLA & Cut-off */}
-                                      <td className="p-1 align-middle text-center">
-                                        <input
-                                          type="text"
-                                          value={effSla}
-                                          onChange={(e) => handleUpdateRouteRow(route.id, 'sla', e.target.value)}
-                                          placeholder="Đóng gói < 2h..."
-                                          className="w-full px-2 py-1.5 text-center font-medium text-slate-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-purple-500 rounded text-xs"
-                                        />
-                                      </td>
-
-                                      {/* 15. Hạn Giá */}
-                                      <td className="p-1 align-middle text-center">
-                                        <input
-                                          type="date"
-                                          value={effValidUntil}
-                                          onChange={(e) => handleUpdateRouteRow(route.id, 'validUntil', e.target.value)}
-                                          className="w-full px-1 py-1.5 text-center text-slate-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-purple-500 rounded text-xs"
-                                        />
-                                      </td>
-
-                                      {/* 16. Promotion */}
-                                      <td className="p-1 align-middle text-center">
-                                        <input
-                                          type="number"
-                                          min="0"
-                                          max="100"
-                                          value={effPromotionPercent || ''}
-                                          onChange={(e) => handleUpdateRouteRow(route.id, 'promotionPercent', Math.min(100, Math.max(0, parseInt(e.target.value) || 0)))}
-                                          placeholder="0%"
-                                          className="w-full px-1 py-1.5 text-center font-bold text-rose-600 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-purple-500 rounded text-xs"
-                                        />
-                                      </td>
-
-                                      {/* 17. Chi Tiết (WMS, Sàn, VAS) */}
-                                      <td className="p-1 align-middle text-center bg-purple-50/40">
+                                      {/* 6. Chi tiết */}
+                                      <td className="p-2 text-center align-middle bg-purple-50/10">
                                         <button
                                           type="button"
                                           onClick={() => handleOpenWarehouseDetailModal(route)}
-                                          className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-black text-purple-700 bg-purple-100 hover:bg-purple-200 border border-purple-300 rounded-lg shadow-2xs hover:shadow-xs transition-all cursor-pointer"
+                                          className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-xl font-bold text-xs shadow-xs hover:shadow-md hover:shadow-purple-600/20 transition-all cursor-pointer group"
+                                          title="Mở Modal cấu hình chuyên sâu: Công suất xử lý đơn/ngày, Tích hợp sàn TMĐT (Shopee/TikTok/Lazada), Album ảnh, Biểu giá Pick-Pack, Phụ phí & VAS"
                                         >
-                                          <Sliders className="w-3.5 h-3.5 text-purple-700" />
+                                          <Sliders className="w-3.5 h-3.5 text-purple-200 group-hover:text-white transition-colors shrink-0" />
                                           <span>Chi Tiết</span>
-                                          <span className="ml-1 px-1.5 py-0.2 bg-purple-700 text-white rounded-full text-[10px] font-bold">
-                                            {(route.warehousePhotos?.length || 0) + (route.warehousePaidSurcharges?.length || 0) + (route.warehouseVasItems?.length || 0)}
+                                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-white/20 rounded-md text-[10px] font-semibold text-white">
+                                            {photoCount > 0 && <span>{photoCount}📸 • </span>}
+                                            <span>{surchargeCount > 0 ? `${surchargeCount} phụ phí & VAS` : 'Cấu hình giá & VAS'}</span>
                                           </span>
                                         </button>
                                       </td>
 
-                                      {/* 18. Action */}
-                                      <td className="p-1 text-center align-middle w-16">
-                                        <div className="flex items-center justify-center gap-1">
+                                      {/* 7. Thao tác */}
+                                      <td className="p-2 text-center align-middle w-20 min-w-[80px]">
+                                        <div className="flex items-center justify-center gap-1.5">
                                           <button
                                             type="button"
                                             onClick={() => handleDuplicateRouteRow(route.id)}
-                                            className="p-1 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors cursor-pointer"
-                                            title="Nhân bản trung tâm fulfillment này"
+                                            className="p-1.5 text-slate-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg border border-slate-200 hover:border-purple-200 transition-all cursor-pointer shadow-2xs"
+                                            title="Nhân bản kho TMĐT này"
                                           >
                                             <Copy className="w-3.5 h-3.5" />
                                           </button>
                                           <button
                                             type="button"
                                             onClick={() => handleDeleteRouteRow(route.id)}
-                                            className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors cursor-pointer"
-                                            title="Xóa trung tâm fulfillment này"
+                                            className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg border border-slate-200 hover:border-rose-200 transition-all cursor-pointer shadow-2xs"
+                                            title="Xóa kho TMĐT này"
                                           >
                                             <Trash2 className="w-3.5 h-3.5" />
                                           </button>

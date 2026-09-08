@@ -33,13 +33,22 @@ import {
   CapabilityRouteItem, 
   PaidSurchargeItem, 
   CapabilityVasItem,
-  WarehousePhotoItem,
   WarehouseTechSpecs,
-  getWarehousePhotoSlots,
-  getWarehouseTechSpecCategories,
-  CUSTOMS_AUTHORITIES_LOV
+  WAREHOUSE_SUGGESTED_SURCHARGES,
+  WAREHOUSE_SUGGESTED_VAS
 } from '../../supplier/SupplierServiceCapabilityModal';
 import { FULL_MOCK_CAPABILITY_SERVICES, DeclaredServiceModelItem } from '../../../data/mockDeclaredServices';
+import { WarehouseDetailModal } from '../../supplier/WarehouseDetailModal';
+import { TruckingFtlCostMatrixModal } from '../../supplier/TruckingFtlCostMatrixModal';
+import { TruckingLtlCostMatrixModal } from '../../supplier/TruckingLtlCostMatrixModal';
+import { OceanFclCostMatrixModal } from '../../supplier/OceanFclCostMatrixModal';
+import { OceanLclCostMatrixModal } from '../../supplier/OceanLclCostMatrixModal';
+import { RailFclCostMatrixModal } from '../../supplier/RailFclCostMatrixModal';
+import { RailLclCostMatrixModal } from '../../supplier/RailLclCostMatrixModal';
+import { AirCargoCostMatrixModal } from '../../supplier/AirCargoCostMatrixModal';
+import { AirExpressCostMatrixModal } from '../../supplier/AirExpressCostMatrixModal';
+import { CrossBorderFtlCostMatrixModal } from '../../supplier/CrossBorderFtlCostMatrixModal';
+import { CrossBorderLtlCostMatrixModal } from '../../supplier/CrossBorderLtlCostMatrixModal';
 
 interface SupplierDeclaredServicesViewProps {
   services?: any[];
@@ -144,16 +153,14 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
   };
 
   // State for Customer Warehouse Detail Modal
+  const [activeMatrixModalRoute, setActiveMatrixModalRoute] = useState<CapabilityRouteItem | null>(null);
+
   const [activeWarehouseModalData, setActiveWarehouseModalData] = useState<{
     route: CapabilityRouteItem;
     category: any;
     cargoGroup: any;
     model: any;
   } | null>(null);
-
-  const [warehouseModalTab, setWarehouseModalTab] = useState<'photos' | 'techSpecs' | 'surcharges' | 'vas'>('photos');
-  const [activeTechCategory, setActiveTechCategory] = useState<string>('structure');
-  const [zoomedPhoto, setZoomedPhoto] = useState<WarehousePhotoItem | null>(null);
 
   // Find active model object & category & cargoGroup
   const activeDetails = useMemo(() => {
@@ -205,10 +212,6 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
     ? declaredData.routes 
     : model.defaultRoutes;
 
-  const freeSurchargesList: string[] = (declaredData?.freeSurcharges && declaredData.freeSurcharges.length > 0)
-    ? declaredData.freeSurcharges
-    : (model.defaultFreeSurcharges || []);
-
   const paidSurchargesList: PaidSurchargeItem[] = (declaredData?.paidSurcharges && declaredData.paidSurcharges.length > 0)
     ? declaredData.paidSurcharges
     : (model.paidSurchargeOptions?.filter((p) => p.isChecked) || []);
@@ -253,6 +256,165 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
     }
   };
 
+
+  const buildWarehouseDetailData = (
+    route: CapabilityRouteItem,
+    modelObj: any,
+    cargoGroupObj: any,
+    categoryObj: any
+  ): any => {
+    const currentModelId = modelObj?.id || 'wh-gen-std';
+    const isColdStorage = Boolean(categoryObj?.id === 'warehousing' && (modelObj?.id?.includes('ref') || modelObj?.name?.includes('Kho Lạnh') || modelObj?.code === 'Reefer' || (route as any).isColdStorage));
+    const isChemicalStorage = Boolean(categoryObj?.id === 'warehousing' && (modelObj?.id?.includes('haz') || modelObj?.name?.includes('Nguy Hiểm') || modelObj?.code === 'Hazmat' || (route as any).isChemicalStorage));
+    const isBondedStorage = Boolean(categoryObj?.id === 'warehousing' && (modelObj?.id?.includes('bon') || modelObj?.name?.includes('Ngoại Quan') || modelObj?.code === 'Bonded' || (route as any).isBondedStorage));
+    const isSelfStorage = Boolean(categoryObj?.id === 'warehousing' && (modelObj?.id?.includes('self') || modelObj?.name?.includes('Tự Quản') || modelObj?.code === 'Self-storage' || (route as any).isSelfStorage));
+    const isFulfillment = Boolean(categoryObj?.id === 'warehousing' && (modelObj?.id?.includes('ful') || modelObj?.name?.includes('Fulfillment') || modelObj?.name?.includes('TMĐT') || modelObj?.code === 'Fulfillment' || (route as any).isFulfillment));
+
+    const existingPhotos = (route.warehousePhotos && route.warehousePhotos.length > 0)
+      ? route.warehousePhotos
+      : [
+          {
+            id: 'ph-df-1',
+            url: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1200&auto=format&fit=crop&q=80',
+            name: 'Mặt tiền & Sân bãi container bê tông chịu lực 80T',
+            tag: 'Mặt tiền & Sân bãi',
+            isCover: true,
+          },
+          {
+            id: 'ph-df-2',
+            url: 'https://images.unsplash.com/photo-1553413077-190dd305871c?w=1200&auto=format&fit=crop&q=80',
+            name: 'Hệ thống giá kệ Selective Racking 5 tầng đạt chuẩn FEM/EN',
+            tag: 'Kệ Racking',
+            isCover: false,
+          },
+          {
+            id: 'ph-df-3',
+            url: 'https://images.unsplash.com/photo-1616401784845-180882ba9ba8?w=1200&auto=format&fit=crop&q=80',
+            name: 'Mặt sàn Hardener siêu phẳng kháng bụi & PCCC Sprinkler ESFR',
+            tag: 'Sàn & Trần kho',
+            isCover: false,
+          },
+          {
+            id: 'ph-df-4',
+            url: 'https://images.unsplash.com/photo-1587293852726-70cdb56c2866?w=1200&auto=format&fit=crop&q=80',
+            name: 'Dãy cửa Dock tự động tích hợp Dock Leveler thủy lực',
+            tag: 'Cửa Dock & Leveler',
+            isCover: false,
+          },
+        ];
+
+    const existingSpecs: WarehouseTechSpecs = route.warehouseTechSpecs || {
+      clearHeight: 12.5,
+      floorLoad: 5.5,
+      floorType: 'Bê tông cốt thép xoa nền Hardener & sơn phủ Epoxy chống sinh bụi',
+      columnGrid: '12m x 24m (Nhịp rộng tối ưu chuyển làn cho xe nâng Reach Truck)',
+      ventilation: 'Hệ thống thông gió tự nhiên kết hợp quạt hút cưỡng bức đỉnh mái',
+      rackingTypes: ['Selective Racking', 'Drive-in Racking'],
+      rackingLevels: 5,
+      palletLoadLimit: 1200,
+      compatiblePalletSizes: ['1.0m × 1.2m (ISO/GMA)', '1.1m × 1.1m (Tiêu chuẩn Châu Á)'],
+      dockDoorsCount: 6,
+      hasDockLeveler: true,
+      yardTurnaround: 'Sân bê tông rộng 35m, xe cont 40ft/45ft quay đầu dễ dàng 24/7',
+      operatingHoursTrucks: '24/7 (Không cấm giờ xe cont)',
+      fireProtectionSystem: 'PCCC tự động Sprinkler ESFR (Đã nghiệm thu PCCC)',
+      fireProtectionApprovalNo: 'Nghiệm thu PCCC số 184/TD-PCCC',
+      cctvSurveillance: 'Hệ thống camera AI nhận diện biển số & bao quát 100% góc chết kho',
+      securityGuards: 'Bảo vệ chuyên nghiệp 2 lớp túc trực 24/7/365',
+      wmsSoftwareName: 'WMS Infor SCM Cloud (Hỗ trợ quét Barcode 1D/2D / RFID)',
+      scanningTechnologies: ['Barcode 1D / 2D Handheld', 'RFID Portal Gateway'],
+      hasApiIntegration: true,
+      realtimeWebPortal: true,
+      certifications: ['ISO 9001:2015', 'ISO 14001', 'C-TPAT Security Standard'],
+      hasFullInsurance: true,
+      hasBackupGeneratorAts: true,
+    };
+
+    const existingFree = (route.warehouseFreeSurcharges && route.warehouseFreeSurcharges.length > 0)
+      ? route.warehouseFreeSurcharges
+      : (modelObj?.defaultFreeSurcharges || [
+          'Miễn phí 02 giờ neo xe chờ bốc dỡ',
+          'Miễn phí tài khoản phần mềm WMS Portal theo dõi tồn kho 24/7',
+          'Bảo vệ an ninh 24/7 & Giám sát camera an ninh',
+          'Bảo hiểm cháy nổ & trách nhiệm kho bãi 100%',
+          'Phí bến bãi đỗ xe container chờ xuất nhập',
+          'Vệ sinh và kiểm soát côn trùng định kỳ'
+        ]);
+
+    const existingPaid = (route.warehousePaidSurcharges && route.warehousePaidSurcharges.length > 0)
+      ? route.warehousePaidSurcharges
+      : (modelObj?.paidSurchargeOptions || WAREHOUSE_SUGGESTED_SURCHARGES.slice(0, 5).map(s => ({
+          id: s.code,
+          name: s.name,
+          priceText: s.defaultPrice,
+          isChecked: true,
+          category: s.category,
+          unit: s.unit
+        })));
+
+    const existingVas = (route.warehouseVasItems && route.warehouseVasItems.length > 0)
+      ? route.warehouseVasItems
+      : (WAREHOUSE_SUGGESTED_VAS.slice(0, 4).map(v => ({
+          id: v.code,
+          name: v.name,
+          category: v.category,
+          unit: v.unit,
+          priceText: v.defaultPrice,
+          slaNote: 'SLA trong ngày',
+          isChecked: true
+        })));
+
+    const capArea = route.capacityArea ?? 2500;
+    const capPallet = route.capacityPallets ?? 1800;
+    const capVol = route.capacityVolume ?? 3000;
+    const availArea = route.availableArea ?? 850;
+    const availPallet = route.availablePallets ?? 600;
+    const availVol = route.availableVolume ?? 1100;
+
+    return {
+      routeId: route.id,
+      modelId: currentModelId,
+      warehouseCode: route.customsWarehouseCode || route.warehouseCode || route.routeCode || 'WH-BD-001',
+      warehouseName: route.warehouseName || route.route || 'Kho Trung Tâm KCN Sóng Thần 1',
+      province: route.warehouseProvince || route.origin || 'Bình Dương',
+      address: route.warehouseAddress || route.destination || 'KCN Sóng Thần 1, TP. Dĩ An',
+      isColdStorage,
+      isChemicalStorage,
+      isBondedStorage,
+      isSelfStorage,
+      isFulfillment,
+      customsWarehouseCode: route.customsWarehouseCode || route.warehouseCode || 'WH-BD-001',
+      customsAuthority: route.customsAuthority || 'Chi cục Hải quan KCN Sóng Thần',
+      photos: existingPhotos,
+      techSpecs: existingSpecs,
+      freeSurcharges: existingFree,
+      paidSurcharges: existingPaid,
+      vasItems: existingVas,
+      capacityArea: capArea,
+      capacityPallets: capPallet,
+      capacityVolume: capVol,
+      availableArea: availArea,
+      availablePallets: availPallet,
+      availableVolume: availVol,
+      occupiedArea: route.occupiedArea ?? Math.max(0, capArea - availArea),
+      occupiedPallets: route.occupiedPallets ?? Math.max(0, capPallet - availPallet),
+      occupiedVolume: route.occupiedVolume ?? Math.max(0, capVol - availVol),
+      receptionStatus: route.receptionStatus || 'ready',
+      pricePerArea: route.pricePerArea ?? (route.price || 95000),
+      pricePerPallet: route.pricePerPallet ?? 110000,
+      pricePerVolume: route.pricePerVolume ?? 120000,
+      pricePerTon: route.pricePerTon ?? 150000,
+      minChargeMonthly: route.minChargeMonthly ?? 3000000,
+      currency: route.currency || 'VND',
+      validUntil: route.validUntil || '2026-12-31',
+      promotionPercent: route.promotionPercent ?? 10,
+      sla: route.sla || '2 - 4 giờ kể từ khi xe vào dock',
+      operatingHours: route.operatingHours || '24/7 (Không cấm giờ xe cont)',
+      cutOffTime: route.cutOffTime || '16:30 hàng ngày',
+      paymentTerms: route.paymentTerms || 'Net 30 ngày',
+    };
+  };
+
   const handleOpenWarehouseModal = (route: CapabilityRouteItem) => {
     setActiveWarehouseModalData({
       route,
@@ -260,11 +422,6 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
       cargoGroup,
       model,
     });
-    setWarehouseModalTab('photos');
-    const techCategories = getWarehouseTechSpecCategories(model.id, cargoGroup.id);
-    if (techCategories.length > 0) {
-      setActiveTechCategory(techCategories[0].id);
-    }
   };
 
   // Helper category identification flags matching SupplierServiceCapabilityModal.tsx
@@ -280,11 +437,14 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
   const isAirTable = category.id === 'air' || model.id?.startsWith('air-');
   const isExpressTable = category.id === 'air' && (model.id === 'air-gen-exp' || model.name?.includes('Express') || model.code === 'Express');
   const isAirCargoTable = isAirTable && !isExpressTable;
-  const isFclTable = (isOceanTable && (model.id?.includes('fcl') || model.name?.includes('FCL') || model.code === 'FCL')) || (isRailTable && (model.id?.includes('fcl') || model.name?.includes('FCL')));
+  const isOceanFclTable = isOceanTable && (model.id?.includes('fcl') || model.name?.includes('FCL') || model.code === 'FCL');
   const isOceanLclTable = isOceanTable && (model.id?.includes('lcl') || model.name?.includes('LCL') || model.code === 'LCL');
+  const isRailFclTable = isRailTable && (model.id?.includes('fcl') || model.name?.includes('FCL') || model.code === 'FCL');
   const isRailLclTable = isRailTable && (model.id?.includes('lcl') || model.name?.includes('LCL') || model.code === 'LCL');
+  const isFclTable = isOceanFclTable || isRailFclTable;
   const isLclTable = isOceanLclTable || isRailLclTable;
   const isLtlTable = isTruckingTable && (model.id === 'trk-gen-ltl' || model.name?.includes('LTL') || model.code === 'LTL');
+  const isTruckingFtlTable = isTruckingTable && !isLtlTable;
   const isLtlOrLclTable = isLtlTable || isLclTable;
 
   const isBonded = isWarehousingTable && (model.id === 'wh-gen-bon' || model.id?.includes('bon') || model.name?.toLowerCase().includes('ngoại quan') || model.code?.toLowerCase().includes('ngoại quan'));
@@ -541,339 +701,279 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                 <div className="overflow-x-auto max-h-[520px]">
                   <table className="w-full text-left border-collapse text-xs">
                     <thead className="sticky top-0 z-10">
-                      {/* 1. KHO BÃI 3PL */}
+                      {/* 1. KHO NGOẠI QUAN */}
                       {isWarehousingTable && isBonded && (
                         <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
-                          <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
-                          <th className="py-2.5 px-2.5 min-w-[125px] text-center bg-indigo-50 text-indigo-950 font-black">Mã Kho HQ</th>
-                          <th className="py-2.5 px-2.5 min-w-[185px]">Tên Kho Ngoại Quan / CFS</th>
-                          <th className="py-2.5 px-2.5 min-w-[220px] bg-amber-50 text-amber-950 font-black">Chi Cục Hải Quan Quản Lý</th>
-                          <th className="py-2.5 px-2.5 min-w-[130px]">Tỉnh / TP</th>
-                          <th className="py-2.5 px-2.5 min-w-[185px]">Cổng Cảng / KCN / Địa Chỉ</th>
-                          <th className="py-2.5 px-2 text-right min-w-[110px] bg-blue-50 text-blue-950">Diện Tích (m²)</th>
-                          <th className="py-2.5 px-2 text-right min-w-[115px] bg-blue-50 text-blue-950 font-bold">Sức Chứa CBM (m³)</th>
-                          <th className="py-2.5 px-2 text-right min-w-[115px] bg-blue-50 text-blue-950">Số Pallet (Vị Trí)</th>
-                          <th className="py-2.5 px-2 text-right min-w-[150px] bg-emerald-50 text-emerald-950 font-black">Giá CBM (/ CBM / Ngày)</th>
-                          <th className="py-2.5 px-2 text-right min-w-[140px] bg-emerald-50 text-emerald-950">Giá Pallet (/ Ngày)</th>
-                          <th className="py-2.5 px-2 text-right min-w-[135px] bg-emerald-50 text-emerald-950">Giá m² (/ Tháng)</th>
-                          <th className="py-2.5 px-2 text-right min-w-[155px] bg-amber-50 text-amber-950">Cước Sàn (Min/Lô)</th>
-                          <th className="py-2.5 px-2 w-20 min-w-[80px] text-center">Tiền Tệ</th>
-                          <th className="py-2.5 px-2.5 min-w-[145px] text-center">Giờ Xe & Giám Sát HQ</th>
-                          <th className="py-2.5 px-2.5 min-w-[130px] text-center">Hạn Giá</th>
-                          <th className="py-2.5 px-2 min-w-[85px] text-center">Promotion</th>
-                          <th className="py-2.5 px-2.5 min-w-[170px] text-center bg-indigo-50 text-indigo-950 font-black">Chi Tiết (Specs & Ảnh)</th>
-                          <th className="py-2.5 px-2 text-center min-w-[100px] bg-slate-100 font-bold">Báo Giá</th>
+                          <th className="py-2.5 px-2 text-center w-12 min-w-[48px] bg-slate-100">STT</th>
+                          <th className="py-2.5 px-3 min-w-[130px] text-center bg-indigo-50/80 text-indigo-950 font-black">Mã Kho HQ</th>
+                          <th className="py-2.5 px-3 min-w-[220px]">Tên Kho Ngoại Quan / CFS</th>
+                          <th className="py-2.5 px-3 min-w-[220px] bg-amber-50/80 text-amber-950 font-black">Chi Cục Hải Quan Quản Lý</th>
+                          <th className="py-2.5 px-3 min-w-[130px]">Tỉnh / TP</th>
+                          <th className="py-2.5 px-3 min-w-[240px]">Địa Chỉ</th>
+                          <th className="py-2.5 px-3 min-w-[180px] text-center bg-indigo-50/70 text-indigo-950 font-black">Chi Tiết</th>
+                          <th className="py-2.5 px-2 text-center w-24 min-w-[90px] bg-slate-100 font-bold">Báo Giá</th>
                         </tr>
                       )}
 
+                      {/* 2. KHO TMĐT / FULFILLMENT */}
                       {isWarehousingTable && isFulfillment && (
                         <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
-                          <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
-                          <th className="py-2.5 px-2.5 min-w-[115px] text-center bg-purple-50 text-purple-950 font-black">Mã Kho FUL</th>
-                          <th className="py-2.5 px-2.5 min-w-[185px]">Tên Trung Tâm Fulfillment</th>
-                          <th className="py-2.5 px-2.5 min-w-[130px]">Tỉnh / Thành Phố</th>
-                          <th className="py-2.5 px-2.5 min-w-[185px]">Địa Chỉ / KCN Trọng Điểm</th>
-                          <th className="py-2.5 px-2 text-right min-w-[125px] bg-blue-50 text-blue-950 font-bold">Công Suất (Đơn/Ngày)</th>
-                          <th className="py-2.5 px-2 text-right min-w-[115px] bg-blue-50 text-blue-950">Sức Chứa SKUs</th>
-                          <th className="py-2.5 px-2 text-right min-w-[125px] bg-blue-50 text-blue-950">Lưu Đệm (Pallet/Bins)</th>
-                          <th className="py-2.5 px-2 text-right min-w-[155px] bg-emerald-50 text-emerald-950 font-black">Phí Xử Lý Đơn (Pick&Pack)</th>
-                          <th className="py-2.5 px-2 text-right min-w-[145px] bg-emerald-50 text-emerald-950">Phí Thêm Item (/Item)</th>
-                          <th className="py-2.5 px-2 text-right min-w-[140px] bg-emerald-50 text-emerald-950">Lưu Kho Đệm (/Tháng)</th>
-                          <th className="py-2.5 px-2 text-right min-w-[145px] bg-amber-50 text-amber-950">Cước Sàn (Min/Tháng)</th>
-                          <th className="py-2.5 px-2 w-20 min-w-[80px] text-center">Tiền Tệ</th>
-                          <th className="py-2.5 px-2.5 min-w-[140px] text-center">SLA & Cut-Off</th>
-                          <th className="py-2.5 px-2.5 min-w-[130px] text-center">Hạn Giá</th>
-                          <th className="py-2.5 px-2 min-w-[85px] text-center">Promotion</th>
-                          <th className="py-2.5 px-2.5 min-w-[170px] text-center bg-purple-50 text-purple-950 font-black">Chi Tiết (WMS, Sàn, VAS)</th>
-                          <th className="py-2.5 px-2 text-center min-w-[100px] bg-slate-100 font-bold">Báo Giá</th>
+                          <th className="py-2.5 px-2 text-center w-12 min-w-[48px] bg-slate-100">STT</th>
+                          <th className="py-2.5 px-3 min-w-[130px] text-center bg-purple-50/80 text-purple-950 font-black">Mã kho</th>
+                          <th className="py-2.5 px-3 min-w-[240px]">Tên Trung Tâm Fulfillment</th>
+                          <th className="py-2.5 px-3 min-w-[130px]">Tỉnh/TP</th>
+                          <th className="py-2.5 px-3 min-w-[240px]">Địa chỉ</th>
+                          <th className="py-2.5 px-3 min-w-[180px] text-center bg-purple-50/70 text-purple-950 font-black">Chi tiết</th>
+                          <th className="py-2.5 px-2 text-center w-24 min-w-[90px] bg-slate-100 font-bold">Báo Giá</th>
                         </tr>
                       )}
 
+                      {/* 3. KHO TỰ QUẢN (SELF-STORAGE) */}
                       {isWarehousingTable && isSelfStorage && (
                         <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
-                          <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
-                          <th className="py-2.5 px-2.5 min-w-[115px] text-center bg-amber-50 text-amber-950 font-black">Mã Kho TQ</th>
-                          <th className="py-2.5 px-2.5 min-w-[185px]">Tên Cơ Sở Kho Tự Quản</th>
-                          <th className="py-2.5 px-2.5 min-w-[130px]">Tỉnh / Thành Phố</th>
-                          <th className="py-2.5 px-2.5 min-w-[185px]">KCN / Địa Chỉ Chi Tiết</th>
-                          <th className="py-2.5 px-2 text-right min-w-[125px] bg-blue-50 text-blue-950 font-bold">Diện Tích Sàn (m²)</th>
-                          <th className="py-2.5 px-2 text-right min-w-[115px] bg-blue-50 text-blue-950">Thể Tích (m³)</th>
-                          <th className="py-2.5 px-2 text-right min-w-[125px] bg-blue-50 text-blue-950">Số Khoang Phân Lô</th>
-                          <th className="py-2.5 px-2 text-right min-w-[140px] bg-emerald-50 text-emerald-950 font-black">Giá m² (/Tháng)</th>
-                          <th className="py-2.5 px-2 text-right min-w-[140px] bg-emerald-50 text-emerald-950">Giá m³ (/Tháng)</th>
-                          <th className="py-2.5 px-2 text-right min-w-[145px] bg-amber-50 text-amber-950">Cước Sàn (Min/Tháng)</th>
-                          <th className="py-2.5 px-2 w-20 min-w-[80px] text-center">Tiền Tệ</th>
-                          <th className="py-2.5 px-2.5 min-w-[145px] text-center">Giờ Ra Vào & Truy Cập</th>
-                          <th className="py-2.5 px-2.5 min-w-[130px] text-center">Hạn Giá</th>
-                          <th className="py-2.5 px-2 min-w-[85px] text-center">Promotion</th>
-                          <th className="py-2.5 px-2.5 min-w-[170px] text-center bg-amber-50 text-amber-950 font-black">Chi Tiết (Specs, Ảnh, Tiện Ích)</th>
-                          <th className="py-2.5 px-2 text-center min-w-[100px] bg-slate-100 font-bold">Báo Giá</th>
+                          <th className="py-2.5 px-2 text-center w-12 min-w-[48px] bg-slate-100">STT</th>
+                          <th className="py-2.5 px-3 min-w-[130px] text-center bg-amber-50/80 text-amber-950 font-black">Mã Kho</th>
+                          <th className="py-2.5 px-3 min-w-[220px]">Tên Cơ Sở Kho Tự Quản</th>
+                          <th className="py-2.5 px-3 min-w-[130px]">Tỉnh/Thành Phố</th>
+                          <th className="py-2.5 px-3 min-w-[240px]">Địa Chỉ Chi Tiết</th>
+                          <th className="py-2.5 px-3 min-w-[180px] text-center bg-amber-50/70 text-amber-950 font-black">Chi Tiết</th>
+                          <th className="py-2.5 px-2 text-center w-24 min-w-[90px] bg-slate-100 font-bold">Báo Giá</th>
                         </tr>
                       )}
 
+                      {/* 4. KHO TIÊU CHUẨN / KHO LẠNH / KHO HÓA CHẤT */}
                       {isWarehousingTable && !isBonded && !isFulfillment && !isSelfStorage && (
                         <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
-                          <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
-                          <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-indigo-50 text-indigo-950 font-black">Mã Kho</th>
-                          <th className="py-2.5 px-2.5 min-w-[190px]">Tên Kho / Trung Tâm DC</th>
-                          <th className="py-2.5 px-2.5 min-w-[130px]">Tỉnh / Thành Phố</th>
-                          <th className="py-2.5 px-2.5 min-w-[190px]">KCN / Địa Chỉ Chi Tiết</th>
-                          <th className="py-2.5 px-2 text-right min-w-[110px] bg-blue-50 text-blue-950 font-bold">Diện Tích (m²)</th>
-                          <th className="py-2.5 px-2 text-right min-w-[115px] bg-blue-50 text-blue-950">Số Pallet (Vị Trí)</th>
-                          <th className="py-2.5 px-2 text-right min-w-[110px] bg-blue-50 text-blue-950">Thể Tích (m³)</th>
-                          <th className="py-2.5 px-2 text-right min-w-[135px] bg-emerald-50 text-emerald-950 font-black">Giá m² (/Tháng)</th>
-                          <th className="py-2.5 px-2 text-right min-w-[135px] bg-emerald-50 text-emerald-950 font-black">Giá Pallet (/Tháng)</th>
-                          <th className="py-2.5 px-2 text-right min-w-[135px] bg-emerald-50 text-emerald-950">Giá m³ (/Tháng)</th>
-                          <th className="py-2.5 px-2 text-right min-w-[145px] bg-amber-50 text-amber-950">Cước Sàn (Min/Tháng)</th>
-                          <th className="py-2.5 px-2 w-20 min-w-[80px] text-center">Tiền Tệ</th>
-                          <th className="py-2.5 px-2.5 min-w-[130px] text-center">SLA Vận Hành</th>
-                          <th className="py-2.5 px-2.5 min-w-[125px] text-center">Hạn Giá</th>
-                          <th className="py-2.5 px-2 min-w-[85px] text-center">Promotion</th>
-                          <th className="py-2.5 px-2.5 min-w-[170px] text-center bg-indigo-50 text-indigo-950 font-black">Chi Tiết (Specs & Ảnh)</th>
-                          <th className="py-2.5 px-2 text-center min-w-[100px] bg-slate-100 font-bold">Báo Giá</th>
+                          <th className="py-2.5 px-2 text-center w-12 min-w-[48px] bg-slate-100">STT</th>
+                          <th className="py-2.5 px-3 min-w-[130px] text-center bg-indigo-50/70 text-indigo-950 font-black">Mã Kho</th>
+                          <th className="py-2.5 px-3 min-w-[240px]">Tên Kho</th>
+                          <th className="py-2.5 px-3 min-w-[140px]">Tỉnh</th>
+                          <th className="py-2.5 px-3 min-w-[260px]">Địa Chỉ Chi Tiết</th>
+                          <th className="py-2.5 px-3 min-w-[180px] text-center bg-indigo-50/70 text-indigo-950 font-black">Chi Tiết</th>
+                          <th className="py-2.5 px-2 text-center w-24 min-w-[90px] bg-slate-100 font-bold">Báo Giá</th>
                         </tr>
                       )}
 
-                      {/* 2. PROJECT CARGO (X-DOCK & PORT) */}
+                      {/* 5. TRUCKING FTL */}
+                      {isTruckingTable && isTruckingFtlTable && (
+                        <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
+                          <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
+                          <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-indigo-50/70 text-indigo-950 font-black">Mã Tuyến</th>
+                          <th className="py-2.5 px-2.5 min-w-[180px] bg-indigo-50/70 text-indigo-950 font-black">Hành Lang Tuyến</th>
+                          <th className="py-2.5 px-2.5 min-w-[160px]">Điểm Đi</th>
+                          <th className="py-2.5 px-2.5 min-w-[160px]">Điểm Đến</th>
+                          <th className="py-2.5 px-2.5 min-w-[180px] text-center bg-indigo-100/80 text-indigo-950 font-black">Chi Tiết Biểu Phí</th>
+                          <th className="py-2.5 px-2 text-center w-24 min-w-[90px] bg-slate-100 font-bold">Báo Giá</th>
+                        </tr>
+                      )}
+
+                      {/* 6. TRUCKING LTL */}
+                      {isTruckingTable && isLtlTable && (
+                        <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
+                          <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
+                          <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-indigo-50/70 text-indigo-950 font-black">Mã Tuyến</th>
+                          <th className="py-2.5 px-2.5 min-w-[180px] bg-indigo-50/70 text-indigo-950 font-black">Hành Lang Tuyến</th>
+                          <th className="py-2.5 px-2.5 min-w-[160px]">Điểm Đầu (Điểm Đi)</th>
+                          <th className="py-2.5 px-2.5 min-w-[160px]">Điểm Cuối (Điểm Đến)</th>
+                          <th className="py-2.5 px-2.5 min-w-[180px] text-center bg-indigo-100/80 text-indigo-950 font-black">Chi Tiết Biểu Phí</th>
+                          <th className="py-2.5 px-2 text-center w-24 min-w-[90px] bg-slate-100 font-bold">Báo Giá</th>
+                        </tr>
+                      )}
+
+                      {/* 7. OCEAN FCL */}
+                      {isOceanTable && isOceanFclTable && (
+                        <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
+                          <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
+                          <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-sky-50/70 text-sky-950 font-black">Mã Tuyến</th>
+                          <th className="py-2.5 px-2.5 min-w-[130px] bg-sky-50/70 text-sky-950 font-black">Khu Vực</th>
+                          <th className="py-2.5 px-2.5 min-w-[170px]">Hành Lang Tuyến</th>
+                          <th className="py-2.5 px-2.5 min-w-[150px]">Cảng Đi (POL)</th>
+                          <th className="py-2.5 px-2.5 min-w-[150px]">Cảng Đến (POD)</th>
+                          <th className="py-2.5 px-2.5 min-w-[180px] text-center bg-sky-100/80 text-sky-950 font-black">Chi Tiết Biểu Phí</th>
+                          <th className="py-2.5 px-2 text-center w-24 min-w-[90px] bg-slate-100 font-bold">Báo Giá</th>
+                        </tr>
+                      )}
+
+                      {/* 8. OCEAN LCL */}
+                      {isOceanTable && isOceanLclTable && (
+                        <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
+                          <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
+                          <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-sky-50/70 text-sky-950 font-black">Mã Tuyến</th>
+                          <th className="py-2.5 px-2.5 min-w-[130px] bg-sky-50/70 text-sky-950 font-black">Khu Vực</th>
+                          <th className="py-2.5 px-2.5 min-w-[170px]">Hành Lang Tuyến</th>
+                          <th className="py-2.5 px-2.5 min-w-[150px]">Kho CFS / Điểm Đi</th>
+                          <th className="py-2.5 px-2.5 min-w-[150px]">Kho CFS / Cảng Đến</th>
+                          <th className="py-2.5 px-2.5 min-w-[180px] text-center bg-sky-100/80 text-sky-950 font-black">Chi Tiết Biểu Phí</th>
+                          <th className="py-2.5 px-2 text-center w-24 min-w-[90px] bg-slate-100 font-bold">Báo Giá</th>
+                        </tr>
+                      )}
+
+                      {/* 9. RAIL FCL */}
+                      {isRailTable && isRailFclTable && (
+                        <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
+                          <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
+                          <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-emerald-50/70 text-emerald-950 font-black">Mã Tuyến</th>
+                          <th className="py-2.5 px-2.5 min-w-[180px] bg-emerald-50/70 text-emerald-950 font-black">Hành Lang Tuyến</th>
+                          <th className="py-2.5 px-2.5 min-w-[150px]">Ga Đi (POL)</th>
+                          <th className="py-2.5 px-2.5 min-w-[150px]">Ga Đến (POD)</th>
+                          <th className="py-2.5 px-2.5 min-w-[160px]">Đơn Vị Vận Hành</th>
+                          <th className="py-2.5 px-2.5 min-w-[180px] text-center bg-emerald-100/80 text-emerald-950 font-black">Chi Tiết Biểu Phí</th>
+                          <th className="py-2.5 px-2 text-center w-24 min-w-[90px] bg-slate-100 font-bold">Báo Giá</th>
+                        </tr>
+                      )}
+
+                      {/* 10. RAIL LCL */}
+                      {isRailTable && isRailLclTable && (
+                        <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
+                          <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
+                          <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-emerald-50/70 text-emerald-950 font-black">Mã Tuyến</th>
+                          <th className="py-2.5 px-2.5 min-w-[180px] bg-emerald-50/70 text-emerald-950 font-black">Hành Lang Tuyến</th>
+                          <th className="py-2.5 px-2.5 min-w-[150px]">Ga Đi (POL)</th>
+                          <th className="py-2.5 px-2.5 min-w-[150px]">Ga Đến (POD)</th>
+                          <th className="py-2.5 px-2.5 min-w-[160px]">Đơn Vị Vận Hành</th>
+                          <th className="py-2.5 px-2.5 min-w-[180px] text-center bg-emerald-100/80 text-emerald-950 font-black">Chi Tiết Biểu Phí</th>
+                          <th className="py-2.5 px-2 text-center w-24 min-w-[90px] bg-slate-100 font-bold">Báo Giá</th>
+                        </tr>
+                      )}
+
+                      {/* 11. AIR CARGO */}
+                      {isAirCargoTable && (
+                        <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
+                          <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
+                          <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-sky-50/70 text-sky-950 font-black">Mã Tuyến</th>
+                          <th className="py-2.5 px-2.5 min-w-[130px] bg-sky-50/70 text-sky-950 font-black">Khu Vực</th>
+                          <th className="py-2.5 px-2.5 min-w-[170px]">Hành Lang Tuyến</th>
+                          <th className="py-2.5 px-2.5 min-w-[150px]">Sân Bay Đi (AOD)</th>
+                          <th className="py-2.5 px-2.5 min-w-[150px]">Sân Bay Đến (AOA)</th>
+                          <th className="py-2.5 px-2.5 min-w-[180px] text-center bg-sky-100/80 text-sky-950 font-black">Chi Tiết Biểu Phí</th>
+                          <th className="py-2.5 px-2 text-center w-24 min-w-[90px] bg-slate-100 font-bold">Báo Giá</th>
+                        </tr>
+                      )}
+
+                      {/* 12. AIR EXPRESS */}
+                      {isExpressTable && (
+                        <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
+                          <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
+                          <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-amber-50/80 text-amber-950 font-black">Mã Tuyến</th>
+                          <th className="py-2.5 px-2.5 min-w-[130px] bg-amber-50/80 text-amber-950 font-black">Khu Vực</th>
+                          <th className="py-2.5 px-2.5 min-w-[170px]">Hành Lang Tuyến</th>
+                          <th className="py-2.5 px-2.5 min-w-[150px]">Điểm Lấy (Door Origin)</th>
+                          <th className="py-2.5 px-2.5 min-w-[150px]">Điểm Phát (Door Destination)</th>
+                          <th className="py-2.5 px-2.5 min-w-[180px] text-center bg-amber-100/90 text-amber-950 font-black">Chi Tiết Biểu Phí</th>
+                          <th className="py-2.5 px-2 text-center w-24 min-w-[90px] bg-slate-100 font-bold">Báo Giá</th>
+                        </tr>
+                      )}
+
+                      {/* 13. CROSS-BORDER FTL */}
+                      {isCrossBorderFtl && (
+                        <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
+                          <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
+                          <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-orange-50/80 text-orange-950 font-black">Mã Tuyến XBG</th>
+                          <th className="py-2.5 px-2.5 min-w-[180px] bg-orange-50/80 text-orange-950 font-black">Hành Lang Tuyến XBG</th>
+                          <th className="py-2.5 px-2.5 min-w-[200px] bg-amber-50/80 text-amber-950 font-black">Cửa Khẩu Biên Giới</th>
+                          <th className="py-2.5 px-2.5 min-w-[150px]">Điểm Đi (Origin)</th>
+                          <th className="py-2.5 px-2.5 min-w-[150px]">Điểm Đến (Destination)</th>
+                          <th className="py-2.5 px-2.5 min-w-[180px] text-center bg-orange-100/80 text-orange-950 font-black">Chi Tiết Biểu Phí</th>
+                          <th className="py-2.5 px-2 text-center w-24 min-w-[90px] bg-slate-100 font-bold">Báo Giá</th>
+                        </tr>
+                      )}
+
+                      {/* 14. CROSS-BORDER LTL */}
+                      {isCrossBorderLtl && (
+                        <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
+                          <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
+                          <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-orange-50/80 text-orange-950 font-black">Mã Tuyến LTL</th>
+                          <th className="py-2.5 px-2.5 min-w-[180px] bg-orange-50/80 text-orange-950 font-black">Hành Lang Tuyến XBG</th>
+                          <th className="py-2.5 px-2.5 min-w-[200px] bg-amber-50/80 text-amber-950 font-black">Cửa Khẩu Biên Giới</th>
+                          <th className="py-2.5 px-2.5 min-w-[150px]">Kho Gom Hàng (Origin Hub)</th>
+                          <th className="py-2.5 px-2.5 min-w-[150px]">Kho Giao Hàng (Dest Hub)</th>
+                          <th className="py-2.5 px-2.5 min-w-[180px] text-center bg-orange-100/80 text-orange-950 font-black">Chi Tiết Biểu Phí</th>
+                          <th className="py-2.5 px-2 text-center w-24 min-w-[90px] bg-slate-100 font-bold">Báo Giá</th>
+                        </tr>
+                      )}
+
+                      {/* 15. PROJECT CARGO (X-DOCK) */}
                       {isXdockTable && (
                         <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
                           <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
-                          <th className="py-2.5 px-2.5 min-w-[105px] text-center bg-purple-50 text-purple-950 font-black">Mã Trạm X-Dock</th>
-                          <th className="py-2.5 px-2.5 min-w-[195px]">Tên Trạm Cross-Dock / Hub</th>
+                          <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-purple-50 text-purple-950 font-black">Mã Trạm X-Dock</th>
+                          <th className="py-2.5 px-2.5 min-w-[200px]">Tên Trạm Cross-Dock / Hub</th>
                           <th className="py-2.5 px-2.5 min-w-[130px]">Tỉnh / Thành Phố</th>
-                          <th className="py-2.5 px-2.5 min-w-[150px]">KCN / Vị Trí Trạm</th>
-                          <th className="py-2.5 px-2.5 min-w-[140px] text-right bg-blue-50 text-blue-950 font-black">Công Suất Sàn</th>
-                          <th className="py-2.5 px-2 text-right min-w-[110px] bg-emerald-50 text-emerald-950 font-black">Đơn Giá Kg</th>
-                          <th className="py-2.5 px-2 text-right min-w-[115px] bg-emerald-50 text-emerald-950 font-black">Đơn Giá CBM</th>
-                          <th className="py-2.5 px-2 text-right min-w-[120px] bg-emerald-50 text-emerald-950 font-black">Đơn Giá Pallet</th>
-                          <th className="py-2.5 px-2 text-right min-w-[125px] bg-amber-50 text-amber-950 font-black">Cước Sàn (Min/Lô)</th>
-                          <th className="py-2.5 px-2 w-20 min-w-[80px] text-center">Tiền Tệ</th>
-                          <th className="py-2.5 px-2.5 min-w-[130px] text-center">SLA Giải Phóng</th>
-                          <th className="py-2.5 px-2.5 min-w-[125px] text-center">Hạn Giá</th>
-                          <th className="py-2.5 px-2 min-w-[85px] text-center">Promotion</th>
-                          <th className="py-2.5 px-2.5 text-center min-w-[140px] bg-indigo-50 text-indigo-950 font-black">Chi Tiết (Specs, Ảnh)</th>
-                          <th className="py-2.5 px-2 text-center min-w-[100px] bg-slate-100 font-bold">Báo Giá</th>
+                          <th className="py-2.5 px-2.5 min-w-[160px]">KCN / Vị Trí Trạm</th>
+                          <th className="py-2.5 px-2.5 text-center min-w-[180px] bg-indigo-50 text-indigo-950 font-black">Chi Tiết (Specs, Sàn, VAS)</th>
+                          <th className="py-2.5 px-2 text-center w-24 min-w-[90px] bg-slate-100 font-bold">Báo Giá</th>
                         </tr>
                       )}
 
+                      {/* 16. PROJECT CARGO (PORT / ICD) */}
                       {isPortTable && (
                         <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
                           <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
-                          <th className="py-2.5 px-2.5 min-w-[105px] text-center bg-sky-50 text-sky-950 font-black">Mã Cảng / ICD</th>
+                          <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-sky-50 text-sky-950 font-black">Mã Cảng / ICD</th>
                           <th className="py-2.5 px-2.5 min-w-[200px]">Tên Cảng / Cảng Cạn ICD / Depot</th>
-                          <th className="py-2.5 px-2.5 min-w-[135px]">Tỉnh / Thành Phố</th>
+                          <th className="py-2.5 px-2.5 min-w-[130px]">Tỉnh / Thành Phố</th>
                           <th className="py-2.5 px-2.5 min-w-[160px]">Vị Trí / Khu Bến Cảng</th>
-                          <th className="py-2.5 px-2.5 min-w-[130px] text-right bg-blue-50 text-blue-950 font-black">Sức Chứa Bãi (TEU)</th>
-                          <th className="py-2.5 px-2 text-right min-w-[135px] bg-emerald-50 text-emerald-950 font-black">Shuttle Cont 20ft</th>
-                          <th className="py-2.5 px-2 text-right min-w-[135px] bg-emerald-50 text-emerald-950 font-black">Shuttle Cont 40ft</th>
-                          <th className="py-2.5 px-2 text-right min-w-[130px] bg-amber-50 text-amber-950 font-black">Nâng Hạ (Lift On/Off)</th>
-                          <th className="py-2.5 px-2 w-20 min-w-[80px] text-center">Tiền Tệ</th>
-                          <th className="py-2.5 px-2.5 min-w-[135px] text-center">SLA Luân Chuyển</th>
-                          <th className="py-2.5 px-2.5 min-w-[125px] text-center">Hạn Giá</th>
-                          <th className="py-2.5 px-2 min-w-[85px] text-center">Promotion</th>
-                          <th className="py-2.5 px-2.5 text-center min-w-[140px] bg-indigo-50 text-indigo-950 font-black">Chi Tiết (Specs, Ảnh)</th>
-                          <th className="py-2.5 px-2 text-center min-w-[100px] bg-slate-100 font-bold">Báo Giá</th>
+                          <th className="py-2.5 px-2.5 text-center min-w-[180px] bg-indigo-50 text-indigo-950 font-black">Chi Tiết (Cầu Bến, Bãi, VAS)</th>
+                          <th className="py-2.5 px-2 text-center w-24 min-w-[90px] bg-slate-100 font-bold">Báo Giá</th>
                         </tr>
                       )}
 
-                      {/* 3. THỦ TỤC HẢI QUAN */}
+                      {/* 17. THỦ TỤC HẢI QUAN */}
                       {isCustomsTable && (
                         <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
                           <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
                           <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-amber-50 text-amber-950 font-black">Mã Dịch Vụ</th>
-                          <th className="py-2.5 px-2.5 min-w-[230px] bg-amber-50 text-amber-950 font-black">Chi Cục Hải Quan Mở Tờ Khai</th>
-                          <th className="py-2.5 px-2.5 min-w-[175px]">Khu Vực / Cửa Khẩu / Cảng / KCN</th>
-                          <th className="py-2.5 px-2.5 min-w-[200px]">Loại Hình Tờ Khai Áp Dụng</th>
-                          <th className="py-2.5 px-2 w-20 min-w-[80px] text-center">ĐVT</th>
-                          <th className="py-2.5 px-2 w-20 min-w-[80px] text-center">Tiền Tệ</th>
-                          <th className="py-2.5 px-2 text-right min-w-[160px] bg-emerald-50 text-emerald-950 font-black">Phí Khai Chuẩn (Xanh/Vàng)</th>
-                          <th className="py-2.5 px-2 text-right min-w-[145px] bg-emerald-50 text-emerald-950">Phí Tờ Khai Phụ (/Tờ)</th>
-                          <th className="py-2.5 px-2 text-right min-w-[160px] bg-rose-50 text-rose-950 font-bold">Phí Kiểm Hóa Luồng Đỏ (/Lô)</th>
+                          <th className="py-2.5 px-2.5 min-w-[220px] bg-amber-50 text-amber-950 font-black">Chi Cục Hải Quan Mở Tờ Khai</th>
+                          <th className="py-2.5 px-2.5 min-w-[170px]">Khu Vực / Cửa Khẩu / Cảng</th>
+                          <th className="py-2.5 px-2.5 min-w-[170px]">Loại Hình Tờ Khai Áp Dụng</th>
+                          <th className="py-2.5 px-2 text-right min-w-[150px] bg-emerald-50 text-emerald-950 font-black">Phí Khai Chuẩn</th>
                           <th className="py-2.5 px-2.5 min-w-[130px] text-center">SLA Thông Quan</th>
-                          <th className="py-2.5 px-2.5 min-w-[155px] text-center">Hình Thức Khai Báo</th>
-                          <th className="py-2.5 px-2.5 min-w-[130px] text-center">Hạn Giá</th>
-                          <th className="py-2.5 px-2 min-w-[85px] text-center">Promotion</th>
-                          <th className="py-2.5 px-2 text-center min-w-[100px] bg-slate-100 font-bold">Báo Giá</th>
-                        </tr>
-                      )}
-
-                      {/* 4. VẬN TẢI XUYÊN BIÊN GIỚI */}
-                      {isCrossBorderLtl && (
-                        <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
-                          <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
-                          <th className="py-2.5 px-2.5 min-w-[105px] text-center bg-orange-50 text-orange-950 font-black">Mã Tuyến LTL</th>
-                          <th className="py-2.5 px-2.5 min-w-[195px]">Hành Lang Tuyến Ghép XBG</th>
-                          <th className="py-2.5 px-2.5 min-w-[200px] bg-amber-50 text-amber-950 font-black">Cửa Khẩu Biên Giới (Border Gate)</th>
-                          <th className="py-2.5 px-2.5 min-w-[150px]">Kho Gom Hàng (Origin Hub)</th>
-                          <th className="py-2.5 px-2.5 min-w-[150px]">Kho Phân Phối / Đích (Dest Hub)</th>
-                          <th className="py-2.5 px-2.5 min-w-[170px] text-center">Hình Thức Thông Quan LTL</th>
-                          <th className="py-2.5 px-2 text-right min-w-[110px] bg-emerald-50 text-emerald-950 font-black">Đơn Giá Kg (/Kg)</th>
-                          <th className="py-2.5 px-2 text-right min-w-[125px] bg-emerald-50 text-emerald-950 font-black">Đơn Giá CBM (/CBM)</th>
-                          <th className="py-2.5 px-2 text-right min-w-[120px] bg-amber-50 text-amber-950 font-black">Cước Sàn (Min/Lô)</th>
-                          <th className="py-2.5 px-2 w-20 min-w-[80px] text-center">Tiền Tệ</th>
-                          <th className="py-2.5 px-2.5 min-w-[115px] text-center">SLA Giao Hàng</th>
-                          <th className="py-2.5 px-2.5 min-w-[170px] text-center bg-blue-50 text-blue-950 font-black">Lịch Chạy / Tần Suất</th>
-                          <th className="py-2.5 px-2.5 min-w-[125px] text-center">Hạn Giá</th>
-                          <th className="py-2.5 px-2 min-w-[85px] text-center">Promotion</th>
-                          <th className="py-2.5 px-2 text-center min-w-[100px] bg-slate-100 font-bold">Báo Giá</th>
-                        </tr>
-                      )}
-
-                      {isCrossBorderFtl && (
-                        <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
-                          <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
-                          <th className="py-2.5 px-2.5 min-w-[100px] text-center bg-orange-50 text-orange-950 font-black">Mã Tuyến XBG</th>
-                          <th className="py-2.5 px-2.5 min-w-[200px]">Hành Lang Tuyến Xuyên Biên Giới</th>
-                          <th className="py-2.5 px-2.5 min-w-[210px] bg-amber-50 text-amber-950 font-black">Cửa Khẩu Biên Giới (Border Gate)</th>
-                          <th className="py-2.5 px-2.5 min-w-[150px]">Điểm Đi (Origin)</th>
-                          <th className="py-2.5 px-2.5 min-w-[150px]">Điểm Đến (Destination)</th>
-                          <th className="py-2.5 px-2.5 min-w-[185px]">Loại Phương Tiện / Cont</th>
-                          <th className="py-2.5 px-2.5 min-w-[160px] text-center">Phương Thức Vượt Biên</th>
-                          <th className="py-2.5 px-2.5 min-w-[160px] text-center">Phạm Vi Hải Quan</th>
-                          <th className="py-2.5 px-2 w-20 min-w-[80px] text-center">ĐVT</th>
-                          <th className="py-2.5 px-2 w-20 min-w-[80px] text-center">Tiền Tệ</th>
-                          <th className="py-2.5 px-2 text-right min-w-[145px] bg-emerald-50 text-emerald-950 font-black">Giá Cước FTL</th>
-                          <th className="py-2.5 px-2.5 min-w-[125px] text-center">SLA Vận Chuyển</th>
-                          <th className="py-2.5 px-2.5 min-w-[130px] text-center">Hạn Giá</th>
-                          <th className="py-2.5 px-2 min-w-[85px] text-center">Promotion</th>
-                          <th className="py-2.5 px-2 text-center min-w-[100px] bg-slate-100 font-bold">Báo Giá</th>
-                        </tr>
-                      )}
-
-                      {/* 5. VẬN TẢI TIÊU CHUẨN (TRUCKING / OCEAN / RAIL / AIR) */}
-                      {!isWarehousingTable && !isCustomsTable && !isCrossBorderLtl && !isCrossBorderFtl && !isXdockTable && !isPortTable && (
-                        <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
-                          <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
-                          <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-slate-100 font-bold">Mã Tuyến</th>
-                          {(isOceanTable || isAirTable) && (
-                            <th className="py-2.5 px-2.5 min-w-[140px]">Khu Vực</th>
-                          )}
-                          <th className="py-2.5 px-2.5 min-w-[145px]">Hành Lang Tuyến</th>
-                          <th className="py-2.5 px-2.5 min-w-[135px]">
-                            {isRailLclTable ? 'Kho Bãi Ga Đi' : (isOceanLclTable ? 'Kho CFS Đi' : (isAirCargoTable ? 'Sân Bay Đi' : (isExpressTable ? 'Điểm Lấy Hàng' : 'Điểm Đi')))}
-                          </th>
-                          <th className="py-2.5 px-2.5 min-w-[135px]">
-                            {isRailLclTable ? 'Kho Bãi Ga Đến' : (isOceanLclTable ? 'Kho CFS Đến' : (isAirCargoTable ? 'Sân Bay Đến' : (isExpressTable ? 'Điểm Đến' : 'Điểm Đến')))}
-                          </th>
-                          {isOceanTable && isFclTable && (
-                            <>
-                              <th className="py-2.5 px-2.5 min-w-[170px]">Hãng Tàu</th>
-                              <th className="py-2.5 px-2.5 min-w-[180px]">Loại Vỏ Container</th>
-                            </>
-                          )}
-                          {isOceanTable && isOceanLclTable && (
-                            <th className="py-2.5 px-2.5 min-w-[180px]">Hãng Tàu / Co-loader</th>
-                          )}
-                          {isRailTable && isFclTable && (
-                            <th className="py-2.5 px-2.5 min-w-[180px]">Loại Vỏ Container</th>
-                          )}
-                          {isAirCargoTable && (
-                            <th className="py-2.5 px-2.5 min-w-[180px]">Hãng Bay (Airline)</th>
-                          )}
-                          {isExpressTable && (
-                            <th className="py-2.5 px-2.5 min-w-[180px]">Hãng Chuyển Phát</th>
-                          )}
-                          {isTruckingTable && (
-                            <>
-                              <th className="py-2.5 px-2.5 min-w-[190px]">Loại Thùng Phương Tiện</th>
-                              <th className="py-2.5 px-2.5 min-w-[180px]">Phân Khúc Tải Trọng</th>
-                            </>
-                          )}
-                          <th className="py-2.5 px-2 w-20 min-w-[80px] text-center">ĐVT</th>
-                          <th className="py-2.5 px-2 w-20 min-w-[80px] text-center">Tiền Tệ</th>
-                          <th className="py-2.5 px-2.5 min-w-[155px] text-right font-black text-emerald-950 bg-emerald-50">
-                            {isAirCargoTable ? 'Đơn Giá (+100kg Base)' : (isExpressTable ? 'Đơn Giá (+45kg Base)' : 'Đơn Giá')}
-                          </th>
-                          <th className={`py-2.5 px-2 text-center ${(isAirCargoTable || isExpressTable) ? 'min-w-[165px]' : (isLtlOrLclTable ? 'min-w-[160px]' : 'min-w-[90px]')}`}>
-                            {(isAirCargoTable || isExpressTable) ? 'Lịch Bay & Cut-off' : (isLtlOrLclTable ? 'Lịch Chạy & Cut-off' : 'SLA')}
-                          </th>
-                          {!isExpressTable && (
-                            <th className="py-2.5 px-2.5 min-w-[125px] text-center">Loại Tuyến</th>
-                          )}
-                          {isFclTable && (
-                            <th className="py-2.5 px-2.5 min-w-[140px] text-center">Free Dem/Det</th>
-                          )}
-                          <th className="py-2.5 px-2.5 min-w-[125px] text-center">Hạn Giá</th>
-                          <th className="py-2.5 px-2 min-w-[85px] text-center">Promotion</th>
-                          <th className="py-2.5 px-2 text-center min-w-[100px] bg-slate-100 font-bold">Báo Giá</th>
+                          <th className="py-2.5 px-2 text-center w-24 min-w-[90px] bg-slate-100 font-bold">Báo Giá</th>
                         </tr>
                       )}
                     </thead>
 
                     <tbody className="divide-y divide-slate-200 bg-white">
                       {routesList.map((route, idx) => {
-                        const hasPromo = (route.promotionPercent || 0) > 0;
-                        const discountedPrice = hasPromo 
-                          ? Math.round(route.price * (1 - route.promotionPercent / 100)) 
-                          : route.price;
-
                         // ----------------------------------------------------
                         // ROW 1: KHO NGOẠI QUAN (wh-gen-bon)
                         // ----------------------------------------------------
                         if (isWarehousingTable && isBonded) {
+                          const photoCount = route.warehousePhotos?.length || 0;
                           return (
                             <tr key={route.id || idx} className="hover:bg-indigo-50/20 transition-colors divide-x divide-slate-100 text-xs">
-                              <td className="p-2 text-center font-bold text-slate-500 w-9 bg-slate-50/50">{idx + 1}</td>
+                              <td className="p-2 text-center font-bold text-slate-500 w-12 bg-slate-50/50">{idx + 1}</td>
                               <td className="p-2 text-center font-mono font-bold text-indigo-700 bg-indigo-50/40">
                                 {route.customsWarehouseCode || route.warehouseCode || `02B1B${String(idx + 1).padStart(2, '0')}`}
                               </td>
                               <td className="p-2 font-bold text-slate-900">{route.warehouseName || route.route}</td>
-                              <td className="p-2 font-semibold text-amber-900 bg-amber-50/20">
-                                {route.customsAuthority || 'Chi cục Hải quan Cửa khẩu Cảng Sài Gòn KV1'}
+                              <td className="p-2 font-semibold text-amber-950 bg-amber-50/20">
+                                {route.customsAuthority || 'Chi cục Hải quan quản lý'}
                               </td>
-                              <td className="p-2 font-semibold text-slate-800">{route.warehouseProvince || route.origin}</td>
+                              <td className="p-2 font-medium text-slate-700">{route.warehouseProvince || route.origin || 'TP. Hồ Chí Minh'}</td>
                               <td className="p-2 text-slate-600">{route.warehouseAddress || route.destination}</td>
-                              <td className="p-2 text-right font-semibold text-slate-800 bg-blue-50/20">
-                                {(route.capacityArea ?? 8000).toLocaleString('vi-VN')} m²
-                              </td>
-                              <td className="p-2 text-right font-bold text-blue-900 bg-blue-50/30">
-                                {(route.capacityVolume ?? 12000).toLocaleString('vi-VN')} m³
-                              </td>
-                              <td className="p-2 text-right font-semibold text-slate-800 bg-blue-50/20">
-                                {(route.capacityPallets ?? 6500).toLocaleString('vi-VN')}
-                              </td>
-                              <td className="p-2 text-right font-black text-emerald-800 bg-emerald-50/30">
-                                ${(route.pricePerVolume ?? 0.35).toFixed(2)}
-                              </td>
-                              <td className="p-2 text-right font-bold text-emerald-800 bg-emerald-50/20">
-                                ${(route.pricePerPallet ?? 0.45).toFixed(2)}
-                              </td>
-                              <td className="p-2 text-right font-bold text-emerald-800 bg-emerald-50/20">
-                                ${(route.pricePerArea ?? 6.5).toFixed(1)}
-                              </td>
-                              <td className="p-2 text-right font-bold text-amber-900 bg-amber-50/30">
-                                ${(route.minChargeMonthly ?? 45).toFixed(0)}
-                              </td>
-                              <td className="p-2 text-center font-bold text-slate-800">{route.currency || 'USD'}</td>
-                              <td className="p-2 text-center text-slate-700 font-medium">{route.sla || '24/7 (HQ 08h00 - 17h00)'}</td>
-                              <td className="p-2 text-center text-slate-600">{route.validUntil || '2026-12-31'}</td>
-                              <td className="p-2 text-center">
-                                {hasPromo ? (
-                                  <span className="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 font-black text-[10px]">
-                                    -{route.promotionPercent}%
-                                  </span>
-                                ) : (
-                                  <span className="text-slate-400 font-medium">0%</span>
-                                )}
-                              </td>
-                              <td className="p-2 text-center bg-indigo-50/20">
+                              <td className="p-2 text-center bg-indigo-50/10">
                                 <button
                                   type="button"
                                   onClick={() => handleOpenWarehouseModal(route)}
-                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold text-xs shadow-2xs transition-all cursor-pointer hover:shadow-indigo-600/30"
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
+                                  title="Xem thông số kỹ thuật, ảnh thực tế, biểu phí lưu kho & VAS"
                                 >
-                                  <Camera className="w-3.5 h-3.5" />
-                                  <span>Chi Tiết & Ảnh</span>
-                                  <span className="bg-indigo-400 text-white text-[10px] px-1 py-0.2 rounded-full font-bold">
-                                    {(route.warehousePhotos?.length || 4)}📸
-                                  </span>
+                                  <Sliders className="w-3.5 h-3.5 text-indigo-600 group-hover:scale-110 transition-transform" />
+                                  <span>Chi tiết</span>
+                                  {photoCount > 0 && (
+                                    <span className="text-[10px] px-1 py-0.2 bg-white rounded text-indigo-700 font-semibold border border-indigo-200">
+                                      {photoCount}📸
+                                    </span>
+                                  )}
+                                  <ChevronRight className="w-3 h-3 text-indigo-400 group-hover:translate-x-0.5 transition-transform" />
                                 </button>
                               </td>
                               <td className="p-2 text-center">
                                 <button
                                   type="button"
                                   onClick={() => handleTriggerRFQForRoute(route)}
-                                  className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
+                                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
                                 >
                                   <Send className="w-3 h-3" />
                                   <span>Báo Giá</span>
@@ -887,66 +987,38 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                         // ROW 2: KHO TMĐT / FULFILLMENT (wh-gen-ful)
                         // ----------------------------------------------------
                         if (isWarehousingTable && isFulfillment) {
+                          const photoCount = route.warehousePhotos?.length || 0;
                           return (
                             <tr key={route.id || idx} className="hover:bg-purple-50/20 transition-colors divide-x divide-slate-100 text-xs">
-                              <td className="p-2 text-center font-bold text-slate-500 w-9 bg-slate-50/50">{idx + 1}</td>
-                              <td className="p-2 text-center font-mono font-bold text-purple-700 bg-purple-50/30">
+                              <td className="p-2 text-center font-bold text-slate-500 w-12 bg-slate-50/50">{idx + 1}</td>
+                              <td className="p-2 text-center font-mono font-bold text-purple-700 bg-purple-50/40">
                                 {route.warehouseCode || `FUL-HCM-${String(idx + 1).padStart(2, '0')}`}
                               </td>
                               <td className="p-2 font-bold text-slate-900">{route.warehouseName || route.route}</td>
-                              <td className="p-2 font-semibold text-slate-800">{route.warehouseProvince || route.origin}</td>
+                              <td className="p-2 font-medium text-slate-700">{route.warehouseProvince || route.origin || 'TP. Hồ Chí Minh'}</td>
                               <td className="p-2 text-slate-600">{route.warehouseAddress || route.destination}</td>
-                              <td className="p-2 text-right font-bold text-blue-900 bg-blue-50/30">
-                                {(route.dailyOrderCapacity ?? 3500).toLocaleString('vi-VN')}
-                              </td>
-                              <td className="p-2 text-right font-semibold text-slate-800 bg-blue-50/20">
-                                {(route.maxSkuCount ?? 8000).toLocaleString('vi-VN')}
-                              </td>
-                              <td className="p-2 text-right font-semibold text-slate-800 bg-blue-50/20">
-                                {(route.bufferCapacity ?? 800).toLocaleString('vi-VN')}
-                              </td>
-                              <td className="p-2 text-right font-black text-emerald-700 bg-emerald-50/30">
-                                {(route.pickPackPrice ?? 8500).toLocaleString('vi-VN')} ₫
-                              </td>
-                              <td className="p-2 text-right font-bold text-emerald-700 bg-emerald-50/20">
-                                {(route.extraItemPrice ?? 1500).toLocaleString('vi-VN')} ₫
-                              </td>
-                              <td className="p-2 text-right font-bold text-emerald-700 bg-emerald-50/20">
-                                {(route.bufferStoragePrice ?? 120000).toLocaleString('vi-VN')} ₫
-                              </td>
-                              <td className="p-2 text-right font-bold text-amber-700 bg-amber-50/30">
-                                {(route.minChargeMonthly ?? 5000000).toLocaleString('vi-VN')} ₫
-                              </td>
-                              <td className="p-2 text-center font-bold text-slate-800">{route.currency || 'VND'}</td>
-                              <td className="p-2 text-center text-slate-700 font-medium">{route.sla || 'Đóng gói < 2h'}</td>
-                              <td className="p-2 text-center text-slate-600">{route.validUntil || '2026-12-31'}</td>
-                              <td className="p-2 text-center">
-                                {hasPromo ? (
-                                  <span className="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 font-black text-[10px]">
-                                    -{route.promotionPercent}%
-                                  </span>
-                                ) : (
-                                  <span className="text-slate-400 font-medium">0%</span>
-                                )}
-                              </td>
-                              <td className="p-2 text-center bg-purple-50/30">
+                              <td className="p-2 text-center bg-purple-50/10">
                                 <button
                                   type="button"
                                   onClick={() => handleOpenWarehouseModal(route)}
-                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-bold text-xs shadow-2xs transition-all cursor-pointer"
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
+                                  title="Xem công suất xử lý đơn, WMS, biểu phí Pick&Pack & VAS"
                                 >
-                                  <Camera className="w-3.5 h-3.5" />
-                                  <span>Chi Tiết (WMS & Ảnh)</span>
-                                  <span className="bg-purple-400 text-white text-[10px] px-1 py-0.2 rounded-full font-bold">
-                                    {(route.warehousePhotos?.length || 4)}📸
-                                  </span>
+                                  <Sliders className="w-3.5 h-3.5 text-purple-600 group-hover:scale-110 transition-transform" />
+                                  <span>Chi tiết</span>
+                                  {photoCount > 0 && (
+                                    <span className="text-[10px] px-1 py-0.2 bg-white rounded text-purple-700 font-semibold border border-purple-200">
+                                      {photoCount}📸
+                                    </span>
+                                  )}
+                                  <ChevronRight className="w-3 h-3 text-purple-400 group-hover:translate-x-0.5 transition-transform" />
                                 </button>
                               </td>
                               <td className="p-2 text-center">
                                 <button
                                   type="button"
                                   onClick={() => handleTriggerRFQForRoute(route)}
-                                  className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
+                                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
                                 >
                                   <Send className="w-3 h-3" />
                                   <span>Báo Giá</span>
@@ -960,63 +1032,38 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                         // ROW 3: KHO TỰ QUẢN (wh-gen-self)
                         // ----------------------------------------------------
                         if (isWarehousingTable && isSelfStorage) {
+                          const photoCount = route.warehousePhotos?.length || 0;
                           return (
                             <tr key={route.id || idx} className="hover:bg-amber-50/20 transition-colors divide-x divide-slate-100 text-xs">
-                              <td className="p-2 text-center font-bold text-slate-500 w-9 bg-slate-50/50">{idx + 1}</td>
-                              <td className="p-2 text-center font-mono font-bold text-amber-800 bg-amber-50/30">
-                                {route.warehouseCode || `SELF-HCM-${String(idx + 1).padStart(2, '0')}`}
+                              <td className="p-2 text-center font-bold text-slate-500 w-12 bg-slate-50/50">{idx + 1}</td>
+                              <td className="p-2 text-center font-mono font-bold text-amber-700 bg-amber-50/40">
+                                {route.warehouseCode || `SELF-${String(idx + 1).padStart(2, '0')}`}
                               </td>
                               <td className="p-2 font-bold text-slate-900">{route.warehouseName || route.route}</td>
-                              <td className="p-2 font-semibold text-slate-800">{route.warehouseProvince || route.origin}</td>
+                              <td className="p-2 font-medium text-slate-700">{route.warehouseProvince || route.origin || 'TP. Hồ Chí Minh'}</td>
                               <td className="p-2 text-slate-600">{route.warehouseAddress || route.destination}</td>
-                              <td className="p-2 text-right font-bold text-blue-900 bg-blue-50/30">
-                                {(route.capacityArea ?? 1200).toLocaleString('vi-VN')} m²
-                              </td>
-                              <td className="p-2 text-right font-semibold text-slate-800 bg-blue-50/20">
-                                {(route.capacityVolume ?? 3600).toLocaleString('vi-VN')} m³
-                              </td>
-                              <td className="p-2 text-right font-semibold text-slate-800 bg-blue-50/20">
-                                {route.storageUnitsCount ?? 65} khoang
-                              </td>
-                              <td className="p-2 text-right font-black text-emerald-700 bg-emerald-50/30">
-                                {(route.pricePerArea ?? 190000).toLocaleString('vi-VN')} ₫
-                              </td>
-                              <td className="p-2 text-right font-bold text-emerald-700 bg-emerald-50/20">
-                                {(route.pricePerVolume ?? 85000).toLocaleString('vi-VN')} ₫
-                              </td>
-                              <td className="p-2 text-right font-bold text-amber-700 bg-amber-50/30">
-                                {(route.minChargeMonthly ?? 1200000).toLocaleString('vi-VN')} ₫
-                              </td>
-                              <td className="p-2 text-center font-bold text-slate-800">{route.currency || 'VND'}</td>
-                              <td className="p-2 text-center text-slate-700 font-medium">{route.sla || 'Ra vào 24/7 (Thẻ từ)'}</td>
-                              <td className="p-2 text-center text-slate-600">{route.validUntil || '2026-12-31'}</td>
-                              <td className="p-2 text-center">
-                                {hasPromo ? (
-                                  <span className="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 font-black text-[10px]">
-                                    -{route.promotionPercent}%
-                                  </span>
-                                ) : (
-                                  <span className="text-slate-400 font-medium">0%</span>
-                                )}
-                              </td>
-                              <td className="p-2 text-center bg-amber-50/30">
+                              <td className="p-2 text-center bg-amber-50/10">
                                 <button
                                   type="button"
                                   onClick={() => handleOpenWarehouseModal(route)}
-                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-bold text-xs shadow-2xs transition-all cursor-pointer"
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
+                                  title="Xem quy cách khoang, thẻ từ ra vào 24/7 & biểu phí thuê m²/m³"
                                 >
-                                  <Camera className="w-3.5 h-3.5" />
-                                  <span>Chi Tiết & Ảnh</span>
-                                  <span className="bg-amber-400 text-white text-[10px] px-1 py-0.2 rounded-full font-bold">
-                                    {(route.warehousePhotos?.length || 3)}📸
-                                  </span>
+                                  <Sliders className="w-3.5 h-3.5 text-amber-600 group-hover:scale-110 transition-transform" />
+                                  <span>Chi tiết</span>
+                                  {photoCount > 0 && (
+                                    <span className="text-[10px] px-1 py-0.2 bg-white rounded text-amber-800 font-semibold border border-amber-200">
+                                      {photoCount}📸
+                                    </span>
+                                  )}
+                                  <ChevronRight className="w-3 h-3 text-amber-400 group-hover:translate-x-0.5 transition-transform" />
                                 </button>
                               </td>
                               <td className="p-2 text-center">
                                 <button
                                   type="button"
                                   onClick={() => handleTriggerRFQForRoute(route)}
-                                  className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
+                                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
                                 >
                                   <Send className="w-3 h-3" />
                                   <span>Báo Giá</span>
@@ -1027,71 +1074,41 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                         }
 
                         // ----------------------------------------------------
-                        // ROW 4: KHO TIÊU CHUẨN / KHO LẠNH (wh-gen-std, wh-ref-cold)
+                        // ROW 4: KHO TIÊU CHUẨN / KHO LẠNH / HÓA CHẤT
                         // ----------------------------------------------------
                         if (isWarehousingTable && !isBonded && !isFulfillment && !isSelfStorage) {
+                          const photoCount = route.warehousePhotos?.length || 0;
                           return (
                             <tr key={route.id || idx} className="hover:bg-indigo-50/20 transition-colors divide-x divide-slate-100 text-xs">
-                              <td className="p-2 text-center font-bold text-slate-500 w-9 bg-slate-50/50">{idx + 1}</td>
-                              <td className="p-2 text-center font-mono font-bold text-indigo-700 bg-indigo-50/30">
+                              <td className="p-2 text-center font-bold text-slate-500 w-12 bg-slate-50/50">{idx + 1}</td>
+                              <td className="p-2 text-center font-mono font-bold text-indigo-700 bg-indigo-50/40">
                                 {route.warehouseCode || `WH-DC-${String(idx + 1).padStart(3, '0')}`}
                               </td>
-                              <td className="p-2 font-bold text-slate-900">
-                                {route.warehouseName || route.route}
-                              </td>
-                              <td className="p-2 font-semibold text-slate-800">{route.warehouseProvince || route.origin}</td>
+                              <td className="p-2 font-bold text-slate-900">{route.warehouseName || route.route}</td>
+                              <td className="p-2 font-medium text-slate-700">{route.warehouseProvince || route.origin || 'Bình Dương'}</td>
                               <td className="p-2 text-slate-600">{route.warehouseAddress || route.destination}</td>
-                              <td className="p-2 text-right font-bold text-blue-900 bg-blue-50/30">
-                                {(route.capacityArea ?? 15000).toLocaleString('vi-VN')} m²
-                              </td>
-                              <td className="p-2 text-right font-semibold text-slate-800 bg-blue-50/20">
-                                {(route.capacityPallets ?? 12000).toLocaleString('vi-VN')}
-                              </td>
-                              <td className="p-2 text-right font-semibold text-slate-800 bg-blue-50/20">
-                                {(route.capacityVolume ?? 18000).toLocaleString('vi-VN')} m³
-                              </td>
-                              <td className="p-2 text-right font-black text-emerald-800 bg-emerald-50/30">
-                                {(route.pricePerArea ?? 95000).toLocaleString('vi-VN')} ₫
-                              </td>
-                              <td className="p-2 text-right font-black text-emerald-800 bg-emerald-50/20">
-                                {(route.pricePerPallet ?? 110000).toLocaleString('vi-VN')} ₫
-                              </td>
-                              <td className="p-2 text-right font-bold text-emerald-800 bg-emerald-50/20">
-                                {(route.pricePerVolume ?? 120000).toLocaleString('vi-VN')} ₫
-                              </td>
-                              <td className="p-2 text-right font-bold text-amber-800 bg-amber-50/30">
-                                {(route.minChargeMonthly ?? 5000000).toLocaleString('vi-VN')} ₫
-                              </td>
-                              <td className="p-2 text-center font-bold text-slate-800">{route.currency || 'VND'}</td>
-                              <td className="p-2 text-center text-slate-700 font-medium">{route.sla || 'Xuất nhập 2 - 4h'}</td>
-                              <td className="p-2 text-center text-slate-600">{route.validUntil || '2026-12-31'}</td>
-                              <td className="p-2 text-center">
-                                {hasPromo ? (
-                                  <span className="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 font-black text-[10px]">
-                                    -{route.promotionPercent}%
-                                  </span>
-                                ) : (
-                                  <span className="text-slate-400 font-medium">0%</span>
-                                )}
-                              </td>
-                              <td className="p-2 text-center bg-indigo-50/30">
+                              <td className="p-2 text-center bg-indigo-50/10">
                                 <button
                                   type="button"
                                   onClick={() => handleOpenWarehouseModal(route)}
-                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold text-xs shadow-2xs transition-all cursor-pointer hover:shadow-indigo-600/30"
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
+                                  title="Xem kết cấu sàn, giá kệ, PCCC, album ảnh & biểu phí m²/Pallet"
                                 >
-                                  <Camera className="w-3.5 h-3.5" />
-                                  <span>Chi Tiết & Specs</span>
-                                  <span className="bg-indigo-400 text-white text-[10px] px-1 py-0.2 rounded-full font-bold">
-                                    {(route.warehousePhotos?.length || 5)}📸
-                                  </span>
+                                  <Sliders className="w-3.5 h-3.5 text-indigo-600 group-hover:scale-110 transition-transform" />
+                                  <span>Chi tiết</span>
+                                  {photoCount > 0 && (
+                                    <span className="text-[10px] px-1 py-0.2 bg-white rounded text-indigo-700 font-semibold border border-indigo-200">
+                                      {photoCount}📸
+                                    </span>
+                                  )}
+                                  <ChevronRight className="w-3 h-3 text-indigo-400 group-hover:translate-x-0.5 transition-transform" />
                                 </button>
                               </td>
                               <td className="p-2 text-center">
                                 <button
                                   type="button"
                                   onClick={() => handleTriggerRFQForRoute(route)}
-                                  className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
+                                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
                                 >
                                   <Send className="w-3 h-3" />
                                   <span>Báo Giá</span>
@@ -1102,224 +1119,35 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                         }
 
                         // ----------------------------------------------------
-                        // ROW 5: PROJECT CARGO - X-DOCK
+                        // ROW 5: TRUCKING FTL
                         // ----------------------------------------------------
-                        if (isXdockTable) {
+                        if (isTruckingTable && isTruckingFtlTable) {
                           return (
-                            <tr key={route.id || idx} className="hover:bg-purple-50/20 transition-colors divide-x divide-slate-100 text-xs">
-                              <td className="p-2 text-center font-bold text-slate-500 w-9 bg-slate-50/50">{idx + 1}</td>
-                              <td className="p-2 text-center font-mono font-bold text-purple-700 bg-purple-50/20">
-                                {route.xdockCode || route.routeCode || `XD-${String(idx + 1).padStart(2, '0')}`}
-                              </td>
-                              <td className="p-2 font-bold text-slate-900">{route.xdockName || route.route}</td>
-                              <td className="p-2 font-semibold text-slate-800">{route.xdockProvince || route.origin}</td>
-                              <td className="p-2 text-slate-600">{route.xdockAddress || route.destination}</td>
-                              <td className="p-2 text-right font-black text-blue-900 bg-blue-50/30">
-                                {route.floorProcessingCapacity || '250 Tấn / Ngày'}
-                              </td>
-                              <td className="p-2 text-right font-black text-emerald-700 bg-emerald-50/30">
-                                {(route.pricePerKg ?? 180).toLocaleString('vi-VN')} ₫
-                              </td>
-                              <td className="p-2 text-right font-bold text-emerald-700 bg-emerald-50/20">
-                                {(route.pricePerCbm ?? 45000).toLocaleString('vi-VN')} ₫
-                              </td>
-                              <td className="p-2 text-right font-bold text-emerald-700 bg-emerald-50/20">
-                                {(route.pricePerPallet ?? 35000).toLocaleString('vi-VN')} ₫
-                              </td>
-                              <td className="p-2 text-right font-bold text-amber-700 bg-amber-50/30">
-                                {(route.minChargeXdock ?? 250000).toLocaleString('vi-VN')} ₫
-                              </td>
-                              <td className="p-2 text-center font-bold text-slate-800">{route.currency || 'VND'}</td>
-                              <td className="p-2 text-center text-slate-700 font-medium">{route.sla || '< 4 giờ (Sang xe ngay)'}</td>
-                              <td className="p-2 text-center text-slate-600">{route.validUntil || '2026-12-31'}</td>
-                              <td className="p-2 text-center">
-                                {hasPromo ? (
-                                  <span className="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 font-black text-[10px]">
-                                    -{route.promotionPercent}%
-                                  </span>
-                                ) : (
-                                  <span className="text-slate-400 font-medium">0%</span>
-                                )}
-                              </td>
-                              <td className="p-2 text-center bg-purple-50/30">
-                                <button
-                                  type="button"
-                                  onClick={() => handleOpenWarehouseModal(route)}
-                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-bold text-xs shadow-2xs transition-all cursor-pointer"
-                                >
-                                  <Camera className="w-3.5 h-3.5" />
-                                  <span>Chi Tiết & Ảnh</span>
-                                </button>
-                              </td>
-                              <td className="p-2 text-center">
-                                <button
-                                  type="button"
-                                  onClick={() => handleTriggerRFQForRoute(route)}
-                                  className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
-                                >
-                                  <Send className="w-3 h-3" />
-                                  <span>Báo Giá</span>
-                                </button>
-                              </td>
-                            </tr>
-                          );
-                        }
-
-                        // ----------------------------------------------------
-                        // ROW 6: PROJECT CARGO - PORT / ICD
-                        // ----------------------------------------------------
-                        if (isPortTable) {
-                          return (
-                            <tr key={route.id || idx} className="hover:bg-sky-50/20 transition-colors divide-x divide-slate-100 text-xs">
-                              <td className="p-2 text-center font-bold text-slate-500 w-9 bg-slate-50/50">{idx + 1}</td>
-                              <td className="p-2 text-center font-mono font-bold text-sky-800 bg-sky-50/20">
-                                {route.portIcdCode || route.routeCode || `ICD-${String(idx + 1).padStart(2, '0')}`}
-                              </td>
-                              <td className="p-2 font-bold text-slate-900">{route.portIcdName || route.route}</td>
-                              <td className="p-2 font-semibold text-slate-800">{route.portIcdProvince || route.origin}</td>
-                              <td className="p-2 text-slate-600">{route.portIcdAddress || route.destination}</td>
-                              <td className="p-2 text-right font-black text-blue-900 bg-blue-50/30">
-                                {(route.yardCapacityTeu ?? 15000).toLocaleString('vi-VN')} TEU
-                              </td>
-                              <td className="p-2 text-right font-bold text-emerald-700 bg-emerald-50/30">
-                                {(route.priceShuttle20ft ?? 850000).toLocaleString('vi-VN')} ₫
-                              </td>
-                              <td className="p-2 text-right font-black text-emerald-700 bg-emerald-50/30">
-                                {(route.priceShuttle40ft ?? 1350000).toLocaleString('vi-VN')} ₫
-                              </td>
-                              <td className="p-2 text-right font-bold text-amber-700 bg-amber-50/20">
-                                {(route.priceLiftOnOff ?? 320000).toLocaleString('vi-VN')} ₫
-                              </td>
-                              <td className="p-2 text-center font-bold text-slate-800">{route.currency || 'VND'}</td>
-                              <td className="p-2 text-center text-slate-700 font-medium">{route.sla || 'Luân chuyển < 12h'}</td>
-                              <td className="p-2 text-center text-slate-600">{route.validUntil || '2026-12-31'}</td>
-                              <td className="p-2 text-center">
-                                {hasPromo ? (
-                                  <span className="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 font-black text-[10px]">
-                                    -{route.promotionPercent}%
-                                  </span>
-                                ) : (
-                                  <span className="text-slate-400 font-medium">0%</span>
-                                )}
-                              </td>
-                              <td className="p-2 text-center bg-sky-50/30">
-                                <button
-                                  type="button"
-                                  onClick={() => handleOpenWarehouseModal(route)}
-                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-sky-600 hover:bg-sky-700 text-white rounded-lg font-bold text-xs shadow-2xs transition-all cursor-pointer"
-                                >
-                                  <Camera className="w-3.5 h-3.5" />
-                                  <span>Chi Tiết Bãi</span>
-                                </button>
-                              </td>
-                              <td className="p-2 text-center">
-                                <button
-                                  type="button"
-                                  onClick={() => handleTriggerRFQForRoute(route)}
-                                  className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
-                                >
-                                  <Send className="w-3 h-3" />
-                                  <span>Báo Giá</span>
-                                </button>
-                              </td>
-                            </tr>
-                          );
-                        }
-
-                        // ----------------------------------------------------
-                        // ROW 7: THỦ TỤC HẢI QUAN
-                        // ----------------------------------------------------
-                        if (isCustomsTable) {
-                          return (
-                            <tr key={route.id || idx} className="hover:bg-amber-50/20 transition-colors divide-x divide-slate-100 text-xs">
-                              <td className="p-2 text-center font-bold text-slate-500 w-9 bg-slate-50/50">{idx + 1}</td>
-                              <td className="p-2 text-center font-mono font-bold text-amber-800 bg-amber-50/20">
-                                {route.routeCode || `CST-${String(idx + 1).padStart(3, '0')}`}
-                              </td>
-                              <td className="p-2 font-bold text-amber-950 bg-amber-50/20">
-                                {route.customsBranchName || route.route}
-                              </td>
-                              <td className="p-2 font-semibold text-slate-800">{route.customsAreaName || route.origin}</td>
-                              <td className="p-2 text-slate-700">{route.customsDeclarationType || 'Nhập kinh doanh tiêu dùng (A11, A12)'}</td>
-                              <td className="p-2 text-center font-bold text-slate-800">{route.pricingUnit || 'Tờ khai'}</td>
-                              <td className="p-2 text-center font-bold text-slate-800">{route.currency || 'VND'}</td>
-                              <td className="p-2 text-right font-black text-emerald-800 bg-emerald-50/30">
-                                {(route.price || 850000).toLocaleString('vi-VN')} ₫
-                              </td>
-                              <td className="p-2 text-right font-bold text-emerald-800 bg-emerald-50/20">
-                                {(route.customsExtraItemPrice ?? 50000).toLocaleString('vi-VN')} ₫
-                              </td>
-                              <td className="p-2 text-right font-bold text-rose-800 bg-rose-50/20">
-                                {(route.customsRedChannelPrice ?? 1200000).toLocaleString('vi-VN')} ₫
-                              </td>
-                              <td className="p-2 text-center text-slate-700 font-medium">{route.sla || 'Xanh < 30p | Vàng < 2h'}</td>
-                              <td className="p-2 text-center text-slate-600">{route.customsServiceForm || 'Đại lý HQ trọn gói'}</td>
-                              <td className="p-2 text-center text-slate-600">{route.validUntil || '2026-12-31'}</td>
-                              <td className="p-2 text-center">
-                                {hasPromo ? (
-                                  <span className="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 font-black text-[10px]">
-                                    -{route.promotionPercent}%
-                                  </span>
-                                ) : (
-                                  <span className="text-slate-400 font-medium">0%</span>
-                                )}
-                              </td>
-                              <td className="p-2 text-center">
-                                <button
-                                  type="button"
-                                  onClick={() => handleTriggerRFQForRoute(route)}
-                                  className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
-                                >
-                                  <Send className="w-3 h-3" />
-                                  <span>Báo Giá</span>
-                                </button>
-                              </td>
-                            </tr>
-                          );
-                        }
-
-                        // ----------------------------------------------------
-                        // ROW 8: VẬN TẢI XUYÊN BIÊN GIỚI (LTL / FTL)
-                        // ----------------------------------------------------
-                        if (isCrossBorderLtl) {
-                          return (
-                            <tr key={route.id || idx} className="hover:bg-orange-50/20 transition-colors divide-x divide-slate-100 text-xs">
-                              <td className="p-2 text-center font-bold text-slate-500 w-9 bg-slate-50/50">{idx + 1}</td>
-                              <td className="p-2 text-center font-mono font-bold text-orange-800 bg-orange-50/20">
-                                {route.routeCode || `CB-LTL-${String(idx + 1).padStart(2, '0')}`}
+                            <tr key={route.id || idx} className="hover:bg-indigo-50/20 transition-colors divide-x divide-slate-100 text-xs">
+                              <td className="p-2 text-center font-bold text-slate-400 w-9 bg-slate-50/50">{idx + 1}</td>
+                              <td className="p-2 text-center font-mono font-bold text-indigo-700 bg-indigo-50/40">
+                                {route.routeCode || `RC-FTL-${String(idx + 1).padStart(3, '0')}`}
                               </td>
                               <td className="p-2 font-bold text-slate-900">{route.route}</td>
-                              <td className="p-2 font-semibold text-amber-950 bg-amber-50/20">{route.borderGate || 'Cửa khẩu Hữu Nghị'}</td>
-                              <td className="p-2 font-medium text-slate-700">{route.origin}</td>
-                              <td className="p-2 font-medium text-slate-700">{route.destination}</td>
-                              <td className="p-2 text-center text-slate-600">{route.customsLtlMode || 'Chính ngạch gom LTL'}</td>
-                              <td className="p-2 text-right font-black text-emerald-800 bg-emerald-50/30">
-                                {(route.pricePerKg ?? 18000).toLocaleString('vi-VN')} ₫
-                              </td>
-                              <td className="p-2 text-right font-black text-emerald-800 bg-emerald-50/30">
-                                {(route.pricePerCbm ?? 2800000).toLocaleString('vi-VN')} ₫
-                              </td>
-                              <td className="p-2 text-right font-bold text-amber-800 bg-amber-50/20">
-                                {(route.minChargeShipment ?? 500000).toLocaleString('vi-VN')} ₫
-                              </td>
-                              <td className="p-2 text-center font-bold text-slate-800">{route.currency || 'VND'}</td>
-                              <td className="p-2 text-center text-slate-700 font-medium">{route.sla || '3 - 5 ngày'}</td>
-                              <td className="p-2 text-center text-blue-950 font-semibold bg-blue-50/20">{route.departureSchedule || 'Hàng ngày'}</td>
-                              <td className="p-2 text-center text-slate-600">{route.validUntil || '2026-12-31'}</td>
-                              <td className="p-2 text-center">
-                                {hasPromo ? (
-                                  <span className="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 font-black text-[10px]">
-                                    -{route.promotionPercent}%
-                                  </span>
-                                ) : (
-                                  <span className="text-slate-400 font-medium">0%</span>
-                                )}
+                              <td className="p-2 text-slate-700 font-medium">{route.origin}</td>
+                              <td className="p-2 text-slate-700 font-medium">{route.destination}</td>
+                              <td className="p-2 text-center bg-indigo-50/20">
+                                <button
+                                  type="button"
+                                  onClick={() => setActiveMatrixModalRoute(route)}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
+                                  title="Xem ma trận biểu phí chi tiết theo từng loại xe, phụ phí & VAS"
+                                >
+                                  <Sliders className="w-3.5 h-3.5 text-indigo-600 group-hover:scale-110 transition-transform" />
+                                  <span>Chi tiết biểu phí</span>
+                                  <ChevronRight className="w-3 h-3 text-indigo-400 group-hover:translate-x-0.5 transition-transform" />
+                                </button>
                               </td>
                               <td className="p-2 text-center">
                                 <button
                                   type="button"
                                   onClick={() => handleTriggerRFQForRoute(route)}
-                                  className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
+                                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
                                 >
                                   <Send className="w-3 h-3" />
                                   <span>Báo Giá</span>
@@ -1329,41 +1157,316 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                           );
                         }
 
+                        // ----------------------------------------------------
+                        // ROW 6: TRUCKING LTL
+                        // ----------------------------------------------------
+                        if (isTruckingTable && isLtlTable) {
+                          return (
+                            <tr key={route.id || idx} className="hover:bg-indigo-50/20 transition-colors divide-x divide-slate-100 text-xs">
+                              <td className="p-2 text-center font-bold text-slate-400 w-9 bg-slate-50/50">{idx + 1}</td>
+                              <td className="p-2 text-center font-mono font-bold text-indigo-700 bg-indigo-50/40">
+                                {route.routeCode || `RC-LTL-${String(idx + 1).padStart(3, '0')}`}
+                              </td>
+                              <td className="p-2 font-bold text-slate-900">{route.route}</td>
+                              <td className="p-2 text-slate-700 font-medium">{route.origin}</td>
+                              <td className="p-2 text-slate-700 font-medium">{route.destination}</td>
+                              <td className="p-2 text-center bg-indigo-50/20">
+                                <button
+                                  type="button"
+                                  onClick={() => setActiveMatrixModalRoute(route)}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
+                                  title="Xem ma trận biểu phí ghép hàng lẻ LTL theo Kg & CBM"
+                                >
+                                  <Sliders className="w-3.5 h-3.5 text-indigo-600 group-hover:scale-110 transition-transform" />
+                                  <span>Chi tiết biểu phí</span>
+                                  <ChevronRight className="w-3 h-3 text-indigo-400 group-hover:translate-x-0.5 transition-transform" />
+                                </button>
+                              </td>
+                              <td className="p-2 text-center">
+                                <button
+                                  type="button"
+                                  onClick={() => handleTriggerRFQForRoute(route)}
+                                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
+                                >
+                                  <Send className="w-3 h-3" />
+                                  <span>Báo Giá</span>
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        }
+
+                        // ----------------------------------------------------
+                        // ROW 7: OCEAN FCL
+                        // ----------------------------------------------------
+                        if (isOceanTable && isOceanFclTable) {
+                          return (
+                            <tr key={route.id || idx} className="hover:bg-sky-50/20 transition-colors divide-x divide-slate-100 text-xs">
+                              <td className="p-2 text-center font-bold text-slate-400 w-9 bg-slate-50/50">{idx + 1}</td>
+                              <td className="p-2 text-center font-mono font-bold text-sky-700 bg-sky-50/40">
+                                {route.routeCode || `RC-FCL-${String(idx + 1).padStart(3, '0')}`}
+                              </td>
+                              <td className="p-2 font-medium text-slate-700 bg-sky-50/20">{route.region || 'Châu Á'}</td>
+                              <td className="p-2 font-bold text-slate-900">{route.route}</td>
+                              <td className="p-2 text-slate-700 font-medium">{route.origin}</td>
+                              <td className="p-2 text-slate-700 font-medium">{route.destination}</td>
+                              <td className="p-2 text-center bg-sky-50/20">
+                                <button
+                                  type="button"
+                                  onClick={() => setActiveMatrixModalRoute(route)}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
+                                  title="Xem biểu phí container 20ft/40ft/45ft, phụ phí local charges & lịch tàu"
+                                >
+                                  <Sliders className="w-3.5 h-3.5 text-sky-600 group-hover:scale-110 transition-transform" />
+                                  <span>Chi tiết biểu phí</span>
+                                  <ChevronRight className="w-3 h-3 text-sky-400 group-hover:translate-x-0.5 transition-transform" />
+                                </button>
+                              </td>
+                              <td className="p-2 text-center">
+                                <button
+                                  type="button"
+                                  onClick={() => handleTriggerRFQForRoute(route)}
+                                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
+                                >
+                                  <Send className="w-3 h-3" />
+                                  <span>Báo Giá</span>
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        }
+
+                        // ----------------------------------------------------
+                        // ROW 8: OCEAN LCL
+                        // ----------------------------------------------------
+                        if (isOceanTable && isOceanLclTable) {
+                          return (
+                            <tr key={route.id || idx} className="hover:bg-sky-50/20 transition-colors divide-x divide-slate-100 text-xs">
+                              <td className="p-2 text-center font-bold text-slate-400 w-9 bg-slate-50/50">{idx + 1}</td>
+                              <td className="p-2 text-center font-mono font-bold text-sky-700 bg-sky-50/40">
+                                {route.routeCode || `RC-LCL-${String(idx + 1).padStart(3, '0')}`}
+                              </td>
+                              <td className="p-2 font-medium text-slate-700 bg-sky-50/20">{route.region || 'Châu Á'}</td>
+                              <td className="p-2 font-bold text-slate-900">{route.route}</td>
+                              <td className="p-2 text-slate-700 font-medium">{route.origin}</td>
+                              <td className="p-2 text-slate-700 font-medium">{route.destination}</td>
+                              <td className="p-2 text-center bg-sky-50/20">
+                                <button
+                                  type="button"
+                                  onClick={() => setActiveMatrixModalRoute(route)}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
+                                  title="Xem ma trận cước gom hàng lẻ LCL CBM & Kg, phụ phí CFS & local charges"
+                                >
+                                  <Sliders className="w-3.5 h-3.5 text-sky-600 group-hover:scale-110 transition-transform" />
+                                  <span>Chi tiết biểu phí</span>
+                                  <ChevronRight className="w-3 h-3 text-sky-400 group-hover:translate-x-0.5 transition-transform" />
+                                </button>
+                              </td>
+                              <td className="p-2 text-center">
+                                <button
+                                  type="button"
+                                  onClick={() => handleTriggerRFQForRoute(route)}
+                                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
+                                >
+                                  <Send className="w-3 h-3" />
+                                  <span>Báo Giá</span>
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        }
+
+                        // ----------------------------------------------------
+                        // ROW 9: RAIL FCL
+                        // ----------------------------------------------------
+                        if (isRailTable && isRailFclTable) {
+                          return (
+                            <tr key={route.id || idx} className="hover:bg-emerald-50/20 transition-colors divide-x divide-slate-100 text-xs">
+                              <td className="p-2 text-center font-bold text-slate-400 w-9 bg-slate-50/50">{idx + 1}</td>
+                              <td className="p-2 text-center font-mono font-bold text-emerald-700 bg-emerald-50/40">
+                                {route.routeCode || `RC-RAIL-${String(idx + 1).padStart(3, '0')}`}
+                              </td>
+                              <td className="p-2 font-bold text-slate-900">{route.route}</td>
+                              <td className="p-2 text-slate-700 font-medium">{route.origin}</td>
+                              <td className="p-2 text-slate-700 font-medium">{route.destination}</td>
+                              <td className="p-2 font-semibold text-slate-800">{route.shippingLine || 'Đường Sắt Việt Nam (VNR)'}</td>
+                              <td className="p-2 text-center bg-emerald-50/20">
+                                <button
+                                  type="button"
+                                  onClick={() => setActiveMatrixModalRoute(route)}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
+                                  title="Xem ma trận giá container đường sắt, phụ phí ga & lịch chạy tàu hàng"
+                                >
+                                  <Sliders className="w-3.5 h-3.5 text-emerald-600 group-hover:scale-110 transition-transform" />
+                                  <span>Chi tiết biểu phí</span>
+                                  <ChevronRight className="w-3 h-3 text-emerald-400 group-hover:translate-x-0.5 transition-transform" />
+                                </button>
+                              </td>
+                              <td className="p-2 text-center">
+                                <button
+                                  type="button"
+                                  onClick={() => handleTriggerRFQForRoute(route)}
+                                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
+                                >
+                                  <Send className="w-3 h-3" />
+                                  <span>Báo Giá</span>
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        }
+
+                        // ----------------------------------------------------
+                        // ROW 10: RAIL LCL
+                        // ----------------------------------------------------
+                        if (isRailTable && isRailLclTable) {
+                          return (
+                            <tr key={route.id || idx} className="hover:bg-emerald-50/20 transition-colors divide-x divide-slate-100 text-xs">
+                              <td className="p-2 text-center font-bold text-slate-400 w-9 bg-slate-50/50">{idx + 1}</td>
+                              <td className="p-2 text-center font-mono font-bold text-emerald-700 bg-emerald-50/40">
+                                {route.routeCode || `RC-RLCL-${String(idx + 1).padStart(3, '0')}`}
+                              </td>
+                              <td className="p-2 font-bold text-slate-900">{route.route}</td>
+                              <td className="p-2 text-slate-700 font-medium">{route.origin}</td>
+                              <td className="p-2 text-slate-700 font-medium">{route.destination}</td>
+                              <td className="p-2 font-semibold text-slate-800">{route.shippingLine || 'Đường Sắt Việt Nam (VNR)'}</td>
+                              <td className="p-2 text-center bg-emerald-50/20">
+                                <button
+                                  type="button"
+                                  onClick={() => setActiveMatrixModalRoute(route)}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
+                                  title="Xem ma trận cước ghép hàng lẻ đường sắt LCL theo Kg & CBM"
+                                >
+                                  <Sliders className="w-3.5 h-3.5 text-emerald-600 group-hover:scale-110 transition-transform" />
+                                  <span>Chi tiết biểu phí</span>
+                                  <ChevronRight className="w-3 h-3 text-emerald-400 group-hover:translate-x-0.5 transition-transform" />
+                                </button>
+                              </td>
+                              <td className="p-2 text-center">
+                                <button
+                                  type="button"
+                                  onClick={() => handleTriggerRFQForRoute(route)}
+                                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
+                                >
+                                  <Send className="w-3 h-3" />
+                                  <span>Báo Giá</span>
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        }
+
+                        // ----------------------------------------------------
+                        // ROW 11: AIR CARGO
+                        // ----------------------------------------------------
+                        if (isAirCargoTable) {
+                          return (
+                            <tr key={route.id || idx} className="hover:bg-sky-50/20 transition-colors divide-x divide-slate-100 text-xs">
+                              <td className="p-2 text-center font-bold text-slate-400 w-9 bg-slate-50/50">{idx + 1}</td>
+                              <td className="p-2 text-center font-mono font-bold text-sky-700 bg-sky-50/40">
+                                {route.routeCode || `RC-AIR-${String(idx + 1).padStart(3, '0')}`}
+                              </td>
+                              <td className="p-2 font-medium text-slate-700 bg-sky-50/20">{route.region || 'Đông Bắc Á'}</td>
+                              <td className="p-2 font-bold text-slate-900">{route.route}</td>
+                              <td className="p-2 text-slate-700 font-medium">{route.origin}</td>
+                              <td className="p-2 text-slate-700 font-medium">{route.destination}</td>
+                              <td className="p-2 text-center bg-sky-50/20">
+                                <button
+                                  type="button"
+                                  onClick={() => setActiveMatrixModalRoute(route)}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
+                                  title="Xem ma trận cước hàng không Air Cargo theo các bậc trọng lượng & phụ phí FSC/SSC"
+                                >
+                                  <Sliders className="w-3.5 h-3.5 text-sky-600 group-hover:scale-110 transition-transform" />
+                                  <span>Chi tiết biểu phí</span>
+                                  <ChevronRight className="w-3 h-3 text-sky-400 group-hover:translate-x-0.5 transition-transform" />
+                                </button>
+                              </td>
+                              <td className="p-2 text-center">
+                                <button
+                                  type="button"
+                                  onClick={() => handleTriggerRFQForRoute(route)}
+                                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
+                                >
+                                  <Send className="w-3 h-3" />
+                                  <span>Báo Giá</span>
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        }
+
+                        // ----------------------------------------------------
+                        // ROW 12: AIR EXPRESS
+                        // ----------------------------------------------------
+                        if (isExpressTable) {
+                          return (
+                            <tr key={route.id || idx} className="hover:bg-amber-50/20 transition-colors divide-x divide-slate-100 text-xs">
+                              <td className="p-2 text-center font-bold text-slate-400 w-9 bg-slate-50/50">{idx + 1}</td>
+                              <td className="p-2 text-center font-mono font-bold text-amber-700 bg-amber-50/40">
+                                {route.routeCode || `RC-EXP-${String(idx + 1).padStart(3, '0')}`}
+                              </td>
+                              <td className="p-2 font-medium text-slate-700 bg-amber-50/20">{route.region || 'Đông Nam Á'}</td>
+                              <td className="p-2 font-bold text-slate-900">{route.route}</td>
+                              <td className="p-2 text-slate-700 font-medium">{route.origin}</td>
+                              <td className="p-2 text-slate-700 font-medium">{route.destination}</td>
+                              <td className="p-2 text-center bg-amber-50/20">
+                                <button
+                                  type="button"
+                                  onClick={() => setActiveMatrixModalRoute(route)}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
+                                  title="Xem bảng cước chuyển phát nhanh Express Door-to-Door"
+                                >
+                                  <Sliders className="w-3.5 h-3.5 text-amber-600 group-hover:scale-110 transition-transform" />
+                                  <span>Chi tiết biểu phí</span>
+                                  <ChevronRight className="w-3 h-3 text-amber-400 group-hover:translate-x-0.5 transition-transform" />
+                                </button>
+                              </td>
+                              <td className="p-2 text-center">
+                                <button
+                                  type="button"
+                                  onClick={() => handleTriggerRFQForRoute(route)}
+                                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
+                                >
+                                  <Send className="w-3 h-3" />
+                                  <span>Báo Giá</span>
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        }
+
+                        // ----------------------------------------------------
+                        // ROW 13: CROSS-BORDER FTL
+                        // ----------------------------------------------------
                         if (isCrossBorderFtl) {
                           return (
                             <tr key={route.id || idx} className="hover:bg-orange-50/20 transition-colors divide-x divide-slate-100 text-xs">
-                              <td className="p-2 text-center font-bold text-slate-500 w-9 bg-slate-50/50">{idx + 1}</td>
-                              <td className="p-2 text-center font-mono font-bold text-orange-800 bg-orange-50/20">
+                              <td className="p-2 text-center font-bold text-slate-400 w-9 bg-slate-50/50">{idx + 1}</td>
+                              <td className="p-2 text-center font-mono font-bold text-orange-800 bg-orange-50/40">
                                 {route.routeCode || `CB-FTL-${String(idx + 1).padStart(2, '0')}`}
                               </td>
                               <td className="p-2 font-bold text-slate-900">{route.route}</td>
                               <td className="p-2 font-semibold text-amber-950 bg-amber-50/20">{route.borderGate || 'Cửa khẩu Quốc tế Hữu Nghị'}</td>
                               <td className="p-2 font-medium text-slate-700">{route.origin}</td>
                               <td className="p-2 font-medium text-slate-700">{route.destination}</td>
-                              <td className="p-2 text-slate-700">{route.truckBodyType || 'Container 40ft/45ft'}</td>
-                              <td className="p-2 text-center text-slate-600">{route.transitMode || 'Đổi tài xế tại biên giới'}</td>
-                              <td className="p-2 text-center text-slate-600">{route.customsScope || 'Trọn gói HQ 2 đầu'}</td>
-                              <td className="p-2 text-center font-bold text-slate-800">{route.pricingUnit || 'Chuyến'}</td>
-                              <td className="p-2 text-center font-bold text-slate-800">{route.currency || 'VND'}</td>
-                              <td className="p-2 text-right font-black text-emerald-800 bg-emerald-50/30">
-                                {(route.price || 32000000).toLocaleString('vi-VN')} ₫
-                              </td>
-                              <td className="p-2 text-center text-slate-700 font-medium">{route.sla || '24 - 36 giờ'}</td>
-                              <td className="p-2 text-center text-slate-600">{route.validUntil || '2026-12-31'}</td>
-                              <td className="p-2 text-center">
-                                {hasPromo ? (
-                                  <span className="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 font-black text-[10px]">
-                                    -{route.promotionPercent}%
-                                  </span>
-                                ) : (
-                                  <span className="text-slate-400 font-medium">0%</span>
-                                )}
+                              <td className="p-2 text-center bg-orange-50/20">
+                                <button
+                                  type="button"
+                                  onClick={() => setActiveMatrixModalRoute(route)}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 hover:bg-orange-100 text-orange-800 border border-orange-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
+                                  title="Xem ma trận biểu phí phương tiện vận tải đường bộ xuyên biên giới (FTL)"
+                                >
+                                  <Sliders className="w-3.5 h-3.5 text-orange-600 group-hover:scale-110 transition-transform" />
+                                  <span>Chi tiết biểu phí</span>
+                                  <ChevronRight className="w-3 h-3 text-orange-400 group-hover:translate-x-0.5 transition-transform" />
+                                </button>
                               </td>
                               <td className="p-2 text-center">
                                 <button
                                   type="button"
                                   onClick={() => handleTriggerRFQForRoute(route)}
-                                  className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
+                                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
                                 >
                                   <Send className="w-3 h-3" />
                                   <span>Báo Giá</span>
@@ -1374,91 +1477,167 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                         }
 
                         // ----------------------------------------------------
-                        // ROW 9: TIÊU CHUẨN (TRUCKING / OCEAN / RAIL / AIR)
+                        // ROW 14: CROSS-BORDER LTL
                         // ----------------------------------------------------
-                        return (
-                          <tr key={route.id || idx} className="hover:bg-slate-50/80 transition-colors divide-x divide-slate-100 text-xs">
-                            <td className="p-2 text-center font-bold text-slate-400 w-9 bg-slate-50/50">{idx + 1}</td>
-                            <td className="p-2 text-center font-mono font-bold text-indigo-700 bg-indigo-50/40">
-                              {route.routeCode || `RC-${(model.code || 'TRK')}-${String(idx + 1).padStart(3, '0')}`}
-                            </td>
-                            {(isOceanTable || isAirTable) && (
-                              <td className="p-2 font-medium text-slate-700">{route.region || 'Nội địa / Châu Á'}</td>
-                            )}
-                            <td className="p-2 font-bold text-slate-900">{route.route}</td>
-                            <td className="p-2 text-slate-700 font-medium">{route.origin}</td>
-                            <td className="p-2 text-slate-700 font-medium">{route.destination}</td>
-                            
-                            {isOceanTable && isFclTable && (
-                              <>
-                                <td className="p-2 font-semibold text-slate-800">{route.shippingLine || 'Hải An / VIMC'}</td>
-                                <td className="p-2 text-slate-700">{route.truckBodyType || 'Cont 40HC'}</td>
-                              </>
-                            )}
-                            {isOceanTable && isOceanLclTable && (
-                              <td className="p-2 font-semibold text-slate-800">{route.shippingLine || 'Co-loader Lines'}</td>
-                            )}
-                            {isRailTable && isFclTable && (
-                              <td className="p-2 text-slate-700">{route.truckBodyType || 'Cont 40HC Đường Sắt'}</td>
-                            )}
-                            {isAirCargoTable && (
-                              <td className="p-2 font-semibold text-slate-800">{route.shippingLine || 'Vietnam Airlines Cargo'}</td>
-                            )}
-                            {isExpressTable && (
-                              <td className="p-2 font-semibold text-slate-800">{route.shippingLine || 'Hỏa Tốc Express'}</td>
-                            )}
-                            {isTruckingTable && (
-                              <>
-                                <td className="p-2 font-semibold text-slate-800">
-                                  {route.truckBodyType?.split(' (')[0] || route.vehicleType || 'Xe tải kín'}
-                                </td>
-                                <td className="p-2 text-slate-600">
-                                  {route.truckTonnage?.split(' (')[0] || '15.0T'}
-                                </td>
-                              </>
-                            )}
-
-                            <td className="p-2 text-center font-bold text-slate-800">{route.pricingUnit}</td>
-                            <td className="p-2 text-center font-bold text-slate-800">{route.currency}</td>
-                            <td className="p-2 text-right font-black text-emerald-700 bg-emerald-50/30">
-                              {route.currency === 'USD' ? `$${route.price.toFixed(2)}` : `${route.price.toLocaleString('vi-VN')} ₫`}
-                            </td>
-                            <td className="p-2 text-center">
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-semibold text-[11px]">
-                                <Clock className="w-3 h-3 text-slate-500" />
-                                <span>{route.departureSchedule || route.sla || 'Theo thỏa thuận'}</span>
-                              </span>
-                            </td>
-                            {!isExpressTable && (
-                              <td className="p-2 text-center text-slate-600 font-medium">{route.transitType || 'Direct'}</td>
-                            )}
-                            {isFclTable && (
-                              <td className="p-2 text-center font-bold text-indigo-700">
-                                {route.freeDemDetDays ? `${route.freeDemDetDays} ngày` : '14 ngày'}
+                        if (isCrossBorderLtl) {
+                          return (
+                            <tr key={route.id || idx} className="hover:bg-orange-50/20 transition-colors divide-x divide-slate-100 text-xs">
+                              <td className="p-2 text-center font-bold text-slate-400 w-9 bg-slate-50/50">{idx + 1}</td>
+                              <td className="p-2 text-center font-mono font-bold text-orange-800 bg-orange-50/40">
+                                {route.routeCode || `CB-LTL-${String(idx + 1).padStart(2, '0')}`}
                               </td>
-                            )}
-                            <td className="p-2 text-center text-slate-600">{route.validUntil || '2026-12-31'}</td>
-                            <td className="p-2 text-center">
-                              {hasPromo ? (
-                                <span className="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 font-black text-[10px]">
-                                  -{route.promotionPercent}%
-                                </span>
-                              ) : (
-                                <span className="text-slate-400 font-medium">0%</span>
-                              )}
-                            </td>
-                            <td className="p-2 text-center">
-                              <button
-                                type="button"
-                                onClick={() => handleTriggerRFQForRoute(route)}
-                                className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
-                              >
-                                <Send className="w-3 h-3" />
-                                <span>Báo Giá</span>
-                              </button>
-                            </td>
-                          </tr>
-                        );
+                              <td className="p-2 font-bold text-slate-900">{route.route}</td>
+                              <td className="p-2 font-semibold text-amber-950 bg-amber-50/20">{route.borderGate || 'Cửa khẩu Quốc tế Hữu Nghị'}</td>
+                              <td className="p-2 font-medium text-slate-700">{route.origin}</td>
+                              <td className="p-2 font-medium text-slate-700">{route.destination}</td>
+                              <td className="p-2 text-center bg-orange-50/20">
+                                <button
+                                  type="button"
+                                  onClick={() => setActiveMatrixModalRoute(route)}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 hover:bg-orange-100 text-orange-800 border border-orange-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
+                                  title="Xem ma trận cước ghép hàng lẻ xuyên biên giới theo Kg & CBM"
+                                >
+                                  <Sliders className="w-3.5 h-3.5 text-orange-600 group-hover:scale-110 transition-transform" />
+                                  <span>Chi tiết biểu phí</span>
+                                  <ChevronRight className="w-3 h-3 text-orange-400 group-hover:translate-x-0.5 transition-transform" />
+                                </button>
+                              </td>
+                              <td className="p-2 text-center">
+                                <button
+                                  type="button"
+                                  onClick={() => handleTriggerRFQForRoute(route)}
+                                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
+                                >
+                                  <Send className="w-3 h-3" />
+                                  <span>Báo Giá</span>
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        }
+
+                        // ----------------------------------------------------
+                        // ROW 15: PROJECT CARGO (X-DOCK)
+                        // ----------------------------------------------------
+                        if (isXdockTable) {
+                          const photoCount = route.warehousePhotos?.length || 0;
+                          return (
+                            <tr key={route.id || idx} className="hover:bg-purple-50/20 transition-colors divide-x divide-slate-100 text-xs">
+                              <td className="p-2 text-center font-bold text-slate-500 w-9 bg-slate-50/50">{idx + 1}</td>
+                              <td className="p-2 text-center font-mono font-bold text-purple-700 bg-purple-50/40">
+                                {route.xdockCode || route.routeCode || `XD-${String(idx + 1).padStart(2, '0')}`}
+                              </td>
+                              <td className="p-2 font-bold text-slate-900">{route.xdockName || route.warehouseName || route.route}</td>
+                              <td className="p-2 font-medium text-slate-700">{route.xdockProvince || route.warehouseProvince || route.origin || 'Bình Dương'}</td>
+                              <td className="p-2 text-slate-600">{route.xdockAddress || route.warehouseAddress || route.destination}</td>
+                              <td className="p-2 text-center bg-indigo-50/10">
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenWarehouseModal(route)}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
+                                  title="Xem công suất sàn chia chọn, cửa dock, SLA giải phóng & biểu phí handling"
+                                >
+                                  <Sliders className="w-3.5 h-3.5 text-indigo-600 group-hover:scale-110 transition-transform" />
+                                  <span>Chi tiết</span>
+                                  {photoCount > 0 && (
+                                    <span className="text-[10px] px-1 py-0.2 bg-white rounded text-indigo-700 font-semibold border border-indigo-200">
+                                      {photoCount}📸
+                                    </span>
+                                  )}
+                                  <ChevronRight className="w-3 h-3 text-indigo-400 group-hover:translate-x-0.5 transition-transform" />
+                                </button>
+                              </td>
+                              <td className="p-2 text-center">
+                                <button
+                                  type="button"
+                                  onClick={() => handleTriggerRFQForRoute(route)}
+                                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
+                                >
+                                  <Send className="w-3 h-3" />
+                                  <span>Báo Giá</span>
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        }
+
+                        // ----------------------------------------------------
+                        // ROW 16: PROJECT CARGO (PORT / ICD)
+                        // ----------------------------------------------------
+                        if (isPortTable) {
+                          const photoCount = route.warehousePhotos?.length || 0;
+                          return (
+                            <tr key={route.id || idx} className="hover:bg-sky-50/20 transition-colors divide-x divide-slate-100 text-xs">
+                              <td className="p-2 text-center font-bold text-slate-500 w-9 bg-slate-50/50">{idx + 1}</td>
+                              <td className="p-2 text-center font-mono font-bold text-sky-700 bg-sky-50/40">
+                                {(route as any).portCode || route.routeCode || `PORT-${String(idx + 1).padStart(2, '0')}`}
+                              </td>
+                              <td className="p-2 font-bold text-slate-900">{route.portIcdName || route.warehouseName || route.route}</td>
+                              <td className="p-2 font-medium text-slate-700">{route.portIcdProvince || route.warehouseProvince || route.origin || 'Hải Phòng'}</td>
+                              <td className="p-2 text-slate-600">{route.portIcdAddress || route.warehouseAddress || route.destination}</td>
+                              <td className="p-2 text-center bg-indigo-50/10">
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenWarehouseModal(route)}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
+                                  title="Xem năng lực cầu bến, bãi TEU, thiết bị cẩu nâng hạ & biểu phí shuttle cont"
+                                >
+                                  <Sliders className="w-3.5 h-3.5 text-indigo-600 group-hover:scale-110 transition-transform" />
+                                  <span>Chi tiết</span>
+                                  {photoCount > 0 && (
+                                    <span className="text-[10px] px-1 py-0.2 bg-white rounded text-indigo-700 font-semibold border border-indigo-200">
+                                      {photoCount}📸
+                                    </span>
+                                  )}
+                                  <ChevronRight className="w-3 h-3 text-indigo-400 group-hover:translate-x-0.5 transition-transform" />
+                                </button>
+                              </td>
+                              <td className="p-2 text-center">
+                                <button
+                                  type="button"
+                                  onClick={() => handleTriggerRFQForRoute(route)}
+                                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
+                                >
+                                  <Send className="w-3 h-3" />
+                                  <span>Báo Giá</span>
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        }
+
+                        // ----------------------------------------------------
+                        // ROW 17: THỦ TỤC HẢI QUAN
+                        // ----------------------------------------------------
+                        if (isCustomsTable) {
+                          return (
+                            <tr key={route.id || idx} className="hover:bg-amber-50/20 transition-colors divide-x divide-slate-100 text-xs">
+                              <td className="p-2 text-center font-bold text-slate-500 w-9 bg-slate-50/50">{idx + 1}</td>
+                              <td className="p-2 text-center font-mono font-bold text-amber-800 bg-amber-50/40">
+                                {route.routeCode || `CUS-CL-${String(idx + 1).padStart(2, '0')}`}
+                              </td>
+                              <td className="p-2 font-bold text-slate-900 bg-amber-50/20">{route.customsBranchName || route.route || route.origin}</td>
+                              <td className="p-2 font-medium text-slate-700">{route.customsAreaName || route.destination}</td>
+                              <td className="p-2 font-semibold text-slate-800">{route.customsDeclarationType || route.vehicleType || 'Kinh doanh (A11/A12)'}</td>
+                              <td className="p-2 text-right font-black text-emerald-800 bg-emerald-50/30">
+                                {(route.price || 850000).toLocaleString('vi-VN')} ₫ / {route.pricingUnit || 'Tờ khai'}
+                              </td>
+                              <td className="p-2 text-center text-slate-700 font-medium">{route.sla || '4 - 8 giờ'}</td>
+                              <td className="p-2 text-center">
+                                <button
+                                  type="button"
+                                  onClick={() => handleTriggerRFQForRoute(route)}
+                                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
+                                >
+                                  <Send className="w-3 h-3" />
+                                  <span>Báo Giá</span>
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        }
+
+                        return null;
                       })}
                     </tbody>
                   </table>
@@ -1466,94 +1645,7 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
               </div>
             </div>
 
-            {/* ===================================================================
-                PHẦN 3: CHÍNH SÁCH PHỤ PHÍ & DỊCH VỤ GIA TĂNG (VAS) - READ ONLY
-                (Dịch vụ kho bãi được khai báo & hiển thị riêng biệt trong chi tiết từng cơ sở kho)
-            =================================================================== */}
-            {!isWarehousingTable && (
-              <div className="space-y-4 pt-3 border-t border-slate-100">
-                <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-full bg-indigo-50 text-indigo-700 flex items-center justify-center text-[10.5px] font-bold">3</span>
-                  <span>Chính Sách Phụ Phí & Dịch Vụ Gia Tăng (VAS)</span>
-                </h4>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  
-                  {/* 3.1: Miễn phí đã bao gồm */}
-                  <div className="rounded-2xl border border-emerald-200/80 bg-emerald-50/20 p-4 space-y-2.5">
-                    <div className="flex items-center gap-1.5 text-emerald-900 font-bold text-xs">
-                      <Check className="w-4 h-4 text-emerald-600 stroke-[3]" />
-                      <span>Tiện Ích Đã Bao Gồm Trong Giá Cước (Miễn Phí)</span>
-                    </div>
-
-                    {freeSurchargesList.length > 0 ? (
-                      <div className="flex flex-wrap gap-2 pt-1">
-                        {freeSurchargesList.map((item, i) => (
-                          <span
-                            key={i}
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white border border-emerald-200 text-slate-700 font-semibold text-xs shadow-2xs"
-                          >
-                            <Check className="w-3 h-3 text-emerald-600" />
-                            <span>{item}</span>
-                          </span>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-xs text-slate-500 italic">Đã bao gồm chi phí nhiên liệu & phí cầu đường.</p>
-                    )}
-                  </div>
-
-                  {/* 3.2: Có phí khi phát sinh / VAS */}
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50/40 p-4 space-y-2.5">
-                    <div className="flex items-center gap-1.5 text-slate-900 font-bold text-xs">
-                      <Receipt className="w-4 h-4 text-indigo-600" />
-                      <span>Dịch Vụ Phụ Trợ Tùy Chọn & Phí Phát Sinh (Nếu có)</span>
-                    </div>
-
-                    {paidSurchargesList.length > 0 ? (
-                      <div className="space-y-1.5 pt-1">
-                        {paidSurchargesList.map((p) => (
-                          <div
-                            key={p.id}
-                            className="flex items-center justify-between py-1.5 px-2.5 rounded-xl bg-white border border-slate-200/80 text-xs shadow-2xs"
-                          >
-                            <span className="font-medium text-slate-800">{p.name}</span>
-                            <span className="font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md text-[11px]">
-                              {p.priceText}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-xs text-slate-500 italic">Áp dụng theo thỏa thuận cụ thể trong hợp đồng vận chuyển.</p>
-                    )}
-                  </div>
-
-                </div>
-
-                {/* 3.3: VAS đặc biệt nếu có */}
-                {vasList.length > 0 && (
-                  <div className="rounded-2xl border border-indigo-100 bg-indigo-50/30 p-3.5 space-y-2">
-                    <div className="flex items-center gap-1.5 text-indigo-900 font-bold text-xs">
-                      <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-                      <span>Dịch Vụ Gia Tăng Đặc Biệt (Value-Added Services)</span>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {vasList.map((vas, vIdx) => (
-                        <span
-                          key={vIdx}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-indigo-200 text-indigo-900 text-xs font-semibold shadow-2xs"
-                        >
-                          <Zap className="w-3 h-3 text-amber-500 fill-amber-500" />
-                          <span>{vas}</span>
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-              </div>
-            )}
+            
 
           </div>
 
@@ -1561,745 +1653,131 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
       </div>
 
       {/* =========================================================================
-          MODAL: CUSTOMER WAREHOUSE PREVIEW MODAL (ALBUM ẢNH + SPECS + PHỤ PHÍ + VAS)
+          MODAL: CUSTOMER WAREHOUSE PREVIEW MODAL (UNIFIED 3-TAB DECLARATION LAYOUT IN READ-ONLY MODE)
       ========================================================================= */}
       {activeWarehouseModalData && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-5xl h-[88vh] min-h-[600px] max-h-[850px] flex flex-col overflow-hidden animate-in zoom-in-95 duration-150">
-            
-            {/* 1. Modal Header */}
-            <div className="px-6 py-4 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex items-center justify-between border-b border-slate-800 shrink-0">
-              <div className="flex items-center gap-3.5">
-                <div className="w-11 h-11 rounded-2xl bg-indigo-500/20 text-indigo-400 border border-indigo-400/30 flex items-center justify-center shrink-0 shadow-inner">
-                  <Building2 className="w-6 h-6" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-base sm:text-lg font-black tracking-tight text-white">
-                      {activeWarehouseModalData.route.warehouseName || activeWarehouseModalData.route.route}
-                    </h3>
-                    <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded-lg bg-indigo-500/30 text-indigo-200 border border-indigo-400/30">
-                      Mã: {activeWarehouseModalData.route.warehouseCode || activeWarehouseModalData.route.routeCode}
-                    </span>
-                    {activeWarehouseModalData.model.id?.includes('ref') && (
-                      <span className="text-[11px] font-bold px-2 py-0.5 rounded-lg bg-cyan-500/20 text-cyan-200 border border-cyan-400/30 flex items-center gap-1">
-                        <Thermometer className="w-3 h-3 text-cyan-300" />
-                        Kho Lạnh Đa Nhiệt
-                      </span>
-                    )}
-                    {activeWarehouseModalData.model.id?.includes('bon') && (
-                      <span className="text-[11px] font-bold px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-200 border border-amber-400/30">
-                        Kho Ngoại Quan CFS
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs text-slate-300 mt-0.5 flex items-center gap-1.5 flex-wrap">
-                    <MapPin className="w-3.5 h-3.5 text-rose-400 shrink-0" />
-                    <span>
-                      {activeWarehouseModalData.route.warehouseAddress || activeWarehouseModalData.route.destination}, {activeWarehouseModalData.route.warehouseProvince || activeWarehouseModalData.route.origin}
-                    </span>
-                    <span className="text-slate-500">•</span>
-                    <span className="text-indigo-300 font-medium">Hồ sơ năng lực cơ sở kho bãi chính thức của {companyName}</span>
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    handleTriggerRFQForRoute(activeWarehouseModalData.route);
-                    setActiveWarehouseModalData(null);
-                  }}
-                  className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer"
-                >
-                  <Send className="w-3.5 h-3.5" />
-                  <span>Yêu Cầu Báo Giá Kho Này</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setActiveWarehouseModalData(null)}
-                  className="w-9 h-9 rounded-xl bg-slate-800 hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 flex items-center justify-center transition-all cursor-pointer border border-slate-700/60"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-
-            {/* 2. Top Tab Bar */}
-            <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50/90 px-6 py-2.5 shrink-0">
-              <div className="flex items-center gap-2 overflow-x-auto">
-                <button
-                  type="button"
-                  onClick={() => setWarehouseModalTab('photos')}
-                  className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                    warehouseModalTab === 'photos'
-                      ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
-                      : 'text-slate-600 hover:bg-slate-200/70'
-                  }`}
-                >
-                  <Camera className="w-4 h-4" />
-                  <span>📸 Album Ảnh Thực Tế</span>
-                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                    warehouseModalTab === 'photos' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
-                  }`}>
-                    {activeWarehouseModalData.route.warehousePhotos?.length || 4} ảnh
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setWarehouseModalTab('techSpecs')}
-                  className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                    warehouseModalTab === 'techSpecs'
-                      ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
-                      : 'text-slate-600 hover:bg-slate-200/70'
-                  }`}
-                >
-                  <Sliders className="w-4 h-4" />
-                  <span>🏗️ Thông Số Kỹ Thuật (Specs)</span>
-                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                    warehouseModalTab === 'techSpecs' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
-                  }`}>
-                    {getWarehouseTechSpecCategories(activeWarehouseModalData.model.id, activeWarehouseModalData.cargoGroup.id).length} Nhóm
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setWarehouseModalTab('surcharges')}
-                  className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                    warehouseModalTab === 'surcharges'
-                      ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
-                      : 'text-slate-600 hover:bg-slate-200/70'
-                  }`}
-                >
-                  <DollarSign className="w-4 h-4" />
-                  <span>🏷️ Phụ Phí Handling & Lưu Kho</span>
-                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                    warehouseModalTab === 'surcharges' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
-                  }`}>
-                    {(activeWarehouseModalData.route.warehousePaidSurcharges?.length || paidSurchargesList.length)} phí
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setWarehouseModalTab('vas')}
-                  className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                    warehouseModalTab === 'vas'
-                      ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
-                      : 'text-slate-600 hover:bg-slate-200/70'
-                  }`}
-                >
-                  <Sparkles className="w-4 h-4" />
-                  <span>✨ Dịch Vụ Gia Tăng (VAS)</span>
-                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                    warehouseModalTab === 'vas' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
-                  }`}>
-                    {(activeWarehouseModalData.route.warehouseVasItems?.length || vasList.length)} VAS
-                  </span>
-                </button>
-              </div>
-
-              <div className="hidden lg:flex items-center gap-2 text-xs font-bold text-slate-500">
-                <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                <span>Hạ tầng kho đã được xác minh thực địa</span>
-              </div>
-            </div>
-
-            {/* 3. Modal Body */}
-            <div className="flex-1 min-h-0 overflow-y-auto p-6 bg-slate-50/50">
-              
-              {/* TAB 1: ALBUM ẢNH THỰC TẾ KHO */}
-              {warehouseModalTab === 'photos' && (() => {
-                const photos: WarehousePhotoItem[] = activeWarehouseModalData.route.warehousePhotos && activeWarehouseModalData.route.warehousePhotos.length > 0
-                  ? activeWarehouseModalData.route.warehousePhotos
-                  : [
-                      {
-                        id: 'ph-df-1',
-                        url: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1200&auto=format&fit=crop&q=80',
-                        name: 'Mặt tiền & Sân bãi container bê tông chịu lực 80T',
-                        tag: 'Mặt tiền & Sân bãi',
-                        isCover: true,
-                      },
-                      {
-                        id: 'ph-df-2',
-                        url: 'https://images.unsplash.com/photo-1553413077-190dd305871c?w=1200&auto=format&fit=crop&q=80',
-                        name: 'Hệ thống giá kệ Selective Racking 5 tầng đạt chuẩn FEM/EN',
-                        tag: 'Kệ Racking',
-                        isCover: false,
-                      },
-                      {
-                        id: 'ph-df-3',
-                        url: 'https://images.unsplash.com/photo-1616401784845-180882ba9ba8?w=1200&auto=format&fit=crop&q=80',
-                        name: 'Mặt sàn Hardener siêu phẳng kháng bụi & PCCC Sprinkler ESFR',
-                        tag: 'Sàn & Trần kho',
-                        isCover: false,
-                      },
-                      {
-                        id: 'ph-df-4',
-                        url: 'https://images.unsplash.com/photo-1587293852726-70cdb56c2866?w=1200&auto=format&fit=crop&q=80',
-                        name: 'Dãy cửa Dock tự động tích hợp Dock Leveler thủy lực',
-                        tag: 'Cửa Dock & Leveler',
-                        isCover: false,
-                      },
-                    ];
-
-                return (
-                  <div className="space-y-6">
-                    {/* Header banner */}
-                    <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs flex items-center justify-between flex-wrap gap-3">
-                      <div>
-                        <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                          <span>Hình Ảnh Thực Tế Cơ Sở Kho Bãi ({photos.length} Góc Ảnh)</span>
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                            ✓ Đã Kiểm Tra Thực Địa
-                          </span>
-                        </h4>
-                        <p className="text-xs text-slate-500 mt-0.5">
-                          Hình ảnh độ phân giải cao ghi nhận trực tiếp hạ tầng mặt bằng, sàn, kệ Racking, hệ thống PCCC và cửa dock bốc dỡ xe container.
-                        </p>
-                      </div>
-
-                      <span className="text-xs font-semibold text-indigo-700 bg-indigo-50 px-3 py-1 rounded-xl border border-indigo-200 flex items-center gap-1">
-                        <Eye className="w-3.5 h-3.5" />
-                        Nhấp vào ảnh để phóng to
-                      </span>
-                    </div>
-
-                    {/* Photo Grid */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {photos.map((ph, pIdx) => (
-                        <div
-                          key={ph.id || pIdx}
-                          onClick={() => setZoomedPhoto(ph)}
-                          className="group relative rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-xs hover:shadow-md transition-all cursor-pointer aspect-4/3 flex flex-col"
-                        >
-                          <img
-                            src={ph.url}
-                            alt={ph.name}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                            loading="lazy"
-                          />
-                          
-                          {/* Overlay gradient */}
-                          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent opacity-90 group-hover:opacity-100 transition-opacity" />
-
-                          {/* Top Badges */}
-                          <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between pointer-events-none">
-                            <span className="px-2 py-0.5 rounded-lg bg-black/60 backdrop-blur-xs text-white text-[10.5px] font-bold border border-white/20">
-                              {ph.tag || 'Góc ảnh kho'}
-                            </span>
-                            {ph.isCover && (
-                              <span className="px-2 py-0.5 rounded-lg bg-indigo-600 text-white text-[10px] font-black shadow-xs">
-                                ★ Ảnh Bìa
-                              </span>
-                            )}
-                          </div>
-
-                          {/* Bottom Caption & Action */}
-                          <div className="absolute bottom-2.5 left-2.5 right-2.5 text-white flex items-end justify-between gap-2">
-                            <div className="truncate">
-                              <p className="text-xs font-bold truncate text-white drop-shadow-xs">{ph.name}</p>
-                              <p className="text-[10px] text-slate-300 font-medium">Bấm để phóng to xem chi tiết</p>
-                            </div>
-                            <div className="w-7 h-7 rounded-lg bg-white/20 hover:bg-white/30 backdrop-blur-xs flex items-center justify-center shrink-0 text-white transition-colors">
-                              <Maximize2 className="w-3.5 h-3.5" />
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })()}
-
-              {/* TAB 2: THÔNG SỐ KỸ THUẬT (SPECS) */}
-              {warehouseModalTab === 'techSpecs' && (() => {
-                const specs: WarehouseTechSpecs = activeWarehouseModalData.route.warehouseTechSpecs || {
-                  clearHeight: 12.5,
-                  floorLoad: 5.5,
-                  floorType: 'Bê tông xoa nền Hardener phủ Epoxy tự phẳng',
-                  columnGrid: '12m x 24m',
-                  rackingTypes: ['Selective Racking (5 tầng)', 'Double Deep Racking'],
-                  rackingLevels: 5,
-                  palletLoadLimit: 1200,
-                  dockDoorsCount: 16,
-                  hasDockLeveler: true,
-                  hasDockShelter: true,
-                  yardTurnaround: 'Sân bãi bê tông rộng 42m cho xe cont 45ft',
-                  operatingHoursTrucks: 'Tiếp nhận xe 24/7',
-                  fireProtectionSystem: 'Sprinkler tự động ESFR độ nhạy cao',
-                  fireProtectionApprovalNo: '148/TD-PCCC',
-                  cctvSurveillance: '64 Camera IP Full HD 4K ghi hình 24/7',
-                  securityGuards: 'Bảo vệ chuyên nghiệp 24/7',
-                  wmsSoftwareName: 'Infor CloudSuite WMS & FlexGO WMS',
-                  scanningTechnologies: ['Barcode 1D/2D QR', 'Thiết bị PDA Handheld'],
-                  hasApiIntegration: true,
-                };
-
-                const techCategories = getWarehouseTechSpecCategories(activeWarehouseModalData.model.id, activeWarehouseModalData.cargoGroup.id);
-
-                return (
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
-                    {/* Left Category Menu */}
-                    <div className="md:col-span-4 lg:col-span-3 space-y-1.5">
-                      <div className="text-[11px] font-black text-slate-400 uppercase tracking-wider px-2 pb-1">
-                        Nhóm Thông Số Kỹ Thuật
-                      </div>
-                      {techCategories.map((tc) => {
-                        const isCatSelected = activeTechCategory === tc.id;
-                        return (
-                          <div
-                            key={tc.id}
-                            onClick={() => setActiveTechCategory(tc.id)}
-                            className={`p-2.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between text-xs ${
-                              isCatSelected
-                                ? 'bg-indigo-600 text-white font-bold border-indigo-600 shadow-sm'
-                                : 'bg-white text-slate-700 hover:bg-indigo-50/60 border-slate-200'
-                            }`}
-                          >
-                            <div className="flex items-center gap-2 truncate">
-                              <span className="text-sm">{tc.icon}</span>
-                              <span className="truncate">{tc.label}</span>
-                            </div>
-                            <ChevronRight className={`w-3.5 h-3.5 shrink-0 ${isCatSelected ? 'text-white' : 'text-slate-400'}`} />
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    {/* Right Detailed Specs View */}
-                    <div className="md:col-span-8 lg:col-span-9 bg-white rounded-2xl border border-slate-200 p-5 space-y-5 shadow-2xs">
-                      
-                      {/* Structure & Floor */}
-                      {activeTechCategory.includes('structure') && (
-                        <div className="space-y-4">
-                          <div className="border-b border-slate-100 pb-2 flex items-center justify-between">
-                            <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                              <span>🏗️ Kết Cấu Kho & Mặt Sàn Chịu Lực</span>
-                            </h4>
-                            <span className="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">Grade A Standard</span>
-                          </div>
-
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
-                            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/70 space-y-1">
-                              <span className="text-slate-500 font-medium">Chiều cao thông thủy (Clear Height)</span>
-                              <p className="text-sm font-black text-slate-900">{specs.clearHeight ? `${specs.clearHeight} mét` : '12.5 mét'}</p>
-                              <span className="text-[10px] text-slate-400">Tối ưu cho kệ Racking 5 - 6 tầng</span>
-                            </div>
-
-                            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/70 space-y-1">
-                              <span className="text-slate-500 font-medium">Tải trọng sàn thiết kế (Floor Load)</span>
-                              <p className="text-sm font-black text-indigo-700">{specs.floorLoad ? `${specs.floorLoad} Tấn / m²` : '5.5 Tấn / m²'}</p>
-                              <span className="text-[10px] text-slate-400">Chịu lực tập trung cho xe nâng tải nặng</span>
-                            </div>
-
-                            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/70 space-y-1 sm:col-span-2">
-                              <span className="text-slate-500 font-medium">Quy cách bề mặt sàn</span>
-                              <p className="text-xs font-bold text-slate-800">{specs.floorType || 'Bê tông cốt thép xoa nền Hardener phủ sơn Epoxy'}</p>
-                            </div>
-
-                            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/70 space-y-1 sm:col-span-2">
-                              <span className="text-slate-500 font-medium">Khẩu độ bước cột (Column Grid)</span>
-                              <p className="text-xs font-bold text-slate-800">{specs.columnGrid || '12m x 24m (Nhịp rộng không cản trở xe nâng)'}</p>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Racking & Storage */}
-                      {activeTechCategory.includes('racking') && (
-                        <div className="space-y-4">
-                          <div className="border-b border-slate-100 pb-2 flex items-center justify-between">
-                            <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                              <span>📦 Hệ Thống Giá Kệ & Sức Chứa Pallet</span>
-                            </h4>
-                            <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">FEM / EN Standard</span>
-                          </div>
-
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
-                            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/70 space-y-1">
-                              <span className="text-slate-500 font-medium">Loại giá kệ lắp đặt</span>
-                              <p className="text-xs font-black text-slate-900">{specs.rackingTypes?.join(', ') || 'Selective Racking, Double Deep'}</p>
-                            </div>
-
-                            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/70 space-y-1">
-                              <span className="text-slate-500 font-medium">Số tầng kệ chứa hàng</span>
-                              <p className="text-sm font-black text-slate-900">{specs.rackingLevels || 5} Tầng</p>
-                            </div>
-
-                            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/70 space-y-1">
-                              <span className="text-slate-500 font-medium">Tải trọng thiết kế tối đa / Pallet</span>
-                              <p className="text-sm font-black text-emerald-700">{specs.palletLoadLimit || 1200} Kg / Pallet</p>
-                            </div>
-
-                            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/70 space-y-1">
-                              <span className="text-slate-500 font-medium">Kích thước Pallet tương thích</span>
-                              <p className="text-xs font-bold text-slate-800">1.0m x 1.2m & 1.2m x 1.2m</p>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Dock & Yard */}
-                      {activeTechCategory.includes('dock') && (
-                        <div className="space-y-4">
-                          <div className="border-b border-slate-100 pb-2 flex items-center justify-between">
-                            <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                              <span>🚛 Cửa Dock Xuất Nhập & Sân Bãi Container</span>
-                            </h4>
-                            <span className="text-[11px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">24/7 Access</span>
-                          </div>
-
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
-                            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/70 space-y-1">
-                              <span className="text-slate-500 font-medium">Số lượng cửa Dock tự động</span>
-                              <p className="text-sm font-black text-indigo-700">{specs.dockDoorsCount || 16} Cửa</p>
-                            </div>
-
-                            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/70 space-y-1">
-                              <span className="text-slate-500 font-medium">Cầu nâng tự động (Dock Leveler)</span>
-                              <p className="text-xs font-bold text-emerald-700">✓ Có trang bị thủy lực tự động</p>
-                            </div>
-
-                            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/70 space-y-1 sm:col-span-2">
-                              <span className="text-slate-500 font-medium">Sân bãi container quay đầu</span>
-                              <p className="text-xs font-bold text-slate-800">{specs.yardTurnaround || 'Sân bê tông rộng 42m, xe đầu kéo cont 45ft quay đầu tự do 360°'}</p>
-                            </div>
-
-                            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/70 space-y-1 sm:col-span-2">
-                              <span className="text-slate-500 font-medium">Khung giờ tiếp nhận xe tải & cont</span>
-                              <p className="text-xs font-bold text-slate-800">{specs.operatingHoursTrucks || 'Tiếp nhận xe 24/7 (Không vướng giờ cấm tải nội đô)'}</p>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Fire & Security */}
-                      {activeTechCategory.includes('fire') && (
-                        <div className="space-y-4">
-                          <div className="border-b border-slate-100 pb-2 flex items-center justify-between">
-                            <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                              <span>🔥 Hệ Thống PCCC & An Ninh An Toàn Kho</span>
-                            </h4>
-                            <span className="text-[11px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md">Đã Nghiệm Thu 100%</span>
-                          </div>
-
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
-                            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/70 space-y-1 sm:col-span-2">
-                              <span className="text-slate-500 font-medium">Hệ thống chữa cháy tự động</span>
-                              <p className="text-xs font-black text-rose-700">{specs.fireProtectionSystem || 'PCCC Sprinkler tự động ESFR độ nhạy cao, báo cháy Beam quang học'}</p>
-                            </div>
-
-                            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/70 space-y-1">
-                              <span className="text-slate-500 font-medium">Giấy chứng nhận thẩm duyệt & nghiệm thu PCCC</span>
-                              <p className="text-xs font-bold text-slate-900">{specs.fireProtectionApprovalNo || '148/TD-PCCC cấp bởi Cảnh sát PCCC'}</p>
-                            </div>
-
-                            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/70 space-y-1">
-                              <span className="text-slate-500 font-medium">Camera an ninh giám sát (CCTV)</span>
-                              <p className="text-xs font-bold text-slate-900">{specs.cctvSurveillance || '64 Camera IP Full HD 4K ghi hình 24/7'}</p>
-                            </div>
-
-                            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/70 space-y-1 sm:col-span-2">
-                              <span className="text-slate-500 font-medium">Lực lượng bảo vệ thường trực</span>
-                              <p className="text-xs font-bold text-slate-800">{specs.securityGuards || 'Lực lượng an ninh bảo vệ chuyên nghiệp túc trực barie kiểm soát 24/7'}</p>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* WMS & Tech */}
-                      {activeTechCategory.includes('wms') && (
-                        <div className="space-y-4">
-                          <div className="border-b border-slate-100 pb-2 flex items-center justify-between">
-                            <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                              <span>💻 Phần Mềm WMS & Công Nghệ Quản Lý Tồn Kho</span>
-                            </h4>
-                            <span className="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">Realtime API</span>
-                          </div>
-
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
-                            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/70 space-y-1 sm:col-span-2">
-                              <span className="text-slate-500 font-medium">Tên hệ thống quản trị kho (WMS)</span>
-                              <p className="text-sm font-black text-indigo-700">{specs.wmsSoftwareName || 'Infor CloudSuite WMS & FlexGO WMS Enterprise'}</p>
-                            </div>
-
-                            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/70 space-y-1">
-                              <span className="text-slate-500 font-medium">Công nghệ định vị & quét mã</span>
-                              <p className="text-xs font-bold text-slate-800">Barcode 1D/2D, QR Code & PDA Handheld Honeywell</p>
-                            </div>
-
-                            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/70 space-y-1">
-                              <span className="text-slate-500 font-medium">Kết nối dữ liệu API / EDI</span>
-                              <p className="text-xs font-bold text-emerald-700">✓ Sẵn sàng API tích hợp ERP (SAP, Oracle, Odoo, Sapo)</p>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* General Cert / Fallback */}
-                      {!['structure', 'racking', 'dock', 'fire', 'wms'].some(k => activeTechCategory.includes(k)) && (
-                        <div className="space-y-4">
-                          <div className="border-b border-slate-100 pb-2 flex items-center justify-between">
-                            <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                              <span>📜 Tiêu Chuẩn Vận Hành & Chứng Nhận</span>
-                            </h4>
-                            <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">Verified</span>
-                          </div>
-
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
-                            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/70 space-y-1">
-                              <span className="text-slate-500 font-medium">Chứng nhận hệ thống quản lý</span>
-                              <p className="text-xs font-bold text-slate-900">ISO 9001:2015, ISO 14001, HACCP (Kho Lạnh)</p>
-                            </div>
-
-                            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/70 space-y-1">
-                              <span className="text-slate-500 font-medium">Bảo hiểm trách nhiệm kho bãi</span>
-                              <p className="text-xs font-bold text-emerald-700">Bảo hiểm 100% tài sản lưu kho lên đến 50 Tỷ VND</p>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                    </div>
-                  </div>
-                );
-              })()}
-
-              {/* TAB 3: PHỤ PHÍ HANDLING & LƯU KHO (KHAI BÁO CHI TIẾT RIÊNG TỪNG CƠ SỞ KHO) */}
-              {warehouseModalTab === 'surcharges' && (() => {
-                const curRoute = activeWarehouseModalData.route;
-                const freeList = curRoute.warehouseFreeSurcharges && curRoute.warehouseFreeSurcharges.length > 0
-                  ? curRoute.warehouseFreeSurcharges
-                  : (activeWarehouseModalData.cargoGroup.freeSurcharges || []);
-                const paidList = curRoute.warehousePaidSurcharges && curRoute.warehousePaidSurcharges.length > 0
-                  ? curRoute.warehousePaidSurcharges
-                  : (activeWarehouseModalData.cargoGroup.paidSurcharges || paidSurchargesList);
-
-                return (
-                  <div className="space-y-4">
-                    <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs">
-                      <div className="flex items-center justify-between flex-wrap gap-2">
-                        <div>
-                          <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                            <span>Biểu Phí Dịch Vụ Bốc Xếp & Vận Hành Kho (Handling Surcharges)</span>
-                          </h4>
-                          <p className="text-xs text-slate-500 mt-0.5">
-                            Bảng giá niêm yết các hạng mục nâng hạ, bốc xếp và dịch vụ phát sinh khi vận hành tại: <span className="font-semibold text-slate-700">{curRoute.warehouseName || curRoute.route}</span>
-                          </p>
-                        </div>
-                        <span className="text-[11px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2.5 py-1 rounded-lg">
-                          Áp dụng riêng cho cơ sở kho này
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Tiện ích miễn phí đã bao gồm */}
-                    {freeList.length > 0 && (
-                      <div className="rounded-2xl border border-emerald-200/80 bg-emerald-50/25 p-4 space-y-2.5">
-                        <div className="flex items-center gap-2 text-emerald-900 font-bold text-xs">
-                          <Check className="w-4 h-4 text-emerald-600 stroke-[3]" />
-                          <span>Tiện Ích Đã Bao Gồm Trong Giá Cước (Miễn Phí Tại Kho Này)</span>
-                        </div>
-                        <div className="flex flex-wrap gap-2 pt-1">
-                          {freeList.map((item, i) => (
-                            <span
-                              key={i}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-emerald-200 text-slate-700 font-semibold text-xs shadow-2xs"
-                            >
-                              <Check className="w-3.5 h-3.5 text-emerald-600" />
-                              <span>{item}</span>
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Phụ phí có phí phát sinh */}
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-1.5 text-slate-800 font-bold text-xs">
-                        <Receipt className="w-4 h-4 text-indigo-600" />
-                        <span>Phụ Phí Bốc Xếp, Nâng Hạ & Vận Hành Phát Sinh</span>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                        {paidList.map((p) => (
-                          <div
-                            key={p.id}
-                            className="p-4 rounded-2xl border border-slate-200 bg-white shadow-2xs flex items-center justify-between gap-3 text-xs hover:border-indigo-200 hover:shadow-xs transition-all"
-                          >
-                            <div className="space-y-1">
-                              <span className="font-bold text-slate-900">{p.name}</span>
-                              <p className="text-[11px] text-slate-500">Phí tiêu chuẩn áp dụng cho cơ sở kho này</p>
-                            </div>
-                            <span className="font-black text-indigo-700 bg-indigo-50 px-3 py-1.5 rounded-xl border border-indigo-200 text-xs shrink-0 whitespace-nowrap">
-                              {p.priceText}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })()}
-
-              {/* TAB 4: DỊCH VỤ GIA TĂNG (VAS KHAI BÁO CHI TIẾT RIÊNG TỪNG CƠ SỞ KHO) */}
-              {warehouseModalTab === 'vas' && (() => {
-                const curRoute = activeWarehouseModalData.route;
-                const vasItems = curRoute.warehouseVasItems && curRoute.warehouseVasItems.length > 0
-                  ? curRoute.warehouseVasItems
-                  : (activeWarehouseModalData.cargoGroup.vasList?.map((v, i) => ({
-                      id: `v-fallback-${i}`,
-                      name: v,
-                      category: 'Dịch Vụ Gia Tăng',
-                      priceText: 'Theo thỏa thuận',
-                      isChecked: true,
-                      desc: 'Dịch vụ xử lý, hoàn tất và đóng gói tại kho theo quy chuẩn khách hàng.'
-                    })) || []);
-
-                return (
-                  <div className="space-y-4">
-                    <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs">
-                      <div className="flex items-center justify-between flex-wrap gap-2">
-                        <div>
-                          <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                            <Sparkles className="w-4 h-4 text-amber-500 fill-amber-500" />
-                            <span>Dịch Vụ Giá Trị Gia Tăng Tại Kho (Value-Added Services - VAS)</span>
-                          </h4>
-                          <p className="text-xs text-slate-500 mt-0.5">
-                            Các giải pháp đóng gói, dán nhãn mác, hoàn tất đơn hàng và chuẩn bị hàng hóa phân phối tại <span className="font-semibold text-slate-700">{curRoute.warehouseName || curRoute.route}</span>.
-                          </p>
-                        </div>
-                        <span className="text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-lg">
-                          Chuyên biệt cho cơ sở này
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-                      {vasItems.map((vas, idx) => (
-                        <div
-                          key={vas.id || idx}
-                          className="p-4 rounded-2xl border border-indigo-100 bg-white shadow-2xs space-y-2.5 text-xs hover:border-indigo-300 hover:shadow-xs transition-all flex flex-col justify-between"
-                        >
-                          <div className="space-y-2">
-                            <div className="flex items-start justify-between gap-2">
-                              <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200/60 px-2 py-0.5 rounded-md uppercase tracking-wider">
-                                {vas.category || 'VAS Cơ Sở'}
-                              </span>
-                              {vas.priceText && (
-                                <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md text-[11px] shrink-0 border border-emerald-200/60">
-                                  {vas.priceText}
-                                </span>
-                              )}
-                            </div>
-                            <div className="flex items-start gap-2 text-slate-900 font-bold">
-                              <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-500 shrink-0 mt-0.5" />
-                              <span className="text-xs leading-snug">{vas.name}</span>
-                            </div>
-                            {vas.desc && (
-                              <p className="text-[11px] text-slate-500 leading-relaxed">
-                                {vas.desc}
-                              </p>
-                            )}
-                          </div>
-
-                          <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400 mt-2">
-                            <span>Trạng thái</span>
-                            <span className="text-emerald-600 font-bold flex items-center gap-1">
-                              <Check className="w-3 h-3 text-emerald-600" /> Sẵn sàng cung ứng
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })()}
-
-            </div>
-
-            {/* 4. Modal Footer */}
-            <div className="px-6 py-3.5 bg-white border-t border-slate-200 flex items-center justify-between shrink-0">
-              <div className="text-xs text-slate-500">
-                Cần tham quan khảo sát trực tiếp cơ sở kho? Hãy liên hệ chuyên viên để sắp xếp lịch hẹn.
-              </div>
-
-              <div className="flex items-center gap-2.5">
-                <button
-                  type="button"
-                  onClick={() => setActiveWarehouseModalData(null)}
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors cursor-pointer"
-                >
-                  Đóng
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    handleTriggerRFQForRoute(activeWarehouseModalData.route);
-                    setActiveWarehouseModalData(null);
-                  }}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer"
-                >
-                  <Send className="w-3.5 h-3.5" />
-                  <span>Yêu Cầu Báo Giá Cơ Sở Kho Này</span>
-                </button>
-              </div>
-            </div>
-
-          </div>
-        </div>
+        <WarehouseDetailModal
+          isOpen={Boolean(activeWarehouseModalData)}
+          onClose={() => setActiveWarehouseModalData(null)}
+          data={buildWarehouseDetailData(
+            activeWarehouseModalData.route,
+            activeWarehouseModalData.model,
+            activeWarehouseModalData.cargoGroup,
+            activeWarehouseModalData.category
+          )}
+          isReadOnly={true}
+          companyName={companyName}
+          onRequestQuote={() => {
+            handleTriggerRFQForRoute(activeWarehouseModalData.route);
+            setActiveWarehouseModalData(null);
+          }}
+          cargoGroupId={activeWarehouseModalData.cargoGroup?.id}
+        />
       )}
 
       {/* =========================================================================
-          LIGHTBOX: PHÓNG TO ẢNH THỰC TẾ KHO
+          MODAL MA TRẬN BIỂU PHÍ CHUYÊN SÂU DÀNH CHO KHÁCH HÀNG (PREVIEW / PUBLIC)
       ========================================================================= */}
-      {zoomedPhoto && (
-        <div 
-          className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-in fade-in duration-150"
-          onClick={() => setZoomedPhoto(null)}
-        >
-          <div 
-            className="relative max-w-4xl w-full bg-slate-950 rounded-3xl overflow-hidden border border-slate-800 shadow-2xl animate-in zoom-in-95 duration-150"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="relative aspect-16/10 sm:aspect-16/9 bg-black">
-              <img
-                src={zoomedPhoto.url}
-                alt={zoomedPhoto.name}
-                className="w-full h-full object-contain"
-              />
-              <button
-                type="button"
-                onClick={() => setZoomedPhoto(null)}
-                className="absolute top-4 right-4 w-9 h-9 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center transition-colors cursor-pointer border border-white/20"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+      {activeMatrixModalRoute && (
+        <>
+          {isTruckingTable && isTruckingFtlTable && (
+            <TruckingFtlCostMatrixModal
+              isOpen={Boolean(activeMatrixModalRoute)}
+              onClose={() => setActiveMatrixModalRoute(null)}
+              route={activeMatrixModalRoute}
+              onSave={() => {}}
+              cargoType={activeMatrixModalRoute?.cargoType as any}
+            />
+          )}
 
-            <div className="p-4 bg-slate-900 border-t border-slate-800 flex items-center justify-between text-white flex-wrap gap-2">
-              <div>
-                <span className="text-[11px] font-bold text-indigo-400 bg-indigo-500/20 px-2 py-0.5 rounded-md border border-indigo-400/30">
-                  {zoomedPhoto.tag || 'Ảnh Thực Tế Cơ Sở'}
-                </span>
-                <h4 className="text-sm font-bold text-white mt-1">{zoomedPhoto.name}</h4>
-              </div>
+          {isTruckingTable && isLtlTable && (
+            <TruckingLtlCostMatrixModal
+              isOpen={Boolean(activeMatrixModalRoute)}
+              onClose={() => setActiveMatrixModalRoute(null)}
+              route={activeMatrixModalRoute}
+              onSave={() => {}}
+            />
+          )}
 
-              <button
-                type="button"
-                onClick={() => setZoomedPhoto(null)}
-                className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer"
-              >
-                Đóng Ảnh Phóng To
-              </button>
-            </div>
-          </div>
-        </div>
+          {isOceanTable && isOceanFclTable && (
+            <OceanFclCostMatrixModal
+              isOpen={Boolean(activeMatrixModalRoute)}
+              onClose={() => setActiveMatrixModalRoute(null)}
+              route={activeMatrixModalRoute}
+              onSave={() => {}}
+              cargoType={activeMatrixModalRoute?.cargoType as any}
+            />
+          )}
+
+          {isOceanTable && isOceanLclTable && (
+            <OceanLclCostMatrixModal
+              isOpen={Boolean(activeMatrixModalRoute)}
+              onClose={() => setActiveMatrixModalRoute(null)}
+              route={activeMatrixModalRoute}
+              onSave={() => {}}
+              cargoType={activeMatrixModalRoute?.cargoType as any}
+            />
+          )}
+
+          {isRailTable && isRailFclTable && (
+            <RailFclCostMatrixModal
+              isOpen={Boolean(activeMatrixModalRoute)}
+              onClose={() => setActiveMatrixModalRoute(null)}
+              route={activeMatrixModalRoute}
+              onSave={() => {}}
+              cargoType={activeMatrixModalRoute?.cargoType as any}
+            />
+          )}
+
+          {isRailTable && isRailLclTable && (
+            <RailLclCostMatrixModal
+              isOpen={Boolean(activeMatrixModalRoute)}
+              onClose={() => setActiveMatrixModalRoute(null)}
+              route={activeMatrixModalRoute}
+              onSave={() => {}}
+              cargoType={activeMatrixModalRoute?.cargoType as any}
+            />
+          )}
+
+          {isAirCargoTable && (
+            <AirCargoCostMatrixModal
+              isOpen={Boolean(activeMatrixModalRoute)}
+              onClose={() => setActiveMatrixModalRoute(null)}
+              route={activeMatrixModalRoute}
+              onSave={() => {}}
+              cargoType={activeMatrixModalRoute?.cargoType as any}
+            />
+          )}
+
+          {isExpressTable && (
+            <AirExpressCostMatrixModal
+              isOpen={Boolean(activeMatrixModalRoute)}
+              onClose={() => setActiveMatrixModalRoute(null)}
+              route={activeMatrixModalRoute}
+              onSave={() => {}}
+            />
+          )}
+
+          {isCrossBorderFtl && (
+            <CrossBorderFtlCostMatrixModal
+              isOpen={Boolean(activeMatrixModalRoute)}
+              onClose={() => setActiveMatrixModalRoute(null)}
+              route={activeMatrixModalRoute}
+              onSave={() => {}}
+              cargoType={activeMatrixModalRoute?.cargoType as any}
+            />
+          )}
+
+          {isCrossBorderLtl && (
+            <CrossBorderLtlCostMatrixModal
+              isOpen={Boolean(activeMatrixModalRoute)}
+              onClose={() => setActiveMatrixModalRoute(null)}
+              route={activeMatrixModalRoute}
+              onSave={() => {}}
+              cargoType={activeMatrixModalRoute?.cargoType as any}
+            />
+          )}
+        </>
       )}
 
     </div>

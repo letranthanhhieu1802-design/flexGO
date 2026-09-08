@@ -8,26 +8,19 @@ import {
   FileCheck2,
   Globe,
   Tag,
-  Percent,
   Clock,
   CheckCircle2,
   Building2,
   BadgeCheck,
   Phone,
-  Send,
-  ArrowRight,
-  ShieldCheck,
   Star,
   ExternalLink,
-  Plus,
   Bookmark,
   Calendar,
   Layers,
   Sparkles,
   Info,
   DollarSign,
-  Briefcase,
-  SlidersHorizontal,
   Flame,
   Check,
   X,
@@ -39,12 +32,35 @@ import {
   MapPin,
   ShieldAlert,
   Boxes,
-  Maximize2
+  Maximize2,
+  ChevronRight,
+  ShieldCheck,
+  TrainTrack
 } from 'lucide-react';
-import { HotPromotionItem, CurrentView, UserProfile } from '../../types';
+import { HotPromotionItem, CurrentView } from '../../types';
 import { mockSalesSpecialists } from '../../data/mockSalesSpecialists';
 import { FULL_MOCK_CAPABILITY_SERVICES, DeclaredServiceModelItem } from '../../data/mockDeclaredServices';
-import { CapabilityRouteItem, WarehousePhotoItem, WarehouseTechSpecs } from '../supplier/SupplierServiceCapabilityModal';
+import { 
+  CapabilityRouteItem, 
+  WarehousePhotoItem, 
+  WarehouseTechSpecs, 
+  WarehouseDetailModalData, 
+  WAREHOUSE_SUGGESTED_SURCHARGES, 
+  WAREHOUSE_SUGGESTED_VAS, 
+  getWarehouseTechSpecCategories
+} from '../supplier/SupplierServiceCapabilityModal';
+import { WarehousePricingContinuousTable } from '../supplier/WarehousePricingContinuousTable';
+import { WarehouseDetailModal } from '../supplier/WarehouseDetailModal';
+import { OceanFclCostMatrixModal, OCEAN_FCL_GENERAL_SURCHARGES_LOV, OCEAN_FCL_GENERAL_VAS_LOV } from '../supplier/OceanFclCostMatrixModal';
+import { OceanLclCostMatrixModal } from '../supplier/OceanLclCostMatrixModal';
+import { TruckingFtlCostMatrixModal, TRUCKING_SECTION_1_SURCHARGES_LOV, TRUCKING_SECTION_2_VAS_LOV } from '../supplier/TruckingFtlCostMatrixModal';
+import { TruckingLtlCostMatrixModal } from '../supplier/TruckingLtlCostMatrixModal';
+import { RailFclCostMatrixModal } from '../supplier/RailFclCostMatrixModal';
+import { RailLclCostMatrixModal } from '../supplier/RailLclCostMatrixModal';
+import { AirCargoCostMatrixModal } from '../supplier/AirCargoCostMatrixModal';
+import { AirExpressCostMatrixModal } from '../supplier/AirExpressCostMatrixModal';
+import { CrossBorderFtlCostMatrixModal } from '../supplier/CrossBorderFtlCostMatrixModal';
+import { CrossBorderLtlCostMatrixModal } from '../supplier/CrossBorderLtlCostMatrixModal';
 
 interface HotPromotionRateDetailCardProps {
   item: HotPromotionItem;
@@ -63,6 +79,17 @@ export const HotPromotionRateDetailCard: React.FC<HotPromotionRateDetailCardProp
 }) => {
   const [copiedPhone, setCopiedPhone] = useState(false);
   const [selectedPhotoForPreview, setSelectedPhotoForPreview] = useState<WarehousePhotoItem | null>(null);
+  const [isFullModalOpen, setIsFullModalOpen] = useState(false);
+
+  // Sub-tabs for Warehouse
+  const [warehouseActiveTab, setWarehouseActiveTab] = useState<'pricing' | 'techSpecs' | 'photos'>('pricing');
+  const [activeTechCategory, setActiveTechCategory] = useState<string>('structure');
+
+  // Container configuration tab for Ocean FCL
+  const [activeOceanContTab, setActiveOceanContTab] = useState<string>('cont-20dc');
+
+  // Vehicle configuration tab for Trucking FTL
+  const [activeTruckVehicleTab, setActiveTruckVehicleTab] = useState<string>('truck-5t');
 
   // 1. Resolve declaredModel and declaredRoute from Tab 3 Data (Supplier Profile Capability Tree)
   const { declaredModel, declaredRoute } = useMemo(() => {
@@ -150,7 +177,7 @@ export const HotPromotionRateDetailCard: React.FC<HotPromotionRateDetailCardProp
     if (s.includes('kho') || s.includes('warehousing')) return Warehouse;
     if (s.includes('biển') || s.includes('sea')) return Ship;
     if (s.includes('không') || s.includes('air')) return Plane;
-    if (s.includes('sắt') || s.includes('rail')) return Truck;
+    if (s.includes('sắt') || s.includes('rail')) return TrainTrack;
     if (s.includes('quan') || s.includes('customs')) return FileCheck2;
     if (s.includes('biên') || s.includes('cross')) return Globe;
     if (s.includes('lạnh') || s.includes('cold')) return Snowflake;
@@ -161,51 +188,20 @@ export const HotPromotionRateDetailCard: React.FC<HotPromotionRateDetailCardProp
 
   // 3. Extract Specific Tab 3 Data Fields
   const routeCode = declaredRoute?.routeCode || item.code;
-  const routeName = declaredRoute?.route || item.routeDisplay || `${item.origin} ⇄ ${item.destination}`;
-  const originName = declaredRoute?.origin || item.origin;
-  const destName = declaredRoute?.destination || item.destination;
-  const vehicleDesc = declaredRoute?.truckBodyType || declaredRoute?.vehicleType || item.vehicleOrUnit || 'Xe Tải Thùng Kín (Dry Box)';
-  const tonnageDesc = declaredRoute?.truckTonnage || 'Tiêu chuẩn ngành';
+  const originName = declaredRoute?.origin || item.origin || 'Điểm xuất phát';
+  const destName = declaredRoute?.destination || item.destination || 'Điểm đến';
   const slaDesc = declaredRoute?.sla || item.transitTime || '24 - 48 Giờ';
-  const scheduleDesc = declaredRoute?.departureSchedule || 'Hàng ngày';
-  const pricingStyleDesc = declaredRoute?.pricingStyle || 'All-in';
-  const validUntilDesc = declaredRoute?.validUntil || item.validUntil;
-
-  // Surcharges from Tab 3
-  const freeSurchargesList: string[] = declaredRoute?.warehouseFreeSurcharges || declaredModel?.freeSurcharges || [
-    'Phí nhiên liệu & Cầu đường cao tốc (Đã bao gồm)',
-    'Định vị GPS giám sát hành trình thời gian thực',
-    'Miễn phí 02 giờ neo xe chờ bốc dỡ',
-    'Biên bản bàn giao chứng từ ký nhận (e-POD)'
-  ];
-
-  const paidSurchargesList = declaredRoute?.warehousePaidSurcharges || declaredModel?.paidSurcharges || [
-    { id: 'p-1', name: 'Phí neo xe phát sinh ngoài 2 giờ quy định', priceText: '150,000 ₫ / Giờ', isChecked: true },
-    { id: 'p-2', name: 'Phí bốc xếp thủ công hạ hàng tận nơi', priceText: '350,000 ₫ / Tấn', isChecked: true },
-    { id: 'p-3', name: 'Phí giao thêm điểm phụ cùng cung đường', priceText: '500,000 ₫ / Điểm', isChecked: true },
-  ];
-
-  const vasList = (declaredModel?.vasList || [
-    'Dán seal chì niêm phong hàng hóa',
-    'Kiểm đếm kiện tại kho',
-    'Chụp ảnh nghiệm thu hiện trường'
-  ]);
-
-  // Capability commitments from Tab 3
-  const fleetInfo = declaredModel?.fleet || 'Đội xe 45 xe tải thùng kín, bạt (1.5T - 15T) và 30 đầu kéo container 40ft/45ft';
-  const operationInfo = declaredModel?.operationCapacity || 'Hệ thống TMS điều phối GPS 24/7, 2 tài xế/chuyến đường dài, hỗ trợ bốc xếp tại kho';
-  const commitmentInfo = declaredModel?.serviceCommitment || 'Cam kết giao hàng đúng hẹn 99.6%, bảo hiểm hàng hóa 100% lên đến 5 Tỷ VND/chuyến';
 
   // Specific Service Group & Model Flags
   const serviceGroup = (item.serviceGroup || item.category || item.serviceType || '').toLowerCase();
-  const serviceModel = (item.serviceModel || declaredModel?.serviceModel || '').toUpperCase();
-  const cargoGroup = (item.cargoGroup || declaredModel?.cargoGroup || 'Hàng thường');
+  const serviceModel = (item.serviceModel || '').toUpperCase();
   const titleLower = (item.title || '').toLowerCase();
   const vehicleLower = (item.vehicleOrUnit || '').toLowerCase();
+  const cargoGroup = (item.cargoGroup || '').toLowerCase();
 
-  const isCrossBorder = serviceGroup.includes('biên') || serviceGroup.includes('cross') || titleLower.includes('xuyên biên giới') || titleLower.includes('liên vận');
-  const isCustoms = serviceGroup.includes('quan') || serviceGroup.includes('custom') || titleLower.includes('hải quan');
-  const isWarehousing = serviceGroup.includes('kho') || serviceGroup.includes('warehous') || titleLower.includes('kho bãi');
+  const isWarehousing = serviceGroup.includes('kho') || serviceGroup.includes('warehousing') || titleLower.includes('kho bãi');
+  const isCustoms = serviceGroup.includes('quan') || serviceGroup.includes('customs') || titleLower.includes('hải quan');
+  const isCrossBorder = serviceGroup.includes('biên') || serviceGroup.includes('cross') || titleLower.includes('xuyên biên giới');
   const isOcean = serviceGroup.includes('biển') || serviceGroup.includes('sea') || serviceGroup.includes('ocn') || titleLower.includes('đường biển');
   const isAir = serviceGroup.includes('không') || serviceGroup.includes('air') || titleLower.includes('hàng không');
   const isRail = serviceGroup.includes('sắt') || serviceGroup.includes('rail') || titleLower.includes('đường sắt');
@@ -219,1142 +215,1116 @@ export const HotPromotionRateDetailCard: React.FC<HotPromotionRateDetailCardProp
   const isLCL = serviceModel.includes('LCL') || serviceModel.includes('CFS') || titleLower.includes('lcl') || titleLower.includes('cfs');
   const isFCL = !isLCL;
 
-  const isBonded = isWarehousing && (serviceModel.includes('NGOẠI QUAN') || serviceModel.includes('BONDED') || serviceModel.includes('CFS') || titleLower.includes('ngoại quan') || titleLower.includes('bonded'));
-  const isEcom = isWarehousing && (serviceModel.includes('TMĐT') || serviceModel.includes('ECOM') || serviceModel.includes('FULFILLMENT') || titleLower.includes('fulfillment') || titleLower.includes('tmđt'));
-  const isSelfStorage = isWarehousing && (serviceModel.includes('TỰ QUẢN') || serviceModel.includes('SELF') || titleLower.includes('tự quản'));
-  const isColdWarehouse = isWarehousing && (cargoGroup.includes('Lạnh') || titleLower.includes('lạnh') || serviceGroup.includes('lạnh'));
-  const isStandardWarehouse = isWarehousing && !isBonded && !isEcom && !isSelfStorage;
+  const isColdCargo = cargoGroup.includes('lạnh') || cargoGroup.includes('cold') || cargoGroup.includes('reefer') || (item.badgeLabel || '').toLowerCase().includes('lạnh');
+  const isHazmatCargo = cargoGroup.includes('nguy hiểm') || cargoGroup.includes('dg') || cargoGroup.includes('imo') || (item.badgeLabel || '').toLowerCase().includes('nguy hiểm');
 
-  const isCrossBorderLtl = isCrossBorder && (isLTL || titleLower.includes('ghép') || titleLower.includes('ltl'));
-  const isCrossBorderFtl = isCrossBorder && !isCrossBorderLtl;
+  // Warehouse specific data
+  const warehouseSpecs: WarehouseTechSpecs = declaredRoute?.warehouseTechSpecs || (declaredModel as any)?.techSpecs || {
+    clearHeight: 12.5,
+    floorLoad: 5.5,
+    floorType: 'Bê tông cốt thép xoa nền Hardener & sơn phủ Epoxy chống sinh bụi',
+    columnGrid: '12m x 24m (Nhịp rộng tối ưu chuyển làn cho xe nâng Reach Truck)',
+    ventilation: 'Hệ thống thông gió tự nhiên kết hợp quạt hút cưỡng bức đỉnh mái',
+    rackingTypes: ['Selective Racking', 'Drive-in Racking'],
+    rackingLevels: 5,
+    palletLoadLimit: 1200,
+    compatiblePalletSizes: ['1.0m × 1.2m (ISO/GMA)', '1.1m × 1.1m (Tiêu chuẩn Châu Á)'],
+    dockDoorsCount: 6,
+    hasDockLeveler: true,
+    yardTurnaround: 'Sân bê tông rộng 35m, xe cont 40ft/45ft quay đầu dễ dàng 24/7',
+    operatingHoursTrucks: '24/7 (Không cấm giờ xe cont)',
+    fireProtectionSystem: 'PCCC tự động Sprinkler ESFR (Đã nghiệm thu PCCC)',
+    fireProtectionApprovalNo: 'Nghiệm thu PCCC số 184/TD-PCCC',
+    cctvSurveillance: 'Hệ thống camera AI nhận diện biển số & bao quát 100% góc chết kho',
+    securityGuards: 'Bảo vệ chuyên nghiệp 2 lớp túc trực 24/7/365',
+    wmsSoftwareName: 'WMS Infor SCM Cloud (Hỗ trợ quét Barcode 1D/2D / RFID)',
+    scanningTechnologies: ['Barcode 1D / 2D Handheld', 'RFID Portal Gateway'],
+    hasApiIntegration: true,
+    realtimeWebPortal: true,
+    certifications: ['ISO 9001:2015', 'ISO 14001', 'C-TPAT Security Standard'],
+    hasFullInsurance: true,
+    hasBackupGeneratorAts: true,
+  };
 
-  const isXdock = isProject && (serviceModel.includes('CROSS') || serviceModel.includes('DOCK') || titleLower.includes('cross-dock') || titleLower.includes('x-dock') || titleLower.includes('hub'));
-  const isPort = isProject && !isXdock;
+  const warehousePhotos: WarehousePhotoItem[] = declaredRoute?.warehousePhotos || (declaredModel as any)?.photos || [
+    {
+      id: 'ph-wh-1',
+      url: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1200&auto=format&fit=crop&q=80',
+      name: 'Toàn cảnh mặt ngoài cơ sở kho bãi & Sân quay đầu xe Container',
+      tag: 'Toàn Cảnh Cơ Sở Kho',
+      isCover: true,
+    },
+    {
+      id: 'ph-wh-2',
+      url: 'https://images.unsplash.com/photo-1553413077-190dd305871c?w=1200&auto=format&fit=crop&q=80',
+      name: 'Hệ thống giá kệ Selective Racking tải trọng nặng 5 tầng',
+      tag: 'Mặt Sàn & Giá Kệ Racking',
+      isCover: false,
+    },
+    {
+      id: 'ph-wh-3',
+      url: 'https://images.unsplash.com/photo-1578575437130-527eed3abbec?w=1200&auto=format&fit=crop&q=80',
+      name: 'Dãy cửa Dock tự động tích hợp Dock Leveler thủy lực',
+      tag: 'Cửa Dock & Leveler',
+      isCover: false,
+    },
+    {
+      id: 'ph-wh-4',
+      url: 'https://images.unsplash.com/photo-1587293852726-70cdb56c2866?w=1200&auto=format&fit=crop&q=80',
+      name: 'Hệ thống báo cháy tự động Sprinkler ESFR và camera giám sát AI',
+      tag: 'PCCC & An Ninh',
+      isCover: false,
+    }
+  ];
 
-  const isColdCargo = cargoGroup.includes('Lạnh') || cargoGroup.includes('Cold') || cargoGroup.includes('Reefer') || (item.badgeLabel || '').includes('Lạnh');
-  const isHazardous = cargoGroup.includes('Nguy hiểm') || cargoGroup.includes('DG') || cargoGroup.includes('IMO') || (item.badgeLabel || '').includes('Nguy hiểm');
+  // 4. Build WarehouseDetailModalData for continuous spreadsheet table
+  const warehouseDetailData: WarehouseDetailModalData = useMemo(() => {
+    const freeUtils = (declaredRoute?.warehouseFreeSurcharges && declaredRoute.warehouseFreeSurcharges.length > 0)
+      ? declaredRoute.warehouseFreeSurcharges
+      : [
+          'Miễn phí 02 giờ neo xe chờ bốc dỡ',
+          'Miễn phí tài khoản phần mềm WMS Portal theo dõi tồn kho 24/7',
+          'Bảo vệ an ninh 24/7 & Giám sát camera an ninh',
+          'Bảo hiểm cháy nổ & trách nhiệm kho bãi 100%',
+          'Phí bến bãi đỗ xe container chờ xuất nhập',
+          'Vệ sinh và kiểm soát côn trùng định kỳ'
+        ];
 
-  const warehouseSpecs: WarehouseTechSpecs | undefined = declaredRoute?.warehouseTechSpecs || (declaredModel as any)?.techSpecs;
-  const warehousePhotos: WarehousePhotoItem[] = declaredRoute?.warehousePhotos || (declaredModel as any)?.photos || [];
+    const varSurcharges = [
+      {
+        id: 'sur-inbound',
+        code: 'SUR-INBOUND',
+        name: 'Phí nâng hạ & dỡ hàng nhập kho (Inbound)',
+        category: 'Handling Inbound',
+        unit: 'VND / Lần / Cột',
+        columnPrices: { 'col-1': 35000, 'col-2': 35000, 'col-3': 30000 }
+      },
+      {
+        id: 'sur-outbound',
+        code: 'SUR-OUTBOUND',
+        name: 'Phí lấy hàng & bốc xếp xuất kho (Outbound)',
+        category: 'Handling Outbound',
+        unit: 'VND / Lần / Cột',
+        columnPrices: { 'col-1': 35000, 'col-2': 35000, 'col-3': 30000 }
+      },
+      {
+        id: 'sur-count',
+        code: 'SUR-COUNT',
+        name: 'Phí kiểm đếm chi tiết theo Serial / Barcode SKU',
+        category: 'Kiểm Đếm & Phân Loại',
+        unit: 'VND / Đơn vị / Cột',
+        columnPrices: { 'col-1': 1500, 'col-2': 1500, 'col-3': 1200 }
+      },
+      {
+        id: 'sur-pallet-wrap',
+        code: 'SUR-WRAP',
+        name: 'Phí quấn màng co PE bảo vệ kiện hàng',
+        category: 'Đóng Gói & Bảo Vệ',
+        unit: 'VND / Cuộn / Cột',
+        columnPrices: { 'col-1': 25000, 'col-2': 25000, 'col-3': 20000 }
+      },
+      {
+        id: 'sur-pallet-wood',
+        code: 'SUR-PALLET-WOOD',
+        name: 'Phí cung cấp pallet gỗ tiêu chuẩn xuất khẩu',
+        category: 'Vật Tư & Phụ Trợ',
+        unit: 'VND / Pallet / Cột',
+        columnPrices: { 'col-1': 120000, 'col-2': 120000, 'col-3': 110000 }
+      }
+    ];
+
+    const fixSurcharges = [
+      {
+        id: 'fix-yard-cont',
+        code: 'FIX-YARD-CONT',
+        name: 'Phí lưu bãi xe container qua đêm tại sân kho',
+        unit: 'VND / Xe / Đêm',
+        price: 150000,
+        note: 'Miễn phí 2 giờ đầu bốc dỡ ban ngày'
+      },
+      {
+        id: 'fix-ot-night',
+        code: 'FIX-OT-NIGHT',
+        name: 'Phí mở cửa kho vận hành ngoài giờ / Chủ nhật / Ngày lễ',
+        unit: 'VND / Giờ',
+        price: 300000,
+        note: 'Báo trước 4 tiếng cho thủ kho'
+      },
+      {
+        id: 'fix-plug-cont',
+        code: 'FIX-PLUG-CONT',
+        name: 'Phí điện lạnh cắm container Reefer lưu bãi',
+        unit: 'VND / Giờ',
+        price: 65000,
+        note: 'Giám sát nhiệt độ 24/7'
+      }
+    ];
+
+    const vasItems = [
+      {
+        id: 'vas-kitting',
+        code: 'VAS-KITTING',
+        name: 'Đóng gói lại / Kitting / Dán tem nhãn phụ tiếng Việt',
+        category: 'Kitting & Labeling',
+        unit: 'VND / Sản phẩm',
+        priceText: '800 ₫ / Tem nhãn',
+        slaNote: 'SLA hoàn thành trong ngày'
+      },
+      {
+        id: 'vas-return',
+        code: 'VAS-RETURN',
+        name: 'Phân loại & Xử lý hàng hoàn trả sàn TMĐT (Reverse Logistics)',
+        category: 'Reverse Logistics',
+        unit: 'VND / Kiện hàng',
+        priceText: '3.500 ₫ / Kiện',
+        slaNote: 'Kiểm tra ngoại quan và nhập hệ thống'
+      },
+      {
+        id: 'vas-customs-bonded',
+        code: 'VAS-CUSTOMS-BONDED',
+        name: 'Dịch vụ khai báo hải quan kho ngoại quan trọn gói',
+        category: 'Hải Quan Kho Ngoại Quan',
+        unit: 'VND / Tờ khai',
+        priceText: '650.000 ₫ / Tờ khai',
+        slaNote: 'Phối hợp công chức Hải quan trực kho'
+      },
+      {
+        id: 'vas-fifo-lot',
+        code: 'VAS-FIFO-LOT',
+        name: 'Quản lý Date / Hạn sử dụng theo lô FIFO / FEFO chuyên sâu',
+        category: 'Quản Lý Date & Batch',
+        unit: 'VND / Tháng',
+        priceText: 'Miễn phí trên phần mềm WMS',
+        slaNote: 'Cảnh báo date tự động trước 60 ngày'
+      }
+    ];
+    const isColdStorage = Boolean(cargoGroup.includes('lạnh') || titleLower.includes('lạnh'));
+    const isChemicalStorage = Boolean(cargoGroup.includes('nguy hiểm') || titleLower.includes('nguy hiểm'));
+    const isBondedStorage = Boolean(titleLower.includes('ngoại quan') || serviceModel.includes('NGOẠI QUAN'));
+    const isSelfStorage = Boolean(titleLower.includes('tự quản') || serviceModel.includes('TỰ QUẢN'));
+    const isFulfillment = Boolean(titleLower.includes('fulfillment') || titleLower.includes('tmđt') || serviceModel.includes('TMĐT'));
+
+    return {
+      routeId: declaredRoute?.id || item.code || item.id,
+      warehouseCode: declaredRoute?.customsWarehouseCode || declaredRoute?.warehouseCode || item.code || 'WH-BD-001',
+      warehouseName: declaredRoute?.warehouseName || item.title || 'Kho Trung Tâm KCN Sóng Thần 1',
+      province: declaredRoute?.city || 'Bình Dương',
+      address: declaredRoute?.warehouseAddress || item.origin || 'KCN Sóng Thần 1, Dĩ An, Bình Dương',
+      isColdStorage,
+      isChemicalStorage,
+      isBondedStorage,
+      isSelfStorage,
+      isFulfillment,
+      customsWarehouseCode: declaredRoute?.customsWarehouseCode || 'WH-BD-001',
+      customsAuthority: declaredRoute?.customsAuthority || 'Chi cục Hải quan KCN Sóng Thần',
+      photos: warehousePhotos,
+      techSpecs: warehouseSpecs,
+      freeSurcharges: freeUtils,
+      paidSurcharges: [
+        { id: 'sur-inbound', name: 'Phí nâng hạ & dỡ hàng nhập kho (Inbound)', priceText: '35.000 ₫/lần', isChecked: true },
+        { id: 'sur-outbound', name: 'Phí lấy hàng & bốc xếp xuất kho (Outbound)', priceText: '35.000 ₫/lần', isChecked: true }
+      ],
+      vasItems: [
+        { id: 'vas-kitting', name: 'Đóng gói lại / Kitting / Dán tem nhãn phụ', priceText: '800 ₫/sản phẩm', isChecked: true }
+      ],
+      capacityArea: 2500,
+      capacityPallets: 1800,
+      capacityVolume: 3000,
+      availableArea: 850,
+      availablePallets: 600,
+      availableVolume: 1100,
+      occupiedArea: 1650,
+      occupiedPallets: 1200,
+      occupiedVolume: 1900,
+      receptionStatus: 'ready',
+      pricePerArea: declaredRoute?.priceM2 || 95000,
+      pricePerPallet: declaredRoute?.pricePallet || 110000,
+      pricePerVolume: declaredRoute?.priceCbm || 120000,
+      minChargeMonthly: 3000000,
+      currency: 'VND',
+      validUntil: declaredRoute?.validUntil || item.validUntil || '2026-12-31',
+      promotionPercent: item.discountPercent || 10,
+      sla: declaredRoute?.sla || '2 - 4 giờ kể từ khi xe vào dock',
+      operatingHours: declaredRoute?.operatingHours || '24/7 (Không cấm giờ xe cont)',
+      cutOffTime: declaredRoute?.cutOffTime || '16:30 hàng ngày',
+      paymentTerms: declaredRoute?.paymentTerms || 'Net 30 ngày',
+      pricingContinuousMatrix: {
+        columns: [
+          { id: 'col-1', name: '1. Diện Tích Sàn (m²)', unit: 'm²' },
+          { id: 'col-2', name: '2. Sức Chứa Pallet (Racking)', unit: 'Pallet' },
+          { id: 'col-3', name: '3. Thể Tích Chứa (m³ / CBM)', unit: 'm³' }
+        ],
+        capacityRow: {
+          design: { 'col-1': 2500, 'col-2': 1800, 'col-3': 3000 },
+          occupied: { 'col-1': 1650, 'col-2': 1200, 'col-3': 1900 },
+          available: { 'col-1': 850, 'col-2': 600, 'col-3': 1100 }
+        },
+        rentalPriceRow: {
+          'col-1': declaredRoute?.priceM2 || 95000,
+          'col-2': declaredRoute?.pricePallet || 110000,
+          'col-3': declaredRoute?.priceCbm || 120000
+        },
+        minChargeMonthlyRow: {
+          'col-1': 3000000,
+          'col-2': 10000000,
+          'col-3': 8000000
+        },
+        variableSurcharges: varSurcharges,
+        fixedSurcharges: fixSurcharges,
+        vasList: vasItems,
+        rules: {
+          operatingHours: declaredRoute?.operatingHours || '24/7 (Không cấm giờ xe cont)',
+          cutOffTime: declaredRoute?.cutOffTime || '16:30 hàng ngày',
+          sla: declaredRoute?.sla || '2 - 4 giờ kể từ khi xe vào dock',
+          validUntil: declaredRoute?.validUntil || item.validUntil || '2026-12-31',
+          promotionPercent: item.discountPercent || 10,
+          paymentTerms: declaredRoute?.paymentTerms || 'Net 30 ngày'
+        }
+      }
+    };
+  }, [declaredRoute, declaredModel, item, warehousePhotos, warehouseSpecs]);
+
+  const [warehouseData, setWarehouseData] = useState<WarehouseDetailModalData | null>(warehouseDetailData);
+
+  const techCategories = useMemo(() => {
+    return getWarehouseTechSpecCategories(declaredModel?.id, declaredModel?.cargoGroupId);
+  }, [declaredModel]);
 
   return (
-    <div className="bg-slate-50/95 rounded-2xl p-4 sm:p-5 border border-indigo-100 shadow-inner space-y-4 text-xs animate-in fade-in duration-150">
-      {/* Main 2-Column Layout (70% Technical & Surcharges | 30% PIC & Actions) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        {/* =========================================================================
-            LEFT COLUMN (8/12): FULL TECHNICAL DATA, SURCHARGES & CAPABILITIES
-           ========================================================================= */}
-        <div className="lg:col-span-8 space-y-4">
-          {/* KHỐI 1: THÔNG TIN CHI TIẾT (ÁNH XẠ CHUẨN TAB 3 THEO TỪNG NHÓM DỊCH VỤ) */}
-          <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs space-y-3">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
-              <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                <span className="w-5 h-5 rounded-full bg-indigo-50 text-indigo-700 flex items-center justify-center text-[10.5px] font-bold">1</span>
-                <ServiceIcon className="w-4 h-4 text-orange-600 shrink-0" />
-                <span>Thông Tin Chi Tiết</span>
-                <span className="font-mono text-orange-600 font-bold ml-0.5">({routeCode})</span>
+    <div className="bg-slate-50/95 rounded-2xl p-3 sm:p-4 border border-slate-200 shadow-inner space-y-3.5 text-xs animate-in fade-in duration-150">
+      {/* =========================================================================
+          THẺ THÔNG TIN CHUYÊN VIÊN (PIC) & ĐẶT GIỮ CHỖ TRÊN 1 HÀNG DUY NHẤT (FULL WIDTH)
+         ========================================================================= */}
+      <div className="bg-white rounded-xl border border-slate-200 p-3 sm:p-3.5 shadow-2xs flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-3 sm:gap-4">
+        {/* Left: PIC Profile */}
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-11 h-11 rounded-xl bg-linear-to-tr from-blue-600 to-indigo-600 text-white font-bold text-base flex items-center justify-center shadow-xs shrink-0">
+            {specialist.avatarInitial}
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <h4 
+                onClick={() => {
+                  onNavigate({ 
+                    type: 'public', 
+                    tab: 'supplier-profile', 
+                    params: { specialistId: item.specialistId, viewState: 'detail' } 
+                  });
+                }}
+                className="text-sm font-extrabold text-slate-900 hover:text-indigo-600 cursor-pointer truncate"
+                title="Bấm để xem hồ sơ năng lực đầy đủ của chuyên viên"
+              >
+                {specialist.vietnameseName}
               </h4>
-              <span className="text-[10.5px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                ✓ Dữ liệu gốc Tab 3
-              </span>
-            </div>
-
-            {/* DYNAMIC SPECS GRID ACCORDING TO SERVICE TYPE & MODEL */}
-            {/* 1. KHO BÃI 3PL */}
-            {isWarehousing && isBonded && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Mã Kho HQ & Tên Kho:</span>
-                  <p className="font-bold text-slate-900 flex items-center gap-1.5">
-                    <span className="font-mono text-indigo-700 bg-indigo-50 px-1.5 py-0.2 rounded border border-indigo-200">{declaredRoute?.customsWarehouseCode || declaredRoute?.warehouseCode || routeCode}</span>
-                    <span className="truncate">{declaredRoute?.warehouseName || item.title}</span>
-                  </p>
-                  <span className="text-[10.5px] text-slate-500 block">Mô hình: Kho Ngoại Quan & Kho CFS chuyên dụng</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Chi Cục Hải Quan Quản Lý:</span>
-                  <p className="font-bold text-amber-900">{declaredRoute?.customsAuthority || 'Hải quan KV Cảng Cát Lái / KCN Sóng Thần'}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Có cán bộ Hải quan giám sát & niêm phong tại kho</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Cổng Cảng / KCN / Địa Chỉ:</span>
-                  <p className="font-bold text-slate-900">{declaredRoute?.warehouseAddress || originName}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Khu vực: {declaredRoute?.city || 'Hồ Chí Minh / Bình Dương'}</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Diện Tích & Thể Tích CBM:</span>
-                  <p className="font-bold text-slate-900">
-                    {declaredRoute?.capacityArea ? `${declaredRoute.capacityArea.toLocaleString('vi-VN')} m²` : '18.000 m²'} • {declaredRoute?.capacityCbm ? `${declaredRoute.capacityCbm.toLocaleString('vi-VN')} m³` : '45.000 m³'}
-                  </p>
-                  <span className="text-[10.5px] text-slate-500 block">Sức chứa: {declaredRoute?.capacityPallets ? `${declaredRoute.capacityPallets.toLocaleString('vi-VN')} Pallet vị trí` : '15.000 Pallet vị trí'}</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Đơn Giá Lưu Kho CBM & Pallet:</span>
-                  <p className="font-bold text-emerald-700 text-sm">
-                    {declaredRoute?.priceCbm ? `${declaredRoute.priceCbm.toLocaleString('vi-VN')} ₫/CBM/ngày` : `${item.promotionalPriceDisplay}`}
-                  </p>
-                  <span className="text-[10.5px] text-slate-500 block">
-                    Đơn giá m²: {declaredRoute?.priceM2 ? `${declaredRoute.priceM2.toLocaleString('vi-VN')} ₫/m²/tháng` : '145.000 ₫/m²/tháng'}
-                  </span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Cước Sàn Tối Thiểu (Min Charge):</span>
-                  <p className="font-bold text-amber-900">{(declaredRoute?.minChargeAmount || 500000).toLocaleString('vi-VN')} ₫ / Lô hàng</p>
-                  <span className="text-[10.5px] text-slate-500 block">Tiền tệ niêm yết: VNĐ (Đã bao gồm giám sát)</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Giờ Xe Ra Vào & Giám Sát:</span>
-                  <p className="font-bold text-indigo-900">{declaredRoute?.operatingHours || 'Tiếp nhận xe 24/7 (Cả ngày lễ)'}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Hệ thống camera CCTV an ninh trực tuyến lưu trữ 90 ngày</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Thời Hạn Giá & Khuyến Mãi:</span>
-                  <p className="font-bold text-slate-900">{validUntilDesc}</p>
-                  <span className="text-[10.5px] text-emerald-700 block font-semibold">Ưu đãi độc quyền: Giảm {item.discountPercent}% cho 3 tháng đầu</span>
-                </div>
-              </div>
-            )}
-
-            {isWarehousing && isEcom && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Mã Kho FUL & Trung Tâm Fulfillment:</span>
-                  <p className="font-bold text-slate-900 flex items-center gap-1.5">
-                    <span className="font-mono text-purple-700 bg-purple-50 px-1.5 py-0.2 rounded border border-purple-200">{declaredRoute?.fulfillmentCode || declaredRoute?.warehouseCode || routeCode}</span>
-                    <span className="truncate">{declaredRoute?.warehouseName || item.title}</span>
-                  </p>
-                  <span className="text-[10.5px] text-slate-500 block">Mô hình: E-commerce Fulfillment & B2C Warehousing</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Địa Chỉ / KCN Trọng Điểm:</span>
-                  <p className="font-bold text-slate-900">{declaredRoute?.warehouseAddress || originName}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Gần nút giao cao tốc, xe tải trung chuyển dễ dàng</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Công Suất Xử Lý Đơn Hàng:</span>
-                  <p className="font-bold text-indigo-900">
-                    {declaredRoute?.dailyOrderCapacity ? `${declaredRoute.dailyOrderCapacity.toLocaleString('vi-VN')} Đơn/Ngày` : '25.000 Đơn/Ngày'}
-                  </p>
-                  <span className="text-[10.5px] text-slate-500 block">Sức chứa: {declaredRoute?.skuCapacity ? `${declaredRoute.skuCapacity.toLocaleString('vi-VN')} SKUs` : '80.000 SKUs'}</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Phí Xử Lý Đơn (Pick & Pack):</span>
-                  <p className="font-bold text-emerald-700 text-sm">
-                    {(declaredRoute?.pickPackFee || 4500).toLocaleString('vi-VN')} ₫ / Đơn cơ bản
-                  </p>
-                  <span className="text-[10.5px] text-slate-500 block">Phí thêm item: {(declaredRoute?.extraItemFee || 800).toLocaleString('vi-VN')} ₫/item</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Lưu Kho Đệm (Pallet / Bins):</span>
-                  <p className="font-bold text-slate-900">
-                    {declaredRoute?.bufferStorageFee ? `${declaredRoute.bufferStorageFee.toLocaleString('vi-VN')} ₫/m³/tháng` : '180.000 ₫/m³/tháng'}
-                  </p>
-                  <span className="text-[10.5px] text-slate-500 block">Hệ thống kệ chia chọn đa tầng Mezzanine hiện đại</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Cước Sàn Tối Thiểu (Min/Tháng):</span>
-                  <p className="font-bold text-amber-900">
-                    {(declaredRoute?.minMonthlyFee || 3000000).toLocaleString('vi-VN')} ₫ / Tháng
-                  </p>
-                  <span className="text-[10.5px] text-slate-500 block">Đã gồm tài khoản WMS quản lý tồn kho trực tiếp</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">SLA Đóng Hàng & Cut-Off Giờ:</span>
-                  <p className="font-bold text-indigo-900">Cut-off 16:00 (Xuất hàng cùng ngày 99.8%)</p>
-                  <span className="text-[10.5px] text-slate-500 block">Tích hợp API sàn Shopee, TikTok Shop, Lazada</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Hạn Giá & Khuyến Mãi:</span>
-                  <p className="font-bold text-slate-900">{validUntilDesc}</p>
-                  <span className="text-[10.5px] text-emerald-700 block font-semibold">Ưu đãi: Miễn phí lưu kho đệm tháng đầu tiên</span>
-                </div>
-              </div>
-            )}
-
-            {isWarehousing && isSelfStorage && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Mã Kho TQ & Tên Cơ Sở:</span>
-                  <p className="font-bold text-slate-900 flex items-center gap-1.5">
-                    <span className="font-mono text-amber-700 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200">{declaredRoute?.warehouseCode || routeCode}</span>
-                    <span className="truncate">{declaredRoute?.warehouseName || item.title}</span>
-                  </p>
-                  <span className="text-[10.5px] text-slate-500 block">Mô hình: Kho Tự Quản Thông Minh (Self Storage)</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">KCN / Địa Chỉ Chi Tiết:</span>
-                  <p className="font-bold text-slate-900">{declaredRoute?.warehouseAddress || originName}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Khu vực trung tâm, đường xe tải không cấm giờ</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Diện Tích Sàn & Thể Tích:</span>
-                  <p className="font-bold text-slate-900">
-                    {declaredRoute?.capacityArea ? `${declaredRoute.capacityArea.toLocaleString('vi-VN')} m²` : '6.000 m²'} • {declaredRoute?.capacityCbm ? `${declaredRoute.capacityCbm.toLocaleString('vi-VN')} m³` : '18.000 m³'}
-                  </p>
-                  <span className="text-[10.5px] text-slate-500 block">Số khoang phân lô: 120 khoang (10m² - 200m²)</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Đơn Giá Thuê Niêm Yết:</span>
-                  <p className="font-bold text-emerald-700 text-sm">
-                    {declaredRoute?.priceM2 ? `${declaredRoute.priceM2.toLocaleString('vi-VN')} ₫/m²/tháng` : item.promotionalPriceDisplay}
-                  </p>
-                  <span className="text-[10.5px] text-slate-500 block">Đơn vị tính: {item.pricingUnit}</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Cước Sàn Tối Thiểu (Min/Tháng):</span>
-                  <p className="font-bold text-amber-900">{(declaredRoute?.minMonthlyFee || 1500000).toLocaleString('vi-VN')} ₫ / Tháng</p>
-                  <span className="text-[10.5px] text-slate-500 block">Không bắt buộc ký hợp đồng dài hạn</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Giờ Ra Vào & Tiện Ích:</span>
-                  <p className="font-bold text-indigo-900">Chủ động ra vào 24/7 bằng thẻ từ hoặc vân tay</p>
-                  <span className="text-[10.5px] text-slate-500 block">Khóa riêng biệt, camera an ninh riêng từng khoang</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">PCCC & Bảo Hiểm:</span>
-                  <p className="font-bold text-slate-900">PCCC tự động Sprinkler thẩm duyệt nghiệm thu</p>
-                  <span className="text-[10.5px] text-slate-500 block">Bảo hiểm cháy nổ cơ sở vật chất 100%</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Hạn Giá & Khuyến Mãi:</span>
-                  <p className="font-bold text-slate-900">{validUntilDesc}</p>
-                  <span className="text-[10.5px] text-emerald-700 block font-semibold">Ưu đãi: Giảm {item.discountPercent}% cho hợp đồng từ 6 tháng</span>
-                </div>
-              </div>
-            )}
-
-            {isWarehousing && isStandardWarehouse && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Mã Kho & Tên Trung Tâm DC:</span>
-                  <p className="font-bold text-slate-900 flex items-center gap-1.5">
-                    <span className="font-mono text-indigo-700 bg-indigo-50 px-1.5 py-0.2 rounded border border-indigo-200">{declaredRoute?.warehouseCode || routeCode}</span>
-                    <span className="truncate">{declaredRoute?.warehouseName || item.title}</span>
-                  </p>
-                  <span className="text-[10.5px] text-slate-500 block">
-                    Phân loại: {isColdWarehouse ? 'Kho Lạnh Âm Sâu & Kho Mát Đạt Chuẩn HACCP' : 'Kho Phân Phối Tiêu Chuẩn Hiện Đại (Standard DC)'}
-                  </span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Địa Chỉ KCN & Tỉnh / TP:</span>
-                  <p className="font-bold text-slate-900">{declaredRoute?.warehouseAddress || originName}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Khu bãi đỗ xe container rộng 4.000 m², không kẹt xe</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Quy Mô Diện Tích & Thể Tích:</span>
-                  <p className="font-bold text-slate-900">
-                    {declaredRoute?.capacityArea ? `${declaredRoute.capacityArea.toLocaleString('vi-VN')} m²` : '15.000 m²'} • {declaredRoute?.capacityCbm ? `${declaredRoute.capacityCbm.toLocaleString('vi-VN')} m³` : '40.000 m³'}
-                  </p>
-                  <span className="text-[10.5px] text-slate-500 block">
-                    {isColdWarehouse 
-                      ? 'Dải nhiệt độ: -18°C ~ -25°C (Đông lạnh) / 0°C ~ 5°C (Mát)' 
-                      : 'Chiều cao trần tĩnh: 12m | Tải trọng sàn: 5 Tấn/m²'}
-                  </span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Sức Chứa Pallet & Cửa Dock:</span>
-                  <p className="font-bold text-slate-900">
-                    {declaredRoute?.capacityPallets ? `${declaredRoute.capacityPallets.toLocaleString('vi-VN')} Pallet` : '12.000 Pallet vị trí'}
-                  </p>
-                  <span className="text-[10.5px] text-slate-500 block">Hệ thống 8 Cửa Dock Leveler thủy lực tự động</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Đơn Giá Thuê Niêm Yết:</span>
-                  <p className="font-bold text-emerald-700 text-sm">
-                    {declaredRoute?.priceM2 ? `${declaredRoute.priceM2.toLocaleString('vi-VN')} ₫/m²/tháng` : item.promotionalPriceDisplay}
-                  </p>
-                  <span className="text-[10.5px] text-slate-500 block">
-                    Đơn giá Pallet: {declaredRoute?.pricePallet ? `${declaredRoute.pricePallet.toLocaleString('vi-VN')} ₫/Pallet/tháng` : '135.000 ₫/Pallet/tháng'}
-                  </span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Cước Sàn Tối Thiểu (Min/Tháng):</span>
-                  <p className="font-bold text-amber-900">{(declaredRoute?.minMonthlyFee || 2500000).toLocaleString('vi-VN')} ₫ / Tháng</p>
-                  <span className="text-[10.5px] text-slate-500 block">Áp dụng linh hoạt theo diện tích hoặc số lượng pallet</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">SLA Vận Hành & An Ninh:</span>
-                  <p className="font-bold text-indigo-900">Tiếp nhận & xuất hàng 24/7 | Xe nâng điện Reach Truck</p>
-                  <span className="text-[10.5px] text-slate-500 block">WMS tích hợp Barcode quét mã vạch kiểm kê theo thời gian thực</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Thời Hạn Giá & Khuyến Mãi:</span>
-                  <p className="font-bold text-slate-900">{validUntilDesc}</p>
-                  <span className="text-[10.5px] text-emerald-700 block font-semibold">Ưu đãi: Tiết kiệm {item.discountPercent}% cho hợp đồng ký mới</span>
-                </div>
-              </div>
-            )}
-
-            {/* 2. DỰ ÁN & KHAI THÁC CẢNG / X-DOCK */}
-            {isProject && isXdock && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Mã Trạm X-Dock & Tên Hub:</span>
-                  <p className="font-bold text-slate-900 flex items-center gap-1.5">
-                    <span className="font-mono text-purple-700 bg-purple-50 px-1.5 py-0.2 rounded border border-purple-200">{declaredRoute?.routeCode || routeCode}</span>
-                    <span className="truncate">{declaredRoute?.warehouseName || item.title}</span>
-                  </p>
-                  <span className="text-[10.5px] text-slate-500 block">Trạm Cross-Docking trung chuyển & chia chọn nhanh</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">KCN / Vị Trí Trạm:</span>
-                  <p className="font-bold text-slate-900">{declaredRoute?.warehouseAddress || originName}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Điểm giao thoa các hành lang vận tải liên tỉnh</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Công Suất Sàn Trung Chuyển:</span>
-                  <p className="font-bold text-indigo-900">
-                    {declaredRoute?.capacityPerDay ? `${declaredRoute.capacityPerDay.toLocaleString('vi-VN')} Tấn/Ngày` : '1.200 Tấn/Ngày'}
-                  </p>
-                  <span className="text-[10.5px] text-slate-500 block">Diện tích sàn thao tác: 8.000 m² (12 In-Docks, 16 Out-Docks)</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Đơn Giá Phân Loại & Đơn Giá CBM:</span>
-                  <p className="font-bold text-emerald-700 text-sm">
-                    {declaredRoute?.pricePerKg ? `${declaredRoute.pricePerKg.toLocaleString('vi-VN')} ₫/kg` : '350 ₫/kg'} • {declaredRoute?.pricePerCbm ? `${declaredRoute.pricePerCbm.toLocaleString('vi-VN')} ₫/m³` : '95.000 ₫/m³'}
-                  </p>
-                  <span className="text-[10.5px] text-slate-500 block">Đơn giá Pallet: {(declaredRoute?.pricePerPallet || 45000).toLocaleString('vi-VN')} ₫/pallet</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Cước Sàn Tối Thiểu (Min/Lô):</span>
-                  <p className="font-bold text-amber-900">{(declaredRoute?.minChargeAmount || 500000).toLocaleString('vi-VN')} ₫ / Lô chuyển tiếp</p>
-                  <span className="text-[10.5px] text-slate-500 block">Bao gồm phân loại theo tuyến giao hàng cuối</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">SLA Giải Phóng Sàn:</span>
-                  <p className="font-bold text-indigo-900">{'< 12 Giờ (Cross-dock chuyển thẳng)'}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Cam kết không lưu hàng qua đêm trên sàn</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Công Nghệ Quản Lý Hub:</span>
-                  <p className="font-bold text-slate-900">Hệ thống băng chuyền phân loại tự động kết hợp Barcode</p>
-                  <span className="text-[10.5px] text-slate-500 block">Theo dõi luồng hàng thời gian thực trên cổng đối tác</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Hạn Giá & Khuyến Mãi:</span>
-                  <p className="font-bold text-slate-900">{validUntilDesc}</p>
-                  <span className="text-[10.5px] text-emerald-700 block font-semibold">Ưu đãi: Giảm {item.discountPercent}% cho sản lượng vượt cam kết</span>
-                </div>
-              </div>
-            )}
-
-            {isProject && isPort && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Mã Cảng / ICD & Tên Cảng Cạn:</span>
-                  <p className="font-bold text-slate-900 flex items-center gap-1.5">
-                    <span className="font-mono text-sky-700 bg-sky-50 px-1.5 py-0.2 rounded border border-sky-200">{declaredRoute?.routeCode || routeCode}</span>
-                    <span className="truncate">{declaredRoute?.warehouseName || item.title}</span>
-                  </p>
-                  <span className="text-[10.5px] text-slate-500 block">Cảng cạn ICD / Depot Container tiếp vận hậu cần</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Vị Trí / Khu Bến Cảng:</span>
-                  <p className="font-bold text-slate-900">{declaredRoute?.warehouseAddress || originName}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Kết nối luồng hàng hải & đường bộ thông suốt</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Sức Chứa Bãi Chứa Cont (TEU):</span>
-                  <p className="font-bold text-indigo-900">
-                    {declaredRoute?.capacityTeu ? `${declaredRoute.capacityTeu.toLocaleString('vi-VN')} TEU` : '25.000 TEU'}
-                  </p>
-                  <span className="text-[10.5px] text-slate-500 block">Trang bị 6 Cẩu bờ RTG/STS và xe nâng vỏ cont hiện đại</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Cước Shuttle Cont 20ft & 40ft:</span>
-                  <p className="font-bold text-emerald-700 text-sm">
-                    20ft: {(declaredRoute?.shuttle20Price || 750000).toLocaleString('vi-VN')} ₫ • 40ft: {(declaredRoute?.shuttle40Price || 1150000).toLocaleString('vi-VN')} ₫
-                  </p>
-                  <span className="text-[10.5px] text-slate-500 block">Shuttle giữa bãi ICD và cầu bến cảng chính</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Phí Cẩu Nâng Hạ (Lift On / Lift Off):</span>
-                  <p className="font-bold text-amber-900">
-                    {(declaredRoute?.liftOnPrice || 350000).toLocaleString('vi-VN')} ₫ / Lần nâng hạ cont
-                  </p>
-                  <span className="text-[10.5px] text-slate-500 block">Miễn phí thời gian chờ cẩu dưới 15 phút</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">SLA Luân Chuyển Cont Bãi:</span>
-                  <p className="font-bold text-indigo-900">Tiếp nhận & hạ cont 24/7 (Giải phóng xe {'< 25 phút'})</p>
-                  <span className="text-[10.5px] text-slate-500 block">Hệ thống TOS điều phối bãi cont tự động</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Dịch Vụ Kèm Theo Tại Cảng:</span>
-                  <p className="font-bold text-slate-900">Sửa chữa vỏ cont (IICL), vệ sinh rửa cont, cấp điện cont lạnh</p>
-                  <span className="text-[10.5px] text-slate-500 block">Hỗ trợ soi chiếu container Hải quan tại bãi</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Hạn Giá & Khuyến Mãi:</span>
-                  <p className="font-bold text-slate-900">{validUntilDesc}</p>
-                  <span className="text-[10.5px] text-emerald-700 block font-semibold">Ưu đãi: Tiết kiệm {item.discountPercent}% phí nâng hạ cho hãng tàu</span>
-                </div>
-              </div>
-            )}
-
-            {/* 3. THỦ TỤC HẢI QUAN */}
-            {isCustoms && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Mã Dịch Vụ & Chi Cục Hải Quan Mở Tờ Khai:</span>
-                  <p className="font-bold text-slate-900 flex items-center gap-1.5">
-                    <span className="font-mono text-amber-700 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200">{declaredRoute?.routeCode || routeCode}</span>
-                    <span className="truncate">{declaredRoute?.customsBranchName || routeName}</span>
-                  </p>
-                  <span className="text-[10.5px] text-slate-500 block">Khu vực: {declaredRoute?.customsAreaName || originName}</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Loại Hình Tờ Khai Áp Dụng:</span>
-                  <p className="font-bold text-slate-900">{declaredRoute?.customsDeclarationType || 'Nhập kinh doanh (A11, A12), SXXK (E21, E62)'}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Hình thức: {declaredRoute?.customsServiceForm || 'Đại lý Hải Quan chính thức (Ký số Đại lý)'}</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Phí Khai Chuẩn (Luồng Xanh / Vàng):</span>
-                  <p className="font-bold text-emerald-700 text-sm">{(declaredRoute?.price || 850000).toLocaleString('vi-VN')} ₫ / Tờ khai chính</p>
-                  <span className="text-[10.5px] text-slate-500 block">Phí dòng hàng / tờ khai phụ: {(declaredRoute?.customsExtraItemPrice || 50000).toLocaleString('vi-VN')} ₫/tờ</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Phí Kiểm Hóa Luồng Đỏ:</span>
-                  <p className="font-bold text-rose-700">{(declaredRoute?.customsRedChannelPrice || 1200000).toLocaleString('vi-VN')} ₫ / Lô hàng</p>
-                  <span className="text-[10.5px] text-slate-500 block">Có nhân viên hiện trường túc trực kiểm hóa 24/7</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">SLA Thông Quan Cam Kết:</span>
-                  <p className="font-bold text-indigo-900">Luồng Xanh: &lt; 30 phút | Luồng Vàng: &lt; 2 Giờ làm việc</p>
-                  <span className="text-[10.5px] text-slate-500 block">Kiểm tra hồ sơ chứng từ trước khi truyền chính thức</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Chứng Từ & Giấy Phép Chuyên Ngành:</span>
-                  <p className="font-bold text-slate-900">Hỗ trợ C/O Form D, E, AK, VK, Kiểm dịch thực vật & Hợp quy</p>
-                  <span className="text-[10.5px] text-slate-500 block">Tư vấn mã HS Code và tối ưu hóa biểu thuế nhập khẩu</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Phạm Vi Nghiệp Vụ Trọn Gói:</span>
-                  <p className="font-bold text-slate-900">Đại lý ký số thay chủ hàng, chịu trách nhiệm pháp lý tờ khai</p>
-                  <span className="text-[10.5px] text-slate-500 block">Theo dõi tình trạng thông quan trên cổng Hải quan tự động VNACCS</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Thời Hạn Giá & Khuyến Mãi:</span>
-                  <p className="font-bold text-slate-900">{validUntilDesc}</p>
-                  <span className="text-[10.5px] text-emerald-700 block font-semibold">Ưu đãi: Tiết kiệm {item.discountPercent}% cho 20 tờ khai đầu tiên</span>
-                </div>
-              </div>
-            )}
-
-            {/* 4. VẬN TẢI XUYÊN BIÊN GIỚI */}
-            {isCrossBorder && isCrossBorderLtl && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Mã Tuyến & Hành Lang Ghép XBG:</span>
-                  <p className="font-bold text-slate-900 flex items-center gap-1.5">
-                    <span className="font-mono text-orange-700 bg-orange-50 px-1.5 py-0.2 rounded border border-orange-200">{routeCode}</span>
-                    <span>{originName}</span>
-                    <ArrowRight className="w-3 h-3 text-orange-500 shrink-0" />
-                    <span>{destName}</span>
-                  </p>
-                  <span className="text-[10.5px] text-slate-500 block">Dịch vụ ghép hàng lẻ xuyên biên giới LTL chuyên tuyến</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Cửa Khẩu Biên Giới (Border Gate):</span>
-                  <p className="font-bold text-amber-900">{declaredRoute?.borderGate || 'Cửa khẩu Quốc tế Hữu Nghị / Bằng Tường / Tân Thanh'}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Thông quan nhanh qua luồng xe ưu tiên LTL</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Kho Gom Hàng (Origin Hub):</span>
-                  <p className="font-bold text-slate-900">{declaredRoute?.originHub || 'Hub Phật Sơn / Bằng Tường / Đông Quản'}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Tiếp nhận hàng lẻ từ các nhà máy vệ tinh</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Kho Phân Phối Đích (Dest Hub):</span>
-                  <p className="font-bold text-slate-900">{declaredRoute?.destHub || 'Hub Hà Nội (Long Biên) / TP.HCM (Sóng Thần)'}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Hỗ trợ giao hàng tận nơi chặng cuối (Last-mile)</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Đơn Giá Cước Kg & CBM:</span>
-                  <p className="font-bold text-emerald-700 text-sm">
-                    Kg: {(declaredRoute?.pricePerKg || 8500).toLocaleString('vi-VN')} ₫/kg • CBM: {(declaredRoute?.pricePerCbm || 1850000).toLocaleString('vi-VN')} ₫/m³
-                  </p>
-                  <span className="text-[10.5px] text-slate-500 block">Cước sàn: {(declaredRoute?.minChargeAmount || 500000).toLocaleString('vi-VN')} ₫/lô</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Hình Thức Thông Quan LTL:</span>
-                  <p className="font-bold text-slate-900">{declaredRoute?.customsMethodLtl || 'Khai ghép tiểu ngạch hoặc Gom chung tờ khai chính ngạch'}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Bao trọn thủ tục xuất nhập khẩu 2 đầu biên giới</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">SLA Giao Hàng & Lịch Chạy:</span>
-                  <p className="font-bold text-indigo-900">Xe xuất bến hàng ngày (Cut-off 17:00) • SLA: {declaredRoute?.sla || '3 - 4 Ngày'}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Hệ thống GPS theo dõi xe liên vận xuyên suốt hành trình</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Hạn Giá & Khuyến Mãi:</span>
-                  <p className="font-bold text-slate-900">{validUntilDesc}</p>
-                  <span className="text-[10.5px] text-emerald-700 block font-semibold">Ưu đãi: Tiết kiệm {item.discountPercent}% cho kiện hàng trên 300kg</span>
-                </div>
-              </div>
-            )}
-
-            {isCrossBorder && isCrossBorderFtl && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Mã Tuyến & Hành Lang Xuyên Biên Giới:</span>
-                  <p className="font-bold text-slate-900 flex items-center gap-1.5">
-                    <span className="font-mono text-orange-700 bg-orange-50 px-1.5 py-0.2 rounded border border-orange-200">{routeCode}</span>
-                    <span>{originName}</span>
-                    <ArrowRight className="w-3 h-3 text-orange-500 shrink-0" />
-                    <span>{destName}</span>
-                  </p>
-                  <span className="text-[10.5px] text-slate-500 block">{routeName}</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Cửa Khẩu Biên Giới (Border Gate):</span>
-                  <p className="font-bold text-amber-900">{declaredRoute?.borderGate || 'Cửa khẩu Quốc tế Hữu Nghị / Kim Thành / Mộc Bài / Cha Lo'}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Làn luồng xanh thông quan ưu tiên cho xe tải liên vận</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Loại Phương Tiện / Cont XBG:</span>
-                  <p className="font-bold text-slate-900">{declaredRoute?.truckBodyType || declaredRoute?.vehicleType || item.vehicleOrUnit || 'Đầu kéo Cont 40HC / 45ft Liên Vận Quốc Tế'}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Có giấy phép vận tải đường bộ liên vận GMS / Việt - Trung</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Phương Thức Vượt Biên & Hải Quan:</span>
-                  <p className="font-bold text-indigo-900">{declaredRoute?.borderCrossingMethod || 'Đổi đầu kéo tại cửa khẩu hoặc Xe chạy thẳng sang tải Door-to-Door'}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Hải quan: {declaredRoute?.customsScope || 'Bao gồm thủ tục tờ khai liên vận 2 đầu'}</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Giá Cước FTL Niêm Yết:</span>
-                  <p className="font-bold text-emerald-700 text-sm">{item.promotionalPriceDisplay}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Đơn vị: {item.pricingUnit} ({pricingStyleDesc})</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Thời Gian Hành Trình (SLA Vận Chuyển):</span>
-                  <p className="font-bold text-indigo-900">{declaredRoute?.sla || item.transitTime || '48 - 72 Giờ Door-to-Door'}</p>
-                  <span className="text-[10.5px] text-slate-500 block">2 Bác tài chạy luân phiên, không dừng đỗ ngoài lộ trình</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Giám Sát Định Vị & Seal Chì:</span>
-                  <p className="font-bold text-slate-900">GPS định vị quốc tế 2 đầu biên giới, dán Seal Hải quan điện tử</p>
-                  <span className="text-[10.5px] text-slate-500 block">Bảo hiểm hàng hóa vận tải quốc tế đến 5 Tỷ VNĐ/chuyến</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Thời Hạn Giá & Khuyến Mãi:</span>
-                  <p className="font-bold text-slate-900">{validUntilDesc}</p>
-                  <span className="text-[10.5px] text-emerald-700 block font-semibold">Ưu đãi: Tiết kiệm {item.discountPercent}% cho hợp đồng chuyến 2 chiều</span>
-                </div>
-              </div>
-            )}
-
-            {/* 5. VẬN TẢI HÀNG KHÔNG */}
-            {isAir && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Hành Lang Bay & Sân Bay Đi:</span>
-                  <p className="font-bold text-slate-900 flex items-center gap-1.5">
-                    <span className="font-mono text-sky-700 bg-sky-50 px-1.5 py-0.2 rounded border border-sky-200">{routeCode}</span>
-                    <span>{declaredRoute?.originAirport || originName}</span>
-                    <ArrowRight className="w-3 h-3 text-orange-500 shrink-0" />
-                    <span>{declaredRoute?.destAirport || destName}</span>
-                  </p>
-                  <span className="text-[10.5px] text-slate-500 block">Cặp sân bay: {declaredRoute?.airportPair || 'SGN ⇄ HAN / DAD'}</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Hãng Bay & Loại Dịch Vụ:</span>
-                  <p className="font-bold text-slate-900">{declaredRoute?.airline || 'Vietnam Airlines Cargo / Vietjet Air Cargo'}</p>
-                  <span className="text-[10.5px] text-slate-500 block">
-                    Phân loại: {item.badgeLabel?.includes('Express') ? 'Hàng Không Chuyển Phát Hỏa Tốc (Air Express)' : 'Hàng Không Tiêu Chuẩn (General Cargo)'}
-                  </span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Đơn Giá Cước Bay Niêm Yết:</span>
-                  <p className="font-bold text-emerald-700 text-sm">{item.promotionalPriceDisplay}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Đơn vị: {item.pricingUnit} (Áp dụng bậc cước +100kg Base)</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Thời Gian Bay & SLA Vận Chuyển:</span>
-                  <p className="font-bold text-indigo-900">{declaredRoute?.sla || item.transitTime || 'Bay cùng ngày (Same-day 4 - 6 Giờ)'}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Hàng giao tận sân bay hoặc door-to-door theo yêu cầu</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Lịch Chuyến Bay & Giờ Cắt Hàng (Cut-Off):</span>
-                  <p className="font-bold text-slate-900">{declaredRoute?.departureSchedule || '4 Chuyến/Ngày (Sáng - Trưa - Chiều - Tối)'}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Cut-off nhận hàng trước giờ cất cánh 180 phút</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Quy Đổi Thể Tích Hàng Không:</span>
-                  <p className="font-bold text-slate-900">Tỷ lệ quy đổi IATA chuẩn: 1 CBM = 167 Kg</p>
-                  <span className="text-[10.5px] text-slate-500 block">Tính cước theo Gross Weight hoặc Chargeable Weight (lấy giá trị lớn hơn)</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">An Ninh Hàng Không & Soi Chiếu:</span>
-                  <p className="font-bold text-slate-900">Đã bao gồm phí soi chiếu an ninh X-ray & chứng từ AWB</p>
-                  <span className="text-[10.5px] text-slate-500 block">Hỗ trợ cấp phiếu gửi hàng điện tử e-Airway Bill</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Thời Hạn Giá & Khuyến Mãi:</span>
-                  <p className="font-bold text-slate-900">{validUntilDesc}</p>
-                  <span className="text-[10.5px] text-emerald-700 block font-semibold">Ưu đãi: Tiết kiệm {item.discountPercent}% cho khách hàng ký hợp đồng tháng</span>
-                </div>
-              </div>
-            )}
-
-            {/* 6. VẬN TẢI ĐƯỜNG SẮT */}
-            {isRail && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Hành Lang Tuyến Đường Sắt:</span>
-                  <p className="font-bold text-slate-900 flex items-center gap-1.5">
-                    <span className="font-mono text-indigo-700 bg-indigo-50 px-1.5 py-0.2 rounded border border-indigo-200">{routeCode}</span>
-                    <span>{declaredRoute?.originStation || originName}</span>
-                    <ArrowRight className="w-3 h-3 text-orange-500 shrink-0" />
-                    <span>{declaredRoute?.destStation || destName}</span>
-                  </p>
-                  <span className="text-[10.5px] text-slate-500 block">Tuyến đường sắt Bắc Nam chuyên tuyến</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Ga Xuất Phát & Ga Đến:</span>
-                  <p className="font-bold text-slate-900">
-                    Ga Đi: {declaredRoute?.originStation || 'Ga Sóng Thần (Bình Dương)'} • Ga Đến: {declaredRoute?.destStation || 'Ga Yên Viên / Giáp Bát (Hà Nội)'}
-                  </p>
-                  <span className="text-[10.5px] text-slate-500 block">Kho bãi ga tiếp nhận xe tải và container 40ft</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Toa Xe / Loại Vỏ Container:</span>
-                  <p className="font-bold text-slate-900">{declaredRoute?.containerType || declaredRoute?.railCarType || 'Container 40HC / Toa xe chuyên dụng P/G'}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Khả năng chuyên chở tải trọng lớn lên đến 28 Tấn/cont</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Đơn Giá Cước Niêm Yết:</span>
-                  <p className="font-bold text-emerald-700 text-sm">{item.promotionalPriceDisplay}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Đơn vị: {item.pricingUnit} ({pricingStyleDesc})</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Thời Gian Hành Trình (SLA):</span>
-                  <p className="font-bold text-indigo-900">{declaredRoute?.sla || item.transitTime || '48 - 60 Giờ Ga - Ga'}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Hành trình cố định không ảnh hưởng bởi thời tiết & kẹt xe</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Tần Suất Đoàn Tàu & Giờ Xuất Phát:</span>
-                  <p className="font-bold text-slate-900">{declaredRoute?.departureSchedule || 'Khởi hành hàng ngày lúc 20:00 (Đoàn tàu chuyên tuyến Giáp Bát - Sóng Thần)'}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Cut-off nhận container tại bãi ga trước 16:00</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Nâng Hạ Hai Đầu Ga (LO/LO):</span>
-                  <p className="font-bold text-slate-900">Đã bao gồm chi phí cẩu gắp Lift On / Lift Off tại ga đi & ga đến</p>
-                  <span className="text-[10.5px] text-slate-500 block">Hỗ trợ xe đầu kéo kéo cont giao tận kho khách hàng</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Thời Hạn Giá & Khuyến Mãi:</span>
-                  <p className="font-bold text-slate-900">{validUntilDesc}</p>
-                  <span className="text-[10.5px] text-emerald-700 block font-semibold">Ưu đãi: Giảm {item.discountPercent}% cho lô hàng từ 5 container trở lên</span>
-                </div>
-              </div>
-            )}
-
-            {/* 7. ĐƯỜNG BIỂN (FCL & LCL) */}
-            {isOcean && isLCL && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Tuyến Đóng Ghép Biển LCL:</span>
-                  <p className="font-bold text-slate-900 flex items-center gap-1.5">
-                    <span className="font-mono text-cyan-700 bg-cyan-50 px-1.5 py-0.2 rounded border border-cyan-200">{routeCode}</span>
-                    <span>{originName}</span>
-                    <ArrowRight className="w-3 h-3 text-orange-500 shrink-0" />
-                    <span>{destName}</span>
-                  </p>
-                  <span className="text-[10.5px] text-slate-500 block">Khu vực: {declaredRoute?.region || 'Nội địa Bắc - Nam / Quốc tế Intra-Asia'}</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Kho CFS Đóng Hàng (Origin CFS):</span>
-                  <p className="font-bold text-slate-900">{declaredRoute?.originCfs || declaredRoute?.origin || 'CFS Cát Lái / CFS Tân Cảng Logistics'}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Kho dỡ đích: {declaredRoute?.destCfs || declaredRoute?.destination || 'CFS Cảng Hải Phòng (Đình Vũ)'}</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Đơn Vị Đóng Ghép / Co-Loader:</span>
-                  <p className="font-bold text-slate-900">{declaredRoute?.coloader || declaredRoute?.shippingLine || 'Top CFS Consolidator / Vinafco Co-loader'}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Uy tín đóng ghép trực tiếp không qua trung gian</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Đơn Giá Cước CFS Niêm Yết:</span>
-                  <p className="font-bold text-emerald-700 text-sm">{item.promotionalPriceDisplay}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Đơn vị: {item.pricingUnit} (Theo nguyên tắc W/M 1 CBM = 1.000 Kg)</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Thời Gian Vận Chuyển (Transit Time):</span>
-                  <p className="font-bold text-indigo-900">{declaredRoute?.sla || item.transitTime || '3 - 4 Ngày Port to Port'}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Thời gian rút hàng tại kho CFS đích: &lt; 24h kể từ khi tàu cập</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Lịch Đóng Cont & Giờ Cut-Off CFS:</span>
-                  <p className="font-bold text-slate-900">{declaredRoute?.departureSchedule || 'Đóng cont T3 & T6 hàng tuần'}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Cut-off nhận hàng tại kho CFS trước 17:00 ngày hôm trước</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Chứng Từ Vận Tải Biển CFS:</span>
-                  <p className="font-bold text-slate-900">Phát hành House Bill of Lading (HBL) / Vận đơn đường biển</p>
-                  <span className="text-[10.5px] text-slate-500 block">Hỗ trợ khai báo E-Manifest & phân tách tờ khai thứ cấp</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Thời Hạn Giá & Khuyến Mãi:</span>
-                  <p className="font-bold text-slate-900">{validUntilDesc}</p>
-                  <span className="text-[10.5px] text-emerald-700 block font-semibold">Ưu đãi: Tiết kiệm {item.discountPercent}% cho đơn hàng ghép từ 5 CBM</span>
-                </div>
-              </div>
-            )}
-
-            {isOcean && isFCL && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Tuyến Vận Chuyển Biển FCL:</span>
-                  <p className="font-bold text-slate-900 flex items-center gap-1.5">
-                    <span className="font-mono text-cyan-700 bg-cyan-50 px-1.5 py-0.2 rounded border border-cyan-200">{routeCode}</span>
-                    <span>{originName}</span>
-                    <ArrowRight className="w-3 h-3 text-orange-500 shrink-0" />
-                    <span>{destName}</span>
-                  </p>
-                  <span className="text-[10.5px] text-slate-500 block">Khu vực: {declaredRoute?.region || 'Tuyến Hải Phòng - TP.HCM - Đà Nẵng'}</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Cảng Đi (POL) & Cảng Đến (POD):</span>
-                  <p className="font-bold text-slate-900">
-                    POL: {declaredRoute?.origin || item.origin} • POD: {declaredRoute?.destination || item.destination}
-                  </p>
-                  <span className="text-[10.5px] text-slate-500 block">Tuyến chạy thẳng (Direct), không chuyển tải</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Hãng Tàu & Loại Vỏ Container:</span>
-                  <p className="font-bold text-slate-900">
-                    {declaredRoute?.shippingLine || 'Vinafco / SITC / Maersk / ONE'} • {declaredRoute?.containerType || declaredRoute?.vehicleType || item.vehicleOrUnit || 'Container 40HC / 20GP'}
-                  </p>
-                  <span className="text-[10.5px] text-slate-500 block">
-                    {isColdCargo ? 'Cont Lạnh (Reefer RF) Set-point: -18°C' : 'Cont khô bách hóa tiêu chuẩn biển quốc tế'}
-                  </span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Đơn Giá Cước Biển Niêm Yết:</span>
-                  <p className="font-bold text-emerald-700 text-sm">{item.promotionalPriceDisplay}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Đơn vị: {item.pricingUnit} (Cước Ocean Freight All-in)</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Thời Gian Hành Trình (Transit Time):</span>
-                  <p className="font-bold text-indigo-900">{declaredRoute?.sla || item.transitTime || '3 - 4 Ngày Port to Port'}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Lịch trình ổn định, cập cầu cảng ưu tiên</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Lịch Tàu Chạy & Giờ Cắt Máng (Closing):</span>
-                  <p className="font-bold text-slate-900">{declaredRoute?.departureSchedule || 'Khởi hành T4 & T7 hàng tuần'}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Closing time hạ bãi trước 12:00 ngày tàu chạy</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Chính Sách Miễn Phí Dem / Det:</span>
-                  <p className="font-bold text-emerald-700">
-                    {declaredRoute?.freeDemDetDays ? `${declaredRoute.freeDemDetDays} Ngày lưu bãi/cont miễn phí (Dem/Det Combined)` : '14 Ngày Free Dem/Det kết hợp'}
-                  </p>
-                  <span className="text-[10.5px] text-slate-500 block">Linh hoạt thời gian lưu bãi cho khách hàng bốc hàng</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Thời Hạn Giá & Khuyến Mãi:</span>
-                  <p className="font-bold text-slate-900">{validUntilDesc}</p>
-                  <span className="text-[10.5px] text-emerald-700 block font-semibold">Ưu đãi: Tiết kiệm {item.discountPercent}% cho booking đặt trước 7 ngày</span>
-                </div>
-              </div>
-            )}
-
-            {/* 8. ĐƯỜNG BỘ (TRUCKING FTL & LTL) */}
-            {isTrucking && isLTL && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Hành Lang Ghép Tuyến LTL:</span>
-                  <p className="font-bold text-slate-900 flex items-center gap-1.5">
-                    <span className="font-mono text-orange-700 bg-orange-50 px-1.5 py-0.2 rounded border border-orange-200">{routeCode}</span>
-                    <span>{originName}</span>
-                    <ArrowRight className="w-3 h-3 text-orange-500 shrink-0" />
-                    <span>{destName}</span>
-                  </p>
-                  <span className="text-[10.5px] text-slate-500 block">{routeName}</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Kho Gom Hàng & Kho Phân Phối:</span>
-                  <p className="font-bold text-slate-900">
-                    Gom: {declaredRoute?.originHub || declaredRoute?.origin || 'Hub Miền Nam (KCN Sóng Thần)'} • Giao: {declaredRoute?.destHub || declaredRoute?.destination || 'Hub Miền Bắc (Long Biên / Bắc Ninh)'}
-                  </p>
-                  <span className="text-[10.5px] text-slate-500 block">Nhận hàng tận nơi và giao hàng tận nơi (Door-to-Door)</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Phương Thức Ghép & Khối Lượng Tối Thiểu:</span>
-                  <p className="font-bold text-slate-900">{declaredRoute?.consolidationType || 'Ghép xe tải thùng kín / Cont đường dài chuyên tuyến'}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Min Charge: {declaredRoute?.minCharge || '50 kg hoặc 0.3 CBM / Đơn'}</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Đơn Giá Cước Niêm Yết:</span>
-                  <p className="font-bold text-emerald-700 text-sm">{item.promotionalPriceDisplay}</p>
-                  <span className="text-[10.5px] text-slate-500 block">
-                    Đơn vị: {item.pricingUnit} • Cước kg: {(declaredRoute?.pricePerKg || 2500).toLocaleString('vi-VN')} ₫/kg
-                  </span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Thời Gian Hành Trình (SLA):</span>
-                  <p className="font-bold text-indigo-900">{declaredRoute?.sla || item.transitTime || '36 - 48 Giờ'}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Cam kết chuẩn giờ giao hàng 99.5%</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Lịch Xuất Bến & Giờ Cut-Off:</span>
-                  <p className="font-bold text-slate-900">{declaredRoute?.departureSchedule || '2 Chuyến/Ngày (Xuất bến 19:00 & 22:00)'}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Cut-off nhận hàng tại kho trước 17:00 hàng ngày</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Định Vị & e-POD Ký Nhận:</span>
-                  <p className="font-bold text-slate-900">Giám sát lộ trình GPS thời gian thực và ký nhận e-POD điện tử</p>
-                  <span className="text-[10.5px] text-slate-500 block">Kiểm tra hiện trạng kiện hàng và chụp ảnh bàn giao</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Thời Hạn Giá & Khuyến Mãi:</span>
-                  <p className="font-bold text-slate-900">{validUntilDesc}</p>
-                  <span className="text-[10.5px] text-emerald-700 block font-semibold">Ưu đãi: Tiết kiệm {item.discountPercent}% cho khách hàng mới</span>
-                </div>
-              </div>
-            )}
-
-            {isTrucking && isFTL && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Hành Lang Tuyến FTL:</span>
-                  <p className="font-bold text-slate-900 flex items-center gap-1.5">
-                    <span className="font-mono text-orange-700 bg-orange-50 px-1.5 py-0.2 rounded border border-orange-200">{routeCode}</span>
-                    <span>{originName}</span>
-                    <ArrowRight className="w-3 h-3 text-orange-500 shrink-0" />
-                    <span>{destName}</span>
-                  </p>
-                  <span className="text-[10.5px] text-slate-500 block">{routeName}</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Điểm Lấy & Trả Hàng Chi Tiết:</span>
-                  <p className="font-bold text-slate-900">
-                    Lấy: {declaredRoute?.origin || item.origin} • Giao: {declaredRoute?.destination || item.destination}
-                  </p>
-                  <span className="text-[10.5px] text-slate-500 block">Chạy thẳng Direct không sang xe hạ tải</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Phương Tiện / Loại Thùng Xe:</span>
-                  <p className="font-bold text-slate-900">{vehicleDesc}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Phân khúc tải trọng: <strong className="text-slate-800">{tonnageDesc}</strong></span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Đơn Giá Cước Nguyên Chuyến:</span>
-                  <p className="font-bold text-emerald-700 text-sm">{item.promotionalPriceDisplay}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Đơn vị: {item.pricingUnit} ({pricingStyleDesc})</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Thời Gian Hành Trình (SLA):</span>
-                  <p className="font-bold text-indigo-900">{slaDesc}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Bao trọn tuyến, 2 tài xế luân phiên đảm bảo an toàn</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Lịch Khởi Hành / Tần Suất:</span>
-                  <p className="font-bold text-slate-900">{scheduleDesc}</p>
-                  <span className="text-[10.5px] text-slate-500 block">Đáp ứng xe trong vòng 2 giờ kể từ khi xác nhận booking</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">
-                    {isColdCargo ? 'Dải Nhiệt Độ & Cảm Biến IoT:' : isHazardous ? 'Cấp Độ Nguy Hiểm & PCCC:' : 'Giám Sát Hành Trình GPS:'}
-                  </span>
-                  <p className="font-bold text-slate-900">
-                    {isColdCargo 
-                      ? `${declaredRoute?.tempRange || '-18°C ~ -22°C (Frozen)'} • Cảm biến IoT 24/7` 
-                      : isHazardous 
-                        ? `${declaredRoute?.dgClass || 'IMO Class 3 / 8'} • Trang bị PCCC & Giấy phép` 
-                        : 'Giám sát GPS thời gian thực, cảnh báo quá tốc độ'}
-                  </p>
-                  <span className="text-[10.5px] text-slate-500 block">Miễn phí 02 giờ neo xe chờ bốc dỡ tại mỗi đầu</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-0.5">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Thời Hạn Giá & Khuyến Mãi:</span>
-                  <p className="font-bold text-slate-900">{validUntilDesc}</p>
-                  <span className="text-[10.5px] text-emerald-700 block font-semibold">Ưu đãi: Tiết kiệm {item.discountPercent}% cho chuyến đặt ngay hôm nay</span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* KHỐI 2: CHÍNH SÁCH PHỤ PHÍ & DỊCH VỤ GIA TĂNG (VAS) - LẤY TRỰC TIẾP TỪ PHẦN 3 TAB 3 */}
-          <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs space-y-3">
-            <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-              <span className="w-5 h-5 rounded-full bg-indigo-50 text-indigo-700 flex items-center justify-center text-[10.5px] font-bold">2</span>
-              <span>Chính Sách Phụ Phí & Dịch Vụ Gia Tăng (VAS)</span>
-            </h4>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-              {/* 2.1: Tiện ích đã bao gồm (Miễn phí) */}
-              <div className="rounded-xl border border-emerald-200 bg-emerald-50/20 p-3.5 space-y-2">
-                <div className="flex items-center gap-1.5 text-emerald-900 font-bold text-xs">
-                  <Check className="w-4 h-4 text-emerald-600 stroke-[3]" />
-                  <span>Tiện Ích Đã Bao Gồm Trong Cước (Miễn Phí)</span>
-                </div>
-                <div className="space-y-1.5 pt-0.5">
-                  {freeSurchargesList.map((itemStr, idx) => (
-                    <div key={idx} className="flex items-start gap-2 bg-white px-2.5 py-1.5 rounded-lg border border-emerald-100 text-xs text-slate-800 shadow-2xs">
-                      <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                      <span className="font-medium">{itemStr}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* 2.2: Dịch vụ phụ trợ tùy chọn & Phí phát sinh */}
-              <div className="rounded-xl border border-slate-200 bg-slate-50/40 p-3.5 space-y-2">
-                <div className="flex items-center gap-1.5 text-slate-900 font-bold text-xs">
-                  <Receipt className="w-4 h-4 text-indigo-600" />
-                  <span>Dịch Vụ Phụ Trợ Tùy Chọn & Phí Phát Sinh (Nếu có)</span>
-                </div>
-                <div className="space-y-1.5 pt-0.5">
-                  {paidSurchargesList.map((p, idx) => (
-                    <div key={idx} className="flex items-center justify-between bg-white px-2.5 py-1.5 rounded-lg border border-slate-200/80 text-xs shadow-2xs">
-                      <span className="font-medium text-slate-800">{p.name}</span>
-                      <span className="font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md text-[11px] shrink-0 ml-2">
-                        {p.priceText}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* 2.3: Dịch vụ VAS nếu có */}
-            {vasList.length > 0 && (
-              <div className="rounded-xl border border-indigo-100 bg-indigo-50/30 p-3 space-y-1.5">
-                <div className="flex items-center gap-1.5 text-indigo-900 font-bold text-xs">
-                  <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-                  <span>Dịch Vụ Gia Tăng Đặc Biệt (Value-Added Services):</span>
-                </div>
-                <div className="flex flex-wrap gap-2 pt-0.5">
-                  {vasList.map((vas, vIdx) => (
-                    <span key={vIdx} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-indigo-200 text-indigo-900 text-xs font-semibold shadow-2xs">
-                      <Zap className="w-3 h-3 text-amber-500 fill-amber-500" />
-                      <span>{vas}</span>
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* KHỐI 3: THÔNG TIN NĂNG LỰC CHUNG & CAM KẾT SLA (TỪ PHẦN 1 TAB 3) */}
-          <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs space-y-3">
-            <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-              <span className="w-5 h-5 rounded-full bg-indigo-50 text-indigo-700 flex items-center justify-center text-[10.5px] font-bold">3</span>
-              <span>Năng Lực Vận Hành & Cam Kết Dịch Vụ Của Supplier</span>
-            </h4>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-              <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-3 space-y-1">
-                <div className="flex items-center gap-1.5 text-indigo-900 font-bold">
-                  <Building2 className="w-3.5 h-3.5 text-indigo-600" />
-                  <span>Quy mô & Hạ tầng:</span>
-                </div>
-                <p className="text-slate-700 font-medium leading-relaxed text-[11.5px]">{fleetInfo}</p>
-              </div>
-
-              <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-3 space-y-1">
-                <div className="flex items-center gap-1.5 text-indigo-900 font-bold">
-                  <Zap className="w-3.5 h-3.5 text-indigo-600" />
-                  <span>Vận hành & Công nghệ:</span>
-                </div>
-                <p className="text-slate-700 font-medium leading-relaxed text-[11.5px]">{operationInfo}</p>
-              </div>
-
-              <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-3 space-y-1">
-                <div className="flex items-center gap-1.5 text-emerald-900 font-bold">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Cam kết SLA & Bồi thường:</span>
-                </div>
-                <p className="text-slate-700 font-medium leading-relaxed text-[11.5px]">{commitmentInfo}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* KHỐI 4 (RIÊNG CHO KHO BÃI): THÔNG SỐ KỸ THUẬT & THƯ VIỆN ẢNH KHO */}
-          {isWarehousing && warehouseSpecs && (
-            <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs space-y-3">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                  <Warehouse className="w-4 h-4 text-indigo-600" />
-                  <span>Thông Số Hạ Tầng Kho Bãi Đạt Chuẩn Công Nghiệp</span>
-                </h4>
-                <span className="text-[10px] font-bold bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full">
-                  Tiêu chuẩn WMS & PCCC
-                </span>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
-                <div className="p-2 bg-slate-50 rounded-lg border border-slate-100">
-                  <span className="text-[10px] text-slate-400 block font-semibold">Chiều cao thông thủy:</span>
-                  <strong className="text-slate-800 text-xs">{warehouseSpecs.clearHeight} m</strong>
-                </div>
-                <div className="p-2 bg-slate-50 rounded-lg border border-slate-100">
-                  <span className="text-[10px] text-slate-400 block font-semibold">Tải trọng sàn:</span>
-                  <strong className="text-slate-800 text-xs">{warehouseSpecs.floorLoad} Tấn / m²</strong>
-                </div>
-                <div className="p-2 bg-slate-50 rounded-lg border border-slate-100">
-                  <span className="text-[10px] text-slate-400 block font-semibold">Hệ thống giá kệ:</span>
-                  <strong className="text-slate-800 text-xs">{warehouseSpecs.rackingLevels} tầng Selective</strong>
-                </div>
-                <div className="p-2 bg-slate-50 rounded-lg border border-slate-100">
-                  <span className="text-[10px] text-slate-400 block font-semibold">Cửa Dock Leveler:</span>
-                  <strong className="text-slate-800 text-xs">{warehouseSpecs.dockDoorsCount} cửa tự động</strong>
-                </div>
-              </div>
-
-              {/* Photos Gallery preview if exists */}
-              {warehousePhotos.length > 0 && (
-                <div className="pt-2 space-y-1.5">
-                  <span className="text-[11px] font-bold text-slate-700 flex items-center gap-1">
-                    <Camera className="w-3.5 h-3.5 text-indigo-600" />
-                    <span>Hình ảnh thực tế bãi kho ({warehousePhotos.length} ảnh):</span>
-                  </span>
-                  <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
-                    {warehousePhotos.slice(0, 5).map((photo, pIdx) => (
-                      <div
-                        key={pIdx}
-                        onClick={() => setSelectedPhotoForPreview(photo)}
-                        className="group relative h-20 rounded-lg overflow-hidden border border-slate-200 cursor-pointer shadow-2xs hover:border-indigo-400 transition-all"
-                        title={photo.name}
-                      >
-                        <img src={photo.url} alt={photo.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 flex items-center justify-center transition-colors">
-                          <Maximize2 className="w-4 h-4 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </div>
-                        <span className="absolute bottom-0 inset-x-0 bg-black/60 text-white text-[9px] px-1 py-0.5 truncate font-medium">
-                          {photo.tag}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* =========================================================================
-            RIGHT COLUMN (4/12): SPECIALIST (PIC) PROFILE & ACTION BOX
-           ========================================================================= */}
-        <div className="lg:col-span-4 space-y-4">
-          {/* Sales Specialist (PIC) Contact Card */}
-          <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs space-y-3.5">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                Chuyên Viên (PIC) Phụ Trách Tuyến
-              </span>
-              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 shrink-0">
                 <BadgeCheck className="w-3 h-3 text-emerald-600" />
                 <span>Verified Specialist</span>
               </span>
             </div>
+            <p className="text-[11px] text-slate-500 font-medium truncate mt-0.5">
+              {specialist.title} • <span className="font-bold text-indigo-950">{specialist.companyName}</span>
+            </p>
+          </div>
+        </div>
 
-            {/* Profile Avatar & Info */}
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-linear-to-tr from-blue-600 to-indigo-600 text-white font-bold text-base flex items-center justify-center shadow-xs shrink-0">
-                {specialist.avatarInitial}
-              </div>
-              <div className="min-w-0">
-                <h4 
-                  onClick={() => {
-                    onNavigate({ 
-                      type: 'public', 
-                      tab: 'supplier-profile', 
-                      params: { specialistId: item.specialistId, viewState: 'detail' } 
-                    });
-                  }}
-                  className="text-sm font-extrabold text-slate-900 hover:text-indigo-600 cursor-pointer truncate"
-                  title="Bấm để xem hồ sơ năng lực đầy đủ của chuyên viên"
-                >
-                  {specialist.vietnameseName}
-                </h4>
-                <p className="text-[11px] text-slate-500 font-medium truncate">{specialist.title}</p>
-                <p className="text-[11px] font-bold text-indigo-900 truncate mt-0.5">{specialist.companyName}</p>
-              </div>
+        {/* Center: Rating, Response, Hotline & Direct Actions */}
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 justify-start xl:justify-center border-t xl:border-t-0 xl:border-l xl:border-r border-slate-100 pt-2.5 xl:pt-0 xl:px-4">
+          <div className="flex items-center gap-2 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-100 text-xs">
+            <div className="flex items-center gap-1">
+              <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+              <strong className="text-slate-800">{specialist.rating}</strong>
+              <span className="text-slate-400 text-[10.5px]">({specialist.reviewsCount})</span>
             </div>
+            <span className="text-slate-300">•</span>
+            <div className="flex items-center gap-1 text-[11px]">
+              <Clock className="w-3 h-3 text-emerald-600" />
+              <span className="text-slate-500">Phản hồi:</span>
+              <strong className="text-emerald-700">&lt; 15 Phút</strong>
+            </div>
+          </div>
 
-            {/* Rating & Response Rate */}
-            <div className="grid grid-cols-2 gap-2 bg-slate-50 p-2.5 rounded-lg border border-slate-100 text-center">
-              <div>
-                <span className="text-[10px] text-slate-400 block font-semibold">Đánh giá uy tín</span>
-                <span className="font-extrabold text-slate-800 text-xs flex items-center justify-center gap-1 mt-0.5">
-                  <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
-                  <span>{specialist.rating}</span>
-                  <span className="text-[10px] text-slate-400 font-normal">({specialist.reviewsCount})</span>
+          <div className="flex items-center gap-1.5 bg-indigo-50/70 border border-indigo-100 px-2.5 py-1.5 rounded-lg">
+            <Phone className="w-3.5 h-3.5 text-indigo-600" />
+            <span className="font-mono font-bold text-slate-800 text-xs">{specialist.phone}</span>
+            <button
+              onClick={handleCopyPhone}
+              className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-white px-1.5 py-0.5 rounded border border-indigo-200 cursor-pointer transition-colors"
+            >
+              {copiedPhone ? 'Đã chép!' : 'Copy'}
+            </button>
+          </div>
+
+          <a
+            href={'tel:' + specialist.phone}
+            className="py-1.5 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
+          >
+            <Phone className="w-3.5 h-3.5" />
+            <span>Gọi Trực Tiếp</span>
+          </a>
+
+          <button
+            onClick={() => {
+              onNavigate({ 
+                type: 'public', 
+                tab: 'supplier-profile', 
+                params: { specialistId: item.specialistId, viewState: 'detail' } 
+              });
+            }}
+            className="py-1.5 px-3 rounded-lg bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs border border-slate-200 flex items-center gap-1 transition-colors cursor-pointer"
+            title="Xem toàn bộ biểu giá và hồ sơ năng lực của PIC này"
+          >
+            <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
+            <span>Xem Hồ Sơ</span>
+          </button>
+        </div>
+
+        {/* Right: Bookmark, Countdown & Primary CTA */}
+        <div className="flex items-center gap-2.5 justify-between xl:justify-end border-t xl:border-t-0 border-slate-100 pt-2.5 xl:pt-0 shrink-0">
+          <button
+            onClick={() => onToggleBookmark(item.id, item.title)}
+            title={isBookmarked ? 'Bỏ lưu ưu đãi' : 'Lưu biểu giá này'}
+            className={`p-2 rounded-xl border transition-all cursor-pointer ${
+              isBookmarked
+                ? 'bg-amber-50 border-amber-300 text-amber-600'
+                : 'bg-white border-slate-200 text-slate-400 hover:text-amber-500 hover:border-amber-200'
+            }`}
+          >
+            <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-amber-500 text-amber-500' : ''}`} />
+          </button>
+
+          <div className="text-right hidden sm:block">
+            <span className="text-[10px] text-slate-400 block font-semibold">Ưu đãi còn</span>
+            <span className="text-[11px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200 inline-block">
+              {item.daysRemaining || 30} ngày
+            </span>
+          </div>
+
+          <button
+            onClick={() => onBookPromotion(item)}
+            id={`book-detail-btn-${item.code}`}
+            className="py-2 px-3.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-black text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-[0.99] cursor-pointer"
+          >
+            <Flame className="w-3.5 h-3.5" />
+            <span>Khóa Giá & Đặt Giữ Chỗ Ngay</span>
+          </button>
+        </div>
+      </div>
+
+      {/* =========================================================================
+          NỘI DUNG GIÁ CƯỚC ÁNH XẠ CHUẨN MÀN HÌNH PRE-VIEW (100% WIDTH)
+         ========================================================================= */}
+      <div className="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
+        {/* Service Header Strip with Full Modal Launcher */}
+        <div className="bg-slate-900 text-white p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-orange-600/30 border border-orange-500/40 text-orange-400 flex items-center justify-center shrink-0">
+              <ServiceIcon className="w-4 h-4" />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="px-2 py-0.5 bg-orange-500/20 text-orange-300 font-bold text-[10px] rounded border border-orange-500/30 uppercase">
+                  {item.serviceGroup || item.category}
+                </span>
+                <span className="font-mono text-slate-300 font-bold text-xs">{routeCode}</span>
+                <span className="text-slate-400 text-xs">•</span>
+                <span className="font-extrabold text-white text-xs truncate">
+                  {declaredRoute?.warehouseName || declaredRoute?.route || item.title}
                 </span>
               </div>
-              <div>
-                <span className="text-[10px] text-slate-400 block font-semibold">Tốc độ phản hồi</span>
-                <span className="font-extrabold text-emerald-700 text-xs block mt-0.5">&lt; 15 Phút</span>
+              <p className="text-[11px] text-slate-300 truncate mt-0.5">
+                {originName} ⇄ {destName} • Đơn vị: <strong className="text-amber-300">{item.pricingUnit}</strong> • SLA: <strong>{slaDesc}</strong>
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+            <div className="text-right mr-2 hidden md:block">
+              <span className="text-[10px] text-slate-400 block">Đơn giá áp dụng</span>
+              <strong className="text-sm font-black text-amber-300">{item.promotionalPriceDisplay}</strong>
+            </div>
+
+            <button
+              onClick={() => setIsFullModalOpen(true)}
+              className="py-1.5 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-bold text-xs border border-slate-700 flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+              title="Mở toàn màn hình theo dạng popup modal"
+            >
+              <Maximize2 className="w-3.5 h-3.5 text-orange-400" />
+              <span>Mở Xem Modal Đầy Đủ</span>
+            </button>
+          </div>
+        </div>
+
+        {/* =========================================================================
+            CASE 1: NHÓM DỊCH VỤ KHO BÃI 3PL
+           ========================================================================= */}
+        {isWarehousing && (
+          <div className="p-3 sm:p-4 space-y-4">
+            {/* Warehouse Facility Sub-bar */}
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-wrap items-center justify-between gap-2.5 text-xs">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-slate-400 font-bold uppercase text-[10px]">Mã Kho:</span>
+                <span className="font-mono font-bold text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-200">
+                  {warehouseDetailData.warehouseCode}
+                </span>
+                <span className="text-slate-300">|</span>
+                <span className="text-slate-400 font-bold uppercase text-[10px]">Tên Cơ Sở:</span>
+                <strong className="text-slate-800">{warehouseDetailData.warehouseName}</strong>
+                <span className="text-slate-300">|</span>
+                <span className="text-slate-400 font-bold uppercase text-[10px]">Địa Điểm:</span>
+                <span className="text-slate-600">{warehouseDetailData.address}</span>
+                <span className="text-slate-300">|</span>
+                <span className="text-slate-400 font-bold uppercase text-[10px]">Tiêu Chuẩn:</span>
+                <span className="bg-purple-50 text-purple-700 font-bold px-2 py-0.5 rounded-full border border-purple-200 text-[10.5px]">
+                  {warehouseDetailData.isBondedStorage ? 'Kho Ngoại Quan & CFS' : (warehouseDetailData.isColdStorage ? 'Kho Lạnh Tiêu Chuẩn' : (warehouseDetailData.isFulfillment ? 'Kho TMĐT Fulfillment' : 'Kho Thường Tiêu Chuẩn 3PL'))}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span>Sẵn sàng nhận hàng</span>
+                </span>
               </div>
             </div>
 
-            {/* Direct Contact Phone & Hotline */}
-            <div className="space-y-2 pt-1">
-              <div className="flex items-center justify-between p-2 rounded-lg bg-indigo-50/60 border border-indigo-100">
-                <div className="flex items-center gap-2">
-                  <Phone className="w-3.5 h-3.5 text-indigo-600" />
-                  <span className="font-mono font-bold text-slate-800 text-xs">{specialist.phone}</span>
+            {/* Warehouse Sub-tabs Switcher */}
+            <div className="flex items-center gap-1 border-b border-slate-200 pb-1">
+              <button
+                onClick={() => setWarehouseActiveTab('pricing')}
+                className={`py-2 px-3.5 rounded-t-lg font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer ${
+                  warehouseActiveTab === 'pricing'
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                }`}
+              >
+                <DollarSign className="w-3.5 h-3.5" />
+                <span>1. Ma Trận Giá, Phụ Phí & VAS</span>
+              </button>
+
+              <button
+                onClick={() => setWarehouseActiveTab('techSpecs')}
+                className={`py-2 px-3.5 rounded-t-lg font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer ${
+                  warehouseActiveTab === 'techSpecs'
+                    ? 'bg-indigo-600 text-white shadow-xs'
+                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                }`}
+              >
+                <Layers className="w-3.5 h-3.5" />
+                <span>2. Thông Số Kỹ Thuật (Specs) & Tiện Ích</span>
+              </button>
+
+              <button
+                onClick={() => setWarehouseActiveTab('photos')}
+                className={`py-2 px-3.5 rounded-t-lg font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer ${
+                  warehouseActiveTab === 'photos'
+                    ? 'bg-blue-600 text-white shadow-xs'
+                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                }`}
+              >
+                <Camera className="w-3.5 h-3.5" />
+                <span>3. Album Ảnh Thực Tế ({warehousePhotos.length})</span>
+              </button>
+            </div>
+
+            {/* Tab 1: Continuous Spreadsheet Matrix Table */}
+            {warehouseActiveTab === 'pricing' && (
+              <div className="border border-slate-200 rounded-xl overflow-hidden shadow-2xs">
+                <WarehousePricingContinuousTable
+                  data={warehouseData || warehouseDetailData}
+                  setData={setWarehouseData}
+                  surchargesLov={WAREHOUSE_SUGGESTED_SURCHARGES}
+                  vasLov={WAREHOUSE_SUGGESTED_VAS}
+                  isReadOnly={true}
+                />
+              </div>
+            )}
+
+            {/* Tab 2: Technical Specifications & Free Utilities */}
+            {warehouseActiveTab === 'techSpecs' && (
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                {/* Left Categories List */}
+                <div className="md:col-span-4 space-y-1.5 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                  {techCategories.map((cat) => (
+                    <button
+                      key={cat.id}
+                      onClick={() => setActiveTechCategory(cat.id)}
+                      className={`w-full text-left p-2.5 rounded-lg font-bold text-xs flex items-center justify-between transition-colors cursor-pointer ${
+                        activeTechCategory === cat.id
+                          ? 'bg-indigo-600 text-white shadow-xs'
+                          : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span>{cat.icon}</span>
+                        <span>{cat.name}</span>
+                      </div>
+                      <ChevronRight className="w-3.5 h-3.5 opacity-60" />
+                    </button>
+                  ))}
                 </div>
+
+                {/* Right Category Details */}
+                <div className="md:col-span-8 bg-slate-50/50 p-4 rounded-xl border border-slate-200 space-y-4">
+                  {activeTechCategory === 'structure' && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="bg-white p-3 rounded-lg border border-slate-200">
+                        <span className="text-[10px] text-slate-400 block font-semibold">Chiều cao thông thủy (Clear Height):</span>
+                        <strong className="text-slate-900 text-sm">{warehouseSpecs.clearHeight} mét</strong>
+                      </div>
+                      <div className="bg-white p-3 rounded-lg border border-slate-200">
+                        <span className="text-[10px] text-slate-400 block font-semibold">Tải trọng sàn thiết kế (Floor Load):</span>
+                        <strong className="text-slate-900 text-sm">{warehouseSpecs.floorLoad} Tấn / m²</strong>
+                      </div>
+                      <div className="bg-white p-3 rounded-lg border border-slate-200 sm:col-span-2">
+                        <span className="text-[10px] text-slate-400 block font-semibold">Quy cách bề mặt sàn:</span>
+                        <p className="font-bold text-slate-900 text-xs mt-0.5">{warehouseSpecs.floorType}</p>
+                      </div>
+                      <div className="bg-white p-3 rounded-lg border border-slate-200 sm:col-span-2">
+                        <span className="text-[10px] text-slate-400 block font-semibold">Khẩu độ bước cột (Column Grid):</span>
+                        <p className="font-bold text-slate-900 text-xs mt-0.5">{warehouseSpecs.columnGrid}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeTechCategory === 'racking' && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="bg-white p-3 rounded-lg border border-slate-200">
+                        <span className="text-[10px] text-slate-400 block font-semibold">Số tầng giá kệ:</span>
+                        <strong className="text-slate-900 text-sm">{warehouseSpecs.rackingLevels} tầng Selective</strong>
+                      </div>
+                      <div className="bg-white p-3 rounded-lg border border-slate-200">
+                        <span className="text-[10px] text-slate-400 block font-semibold">Tải trọng tối đa mỗi vị trí Pallet:</span>
+                        <strong className="text-slate-900 text-sm">{warehouseSpecs.palletLoadLimit} kg / Pallet</strong>
+                      </div>
+                      <div className="bg-white p-3 rounded-lg border border-slate-200 sm:col-span-2">
+                        <span className="text-[10px] text-slate-400 block font-semibold">Quy cách Pallet tương thích:</span>
+                        <p className="font-bold text-slate-900 text-xs mt-0.5">{warehouseSpecs.compatiblePalletSizes?.join(', ')}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeTechCategory === 'dock' && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="bg-white p-3 rounded-lg border border-slate-200">
+                        <span className="text-[10px] text-slate-400 block font-semibold">Số lượng cửa Dock bốc dỡ:</span>
+                        <strong className="text-slate-900 text-sm">{warehouseSpecs.dockDoorsCount} Cửa</strong>
+                      </div>
+                      <div className="bg-white p-3 rounded-lg border border-slate-200">
+                        <span className="text-[10px] text-slate-400 block font-semibold">Dock Leveler thủy lực tự động:</span>
+                        <strong className="text-emerald-700 text-sm">{warehouseSpecs.hasDockLeveler ? '✓ Đã lắp đặt' : 'Không'}</strong>
+                      </div>
+                      <div className="bg-white p-3 rounded-lg border border-slate-200 sm:col-span-2">
+                        <span className="text-[10px] text-slate-400 block font-semibold">Quy cách sân bãi quay đầu xe:</span>
+                        <p className="font-bold text-slate-900 text-xs mt-0.5">{warehouseSpecs.yardTurnaround}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeTechCategory === 'fire_security' && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="bg-white p-3 rounded-lg border border-slate-200 sm:col-span-2">
+                        <span className="text-[10px] text-slate-400 block font-semibold">Hệ thống PCCC:</span>
+                        <strong className="text-slate-900 text-xs mt-0.5 block">{warehouseSpecs.fireProtectionSystem}</strong>
+                        <span className="text-emerald-700 font-semibold text-[11px] block mt-0.5">{warehouseSpecs.fireProtectionApprovalNo}</span>
+                      </div>
+                      <div className="bg-white p-3 rounded-lg border border-slate-200 sm:col-span-2">
+                        <span className="text-[10px] text-slate-400 block font-semibold">Hệ thống camera CCTV:</span>
+                        <p className="font-bold text-slate-900 text-xs mt-0.5">{warehouseSpecs.cctvSurveillance}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeTechCategory === 'wms' && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="bg-white p-3 rounded-lg border border-slate-200 sm:col-span-2">
+                        <span className="text-[10px] text-slate-400 block font-semibold">Hệ thống phần mềm WMS:</span>
+                        <strong className="text-slate-900 text-xs mt-0.5 block">{warehouseSpecs.wmsSoftwareName}</strong>
+                      </div>
+                      <div className="bg-white p-3 rounded-lg border border-slate-200">
+                        <span className="text-[10px] text-slate-400 block font-semibold">Tích hợp API/EDI:</span>
+                        <strong className="text-emerald-700 text-sm">{warehouseSpecs.hasApiIntegration ? '✓ Đầy đủ RESTful API' : 'Không'}</strong>
+                      </div>
+                      <div className="bg-white p-3 rounded-lg border border-slate-200">
+                        <span className="text-[10px] text-slate-400 block font-semibold">Web Portal tồn kho trực tuyến:</span>
+                        <strong className="text-emerald-700 text-sm">{warehouseSpecs.realtimeWebPortal ? '✓ Đã kích hoạt 24/7' : 'Không'}</strong>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeTechCategory === 'permits' && (
+                    <div className="space-y-3">
+                      <div className="bg-white p-3 rounded-lg border border-slate-200">
+                        <span className="text-[10px] text-slate-400 block font-semibold">Chứng chỉ quản lý chất lượng & An ninh:</span>
+                        <div className="flex flex-wrap gap-1.5 mt-1">
+                          {warehouseSpecs.certifications?.map((c, i) => (
+                            <span key={i} className="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-xs rounded-md">
+                              ✓ {c}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeTechCategory === 'utilities' && (
+                    <div className="space-y-3">
+                      <span className="text-[11px] font-bold text-slate-700 block">
+                        Danh sách tiện ích & dịch vụ đã bao gồm miễn phí:
+                      </span>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {warehouseDetailData.freeSurcharges.map((util, uIdx) => (
+                          <div key={uIdx} className="bg-white p-2.5 rounded-lg border border-slate-200 flex items-center gap-2">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                            <span className="font-semibold text-slate-800 text-xs">{util}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Tab 3: Photo Gallery with Lightbox Zoom */}
+            {warehouseActiveTab === 'photos' && (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {warehousePhotos.map((photo, pIdx) => (
+                  <div
+                    key={pIdx}
+                    onClick={() => setSelectedPhotoForPreview(photo)}
+                    className="group relative h-40 rounded-xl overflow-hidden border border-slate-200 cursor-pointer shadow-2xs hover:border-indigo-400 transition-all"
+                    title="Bấm để xem ảnh phóng to"
+                  >
+                    <img src={photo.url} alt={photo.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />
+                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 flex items-center justify-center transition-colors">
+                      <Maximize2 className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
+                    {photo.isCover && (
+                      <span className="absolute top-2 left-2 bg-emerald-600 text-white text-[9px] font-extrabold px-1.5 py-0.5 rounded shadow-xs">
+                        Ảnh đại diện
+                      </span>
+                    )}
+                    <span className="absolute bottom-0 inset-x-0 bg-black/70 text-white text-[10px] px-2 py-1 truncate font-medium">
+                      {photo.tag || photo.name}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* =========================================================================
+            CASE 2: NHÓM VẬN TẢI ĐƯỜNG BIỂN FCL (NGUYÊN CONTAINER) - KHỚP 100% ẢNH 2!
+           ========================================================================= */}
+        {isOcean && isFCL && (
+          <div className="p-3 sm:p-4 space-y-4">
+            {/* Banner & Container Configurations Tab */}
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[10px] text-slate-400 font-bold uppercase">Cấu hình Container:</span>
                 <button
-                  onClick={handleCopyPhone}
-                  className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-white px-2 py-0.5 rounded border border-indigo-200 cursor-pointer"
+                  onClick={() => setActiveOceanContTab('cont-20dc')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeOceanContTab === 'cont-20dc'
+                      ? 'bg-indigo-600 text-white shadow-xs'
+                      : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
+                  }`}
                 >
-                  {copiedPhone ? 'Đã chép!' : 'Copy'}
+                  Cont #1: 20ft General (20DC) —— (33 CBM / 28.2 Tấn)
+                </button>
+                <button
+                  onClick={() => setActiveOceanContTab('cont-40dc')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeOceanContTab === 'cont-40dc'
+                      ? 'bg-indigo-600 text-white shadow-xs'
+                      : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
+                  }`}
+                >
+                  Cont #2: 40ft General (40DC) —— (67 CBM / 28.5 Tấn)
+                </button>
+                <button
+                  onClick={() => setActiveOceanContTab('cont-40hc')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeOceanContTab === 'cont-40hc'
+                      ? 'bg-indigo-600 text-white shadow-xs'
+                      : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
+                  }`}
+                >
+                  Cont #3: 40ft High Cube (40HC) —— (76 CBM / 28.5 Tấn)
                 </button>
               </div>
 
               <div className="flex items-center gap-2">
-                <a
-                  href={`tel:${specialist.phone}`}
-                  className="flex-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-colors shadow-2xs"
-                >
-                  <Phone className="w-3.5 h-3.5" />
-                  <span>Gọi Trực Tiếp</span>
-                </a>
+                <span className="text-[11px] font-bold text-indigo-900 bg-indigo-50 px-2.5 py-1 rounded-md border border-indigo-200">
+                  Hãng tàu: {declaredRoute?.carrier || 'Hải An / VIMC Lines'}
+                </span>
+              </div>
+            </div>
 
-                <button
-                  onClick={() => {
-                    onNavigate({ 
-                      type: 'public', 
-                      tab: 'supplier-profile', 
-                      params: { specialistId: item.specialistId, viewState: 'detail' } 
-                    });
-                  }}
-                  className="py-2 px-3 rounded-xl bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs border border-slate-200 flex items-center justify-center gap-1 transition-colors cursor-pointer"
-                  title="Xem toàn bộ biểu giá và các tuyến khác của PIC này trong Tab 3"
-                >
-                  <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
-                  <span>Xem Hồ Sơ</span>
-                </button>
+            {/* Container Rate Matrix Display Table (Matching Image 2) */}
+            <div className="border border-slate-200 rounded-xl overflow-hidden shadow-2xs">
+              <div className="p-3 bg-linear-to-r from-blue-50 to-indigo-50/40 border-b border-slate-200 flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] text-slate-500 font-bold uppercase block">Tổng cước dự kiến (OF + Phụ phí bắt buộc):</span>
+                  <span className="text-lg font-black text-indigo-950">
+                    {activeOceanContTab === 'cont-20dc' ? '$450 USD / Cont' : (activeOceanContTab === 'cont-40dc' ? '$780 USD / Cont' : '$850 USD / Cont')}
+                  </span>
+                </div>
+                <span className="text-xs text-slate-500 font-medium">
+                  Đã bao gồm toàn bộ phụ phí bốc dỡ THC & chứng từ
+                </span>
+              </div>
+
+              {/* Ocean Freight Base */}
+              <div className="p-3 border-b border-slate-100 bg-white flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Ship className="w-4 h-4 text-indigo-600" />
+                  <div>
+                    <strong className="text-slate-900 text-xs">Cước Biển Cơ Bản (Ocean Freight - OF) *</strong>
+                    <span className="text-[10px] text-slate-400 block">Đơn giá cước vận chuyển chặng biển</span>
+                  </div>
+                </div>
+                <span className="font-mono font-black text-slate-900 text-sm">
+                  {activeOceanContTab === 'cont-20dc' ? '$320 USD' : (activeOceanContTab === 'cont-40dc' ? '$550 USD' : '$600 USD')}
+                </span>
+              </div>
+
+              {/* 1. PHỤ PHÍ HÃNG TÀU & CẢNG BIỂN */}
+              <div className="bg-slate-50/80 px-3 py-2 border-b border-slate-200 font-extrabold text-[11px] text-slate-700 uppercase flex items-center gap-1.5">
+                <Receipt className="w-3.5 h-3.5 text-indigo-600" />
+                <span>1. Phụ Phí Hãng Tàu & Cảng Biển (Surcharges)</span>
+              </div>
+              <div className="divide-y divide-slate-100 bg-white">
+                {OCEAN_FCL_GENERAL_SURCHARGES_LOV.slice(0, 5).map((sur, sIdx) => (
+                  <div key={sIdx} className="p-2.5 px-3 flex items-center justify-between text-xs hover:bg-slate-50/50">
+                    <span className="text-slate-700 font-medium">{sur.name}</span>
+                    <span className="font-mono font-bold text-slate-800">
+                      ${sur.defaultPrice} {sur.unit}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* 2. DỊCH VỤ GIÁ TRỊ GIA TĂNG (VAS) */}
+              <div className="bg-slate-50/80 px-3 py-2 border-b border-t border-slate-200 font-extrabold text-[11px] text-slate-700 uppercase flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                <span>2. Dịch Vụ Giá Trị Gia Tăng (VAS) & Tiện Ích Kèm Theo</span>
+              </div>
+              <div className="divide-y divide-slate-100 bg-white">
+                {OCEAN_FCL_GENERAL_VAS_LOV.slice(0, 4).map((vas, vIdx) => (
+                  <div key={vIdx} className="p-2.5 px-3 flex items-center justify-between text-xs hover:bg-slate-50/50">
+                    <span className="text-slate-700 font-medium">{vas.name}</span>
+                    <span className={`font-mono font-bold ${vas.defaultPrice === 0 ? 'text-emerald-700' : 'text-slate-800'}`}>
+                      {vas.defaultPrice === 0 ? 'Miễn phí' : `$${vas.defaultPrice} ${vas.unit}`}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* 3. CAM KẾT LỊCH TÀU & VẬN CHUYỂN */}
+              <div className="bg-slate-50/80 px-3 py-2 border-b border-t border-slate-200 font-extrabold text-[11px] text-slate-700 uppercase flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-indigo-600" />
+                <span>3. Cam Kết Lịch Tàu & Điều Khoản Vận Chuyển</span>
+              </div>
+              <div className="p-3 bg-white grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                  <span className="text-[10px] text-slate-400 block font-semibold">Lịch tàu chạy & Cắt máng (Closing):</span>
+                  <strong className="text-slate-900 text-xs mt-0.5 block">Thứ 4, Thứ 7 hàng tuần (Cut-off 17:00)</strong>
+                </div>
+                <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                  <span className="text-[10px] text-slate-400 block font-semibold">Thời gian hành hải (Transit Time):</span>
+                  <strong className="text-slate-900 text-xs mt-0.5 block">{slaDesc} (Tàu chạy Direct)</strong>
+                </div>
+                <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                  <span className="text-[10px] text-slate-400 block font-semibold">Miễn phí lưu bãi / cont (Free Dem/Det):</span>
+                  <strong className="text-emerald-700 text-xs mt-0.5 block">14 - 21 Ngày tại cảng đến</strong>
+                </div>
               </div>
             </div>
           </div>
+        )}
 
-          {/* Action Box: Book Promotion / Create Custom RFQ */}
-          <div className="bg-linear-to-b from-orange-500/10 to-amber-500/5 rounded-xl border border-orange-200 p-4 space-y-3 shadow-2xs">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-black text-orange-900">Khóa Giá Ưu Đãi Ngay</span>
-              <span className="text-[10px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200">
-                Còn {item.daysRemaining || 15} ngày
+        {/* =========================================================================
+            CASE 3: NHÓM VẬN TẢI ĐƯỜNG BỘ FTL (NGUYÊN CHUYẾN)
+           ========================================================================= */}
+        {isTrucking && isFTL && (
+          <div className="p-3 sm:p-4 space-y-4">
+            {/* Vehicle Selection Ribbon */}
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[10px] text-slate-400 font-bold uppercase">Cấu hình Phương Tiện:</span>
+                <button
+                  onClick={() => setActiveTruckVehicleTab('truck-5t')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeTruckVehicleTab === 'truck-5t'
+                      ? 'bg-indigo-600 text-white shadow-xs'
+                      : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
+                  }`}
+                >
+                  Xe 5 Tấn (Thùng kín 6.2m)
+                </button>
+                <button
+                  onClick={() => setActiveTruckVehicleTab('truck-8t')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeTruckVehicleTab === 'truck-8t'
+                      ? 'bg-indigo-600 text-white shadow-xs'
+                      : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
+                  }`}
+                >
+                  Xe 8 Tấn (Thùng bạt 8.2m)
+                </button>
+                <button
+                  onClick={() => setActiveTruckVehicleTab('truck-15t')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeTruckVehicleTab === 'truck-15t'
+                      ? 'bg-indigo-600 text-white shadow-xs'
+                      : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
+                  }`}
+                >
+                  Xe 15 Tấn (3 chân 9.6m)
+                </button>
+                <button
+                  onClick={() => setActiveTruckVehicleTab('truck-cont')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeTruckVehicleTab === 'truck-cont'
+                      ? 'bg-indigo-600 text-white shadow-xs'
+                      : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
+                  }`}
+                >
+                  Đầu kéo Container 40ft/45ft
+                </button>
+              </div>
+
+              <span className="text-[11px] font-bold text-slate-700 bg-white px-2.5 py-1 rounded-md border border-slate-200">
+                Đội xe: 45 xe hoạt động GPS 24/7
               </span>
             </div>
-            <p className="text-[11px] text-slate-600 leading-relaxed">
-              Áp dụng mức giá khuyến mãi <strong>{item.promotionalPriceDisplay}</strong> cho lô hàng của bạn theo đúng quy cách niêm yết.
-            </p>
 
-            <button
-              onClick={() => onBookPromotion(item)}
-              id={`book-detail-btn-${item.code}`}
-              className="w-full py-2.5 px-4 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-black text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-[0.99] cursor-pointer"
-            >
-              <Flame className="w-3.5 h-3.5" />
-              <span>Khóa Giá & Đặt Giữ Chỗ Ngay</span>
-            </button>
+            {/* FTL Pricing Breakdown Matrix */}
+            <div className="border border-slate-200 rounded-xl overflow-hidden shadow-2xs">
+              <div className="p-3 bg-linear-to-r from-orange-50 to-amber-50/40 border-b border-slate-200 flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] text-slate-500 font-bold uppercase block">Tổng cước chuyến dự kiến:</span>
+                  <span className="text-lg font-black text-slate-900">
+                    {activeTruckVehicleTab === 'truck-5t' ? '8.500.000 ₫ / Chuyến' : (activeTruckVehicleTab === 'truck-8t' ? '12.500.000 ₫ / Chuyến' : (activeTruckVehicleTab === 'truck-15t' ? '18.500.000 ₫ / Chuyến' : '22.000.000 ₫ / Chuyến'))}
+                  </span>
+                </div>
+                <span className="text-xs text-emerald-700 font-bold bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                  ✓ Bao gồm phí cầu đường cao tốc & nhiên liệu
+                </span>
+              </div>
+
+              {/* Surcharges Section */}
+              <div className="bg-slate-50/80 px-3 py-2 border-b border-slate-200 font-extrabold text-[11px] text-slate-700 uppercase flex items-center gap-1.5">
+                <Receipt className="w-3.5 h-3.5 text-indigo-600" />
+                <span>1. Phụ Phí Vận Tải & Điều Kiện Giao Nhận</span>
+              </div>
+              <div className="divide-y divide-slate-100 bg-white">
+                {TRUCKING_SECTION_1_SURCHARGES_LOV.slice(0, 4).map((sur, sIdx) => (
+                  <div key={sIdx} className="p-2.5 px-3 flex items-center justify-between text-xs hover:bg-slate-50/50">
+                    <span className="text-slate-700 font-medium">{sur.name}</span>
+                    <span className="font-mono font-bold text-slate-800">
+                      {(sur.defaultPrice || 350000).toLocaleString('vi-VN')} ₫ / {sur.unit}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* VAS & Commitments */}
+              <div className="bg-slate-50/80 px-3 py-2 border-b border-t border-slate-200 font-extrabold text-[11px] text-slate-700 uppercase flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                <span>2. Tiện Ích Đã Bao Gồm & Cam Kết SLA</span>
+              </div>
+              <div className="p-3 bg-white grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                  <span className="text-[10px] text-slate-400 block font-semibold">Giám sát hành trình:</span>
+                  <strong className="text-slate-900 text-xs mt-0.5 block">Định vị GPS Real-time & e-POD</strong>
+                </div>
+                <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                  <span className="text-[10px] text-slate-400 block font-semibold">Bảo hiểm hàng hóa:</span>
+                  <strong className="text-slate-900 text-xs mt-0.5 block">Bảo hiểm trách nhiệm 5 Tỷ VND</strong>
+                </div>
+                <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                  <span className="text-[10px] text-slate-400 block font-semibold">Miễn phí chờ bốc dỡ:</span>
+                  <strong className="text-emerald-700 text-xs mt-0.5 block">02 Giờ đầu tiên tại 2 đầu</strong>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* =========================================================================
+            CASE 4: CÁC DỊCH VỤ KHÁC (LTL, OCEAN LCL, RAIL, AIR, CUSTOMS)
+           ========================================================================= */}
+        {!isWarehousing && !(isOcean && isFCL) && !(isTrucking && isFTL) && (
+          <div className="p-3 sm:p-4 space-y-4">
+            <div className="border border-slate-200 rounded-xl overflow-hidden shadow-2xs">
+              <div className="p-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Biểu cước niêm yết áp dụng:</span>
+                  <strong className="text-base text-slate-900">{item.promotionalPriceDisplay}</strong>
+                </div>
+                <span className="text-xs bg-indigo-50 text-indigo-700 font-bold px-2.5 py-1 rounded-md border border-indigo-200">
+                  SLA: {slaDesc}
+                </span>
+              </div>
+
+              {/* Weight / Volume Tiers Table */}
+              <div className="p-3 bg-white space-y-3">
+                <span className="text-xs font-bold text-slate-700 block">Ma Trận Bậc Khối Lượng & Biểu Phí Ghép Hàng:</span>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs text-left">
+                    <thead className="bg-slate-50 text-slate-600 font-bold uppercase text-[10px] border-b border-slate-200">
+                      <tr>
+                        <th className="p-2.5">Bậc Trọng Lượng / Khối Lượng</th>
+                        <th className="p-2.5">Đơn Giá Ghép / Kg</th>
+                        <th className="p-2.5">Đơn Giá Ghép / CBM</th>
+                        <th className="p-2.5">Thời Gian Giao Nhận</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      <tr>
+                        <td className="p-2.5 font-medium">&lt; 100 kg / &lt; 0.5 CBM (Min Charge)</td>
+                        <td className="p-2.5 font-bold text-slate-900">350.000 ₫ / Lô</td>
+                        <td className="p-2.5 font-bold text-slate-900">350.000 ₫ / Lô</td>
+                        <td className="p-2.5 text-slate-600">{slaDesc}</td>
+                      </tr>
+                      <tr>
+                        <td className="p-2.5 font-medium">100 - 500 kg / 0.5 - 2 CBM</td>
+                        <td className="p-2.5 font-bold text-emerald-700">1.800 ₫ / kg</td>
+                        <td className="p-2.5 font-bold text-emerald-700">420.000 ₫ / CBM</td>
+                        <td className="p-2.5 text-slate-600">{slaDesc}</td>
+                      </tr>
+                      <tr>
+                        <td className="p-2.5 font-medium">500 - 2.000 kg / 2 - 5 CBM</td>
+                        <td className="p-2.5 font-bold text-emerald-700">1.400 ₫ / kg</td>
+                        <td className="p-2.5 font-bold text-emerald-700">380.000 ₫ / CBM</td>
+                        <td className="p-2.5 text-slate-600">{slaDesc}</td>
+                      </tr>
+                      <tr>
+                        <td className="p-2.5 font-medium">&gt; 2.000 kg / &gt; 5 CBM (Quy mô lớn)</td>
+                        <td className="p-2.5 font-bold text-indigo-700">1.100 ₫ / kg</td>
+                        <td className="p-2.5 font-bold text-indigo-700">340.000 ₫ / CBM</td>
+                        <td className="p-2.5 text-slate-600">{slaDesc}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* =========================================================================
+          MODAL PREVIEW FULL SCREEN VIEW (TƯƠNG ỨNG TỪNG NHÓM DỊCH VỤ)
+         ========================================================================= */}
+      {isFullModalOpen && (
+        <>
+          {isWarehousing && (
+            <WarehouseDetailModal
+              isOpen={isFullModalOpen}
+              onClose={() => setIsFullModalOpen(false)}
+              data={warehouseData || warehouseDetailData}
+              isReadOnly={true}
+              companyName={specialist.companyName}
+              onRequestQuote={() => {
+                setIsFullModalOpen(false);
+                onBookPromotion(item);
+              }}
+            />
+          )}
+
+          {isOcean && isFCL && (
+            <OceanFclCostMatrixModal
+              isOpen={isFullModalOpen}
+              onClose={() => setIsFullModalOpen(false)}
+              route={declaredRoute || ({ id: item.id, routeCode: item.code, origin: item.origin, destination: item.destination } as any)}
+              onSave={() => {}}
+              cargoType={isColdCargo ? 'reefer' : (isHazmatCargo ? 'hazmat' : 'general')}
+            />
+          )}
+
+          {isOcean && isLCL && (
+            <OceanLclCostMatrixModal
+              isOpen={isFullModalOpen}
+              onClose={() => setIsFullModalOpen(false)}
+              route={declaredRoute || ({ id: item.id, routeCode: item.code, origin: item.origin, destination: item.destination } as any)}
+              onSave={() => {}}
+              cargoType={isColdCargo ? 'reefer' : 'general'}
+            />
+          )}
+
+          {isTrucking && isFTL && (
+            <TruckingFtlCostMatrixModal
+              isOpen={isFullModalOpen}
+              onClose={() => setIsFullModalOpen(false)}
+              route={declaredRoute || ({ id: item.id, routeCode: item.code, origin: item.origin, destination: item.destination } as any)}
+              onSave={() => {}}
+              cargoType={isColdCargo ? 'reefer' : (isHazmatCargo ? 'hazmat' : 'general')}
+            />
+          )}
+
+          {isTrucking && isLTL && (
+            <TruckingLtlCostMatrixModal
+              isOpen={isFullModalOpen}
+              onClose={() => setIsFullModalOpen(false)}
+              route={declaredRoute || ({ id: item.id, routeCode: item.code, origin: item.origin, destination: item.destination } as any)}
+              onSave={() => {}}
+            />
+          )}
+
+          {isRail && isFCL && (
+            <RailFclCostMatrixModal
+              isOpen={isFullModalOpen}
+              onClose={() => setIsFullModalOpen(false)}
+              route={declaredRoute || ({ id: item.id, routeCode: item.code, origin: item.origin, destination: item.destination } as any)}
+              onSave={() => {}}
+              cargoType={isColdCargo ? 'reefer' : 'general'}
+            />
+          )}
+
+          {isRail && isLCL && (
+            <RailLclCostMatrixModal
+              isOpen={isFullModalOpen}
+              onClose={() => setIsFullModalOpen(false)}
+              route={declaredRoute || ({ id: item.id, routeCode: item.code, origin: item.origin, destination: item.destination } as any)}
+              onSave={() => {}}
+              cargoType="general"
+            />
+          )}
+
+          {isAir && (
+            <AirCargoCostMatrixModal
+              isOpen={isFullModalOpen}
+              onClose={() => setIsFullModalOpen(false)}
+              route={declaredRoute || ({ id: item.id, routeCode: item.code, origin: item.origin, destination: item.destination } as any)}
+              onSave={() => {}}
+              cargoType="general"
+            />
+          )}
+
+          {isCrossBorder && isFTL && (
+            <CrossBorderFtlCostMatrixModal
+              isOpen={isFullModalOpen}
+              onClose={() => setIsFullModalOpen(false)}
+              route={declaredRoute || ({ id: item.id, routeCode: item.code, origin: item.origin, destination: item.destination } as any)}
+              onSave={() => {}}
+              cargoType="general"
+            />
+          )}
+
+          {isCrossBorder && isLTL && (
+            <CrossBorderLtlCostMatrixModal
+              isOpen={isFullModalOpen}
+              onClose={() => setIsFullModalOpen(false)}
+              route={declaredRoute || ({ id: item.id, routeCode: item.code, origin: item.origin, destination: item.destination } as any)}
+              onSave={() => {}}
+              cargoType="general"
+            />
+          )}
+        </>
+      )}
 
       {/* LIGHTBOX PREVIEW MODAL FOR WAREHOUSE PHOTO */}
       {selectedPhotoForPreview && (
@@ -1367,7 +1337,7 @@ export const HotPromotionRateDetailCard: React.FC<HotPromotionRateDetailCardProp
               <span className="font-bold text-slate-800 text-xs truncate">{selectedPhotoForPreview.name}</span>
               <button 
                 onClick={() => setSelectedPhotoForPreview(null)}
-                className="w-7 h-7 rounded-lg hover:bg-slate-200 text-slate-500 flex items-center justify-center font-bold text-sm"
+                className="w-7 h-7 rounded-lg hover:bg-slate-200 text-slate-500 flex items-center justify-center font-bold text-sm cursor-pointer"
               >
                 ✕
               </button>

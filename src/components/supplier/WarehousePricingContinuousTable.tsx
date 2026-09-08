@@ -197,6 +197,15 @@ export const SELF_GENERAL_PRESET_WAREHOUSE_COLUMNS: Array<{ name: string; unit: 
   { name: 'Tủ Khóa Thông Minh Smart Locker (Tủ)', unit: 'Tủ' },
 ];
 
+export const FULFILLMENT_PRESET_WAREHOUSE_COLUMNS: Array<{ name: string; unit: string }> = [
+  { name: 'Khu Vực Bins/Hộc Pick Hàng (Bins)', unit: 'Bins' },
+  { name: 'Lưu Kho Đệm Pallet Racking (Pallet)', unit: 'Pallet' },
+  { name: 'Bàn Đóng Gói Packing Station (Bàn)', unit: 'Bàn' },
+  { name: 'Khu Vực Xử Lý Hàng Hoàn Return (m²)', unit: 'm²' },
+  { name: 'Khu Vực Giá Kệ Mezzanine (m²)', unit: 'm²' },
+  { name: 'Phòng Đệm Giữ Nhiệt 18°C-25°C (m²)', unit: 'm²' },
+];
+
 export const SELF_PRESET_WAREHOUSE_COLUMNS = SELF_GENERAL_PRESET_WAREHOUSE_COLUMNS;
 
 export const PRESET_WAREHOUSE_COLUMNS = GENERAL_PRESET_WAREHOUSE_COLUMNS;
@@ -206,6 +215,7 @@ interface WarehousePricingContinuousTableProps {
   setData: React.Dispatch<React.SetStateAction<WarehouseDetailModalData | null>>;
   surchargesLov: Array<{ code: string; name: string; category: string; unit: string; defaultPrice: string; isFree?: boolean }>;
   vasLov: Array<{ code: string; name: string; category: string; unit: string; defaultPrice: string; isFree?: boolean }>;
+  isReadOnly?: boolean;
 }
 
 // DANH SÁCH LOV PHỤ PHÍ CỐ ĐỊNH TIÊU CHUẨN (SECTION 1B)
@@ -293,6 +303,15 @@ export const BONDED_HAZMAT_FIXED_SURCHARGES_LOV = [
   { code: 'FIX-BON-HAZ-DRILL', name: 'Phí định kỳ diễn tập ứng phó sự cố hóa chất phối hợp lực lượng Hải quan & PCCC', unit: 'VND / Quý', defaultPrice: 2500000, note: 'Thực tập phương án PCCC chuyên nghiệp' },
 ];
 
+export const FULFILLMENT_FIXED_SURCHARGES_LOV = [
+  { code: 'FIX-FUL-API-MULTI', name: 'Phí tích hợp & đồng bộ cổng API đa sàn (Shopee, TikTok Shop, Lazada)', unit: 'VND / Tháng', defaultPrice: 1500000, note: 'Tự động kéo đơn, đẩy tồn kho thời gian thực' },
+  { code: 'FIX-FUL-WMS-OMS', name: 'Phí bản quyền hệ thống phần mềm OMS/WMS quản lý đơn TMĐT Cloud', unit: 'VND / Tháng', defaultPrice: 2000000, note: 'Quản lý Barcode SKU lẻ, phân loại theo đơn vị vận chuyển' },
+  { code: 'FIX-FUL-PACK-MAINT', name: 'Phí duy trì bàn đóng gói, máy in mã vạch nhiệt & cân điện tử tự động', unit: 'VND / Tháng', defaultPrice: 800000, note: 'Kiểm định cân và thay thế phụ tùng máy in' },
+  { code: 'FIX-FUL-CCTV-PACK', name: 'Phí lưu trữ video camera giám sát bàn đóng gói 90 ngày (Phục vụ khiếu nại)', unit: 'VND / Tháng', defaultPrice: 1200000, note: 'Trích xuất video đóng gói đối soát nhanh trong 2h' },
+  { code: 'FIX-FUL-RETURN-HUB', name: 'Phí duy trì khu vực xử lý hàng hoàn (Reverse Hub) & kiểm tra ngoại quan', unit: 'VND / Tháng', defaultPrice: 1000000, note: 'Phân loại hàng hoàn, chụp ảnh báo cáo hư hại' },
+  { code: 'FIX-FUL-PEST-CONTROL', name: 'Phí kiểm soát côn trùng, ẩm mốc & bảo vệ hàng hóa giá trị cao', unit: 'VND / Tháng', defaultPrice: 600000, note: 'Định kỳ phun khử côn trùng 2 lần/tháng' },
+];
+
 export const FIXED_SURCHARGES_LOV = GENERAL_FIXED_SURCHARGES_LOV;
 
 export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuousTableProps> = ({
@@ -300,6 +319,7 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
   setData,
   surchargesLov,
   vasLov,
+  isReadOnly = false,
 }) => {
   const isCold = Boolean(data.isColdStorage);
   const isHazmat = Boolean(data.isChemicalStorage);
@@ -311,7 +331,18 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
     data.warehouseCode?.toLowerCase().includes('self')
   );
 
-  const activeFixedLov = isBonded
+  const isFulfillment = Boolean(
+    data.isFulfillment ||
+    data.modelId?.includes('ful') ||
+    data.modelId === 'wh-gen-ful' ||
+    data.warehouseName?.toLowerCase().includes('fulfillment') ||
+    data.warehouseName?.toLowerCase().includes('tmđt') ||
+    data.warehouseCode?.toLowerCase().includes('ful')
+  );
+
+  const activeFixedLov = isFulfillment
+    ? FULFILLMENT_FIXED_SURCHARGES_LOV
+    : (isBonded
     ? (isCold
         ? BONDED_COLD_FIXED_SURCHARGES_LOV
         : (isHazmat ? BONDED_HAZMAT_FIXED_SURCHARGES_LOV : BONDED_GENERAL_FIXED_SURCHARGES_LOV))
@@ -321,9 +352,11 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
             : (isHazmat ? SELF_HAZMAT_FIXED_SURCHARGES_LOV : SELF_GENERAL_FIXED_SURCHARGES_LOV))
         : (isCold 
             ? COLD_FIXED_SURCHARGES_LOV 
-            : (isHazmat ? HAZMAT_FIXED_SURCHARGES_LOV : GENERAL_FIXED_SURCHARGES_LOV)));
+            : (isHazmat ? HAZMAT_FIXED_SURCHARGES_LOV : GENERAL_FIXED_SURCHARGES_LOV))));
 
-  const activePresetColumns = isBonded
+  const activePresetColumns = isFulfillment
+    ? FULFILLMENT_PRESET_WAREHOUSE_COLUMNS
+    : (isBonded
     ? (isCold
         ? BONDED_COLD_PRESET_WAREHOUSE_COLUMNS
         : (isHazmat ? BONDED_HAZMAT_PRESET_WAREHOUSE_COLUMNS : BONDED_GENERAL_PRESET_WAREHOUSE_COLUMNS))
@@ -331,10 +364,17 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
         ? SELF_PRESET_WAREHOUSE_COLUMNS
         : (isCold
             ? COLD_PRESET_WAREHOUSE_COLUMNS
-            : (isHazmat ? HAZMAT_PRESET_WAREHOUSE_COLUMNS : GENERAL_PRESET_WAREHOUSE_COLUMNS)));
+            : (isHazmat ? HAZMAT_PRESET_WAREHOUSE_COLUMNS : GENERAL_PRESET_WAREHOUSE_COLUMNS))));
 
   // CÁC CỘT MA TRẬN LƯU TRỮ (TỰ ĐỘNG KHỞI TẠO THEO LOẠI HÌNH KHO THƯỜNG / LẠNH / NGUY HIỂM / NGOẠI QUAN / TỰ QUẢN)
   const [columns, setColumns] = useState<WarehouseMatrixColumn[]>(() => {
+    if (isFulfillment) {
+      return [
+        { id: 'col_pallets', name: '1. Lưu Kho Đệm (Pallet)', unit: 'Pallet', typeKey: 'pallets' },
+        { id: 'col_bins', name: '2. Sức Chứa Bins/SKUs (Hộc)', unit: 'Hộc', typeKey: 'volume' },
+        { id: 'col_area', name: '3. Sàn Vận Hành Pick & Pack (m²)', unit: 'm²', typeKey: 'area' },
+      ];
+    }
     if (isSelfStorage) {
       // Yêu cầu: các cột trong tab của cả 3 nhóm hàng đều là 1. Diện Tích Sàn (m²), 2. Sức Chứa Pallet (Pallet), 3. Thể Tích Chứa (m³/CBM)
       return [
@@ -501,6 +541,15 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
     price: number;
     note?: string;
   }>>(() => {
+    if (isFulfillment) {
+      return FULFILLMENT_FIXED_SURCHARGES_LOV.slice(0, 4).map((f, i) => ({
+        id: `fix-ful-${i + 1}`,
+        name: f.name,
+        unit: f.unit,
+        price: f.defaultPrice,
+        note: f.note,
+      }));
+    }
     if (isBonded) {
       if (isCold) {
         return BONDED_COLD_FIXED_SURCHARGES_LOV.slice(0, 4).map((f, i) => ({
@@ -1184,6 +1233,7 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
           </button>
 
           {/* NÚT THÊM CỘT NHƯ TRONG LTL */}
+          {!isReadOnly && (
           <button
             type="button"
             onClick={() => setIsAddColumnModalOpen(true)}
@@ -1193,6 +1243,7 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
             <Plus className="w-3.5 h-3.5 text-indigo-700" />
             <span>+ Thêm Cột Đo Lường / Loại Hình Lưu Trữ</span>
           </button>
+          )}
         </div>
       </div>
 
@@ -1241,7 +1292,7 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
                   >
                     <div className="flex items-center justify-between text-[10px] text-indigo-900 font-bold mb-1">
                       <span className="uppercase tracking-wide text-indigo-600 font-extrabold">CỘT #{idx + 1}</span>
-                      {columns.length > 1 && (
+                      {!isReadOnly && columns.length > 1 && (
                         <button
                           type="button"
                           onClick={() => handleRemoveColumn(col.id)}
@@ -1255,12 +1306,18 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
                     
                     {/* Ô NHẬP HOẶC HIỂN THỊ TÊN CỘT */}
                     <div className="flex items-center gap-1.5">
-                      <input
-                        type="text"
-                        value={col.name}
+                      {isReadOnly ? (
+                        <div className="w-full text-center font-black text-indigo-950 bg-white/60 border border-indigo-200 rounded px-2 py-1 text-xs select-none">
+                          {col.name}
+                        </div>
+                      ) : (
+                        <input
+                          type="text"
+                          value={col.name}
                         onChange={(e) => handleRenameColumn(col.id, e.target.value)}
-                        className="w-full text-center font-black text-indigo-950 bg-white border border-indigo-300 rounded px-2 py-1 text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none shadow-2xs"
-                      />
+                          className="w-full text-center font-black text-indigo-950 bg-white border border-indigo-300 rounded px-2 py-1 text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none shadow-2xs"
+                        />
+                      )}
                     </div>
                     <div className="text-[10px] font-semibold text-indigo-700/80 mt-1">
                       Đơn vị đo: <strong className="text-indigo-900">{col.unit}</strong>
@@ -1295,7 +1352,7 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
                         <div className="relative">
                           <input
                             type="number"
-                            value={cap || ''}
+                            disabled={isReadOnly} value={cap || ''}
                             onChange={(e) => setCapacityVal(col, parseFloat(e.target.value) || 0)}
                             className="w-full text-center font-black text-slate-900 bg-white border border-slate-300 rounded px-2 py-1 text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none"
                             placeholder="0"
@@ -1332,7 +1389,7 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
                     <td key={col.id} className="border-r border-slate-200 px-3 py-2 text-center bg-rose-50/10">
                       <input
                         type="number"
-                        value={occ || ''}
+                        disabled={isReadOnly} value={occ || ''}
                         onChange={(e) => setOccupiedVal(col, parseFloat(e.target.value) || 0)}
                         className="w-full text-center font-bold text-rose-900 bg-white border border-rose-300 rounded px-2 py-1 text-xs focus:ring-1 focus:ring-rose-500 focus:outline-none"
                         placeholder="0"
@@ -1360,7 +1417,7 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
                     <td key={col.id} className="border-r border-slate-200 px-3 py-2 text-center bg-emerald-50/10">
                       <input
                         type="number"
-                        value={avail || ''}
+                        disabled={isReadOnly} value={avail || ''}
                         onChange={(e) => setAvailableVal(col, parseFloat(e.target.value) || 0)}
                         className="w-full text-center font-bold text-emerald-900 bg-white border border-emerald-300 rounded px-2 py-1 text-xs focus:ring-1 focus:ring-emerald-500 focus:outline-none"
                         placeholder="0"
@@ -1471,6 +1528,7 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
                   <td className="sticky left-0 z-20 bg-white border-r-2 border-slate-300 px-4 py-2 text-slate-900 shadow-[2px_0_5px_rgba(0,0,0,0.06)]">
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2.5 min-w-0">
+                        {!isReadOnly && (
                         <button
                           type="button"
                           onClick={() => handleRemoveSurcharge(sch.id)}
@@ -1479,6 +1537,7 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
+                        )}
                         <span className="font-semibold text-xs text-slate-800 truncate">
                           • {sch.name}
                         </span>
@@ -1498,7 +1557,7 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
                         <div className="relative">
                           <input
                             type="text"
-                            value={priceVal ? priceVal.toLocaleString('vi-VN') : ''}
+                            disabled={isReadOnly} value={priceVal ? priceVal.toLocaleString('vi-VN') : ''}
                             onChange={(e) => {
                               const num = parseInt(e.target.value.replace(/[^\d]/g, ''), 10) || 0;
                               setSurchargePriceForCol(sch.id, col.id, num);
@@ -1517,6 +1576,7 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
               ))}
 
               {/* HÀNG HÀNH ĐỘNG DƯỚI CÙNG 1A: CHỌN PHỤ PHÍ THÊM TỪ LOV HOẶC TÙY CHỈNH (THEO THIẾT KẾ VÍ DỤ) */}
+              {!isReadOnly && (
               <tr className="bg-slate-50/30 border-b border-slate-200">
                 <td className="sticky left-0 z-20 bg-white border-r-2 border-slate-300 px-3 py-2 shadow-[2px_0_5px_rgba(0,0,0,0.06)]">
                   <div className="flex items-center gap-2">
@@ -1561,6 +1621,7 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
                   <td key={col.id} className="border-r border-slate-200 bg-slate-50/10" />
                 ))}
               </tr>
+              )}
 
               {/* PHÂN ĐOẠN 1B: PHỤ PHÍ CỐ ĐỊNH (FIXED SURCHARGES) */}
               <tr className="bg-slate-100/90 font-black text-slate-800">
@@ -1578,6 +1639,7 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
                   <td className="sticky left-0 z-20 bg-white border-r-2 border-slate-300 px-4 py-2 text-slate-900 shadow-[2px_0_5px_rgba(0,0,0,0.06)]">
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2.5 min-w-0">
+                        {!isReadOnly && (
                         <button
                           type="button"
                           onClick={() => setFixedSurcharges(fixedSurcharges.filter(f => f.id !== fix.id))}
@@ -1586,6 +1648,7 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
+                        )}
                         <div className="min-w-0">
                           <span className="font-semibold text-xs text-slate-800 truncate">• {fix.name}</span>
                           {fix.note && <span className="text-[10px] text-slate-400 block truncate">{fix.note}</span>}
@@ -1605,7 +1668,7 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
                         <div className="relative">
                           <input
                             type="text"
-                            value={fix.price ? fix.price.toLocaleString('vi-VN') : ''}
+                            disabled={isReadOnly} value={fix.price ? fix.price.toLocaleString('vi-VN') : ''}
                             onChange={(e) => {
                               const num = parseInt(e.target.value.replace(/[^\d]/g, ''), 10) || 0;
                               setFixedSurcharges(fixedSurcharges.map(f => f.id === fix.id ? { ...f, price: num } : f));
@@ -1628,6 +1691,7 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
               ))}
 
               {/* HÀNG HÀNH ĐỘNG DƯỚI CÙNG 1B: CHỌN PHỤ PHÍ CỐ ĐỊNH TỪ LOV HOẶC THÊM TÙY CHỈNH (THEO THIẾT KẾ MẪU) */}
+              {!isReadOnly && (
               <tr className="bg-slate-50/30 border-b border-slate-200">
                 <td className="sticky left-0 z-20 bg-white border-r-2 border-slate-300 px-3 py-2 shadow-[2px_0_5px_rgba(0,0,0,0.06)]">
                   <div className="flex items-center gap-2">
@@ -1673,6 +1737,7 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
                   <td key={col.id} className="border-r border-slate-200 bg-slate-50/10" />
                 ))}
               </tr>
+              )}
 
               {/* PHÂN ĐOẠN 2: GIÁ TRỊ GIA TĂNG (VAS) */}
               <tr className="bg-slate-100/90 font-black text-slate-800">
@@ -1690,6 +1755,7 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
                   <td className="sticky left-0 z-20 bg-white border-r-2 border-slate-300 px-4 py-2 text-slate-900 shadow-[2px_0_5px_rgba(0,0,0,0.06)]">
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2.5 min-w-0">
+                        {!isReadOnly && (
                         <button
                           type="button"
                           onClick={() => handleRemoveVas(vas.id)}
@@ -1698,6 +1764,7 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
+                        )}
                         <span className="font-semibold text-xs text-slate-800 truncate">• {vas.name}</span>
                       </div>
                       <span className="text-[10px] font-bold text-slate-500 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded shrink-0">
@@ -1713,7 +1780,7 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
                       <div className="relative">
                         <input
                           type="text"
-                          value={vas.priceText}
+                          disabled={isReadOnly} value={vas.priceText}
                           onChange={(e) => {
                             const val = e.target.value;
                             setData(prev => prev ? ({
@@ -1731,6 +1798,7 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
               ))}
 
               {/* HÀNG HÀNH ĐỘNG DƯỚI CÙNG 2: + CHỌN VAS THÊM TỪ DANH MỤC (THEO THIẾT KẾ VÍ DỤ) */}
+              {!isReadOnly && (
               <tr className="bg-slate-50/30 border-b border-slate-200">
                 <td className="sticky left-0 z-20 bg-white border-r-2 border-slate-300 px-3 py-2 shadow-[2px_0_5px_rgba(0,0,0,0.06)]">
                   <div className="flex items-center gap-2">
@@ -1776,6 +1844,8 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
                 ))}
               </tr>
 
+              )}
+
               {/* PHÂN ĐOẠN 3: CAM KẾT VẬN HÀNH (SLA & OPERATION) */}
               <tr className="bg-slate-100/90 font-black text-slate-800">
                 <td colSpan={columns.length + 2} className="px-4 py-2.5 text-[11px] uppercase tracking-wider text-slate-800 flex items-center gap-2">
@@ -1796,7 +1866,7 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
                 <td colSpan={columns.length} className="border-r border-slate-200 px-3 py-2">
                   <input
                     type="text"
-                    value={data.operatingHours || (isCold ? '24/7 (Cấp nguồn điện lạnh & trực kỹ thuật 24/7)' : (isHazmat ? '07:30 - 18:00 (Khung giờ vận chuyển hóa chất)' : '24/7 (Không cấm giờ xe cont)'))}
+                    disabled={isReadOnly} value={data.operatingHours || (isCold ? '24/7 (Cấp nguồn điện lạnh & trực kỹ thuật 24/7)' : (isHazmat ? '07:30 - 18:00 (Khung giờ vận chuyển hóa chất)' : '24/7 (Không cấm giờ xe cont)'))}
                     onChange={(e) => setData(prev => prev ? ({ ...prev, operatingHours: e.target.value }) : prev)}
                     className="w-full font-bold text-slate-800 bg-white border border-slate-300 rounded px-2.5 py-1 text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none shadow-2xs"
                     placeholder={isCold ? '24/7 (Cấp nguồn điện lạnh & trực kỹ thuật 24/7)' : (isHazmat ? '07:30 - 18:00 (Khung giờ vận chuyển hóa chất)' : '24/7 (Không cấm giờ xe cont)')}
@@ -1816,7 +1886,7 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
                 <td colSpan={columns.length} className="border-r border-slate-200 px-3 py-2">
                   <input
                     type="text"
-                    value={data.cutOffTime || (isCold ? '15:30 hàng ngày (bảo đảm xuất kho lạnh)' : (isHazmat ? '16:00 hàng ngày (gửi trước MSDS 2 giờ)' : '16:30 hàng ngày'))}
+                    disabled={isReadOnly} value={data.cutOffTime || (isCold ? '15:30 hàng ngày (bảo đảm xuất kho lạnh)' : (isHazmat ? '16:00 hàng ngày (gửi trước MSDS 2 giờ)' : '16:30 hàng ngày'))}
                     onChange={(e) => setData(prev => prev ? ({ ...prev, cutOffTime: e.target.value }) : prev)}
                     className="w-full font-bold text-slate-800 bg-white border border-slate-300 rounded px-2.5 py-1 text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none shadow-2xs"
                     placeholder={isCold ? '15:30 hàng ngày (bảo đảm xuất kho lạnh)' : (isHazmat ? '16:00 hàng ngày (gửi trước MSDS 2 giờ)' : '16:30 hàng ngày')}
@@ -1836,7 +1906,7 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
                 <td colSpan={columns.length} className="border-r border-slate-200 px-3 py-2">
                   <input
                     type="text"
-                    value={data.sla || (isCold ? '≤ 45 phút tại Dock lạnh có đệm trùm khí' : (isHazmat ? '≤ 60 phút kiểm tra niêm phong & bốc dỡ an toàn' : '2 - 4 giờ kể từ khi xe vào dock'))}
+                    disabled={isReadOnly} value={data.sla || (isCold ? '≤ 45 phút tại Dock lạnh có đệm trùm khí' : (isHazmat ? '≤ 60 phút kiểm tra niêm phong & bốc dỡ an toàn' : '2 - 4 giờ kể từ khi xe vào dock'))}
                     onChange={(e) => setData(prev => prev ? ({ ...prev, sla: e.target.value }) : prev)}
                     className="w-full font-bold text-slate-800 bg-white border border-slate-300 rounded px-2.5 py-1 text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none shadow-2xs"
                     placeholder={isCold ? '≤ 45 phút tại Dock lạnh có đệm trùm khí' : (isHazmat ? '≤ 60 phút kiểm tra niêm phong & bốc dỡ an toàn' : '2 - 4 giờ kể từ khi xe vào dock')}
@@ -1864,7 +1934,7 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
                 <td colSpan={columns.length} className="border-r border-slate-200 px-3 py-2">
                   <input
                     type="date"
-                    value={data.validUntil || '2026-12-31'}
+                    disabled={isReadOnly} value={data.validUntil || '2026-12-31'}
                     onChange={(e) => setData(prev => prev ? ({ ...prev, validUntil: e.target.value }) : prev)}
                     className="font-bold text-slate-800 bg-white border border-slate-300 rounded px-2.5 py-1 text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none shadow-2xs"
                   />
@@ -1884,7 +1954,7 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
                   <div className="flex items-center gap-2">
                     <input
                       type="number"
-                      value={data.promotionPercent || 10}
+                      disabled={isReadOnly} value={data.promotionPercent || 10}
                       onChange={(e) => setData(prev => prev ? ({ ...prev, promotionPercent: parseFloat(e.target.value) || 0 }) : prev)}
                       className="w-20 text-center font-bold text-slate-800 bg-white border border-slate-300 rounded px-2 py-1 text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none shadow-2xs"
                     />
@@ -1905,7 +1975,7 @@ export const WarehousePricingContinuousTable: React.FC<WarehousePricingContinuou
                 <td colSpan={columns.length} className="border-r border-slate-200 px-3 py-2">
                   <input
                     type="text"
-                    value={data.paymentTerms || 'Net 30 ngày'}
+                    disabled={isReadOnly} value={data.paymentTerms || 'Net 30 ngày'}
                     onChange={(e) => setData(prev => prev ? ({ ...prev, paymentTerms: e.target.value }) : prev)}
                     className="w-full font-bold text-slate-800 bg-white border border-slate-300 rounded px-2.5 py-1 text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none shadow-2xs"
                     placeholder="Net 30 ngày"
