@@ -58,6 +58,12 @@ import {
   OceanLclCostMatrixModal
 } from './OceanLclCostMatrixModal';
 import {
+  AirCargoCostMatrixModal
+} from './AirCargoCostMatrixModal';
+import {
+  AirExpressCostMatrixModal
+} from './AirExpressCostMatrixModal';
+import {
   OceanFclCostMatrixModal,
   ContainerPricingMatrixColumn,
   createDefaultContainerPricingColumn,
@@ -1190,6 +1196,12 @@ export interface CapabilityRouteItem {
   vehiclePricingMatrix?: VehiclePricingMatrixColumn[];
   containerPricingMatrix?: ContainerPricingMatrixColumn[];
   railContainerPricingMatrix?: RailContainerPricingMatrixColumn[];
+  airCargoPricing?: any;
+  temperatureRange?: string;
+  tempPackagingType?: string;
+  iataDgClass?: string;
+  dgAircraftRule?: string;
+  aircraftType?: string;
   cargoType?: 'general' | 'reefer' | 'hazmat';
   // Truong thong tin chuyen biet cho Kho Bai 3PL (Warehousing)
   warehouseCode?: string;
@@ -4861,6 +4873,8 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
   const [costMatrixModalRoute, setCostMatrixModalRoute] = useState<CapabilityRouteItem | null>(null);
   const [ltlCostMatrixModalRoute, setLtlCostMatrixModalRoute] = useState<CapabilityRouteItem | null>(null);
   const [oceanLclCostMatrixModalRoute, setOceanLclCostMatrixModalRoute] = useState<CapabilityRouteItem | null>(null);
+  const [airCargoCostMatrixModalRoute, setAirCargoCostMatrixModalRoute] = useState<CapabilityRouteItem | null>(null);
+  const [airExpressCostMatrixModalRoute, setAirExpressCostMatrixModalRoute] = useState<CapabilityRouteItem | null>(null);
   const [oceanFclCostMatrixModalRoute, setOceanFclCostMatrixModalRoute] = useState<CapabilityRouteItem | null>(null);
   const [railFclCostMatrixModalRoute, setRailFclCostMatrixModalRoute] = useState<CapabilityRouteItem | null>(null);
   const [crossBorderFtlCostMatrixModalRoute, setCrossBorderFtlCostMatrixModalRoute] = useState<CapabilityRouteItem | null>(null);
@@ -4870,6 +4884,22 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
   };
 
   const handleSaveLtlCostMatrix = (routeId: string, updatedData: Partial<CapabilityRouteItem>) => {
+    handleUpdateRouteRowMultiple(routeId, updatedData);
+  };
+
+  const handleOpenAirCargoCostMatrixModal = (route: CapabilityRouteItem) => {
+    setAirCargoCostMatrixModalRoute(route);
+  };
+
+  const handleSaveAirCargoCostMatrix = (routeId: string, updatedData: Partial<CapabilityRouteItem>) => {
+    handleUpdateRouteRowMultiple(routeId, updatedData);
+  };
+
+  const handleOpenAirExpressCostMatrixModal = (route: CapabilityRouteItem) => {
+    setAirExpressCostMatrixModalRoute(route);
+  };
+
+  const handleSaveAirExpressCostMatrix = (routeId: string, updatedData: Partial<CapabilityRouteItem>) => {
     handleUpdateRouteRowMultiple(routeId, updatedData);
   };
 
@@ -6637,6 +6667,38 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                               );
                             }
 
+                            if (isAirCargoTable) {
+                              return (
+                                <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
+                                  <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
+                                  <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-sky-50/70 text-sky-950 font-black">Mã Tuyến</th>
+                                  <th className="py-2.5 px-2.5 min-w-[130px] bg-sky-50/70 text-sky-950 font-black">Khu Vực</th>
+                                  <th className="py-2.5 px-2.5 min-w-[160px] bg-sky-50/70 text-sky-950 font-black">Hành Lang Tuyến</th>
+                                  <th className="py-2.5 px-2.5 min-w-[150px]">Sân Bay Đi (AOD)</th>
+                                  <th className="py-2.5 px-2.5 min-w-[150px]">Sân Bay Đến (AOA)</th>
+                                  <th className="py-2.5 px-2.5 min-w-[170px]">Hãng Bay (Airline)</th>
+                                  <th className="py-2.5 px-2.5 min-w-[140px] text-center bg-sky-100/80 text-sky-950 font-black">Chi Tiết Biểu Phí</th>
+                                  <th className="py-2.5 px-2 text-center w-16 min-w-[65px]">Action</th>
+                                </tr>
+                              );
+                            }
+
+                            if (isExpressTable) {
+                              return (
+                                <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
+                                  <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
+                                  <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-amber-50/80 text-amber-950 font-black">Mã Tuyến</th>
+                                  <th className="py-2.5 px-2.5 min-w-[130px] bg-amber-50/80 text-amber-950 font-black">Khu Vực</th>
+                                  <th className="py-2.5 px-2.5 min-w-[160px] bg-amber-50/80 text-amber-950 font-black">Hành Lang Tuyến</th>
+                                  <th className="py-2.5 px-2.5 min-w-[150px]">Điểm Lấy (Door Origin)</th>
+                                  <th className="py-2.5 px-2.5 min-w-[150px]">Điểm Phát (Door Destination)</th>
+                                  <th className="py-2.5 px-2.5 min-w-[170px]">Hãng Chuyển Phát (Carrier)</th>
+                                  <th className="py-2.5 px-2.5 min-w-[140px] text-center bg-amber-100/90 text-amber-950 font-black">Chi Tiết Biểu Phí</th>
+                                  <th className="py-2.5 px-2 text-center w-16 min-w-[65px]">Action</th>
+                                </tr>
+                              );
+                            }
+
                             const isRailFclTable = isRailTable && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL');
                             if (isRailFclTable) {
                               return (
@@ -6924,7 +6986,44 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                         <tbody className="divide-y divide-slate-200 bg-white">
                           {(!currentData.routes || currentData.routes.length === 0) ? (
                             <tr>
-                              <td colSpan={activeCategory?.id === 'trucking' && !((activeModel?.id === 'trk-gen-ltl' || activeModel?.name?.includes('LTL') || activeModel?.code === 'LTL')) && !(activeCargoGroup?.name?.includes('lạnh') || activeModel?.name?.includes('lạnh') || activeModel?.id?.includes('ref')) && !(activeCargoGroup?.name?.includes('nguy hiểm') || activeModel?.name?.includes('nguy hiểm') || activeModel?.id?.includes('haz') || activeModel?.id?.includes('dg')) ? 7 : activeCategory?.id === 'warehousing' ? ((activeModel?.id === 'wh-gen-bon' || activeModel?.name?.toLowerCase().includes('ngoại quan')) ? 19 : (activeModel?.id === 'wh-gen-self' ? 17 : 18)) : ((activeCategory?.id === 'project' && (activeModel?.id?.includes('xdock') || activeModel?.name?.toLowerCase().includes('cross-dock') || activeModel?.name?.toLowerCase().includes('x-dock'))) ? 16 : ((activeCategory?.id === 'project' && (activeModel?.id?.includes('port') || activeModel?.name?.toLowerCase().includes('cảng') || activeModel?.code?.toLowerCase().includes('port'))) ? 15 : (((activeCategory?.id === 'cross-border' || activeCategory?.serviceType === 'Cross-border') && (activeModel?.id?.includes('ftl') || activeModel?.name?.includes('FTL') || activeModel?.code === 'FTL' || !activeModel?.id?.includes('ltl'))) ? 16 : activeCategory?.id === 'customs' ? 15 : (activeCategory?.id === 'trucking' ? 15 : ((activeCategory?.id === 'ocean') ? ((activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL') ? 17 : 15) : (((activeCategory?.id === 'rail') && (activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL')) ? 15 : ((activeCategory?.id === 'air' && (activeModel?.id === 'air-gen-exp' || activeModel?.name?.includes('Express') || activeModel?.code === 'Express')) ? 13 : 15)))))))} className="py-8 text-center text-slate-400 font-medium">
+                              <td colSpan={(() => {
+                                if (activeCategory?.id === 'warehousing') {
+                                  if (activeModel?.id === 'wh-gen-bon' || activeModel?.name?.toLowerCase().includes('ngoại quan')) return 19;
+                                  if (activeModel?.id === 'wh-gen-self') return 17;
+                                  return 18;
+                                }
+                                if (activeCategory?.id === 'customs') return 15;
+                                if (activeCategory?.id === 'project') {
+                                  if (activeModel?.id?.includes('xdock') || activeModel?.name?.toLowerCase().includes('cross-dock') || activeModel?.name?.toLowerCase().includes('x-dock')) return 16;
+                                  return 15;
+                                }
+                                if (activeCategory?.id === 'trucking') {
+                                  const isLtl = activeModel?.id === 'trk-gen-ltl' || activeModel?.name?.includes('LTL') || activeModel?.code === 'LTL';
+                                  const isSpecialCargo = activeCargoGroup?.name?.includes('lạnh') || activeModel?.name?.includes('lạnh') || activeModel?.id?.includes('ref') || activeCargoGroup?.name?.includes('nguy hiểm') || activeModel?.name?.includes('nguy hiểm') || activeModel?.id?.includes('haz') || activeModel?.id?.includes('dg');
+                                  if (!isLtl && !isSpecialCargo) return 7;
+                                  return 15;
+                                }
+                                if (activeCategory?.id === 'ocean') {
+                                  const isFcl = activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL';
+                                  const isLcl = activeModel?.id?.includes('lcl') || activeModel?.name?.includes('LCL') || activeModel?.code === 'LCL';
+                                  if (isFcl) return 8;
+                                  if (isLcl) return 9;
+                                  return 15;
+                                }
+                                if (activeCategory?.id === 'air') {
+                                  const isExp = activeModel?.id === 'air-gen-exp' || activeModel?.name?.includes('Express') || activeModel?.code === 'Express';
+                                  return isExp ? 13 : 9;
+                                }
+                                if (activeCategory?.id === 'rail') {
+                                  const isFcl = activeModel?.id?.includes('fcl') || activeModel?.name?.includes('FCL') || activeModel?.code === 'FCL';
+                                  return isFcl ? 8 : 15;
+                                }
+                                if (activeCategory?.id === 'cross-border' || activeCategory?.serviceType === 'Cross-border') {
+                                  const isLtl = activeModel?.id?.includes('ltl') || activeModel?.name?.includes('LTL') || activeModel?.code === 'LTL';
+                                  return isLtl ? 15 : 8;
+                                }
+                                return 15;
+                              })()} className="py-8 text-center text-slate-400 font-medium">
                                 {activeCategory?.id === 'warehousing' ? (
                                   <>Chưa có cơ sở kho nào. Bấm nút <strong className="text-indigo-600 font-bold">+ Thêm Kho Mới</strong> để khai báo năng lực & biểu phí lưu kho.</>
                                 ) : activeCategory?.id === 'customs' ? (
@@ -9277,6 +9376,272 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                   );
                                 }
 
+                                const isAirCargoRow = isAir && !isExpress;
+                                if (isAirCargoRow) {
+                                  const effectiveRouteCode = route.routeCode || `RC-AIR-${String(idx + 1).padStart(3, '0')}`;
+                                  const effectiveRegion = route.region || 'Đông Bắc Á (Nhật - Hàn - Trung - Đài)';
+                                  const airLov = AIR_AIRLINES_LOV;
+                                  const currentAirline = airLov.includes(route.vehicleType || route.shippingLine || '')
+                                    ? (route.vehicleType || route.shippingLine || airLov[0])
+                                    : (route.customShippingLine || route.shippingLine === 'Khác (Nhập hãng bay khác)...'
+                                      ? 'Khác (Nhập hãng bay khác)...'
+                                      : (airLov[0] || 'Vietnam Airlines (VN Cargo)'));
+
+                                  return (
+                                    <tr key={route.id} className="divide-x divide-slate-200 hover:bg-sky-50/20 transition-colors">
+                                      {/* 1. STT */}
+                                      <td className="p-0 text-center font-mono text-slate-400 font-semibold text-[11px] bg-slate-50/60 align-middle">
+                                        {idx + 1}
+                                      </td>
+
+                                      {/* 2. Mã Tuyến */}
+                                      <td className="p-0 align-top bg-slate-50/30">
+                                        <input
+                                          type="text"
+                                          value={effectiveRouteCode}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'routeCode', e.target.value)}
+                                          placeholder="RC-AIR-001"
+                                          className="w-full px-2 py-2.5 text-center font-mono font-bold text-sky-700 text-xs bg-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-sky-600 transition-all uppercase"
+                                          title="Mã tuyến hàng không"
+                                        />
+                                      </td>
+
+                                      {/* 3. Khu Vực */}
+                                      <td className="p-0 align-top bg-slate-50/20">
+                                        <select
+                                          value={effectiveRegion}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'region', e.target.value)}
+                                          className="w-full px-2 py-2.5 text-xs font-semibold text-slate-800 bg-transparent cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-sky-600 transition-all"
+                                        >
+                                          {AIR_TRADE_LANE_REGIONS_LOV.map((r, rIdx) => (
+                                            <option key={rIdx} value={r}>{r}</option>
+                                          ))}
+                                        </select>
+                                      </td>
+
+                                      {/* 4. Hành Lang Tuyến */}
+                                      <td className="p-0 align-top">
+                                        <input
+                                          type="text"
+                                          value={route.route}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'route', e.target.value)}
+                                          placeholder="VD: SGN ⇄ NRT / FRA..."
+                                          className="w-full px-2.5 py-2.5 font-bold text-slate-900 text-xs bg-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-sky-600 transition-all"
+                                          title="Hành lang tuyến hàng không"
+                                        />
+                                      </td>
+
+                                      {/* 5. Sân Bay Đi (AOD) */}
+                                      <td className="p-0 align-top">
+                                        <input
+                                          type="text"
+                                          value={route.origin}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'origin', e.target.value)}
+                                          placeholder="Sân bay Tân Sơn Nhất (SGN)..."
+                                          className="w-full px-2.5 py-2.5 bg-transparent text-slate-700 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-sky-600 transition-all"
+                                        />
+                                      </td>
+
+                                      {/* 6. Sân Bay Đến (AOA) */}
+                                      <td className="p-0 align-top">
+                                        <input
+                                          type="text"
+                                          value={route.destination}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'destination', e.target.value)}
+                                          placeholder="Sân bay Tokyo Narita (NRT)..."
+                                          className="w-full px-2.5 py-2.5 bg-transparent text-slate-700 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-sky-600 transition-all"
+                                        />
+                                      </td>
+
+                                      {/* 7. Hãng Bay (Airline) */}
+                                      <td className="p-0 align-top">
+                                        <select
+                                          value={currentAirline}
+                                          onChange={(e) => {
+                                            const val = e.target.value;
+                                            handleUpdateRouteRowMultiple(route.id, {
+                                              vehicleType: val,
+                                              shippingLine: val,
+                                            });
+                                          }}
+                                          className="w-full px-2 py-2.5 text-xs font-semibold text-slate-800 bg-transparent cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-sky-600 transition-all"
+                                        >
+                                          {airLov.map((s, sIdx) => (
+                                            <option key={sIdx} value={s}>{s}</option>
+                                          ))}
+                                        </select>
+                                      </td>
+
+                                      {/* 8. Chi Tiết Biểu Phí */}
+                                      <td className="p-2 text-center align-middle bg-sky-50/20">
+                                        <button
+                                          type="button"
+                                          onClick={() => handleOpenAirCargoCostMatrixModal(route)}
+                                          className="text-xs font-bold text-sky-600 hover:text-sky-800 hover:underline cursor-pointer transition-colors"
+                                          title="Nhấp để mở ma trận khai báo chi tiết biểu phí Air Cargo theo CBM & Kg song song"
+                                        >
+                                          Chi tiết
+                                        </button>
+                                      </td>
+
+                                      {/* 9. Action */}
+                                      <td className="p-1 text-center align-middle">
+                                        <div className="flex items-center justify-center space-x-1">
+                                          <button
+                                            type="button"
+                                            onClick={() => handleDuplicateRouteRow(route.id)}
+                                            className="p-1.5 text-slate-400 hover:text-sky-600 rounded-lg hover:bg-slate-100 transition-colors"
+                                            title="Nhân bản tuyến này"
+                                          >
+                                            <Copy className="w-3.5 h-3.5" />
+                                          </button>
+                                          <button
+                                            type="button"
+                                            onClick={() => handleDeleteRouteRow(route.id)}
+                                            className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-slate-100 transition-colors"
+                                            title="Xóa tuyến"
+                                          >
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                          </button>
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  );
+                                }
+
+                                const isExpressRow = isAir && isExpress;
+                                if (isExpressRow) {
+                                  const effectiveRouteCode = route.routeCode || `RC-EXP-${String(idx + 1).padStart(3, '0')}`;
+                                  const effectiveRegion = route.region || 'Đông Nam Á (ASEAN)';
+                                  const carrierLov = EXPRESS_CARRIERS_LOV;
+                                  const currentCarrier = carrierLov.includes(route.vehicleType || route.shippingLine || '')
+                                    ? (route.vehicleType || route.shippingLine || carrierLov[0])
+                                    : (route.customShippingLine || route.shippingLine === 'Khác (Nhập hãng khác)...'
+                                      ? 'Khác (Nhập hãng khác)...'
+                                      : (carrierLov[0] || 'DHL Express'));
+
+                                  return (
+                                    <tr key={route.id} className="divide-x divide-slate-200 hover:bg-amber-50/20 transition-colors">
+                                      {/* 1. STT */}
+                                      <td className="p-0 text-center font-mono text-slate-400 font-semibold text-[11px] bg-slate-50/60 align-middle">
+                                        {idx + 1}
+                                      </td>
+
+                                      {/* 2. Mã Tuyến */}
+                                      <td className="p-0 align-top bg-amber-50/30">
+                                        <input
+                                          type="text"
+                                          value={effectiveRouteCode}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'routeCode', e.target.value)}
+                                          placeholder="RC-EXP-001"
+                                          className="w-full px-2 py-2.5 text-center font-mono font-bold text-amber-800 text-xs bg-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-amber-600 transition-all uppercase"
+                                          title="Mã tuyến chuyển phát nhanh Express"
+                                        />
+                                      </td>
+
+                                      {/* 3. Khu Vực */}
+                                      <td className="p-0 align-top bg-amber-50/20">
+                                        <select
+                                          value={effectiveRegion}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'region', e.target.value)}
+                                          className="w-full px-2 py-2.5 text-xs font-semibold text-slate-800 bg-transparent cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-amber-600 transition-all"
+                                        >
+                                          {AIR_TRADE_LANE_REGIONS_LOV.map((r, rIdx) => (
+                                            <option key={rIdx} value={r}>{r}</option>
+                                          ))}
+                                        </select>
+                                      </td>
+
+                                      {/* 4. Hành Lang Tuyến */}
+                                      <td className="p-0 align-top">
+                                        <input
+                                          type="text"
+                                          value={route.route}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'route', e.target.value)}
+                                          placeholder="VD: TP.HCM ⇄ Singapore / Tokyo..."
+                                          className="w-full px-2.5 py-2.5 font-bold text-slate-900 text-xs bg-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-amber-600 transition-all"
+                                          title="Hành lang tuyến chuyển phát nhanh Express"
+                                        />
+                                      </td>
+
+                                      {/* 5. Điểm Lấy (Door Origin) */}
+                                      <td className="p-0 align-top">
+                                        <input
+                                          type="text"
+                                          value={route.origin}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'origin', e.target.value)}
+                                          placeholder="Nội thành TP.HCM (Door Pickup)..."
+                                          className="w-full px-2.5 py-2.5 bg-transparent text-slate-700 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-amber-600 transition-all"
+                                        />
+                                      </td>
+
+                                      {/* 6. Điểm Phát (Door Destination) */}
+                                      <td className="p-0 align-top">
+                                        <input
+                                          type="text"
+                                          value={route.destination}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'destination', e.target.value)}
+                                          placeholder="Singapore (Door Delivery)..."
+                                          className="w-full px-2.5 py-2.5 bg-transparent text-slate-700 text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-amber-600 transition-all"
+                                        />
+                                      </td>
+
+                                      {/* 7. Hãng Chuyển Phát (Carrier) */}
+                                      <td className="p-0 align-top">
+                                        <select
+                                          value={currentCarrier}
+                                          onChange={(e) => {
+                                            const val = e.target.value;
+                                            handleUpdateRouteRowMultiple(route.id, {
+                                              vehicleType: val,
+                                              shippingLine: val,
+                                            });
+                                          }}
+                                          className="w-full px-2 py-2.5 text-xs font-semibold text-slate-800 bg-transparent cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-amber-600 transition-all"
+                                        >
+                                          {carrierLov.map((s, sIdx) => (
+                                            <option key={sIdx} value={s}>{s}</option>
+                                          ))}
+                                        </select>
+                                      </td>
+
+                                      {/* 8. Chi Tiết Biểu Phí */}
+                                      <td className="p-2 text-center align-middle bg-amber-50/30">
+                                        <button
+                                          type="button"
+                                          onClick={() => handleOpenAirExpressCostMatrixModal(route)}
+                                          className="text-xs font-bold text-amber-700 hover:text-amber-900 hover:underline cursor-pointer transition-colors"
+                                          title="Nhấp để mở ma trận khai báo chi tiết biểu phí chuyển phát nhanh Express theo các bậc Kg"
+                                        >
+                                          Chi tiết
+                                        </button>
+                                      </td>
+
+                                      {/* 9. Action */}
+                                      <td className="p-1 text-center align-middle">
+                                        <div className="flex items-center justify-center space-x-1">
+                                          <button
+                                            type="button"
+                                            onClick={() => handleDuplicateRouteRow(route.id)}
+                                            className="p-1.5 text-slate-400 hover:text-amber-600 rounded-lg hover:bg-slate-100 transition-colors"
+                                            title="Nhân bản tuyến này"
+                                          >
+                                            <Copy className="w-3.5 h-3.5" />
+                                          </button>
+                                          <button
+                                            type="button"
+                                            onClick={() => handleDeleteRouteRow(route.id)}
+                                            className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-slate-100 transition-colors"
+                                            title="Xóa tuyến"
+                                          >
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                          </button>
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  );
+                                }
+
                                 const isOceanLclRow = isOcean && isLcl;
                                 if (isOceanLclRow) {
                                   const effectiveRouteCode = route.routeCode || `RC-LCL-${String(idx + 1).padStart(3, '0')}`;
@@ -10611,6 +10976,9 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                   const isCrossBorder = activeCategory?.id === 'cross-border' || activeCategory?.serviceType === 'Cross-border';
                   const isCrossBorderLtl = isCrossBorder && (activeModel?.id?.includes('ltl') || activeModel?.name?.includes('LTL') || activeModel?.code === 'LTL');
                   const isCrossBorderFtl = isCrossBorder && !isCrossBorderLtl;
+                  const isAir = activeCategory?.id === 'air' || activeModel?.id?.startsWith('air-');
+                  const isExpress = activeCategory?.id === 'air' && (activeModel?.id === 'air-gen-exp' || activeModel?.name?.includes('Express') || activeModel?.code === 'Express');
+                  const isAirCargo = isAir && !isExpress;
 
                   const shouldHideBlocks3And4 = isTruckingFtl ||
                     isLtlTrucking ||
@@ -10618,6 +10986,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                     isLclOcean ||
                     (isRail && isFcl) ||
                     isCrossBorderFtl ||
+                    isAirCargo ||
                     activeCategory?.id === 'warehousing' ||
                     (activeCategory?.id === 'project' && (
                       activeModel?.id?.includes('xdock') ||
@@ -14213,6 +14582,30 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
             ? 'hazmat'
             : 'general')
         }
+      />
+
+      {/* 6.1 Air Cargo Dual-Metric (Kg & CBM) Cost Matrix Modal */}
+      <AirCargoCostMatrixModal
+        isOpen={!!airCargoCostMatrixModalRoute}
+        onClose={() => setAirCargoCostMatrixModalRoute(null)}
+        route={airCargoCostMatrixModalRoute}
+        onSave={handleSaveAirCargoCostMatrix}
+        cargoType={
+          airCargoCostMatrixModalRoute?.cargoType ||
+          (activeCargoGroup?.name?.includes('lạnh') || activeModel?.name?.includes('lạnh') || activeModel?.id?.includes('ref')
+            ? 'perishable'
+            : activeCargoGroup?.name?.includes('nguy hiểm') || activeModel?.name?.includes('nguy hiểm') || activeModel?.id?.includes('haz') || activeModel?.id?.includes('dg')
+            ? 'dangerous'
+            : 'general')
+        }
+      />
+
+      {/* 6.2 Air Express Weight-Tiered (+45kg Base) Cost Matrix Modal */}
+      <AirExpressCostMatrixModal
+        isOpen={!!airExpressCostMatrixModalRoute}
+        onClose={() => setAirExpressCostMatrixModalRoute(null)}
+        route={airExpressCostMatrixModalRoute}
+        onSave={handleSaveAirExpressCostMatrix}
       />
 
       {/* 7. Rail FCL Multi-Container/Wagon Cost Breakdown Matrix Modal */}
