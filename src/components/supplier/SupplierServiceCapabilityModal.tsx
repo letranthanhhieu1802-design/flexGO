@@ -23,6 +23,7 @@ import {
   DollarSign,
   ShieldCheck,
   Package,
+  Boxes,
   Plus,
   Trash2,
   Copy,
@@ -84,6 +85,10 @@ import {
 import {
   CrossBorderLtlCostMatrixModal,
 } from './CrossBorderLtlCostMatrixModal';
+import {
+  WarehousePricingContinuousTable,
+  WAREHOUSE_FREE_UTILITIES_SUGGESTIONS,
+} from './WarehousePricingContinuousTable';
 
 export const DAYS_OF_WEEK_LOV = [
   { id: 'T2', name: 'Thứ 2', short: 'T2' },
@@ -657,6 +662,33 @@ export const CUSTOMS_SERVICE_FORMS_LOV = [
   'Khai thuê dịch vụ',
 ];
 
+export const WAREHOUSE_SUGGESTED_SURCHARGES = [
+  { code: 'WH-SCH-01', name: 'Phí nâng hạ & dỡ hàng nhập kho (Inbound)', category: 'Bốc Xếp & Vận Hành', unit: 'Pallet', defaultPrice: '35,000 ₫ / Pallet', isFree: false },
+  { code: 'WH-SCH-02', name: 'Phí lấy hàng & bốc xếp xuất kho (Outbound)', category: 'Bốc Xếp & Vận Hành', unit: 'Pallet', defaultPrice: '35,000 ₫ / Pallet', isFree: false },
+  { code: 'WH-SCH-03', name: 'Phí rút ruột container 20ft bằng xe nâng', category: 'Rút / Đóng Cont', unit: 'Cont 20ft', defaultPrice: '700,000 ₫ / Cont', isFree: false },
+  { code: 'WH-SCH-04', name: 'Phí rút ruột container 40ft thủ công & lên Pallet', category: 'Rút / Đóng Cont', unit: 'Cont 40ft', defaultPrice: '1,200,000 ₫ / Cont', isFree: false },
+  { code: 'WH-SCH-05', name: 'Phí đóng hàng vào container (Stuffing)', category: 'Rút / Đóng Cont', unit: 'Cont 40ft', defaultPrice: '1,300,000 ₫ / Cont', isFree: false },
+  { code: 'WH-SCH-06', name: 'Phí kiểm đếm chi tiết từng SKU lẻ', category: 'Kiểm Đếm & Phân Loại', unit: 'SKU', defaultPrice: '500 ₫ / SKU', isFree: false },
+  { code: 'WH-SCH-07', name: 'Phí làm việc ngoài giờ hành chính (Overtime)', category: 'Vận Hành Ngoài Giờ', unit: 'Giờ', defaultPrice: '200,000 ₫ / Giờ', isFree: false },
+  { code: 'WH-SCH-08', name: 'Phí lưu bãi xe container chờ dỡ (sau 2h free)', category: 'Bãi Xe & Lưu Ca', unit: 'Xe / Giờ', defaultPrice: '100,000 ₫ / Giờ', isFree: false },
+  { code: 'WH-SCH-09', name: 'Phí phân loại hàng theo PO / Hóa đơn', category: 'Kiểm Đếm & Phân Loại', unit: 'Kiện', defaultPrice: '2,000 ₫ / Kiện', isFree: false },
+  { code: 'WH-SCH-10', name: 'Phí vận hành ngày Lễ / Tết / Chủ nhật', category: 'Vận Hành Ngoài Giờ', unit: 'Lô hàng', defaultPrice: '500,000 ₫ / Lô', isFree: false },
+  { code: 'WH-SCH-11', name: 'Phí hủy kiện rác thải & xử lý pallet hỏng', category: 'Dịch Vụ Khác', unit: 'Pallet', defaultPrice: '25,000 ₫ / Pallet', isFree: false },
+];
+
+export const WAREHOUSE_SUGGESTED_VAS = [
+  { code: 'WH-VAS-01', name: 'Dán tem phụ tiếng Việt / Barcode SKU', category: 'Tem Nhãn & Barcode', unit: 'Tem', defaultPrice: '400 ₫ / Tem', isFree: false },
+  { code: 'WH-VAS-02', name: 'Quấn màng co PE Pallet & Đóng đai bảo vệ', category: 'Đóng Gói & Xử Lý', unit: 'Pallet', defaultPrice: '35,000 ₫ / Pallet', isFree: false },
+  { code: 'WH-VAS-03', name: 'Đóng thùng carton kitting combo / Hộp quà', category: 'Đóng Gói & Xử Lý', unit: 'Hộp', defaultPrice: '5,000 ₫ / Hộp', isFree: false },
+  { code: 'WH-VAS-04', name: 'Bảo hiểm cháy nổ tài sản kho bãi 100%', category: 'Bảo Hiểm & An Ninh', unit: '% Giá trị hàng', defaultPrice: '0.05% Giá trị hàng', isFree: true },
+  { code: 'WH-VAS-05', name: 'Chụp ảnh nghiệm thu tình trạng hàng xuất nhập', category: 'Kiểm Định & QC', unit: 'Lô hàng', defaultPrice: '0 ₫ (Miễn phí)', isFree: true },
+  { code: 'WH-VAS-06', name: 'Hun trùng kiểm dịch Pallet gỗ xuất khẩu (ISPM 15)', category: 'Đóng Gói & Xử Lý', unit: 'Pallet', defaultPrice: '25,000 ₫ / Pallet', isFree: false },
+  { code: 'WH-VAS-07', name: 'Đóng kiện gỗ nan / kiện gỗ kín bảo vệ hàng dễ vỡ', category: 'Đóng Gói & Xử Lý', unit: 'Kiện', defaultPrice: '180,000 ₫ / Kiện', isFree: false },
+  { code: 'WH-VAS-08', name: 'Kiểm tra chất lượng & Đếm ngoại quan chi tiết (AQL)', category: 'Kiểm Định & QC', unit: 'Kiện', defaultPrice: '1,500 ₫ / Kiện', isFree: false },
+  { code: 'WH-VAS-09', name: 'In phiếu giao hàng (Packing List) & Bàn giao e-POD', category: 'Tem Nhãn & Barcode', unit: 'Bộ chứng từ', defaultPrice: '0 ₫ (Miễn phí)', isFree: true },
+  { code: 'WH-VAS-10', name: 'Bảo quản nhiệt độ điều hòa mát (+18°C ~ +25°C)', category: 'Bảo Quản & Nhiệt Độ', unit: 'Pallet / Tháng', defaultPrice: '45,000 ₫ / Pallet', isFree: false },
+];
+
 export const CROSS_BORDER_GATE_GROUPS = [
   {
     group: '🇰🇭 Tuyến Cửa Khẩu Campuchia (Cambodia Route)',
@@ -938,7 +970,8 @@ export interface WarehouseTechCategoryDef {
 }
 
 export const getWarehouseTechSpecCategories = (modelId?: string, cargoGroupId?: string): WarehouseTechCategoryDef[] => {
-  // 0A. Cross-Dock (proj-gen-xdock, proj-ref-xdock, proj-haz-xdock)
+  const getBaseCategories = (): WarehouseTechCategoryDef[] => {
+    // 0A. Cross-Dock (proj-gen-xdock, proj-ref-xdock, proj-haz-xdock)
   if (modelId?.includes('xdock') || modelId?.includes('cross-dock') || modelId?.includes('x-dock')) {
     if (modelId?.includes('ref') || cargoGroupId?.includes('ref')) {
       return [
@@ -1052,14 +1085,25 @@ export const getWarehouseTechSpecCategories = (modelId?: string, cargoGroupId?: 
     ];
   }
 
-  // 6. Kho Thường Tiêu Chuẩn (Standard General Warehouse - Default)
+    // 6. Kho Thường Tiêu Chuẩn (Standard General Warehouse - Default)
+    return [
+      { id: 'structure', icon: '🏗️', label: 'Kết Cấu & Mặt Sàn', desc: 'Chiều cao, tải trọng sàn, nền' },
+      { id: 'racking', icon: '📦', label: 'Giá Kệ & Sức Chứa', desc: 'Loại kệ, tầng kệ, tải Pallet' },
+      { id: 'dock', icon: '🚛', label: 'Cửa Dock & Sân Bãi', desc: 'Cửa xuất nhập, dock leveler, sân cont' },
+      { id: 'fire', icon: '🔥', label: 'PCCC & An Ninh', desc: 'Sprinkler, nghiệm thu, camera 24/7' },
+      { id: 'wms', icon: '💻', label: 'WMS & Công Nghệ', desc: 'Phần mềm quản lý, Barcode, API' },
+      { id: 'cert', icon: '📜', label: 'Giấy Phép & Chứng Nhận', desc: 'ISO, LEED, Bảo hiểm kho bãi' },
+    ];
+  };
+
   return [
-    { id: 'structure', icon: '🏗️', label: 'Kết Cấu & Mặt Sàn', desc: 'Chiều cao, tải trọng sàn, nền' },
-    { id: 'racking', icon: '📦', label: 'Giá Kệ & Sức Chứa', desc: 'Loại kệ, tầng kệ, tải Pallet' },
-    { id: 'dock', icon: '🚛', label: 'Cửa Dock & Sân Bãi', desc: 'Cửa xuất nhập, dock leveler, sân cont' },
-    { id: 'fire', icon: '🔥', label: 'PCCC & An Ninh', desc: 'Sprinkler, nghiệm thu, camera 24/7' },
-    { id: 'wms', icon: '💻', label: 'WMS & Công Nghệ', desc: 'Phần mềm quản lý, Barcode, API' },
-    { id: 'cert', icon: '📜', label: 'Giấy Phép & Chứng Nhận', desc: 'ISO, LEED, Bảo hiểm kho bãi' },
+    ...getBaseCategories(),
+    {
+      id: 'utilities',
+      icon: '🎁',
+      label: 'Tiện Ích Đi Kèm (Miễn Phí)',
+      desc: 'Tiện ích & dịch vụ đã bao gồm 100% trong giá thuê',
+    },
   ];
 };
 
@@ -1169,6 +1213,32 @@ export interface WarehouseDetailModalData {
   freeSurcharges: string[];
   paidSurcharges: PaidSurchargeItem[];
   vasItems: CapabilityVasItem[];
+
+  // Năng lực sức chứa (Thiết kế & Hiện trạng còn trống)
+  capacityArea?: number;
+  capacityPallets?: number;
+  capacityVolume?: number;
+  availableArea?: number;
+  availablePallets?: number;
+  availableVolume?: number;
+  occupiedArea?: number;
+  occupiedPallets?: number;
+  occupiedVolume?: number;
+  receptionStatus?: 'ready' | 'nearly_full' | 'full';
+
+  // Đơn giá thuê kho cơ bản & Điều khoản thương mại
+  pricePerArea?: number;
+  pricePerPallet?: number;
+  pricePerVolume?: number;
+  pricePerTon?: number;
+  minChargeMonthly?: number;
+  currency?: 'VND' | 'USD';
+  validUntil?: string;
+  promotionPercent?: number;
+  sla?: string;
+  operatingHours?: string;
+  cutOffTime?: string;
+  paymentTerms?: string;
 }
 
 export interface CapabilityRouteItem {
@@ -1217,10 +1287,21 @@ export interface CapabilityRouteItem {
   capacityArea?: number;
   capacityPallets?: number;
   capacityVolume?: number;
+  availableArea?: number;
+  availablePallets?: number;
+  availableVolume?: number;
+  occupiedArea?: number;
+  occupiedPallets?: number;
+  occupiedVolume?: number;
+  receptionStatus?: 'ready' | 'nearly_full' | 'full';
   pricePerArea?: number;
   pricePerPallet?: number;
   pricePerVolume?: number;
+  pricePerTon?: number;
   minChargeMonthly?: number;
+  operatingHours?: string;
+  cutOffTime?: string;
+  paymentTerms?: string;
   warehousePhotos?: WarehousePhotoItem[];
   warehouseTechSpecs?: WarehouseTechSpecs;
   warehouseFreeSurcharges?: string[];
@@ -1269,18 +1350,25 @@ export interface CapabilityRouteItem {
 
 export interface PaidSurchargeItem {
   id: string;
+  code?: string;
   name: string;
+  category?: string;
   priceText: string;
+  unit?: string;
+  slaNote?: string;
   isChecked: boolean;
 }
 
 export interface CapabilityVasItem {
   id: string;
+  code?: string;
   name: string;
   desc?: string;
   category: string; // VD: 'Dịch Vụ Bốc Xếp & Đóng Gói', 'Phương Tiện & Thiết Bị Phụ Trợ', 'Giám Sát, An Ninh & Chứng Từ', 'Quy Định, Pháp Lý & Bảo Hiểm'
   tag?: string;
   priceText: string;
+  unit?: string;
+  slaNote?: string;
   isChecked: boolean;
   isPopular?: boolean;
 }
@@ -5071,10 +5159,10 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
     setScheduleModalData(null);
   };
 
-  // STATE & HANDLERS CHO MODAL CHI TIET CO SO KHO (TECH SPECS, PHOTOS, PHU PHI, VAS)
+  // STATE & HANDLERS CHO MODAL CHI TIET CO SO KHO (TECH SPECS, PHOTOS, GIA, PHU PHI, VAS)
   const [warehouseDetailModalData, setWarehouseDetailModalData] = useState<WarehouseDetailModalData | null>(null);
   const [activePhotoUploadSlot, setActivePhotoUploadSlot] = useState<{ key: string; label: string } | null>(null);
-  const [warehouseDetailActiveTab, setWarehouseDetailActiveTab] = useState<'photos' | 'techSpecs' | 'surcharges' | 'vas'>('photos');
+  const [warehouseDetailActiveTab, setWarehouseDetailActiveTab] = useState<'photos' | 'techSpecs' | 'pricing' | 'surcharges' | 'vas'>('photos');
   const [warehouseTechActiveCategory, setWarehouseTechActiveCategory] = useState<string>('structure');
   const warehousePhotoUploadRef = useRef<HTMLInputElement>(null);
 
@@ -5175,6 +5263,13 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
           { id: 'vwh-4', name: 'Bảo hiểm cháy nổ tài sản kho bãi', category: 'An Ninh & Bảo Hiểm', priceText: '0.05% giá trị hàng', isChecked: true },
         ];
 
+    const capArea = route.capacityArea ?? 2500;
+    const capPallet = route.capacityPallets ?? 1800;
+    const capVol = route.capacityVolume ?? 3000;
+    const availArea = route.availableArea ?? 850;
+    const availPallet = route.availablePallets ?? 600;
+    const availVol = route.availableVolume ?? 1100;
+
     setWarehouseDetailModalData({
       routeId: route.id,
       modelId: currentModelId,
@@ -5189,6 +5284,28 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
       freeSurcharges: existingFree,
       paidSurcharges: existingPaid,
       vasItems: existingVas,
+      capacityArea: capArea,
+      capacityPallets: capPallet,
+      capacityVolume: capVol,
+      availableArea: availArea,
+      availablePallets: availPallet,
+      availableVolume: availVol,
+      occupiedArea: route.occupiedArea ?? Math.max(0, capArea - availArea),
+      occupiedPallets: route.occupiedPallets ?? Math.max(0, capPallet - availPallet),
+      occupiedVolume: route.occupiedVolume ?? Math.max(0, capVol - availVol),
+      receptionStatus: route.receptionStatus || 'ready',
+      pricePerArea: route.pricePerArea ?? (route.price || 95000),
+      pricePerPallet: route.pricePerPallet ?? 110000,
+      pricePerVolume: route.pricePerVolume ?? 120000,
+      pricePerTon: route.pricePerTon ?? 150000,
+      minChargeMonthly: route.minChargeMonthly ?? 3000000,
+      currency: route.currency || 'VND',
+      validUntil: route.validUntil || '2026-12-31',
+      promotionPercent: route.promotionPercent ?? 0,
+      sla: route.sla || 'Xuất nhập 2 - 4h',
+      operatingHours: route.operatingHours || '24/7 (Không cấm giờ xe cont)',
+      cutOffTime: route.cutOffTime || '16:30 hàng ngày',
+      paymentTerms: route.paymentTerms || 'Net 30 ngày',
     });
     setWarehouseDetailActiveTab('photos');
     setWarehouseTechActiveCategory(initialCategories[0]?.id || 'structure');
@@ -5196,13 +5313,66 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
 
   const handleSaveWarehouseDetailModal = () => {
     if (!warehouseDetailModalData) return;
-    const { routeId, photos, techSpecs, freeSurcharges, paidSurcharges, vasItems } = warehouseDetailModalData;
+    const {
+      routeId,
+      photos,
+      techSpecs,
+      freeSurcharges,
+      paidSurcharges,
+      vasItems,
+      capacityArea,
+      capacityPallets,
+      capacityVolume,
+      availableArea,
+      availablePallets,
+      availableVolume,
+      occupiedArea,
+      occupiedPallets,
+      occupiedVolume,
+      receptionStatus,
+      pricePerArea,
+      pricePerPallet,
+      pricePerVolume,
+      pricePerTon,
+      minChargeMonthly,
+      currency,
+      validUntil,
+      promotionPercent,
+      sla,
+      operatingHours,
+      cutOffTime,
+      paymentTerms,
+    } = warehouseDetailModalData;
+
     handleUpdateRouteRowMultiple(routeId, {
       warehousePhotos: photos,
       warehouseTechSpecs: techSpecs,
       warehouseFreeSurcharges: freeSurcharges,
       warehousePaidSurcharges: paidSurcharges,
       warehouseVasItems: vasItems,
+      capacityArea: capacityArea ?? 0,
+      capacityPallets: capacityPallets ?? 0,
+      capacityVolume: capacityVolume ?? 0,
+      availableArea: availableArea ?? 0,
+      availablePallets: availablePallets ?? 0,
+      availableVolume: availableVolume ?? 0,
+      occupiedArea: occupiedArea ?? 0,
+      occupiedPallets: occupiedPallets ?? 0,
+      occupiedVolume: occupiedVolume ?? 0,
+      receptionStatus: receptionStatus || 'ready',
+      pricePerArea: pricePerArea ?? 0,
+      price: pricePerArea ?? 0,
+      pricePerPallet: pricePerPallet ?? 0,
+      pricePerVolume: pricePerVolume ?? 0,
+      pricePerTon: pricePerTon ?? 0,
+      minChargeMonthly: minChargeMonthly ?? 0,
+      currency: currency || 'VND',
+      validUntil: validUntil || '2026-12-31',
+      promotionPercent: promotionPercent ?? 0,
+      sla: sla || 'Xuất nhập 2 - 4h',
+      operatingHours: operatingHours || '24/7 (Không cấm giờ xe cont)',
+      cutOffTime: cutOffTime || '16:30 hàng ngày',
+      paymentTerms: paymentTerms || 'Net 30 ngày',
     });
     setWarehouseDetailModalData(null);
   };
@@ -6821,24 +6991,13 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
 
                               return (
                                 <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
-                                  <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
-                                  <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-slate-100">Mã Kho</th>
-                                  <th className="py-2.5 px-2.5 min-w-[180px]">Tên Kho / Trung Tâm DC</th>
-                                  <th className="py-2.5 px-2.5 min-w-[130px]">Tỉnh / Thành Phố</th>
-                                  <th className="py-2.5 px-2.5 min-w-[180px]">KCN / Địa Chỉ Chi Tiết</th>
-                                  <th className="py-2.5 px-2 text-right min-w-[110px] bg-blue-50/70 text-blue-950">Diện Tích (m²)</th>
-                                  <th className="py-2.5 px-2 text-right min-w-[115px] bg-blue-50/70 text-blue-950">Số Pallet (Vị Trí)</th>
-                                  <th className="py-2.5 px-2 text-right min-w-[110px] bg-blue-50/70 text-blue-950">Thể Tích (m³)</th>
-                                  <th className="py-2.5 px-2 text-right min-w-[135px] bg-emerald-50/70 text-emerald-950">Giá m² (/Tháng)</th>
-                                  <th className="py-2.5 px-2 text-right min-w-[135px] bg-emerald-50/70 text-emerald-950">Giá Pallet (/Tháng)</th>
-                                  <th className="py-2.5 px-2 text-right min-w-[135px] bg-emerald-50/70 text-emerald-950">Giá m³ (/Tháng)</th>
-                                  <th className="py-2.5 px-2 text-right min-w-[145px] bg-amber-50/80 text-amber-950">Cước Sàn (Min/Tháng)</th>
-                                  <th className="py-2.5 px-2 w-20 min-w-[80px] text-center">Tiền Tệ</th>
-                                  <th className="py-2.5 px-2.5 min-w-[125px] text-center">SLA Vận Hành</th>
-                                  <th className="py-2.5 px-2.5 min-w-[130px] text-center">Hạn Giá</th>
-                                  <th className="py-2.5 px-2 min-w-[85px] text-center">Promotion</th>
-                                  <th className="py-2.5 px-2.5 min-w-[170px] text-center bg-indigo-50/70 text-indigo-950">Chi Tiết (Specs, Ảnh, VAS)</th>
-                                  <th className="py-2.5 px-2 text-center w-16 min-w-[65px]">Action</th>
+                                  <th className="py-2.5 px-2 text-center w-12 min-w-[48px] bg-slate-100">STT</th>
+                                  <th className="py-2.5 px-3 min-w-[130px] text-center bg-indigo-50/70 text-indigo-950 font-black">Mã Kho</th>
+                                  <th className="py-2.5 px-3 min-w-[240px]">Tên Kho</th>
+                                  <th className="py-2.5 px-3 min-w-[160px]">Tỉnh</th>
+                                  <th className="py-2.5 px-3 min-w-[300px]">Địa Chỉ Chi Tiết</th>
+                                  <th className="py-2.5 px-3 min-w-[160px] text-center bg-indigo-50/70 text-indigo-950 font-black">Chi Tiết</th>
+                                  <th className="py-2.5 px-2 text-center w-20 min-w-[80px]">Action</th>
                                 </tr>
                               );
                             }
@@ -8777,235 +8936,87 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                 return (
                                   <tr key={route.id} className="hover:bg-indigo-50/20 transition-colors divide-x divide-slate-100 text-xs">
                                     {/* 1. STT */}
-                                    <td className="p-1 text-center font-bold text-slate-500 w-9 bg-slate-50/50">
+                                    <td className="p-2 text-center font-bold text-slate-500 w-12 bg-slate-50/50">
                                       {idx + 1}
                                     </td>
 
                                     {/* 2. Mã Kho */}
-                                    <td className="p-1 text-center font-mono font-bold text-indigo-700 bg-indigo-50/20">
+                                    <td className="p-1.5 text-center font-mono font-bold text-indigo-700 bg-indigo-50/20">
                                       <input
                                         type="text"
                                         value={effWhCode}
                                         onChange={(e) => handleUpdateRouteRowMultiple(route.id, { warehouseCode: e.target.value, routeCode: e.target.value })}
-                                        className="w-full text-center bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded px-1 py-1 font-bold text-indigo-700 text-xs"
+                                        className="w-full text-center bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded px-2 py-1.5 font-bold text-indigo-700 text-xs"
+                                        placeholder="WH-001"
                                       />
                                     </td>
 
-                                    {/* 3. Tên Kho / Trung Tâm DC */}
-                                    <td className="p-1 align-middle">
+                                    {/* 3. Tên Kho */}
+                                    <td className="p-1.5 align-middle">
                                       <input
                                         type="text"
                                         value={effWhName}
                                         onChange={(e) => handleUpdateRouteRowMultiple(route.id, { warehouseName: e.target.value, route: e.target.value })}
                                         placeholder="Tên kho / Trung tâm phân phối..."
-                                        className="w-full px-2 py-1.5 font-bold text-slate-900 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
+                                        className="w-full px-2.5 py-1.5 font-bold text-slate-900 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
                                       />
                                     </td>
 
-                                    {/* 4. Tỉnh / Thành Phố */}
-                                    <td className="p-1 align-middle">
+                                    {/* 4. Tỉnh */}
+                                    <td className="p-1.5 align-middle">
                                       <input
                                         type="text"
                                         value={effProvince}
                                         onChange={(e) => handleUpdateRouteRowMultiple(route.id, { warehouseProvince: e.target.value, origin: e.target.value })}
                                         placeholder="Bình Dương, Bắc Ninh..."
-                                        className="w-full px-2 py-1.5 font-semibold text-slate-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
+                                        className="w-full px-2.5 py-1.5 font-semibold text-slate-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
                                       />
                                     </td>
 
-                                    {/* 5. KCN / Địa Chỉ Chi Tiết */}
-                                    <td className="p-1 align-middle">
+                                    {/* 5. Địa Chỉ Chi Tiết */}
+                                    <td className="p-1.5 align-middle">
                                       <input
                                         type="text"
                                         value={effAddress}
                                         onChange={(e) => handleUpdateRouteRowMultiple(route.id, { warehouseAddress: e.target.value, destination: e.target.value })}
                                         placeholder="KCN, Phường/Xã, Quận/Huyện..."
-                                        className="w-full px-2 py-1.5 text-slate-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
+                                        className="w-full px-2.5 py-1.5 text-slate-700 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
                                       />
                                     </td>
 
-                                    {/* 6. Diện Tích (m²) */}
-                                    <td className="p-1 align-middle text-right bg-blue-50/20">
-                                      <input
-                                        type="number"
-                                        value={effCapArea || ''}
-                                        onChange={(e) => handleUpdateRouteRow(route.id, 'capacityArea', parseFloat(e.target.value) || 0)}
-                                        placeholder="2500"
-                                        className="w-full px-2 py-1.5 text-right font-semibold text-slate-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
-                                      />
-                                    </td>
-
-                                    {/* 7. Số Pallet (Vị Trí) */}
-                                    <td className="p-1 align-middle text-right bg-blue-50/20">
-                                      <input
-                                        type="number"
-                                        value={effCapPallet || ''}
-                                        onChange={(e) => handleUpdateRouteRow(route.id, 'capacityPallets', parseFloat(e.target.value) || 0)}
-                                        placeholder="1800"
-                                        className="w-full px-2 py-1.5 text-right font-semibold text-slate-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
-                                      />
-                                    </td>
-
-                                    {/* 8. Thể Tích (m³) */}
-                                    <td className="p-1 align-middle text-right bg-blue-50/20">
-                                      <input
-                                        type="number"
-                                        value={effCapVolume || ''}
-                                        onChange={(e) => handleUpdateRouteRow(route.id, 'capacityVolume', parseFloat(e.target.value) || 0)}
-                                        placeholder="3000"
-                                        className="w-full px-2 py-1.5 text-right font-semibold text-slate-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
-                                      />
-                                    </td>
-
-                                    {/* 9. Giá m² (/Tháng) */}
-                                    <td className="p-1 align-middle text-right bg-emerald-50/20">
-                                      <input
-                                        type="number"
-                                        value={effPriceArea || ''}
-                                        onChange={(e) => {
-                                          const v = parseFloat(e.target.value) || 0;
-                                          handleUpdateRouteRowMultiple(route.id, { pricePerArea: v, price: v });
-                                        }}
-                                        placeholder="95000"
-                                        className="w-full px-2 py-1.5 text-right font-bold text-emerald-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
-                                      />
-                                    
-                                      {(route.promotionPercent || 0) > 0 && effPriceArea > 0 && (
-    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
-      Giảm còn: {Math.round(effPriceArea * (1 - (route.promotionPercent || 0) / 100)).toLocaleString('vi-VN')} {route.currency || 'VND'}
-    </div>
-  )}
-                                    </td>
-
-                                    {/* 10. Giá Pallet (/Tháng) */}
-                                    <td className="p-1 align-middle text-right bg-emerald-50/20">
-                                      <input
-                                        type="number"
-                                        value={effPricePallet || ''}
-                                        onChange={(e) => handleUpdateRouteRow(route.id, 'pricePerPallet', parseFloat(e.target.value) || 0)}
-                                        placeholder="110000"
-                                        className="w-full px-2 py-1.5 text-right font-bold text-emerald-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
-                                      />
-                                    
-                                      {(route.promotionPercent || 0) > 0 && effPricePallet > 0 && (
-    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
-      Giảm còn: {Math.round(effPricePallet * (1 - (route.promotionPercent || 0) / 100)).toLocaleString('vi-VN')} {route.currency || 'VND'}
-    </div>
-  )}
-                                    </td>
-
-                                    {/* 11. Giá m³ (/Tháng) */}
-                                    <td className="p-1 align-middle text-right bg-emerald-50/20">
-                                      <input
-                                        type="number"
-                                        value={effPriceVolume || ''}
-                                        onChange={(e) => handleUpdateRouteRow(route.id, 'pricePerVolume', parseFloat(e.target.value) || 0)}
-                                        placeholder="120000"
-                                        className="w-full px-2 py-1.5 text-right font-bold text-emerald-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
-                                      />
-                                    
-                                      {(route.promotionPercent || 0) > 0 && effPriceVolume > 0 && (
-    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
-      Giảm còn: {Math.round(effPriceVolume * (1 - (route.promotionPercent || 0) / 100)).toLocaleString('vi-VN')} {route.currency || 'VND'}
-    </div>
-  )}
-                                    </td>
-
-                                    {/* 12. Cước Sàn (Min Charge / Tháng) */}
-                                    <td className="p-1 align-middle text-right bg-amber-50/30">
-                                      <input
-                                        type="number"
-                                        value={effMinCharge || ''}
-                                        onChange={(e) => handleUpdateRouteRow(route.id, 'minChargeMonthly', parseFloat(e.target.value) || 0)}
-                                        placeholder="3000000"
-                                        className="w-full px-2 py-1.5 text-right font-bold text-amber-900 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
-                                      />
-                                    
-                                      {(route.promotionPercent || 0) > 0 && effMinCharge > 0 && (
-    <div className="text-[9.5px] text-emerald-600 font-bold text-right px-1 mt-0.5">
-      Giảm còn: {Math.round(effMinCharge * (1 - (route.promotionPercent || 0) / 100)).toLocaleString('vi-VN')} {route.currency || 'VND'}
-    </div>
-  )}
-                                    </td>
-
-                                    {/* 13. Tiền Tệ */}
-                                    <td className="p-0 text-center bg-slate-50/30 align-middle">
-                                      <select
-                                        value={route.currency || 'VND'}
-                                        onChange={(e) => handleUpdateRouteRow(route.id, 'currency', e.target.value as 'VND' | 'USD')}
-                                        className="w-full px-1.5 py-2 bg-transparent text-slate-800 text-xs font-bold text-center focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
-                                      >
-                                        <option value="VND">VND (₫)</option>
-                                        <option value="USD">USD ($)</option>
-                                      </select>
-                                    </td>
-
-                                    {/* 14. SLA Vận Hành */}
-                                    <td className="p-1 align-middle">
-                                      <input
-                                        type="text"
-                                        value={route.sla || 'Xuất nhập 2 - 4h'}
-                                        onChange={(e) => handleUpdateRouteRow(route.id, 'sla', e.target.value)}
-                                        placeholder="2 - 4h, 24/7..."
-                                        className="w-full px-2 py-1.5 text-center text-slate-800 font-medium bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 rounded text-xs"
-                                      />
-                                    </td>
-
-                                    {/* 15. Hạn Giá */}
-                                    <td className="p-0 text-center align-middle">
-                                      <input
-                                        type="date"
-                                        value={route.validUntil || '2026-12-31'}
-                                        onChange={(e) => handleUpdateRouteRow(route.id, 'validUntil', e.target.value)}
-                                        className="w-full px-2 py-2 bg-transparent text-slate-700 text-xs font-medium text-center focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all cursor-pointer"
-                                      />
-                                    </td>
-
-                                    {/* 16. Promotion (%) */}
-                                    <td className="p-0 text-center align-middle">
-                                      <div className="flex items-center justify-center gap-0.5 px-1">
-                                        <input
-                                          type="number"
-                                          min={0}
-                                          max={100}
-                                          value={route.promotionPercent || 0}
-                                          onChange={(e) => handleUpdateRouteRow(route.id, 'promotionPercent', Math.min(100, Math.max(0, parseInt(e.target.value) || 0)))}
-                                          className={`w-10 py-1 text-center text-xs font-bold rounded focus:outline-none focus:ring-1 focus:ring-indigo-500 ${(route.promotionPercent || 0) > 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-transparent text-slate-400'}`}
-                                        />
-                                        <span className="text-[11px] text-slate-400 font-bold">%</span>
-                                      </div>
-                                    </td>
-
-                                    {/* 17. Chi Tiết (Specs, Ảnh, Phụ Phí, VAS) */}
-                                    <td className="p-1 text-center align-middle bg-indigo-50/20">
+                                    {/* 6. Chi Tiết */}
+                                    <td className="p-1.5 text-center align-middle bg-indigo-50/20">
                                       {(() => {
                                         const photoCount = route.warehousePhotos?.length ?? 3;
                                         const vasCount = (route.warehouseVasItems || []).filter(v => v.isChecked).length || 2;
                                         const paidCount = (route.warehousePaidSurcharges || []).filter(p => p.isChecked).length || 3;
+                                        const capArea = route.capacityArea ?? 2500;
+                                        const availArea = route.availableArea ?? 850;
                                         return (
                                           <button
                                             type="button"
                                             onClick={() => handleOpenWarehouseDetailModal(route)}
-                                            className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold text-indigo-700 bg-indigo-100/90 hover:bg-indigo-200 border border-indigo-300/80 rounded-xl transition-all cursor-pointer shadow-2xs group"
-                                            title="Bấm để cấu hình Specs kỹ thuật, Upload ảnh thực tế, Phụ phí và Dịch vụ VAS cho kho này"
+                                            className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-indigo-700 bg-indigo-100 hover:bg-indigo-200 border border-indigo-300 rounded-xl transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
+                                            title="Bấm để cấu hình Album ảnh, Thông số kỹ thuật/Vận hành và Biểu giá, Phụ phí & VAS"
                                           >
-                                            <span className="text-[11px]">🏢 Chi Tiết</span>
-                                            <span className="text-[9.5px] px-1 py-0.2 bg-white rounded text-indigo-900 border border-indigo-200 font-medium">
-                                              {photoCount} ảnh • {paidCount + vasCount} phí
+                                            <Sliders className="w-3.5 h-3.5 text-indigo-700 group-hover:scale-110 transition-transform" />
+                                            <span>Chi Tiết</span>
+                                            <span className="text-[10px] px-1.5 py-0.5 bg-white/90 rounded-md text-indigo-900 border border-indigo-200 font-semibold">
+                                              {availArea}/{capArea} m² • {paidCount + vasCount} phí
                                             </span>
-                                            <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                                            <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform text-indigo-500" />
                                           </button>
                                         );
                                       })()}
                                     </td>
 
-                                    {/* 18. Action */}
-                                    <td className="p-1 text-center align-middle w-16">
-                                      <div className="flex items-center justify-center gap-1">
+                                    {/* 7. Action */}
+                                    <td className="p-1.5 text-center align-middle w-20">
+                                      <div className="flex items-center justify-center gap-1.5">
                                         <button
                                           type="button"
                                           onClick={() => handleDuplicateRouteRow(route.id)}
-                                          className="p-1 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-all cursor-pointer"
+                                          className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all cursor-pointer"
                                           title="Nhân bản cơ sở kho này"
                                         >
                                           <Copy className="w-3.5 h-3.5" />
@@ -9013,7 +9024,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                         <button
                                           type="button"
                                           onClick={() => handleDeleteRouteRow(route.id)}
-                                          className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-all cursor-pointer"
+                                          className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all cursor-pointer"
                                           title="Xóa cơ sở kho này"
                                         >
                                           <Trash2 className="w-3.5 h-3.5" />
@@ -12444,7 +12455,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
       ========================================================================= */}
       {warehouseDetailModalData && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-5xl h-[85vh] min-h-[600px] max-h-[820px] flex flex-col overflow-hidden animate-in zoom-in-95 duration-150">
+          <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-6xl xl:max-w-7xl h-[92vh] min-h-[660px] max-h-[920px] flex flex-col overflow-hidden animate-in zoom-in-95 duration-150">
             {/* 1. Modal Header */}
             <div className="px-6 py-4 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex items-center justify-between border-b border-slate-800 shrink-0">
               <div className="flex items-center gap-3.5">
@@ -12483,20 +12494,21 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
               </button>
             </div>
 
-            {/* 2. Top Tab Bar */}
+            {/* 2. Top Tab Bar - 3 Tabs */}
             <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50/90 px-6 py-2.5 shrink-0">
               <div className="flex items-center gap-2 overflow-x-auto">
+                {/* Tab 1: Album ảnh thực tế */}
                 <button
                   type="button"
                   onClick={() => setWarehouseDetailActiveTab('photos')}
-                  className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                     warehouseDetailActiveTab === 'photos'
                       ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
                       : 'text-slate-600 hover:bg-slate-200/70'
                   }`}
                 >
                   <Camera className="w-4 h-4" />
-                  <span>📸 Album Ảnh Thực Tế</span>
+                  <span>1. Album Ảnh Thực Tế</span>
                   <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
                     warehouseDetailActiveTab === 'photos' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
                   }`}>
@@ -12504,17 +12516,18 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                   </span>
                 </button>
 
+                {/* Tab 2: Thông số kỹ thuật, vận hành, tiện ích */}
                 <button
                   type="button"
                   onClick={() => setWarehouseDetailActiveTab('techSpecs')}
-                  className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                     warehouseDetailActiveTab === 'techSpecs'
                       ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
                       : 'text-slate-600 hover:bg-slate-200/70'
                   }`}
                 >
                   <Sliders className="w-4 h-4" />
-                  <span>🏗️ Thông Số Kỹ Thuật (Specs)</span>
+                  <span>2. Thông Số Kỹ Thuật, Vận Hành, Tiện Ích</span>
                   <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
                     warehouseDetailActiveTab === 'techSpecs' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
                   }`}>
@@ -12522,39 +12535,22 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                   </span>
                 </button>
 
+                {/* Tab 3: Giá, phụ phí và vas */}
                 <button
                   type="button"
-                  onClick={() => setWarehouseDetailActiveTab('surcharges')}
-                  className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                    warehouseDetailActiveTab === 'surcharges'
-                      ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
+                  onClick={() => setWarehouseDetailActiveTab('pricing')}
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    warehouseDetailActiveTab === 'pricing'
+                      ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/20'
                       : 'text-slate-600 hover:bg-slate-200/70'
                   }`}
                 >
                   <DollarSign className="w-4 h-4" />
-                  <span>🏷️ Phụ Phí Handling & Lưu Kho</span>
+                  <span>3. Giá, Phụ Phí và VAS</span>
                   <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                    warehouseDetailActiveTab === 'surcharges' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
+                    warehouseDetailActiveTab === 'pricing' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-800'
                   }`}>
-                    {warehouseDetailModalData.paidSurcharges.filter(s => s.isChecked).length} phí
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setWarehouseDetailActiveTab('vas')}
-                  className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                    warehouseDetailActiveTab === 'vas'
-                      ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20'
-                      : 'text-slate-600 hover:bg-slate-200/70'
-                  }`}
-                >
-                  <Sparkles className="w-4 h-4" />
-                  <span>✨ Dịch Vụ Gia Tăng (VAS)</span>
-                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                    warehouseDetailActiveTab === 'vas' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
-                  }`}>
-                    {warehouseDetailModalData.vasItems.filter(v => v.isChecked).length} VAS
+                    {warehouseDetailModalData.paidSurcharges.filter(s => s.isChecked).length + warehouseDetailModalData.vasItems.filter(v => v.isChecked).length} mục
                   </span>
                 </button>
               </div>
@@ -14253,315 +14249,168 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                           </label>
                         </div>
                       )}
+
+                      {/* NHÓM TIỆN ÍCH MIỄN PHÍ ĐÃ DI CHUYỂN TỪ TAB 3 SANG TAB 2 */}
+                      {activeCatId === 'utilities' && (
+                        <div className="space-y-5 max-w-3xl animate-in fade-in duration-200">
+                          <div className="border-b border-slate-200 pb-3.5 flex flex-wrap items-center justify-between gap-2">
+                            <div>
+                              <h4 className="font-black text-slate-900 text-base flex items-center gap-2">
+                                <span>🎁</span> Tiện Ích & Dịch Vụ Miễn Phí (Bao Gồm Trong Giá Thuê)
+                              </h4>
+                              <p className="text-xs text-slate-500 mt-1">
+                                Các dịch vụ phụ trợ, hạ tầng cơ sở và tiện ích được cung cấp miễn phí 100% cho khách hàng thuê kho.
+                              </p>
+                            </div>
+                            <span className="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-300 px-3 py-1 rounded-full shadow-2xs">
+                              {warehouseDetailModalData.freeSurcharges.length} Tiện ích đã kích hoạt
+                            </span>
+                          </div>
+
+                          {/* DANH SÁCH TIỆN ÍCH ĐANG ÁP DỤNG */}
+                          <div className="bg-emerald-50/50 border border-emerald-200 rounded-2xl p-4 shadow-2xs">
+                            <h5 className="text-xs font-black text-emerald-950 uppercase tracking-wide mb-3 flex items-center gap-1.5">
+                              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                              <span>Đang Cung Cấp Miễn Phí ({warehouseDetailModalData.freeSurcharges.length}):</span>
+                            </h5>
+                            {warehouseDetailModalData.freeSurcharges.length === 0 ? (
+                              <p className="text-xs text-slate-500 italic py-2">
+                                Chưa có tiện ích miễn phí nào được chọn. Hãy tick chọn các tiện ích đề xuất bên dưới hoặc tự thêm mới.
+                              </p>
+                            ) : (
+                              <div className="flex flex-wrap gap-2.5">
+                                {warehouseDetailModalData.freeSurcharges.map((fName, idx) => (
+                                  <span
+                                    key={idx}
+                                    className="inline-flex items-center gap-2 bg-white text-emerald-950 px-3.5 py-1.5 rounded-xl text-xs font-bold border border-emerald-200 shadow-2xs group hover:border-emerald-300 transition-colors"
+                                  >
+                                    <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                                    <span>{fName}</span>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setWarehouseDetailModalData(prev => prev ? ({
+                                          ...prev,
+                                          freeSurcharges: prev.freeSurcharges.filter(f => f !== fName)
+                                        }) : prev);
+                                      }}
+                                      className="text-slate-400 hover:text-rose-600 p-0.5 rounded cursor-pointer transition-colors ml-0.5"
+                                      title="Xóa tiện ích này"
+                                    >
+                                      <X className="w-3.5 h-3.5" />
+                                    </button>
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* BẢNG CHỌN TIỆN ÍCH TIÊU CHUẨN 3PL */}
+                          <div>
+                            <div className="flex items-center justify-between mb-2.5">
+                              <h5 className="text-xs font-black text-slate-800 uppercase tracking-wider">
+                                Tiện Ích Tiêu Chuẩn 3PL Phổ Biến (Tick để bật / tắt):
+                              </h5>
+                              <span className="text-[11px] text-slate-500">Bấm trực tiếp vào từng ô để kích hoạt nhanh</span>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              {WAREHOUSE_FREE_UTILITIES_SUGGESTIONS.map((utilName) => {
+                                const isChecked = warehouseDetailModalData.freeSurcharges.includes(utilName);
+                                return (
+                                  <label
+                                    key={utilName}
+                                    className={`flex items-start gap-3 p-3.5 rounded-xl border transition-all cursor-pointer select-none ${
+                                      isChecked
+                                        ? 'bg-emerald-50/80 border-emerald-400 text-emerald-950 shadow-xs font-bold'
+                                        : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-700 hover:border-slate-300'
+                                    }`}
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={isChecked}
+                                      onChange={(e) => {
+                                        if (e.target.checked) {
+                                          setWarehouseDetailModalData(prev => prev ? ({
+                                            ...prev,
+                                            freeSurcharges: [...prev.freeSurcharges, utilName]
+                                          }) : prev);
+                                        } else {
+                                          setWarehouseDetailModalData(prev => prev ? ({
+                                            ...prev,
+                                            freeSurcharges: prev.freeSurcharges.filter(f => f !== utilName)
+                                          }) : prev);
+                                        }
+                                      }}
+                                      className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 mt-0.5 accent-emerald-600"
+                                    />
+                                    <span className="text-xs leading-relaxed">{utilName}</span>
+                                  </label>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          {/* THÊM TIỆN ÍCH TÙY CHỈNH */}
+                          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                            <h5 className="text-xs font-bold text-slate-800 mb-2.5">
+                              Thêm Tiện Ích / Dịch Vụ Tùy Chỉnh Khác:
+                            </h5>
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                id="warehouse-custom-utility-input"
+                                placeholder="VD: Miễn phí pallet gỗ tiêu chuẩn, Trà cà phê tiếp khách, Khu vực locker cá nhân..."
+                                className="flex-1 px-3.5 py-2 text-xs bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs"
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    const val = (e.currentTarget.value || '').trim();
+                                    if (val && !warehouseDetailModalData.freeSurcharges.includes(val)) {
+                                      setWarehouseDetailModalData(prev => prev ? ({
+                                        ...prev,
+                                        freeSurcharges: [...prev.freeSurcharges, val]
+                                      }) : prev);
+                                      e.currentTarget.value = '';
+                                    }
+                                  }
+                                }}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const input = document.getElementById('warehouse-custom-utility-input') as HTMLInputElement;
+                                  if (input && input.value.trim()) {
+                                    const val = input.value.trim();
+                                    if (!warehouseDetailModalData.freeSurcharges.includes(val)) {
+                                      setWarehouseDetailModalData(prev => prev ? ({
+                                        ...prev,
+                                        freeSurcharges: [...prev.freeSurcharges, val]
+                                      }) : prev);
+                                      input.value = '';
+                                    }
+                                  }
+                                }}
+                                className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs shrink-0"
+                              >
+                                + Thêm Tiện Ích
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
               })()}
 
-              {/* TAB 3: PHỤ PHÍ HANDLING & LƯU KHO */}
-              {warehouseDetailActiveTab === 'surcharges' && (
-                <div className="flex-1 min-h-0 p-6 overflow-y-auto space-y-6">
-                  {/* Phụ phí miễn phí */}
-                  <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-bold text-slate-900 text-xs flex items-center gap-1.5 text-emerald-700">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                          Dịch Vụ & Tiện Ích Đã Bao Gồm Trong Giá Lưu Kho (Miễn Phí)
-                        </h4>
-                        <p className="text-[11px] text-slate-500 mt-0.5">
-                          Các tiện ích nhà cung cấp cam kết miễn phí 100% kèm theo hợp đồng thuê.
-                        </p>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const name = prompt('Nhập tên tiện ích miễn phí kèm theo:');
-                          if (name && name.trim()) {
-                            setWarehouseDetailModalData(prev => prev ? ({
-                              ...prev,
-                              freeSurcharges: [...prev.freeSurcharges, name.trim()]
-                            }) : prev);
-                          }
-                        }}
-                        className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded-xl border border-emerald-200 transition-colors cursor-pointer inline-flex items-center gap-1"
-                      >
-                        <Plus className="w-3.5 h-3.5" />
-                        <span>Thêm Tiện Ích</span>
-                      </button>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2 pt-1">
-                      {warehouseDetailModalData.freeSurcharges.map((freeItem, fIdx) => (
-                        <span
-                          key={fIdx}
-                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold group"
-                        >
-                          <Check className="w-3 h-3 text-emerald-600" />
-                          <span>{freeItem}</span>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setWarehouseDetailModalData(prev => prev ? ({
-                                ...prev,
-                                freeSurcharges: prev.freeSurcharges.filter((_, idx) => idx !== fIdx)
-                              }) : prev);
-                            }}
-                            className="text-emerald-500 hover:text-rose-600 ml-1 cursor-pointer"
-                          >
-                            <X className="w-3 h-3" />
-                          </button>
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Bảng phụ phí có tính phí (Handling Inbound / Outbound / Cont) */}
-                  <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-bold text-slate-900 text-xs flex items-center gap-1.5 text-indigo-900">
-                          <DollarSign className="w-4 h-4 text-indigo-600" />
-                          Biểu Phí Xử Lý Hàng Hóa & Phụ Phí Vận Hành (Handling Surcharges)
-                        </h4>
-                        <p className="text-[11px] text-slate-500 mt-0.5">
-                          Khai báo phí bốc xếp dỡ hàng nhập kho (Inbound), xuất kho (Outbound), rút ruột container và các phí phát sinh riêng cho kho này.
-                        </p>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const name = prompt('Nhập tên phụ phí mới:');
-                          if (name && name.trim()) {
-                            const price = prompt('Nhập đơn giá & đơn vị tính (VD: 40,000 ₫ / Pallet):', '35,000 ₫ / Pallet');
-                            setWarehouseDetailModalData(prev => prev ? ({
-                              ...prev,
-                              paidSurcharges: [
-                                ...prev.paidSurcharges,
-                                {
-                                  id: `pwh-cst-${Date.now()}`,
-                                  name: name.trim(),
-                                  priceText: price || 'Liên hệ',
-                                  isChecked: true
-                                }
-                              ]
-                            }) : prev);
-                          }
-                        }}
-                        className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs rounded-xl border border-indigo-200 transition-colors cursor-pointer inline-flex items-center gap-1"
-                      >
-                        <Plus className="w-3.5 h-3.5" />
-                        <span>Thêm Phụ Phí</span>
-                      </button>
-                    </div>
-
-                    <div className="border border-slate-200 rounded-xl overflow-hidden">
-                      <table className="w-full text-left text-xs border-collapse">
-                        <thead>
-                          <tr className="bg-slate-100/80 text-slate-700 font-bold border-b border-slate-200">
-                            <th className="py-2.5 px-3 w-10 text-center">Áp Dụng</th>
-                            <th className="py-2.5 px-3">Tên Phụ Phí / Hạng Mục Xử Lý</th>
-                            <th className="py-2.5 px-3 w-64">Đơn Giá Áp Dụng (Kèm Đơn Vị Tính)</th>
-                            <th className="py-2.5 px-2 w-16 text-center">Xóa</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                          {warehouseDetailModalData.paidSurcharges.map((pItem) => (
-                            <tr key={pItem.id} className={`hover:bg-slate-50/80 transition-colors ${pItem.isChecked ? 'bg-white' : 'bg-slate-50/50 opacity-60'}`}>
-                              <td className="py-2.5 px-3 text-center align-middle">
-                                <input
-                                  type="checkbox"
-                                  checked={pItem.isChecked}
-                                  onChange={(e) => {
-                                    const checked = e.target.checked;
-                                    setWarehouseDetailModalData(prev => prev ? ({
-                                      ...prev,
-                                      paidSurcharges: prev.paidSurcharges.map(p => p.id === pItem.id ? { ...p, isChecked: checked } : p)
-                                    }) : prev);
-                                  }}
-                                  className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                                />
-                              </td>
-                              <td className="py-2.5 px-3 font-semibold text-slate-800 align-middle">
-                                <input
-                                  type="text"
-                                  value={pItem.name}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    setWarehouseDetailModalData(prev => prev ? ({
-                                      ...prev,
-                                      paidSurcharges: prev.paidSurcharges.map(p => p.id === pItem.id ? { ...p, name: val } : p)
-                                    }) : prev);
-                                  }}
-                                  className="w-full bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-500 focus:outline-none px-1 py-0.5 text-xs font-semibold text-slate-800"
-                                />
-                              </td>
-                              <td className="py-2.5 px-3 align-middle">
-                                <input
-                                  type="text"
-                                  value={pItem.priceText}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    setWarehouseDetailModalData(prev => prev ? ({
-                                      ...prev,
-                                      paidSurcharges: prev.paidSurcharges.map(p => p.id === pItem.id ? { ...p, priceText: val } : p)
-                                    }) : prev);
-                                  }}
-                                  placeholder="VD: 35,000 ₫ / Pallet"
-                                  className="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-indigo-700 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                />
-                              </td>
-                              <td className="py-2.5 px-2 text-center align-middle">
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setWarehouseDetailModalData(prev => prev ? ({
-                                      ...prev,
-                                      paidSurcharges: prev.paidSurcharges.filter(p => p.id !== pItem.id)
-                                    }) : prev);
-                                  }}
-                                  className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* TAB 4: DỊCH VỤ GIA TĂNG (VAS) */}
-              {warehouseDetailActiveTab === 'vas' && (
-                <div className="flex-1 min-h-0 p-6 overflow-y-auto space-y-4">
-                  <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-bold text-slate-900 text-xs flex items-center gap-1.5 text-indigo-900">
-                          <Sparkles className="w-4 h-4 text-indigo-600" />
-                          Dịch Vụ Giá Trị Gia Tăng Tại Kho (Value-Added Services - VAS)
-                        </h4>
-                        <p className="text-[11px] text-slate-500 mt-0.5">
-                          Tùy biến các dịch vụ dán tem nhãn, quấn màng co PE, đóng thùng kitting quà tặng theo từng cơ sở kho.
-                        </p>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const name = prompt('Nhập tên dịch vụ VAS mới:');
-                          if (name && name.trim()) {
-                            const price = prompt('Nhập đơn giá & đơn vị tính (VD: 500 ₫ / Tem):', '1,000 ₫ / Kiện');
-                            setWarehouseDetailModalData(prev => prev ? ({
-                              ...prev,
-                              vasItems: [
-                                ...prev.vasItems,
-                                {
-                                  id: `vwh-cst-${Date.now()}`,
-                                  name: name.trim(),
-                                  category: 'Đóng Gói & Xử Lý',
-                                  priceText: price || 'Liên hệ',
-                                  isChecked: true
-                                }
-                              ]
-                            }) : prev);
-                          }
-                        }}
-                        className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs rounded-xl border border-indigo-200 transition-colors cursor-pointer inline-flex items-center gap-1"
-                      >
-                        <Plus className="w-3.5 h-3.5" />
-                        <span>Thêm Dịch Vụ VAS</span>
-                      </button>
-                    </div>
-
-                    <div className="border border-slate-200 rounded-xl overflow-hidden">
-                      <table className="w-full text-left text-xs border-collapse">
-                        <thead>
-                          <tr className="bg-slate-100/80 text-slate-700 font-bold border-b border-slate-200">
-                            <th className="py-2.5 px-3 w-10 text-center">Cung Cấp</th>
-                            <th className="py-2.5 px-3">Tên Dịch Vụ VAS</th>
-                            <th className="py-2.5 px-3 w-40">Nhóm Phân Loại</th>
-                            <th className="py-2.5 px-3 w-60">Đơn Giá Dịch Vụ (Kèm Đơn Vị Tính)</th>
-                            <th className="py-2.5 px-2 w-16 text-center">Xóa</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                          {warehouseDetailModalData.vasItems.map((vas) => (
-                            <tr key={vas.id} className={`hover:bg-slate-50/80 transition-colors ${vas.isChecked ? 'bg-white' : 'bg-slate-50/50 opacity-60'}`}>
-                              <td className="py-2.5 px-3 text-center align-middle">
-                                <input
-                                  type="checkbox"
-                                  checked={vas.isChecked}
-                                  onChange={(e) => {
-                                    const checked = e.target.checked;
-                                    setWarehouseDetailModalData(prev => prev ? ({
-                                      ...prev,
-                                      vasItems: prev.vasItems.map(v => v.id === vas.id ? { ...v, isChecked: checked } : v)
-                                    }) : prev);
-                                  }}
-                                  className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                                />
-                              </td>
-                              <td className="py-2.5 px-3 font-semibold text-slate-800 align-middle">
-                                <input
-                                  type="text"
-                                  value={vas.name}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    setWarehouseDetailModalData(prev => prev ? ({
-                                      ...prev,
-                                      vasItems: prev.vasItems.map(v => v.id === vas.id ? { ...v, name: val } : v)
-                                    }) : prev);
-                                  }}
-                                  className="w-full bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-500 focus:outline-none px-1 py-0.5 text-xs font-semibold text-slate-800"
-                                />
-                              </td>
-                              <td className="py-2.5 px-3 align-middle text-slate-500 font-medium">
-                                <span className="px-2 py-0.5 bg-slate-100 rounded-md border border-slate-200 text-[11px]">
-                                  {vas.category || 'Dịch Vụ Kho'}
-                                </span>
-                              </td>
-                              <td className="py-2.5 px-3 align-middle">
-                                <input
-                                  type="text"
-                                  value={vas.priceText}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    setWarehouseDetailModalData(prev => prev ? ({
-                                      ...prev,
-                                      vasItems: prev.vasItems.map(v => v.id === vas.id ? { ...v, priceText: val } : v)
-                                    }) : prev);
-                                  }}
-                                  placeholder="VD: 35,000 ₫ / Pallet"
-                                  className="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-indigo-700 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                />
-                              </td>
-                              <td className="py-2.5 px-2 text-center align-middle">
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setWarehouseDetailModalData(prev => prev ? ({
-                                      ...prev,
-                                      vasItems: prev.vasItems.filter(v => v.id !== vas.id)
-                                    }) : prev);
-                                  }}
-                                  className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
+              {/* TAB 3: GIÁ, PHỤ PHÍ VÀ VAS (UNIFIED CONTINUOUS TABLE LIKE ROAD FREIGHT) */}
+              {warehouseDetailActiveTab === 'pricing' && (
+                <WarehousePricingContinuousTable
+                  data={warehouseDetailModalData}
+                  setData={setWarehouseDetailModalData}
+                  surchargesLov={WAREHOUSE_SUGGESTED_SURCHARGES}
+                  vasLov={WAREHOUSE_SUGGESTED_VAS}
+                />
               )}
             </div>
 
