@@ -12,12 +12,10 @@ import {
   Send, 
   MapPin, 
   Zap, 
-  Sparkles, 
   Building2,
   Package,
   Layers,
   Receipt,
-  PhoneCall,
   X,
   Thermometer,
   Eye,
@@ -424,6 +422,54 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
     });
   };
 
+  // Local state for item/route view counts
+  const [itemViewsMap, setItemViewsMap] = useState<Record<string, number>>(() => {
+    try {
+      const saved = localStorage.getItem('supplier_profile_route_views_map');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return {};
+  });
+
+  const getRouteViewCount = (route: CapabilityRouteItem, idx: number) => {
+    const routeKey = route.id || route.routeCode || route.warehouseCode || (route as any).portCode || (route as any).xdockCode || `${selectedModelId}-${idx}`;
+    if (itemViewsMap[routeKey] !== undefined) {
+      return itemViewsMap[routeKey];
+    }
+    // Seed deterministic view count based on model and route attributes
+    const seedString = `${selectedModelId}-${routeKey}-${idx}`;
+    let hash = 0;
+    for (let i = 0; i < seedString.length; i++) {
+      hash = (hash << 5) - hash + seedString.charCodeAt(i);
+      hash |= 0;
+    }
+    const baseViews = 320 + Math.abs(hash % 1250);
+    return baseViews;
+  };
+
+  const handleIncrementRouteViews = (route: CapabilityRouteItem, idx: number) => {
+    const routeKey = route.id || route.routeCode || route.warehouseCode || (route as any).portCode || (route as any).xdockCode || `${selectedModelId}-${idx}`;
+    const currentCount = getRouteViewCount(route, idx);
+    const updated = {
+      ...itemViewsMap,
+      [routeKey]: currentCount + 1,
+    };
+    setItemViewsMap(updated);
+    try {
+      localStorage.setItem('supplier_profile_route_views_map', JSON.stringify(updated));
+    } catch (e) {}
+  };
+
+  const handleOpenWarehouseModalWithView = (route: CapabilityRouteItem, idx: number) => {
+    handleIncrementRouteViews(route, idx);
+    handleOpenWarehouseModal(route);
+  };
+
+  const handleOpenMatrixModalWithView = (route: CapabilityRouteItem, idx: number) => {
+    handleIncrementRouteViews(route, idx);
+    setActiveMatrixModalRoute(route);
+  };
+
   // Helper category identification flags matching SupplierServiceCapabilityModal.tsx
   const isWarehousingTable = category.id === 'warehousing';
   const isCustomsTable = category.id === 'customs' || category.serviceType === 'Customs Clearance';
@@ -560,27 +606,6 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                 );
               })}
             </div>
-
-            {/* Support hotline assistance */}
-            <div className="rounded-2xl bg-indigo-50/60 border border-indigo-100 p-3 text-xs space-y-1.5 mt-4">
-              <div className="flex items-center gap-1.5 text-indigo-900 font-bold text-[11px]">
-                <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-                <span>Tư Vấn Thiết Kế Giải Pháp</span>
-              </div>
-              <p className="text-[11px] text-slate-600 leading-relaxed">
-                Quý khách có nhu cầu thuê kho diện tích lớn hoặc vận tải dự án đặc thù ngoài biểu giá niêm yết?
-              </p>
-              {onOpenConsult && (
-                <button
-                  type="button"
-                  onClick={onOpenConsult}
-                  className="w-full mt-1 py-1.5 px-2 bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-bold rounded-lg transition-colors flex items-center justify-center gap-1 cursor-pointer"
-                >
-                  <PhoneCall className="w-3 h-3" />
-                  <span>Liên Hệ Chuyên Viên Ngay</span>
-                </button>
-              )}
-            </div>
           </div>
 
           {/* =====================================================================
@@ -588,8 +613,8 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
           ===================================================================== */}
           <div className="md:col-span-8 lg:col-span-9 p-5 sm:p-7 overflow-y-auto space-y-6 bg-white">
             
-            {/* Header: Service Title & Badges */}
-            <div className="pb-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            {/* Header: Service Title */}
+            <div className="pb-4 border-b border-slate-100">
               <div>
                 <div className="flex items-center gap-2 text-xs font-semibold text-indigo-600 mb-1">
                   <span>{category.name.split(' (')[0]}</span>
@@ -598,28 +623,10 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                   <span>/</span>
                   <span className="font-bold text-slate-900">{model.code || model.name}</span>
                 </div>
-                <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight flex items-center gap-2 flex-wrap">
-                  <span>{model.name}</span>
-                  <span className="px-2.5 py-0.5 rounded-full text-[10.5px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                    ● Sẵn sàng nhận RFQ & Booking
-                  </span>
-                  {category.id === 'warehousing' && (
-                    <span className="px-2.5 py-0.5 rounded-full text-[10.5px] font-bold bg-indigo-100 text-indigo-800 border border-indigo-200 flex items-center gap-1">
-                      <Camera className="w-3 h-3" />
-                      Có hình ảnh thực tế & Specs
-                    </span>
-                  )}
+                <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
+                  {model.name}
                 </h3>
               </div>
-
-              <button
-                type="button"
-                onClick={handleTriggerRFQForCurrentService}
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 active:scale-98 text-white rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer self-start sm:self-auto"
-              >
-                <Send className="w-3.5 h-3.5" />
-                <span>Yêu Cầu Báo Giá Dịch Vụ Này</span>
-              </button>
             </div>
 
             {/* ===================================================================
@@ -679,20 +686,6 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                       {category.id === 'warehousing' ? 'Danh Sách Cơ Sở Kho Bãi & Bảng Giá Tham Chiếu' : 'Các Tuyến Đường & Biểu Giá Tham Chiếu'} ({routesList.length})
                     </span>
                   </h4>
-                  <p className="text-[11px] text-slate-500 mt-0.5">
-                    Biểu cước chi tiết minh bạch, chuẩn hóa theo từng phân khúc dịch vụ và loại hình vận hành.
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  {category.id === 'warehousing' && (
-                    <span className="text-[11px] text-indigo-700 font-bold bg-indigo-50 px-3 py-1 rounded-full border border-indigo-200">
-                      📸 Bấm "Chi tiết" để xem ảnh thực tế & thông số kỹ thuật kho
-                    </span>
-                  )}
-                  <span className="text-[11px] text-emerald-700 font-bold bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
-                    ⚡ Giá chuẩn tham chiếu
-                  </span>
                 </div>
               </div>
 
@@ -711,7 +704,7 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                           <th className="py-2.5 px-3 min-w-[130px]">Tỉnh / TP</th>
                           <th className="py-2.5 px-3 min-w-[240px]">Địa Chỉ</th>
                           <th className="py-2.5 px-3 min-w-[180px] text-center bg-indigo-50/70 text-indigo-950 font-black">Chi Tiết</th>
-                          <th className="py-2.5 px-2 text-center w-24 min-w-[90px] bg-slate-100 font-bold">Báo Giá</th>
+                          <th className="py-2.5 px-2 text-center w-28 min-w-[105px] bg-slate-100 font-bold text-slate-700">Lượt Xem</th>
                         </tr>
                       )}
 
@@ -724,7 +717,7 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                           <th className="py-2.5 px-3 min-w-[130px]">Tỉnh/TP</th>
                           <th className="py-2.5 px-3 min-w-[240px]">Địa chỉ</th>
                           <th className="py-2.5 px-3 min-w-[180px] text-center bg-purple-50/70 text-purple-950 font-black">Chi tiết</th>
-                          <th className="py-2.5 px-2 text-center w-24 min-w-[90px] bg-slate-100 font-bold">Báo Giá</th>
+                          <th className="py-2.5 px-2 text-center w-28 min-w-[105px] bg-slate-100 font-bold text-slate-700">Lượt Xem</th>
                         </tr>
                       )}
 
@@ -733,11 +726,11 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                         <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
                           <th className="py-2.5 px-2 text-center w-12 min-w-[48px] bg-slate-100">STT</th>
                           <th className="py-2.5 px-3 min-w-[130px] text-center bg-amber-50/80 text-amber-950 font-black">Mã Kho</th>
-                          <th className="py-2.5 px-3 min-w-[220px]">Tên Cơ Sở Kho Tự Quản</th>
+                          <th className="py-2.5 px-3 min-w-[220px]">Tên Cơ Sở Kho TỰ Quản</th>
                           <th className="py-2.5 px-3 min-w-[130px]">Tỉnh/Thành Phố</th>
                           <th className="py-2.5 px-3 min-w-[240px]">Địa Chỉ Chi Tiết</th>
                           <th className="py-2.5 px-3 min-w-[180px] text-center bg-amber-50/70 text-amber-950 font-black">Chi Tiết</th>
-                          <th className="py-2.5 px-2 text-center w-24 min-w-[90px] bg-slate-100 font-bold">Báo Giá</th>
+                          <th className="py-2.5 px-2 text-center w-28 min-w-[105px] bg-slate-100 font-bold text-slate-700">Lượt Xem</th>
                         </tr>
                       )}
 
@@ -750,7 +743,7 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                           <th className="py-2.5 px-3 min-w-[140px]">Tỉnh</th>
                           <th className="py-2.5 px-3 min-w-[260px]">Địa Chỉ Chi Tiết</th>
                           <th className="py-2.5 px-3 min-w-[180px] text-center bg-indigo-50/70 text-indigo-950 font-black">Chi Tiết</th>
-                          <th className="py-2.5 px-2 text-center w-24 min-w-[90px] bg-slate-100 font-bold">Báo Giá</th>
+                          <th className="py-2.5 px-2 text-center w-28 min-w-[105px] bg-slate-100 font-bold text-slate-700">Lượt Xem</th>
                         </tr>
                       )}
 
@@ -763,7 +756,7 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                           <th className="py-2.5 px-2.5 min-w-[160px]">Điểm Đi</th>
                           <th className="py-2.5 px-2.5 min-w-[160px]">Điểm Đến</th>
                           <th className="py-2.5 px-2.5 min-w-[180px] text-center bg-indigo-100/80 text-indigo-950 font-black">Chi Tiết Biểu Phí</th>
-                          <th className="py-2.5 px-2 text-center w-24 min-w-[90px] bg-slate-100 font-bold">Báo Giá</th>
+                          <th className="py-2.5 px-2 text-center w-28 min-w-[105px] bg-slate-100 font-bold text-slate-700">Lượt Xem</th>
                         </tr>
                       )}
 
@@ -776,7 +769,7 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                           <th className="py-2.5 px-2.5 min-w-[160px]">Điểm Đầu (Điểm Đi)</th>
                           <th className="py-2.5 px-2.5 min-w-[160px]">Điểm Cuối (Điểm Đến)</th>
                           <th className="py-2.5 px-2.5 min-w-[180px] text-center bg-indigo-100/80 text-indigo-950 font-black">Chi Tiết Biểu Phí</th>
-                          <th className="py-2.5 px-2 text-center w-24 min-w-[90px] bg-slate-100 font-bold">Báo Giá</th>
+                          <th className="py-2.5 px-2 text-center w-28 min-w-[105px] bg-slate-100 font-bold text-slate-700">Lượt Xem</th>
                         </tr>
                       )}
 
@@ -790,7 +783,7 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                           <th className="py-2.5 px-2.5 min-w-[150px]">Cảng Đi (POL)</th>
                           <th className="py-2.5 px-2.5 min-w-[150px]">Cảng Đến (POD)</th>
                           <th className="py-2.5 px-2.5 min-w-[180px] text-center bg-sky-100/80 text-sky-950 font-black">Chi Tiết Biểu Phí</th>
-                          <th className="py-2.5 px-2 text-center w-24 min-w-[90px] bg-slate-100 font-bold">Báo Giá</th>
+                          <th className="py-2.5 px-2 text-center w-28 min-w-[105px] bg-slate-100 font-bold text-slate-700">Lượt Xem</th>
                         </tr>
                       )}
 
@@ -804,7 +797,7 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                           <th className="py-2.5 px-2.5 min-w-[150px]">Kho CFS / Điểm Đi</th>
                           <th className="py-2.5 px-2.5 min-w-[150px]">Kho CFS / Cảng Đến</th>
                           <th className="py-2.5 px-2.5 min-w-[180px] text-center bg-sky-100/80 text-sky-950 font-black">Chi Tiết Biểu Phí</th>
-                          <th className="py-2.5 px-2 text-center w-24 min-w-[90px] bg-slate-100 font-bold">Báo Giá</th>
+                          <th className="py-2.5 px-2 text-center w-28 min-w-[105px] bg-slate-100 font-bold text-slate-700">Lượt Xem</th>
                         </tr>
                       )}
 
@@ -818,7 +811,7 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                           <th className="py-2.5 px-2.5 min-w-[150px]">Ga Đến (POD)</th>
                           <th className="py-2.5 px-2.5 min-w-[160px]">Đơn Vị Vận Hành</th>
                           <th className="py-2.5 px-2.5 min-w-[180px] text-center bg-emerald-100/80 text-emerald-950 font-black">Chi Tiết Biểu Phí</th>
-                          <th className="py-2.5 px-2 text-center w-24 min-w-[90px] bg-slate-100 font-bold">Báo Giá</th>
+                          <th className="py-2.5 px-2 text-center w-28 min-w-[105px] bg-slate-100 font-bold text-slate-700">Lượt Xem</th>
                         </tr>
                       )}
 
@@ -832,7 +825,7 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                           <th className="py-2.5 px-2.5 min-w-[150px]">Ga Đến (POD)</th>
                           <th className="py-2.5 px-2.5 min-w-[160px]">Đơn Vị Vận Hành</th>
                           <th className="py-2.5 px-2.5 min-w-[180px] text-center bg-emerald-100/80 text-emerald-950 font-black">Chi Tiết Biểu Phí</th>
-                          <th className="py-2.5 px-2 text-center w-24 min-w-[90px] bg-slate-100 font-bold">Báo Giá</th>
+                          <th className="py-2.5 px-2 text-center w-28 min-w-[105px] bg-slate-100 font-bold text-slate-700">Lượt Xem</th>
                         </tr>
                       )}
 
@@ -846,7 +839,7 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                           <th className="py-2.5 px-2.5 min-w-[150px]">Sân Bay Đi (AOD)</th>
                           <th className="py-2.5 px-2.5 min-w-[150px]">Sân Bay Đến (AOA)</th>
                           <th className="py-2.5 px-2.5 min-w-[180px] text-center bg-sky-100/80 text-sky-950 font-black">Chi Tiết Biểu Phí</th>
-                          <th className="py-2.5 px-2 text-center w-24 min-w-[90px] bg-slate-100 font-bold">Báo Giá</th>
+                          <th className="py-2.5 px-2 text-center w-28 min-w-[105px] bg-slate-100 font-bold text-slate-700">Lượt Xem</th>
                         </tr>
                       )}
 
@@ -860,7 +853,7 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                           <th className="py-2.5 px-2.5 min-w-[150px]">Điểm Lấy (Door Origin)</th>
                           <th className="py-2.5 px-2.5 min-w-[150px]">Điểm Phát (Door Destination)</th>
                           <th className="py-2.5 px-2.5 min-w-[180px] text-center bg-amber-100/90 text-amber-950 font-black">Chi Tiết Biểu Phí</th>
-                          <th className="py-2.5 px-2 text-center w-24 min-w-[90px] bg-slate-100 font-bold">Báo Giá</th>
+                          <th className="py-2.5 px-2 text-center w-28 min-w-[105px] bg-slate-100 font-bold text-slate-700">Lượt Xem</th>
                         </tr>
                       )}
 
@@ -874,7 +867,7 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                           <th className="py-2.5 px-2.5 min-w-[150px]">Điểm Đi (Origin)</th>
                           <th className="py-2.5 px-2.5 min-w-[150px]">Điểm Đến (Destination)</th>
                           <th className="py-2.5 px-2.5 min-w-[180px] text-center bg-orange-100/80 text-orange-950 font-black">Chi Tiết Biểu Phí</th>
-                          <th className="py-2.5 px-2 text-center w-24 min-w-[90px] bg-slate-100 font-bold">Báo Giá</th>
+                          <th className="py-2.5 px-2 text-center w-28 min-w-[105px] bg-slate-100 font-bold text-slate-700">Lượt Xem</th>
                         </tr>
                       )}
 
@@ -888,7 +881,7 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                           <th className="py-2.5 px-2.5 min-w-[150px]">Kho Gom Hàng (Origin Hub)</th>
                           <th className="py-2.5 px-2.5 min-w-[150px]">Kho Giao Hàng (Dest Hub)</th>
                           <th className="py-2.5 px-2.5 min-w-[180px] text-center bg-orange-100/80 text-orange-950 font-black">Chi Tiết Biểu Phí</th>
-                          <th className="py-2.5 px-2 text-center w-24 min-w-[90px] bg-slate-100 font-bold">Báo Giá</th>
+                          <th className="py-2.5 px-2 text-center w-28 min-w-[105px] bg-slate-100 font-bold text-slate-700">Lượt Xem</th>
                         </tr>
                       )}
 
@@ -901,7 +894,7 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                           <th className="py-2.5 px-2.5 min-w-[130px]">Tỉnh / Thành Phố</th>
                           <th className="py-2.5 px-2.5 min-w-[160px]">KCN / Vị Trí Trạm</th>
                           <th className="py-2.5 px-2.5 text-center min-w-[180px] bg-indigo-50 text-indigo-950 font-black">Chi Tiết (Specs, Sàn, VAS)</th>
-                          <th className="py-2.5 px-2 text-center w-24 min-w-[90px] bg-slate-100 font-bold">Báo Giá</th>
+                          <th className="py-2.5 px-2 text-center w-28 min-w-[105px] bg-slate-100 font-bold text-slate-700">Lượt Xem</th>
                         </tr>
                       )}
 
@@ -914,7 +907,7 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                           <th className="py-2.5 px-2.5 min-w-[130px]">Tỉnh / Thành Phố</th>
                           <th className="py-2.5 px-2.5 min-w-[160px]">Vị Trí / Khu Bến Cảng</th>
                           <th className="py-2.5 px-2.5 text-center min-w-[180px] bg-indigo-50 text-indigo-950 font-black">Chi Tiết (Cầu Bến, Bãi, VAS)</th>
-                          <th className="py-2.5 px-2 text-center w-24 min-w-[90px] bg-slate-100 font-bold">Báo Giá</th>
+                          <th className="py-2.5 px-2 text-center w-28 min-w-[105px] bg-slate-100 font-bold text-slate-700">Lượt Xem</th>
                         </tr>
                       )}
 
@@ -928,7 +921,7 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                           <th className="py-2.5 px-2.5 min-w-[170px]">Loại Hình Tờ Khai Áp Dụng</th>
                           <th className="py-2.5 px-2 text-right min-w-[150px] bg-emerald-50 text-emerald-950 font-black">Phí Khai Chuẩn</th>
                           <th className="py-2.5 px-2.5 min-w-[130px] text-center">SLA Thông Quan</th>
-                          <th className="py-2.5 px-2 text-center w-24 min-w-[90px] bg-slate-100 font-bold">Báo Giá</th>
+                          <th className="py-2.5 px-2 text-center w-28 min-w-[105px] bg-slate-100 font-bold text-slate-700">Lượt Xem</th>
                         </tr>
                       )}
                     </thead>
@@ -955,7 +948,7 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                               <td className="p-2 text-center bg-indigo-50/10">
                                 <button
                                   type="button"
-                                  onClick={() => handleOpenWarehouseModal(route)}
+                                  onClick={() => handleOpenWarehouseModalWithView(route, idx)}
                                   className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
                                   title="Xem thông số kỹ thuật, ảnh thực tế, biểu phí lưu kho & VAS"
                                 >
@@ -969,15 +962,11 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                                   <ChevronRight className="w-3 h-3 text-indigo-400 group-hover:translate-x-0.5 transition-transform" />
                                 </button>
                               </td>
-                              <td className="p-2 text-center">
-                                <button
-                                  type="button"
-                                  onClick={() => handleTriggerRFQForRoute(route)}
-                                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
-                                >
-                                  <Send className="w-3 h-3" />
-                                  <span>Báo Giá</span>
-                                </button>
+                              <td className="p-2 text-center whitespace-nowrap">
+                                <span className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-indigo-50/90 text-indigo-700 border border-indigo-200/80 inline-flex items-center gap-1 shadow-2xs">
+                                  <Eye className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                                  <span>{getRouteViewCount(route, idx).toLocaleString('vi-VN')}</span>
+                                </span>
                               </td>
                             </tr>
                           );
@@ -1000,7 +989,7 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                               <td className="p-2 text-center bg-purple-50/10">
                                 <button
                                   type="button"
-                                  onClick={() => handleOpenWarehouseModal(route)}
+                                  onClick={() => handleOpenWarehouseModalWithView(route, idx)}
                                   className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
                                   title="Xem công suất xử lý đơn, WMS, biểu phí Pick&Pack & VAS"
                                 >
@@ -1014,15 +1003,11 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                                   <ChevronRight className="w-3 h-3 text-purple-400 group-hover:translate-x-0.5 transition-transform" />
                                 </button>
                               </td>
-                              <td className="p-2 text-center">
-                                <button
-                                  type="button"
-                                  onClick={() => handleTriggerRFQForRoute(route)}
-                                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
-                                >
-                                  <Send className="w-3 h-3" />
-                                  <span>Báo Giá</span>
-                                </button>
+                              <td className="p-2 text-center whitespace-nowrap">
+                                <span className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-indigo-50/90 text-indigo-700 border border-indigo-200/80 inline-flex items-center gap-1 shadow-2xs">
+                                  <Eye className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                                  <span>{getRouteViewCount(route, idx).toLocaleString('vi-VN')}</span>
+                                </span>
                               </td>
                             </tr>
                           );
@@ -1045,7 +1030,7 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                               <td className="p-2 text-center bg-amber-50/10">
                                 <button
                                   type="button"
-                                  onClick={() => handleOpenWarehouseModal(route)}
+                                  onClick={() => handleOpenWarehouseModalWithView(route, idx)}
                                   className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
                                   title="Xem quy cách khoang, thẻ từ ra vào 24/7 & biểu phí thuê m²/m³"
                                 >
@@ -1059,15 +1044,11 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                                   <ChevronRight className="w-3 h-3 text-amber-400 group-hover:translate-x-0.5 transition-transform" />
                                 </button>
                               </td>
-                              <td className="p-2 text-center">
-                                <button
-                                  type="button"
-                                  onClick={() => handleTriggerRFQForRoute(route)}
-                                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
-                                >
-                                  <Send className="w-3 h-3" />
-                                  <span>Báo Giá</span>
-                                </button>
+                              <td className="p-2 text-center whitespace-nowrap">
+                                <span className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-indigo-50/90 text-indigo-700 border border-indigo-200/80 inline-flex items-center gap-1 shadow-2xs">
+                                  <Eye className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                                  <span>{getRouteViewCount(route, idx).toLocaleString('vi-VN')}</span>
+                                </span>
                               </td>
                             </tr>
                           );
@@ -1090,7 +1071,7 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                               <td className="p-2 text-center bg-indigo-50/10">
                                 <button
                                   type="button"
-                                  onClick={() => handleOpenWarehouseModal(route)}
+                                  onClick={() => handleOpenWarehouseModalWithView(route, idx)}
                                   className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
                                   title="Xem kết cấu sàn, giá kệ, PCCC, album ảnh & biểu phí m²/Pallet"
                                 >
@@ -1104,15 +1085,11 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                                   <ChevronRight className="w-3 h-3 text-indigo-400 group-hover:translate-x-0.5 transition-transform" />
                                 </button>
                               </td>
-                              <td className="p-2 text-center">
-                                <button
-                                  type="button"
-                                  onClick={() => handleTriggerRFQForRoute(route)}
-                                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
-                                >
-                                  <Send className="w-3 h-3" />
-                                  <span>Báo Giá</span>
-                                </button>
+                              <td className="p-2 text-center whitespace-nowrap">
+                                <span className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-indigo-50/90 text-indigo-700 border border-indigo-200/80 inline-flex items-center gap-1 shadow-2xs">
+                                  <Eye className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                                  <span>{getRouteViewCount(route, idx).toLocaleString('vi-VN')}</span>
+                                </span>
                               </td>
                             </tr>
                           );
@@ -1134,24 +1111,20 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                               <td className="p-2 text-center bg-indigo-50/20">
                                 <button
                                   type="button"
-                                  onClick={() => setActiveMatrixModalRoute(route)}
+                                  onClick={() => handleOpenMatrixModalWithView(route, idx)}
                                   className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
                                   title="Xem ma trận biểu phí chi tiết theo từng loại xe, phụ phí & VAS"
                                 >
                                   <Sliders className="w-3.5 h-3.5 text-indigo-600 group-hover:scale-110 transition-transform" />
-                                  <span>Chi tiết biểu phí</span>
+                                  <span>Xem chi tiết</span>
                                   <ChevronRight className="w-3 h-3 text-indigo-400 group-hover:translate-x-0.5 transition-transform" />
                                 </button>
                               </td>
-                              <td className="p-2 text-center">
-                                <button
-                                  type="button"
-                                  onClick={() => handleTriggerRFQForRoute(route)}
-                                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
-                                >
-                                  <Send className="w-3 h-3" />
-                                  <span>Báo Giá</span>
-                                </button>
+                              <td className="p-2 text-center whitespace-nowrap">
+                                <span className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-indigo-50/90 text-indigo-700 border border-indigo-200/80 inline-flex items-center gap-1 shadow-2xs">
+                                  <Eye className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                                  <span>{getRouteViewCount(route, idx).toLocaleString('vi-VN')}</span>
+                                </span>
                               </td>
                             </tr>
                           );
@@ -1173,24 +1146,20 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                               <td className="p-2 text-center bg-indigo-50/20">
                                 <button
                                   type="button"
-                                  onClick={() => setActiveMatrixModalRoute(route)}
+                                  onClick={() => handleOpenMatrixModalWithView(route, idx)}
                                   className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
                                   title="Xem ma trận biểu phí ghép hàng lẻ LTL theo Kg & CBM"
                                 >
                                   <Sliders className="w-3.5 h-3.5 text-indigo-600 group-hover:scale-110 transition-transform" />
-                                  <span>Chi tiết biểu phí</span>
+                                  <span>Xem chi tiết</span>
                                   <ChevronRight className="w-3 h-3 text-indigo-400 group-hover:translate-x-0.5 transition-transform" />
                                 </button>
                               </td>
-                              <td className="p-2 text-center">
-                                <button
-                                  type="button"
-                                  onClick={() => handleTriggerRFQForRoute(route)}
-                                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
-                                >
-                                  <Send className="w-3 h-3" />
-                                  <span>Báo Giá</span>
-                                </button>
+                              <td className="p-2 text-center whitespace-nowrap">
+                                <span className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-indigo-50/90 text-indigo-700 border border-indigo-200/80 inline-flex items-center gap-1 shadow-2xs">
+                                  <Eye className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                                  <span>{getRouteViewCount(route, idx).toLocaleString('vi-VN')}</span>
+                                </span>
                               </td>
                             </tr>
                           );
@@ -1213,24 +1182,20 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                               <td className="p-2 text-center bg-sky-50/20">
                                 <button
                                   type="button"
-                                  onClick={() => setActiveMatrixModalRoute(route)}
+                                  onClick={() => handleOpenMatrixModalWithView(route, idx)}
                                   className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
                                   title="Xem biểu phí container 20ft/40ft/45ft, phụ phí local charges & lịch tàu"
                                 >
                                   <Sliders className="w-3.5 h-3.5 text-sky-600 group-hover:scale-110 transition-transform" />
-                                  <span>Chi tiết biểu phí</span>
+                                  <span>Xem chi tiết</span>
                                   <ChevronRight className="w-3 h-3 text-sky-400 group-hover:translate-x-0.5 transition-transform" />
                                 </button>
                               </td>
-                              <td className="p-2 text-center">
-                                <button
-                                  type="button"
-                                  onClick={() => handleTriggerRFQForRoute(route)}
-                                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
-                                >
-                                  <Send className="w-3 h-3" />
-                                  <span>Báo Giá</span>
-                                </button>
+                              <td className="p-2 text-center whitespace-nowrap">
+                                <span className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-indigo-50/90 text-indigo-700 border border-indigo-200/80 inline-flex items-center gap-1 shadow-2xs">
+                                  <Eye className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                                  <span>{getRouteViewCount(route, idx).toLocaleString('vi-VN')}</span>
+                                </span>
                               </td>
                             </tr>
                           );
@@ -1253,24 +1218,20 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                               <td className="p-2 text-center bg-sky-50/20">
                                 <button
                                   type="button"
-                                  onClick={() => setActiveMatrixModalRoute(route)}
+                                  onClick={() => handleOpenMatrixModalWithView(route, idx)}
                                   className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
                                   title="Xem ma trận cước gom hàng lẻ LCL CBM & Kg, phụ phí CFS & local charges"
                                 >
                                   <Sliders className="w-3.5 h-3.5 text-sky-600 group-hover:scale-110 transition-transform" />
-                                  <span>Chi tiết biểu phí</span>
+                                  <span>Xem chi tiết</span>
                                   <ChevronRight className="w-3 h-3 text-sky-400 group-hover:translate-x-0.5 transition-transform" />
                                 </button>
                               </td>
-                              <td className="p-2 text-center">
-                                <button
-                                  type="button"
-                                  onClick={() => handleTriggerRFQForRoute(route)}
-                                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
-                                >
-                                  <Send className="w-3 h-3" />
-                                  <span>Báo Giá</span>
-                                </button>
+                              <td className="p-2 text-center whitespace-nowrap">
+                                <span className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-indigo-50/90 text-indigo-700 border border-indigo-200/80 inline-flex items-center gap-1 shadow-2xs">
+                                  <Eye className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                                  <span>{getRouteViewCount(route, idx).toLocaleString('vi-VN')}</span>
+                                </span>
                               </td>
                             </tr>
                           );
@@ -1293,24 +1254,20 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                               <td className="p-2 text-center bg-emerald-50/20">
                                 <button
                                   type="button"
-                                  onClick={() => setActiveMatrixModalRoute(route)}
+                                  onClick={() => handleOpenMatrixModalWithView(route, idx)}
                                   className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
                                   title="Xem ma trận giá container đường sắt, phụ phí ga & lịch chạy tàu hàng"
                                 >
                                   <Sliders className="w-3.5 h-3.5 text-emerald-600 group-hover:scale-110 transition-transform" />
-                                  <span>Chi tiết biểu phí</span>
+                                  <span>Xem chi tiết</span>
                                   <ChevronRight className="w-3 h-3 text-emerald-400 group-hover:translate-x-0.5 transition-transform" />
                                 </button>
                               </td>
-                              <td className="p-2 text-center">
-                                <button
-                                  type="button"
-                                  onClick={() => handleTriggerRFQForRoute(route)}
-                                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
-                                >
-                                  <Send className="w-3 h-3" />
-                                  <span>Báo Giá</span>
-                                </button>
+                              <td className="p-2 text-center whitespace-nowrap">
+                                <span className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-indigo-50/90 text-indigo-700 border border-indigo-200/80 inline-flex items-center gap-1 shadow-2xs">
+                                  <Eye className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                                  <span>{getRouteViewCount(route, idx).toLocaleString('vi-VN')}</span>
+                                </span>
                               </td>
                             </tr>
                           );
@@ -1333,24 +1290,20 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                               <td className="p-2 text-center bg-emerald-50/20">
                                 <button
                                   type="button"
-                                  onClick={() => setActiveMatrixModalRoute(route)}
+                                  onClick={() => handleOpenMatrixModalWithView(route, idx)}
                                   className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
                                   title="Xem ma trận cước ghép hàng lẻ đường sắt LCL theo Kg & CBM"
                                 >
                                   <Sliders className="w-3.5 h-3.5 text-emerald-600 group-hover:scale-110 transition-transform" />
-                                  <span>Chi tiết biểu phí</span>
+                                  <span>Xem chi tiết</span>
                                   <ChevronRight className="w-3 h-3 text-emerald-400 group-hover:translate-x-0.5 transition-transform" />
                                 </button>
                               </td>
-                              <td className="p-2 text-center">
-                                <button
-                                  type="button"
-                                  onClick={() => handleTriggerRFQForRoute(route)}
-                                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
-                                >
-                                  <Send className="w-3 h-3" />
-                                  <span>Báo Giá</span>
-                                </button>
+                              <td className="p-2 text-center whitespace-nowrap">
+                                <span className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-indigo-50/90 text-indigo-700 border border-indigo-200/80 inline-flex items-center gap-1 shadow-2xs">
+                                  <Eye className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                                  <span>{getRouteViewCount(route, idx).toLocaleString('vi-VN')}</span>
+                                </span>
                               </td>
                             </tr>
                           );
@@ -1373,24 +1326,20 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                               <td className="p-2 text-center bg-sky-50/20">
                                 <button
                                   type="button"
-                                  onClick={() => setActiveMatrixModalRoute(route)}
+                                  onClick={() => handleOpenMatrixModalWithView(route, idx)}
                                   className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
                                   title="Xem ma trận cước hàng không Air Cargo theo các bậc trọng lượng & phụ phí FSC/SSC"
                                 >
                                   <Sliders className="w-3.5 h-3.5 text-sky-600 group-hover:scale-110 transition-transform" />
-                                  <span>Chi tiết biểu phí</span>
+                                  <span>Xem chi tiết</span>
                                   <ChevronRight className="w-3 h-3 text-sky-400 group-hover:translate-x-0.5 transition-transform" />
                                 </button>
                               </td>
-                              <td className="p-2 text-center">
-                                <button
-                                  type="button"
-                                  onClick={() => handleTriggerRFQForRoute(route)}
-                                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
-                                >
-                                  <Send className="w-3 h-3" />
-                                  <span>Báo Giá</span>
-                                </button>
+                              <td className="p-2 text-center whitespace-nowrap">
+                                <span className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-indigo-50/90 text-indigo-700 border border-indigo-200/80 inline-flex items-center gap-1 shadow-2xs">
+                                  <Eye className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                                  <span>{getRouteViewCount(route, idx).toLocaleString('vi-VN')}</span>
+                                </span>
                               </td>
                             </tr>
                           );
@@ -1413,24 +1362,20 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                               <td className="p-2 text-center bg-amber-50/20">
                                 <button
                                   type="button"
-                                  onClick={() => setActiveMatrixModalRoute(route)}
+                                  onClick={() => handleOpenMatrixModalWithView(route, idx)}
                                   className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
                                   title="Xem bảng cước chuyển phát nhanh Express Door-to-Door"
                                 >
                                   <Sliders className="w-3.5 h-3.5 text-amber-600 group-hover:scale-110 transition-transform" />
-                                  <span>Chi tiết biểu phí</span>
+                                  <span>Xem chi tiết</span>
                                   <ChevronRight className="w-3 h-3 text-amber-400 group-hover:translate-x-0.5 transition-transform" />
                                 </button>
                               </td>
-                              <td className="p-2 text-center">
-                                <button
-                                  type="button"
-                                  onClick={() => handleTriggerRFQForRoute(route)}
-                                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
-                                >
-                                  <Send className="w-3 h-3" />
-                                  <span>Báo Giá</span>
-                                </button>
+                              <td className="p-2 text-center whitespace-nowrap">
+                                <span className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-indigo-50/90 text-indigo-700 border border-indigo-200/80 inline-flex items-center gap-1 shadow-2xs">
+                                  <Eye className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                                  <span>{getRouteViewCount(route, idx).toLocaleString('vi-VN')}</span>
+                                </span>
                               </td>
                             </tr>
                           );
@@ -1453,24 +1398,20 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                               <td className="p-2 text-center bg-orange-50/20">
                                 <button
                                   type="button"
-                                  onClick={() => setActiveMatrixModalRoute(route)}
+                                  onClick={() => handleOpenMatrixModalWithView(route, idx)}
                                   className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 hover:bg-orange-100 text-orange-800 border border-orange-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
                                   title="Xem ma trận biểu phí phương tiện vận tải đường bộ xuyên biên giới (FTL)"
                                 >
                                   <Sliders className="w-3.5 h-3.5 text-orange-600 group-hover:scale-110 transition-transform" />
-                                  <span>Chi tiết biểu phí</span>
+                                  <span>Xem chi tiết</span>
                                   <ChevronRight className="w-3 h-3 text-orange-400 group-hover:translate-x-0.5 transition-transform" />
                                 </button>
                               </td>
-                              <td className="p-2 text-center">
-                                <button
-                                  type="button"
-                                  onClick={() => handleTriggerRFQForRoute(route)}
-                                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
-                                >
-                                  <Send className="w-3 h-3" />
-                                  <span>Báo Giá</span>
-                                </button>
+                              <td className="p-2 text-center whitespace-nowrap">
+                                <span className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-indigo-50/90 text-indigo-700 border border-indigo-200/80 inline-flex items-center gap-1 shadow-2xs">
+                                  <Eye className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                                  <span>{getRouteViewCount(route, idx).toLocaleString('vi-VN')}</span>
+                                </span>
                               </td>
                             </tr>
                           );
@@ -1493,24 +1434,20 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                               <td className="p-2 text-center bg-orange-50/20">
                                 <button
                                   type="button"
-                                  onClick={() => setActiveMatrixModalRoute(route)}
+                                  onClick={() => handleOpenMatrixModalWithView(route, idx)}
                                   className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 hover:bg-orange-100 text-orange-800 border border-orange-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
                                   title="Xem ma trận cước ghép hàng lẻ xuyên biên giới theo Kg & CBM"
                                 >
                                   <Sliders className="w-3.5 h-3.5 text-orange-600 group-hover:scale-110 transition-transform" />
-                                  <span>Chi tiết biểu phí</span>
+                                  <span>Xem chi tiết</span>
                                   <ChevronRight className="w-3 h-3 text-orange-400 group-hover:translate-x-0.5 transition-transform" />
                                 </button>
                               </td>
-                              <td className="p-2 text-center">
-                                <button
-                                  type="button"
-                                  onClick={() => handleTriggerRFQForRoute(route)}
-                                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
-                                >
-                                  <Send className="w-3 h-3" />
-                                  <span>Báo Giá</span>
-                                </button>
+                              <td className="p-2 text-center whitespace-nowrap">
+                                <span className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-indigo-50/90 text-indigo-700 border border-indigo-200/80 inline-flex items-center gap-1 shadow-2xs">
+                                  <Eye className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                                  <span>{getRouteViewCount(route, idx).toLocaleString('vi-VN')}</span>
+                                </span>
                               </td>
                             </tr>
                           );
@@ -1533,7 +1470,7 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                               <td className="p-2 text-center bg-indigo-50/10">
                                 <button
                                   type="button"
-                                  onClick={() => handleOpenWarehouseModal(route)}
+                                  onClick={() => handleOpenWarehouseModalWithView(route, idx)}
                                   className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
                                   title="Xem công suất sàn chia chọn, cửa dock, SLA giải phóng & biểu phí handling"
                                 >
@@ -1547,15 +1484,11 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                                   <ChevronRight className="w-3 h-3 text-indigo-400 group-hover:translate-x-0.5 transition-transform" />
                                 </button>
                               </td>
-                              <td className="p-2 text-center">
-                                <button
-                                  type="button"
-                                  onClick={() => handleTriggerRFQForRoute(route)}
-                                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
-                                >
-                                  <Send className="w-3 h-3" />
-                                  <span>Báo Giá</span>
-                                </button>
+                              <td className="p-2 text-center whitespace-nowrap">
+                                <span className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-indigo-50/90 text-indigo-700 border border-indigo-200/80 inline-flex items-center gap-1 shadow-2xs">
+                                  <Eye className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                                  <span>{getRouteViewCount(route, idx).toLocaleString('vi-VN')}</span>
+                                </span>
                               </td>
                             </tr>
                           );
@@ -1578,7 +1511,7 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                               <td className="p-2 text-center bg-indigo-50/10">
                                 <button
                                   type="button"
-                                  onClick={() => handleOpenWarehouseModal(route)}
+                                  onClick={() => handleOpenWarehouseModalWithView(route, idx)}
                                   className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs hover:shadow-xs group"
                                   title="Xem năng lực cầu bến, bãi TEU, thiết bị cẩu nâng hạ & biểu phí shuttle cont"
                                 >
@@ -1592,15 +1525,11 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                                   <ChevronRight className="w-3 h-3 text-indigo-400 group-hover:translate-x-0.5 transition-transform" />
                                 </button>
                               </td>
-                              <td className="p-2 text-center">
-                                <button
-                                  type="button"
-                                  onClick={() => handleTriggerRFQForRoute(route)}
-                                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
-                                >
-                                  <Send className="w-3 h-3" />
-                                  <span>Báo Giá</span>
-                                </button>
+                              <td className="p-2 text-center whitespace-nowrap">
+                                <span className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-indigo-50/90 text-indigo-700 border border-indigo-200/80 inline-flex items-center gap-1 shadow-2xs">
+                                  <Eye className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                                  <span>{getRouteViewCount(route, idx).toLocaleString('vi-VN')}</span>
+                                </span>
                               </td>
                             </tr>
                           );
@@ -1623,15 +1552,11 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
                                 {(route.price || 850000).toLocaleString('vi-VN')} ₫ / {route.pricingUnit || 'Tờ khai'}
                               </td>
                               <td className="p-2 text-center text-slate-700 font-medium">{route.sla || '4 - 8 giờ'}</td>
-                              <td className="p-2 text-center">
-                                <button
-                                  type="button"
-                                  onClick={() => handleTriggerRFQForRoute(route)}
-                                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer"
-                                >
-                                  <Send className="w-3 h-3" />
-                                  <span>Báo Giá</span>
-                                </button>
+                              <td className="p-2 text-center whitespace-nowrap">
+                                <span className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-indigo-50/90 text-indigo-700 border border-indigo-200/80 inline-flex items-center gap-1 shadow-2xs">
+                                  <Eye className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                                  <span>{getRouteViewCount(route, idx).toLocaleString('vi-VN')}</span>
+                                </span>
                               </td>
                             </tr>
                           );
