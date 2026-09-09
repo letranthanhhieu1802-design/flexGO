@@ -6968,9 +6968,6 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
               {isInline && <Truck className="w-5 h-5 text-indigo-600" />}
               <span>{isInline ? "Khai Báo Danh Mục Dịch Vụ & Năng Lực Cung Ứng" : "Khai Báo Danh Mục Dịch Vụ Supplier"}</span>
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Tick chọn các dịch vụ có thể cung ứng và thiết lập năng lực & biểu giá tham chiếu.
-            </p>
           </div>
 
           <div className="flex items-center gap-3">
@@ -7161,9 +7158,6 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                     <h3 className="text-sm font-black text-slate-900 uppercase tracking-tight flex items-center gap-2">
                       <span>THÔNG TIN KHAI BÁO ({activeCategory?.name.split(' (')[0]} - {activeCargoGroup?.name} - {activeModel.code || activeModel.name})</span>
                     </h3>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                      Điền thông số năng lực vận hành và mức giá tham chiếu chuẩn để hiển thị cho khách hàng.
-                    </p>
                   </div>
 
                   <button
@@ -7241,17 +7235,6 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                         <span className="w-5 h-5 rounded-full bg-indigo-50 text-indigo-700 flex items-center justify-center text-[10.5px] font-bold">2</span>
                         <span>{activeCategory?.id === 'warehousing' ? 'Danh Sách Cơ Sở Kho & Biểu Phí Lưu Kho' : ((activeCategory?.id === 'project' && (activeModel?.id?.includes('xdock') || activeModel?.name?.toLowerCase().includes('cross-dock') || activeModel?.name?.toLowerCase().includes('x-dock'))) ? 'Danh Sách Trạm Cross-Dock & Biểu Phí Xử Lý Sàn' : ((activeCategory?.id === 'project' && (activeModel?.id?.includes('port') || activeModel?.name?.toLowerCase().includes('cảng') || activeModel?.code?.toLowerCase().includes('port'))) ? 'Danh Sách Cảng / ICD / Depot & Biểu Phí Khai Thác' : (activeCategory?.id === 'customs' ? 'Danh Sách Chi Cục Hải Quan & Biểu Phí Khai Báo' : 'Các Tuyến Đường & Biểu Giá Tham Chiếu')))} ({currentData.routes?.length || 0})</span>
                       </h4>
-                      <p className="text-[11px] text-slate-500 mt-0.5">
-                        {activeCategory?.id === 'warehousing'
-                          ? 'Khai báo thông số kỹ thuật, album ảnh, phụ phí và VAS chi tiết cho từng cơ sở kho.'
-                          : (activeCategory?.id === 'project' && (activeModel?.id?.includes('xdock') || activeModel?.name?.toLowerCase().includes('cross-dock') || activeModel?.name?.toLowerCase().includes('x-dock')))
-                          ? 'Khai báo mặt sàn, công suất xử lý, album ảnh, phụ phí và VAS chi tiết cho từng trạm Cross-Dock.'
-                          : (activeCategory?.id === 'project' && (activeModel?.id?.includes('port') || activeModel?.name?.toLowerCase().includes('cảng') || activeModel?.code?.toLowerCase().includes('port')))
-                          ? 'Khai báo năng lực cầu bến, bãi chứa container, cẩu nâng hạ, phụ phí và VAS chi tiết cho từng Cảng / ICD.'
-                          : activeCategory?.id === 'customs'
-                          ? 'Khai báo biểu phí mở tờ khai chuẩn, tờ khai phụ và phí hỗ trợ kiểm hóa luồng đỏ theo từng Chi cục Hải quan.'
-                          : 'Chỉnh sửa trực tiếp trên bảng biểu giá hoặc tải template Excel để nhập liệu hàng loạt.'}
-                      </p>
                     </div>
 
                     <div className="flex items-center gap-2 flex-wrap">
@@ -11661,11 +11644,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
           })()}
 
                 {/* Bottom Actions */}
-                <div className="pt-4 border-t border-slate-100 flex items-center justify-between flex-wrap gap-2">
-                  <span className="text-[11px] text-slate-400">
-                    * Bấm "Lưu Dữ Liệu" ở góc trên để cập nhật toàn bộ vào Showcase & Rate Cards.
-                  </span>
-
+                <div className="pt-4 border-t border-slate-100 flex items-center justify-end flex-wrap gap-2">
                   <button
                     type="button"
                     onClick={() => {
