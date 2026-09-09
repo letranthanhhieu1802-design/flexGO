@@ -139,7 +139,7 @@ export const SupplierProfileDetailPage: React.FC<SupplierProfileDetailPageProps>
   };
 
   return (
-    <div id="supplier-profile-detail-page" className="min-h-screen bg-slate-50/60 pb-24 text-slate-800">
+    <div id="supplier-profile-detail-page" className="w-full max-w-[1720px] mx-auto px-2 sm:px-4 lg:px-6 py-6 min-h-screen pb-24 text-slate-800 space-y-5 animate-in fade-in duration-200">
       
       {/* Toast Alert Notification */}
       {copiedToast && (
@@ -150,8 +150,8 @@ export const SupplierProfileDetailPage: React.FC<SupplierProfileDetailPageProps>
       )}
 
       {/* Top Header & Breadcrumb Bar */}
-      <div className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+      <div className="sticky top-0 z-30 border border-slate-200/90 rounded-2xl bg-white/95 backdrop-blur-md shadow-2xs">
+        <div className="flex items-center justify-between px-4 py-3 sm:px-6">
           <div className="flex items-center gap-3">
             <button
               onClick={onBackToDirectory}
@@ -206,7 +206,7 @@ export const SupplierProfileDetailPage: React.FC<SupplierProfileDetailPageProps>
       </div>
 
       {/* Main Container */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
+      <div className="space-y-6">
         
         {/* =========================================================================
             4 PRIMARY PUBLIC TABS (MATCHING 4 STUDIO DECLARATION TABS)

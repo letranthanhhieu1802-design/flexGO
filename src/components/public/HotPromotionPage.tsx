@@ -50,11 +50,14 @@ import {
   Hourglass,
   Repeat,
   Boxes,
-  RotateCcw
+  RotateCcw,
+  Maximize2,
+  ExternalLink
 } from 'lucide-react';
 import { HotPromotionItem, PromotionCategory, PromotionBadgeType, ServiceType, CurrentView, UserProfile } from '../../types';
 import { mockPromotionAuditData } from '../../data/mockPromotionAuditData';
 import { HotPromotionRateDetailCard } from './HotPromotionRateDetailCard';
+import { HotPromotionFullCostMatrixModal } from './HotPromotionFullCostMatrixModal';
 
 interface HotPromotionPageProps {
   currentUser: UserProfile;
@@ -63,7 +66,7 @@ interface HotPromotionPageProps {
   onIncrementPromotionViews?: (promoId: string) => void;
 }
 
-type SortField = 'discount' | 'price' | 'createdDate' | 'views' | 'daysRemaining' | 'code' | 'service';
+type SortField = 'discount' | 'price' | 'createdDate' | 'views' | 'daysRemaining' | 'code' | 'service' | 'pic';
 type SortDirection = 'asc' | 'desc';
 
 interface ServiceTabItem {
@@ -111,6 +114,7 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [selectedDealForBooking, setSelectedDealForBooking] = useState<HotPromotionItem | null>(null);
+  const [selectedPromoForModal, setSelectedPromoForModal] = useState<HotPromotionItem | null>(null);
   const [isCreatePromoModalOpen, setIsCreatePromoModalOpen] = useState<boolean>(false);
 
   // New Promotion Form state (for Supplier listing)
@@ -363,6 +367,10 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
           comp = a.code.localeCompare(b.code);
         } else if (sortField === 'service') {
           comp = a.serviceType.localeCompare(b.serviceType);
+        } else if (sortField === 'pic') {
+          const picA = a.specialistVietnameseName || a.specialistName || '';
+          const picB = b.specialistVietnameseName || b.specialistName || '';
+          comp = picA.localeCompare(picB);
         } else {
           comp = a.validFrom.localeCompare(b.validFrom);
         }
@@ -795,8 +803,14 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
     const views = typeof promo.viewsCount === 'number' ? promo.viewsCount : 850;
     const inquiriesViewsDisplay = `${inquiries.toLocaleString('vi-VN')} / ${views.toLocaleString('vi-VN')}`;
 
+    // PIC & Công ty
+    const picName = promo.specialistVietnameseName || promo.specialistName || 'Trần Văn Minh';
+    const companyName = promo.companyName || 'VinaTrans Logistics JSC';
+
     return {
       stt,
+      picName,
+      companyName,
       validUntilDisplay,
       code,
       serviceGroup,
@@ -1063,15 +1077,26 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
             tabIndex={0}
           >
             <table className="w-full text-left border-collapse table-auto" id="promotions-data-table">
-              {/* Frozen Sticky Table Header - Standardized 10 Columns */}
+              {/* Frozen Sticky Table Header - Standardized 11 Columns */}
               <thead className="sticky top-0 z-20 bg-slate-100 shadow-xs border-b border-slate-200">
                 <tr className="bg-slate-100 text-[10px] font-bold text-slate-600 uppercase tracking-wider select-none">
                   {/* 1. STT */}
                   <th className="py-2.5 px-1.5 w-8 text-center sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
                     STT
                   </th>
+
+                  {/* 2. PIC (Tên PIC & Tên công ty) */}
+                  <th 
+                    className="py-2.5 px-2 cursor-pointer hover:text-orange-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200 min-w-[140px]"
+                    onClick={() => handleSort('pic')}
+                  >
+                    <div className="flex items-center gap-1">
+                      <span>PIC / CÔNG TY</span>
+                      <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                    </div>
+                  </th>
                   
-                  {/* 2. Hạn Giá */}
+                  {/* 3. Hạn Giá */}
                   <th 
                     className="py-2.5 px-2 cursor-pointer hover:text-orange-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
                     onClick={() => handleSort('createdDate')}
@@ -1082,7 +1107,7 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
                     </div>
                   </th>
 
-                  {/* 3. Mã */}
+                  {/* 4. Mã */}
                   <th 
                     className="py-2.5 px-2 cursor-pointer hover:text-orange-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
                     onClick={() => handleSort('code')}
@@ -1093,7 +1118,7 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
                     </div>
                   </th>
 
-                  {/* 4. Nhóm Dịch Vụ */}
+                  {/* 5. Nhóm Dịch Vụ */}
                   <th 
                     className="py-2.5 px-2 cursor-pointer hover:text-orange-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
                     onClick={() => handleSort('service')}
@@ -1104,22 +1129,22 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
                     </div>
                   </th>
 
-                  {/* 5. Nhóm Hàng */}
+                  {/* 6. Nhóm Hàng */}
                   <th className="py-2.5 px-1.5 text-center whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
                     <span>Nhóm Hàng</span>
                   </th>
 
-                  {/* 6. Mô Hình */}
+                  {/* 7. Mô Hình */}
                   <th className="py-2.5 px-1.5 text-center whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
                     <span>Mô Hình</span>
                   </th>
 
-                  {/* 7. Mô Tả */}
+                  {/* 8. Mô Tả */}
                   <th className="py-2.5 px-2 whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
                     <span>Mô Tả</span>
                   </th>
 
-                  {/* 8. Đơn Giá */}
+                  {/* 9. Đơn Giá */}
                   <th 
                     className="py-2.5 px-2 text-right cursor-pointer hover:text-orange-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
                     onClick={() => handleSort('price')}
@@ -1130,7 +1155,7 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
                     </div>
                   </th>
 
-                  {/* 9. Số Inquiries / Xem */}
+                  {/* 10. Số Inquiries / Xem */}
                   <th 
                     className="py-2.5 px-1.5 text-center cursor-pointer hover:text-orange-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
                     onClick={() => handleSort('views')}
@@ -1141,8 +1166,8 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
                     </div>
                   </th>
 
-                  {/* 10. Thao Tác */}
-                  <th className="py-2.5 px-2 text-center whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
+                  {/* 11. Thao Tác */}
+                  <th className="py-2.5 px-2 text-center whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200 min-w-[170px]">
                     <span>Thao Tác</span>
                   </th>
                 </tr>
@@ -1152,7 +1177,7 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
               <tbody className="divide-y divide-slate-100 text-xs">
                 {filteredAndSortedPromotions.length === 0 ? (
                   <tr>
-                    <td colSpan={10} className="py-16 text-center">
+                    <td colSpan={11} className="py-16 text-center">
                       <div className="max-w-sm mx-auto space-y-3">
                         <div className="w-12 h-12 rounded-full bg-orange-50 text-orange-400 flex items-center justify-center mx-auto">
                           <Search className="w-6 h-6" />
@@ -1177,153 +1202,182 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
                   paginatedPromotions.map((promo, index) => {
                     const itemIndex = (safeCurrentPage - 1) * pageSize + index + 1;
                     const row = formatPromotionRow(promo, itemIndex);
-                    const isExpanded = !!expandedRowIds[promo.id];
                     const isBookmarked = bookmarkedDealIds.includes(promo.id);
 
                     return (
-                      <React.Fragment key={promo.id}>
-                        <tr
-                          id={`promo-row-${row.code}`}
-                          onClick={() => toggleRowExpand(promo.id)}
-                          className={`hover:bg-orange-50/40 transition-colors cursor-pointer group ${
-                            isExpanded ? 'bg-orange-50/30' : index % 2 === 1 ? 'bg-slate-50/40' : 'bg-white'
-                          }`}
-                        >
-                          {/* 1. STT */}
-                          <td className="py-2.5 px-1.5 text-center font-mono text-slate-500 font-bold text-xs select-none w-8">
-                            {row.stt}
-                          </td>
+                      <tr
+                        key={promo.id}
+                        id={`promo-row-${row.code}`}
+                        className={`hover:bg-orange-50/40 transition-colors ${
+                          index % 2 === 1 ? 'bg-slate-50/40' : 'bg-white'
+                        }`}
+                      >
+                        {/* 1. STT */}
+                        <td className="py-2.5 px-1.5 text-center font-mono text-slate-500 font-bold text-xs select-none w-8">
+                          {row.stt}
+                        </td>
 
-                          {/* 2. Hạn Giá */}
-                          <td className="py-2.5 px-2 whitespace-nowrap">
-                            <span className="text-xs font-semibold text-slate-700">
-                              {row.validUntilDisplay}
-                            </span>
-                          </td>
+                        {/* 2. PIC (Tên PIC & Tên công ty - Không ava, badge, sđt) */}
+                        <td className="py-2.5 px-2 min-w-[140px] max-w-[180px]">
+                          <div className="space-y-0.5">
+                            <p className="font-bold text-slate-800 text-xs truncate" title={row.picName}>
+                              {row.picName}
+                            </p>
+                            <p className="text-[11px] text-slate-500 font-medium truncate" title={row.companyName}>
+                              {row.companyName}
+                            </p>
+                          </div>
+                        </td>
 
-                          {/* 3. Mã */}
-                          <td className="py-2.5 px-2 whitespace-nowrap">
-                            <div className="flex items-center gap-1 font-mono font-bold text-slate-800 text-xs">
-                              <span className="text-orange-600 hover:underline">{row.code}</span>
-                              <button
-                                onClick={(e) => handleCopyCode(row.code, e)}
-                                className="text-slate-400 hover:text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity p-0.5 cursor-pointer"
-                                title="Sao chép mã"
-                              >
-                                {copiedCode === row.code ? (
-                                  <Check className="w-3 h-3 text-emerald-600" />
-                                ) : (
-                                  <Copy className="w-3 h-3" />
-                                )}
-                              </button>
-                            </div>
-                          </td>
+                        {/* 3. Hạn Giá */}
+                        <td className="py-2.5 px-2 whitespace-nowrap">
+                          <span className="text-xs font-semibold text-slate-700">
+                            {row.validUntilDisplay}
+                          </span>
+                        </td>
 
-                          {/* 4. Nhóm Dịch Vụ */}
-                          <td className="py-2.5 px-2 whitespace-nowrap">
-                            <span
-                              className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-bold border ${row.serviceStyle.bg}`}
-                            >
-                              {row.serviceGroup}
-                            </span>
-                          </td>
-
-                          {/* 5. Nhóm Hàng */}
-                          <td className="py-2.5 px-1.5 whitespace-nowrap text-center">
-                            <span
-                              className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-bold border ${
-                                row.cargoGroup === 'Hàng lạnh'
-                                  ? 'bg-cyan-50 text-cyan-700 border-cyan-200'
-                                  : row.cargoGroup === 'Hàng nguy hiểm'
-                                  ? 'bg-amber-50 text-amber-800 border-amber-200'
-                                  : 'bg-slate-100 text-slate-700 border-slate-200'
-                              }`}
-                            >
-                              {row.cargoGroup}
-                            </span>
-                          </td>
-
-                          {/* 6. Mô Hình */}
-                          <td className="py-2.5 px-1.5 whitespace-nowrap text-center">
-                            <span className="text-xs font-bold text-slate-800">
-                              {row.serviceModel}
-                            </span>
-                          </td>
-
-                          {/* 7. Mô Tả (Dòng 1: Hành lang/Địa chỉ, Dòng 2: Subtext chi tiết) */}
-                          <td className="py-2.5 px-2 max-w-[280px]">
-                            <div className="space-y-0.5">
-                              <p className="font-bold text-slate-900 text-xs group-hover:text-orange-600 transition-colors truncate" title={row.descriptionMain}>
-                                {row.descriptionMain}
-                              </p>
-                              <p className="text-[10.5px] text-slate-500 font-medium truncate" title={row.descriptionSub}>
-                                {row.descriptionSub}
-                              </p>
-                            </div>
-                          </td>
-
-                          {/* 8. Đơn Giá: Số tiền dòng trên (VNĐ), ĐVT dòng subtext dưới, không % giảm, không gạch ngang */}
-                          <td className="py-2.5 px-2 text-right whitespace-nowrap">
-                            <div className="space-y-0.5">
-                              <span className="text-xs font-black text-slate-900 block tracking-tight">
-                                {row.priceAmount}
-                              </span>
-                              <span className="text-[10px] font-medium text-slate-500 block">
-                                {row.priceUnit}
-                              </span>
-                            </div>
-                          </td>
-
-                          {/* 9. Thống Kê Số Inquiries / Xem */}
-                          <td className="py-2.5 px-1.5 text-center whitespace-nowrap">
-                            <div className="flex flex-col items-center gap-0.5">
-                              <span className="px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/80">
-                                {row.inquiries} inquiries
-                              </span>
-                              <span className="text-[10px] text-slate-400 font-medium">
-                                {row.views.toLocaleString('vi-VN')} xem
-                              </span>
-                            </div>
-                          </td>
-
-                          {/* 10. Thao Tác (Chỉ duy nhất nút Xem chi tiết) */}
-                          <td className="py-2.5 px-2 text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                        {/* 4. Mã */}
+                        <td className="py-2.5 px-2 whitespace-nowrap">
+                          <div className="flex items-center gap-1 font-mono font-bold text-slate-800 text-xs">
+                            <span className="text-orange-600 hover:underline">{row.code}</span>
                             <button
-                              id={`toggle-promo-btn-${row.code}`}
-                              type="button"
-                              onClick={(e) => toggleRowExpand(promo.id, e)}
-                              className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all inline-flex items-center justify-center gap-1 cursor-pointer shadow-2xs mx-auto ${
-                                isExpanded
-                                  ? 'bg-orange-600 text-white shadow-xs'
-                                  : 'bg-white hover:bg-orange-50 text-orange-700 border border-orange-200 hover:border-orange-300'
-                              }`}
-                              title={isExpanded ? 'Thu gọn chi tiết' : 'Xem chi tiết'}
+                              onClick={(e) => handleCopyCode(row.code, e)}
+                              className="text-slate-400 hover:text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity p-0.5 cursor-pointer"
+                              title="Sao chép mã"
                             >
-                              <span>{isExpanded ? 'Thu gọn' : 'Xem chi tiết'}</span>
-                              {isExpanded ? (
-                                <ChevronUp className="w-3.5 h-3.5" />
+                              {copiedCode === row.code ? (
+                                <Check className="w-3 h-3 text-emerald-600" />
                               ) : (
-                                <ChevronDown className="w-3.5 h-3.5" />
+                                <Copy className="w-3 h-3" />
                               )}
                             </button>
-                          </td>
-                        </tr>
+                          </div>
+                        </td>
 
-                        {/* Expandable Technical Specs Row */}
-                        {isExpanded && (
-                          <tr className="bg-orange-50/40 border-b border-orange-100">
-                            <td colSpan={10} className="p-3 sm:p-4">
-                              <HotPromotionRateDetailCard
-                                item={promo}
-                                onNavigate={onNavigate}
-                                onBookPromotion={setSelectedDealForBooking}
-                                onToggleBookmark={toggleBookmark}
-                                isBookmarked={isBookmarked}
-                              />
-                            </td>
-                          </tr>
-                        )}
-                      </React.Fragment>
+                        {/* 5. Nhóm Dịch Vụ */}
+                        <td className="py-2.5 px-2 whitespace-nowrap">
+                          <span
+                            className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-bold border ${row.serviceStyle.bg}`}
+                          >
+                            {row.serviceGroup}
+                          </span>
+                        </td>
+
+                        {/* 6. Nhóm Hàng */}
+                        <td className="py-2.5 px-1.5 whitespace-nowrap text-center">
+                          <span
+                            className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-bold border ${
+                              row.cargoGroup === 'Hàng lạnh'
+                                ? 'bg-cyan-50 text-cyan-700 border-cyan-200'
+                                : row.cargoGroup === 'Hàng nguy hiểm'
+                                ? 'bg-amber-50 text-amber-800 border-amber-200'
+                                : 'bg-slate-100 text-slate-700 border-slate-200'
+                            }`}
+                          >
+                            {row.cargoGroup}
+                          </span>
+                        </td>
+
+                        {/* 7. Mô Hình */}
+                        <td className="py-2.5 px-1.5 whitespace-nowrap text-center">
+                          <span className="text-xs font-bold text-slate-800">
+                            {row.serviceModel}
+                          </span>
+                        </td>
+
+                        {/* 8. Mô Tả (Dòng 1: Hành lang/Địa chỉ, Dòng 2: Subtext chi tiết) */}
+                        <td className="py-2.5 px-2 max-w-[280px]">
+                          <div className="space-y-0.5">
+                            <p className="font-bold text-slate-900 text-xs group-hover:text-orange-600 transition-colors truncate" title={row.descriptionMain}>
+                              {row.descriptionMain}
+                            </p>
+                            <p className="text-[10.5px] text-slate-500 font-medium truncate" title={row.descriptionSub}>
+                              {row.descriptionSub}
+                            </p>
+                          </div>
+                        </td>
+
+                        {/* 9. Đơn Giá: Số tiền dòng trên (VNĐ), ĐVT dòng subtext dưới, không % giảm, không gạch ngang */}
+                        <td className="py-2.5 px-2 text-right whitespace-nowrap">
+                          <div className="space-y-0.5">
+                            <span className="text-xs font-black text-slate-900 block tracking-tight">
+                              {row.priceAmount}
+                            </span>
+                            <span className="text-[10px] font-medium text-slate-500 block">
+                              {row.priceUnit}
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* 10. Thống Kê Số Inquiries / Xem */}
+                        <td className="py-2.5 px-1.5 text-center whitespace-nowrap">
+                          <div className="flex flex-col items-center gap-0.5">
+                            <span className="px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/80">
+                              {row.inquiries} inquiries
+                            </span>
+                            <span className="text-[10px] text-slate-400 font-medium">
+                              {row.views.toLocaleString('vi-VN')} xem
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* 11. Thao Tác (Xem đầy đủ, Lưu, Xem hồ sơ) */}
+                        <td className="py-2.5 px-2 text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex items-center justify-center gap-1.5">
+                            {/* Nút 1: Xem đầy đủ (Mở modal popup ma trận cước) */}
+                            <button
+                              id={`btn-view-full-${row.code}`}
+                              type="button"
+                              onClick={() => {
+                                handleIncrementPromotionViews(promo.id);
+                                setSelectedPromoForModal(promo);
+                              }}
+                              className="px-2.5 py-1 text-xs font-bold rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-700 hover:text-orange-800 border border-orange-200 hover:border-orange-300 transition-colors inline-flex items-center gap-1 cursor-pointer shadow-2xs"
+                              title="Xem biểu giá ma trận cước đầy đủ"
+                            >
+                              <Maximize2 className="w-3.5 h-3.5 text-orange-600" />
+                              <span>Xem đầy đủ</span>
+                            </button>
+
+                            {/* Nút 2: Lưu */}
+                            <button
+                              id={`btn-bookmark-promo-${row.code}`}
+                              type="button"
+                              onClick={(e) => toggleBookmark(promo.id, promo.title, e)}
+                              className={`p-1.5 text-xs font-bold rounded-lg border transition-colors inline-flex items-center justify-center cursor-pointer shadow-2xs ${
+                                isBookmarked
+                                  ? 'bg-amber-500 border-amber-500 text-white hover:bg-amber-600'
+                                  : 'bg-white border-slate-200 text-slate-600 hover:text-amber-600 hover:bg-amber-50 hover:border-amber-200'
+                              }`}
+                              title={isBookmarked ? 'Đã lưu (Bấm để bỏ lưu)' : 'Lưu biểu giá'}
+                            >
+                              {isBookmarked ? (
+                                <BookmarkCheck className="w-3.5 h-3.5" />
+                              ) : (
+                                <Bookmark className="w-3.5 h-3.5" />
+                              )}
+                            </button>
+
+                            {/* Nút 3: Xem hồ sơ */}
+                            <button
+                              id={`btn-view-profile-${row.code}`}
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onNavigate({
+                                  type: 'public',
+                                  tab: 'supplier-profile',
+                                  params: { specialistId: promo.specialistId, viewState: 'detail' }
+                                });
+                              }}
+                              className="p-1.5 text-xs font-bold rounded-lg bg-white hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 border border-slate-200 hover:border-indigo-200 transition-colors inline-flex items-center justify-center cursor-pointer shadow-2xs"
+                              title="Xem hồ sơ năng lực của PIC"
+                            >
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
                     );
                   })
                 )}
@@ -1655,6 +1709,14 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
           </div>
         </div>
       )}
+
+      {/* Full Cost Matrix Modal View */}
+      <HotPromotionFullCostMatrixModal
+        item={selectedPromoForModal}
+        isOpen={!!selectedPromoForModal}
+        onClose={() => setSelectedPromoForModal(null)}
+        onBookPromotion={setSelectedDealForBooking}
+      />
     </div>
   );
 };

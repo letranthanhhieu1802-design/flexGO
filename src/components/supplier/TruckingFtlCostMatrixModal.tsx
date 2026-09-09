@@ -819,7 +819,7 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
     <>
       <div
         {...getReadOnlyMatrixInteractionProps(isReadOnly)}
-        className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/80 backdrop-blur-xs overflow-hidden animate-in fade-in duration-200"
+        className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-slate-950/75 backdrop-blur-xs overflow-hidden animate-in fade-in duration-150"
       >
       <style>{`
         .custom-matrix-scroll::-webkit-scrollbar {
@@ -842,7 +842,7 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
 
       <div 
         id="trucking-ftl-cost-matrix-modal"
-        className="w-full max-w-[1520px] xl:max-w-[96vw] bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden my-auto flex flex-col h-[94vh] max-h-[96vh]"
+        className="w-full max-w-[96vw] 2xl:max-w-[1560px] h-[94vh] max-h-[95vh] bg-white rounded-2xl shadow-2xl border border-slate-200/80 overflow-hidden flex flex-col my-auto animate-in zoom-in-95 duration-150"
       >
         {/* MODAL HEADER: SLEEK ENTERPRISE DARK INDIGO GRADIENT */}
         <div className="px-5 py-3 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex items-center justify-between shrink-0 border-b border-indigo-900/50 select-none">

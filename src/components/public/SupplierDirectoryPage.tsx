@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Building2, 
   Star, 
@@ -46,7 +46,13 @@ import {
   CheckCircle,
   Eye,
   Flame,
-  Activity
+  Activity,
+  ArrowUpDown,
+  Search,
+  Check,
+  ChevronLeft,
+  ChevronsLeft,
+  ChevronsRight
 } from 'lucide-react';
 import { SupplierCompany, CurrentView, ServiceType } from '../../types';
 import { mockSalesSpecialists } from '../../data/mockSalesSpecialists';
@@ -65,6 +71,67 @@ const SERVICE_TYPE_LABELS: Record<ServiceType, string> = {
   'Cold Chain': 'Vận tải lạnh',
 };
 
+// Cấu hình danh mục dịch vụ đã kích hoạt & khai báo niêm yết giá theo chuẩn 3 cấp [Nhóm / Loại hàng / Mô hình]
+interface DeclaredServiceBadge {
+  fullText: string;
+  badgeClass: string;
+}
+
+const getDeclaredServiceBadges = (specialistId: string): DeclaredServiceBadge[] => {
+  switch (specialistId) {
+    case 'sales-minh-tran':
+      return [
+        { fullText: 'Đường bộ / Hàng thường / FTL', badgeClass: 'bg-blue-50 text-blue-700 border-blue-200' },
+        { fullText: 'Đường biển / Hàng thường / FCL', badgeClass: 'bg-cyan-50 text-cyan-700 border-cyan-200' },
+        { fullText: 'Kho 3PL / Hàng thường / Kho thường', badgeClass: 'bg-purple-50 text-purple-700 border-purple-200' },
+        { fullText: 'Hàng không / Hàng thường / Cargo', badgeClass: 'bg-sky-50 text-sky-700 border-sky-200' },
+        { fullText: 'Đường bộ / Hàng lạnh / FTL', badgeClass: 'bg-teal-50 text-teal-700 border-teal-200' },
+      ];
+    case 'sales-hoang-nam':
+      return [
+        { fullText: 'Đường biển / Hàng thường / FCL', badgeClass: 'bg-cyan-50 text-cyan-700 border-cyan-200' },
+        { fullText: 'Đường biển / Hàng thường / LCL', badgeClass: 'bg-cyan-50 text-cyan-700 border-cyan-200' },
+        { fullText: 'Thủ tục hải quan / Hàng thường / Khai báo & C/O', badgeClass: 'bg-amber-50 text-amber-800 border-amber-200' },
+        { fullText: 'Đường bộ / Hàng thường / FTL', badgeClass: 'bg-blue-50 text-blue-700 border-blue-200' },
+      ];
+    case 'sales-minh-khang':
+      return [
+        { fullText: 'Hàng không / Hàng thường / Cargo', badgeClass: 'bg-sky-50 text-sky-700 border-sky-200' },
+        { fullText: 'Hàng không / Hàng thường / Express', badgeClass: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+        { fullText: 'Thủ tục hải quan / Hàng nguy hiểm / Khai báo & C/O', badgeClass: 'bg-rose-50 text-rose-700 border-rose-200' },
+      ];
+    case 'sales-huong-giang':
+      return [
+        { fullText: 'Thủ tục hải quan / Hàng thường / Khai báo & C/O', badgeClass: 'bg-amber-50 text-amber-800 border-amber-200' },
+        { fullText: 'Thủ tục hải quan / Hàng nguy hiểm / Khai báo & C/O', badgeClass: 'bg-rose-50 text-rose-700 border-rose-200' },
+        { fullText: 'Đường biển / Hàng thường / FCL', badgeClass: 'bg-cyan-50 text-cyan-700 border-cyan-200' },
+      ];
+    case 'sales-tuan-anh':
+      return [
+        { fullText: 'Integrated / Hàng dự án / Đa phương thức', badgeClass: 'bg-violet-50 text-violet-700 border-violet-200' },
+        { fullText: 'Đường bộ / Hàng thường / FTL', badgeClass: 'bg-blue-50 text-blue-700 border-blue-200' },
+        { fullText: 'Đường biển / Hàng thường / FCL', badgeClass: 'bg-cyan-50 text-cyan-700 border-cyan-200' },
+      ];
+    case 'sales-mai-linh':
+      return [
+        { fullText: 'Đường bộ / Hàng lạnh / FTL', badgeClass: 'bg-teal-50 text-teal-700 border-teal-200' },
+        { fullText: 'Cross-Border / Hàng thường / FTL', badgeClass: 'bg-orange-50 text-orange-700 border-orange-200' },
+        { fullText: 'Hàng không / Hàng thường / Express', badgeClass: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+      ];
+    case 'sales-thi-mai':
+      return [
+        { fullText: 'Kho 3PL / Hàng thường / Kho ngoại quan', badgeClass: 'bg-purple-50 text-purple-700 border-purple-200' },
+        { fullText: 'Kho 3PL / Hàng thường / Kho thường', badgeClass: 'bg-purple-50 text-purple-700 border-purple-200' },
+        { fullText: 'Đường sắt / Hàng thường / FCL', badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+      ];
+    default:
+      return [
+        { fullText: 'Đường bộ / Hàng thường / FTL', badgeClass: 'bg-blue-50 text-blue-700 border-blue-200' },
+        { fullText: 'Đường biển / Hàng thường / FCL', badgeClass: 'bg-cyan-50 text-cyan-700 border-cyan-200' },
+      ];
+  }
+};
+
 interface SupplierDirectoryPageProps {
   suppliers: SupplierCompany[];
   initialSpecialistId?: string;
@@ -73,6 +140,8 @@ interface SupplierDirectoryPageProps {
   onOpenCreateInquiry: () => void;
   onNavigate: (view: CurrentView) => void;
 }
+
+type SortField = 'rating' | 'profileViews' | 'rfqRequests' | 'quotesCount' | 'ordersCount' | 'revenue' | 'name';
 
 export const SupplierDirectoryPage: React.FC<SupplierDirectoryPageProps> = ({
   suppliers,
@@ -101,11 +170,92 @@ export const SupplierDirectoryPage: React.FC<SupplierDirectoryPageProps> = ({
     }
   }, [initialSpecialistId, initialViewState]);
 
-  const [displayMode, setDisplayMode] = useState<'gallery' | 'table'>('gallery');
-  const filteredSpecialists = [...mockSalesSpecialists].sort((a, b) => b.rating - a.rating);
+  const [viewsCountMap, setViewsCountMap] = useState<Record<string, number>>(() => {
+    try {
+      const saved = localStorage.getItem('supplier_profile_views_map');
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    } catch (e) {}
+    const initial: Record<string, number> = {};
+    mockSalesSpecialists.forEach((s) => {
+      initial[s.id] = s.profileViews || 12390;
+    });
+    return initial;
+  });
 
-  // Handle open full detail
+  const [displayMode, setDisplayMode] = useState<'gallery' | 'table'>('gallery');
+  const [sortField, setSortField] = useState<SortField>('rating');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('desc');
+    }
+  };
+
+  const sortedSpecialists = useMemo(() => {
+    const list = [...mockSalesSpecialists];
+    return list.sort((a, b) => {
+      let valA: any = 0;
+      let valB: any = 0;
+
+      switch (sortField) {
+        case 'rating':
+          valA = a.rating;
+          valB = b.rating;
+          break;
+        case 'profileViews':
+          valA = viewsCountMap[a.id] ?? (a.profileViews || 0);
+          valB = viewsCountMap[b.id] ?? (b.profileViews || 0);
+          break;
+        case 'rfqRequests':
+          valA = a.viewerInteractions?.rfqRequestsCount || 0;
+          valB = b.viewerInteractions?.rfqRequestsCount || 0;
+          break;
+        case 'quotesCount':
+          valA = a.keyMetrics.quotesCount || 0;
+          valB = b.keyMetrics.quotesCount || 0;
+          break;
+        case 'ordersCount':
+          valA = a.keyMetrics.ordersCount || 0;
+          valB = b.keyMetrics.ordersCount || 0;
+          break;
+        case 'name':
+          return sortOrder === 'asc' 
+            ? a.vietnameseName.localeCompare(b.vietnameseName, 'vi')
+            : b.vietnameseName.localeCompare(a.vietnameseName, 'vi');
+        default:
+          valA = a.rating;
+          valB = b.rating;
+      }
+
+      return sortOrder === 'asc' ? valA - valB : valB - valA;
+    });
+  }, [sortField, sortOrder, viewsCountMap]);
+
+  const totalPages = Math.max(1, Math.ceil(sortedSpecialists.length / pageSize));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const paginatedSpecialists = sortedSpecialists.slice(
+    (safeCurrentPage - 1) * pageSize,
+    safeCurrentPage * pageSize
+  );
+
+  // Handle open full detail & increment profile view count
   const handleOpenDetail = (specialistId: string) => {
+    setViewsCountMap((prev) => {
+      const current = prev[specialistId] ?? (mockSalesSpecialists.find((s) => s.id === specialistId)?.profileViews || 12390);
+      const updated = { ...prev, [specialistId]: current + 1 };
+      try {
+        localStorage.setItem('supplier_profile_views_map', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
     setSelectedSpecialistId(specialistId);
     setViewState('detail');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -132,12 +282,13 @@ export const SupplierDirectoryPage: React.FC<SupplierDirectoryPageProps> = ({
   }
 
   return (
-    <div id="supplier-directory-gallery-page" className="min-h-screen bg-slate-50/70 pb-20">
-      <section className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 pt-6">
-        <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
-          <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-500/20 via-transparent to-transparent pointer-events-none" />
+    <div id="supplier-directory-gallery-page" className="w-full max-w-[1720px] mx-auto px-2 sm:px-4 lg:px-6 py-6 animate-in fade-in duration-200 space-y-5">
+      {/* Hero Header */}
+      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+        <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-500/20 via-transparent to-transparent pointer-events-none" />
 
-          <div className="relative z-10 max-w-3xl space-y-2">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 relative z-10">
+          <div className="space-y-2 max-w-3xl">
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
               Danh bạ nhà cung cấp
             </h1>
@@ -146,109 +297,119 @@ export const SupplierDirectoryPage: React.FC<SupplierDirectoryPageProps> = ({
             </p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 mt-6 pt-6 border-t border-white/10 relative z-10">
-            <div className="bg-slate-800/60 backdrop-blur-md rounded-2xl p-4 border border-white/10 hover:border-emerald-500/40 transition-all group">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-300">Nhà cung cấp xác thực</span>
-                <div className="w-7 h-7 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                </div>
-              </div>
-              <div className="mt-2 flex items-baseline gap-1.5">
-                <span className="text-2xl font-black text-emerald-400 tracking-tight">{mockSalesSpecialists.length}+</span>
-                <span className="text-xs font-bold text-emerald-300/90">đối tác</span>
-              </div>
-              <p className="mt-1 text-[11px] text-slate-400 font-medium">Đã được flexGO xác nhận</p>
-            </div>
-
-            <div className="bg-slate-800/60 backdrop-blur-md rounded-2xl p-4 border border-white/10 hover:border-cyan-500/40 transition-all group">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-300">Nhóm dịch vụ</span>
-                <div className="w-7 h-7 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
-                  <Layers className="w-3.5 h-3.5" />
-                </div>
-              </div>
-              <div className="mt-2 flex items-baseline gap-1.5">
-                <span className="text-2xl font-black text-cyan-400 tracking-tight">8</span>
-                <span className="text-xs font-bold text-cyan-300/90">nhóm</span>
-              </div>
-              <p className="mt-1 text-[11px] text-slate-400 font-medium">Dịch vụ logistics & vận tải</p>
-            </div>
-
-            <div className="bg-slate-800/60 backdrop-blur-md rounded-2xl p-4 border border-white/10 hover:border-purple-500/40 transition-all group">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-300">Biểu giá niêm yết</span>
-                <div className="w-7 h-7 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
-                  <FileText className="w-3.5 h-3.5" />
-                </div>
-              </div>
-              <div className="mt-2 flex items-baseline gap-1.5">
-                <span className="text-2xl font-black text-purple-300 tracking-tight">45+</span>
-                <span className="text-xs font-bold text-purple-200/90">biểu giá</span>
-              </div>
-              <p className="mt-1 text-[11px] text-slate-400 font-medium">Niêm yết công khai, minh bạch</p>
-            </div>
-
-            <div className="bg-slate-800/60 backdrop-blur-md rounded-2xl p-4 border border-white/10 hover:border-amber-500/40 transition-all group">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-300">Thời gian phản hồi</span>
-                <div className="w-7 h-7 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
-                  <Zap className="w-3.5 h-3.5" />
-                </div>
-              </div>
-              <div className="mt-2 flex items-baseline gap-1.5">
-                <span className="text-2xl font-black text-amber-400 tracking-tight">&lt; 15</span>
-                <span className="text-xs font-bold text-amber-300/90">phút</span>
-              </div>
-              <p className="mt-1 text-[11px] text-slate-400 font-medium">Phản hồi yêu cầu báo giá</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="border-b border-slate-200 bg-white py-3">
-        <div className="mx-auto flex max-w-7xl justify-end px-4 sm:px-6 lg:px-8">
-          <div className="inline-flex items-center rounded-xl border border-slate-200 bg-slate-100 p-1 text-xs font-semibold shadow-2xs">
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
             <button
-              onClick={() => setDisplayMode('gallery')}
-              className={`flex items-center gap-1.5 rounded-lg px-3 py-2 transition-all ${
-                displayMode === 'gallery'
-                  ? 'bg-white font-bold text-blue-600 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
+              id="public-post-inquiry-btn"
+              onClick={onOpenCreateInquiry}
+              className="px-5 py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-lg shadow-indigo-600/30"
             >
-              <LayoutGrid className="h-3.5 w-3.5" />
-              <span>Thẻ cá nhân</span>
-            </button>
-            <button
-              onClick={() => setDisplayMode('table')}
-              className={`flex items-center gap-1.5 rounded-lg px-3 py-2 transition-all ${
-                displayMode === 'table'
-                  ? 'bg-white font-bold text-blue-600 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <TableProperties className="h-3.5 w-3.5" />
-              <span>Bảng đối chiếu</span>
+              <Plus className="w-4 h-4" />
+              <span>Đăng Yêu Cầu Vận Chuyển Mới</span>
             </button>
           </div>
         </div>
-      </section>
 
-      {/* =========================================================================
-          MAIN CONTENT AREA (SALESMAN-CENTRIC PIC GALLERY)
-         ========================================================================= */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-8">
-        <p className="mb-6 text-xs text-slate-600">
-          Tìm thấy <strong className="font-bold text-slate-900">{filteredSpecialists.length}</strong> chuyên viên kinh doanh & quản trị giải pháp logistics
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 mt-6 pt-6 border-t border-white/10 relative z-10">
+          <div className="bg-slate-800/60 backdrop-blur-md rounded-2xl p-4 border border-white/10 hover:border-emerald-500/40 transition-all group">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-300">Nhà cung cấp xác thực</span>
+              <div className="w-7 h-7 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+                <ShieldCheck className="w-3.5 h-3.5" />
+              </div>
+            </div>
+            <div className="mt-2 flex items-baseline gap-1.5">
+              <span className="text-2xl font-black text-emerald-400 tracking-tight">{mockSalesSpecialists.length}+</span>
+              <span className="text-xs font-bold text-emerald-300/90">đối tác</span>
+            </div>
+            <p className="mt-1 text-[11px] text-slate-400 font-medium">Đã được flexGO xác nhận</p>
+          </div>
+
+          <div className="bg-slate-800/60 backdrop-blur-md rounded-2xl p-4 border border-white/10 hover:border-cyan-500/40 transition-all group">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-300">Nhóm dịch vụ</span>
+              <div className="w-7 h-7 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
+                <Layers className="w-3.5 h-3.5" />
+              </div>
+            </div>
+            <div className="mt-2 flex items-baseline gap-1.5">
+              <span className="text-2xl font-black text-cyan-400 tracking-tight">8</span>
+              <span className="text-xs font-bold text-cyan-300/90">nhóm</span>
+            </div>
+            <p className="mt-1 text-[11px] text-slate-400 font-medium">Dịch vụ logistics & vận tải</p>
+          </div>
+
+          <div className="bg-slate-800/60 backdrop-blur-md rounded-2xl p-4 border border-white/10 hover:border-purple-500/40 transition-all group">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-300">Biểu giá niêm yết</span>
+              <div className="w-7 h-7 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+                <FileText className="w-3.5 h-3.5" />
+              </div>
+            </div>
+            <div className="mt-2 flex items-baseline gap-1.5">
+              <span className="text-2xl font-black text-purple-300 tracking-tight">45+</span>
+              <span className="text-xs font-bold text-purple-200/90">biểu giá</span>
+            </div>
+            <p className="mt-1 text-[11px] text-slate-400 font-medium">Niêm yết công khai, minh bạch</p>
+          </div>
+
+          <div className="bg-slate-800/60 backdrop-blur-md rounded-2xl p-4 border border-white/10 hover:border-amber-500/40 transition-all group">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-300">Thời gian phản hồi</span>
+              <div className="w-7 h-7 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
+                <Zap className="w-3.5 h-3.5" />
+              </div>
+            </div>
+            <div className="mt-2 flex items-baseline gap-1.5">
+              <span className="text-2xl font-black text-amber-400 tracking-tight">&lt; 15</span>
+              <span className="text-xs font-bold text-amber-300/90">phút</span>
+            </div>
+            <p className="mt-1 text-[11px] text-slate-400 font-medium">Phản hồi yêu cầu báo giá</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Control / View Switcher Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white p-3 sm:px-4 rounded-2xl border border-slate-200/90 shadow-2xs">
+        <p className="text-xs text-slate-600 font-medium">
+          Tìm thấy <strong className="font-bold text-slate-900">{mockSalesSpecialists.length}</strong> chuyên viên kinh doanh & quản trị giải pháp logistics
         </p>
 
+        <div className="inline-flex items-center rounded-xl border border-slate-200 bg-slate-100 p-1 text-xs font-semibold shadow-2xs self-end sm:self-auto">
+          <button
+            onClick={() => setDisplayMode('gallery')}
+            className={`flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 transition-all cursor-pointer ${
+              displayMode === 'gallery'
+                ? 'bg-white font-bold text-blue-600 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <LayoutGrid className="h-3.5 w-3.5" />
+            <span>Thẻ cá nhân</span>
+          </button>
+          <button
+            onClick={() => setDisplayMode('table')}
+            className={`flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 transition-all cursor-pointer ${
+              displayMode === 'table'
+                ? 'bg-white font-bold text-blue-600 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <TableProperties className="h-3.5 w-3.5" />
+            <span>Bảng đối chiếu</span>
+          </button>
+        </div>
+      </div>
+
+      {/* =========================================================================
+          MAIN CONTENT AREA
+         ========================================================================= */}
+      <div className="pt-1">
         {/* -----------------------------------------------------------------------
             MODE 1: SALESMAN-CENTRIC GALLERY CARDS (TRỌNG TÂM CÁ NHÂN PIC)
            ----------------------------------------------------------------------- */}
         {displayMode === 'gallery' && (
-          <div className="mx-auto grid max-w-6xl auto-rows-fr grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 xl:gap-8">
-            {filteredSpecialists.map((specialist) => {
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6">
+            {sortedSpecialists.map((specialist) => {
               const primaryServiceType = specialist.services[0]?.serviceType;
               const primaryService = primaryServiceType ? SERVICE_TYPE_LABELS[primaryServiceType] : 'Logistics';
               const managedRevenue = specialist.keyMetrics.revenueManagedVND.split('(')[0].trim();
@@ -288,7 +449,6 @@ export const SupplierDirectoryPage: React.FC<SupplierDirectoryPageProps> = ({
                         <span className="absolute bottom-1 right-1 h-5 w-5 rounded-full bg-emerald-500 ring-3 ring-slate-800" title="Đang trực tuyến" />
                       )}
                     </div>
-
                   </div>
 
                   <div className="relative mt-4">
@@ -302,7 +462,7 @@ export const SupplierDirectoryPage: React.FC<SupplierDirectoryPageProps> = ({
 
                   <dl className="relative mt-5 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-start gap-x-2 gap-y-2 text-xs leading-5 break-words">
                     <dt className="text-slate-400">Lượt xem</dt>
-                    <dd className="text-right font-black text-slate-100">{specialist.profileViews?.toLocaleString('vi-VN') ?? '—'}</dd>
+                    <dd className="text-right font-black text-slate-100">{(viewsCountMap[specialist.id] ?? (specialist.profileViews || 12390)).toLocaleString('vi-VN')}</dd>
                     <dt className="text-slate-400">Yêu cầu báo giá</dt>
                     <dd className="text-right font-black text-slate-100">{specialist.viewerInteractions?.rfqRequestsCount.toLocaleString('vi-VN') ?? '—'}</dd>
                     <dt className="text-slate-400">Số báo giá</dt>
@@ -314,7 +474,6 @@ export const SupplierDirectoryPage: React.FC<SupplierDirectoryPageProps> = ({
                     <dt className="text-slate-400">Dịch vụ niêm yết</dt>
                     <dd className="text-right font-black text-slate-100">{primaryService}</dd>
                   </dl>
-
                 </div>
               );
             })}
@@ -322,95 +481,318 @@ export const SupplierDirectoryPage: React.FC<SupplierDirectoryPageProps> = ({
         )}
 
         {/* -----------------------------------------------------------------------
-            MODE 2: COMPARATIVE TABLE VIEW (BẢNG SO SÁNH NĂNG LỰC CÁ NHÂN PIC)
+            MODE 2: COMPARATIVE TABLE VIEW (BẢNG ĐỐI CHIẾU ĐỒNG BỘ LEADBOARD STYLE)
            ----------------------------------------------------------------------- */}
         {displayMode === 'table' && (
-          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xs">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="border-b border-slate-200 bg-slate-50 text-slate-600 font-bold uppercase tracking-wider text-[11px]">
-                  <tr>
-                    <th className="py-3.5 px-4">Chuyên Viên Sales (PIC)</th>
-                    <th className="py-3.5 px-4">Đơn Vị Công Tác</th>
-                    <th className="py-3.5 px-4">Thế Mạnh Chuyên Môn</th>
-                    <th className="py-3.5 px-4 text-center">Lượt Xem</th>
-                    <th className="py-3.5 px-4 text-center">Đánh Giá</th>
-                    <th className="py-3.5 px-4 text-center">Kinh Nghiệm</th>
-                    <th className="py-3.5 px-4 text-center">Tốc Độ Phản Hồi</th>
-                    <th className="py-3.5 px-4 text-right">Thao Tác</th>
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden w-full flex flex-col">
+            <div className="overflow-x-auto w-full">
+              <table className="w-full text-left border-collapse table-auto" id="supplier-comparison-table">
+                {/* Table Header */}
+                <thead className="bg-slate-100 shadow-xs border-b border-slate-200">
+                  <tr className="bg-slate-100 text-[10.5px] font-bold text-slate-600 uppercase tracking-wider select-none">
+                    {/* 1. STT */}
+                    <th className="py-3 px-2 w-10 text-center sticky top-0 bg-slate-100 border-b border-slate-200">
+                      STT
+                    </th>
+
+                    {/* 2. PIC */}
+                    <th 
+                      className="py-3 px-3 min-w-[220px] cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 bg-slate-100 border-b border-slate-200"
+                      onClick={() => handleSort('name')}
+                    >
+                      <div className="flex items-center gap-1">
+                        <span>PIC</span>
+                        <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                      </div>
+                    </th>
+
+                    {/* 3. Đơn Vị */}
+                    <th className="py-3 px-3 min-w-[170px] whitespace-nowrap sticky top-0 bg-slate-100 border-b border-slate-200">
+                      <span>Đơn Vị</span>
+                    </th>
+
+                    {/* 4. Dịch Vụ (Cấu trúc: Nhóm / Nhóm Hàng / Mô Hình) */}
+                    <th className="py-3 px-3 min-w-[280px] sticky top-0 bg-slate-100 border-b border-slate-200">
+                      <span>Dịch Vụ</span>
+                    </th>
+
+                    {/* 5. Lượt Xem */}
+                    <th 
+                      className="py-3 px-2 text-center cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 bg-slate-100 border-b border-slate-200"
+                      onClick={() => handleSort('profileViews')}
+                    >
+                      <div className="flex items-center justify-center gap-1">
+                        <span>Lượt Xem</span>
+                        <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                      </div>
+                    </th>
+
+                    {/* 6. Yêu Cầu Báo Giá */}
+                    <th 
+                      className="py-3 px-2 text-center cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 bg-slate-100 border-b border-slate-200"
+                      onClick={() => handleSort('rfqRequests')}
+                    >
+                      <div className="flex items-center justify-center gap-1">
+                        <span>Yêu Cầu Báo Giá</span>
+                        <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                      </div>
+                    </th>
+
+                    {/* 7. Số Báo Giá */}
+                    <th 
+                      className="py-3 px-2 text-center cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 bg-slate-100 border-b border-slate-200"
+                      onClick={() => handleSort('quotesCount')}
+                    >
+                      <div className="flex items-center justify-center gap-1">
+                        <span>Số Báo Giá</span>
+                        <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                      </div>
+                    </th>
+
+                    {/* 8. Số Đơn Hàng (Cột mới) */}
+                    <th 
+                      className="py-3 px-2 text-center cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 bg-slate-100 border-b border-slate-200"
+                      onClick={() => handleSort('ordersCount')}
+                    >
+                      <div className="flex items-center justify-center gap-1">
+                        <span>Số Đơn Hàng</span>
+                        <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                      </div>
+                    </th>
+
+                    {/* 9. Giá Trị */}
+                    <th className="py-3 px-3 text-right whitespace-nowrap sticky top-0 bg-slate-100 border-b border-slate-200">
+                      <span>Giá Trị</span>
+                    </th>
+
+                    {/* 10. Đánh Giá */}
+                    <th 
+                      className="py-3 px-2 text-center cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 bg-slate-100 border-b border-slate-200"
+                      onClick={() => handleSort('rating')}
+                    >
+                      <div className="flex items-center justify-center gap-1">
+                        <span>Đánh Giá</span>
+                        <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                      </div>
+                    </th>
+
+                    {/* 11. Thao Tác */}
+                    <th className="py-3 px-3 text-center whitespace-nowrap sticky top-0 bg-slate-100 border-b border-slate-200">
+                      <span>Thao Tác</span>
+                    </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 text-slate-700">
-                  {filteredSpecialists.map((spec) => (
-                    <tr key={spec.id} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="py-4 px-4">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 font-bold text-white text-xs shrink-0">
-                            {spec.avatarInitial}
+
+                {/* Table Body */}
+                <tbody className="divide-y divide-slate-100 text-xs">
+                  {paginatedSpecialists.map((spec, index) => {
+                    const itemIndex = (safeCurrentPage - 1) * pageSize + index + 1;
+                    const declaredBadges = getDeclaredServiceBadges(spec.id);
+                    const managedRevenue = spec.keyMetrics.revenueManagedVND.split('(')[0].trim();
+
+                    return (
+                      <tr
+                        key={spec.id}
+                        className="hover:bg-indigo-50/40 transition-colors group"
+                      >
+                        {/* 1. STT */}
+                        <td className="py-3.5 px-2 text-center font-mono text-slate-500 font-bold text-xs select-none">
+                          {itemIndex}
+                        </td>
+
+                        {/* 2. PIC (Tên tĩnh, Avatar, Chức danh) */}
+                        <td className="py-3.5 px-3">
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-700 to-indigo-600 font-bold text-white text-xs shadow-2xs shrink-0">
+                              {spec.avatarInitial}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-bold text-slate-900 text-[13px] leading-tight truncate">
+                                {spec.vietnameseName}
+                              </p>
+                              <p className="text-[11px] text-slate-500 font-medium leading-tight truncate mt-0.5" title={spec.title}>
+                                {spec.title}
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <p 
-                              className="font-bold text-slate-900 text-sm hover:text-blue-600 cursor-pointer" 
-                              onClick={() => handleOpenDetail(spec.id)}
-                            >
-                              {spec.vietnameseName}
-                            </p>
-                            <p className="text-xs text-blue-700">{spec.title}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-4 px-4">
-                        <div className="flex items-center gap-1.5">
-                          <span className="font-semibold text-slate-800">{spec.companyName}</span>
-                        </div>
-                      </td>
-                      <td className="py-4 px-4">
-                        <div className="flex flex-wrap gap-1 max-w-xs">
-                          {spec.specialties.slice(0, 2).map((sp, i) => (
-                            <span key={i} className="rounded bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-700 line-clamp-1">
-                              {sp}
+                        </td>
+
+                        {/* 3. Đơn Vị */}
+                        <td className="py-3.5 px-3 whitespace-nowrap">
+                          <div className="flex items-center gap-1.5">
+                            <Building2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                            <span className="font-semibold text-slate-800 text-xs truncate max-w-[180px]" title={spec.companyName}>
+                              {spec.companyName}
                             </span>
-                          ))}
-                        </div>
-                      </td>
-                      <td className="py-4 px-4 text-center">
-                        <span className="inline-flex items-center gap-1 font-bold text-indigo-800 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">
-                          <Eye className="h-3 w-3 text-indigo-600" />
-                          {(spec.profileViews || 14820).toLocaleString('vi-VN')}
-                        </span>
-                      </td>
-                      <td className="py-4 px-4 text-center">
-                        <span className="inline-flex items-center gap-1 font-bold text-slate-900">
-                          <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                          {spec.rating}
-                        </span>
-                      </td>
-                      <td className="py-4 px-4 text-center font-bold text-slate-800">
-                        {spec.yearsOfExperience}+ Năm
-                      </td>
-                      <td className="py-4 px-4 text-center">
-                        <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-700 border border-emerald-200">
-                          {spec.responseTime}
-                        </span>
-                      </td>
-                      <td className="py-4 px-4 text-right">
-                        <button
-                          onClick={() => handleOpenDetail(spec.id)}
-                          className="inline-flex items-center gap-1 rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700 hover:bg-blue-600 hover:text-white transition-colors"
-                        >
-                          <span>Xem Profile</span>
-                          <ChevronRight className="h-3.5 w-3.5" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                          </div>
+                        </td>
+
+                        {/* 4. Dịch Vụ: Dạng [Nhóm / Loại hàng / Mô hình] */}
+                        <td className="py-3.5 px-3">
+                          <div className="flex flex-wrap gap-1.5 max-w-[340px]">
+                            {declaredBadges.map((badge, bIdx) => (
+                              <span
+                                key={bIdx}
+                                className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10.5px] font-bold border tracking-tight ${badge.badgeClass}`}
+                              >
+                                {badge.fullText}
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+
+                        {/* 5. Lượt Xem */}
+                        <td className="py-3.5 px-2 text-center whitespace-nowrap">
+                          <span className="inline-flex items-center gap-1 font-bold text-indigo-800 bg-indigo-50/80 px-2 py-0.5 rounded-md border border-indigo-100 text-[11px]">
+                            <Eye className="h-3 w-3 text-indigo-600 shrink-0" />
+                            {(viewsCountMap[spec.id] ?? (spec.profileViews || 14820)).toLocaleString('vi-VN')}
+                          </span>
+                        </td>
+
+                        {/* 6. Yêu Cầu Báo Giá */}
+                        <td className="py-3.5 px-2 text-center whitespace-nowrap">
+                          <span className="inline-block px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                            {(spec.viewerInteractions?.rfqRequestsCount || 180).toLocaleString('vi-VN')} yêu cầu
+                          </span>
+                        </td>
+
+                        {/* 7. Số Báo Giá */}
+                        <td className="py-3.5 px-2 text-center whitespace-nowrap">
+                          <span className="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/80">
+                            {(spec.keyMetrics.quotesCount || 150).toLocaleString('vi-VN')} báo giá
+                          </span>
+                        </td>
+
+                        {/* 8. Số Đơn Hàng */}
+                        <td className="py-3.5 px-2 text-center whitespace-nowrap">
+                          <span className="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                            {(spec.keyMetrics.ordersCount || 95).toLocaleString('vi-VN')} đơn hàng
+                          </span>
+                        </td>
+
+                        {/* 9. Giá Trị */}
+                        <td className="py-3.5 px-3 text-right whitespace-nowrap">
+                          <div className="space-y-0.5">
+                            <span className="text-[12.5px] font-black text-emerald-700 block tracking-tight">
+                              {managedRevenue}
+                            </span>
+                            <span className="text-[9.5px] font-semibold text-slate-400 block">
+                              Quản lý doanh số
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* 10. Đánh Giá */}
+                        <td className="py-3.5 px-2 text-center whitespace-nowrap">
+                          <div className="inline-flex items-center gap-1 font-bold text-slate-900 bg-amber-50/50 px-2 py-0.5 rounded-md border border-amber-200/60">
+                            <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400 shrink-0" />
+                            <span>{spec.rating}</span>
+                            <span className="text-[10px] text-slate-400 font-normal">({spec.reviewsCount || 120})</span>
+                          </div>
+                        </td>
+
+                        {/* 11. Thao Tác */}
+                        <td className="py-3.5 px-3 text-center whitespace-nowrap">
+                          <button
+                            onClick={() => handleOpenDetail(spec.id)}
+                            className="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white text-xs font-bold transition-all border border-indigo-200/80 hover:border-indigo-600 shadow-2xs cursor-pointer"
+                          >
+                            <span>Xem Profile</span>
+                            <ChevronRight className="h-3.5 w-3.5" />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
+            </div>
+
+            {/* Pagination & Summary Footer (Chuẩn 1:1 LeadBoard Style) */}
+            <div className="px-4 py-3 bg-slate-50/90 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600 select-none">
+              <div className="flex items-center gap-2">
+                <span>
+                  Đang hiển thị <strong className="font-bold text-slate-900">{((safeCurrentPage - 1) * pageSize) + 1} - {Math.min(safeCurrentPage * pageSize, sortedSpecialists.length)}</strong> trên tổng <strong className="font-bold text-slate-900">{sortedSpecialists.length}</strong> chuyên viên
+                </span>
+              </div>
+
+              {/* Page navigation controls */}
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  disabled={safeCurrentPage <= 1}
+                  onClick={() => setCurrentPage(1)}
+                  className="p-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  title="Trang đầu"
+                >
+                  <ChevronsLeft className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  disabled={safeCurrentPage <= 1}
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  className="p-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  title="Trang trước"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                </button>
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                  <button
+                    key={pageNum}
+                    type="button"
+                    onClick={() => setCurrentPage(pageNum)}
+                    className={`min-w-[28px] h-7 px-2 text-xs font-bold rounded-lg transition-colors ${
+                      safeCurrentPage === pageNum
+                        ? 'bg-indigo-600 text-white shadow-2xs'
+                        : 'bg-white border border-slate-200 hover:bg-slate-100 text-slate-700'
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                ))}
+
+                <button
+                  type="button"
+                  disabled={safeCurrentPage >= totalPages}
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  className="p-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  title="Trang sau"
+                >
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  disabled={safeCurrentPage >= totalPages}
+                  onClick={() => setCurrentPage(totalPages)}
+                  className="p-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  title="Trang cuối"
+                >
+                  <ChevronsRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {/* Page size selector */}
+              <div className="flex items-center gap-2">
+                <span className="text-slate-500">Hiển thị:</span>
+                <select
+                  value={pageSize}
+                  onChange={(e) => {
+                    setPageSize(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className="px-2 py-1 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                >
+                  <option value={5}>5 dòng / trang</option>
+                  <option value={10}>10 dòng / trang</option>
+                  <option value={20}>20 dòng / trang</option>
+                  <option value={50}>50 dòng / trang</option>
+                </select>
+              </div>
             </div>
           </div>
         )}
       </div>
-
     </div>
   );
 };
