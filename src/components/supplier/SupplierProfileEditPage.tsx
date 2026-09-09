@@ -80,12 +80,14 @@ interface SupplierProfileEditPageProps {
   currentSpecialistId?: string;
   onNavigate: (view: CurrentView) => void;
   onSaveSuccess?: (updatedProfile: SalesSpecialistProfile) => void;
+  initialTab?: 'profile' | 'company' | 'services' | 'performance';
 }
 
 export const SupplierProfileEditPage: React.FC<SupplierProfileEditPageProps> = ({
   currentSpecialistId = 'sales-minh-tran',
   onNavigate,
   onSaveSuccess,
+  initialTab = 'profile',
 }) => {
   // Mode: 'edit' (Editor UI) vs 'preview' (Live Customer View)
   const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit');
@@ -93,7 +95,7 @@ export const SupplierProfileEditPage: React.FC<SupplierProfileEditPageProps> = (
   // Active Tab inside Studio (4 core tabs)
   const [activeEditorTab, setActiveEditorTab] = useState<
     'profile' | 'company' | 'services' | 'performance'
-  >('profile');
+  >(initialTab);
 
   // Studio Template Configuration State
   const [studioConfig, setStudioConfig] = useState<StudioTemplateConfig>(initialStudioConfig);
@@ -397,36 +399,6 @@ export const SupplierProfileEditPage: React.FC<SupplierProfileEditPageProps> = (
   if (viewMode === 'preview') {
     return (
       <div className="min-h-screen bg-slate-100">
-        {/* Floating Preview Controller Bar */}
-        <div className="sticky top-16 z-40 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white px-4 sm:px-6 py-3 border-b border-indigo-500/30 shadow-xl flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center space-x-3">
-            <span className="px-2.5 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 rounded-full text-xs font-black uppercase tracking-wider flex items-center gap-1.5">
-              <Eye className="w-3.5 h-3.5" />
-              <span>Live Customer Preview Mode</span>
-            </span>
-            <p className="text-xs text-slate-300 hidden sm:block">
-              Đây là giao diện 100% thực tế mà Khách hàng doanh nghiệp (Customer) nhìn thấy khi xem hồ sơ chi tiết của bạn.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setViewMode('edit')}
-              className="px-4 py-1.5 bg-white/10 hover:bg-white/20 border border-white/30 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
-            >
-              <Edit3 className="w-3.5 h-3.5 text-indigo-300" />
-              <span>Quay Lại Chỉnh Sửa (Edit Profile)</span>
-            </button>
-            <button
-              onClick={() => handleSaveProfile()}
-              className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-md"
-            >
-              <Save className="w-3.5 h-3.5" />
-              <span>Lưu & Xuất Bản Hồ Sơ</span>
-            </button>
-          </div>
-        </div>
-
         {/* Render the actual Customer Detail Page Component with live profile data */}
         <SupplierProfileDetailPage
           specialistId={profile.id}

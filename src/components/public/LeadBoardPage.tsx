@@ -50,7 +50,6 @@ import {
   Mail,
   UserCheck,
   MessageSquare,
-  ShieldCheck,
   KeyRound,
   AlertCircle,
   FileText,
@@ -827,33 +826,17 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
 
   return (
     <div className="w-full max-w-[1720px] mx-auto px-2 sm:px-4 lg:px-6 py-6 animate-in fade-in duration-200 space-y-5">
-      {/* Breadcrumb */}
-      <div className="flex items-center space-x-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-        <span className="cursor-pointer hover:text-indigo-600" onClick={() => onNavigate({ type: 'public', tab: 'home' })}>
-          FlexGO Public Sàn Vận Tải
-        </span>
-        <ChevronRight className="w-3.5 h-3.5" />
-        <span className="text-indigo-600 font-bold">Public Freight Lead Board</span>
-        <ChevronRight className="w-3.5 h-3.5" />
-        <span className="text-slate-600 lowercase font-normal">phân định báo giá theo lô & hợp đồng định kỳ</span>
-      </div>
-
       {/* Hero Header */}
       <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
         <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-500/20 via-transparent to-transparent pointer-events-none" />
         
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 relative z-10">
           <div className="space-y-2 max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold tracking-wide">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-              <span>SÀN YÊU CẦU VẬN TẢI CÔNG KHAI (PUBLIC B2B FREIGHT LEADS)</span>
-            </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-              Bảng Săn Lead Vận Tải: Theo Lô & Hợp Đồng Định Kỳ
+              Yêu cầu báo giá
             </h1>
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Minh bạch 100% cấu trúc định giá: phân tách rõ ràng giữa <strong>Hợp đồng định kỳ dài hạn (Contract)</strong> và <strong>Vận chuyển theo lô/chuyến (Spot)</strong>. 
-              Hiển thị chi tiết từng cột: <em>Loại hình</em>, <em>Sản lượng cam kết</em>, <em>Đơn giá dự kiến</em> và <em>Tổng giá trị dự toán</em>.
+              Từ các khách hàng uy tín và đáng tin cậy được flexGO xác nhận.
             </p>
           </div>
 
@@ -1043,31 +1026,6 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
               </button>
             );
           })}
-        </div>
-      </div>
-
-      {/* 2. THANH TÌM KIẾM THEO MÃ LEAD */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-3 shadow-xs">
-        <div className="relative w-full">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-          <input
-            id="leadboard-search-input"
-            type="text"
-            placeholder="Tìm kiếm theo Mã Lead (VD: FG-2608310001, FG-2608250001, FG-2608280002)..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-10 py-2.5 text-xs bg-slate-50 hover:bg-slate-50/80 focus:bg-white border border-slate-200 rounded-xl focus:border-indigo-500 focus:outline-hidden transition-all placeholder:text-slate-400 font-medium text-slate-900"
-          />
-          {searchTerm && (
-            <button
-              type="button"
-              onClick={() => setSearchTerm('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold p-1 cursor-pointer"
-              title="Xóa tìm kiếm"
-            >
-              ✕
-            </button>
-          )}
         </div>
       </div>
 

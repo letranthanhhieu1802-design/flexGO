@@ -1077,6 +1077,8 @@ export interface SalesSpecialistProfile {
     viewsLast7Days: number[];
   };
   keyMetrics: {
+    quotesCount?: number;
+    ordersCount?: number;
     shipmentsCount: string;
     revenueManagedVND: string;
     onTimeDeliveryRate: string;

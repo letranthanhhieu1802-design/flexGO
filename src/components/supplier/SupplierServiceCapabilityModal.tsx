@@ -5187,6 +5187,13 @@ export const CAPABILITY_SERVICE_TREE: ServiceCategoryTree[] = [
   },
 ];
 
+const getServiceTreeDisplayName = (name: string): string => {
+  if (name.startsWith('Air Cargo')) return 'Bay thường';
+  if (name.startsWith('Express')) return 'Chuyển phát nhanh';
+
+  return name.replace(/\s*\([^)]*\)\s*$/, '').trim();
+};
+
 interface SupplierServiceCapabilityModalProps {
   isOpen?: boolean;
   onClose?: () => void;
@@ -7041,7 +7048,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                       </div>
 
                       <IconComp className="w-3.5 h-3.5 text-slate-600 shrink-0" />
-                      <span className="text-xs font-bold text-slate-800 truncate">{cat.name}</span>
+                      <span className="text-xs font-bold text-slate-800 truncate">{getServiceTreeDisplayName(cat.name)}</span>
                     </div>
 
                     {catCheckedCount > 0 && (
@@ -7087,7 +7094,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                   {isCgIndeterminate && <span className="text-[9px] leading-none mb-0.5">-</span>}
                                 </div>
 
-                                <span className="text-xs font-semibold text-slate-700">{cg.name}</span>
+                                <span className="text-xs font-semibold text-slate-700">{getServiceTreeDisplayName(cg.name)}</span>
                               </div>
                             </div>
 
@@ -7126,7 +7133,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                           {isSelected && <Check className="w-2.5 h-2.5 stroke-[3]" />}
                                         </div>
 
-                                        <span className="truncate">{m.name}</span>
+                                        <span className="truncate">{getServiceTreeDisplayName(m.name)}</span>
                                       </div>
 
                                       {isActive && (

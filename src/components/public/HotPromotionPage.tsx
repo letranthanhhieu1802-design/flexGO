@@ -44,12 +44,9 @@ import {
   Share2,
   Users,
   Zap,
-  Info,
   Coins,
   ArrowUpDown,
   Copy,
-  LayoutList,
-  LayoutGrid,
   Hourglass,
   Repeat,
   Boxes,
@@ -93,16 +90,10 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
 
   const [promotionsList, setPromotionsList] = useState<HotPromotionItem[]>(initialCombined);
   
-  // Search & Filter States
-  const [searchTerm, setSearchTerm] = useState<string>('');
+  // Service category and sorting states
   const [selectedService, setSelectedService] = useState<string>('ALL');
-  const [selectedBadge, setSelectedBadge] = useState<string>('ALL');
   const [sortField, setSortField] = useState<SortField>('discount');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
-  
-  // View & Density States (Table view like Lead Board vs Card Grid view)
-  const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
-  const [tableDensity, setTableDensity] = useState<'comfortable' | 'compact'>('comfortable');
   const [expandedRowIds, setExpandedRowIds] = useState<Record<string, boolean>>({});
 
   // Pagination States
@@ -330,19 +321,6 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
   const filteredAndSortedPromotions = useMemo(() => {
     return promotionsList
       .filter((promo) => {
-        const searchLower = searchTerm.toLowerCase();
-        const matchesSearch = 
-          !searchTerm ||
-          promo.code.toLowerCase().includes(searchLower) ||
-          promo.title.toLowerCase().includes(searchLower) ||
-          promo.routeDisplay.toLowerCase().includes(searchLower) ||
-          promo.origin.toLowerCase().includes(searchLower) ||
-          promo.destination.toLowerCase().includes(searchLower) ||
-          promo.specialistVietnameseName.toLowerCase().includes(searchLower) ||
-          promo.companyName.toLowerCase().includes(searchLower) ||
-          promo.vehicleOrUnit.toLowerCase().includes(searchLower) ||
-          promo.cargoSuitability.toLowerCase().includes(searchLower);
-
         let matchesService = true;
         if (selectedService !== 'ALL') {
           if (selectedService === 'Trucking') {
@@ -366,11 +344,7 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
           }
         }
 
-        const matchesBadge = 
-          selectedBadge === 'ALL' || 
-          promo.badgeType === selectedBadge;
-
-        return matchesSearch && matchesService && matchesBadge;
+        return matchesService;
       })
       .sort((a, b) => {
         let comp = 0;
@@ -395,7 +369,7 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
 
         return sortDirection === 'desc' ? -comp : comp;
       });
-  }, [promotionsList, searchTerm, selectedService, selectedBadge, sortField, sortDirection]);
+  }, [promotionsList, selectedService, sortField, sortDirection]);
 
   // Synchronize top and bottom scrollbars
   useEffect(() => {
@@ -411,7 +385,7 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
       clearTimeout(timer);
       window.removeEventListener('resize', updateScrollDims);
     };
-  }, [filteredAndSortedPromotions, tableDensity, currentPage, pageSize, viewMode]);
+  }, [filteredAndSortedPromotions, currentPage, pageSize]);
 
   const handleTopScroll = () => {
     if (isSyncingScroll.current) return;
@@ -451,35 +425,6 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
       setSortField(field);
       setSortDirection('desc');
     }
-  };
-
-  const toggleExpandAll = () => {
-    const allExpanded = paginatedPromotions.every(p => expandedRowIds[p.id]);
-    const newState: Record<string, boolean> = {};
-    if (!allExpanded) {
-      const newlyExpandedIds: string[] = [];
-      paginatedPromotions.forEach(p => {
-        newState[p.id] = true;
-        if (!expandedRowIds[p.id]) {
-          newlyExpandedIds.push(p.id);
-        }
-      });
-      if (newlyExpandedIds.length > 0) {
-        newlyExpandedIds.forEach(id => {
-          if (onIncrementPromotionViews) {
-            onIncrementPromotionViews(id);
-          }
-        });
-        setPromotionsList(prevList =>
-          prevList.map(item =>
-            newlyExpandedIds.includes(item.id)
-              ? { ...item, viewsCount: (item.viewsCount || 0) + 1 }
-              : item
-          )
-        );
-      }
-    }
-    setExpandedRowIds(newState);
   };
 
   // Handle Publish New Promotion Listing by Supplier
@@ -889,24 +834,23 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
 
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div className="space-y-2.5 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/20 border border-orange-500/40 text-orange-300 text-xs font-bold">
-              <Flame className="w-3.5 h-3.5 text-orange-400 animate-pulse" />
-              <span>Sàn Cước Khuyến Mãi & Biểu Giá Dịch Vụ Nhà Cung Cấp Niêm Yết</span>
-            </div>
-            
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-white">
-              Hot Promotions & Biểu Giá Dịch Vụ
+              Biểu giá niêm yết
             </h1>
 
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Tổng hợp tự động toàn bộ <strong>biểu giá dịch vụ, cước chiều về, cước Flash Sale, kho bãi & thủ tục hải quan</strong> do các Nhà xe, Hãng vận tải và Chuyên viên Kinh doanh (PIC) niêm yết trên trang cá nhân của họ để Chủ hàng tra cứu và khóa giá nhanh.
+              Từ các nhà cung cấp uy tín và đáng tin cậy được flexGO xác nhận.
             </p>
           </div>
 
           {/* Action CTA Buttons */}
           <div className="flex flex-wrap items-center gap-3 shrink-0">
             <button
-              onClick={() => setIsCreatePromoModalOpen(true)}
+              onClick={() => onNavigate({
+                type: 'workspace',
+                view: 'supplier-profile-edit',
+                params: { editorTab: 'services' },
+              })}
               id="supplier-list-promo-btn"
               className="px-4 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs shadow-lg hover:shadow-orange-600/30 transition-all flex items-center gap-2 cursor-pointer active:scale-[0.99]"
             >
@@ -1110,122 +1054,7 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
         </div>
       </div>
 
-      {/* =========================================================================
-          2. TOOLBAR: SEARCH, BADGE FILTERS, DENSITY & VIEW SWITCHER
-         ========================================================================= */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs space-y-3">
-        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
-          {/* Search Input */}
-          <div className="relative flex-1 min-w-[280px]">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              id="promo-search-input"
-              type="text"
-              placeholder="Tìm theo Mã Biểu Giá, Tuyến đường, Chuyên viên PIC, Nhà xe, Loại phương tiện..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="w-full pl-10 pr-10 py-2.5 text-xs bg-slate-50 hover:bg-slate-50/80 focus:bg-white border border-slate-200 rounded-xl focus:border-orange-500 focus:outline-hidden transition-all placeholder:text-slate-400 font-medium"
-            />
-            {searchTerm && (
-              <button
-                onClick={() => setSearchTerm('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold"
-              >
-                ✕
-              </button>
-            )}
-          </div>
-
-          {/* Filters & Display Controls */}
-          <div className="flex flex-wrap items-center gap-2 text-xs">
-            {/* Badge Type Filter */}
-            <div className="flex items-center gap-1 bg-orange-50/70 border border-orange-200 rounded-xl px-2.5 py-1.5">
-              <Flame className="w-3.5 h-3.5 text-orange-600" />
-              <select
-                id="promo-badge-filter"
-                value={selectedBadge}
-                onChange={(e) => {
-                  setSelectedBadge(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className="bg-transparent text-xs font-bold text-orange-900 focus:outline-hidden cursor-pointer"
-              >
-                <option value="ALL">Mọi loại ưu đãi</option>
-                <option value="BACKHAUL_DEAL">Cước chiều về (Backhaul)</option>
-                <option value="FLASH_SALE">Flash Sale tuần</option>
-                <option value="HOT_ROUTE">Tuyến hot công nghiệp</option>
-                <option value="VOLUME_DISCOUNT">Giảm theo số lượng</option>
-                <option value="EXCLUSIVE_FLEXGO">Độc quyền flexGO</option>
-                <option value="LIMITED_CAPACITY">Giữ chỗ có hạn</option>
-              </select>
-            </div>
-
-            {/* Expand / Collapse All Toggle */}
-            <button
-              onClick={toggleExpandAll}
-              className="px-2.5 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold text-xs flex items-center gap-1.5 cursor-pointer transition-colors"
-              title="Đóng / Mở tất cả chi tiết thông số kỹ thuật"
-            >
-              <Info className="w-3.5 h-3.5 text-slate-500" />
-              <span>Đóng/Mở Chi Tiết</span>
-            </button>
-
-            {/* View Mode Toggle: Table (Lead Board style) vs Grid (Card style) */}
-            <div className="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200 text-xs">
-              <button
-                onClick={() => setViewMode('table')}
-                className={`px-2.5 py-1.5 rounded-lg font-bold flex items-center gap-1 cursor-pointer transition-all ${
-                  viewMode === 'table' ? 'bg-white text-orange-600 shadow-2xs' : 'text-slate-500 hover:text-slate-700'
-                }`}
-                title="Xem dạng Bảng Dữ Liệu Tra Cứu (như Lead Board)"
-              >
-                <LayoutList className="w-3.5 h-3.5" />
-                <span>Dạng Bảng (Lead Board)</span>
-              </button>
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`px-2.5 py-1.5 rounded-lg font-bold flex items-center gap-1 cursor-pointer transition-all ${
-                  viewMode === 'grid' ? 'bg-white text-orange-600 shadow-2xs' : 'text-slate-500 hover:text-slate-700'
-                }`}
-                title="Xem dạng Thẻ (Cards Grid)"
-              >
-                <LayoutGrid className="w-3.5 h-3.5" />
-                <span>Dạng Thẻ (Cards)</span>
-              </button>
-            </div>
-
-            {/* Table Density Switcher */}
-            {viewMode === 'table' && (
-              <div className="hidden sm:flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200 text-xs">
-                <button
-                  onClick={() => setTableDensity('comfortable')}
-                  className={`px-2 py-1 rounded-lg cursor-pointer ${
-                    tableDensity === 'comfortable' ? 'bg-white text-slate-900 shadow-2xs font-bold' : 'text-slate-500'
-                  }`}
-                >
-                  Chuẩn
-                </button>
-                <button
-                  onClick={() => setTableDensity('compact')}
-                  className={`px-2 py-1 rounded-lg cursor-pointer ${
-                    tableDensity === 'compact' ? 'bg-white text-slate-900 shadow-2xs font-bold' : 'text-slate-500'
-                  }`}
-                >
-                  Thu gọn
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* =========================================================================
-          3. MAIN CONTENT: TABLE VIEW (LEAD BOARD STYLE) VS GRID VIEW
-         ========================================================================= */}
-      {viewMode === 'table' ? (
+      {/* Main content: table view */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden w-full flex flex-col">
           {/* Scrollable Table Area: Vertical max-h-[640px], NO horizontal scrollbar */}
           <div 
@@ -1330,13 +1159,11 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
                         </div>
                         <h3 className="text-sm font-bold text-slate-800">Không tìm thấy biểu giá phù hợp</h3>
                         <p className="text-xs text-slate-500 leading-relaxed">
-                          Thử điều chỉnh lại từ khóa tìm kiếm hoặc chọn danh mục dịch vụ khác để tra cứu các biểu giá khả dụng.
+                          Chọn một nhóm dịch vụ khác để xem các biểu giá đang được niêm yết.
                         </p>
                         <button
                           onClick={() => {
-                            setSearchTerm('');
                             setSelectedService('ALL');
-                            setSelectedBadge('ALL');
                           }}
                           className="px-4 py-2 bg-orange-50 text-orange-600 hover:bg-orange-100 font-bold rounded-xl text-xs transition-colors cursor-pointer inline-flex items-center gap-1.5"
                         >
@@ -1535,200 +1362,6 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
             </div>
           </div>
         </div>
-      ) : (
-        /* PROMOTION CARDS GRID VIEW */
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          {paginatedPromotions.map((promo) => {
-            const isBookmarked = bookmarkedDealIds.includes(promo.id);
-            const savingsVND = promo.originalPriceVND - promo.promotionalPriceVND;
-
-            return (
-              <div
-                key={promo.id}
-                id={`promotion-card-${promo.id}`}
-                className="flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xs hover:shadow-md hover:border-orange-300 transition-all group"
-              >
-                <div>
-                  {/* Card Header: Badge, Discount Pill, Expiry Countdown & Bookmark */}
-                  <div className="border-b border-slate-100 p-5 bg-linear-to-r from-orange-50/50 via-white to-slate-50/50">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-[11px] font-black uppercase tracking-wider ${getBadgeStyle(promo.badgeType)}`}>
-                          <Flame className="h-3 w-3" />
-                          {promo.badgeLabel}
-                        </span>
-
-                        <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-700 border border-emerald-200">
-                          <Percent className="h-3 w-3" />
-                          Giảm {promo.discountPercent}%
-                        </span>
-
-                        <span className="inline-flex items-center gap-1 text-[11px] text-slate-500 font-medium">
-                          <Clock className="h-3 w-3 text-slate-400" />
-                          Còn {promo.daysRemaining} ngày
-                        </span>
-                      </div>
-
-                      {/* Bookmark Button */}
-                      <button
-                        onClick={() => toggleBookmark(promo.id, promo.title)}
-                        className={`rounded-lg p-2 transition-colors cursor-pointer ${
-                          isBookmarked
-                            ? 'text-amber-500 bg-amber-50'
-                            : 'text-slate-400 hover:bg-slate-100 hover:text-slate-600'
-                        }`}
-                        title={isBookmarked ? 'Bỏ lưu ưu đãi' : 'Lưu ưu đãi này'}
-                      >
-                        <Bookmark className={`h-4 w-4 ${isBookmarked ? 'fill-amber-500' : ''}`} />
-                      </button>
-                    </div>
-
-                    {/* Deal Title */}
-                    <h3 className="mt-3 text-base sm:text-lg font-bold text-slate-900 group-hover:text-orange-600 transition-colors">
-                      {promo.title}
-                    </h3>
-
-                    {/* Route Box with Visual Indicator */}
-                    <div className="mt-3 rounded-xl bg-slate-50 p-3 border border-slate-100 flex items-center justify-between text-xs">
-                      <div className="space-y-0.5">
-                        <span className="text-[10px] text-slate-400 font-semibold uppercase block">Tuyến Vận Chuyển:</span>
-                        <p className="font-bold text-slate-900 text-sm flex items-center gap-1.5">
-                          <span>{promo.origin}</span>
-                          <ArrowRight className="h-3.5 w-3.5 text-orange-500 shrink-0" />
-                          <span>{promo.destination}</span>
-                        </p>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <span className="text-[10px] text-slate-400 font-semibold uppercase block">Thời gian:</span>
-                        <span className="font-semibold text-slate-700">{promo.transitTime}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Pricing Comparison Spotlight Box */}
-                  <div className="p-5 space-y-4">
-                    <div className="rounded-xl bg-linear-to-r from-orange-50/80 via-amber-50/40 to-slate-50 p-4 border border-orange-200/80">
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                        <div>
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-xs text-slate-400 line-through">
-                              {promo.originalPriceDisplay}
-                            </span>
-                            <span className="text-xl sm:text-2xl font-black text-orange-600">
-                              {promo.promotionalPriceDisplay}
-                            </span>
-                          </div>
-                          <span className="text-[11px] font-semibold text-slate-500">
-                            Đơn vị tính: {promo.pricingUnit}
-                          </span>
-                        </div>
-
-                        <div className="sm:text-right">
-                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100/80 px-2.5 py-0.5 text-xs font-bold text-emerald-800">
-                            Tiết kiệm {savingsVND > 0 ? `${savingsVND.toLocaleString('vi-VN')} ₫` : `${promo.discountPercent}%`}
-                          </span>
-                          <p className="text-[10px] text-slate-500 mt-1">
-                            {promo.availableCapacity}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Salesman (PIC) & Company Anchor */}
-                    <div className="flex items-center justify-between rounded-xl bg-slate-50/80 p-3 border border-slate-100 text-xs">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 font-bold text-white text-sm shrink-0">
-                          {promo.specialistAvatarInitial}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-1.5">
-                            <span 
-                              onClick={() => {
-                                onNavigate({ 
-                                  type: 'public', 
-                                  tab: 'supplier-profile', 
-                                  params: { specialistId: promo.specialistId, viewState: 'detail' } 
-                                });
-                              }}
-                              className="font-bold text-slate-900 hover:text-blue-600 cursor-pointer"
-                            >
-                              {promo.specialistVietnameseName}
-                            </span>
-                            <BadgeCheck className="h-3.5 w-3.5 text-emerald-600" />
-                          </div>
-                          <p className="text-[11px] text-slate-500">
-                            {promo.specialistTitle} • <strong>{promo.companyName}</strong>
-                          </p>
-                        </div>
-                      </div>
-
-                      <button
-                        onClick={() => {
-                          onNavigate({ 
-                            type: 'public', 
-                            tab: 'supplier-profile', 
-                            params: { specialistId: promo.specialistId, viewState: 'detail' } 
-                          });
-                        }}
-                        className="text-[11px] font-semibold text-blue-600 hover:underline cursor-pointer shrink-0"
-                      >
-                        Hồ sơ PIC ›
-                      </button>
-                    </div>
-
-                    {/* Highlights & Included Perks */}
-                    <div className="space-y-1.5 text-xs text-slate-700">
-                      <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
-                        Đặc quyền & Cam kết dịch vụ:
-                      </span>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                        {promo.highlights.slice(0, 4).map((hl, idx) => (
-                          <div key={idx} className="flex items-start gap-1.5">
-                            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                            <span className="line-clamp-1">{hl}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Card Action Footer */}
-                <div className="border-t border-slate-100 p-4 bg-slate-50/60 flex flex-col sm:flex-row items-center justify-between gap-2.5">
-                  <div className="flex items-center gap-2 w-full sm:w-auto">
-                    <a
-                      href={`tel:${promo.specialistPhone}`}
-                      className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
-                      title={`Gọi cho ${promo.specialistVietnameseName}`}
-                    >
-                      <Phone className="h-3.5 w-3.5 text-emerald-600" />
-                      <span>Gọi PIC</span>
-                    </a>
-
-                    <button
-                      onClick={() => setSelectedDealForBooking(promo)}
-                      className="inline-flex items-center gap-1 rounded-lg border border-orange-200 bg-orange-50 px-3 py-1.5 text-xs font-semibold text-orange-700 hover:bg-orange-100 cursor-pointer"
-                    >
-                      <Send className="h-3.5 w-3.5" />
-                      <span>Gửi RFQ Tuyến Này</span>
-                    </button>
-                  </div>
-
-                  <button
-                    onClick={() => setSelectedDealForBooking(promo)}
-                    id={`book-promo-btn-${promo.id}`}
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl bg-orange-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-orange-700 transition-all active:scale-[0.99] cursor-pointer"
-                  >
-                    <span>Khóa Giá & Nhận Ưu Đãi</span>
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
       {/* =========================================================================
           MODAL 1: BOOK PROMOTION / LOCK IN DEAL (CUSTOMER)
          ========================================================================= */}

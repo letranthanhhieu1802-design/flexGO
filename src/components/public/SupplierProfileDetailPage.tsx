@@ -215,76 +215,41 @@ export const SupplierProfileDetailPage: React.FC<SupplierProfileDetailPageProps>
             3. Danh Mục Dịch Vụ & Bảng Cước (Services & Benchmark Tariffs)
             4. Chỉ Số Hiệu Suất & Đánh Giá (Platform KPIs & Reviews)
            ========================================================================= */}
-        <div className="sticky top-14 z-20 bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200 p-2 shadow-xs">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-            
-            {/* Tab 1: Hồ Sơ Chuyên Viên (My Profile) */}
-            <button
-              onClick={() => setActiveMainTab('profile')}
-              id="tab-profile"
-              className={`flex items-center justify-center gap-2 rounded-xl py-3 px-2 text-xs sm:text-sm font-black transition-all cursor-pointer ${
-                activeMainTab === 'profile'
-                  ? 'bg-indigo-600 text-white shadow-md'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-              }`}
-            >
-              <User className="h-4 w-4" />
-              <span>1. Hồ Sơ Chuyên Viên</span>
-            </button>
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-200 text-xs scrollbar-thin">
+          {[
+            { id: 'profile', label: '1. Hồ Sơ Chuyên Viên (My Profile)', icon: User, count: null },
+            { id: 'company', label: '2. Pháp Nhân & Doanh Nghiệp (My Company)', icon: Building2, count: null },
+            { id: 'services', label: '3. Danh Mục Dịch Vụ & Bảng Cước', icon: Truck, count: activeSpecialist.services?.length || 6 },
+            { id: 'performance', label: '4. Chỉ Số Hiệu Suất & Đánh Giá (Reviews)', icon: TrendingUp, count: 142 },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeMainTab === tab.id;
 
-            {/* Tab 2: Pháp Nhân & Doanh Nghiệp (My Company) */}
-            <button
-              onClick={() => setActiveMainTab('company')}
-              id="tab-company"
-              className={`flex items-center justify-center gap-2 rounded-xl py-3 px-2 text-xs sm:text-sm font-black transition-all cursor-pointer ${
-                activeMainTab === 'company'
-                  ? 'bg-blue-600 text-white shadow-md'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-              }`}
-            >
-              <Building2 className="h-4 w-4" />
-              <span>2. Pháp Nhân Doanh Nghiệp</span>
-            </button>
-
-            {/* Tab 3: Danh Mục Dịch Vụ & Bảng Cước */}
-            <button
-              onClick={() => setActiveMainTab('services')}
-              id="tab-services"
-              className={`flex items-center justify-center gap-2 rounded-xl py-3 px-2 text-xs sm:text-sm font-black transition-all cursor-pointer ${
-                activeMainTab === 'services'
-                  ? 'bg-emerald-600 text-white shadow-md'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-              }`}
-            >
-              <Truck className="h-4 w-4" />
-              <span>3. Dịch Vụ & Bảng Cước</span>
-              <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
-                activeMainTab === 'services' ? 'bg-emerald-800 text-emerald-100' : 'bg-slate-200 text-slate-700'
-              }`}>
-                {activeSpecialist.services?.length || 6}
-              </span>
-            </button>
-
-            {/* Tab 4: Chỉ Số & Đánh Giá */}
-            <button
-              onClick={() => setActiveMainTab('performance')}
-              id="tab-performance"
-              className={`flex items-center justify-center gap-2 rounded-xl py-3 px-2 text-xs sm:text-sm font-black transition-all cursor-pointer ${
-                activeMainTab === 'performance'
-                  ? 'bg-purple-600 text-white shadow-md'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-              }`}
-            >
-              <TrendingUp className="h-4 w-4" />
-              <span>4. Chỉ Số & Đánh Giá</span>
-              <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
-                activeMainTab === 'performance' ? 'bg-purple-800 text-purple-100' : 'bg-slate-200 text-slate-700'
-              }`}>
-                142
-              </span>
-            </button>
-
-          </div>
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveMainTab(tab.id as typeof activeMainTab)}
+                id={`tab-${tab.id}`}
+                aria-selected={isActive}
+                className={`px-4 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+                  isActive
+                    ? 'bg-indigo-600 text-white shadow-sm ring-2 ring-indigo-600/30'
+                    : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200'
+                }`}
+              >
+                <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-indigo-600'}`} />
+                <span>{tab.label}</span>
+                {tab.count !== null && (
+                  <span className={`px-1.5 py-0.2 rounded-md text-[10px] font-black ${
+                    isActive ? 'bg-indigo-800 text-indigo-100' : 'bg-slate-200 text-slate-700'
+                  }`}>
+                    {tab.count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
 
         {/* =========================================================================

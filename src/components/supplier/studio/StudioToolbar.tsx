@@ -2,20 +2,14 @@ import React, { useState } from 'react';
 import { 
   Layout, 
   Palette, 
-  PlusCircle, 
   Eye, 
   Save, 
-  RotateCcw, 
   Share2, 
   Check, 
-  ChevronDown,
-  Sparkles,
   Layers,
   CheckCircle2
 } from 'lucide-react';
 import { 
-  TemplateId, 
-  CompanyTemplateId,
   ThemeColorId, 
   THEME_COLOR_OPTIONS, 
   StudioTemplateConfig 
@@ -48,32 +42,6 @@ export const StudioToolbar: React.FC<StudioToolbarProps> = ({
 
   const activeColor = THEME_COLOR_OPTIONS[config.themeColor];
 
-  const templateNames: Record<TemplateId, string> = {
-    'executive-elite': 'Executive Elite (Sidebar Cổ Điển)',
-    'modern-bento': 'Modern Bento (Thẻ Công Nghệ)',
-    'minimalist': 'Minimalist (Tối Giản Quốc Tế)',
-    'bold-compact': 'Bold Compact (Danh Thiếp Số)',
-    'classic-prestige': 'Classic Prestige (Cột Bên Thanh Lịch)',
-    'prime-experience': 'Prime Experience (Trải Nghiệm Thực Chiến)',
-    'grand-banner': 'Grand Flagship (Đầu Trang Đẳng Cấp)',
-    'clean-elegance': 'Clean Elegance (Tối Giản Chuẩn Mực)',
-    'modular-matrix': 'Modular Matrix (Lưới Thẻ Độc Lập)',
-    'speed-hunter': 'Speed Hunter (Chốt Deal Thần Tốc)',
-  };
-
-  const companyTemplateNames: Record<CompanyTemplateId, string> = {
-    'corporate-flagship': '1. Corporate Flagship (Cổng Doanh Nghiệp 2 Cột)',
-    'corporate-heritage': '2. Corporate Heritage (Trục Thời Gian Lịch Sử)',
-    'executive-pillar': '3. Executive Pillar (Toàn Cảnh 3 Cột)',
-    'modern-bento': '4. Modern Bento (Lưới Thẻ Đa Tầng 12 Cột)',
-    'supply-chain-tech': '5. Supply Chain Tech (Tháp Điều Hành Số)',
-    'staggered-cards': '6. Staggered Cards (Thẻ So Le Nhịp Điệu)',
-    'glassmorphism-luxury': '7. Glassmorphism Luxury (Kính Mờ Đẳng Cấp)',
-    'clean-directory': '8. Clean Directory (Mục Lục Hồ Sơ 01-08)',
-    'industrial-impact': '9. Industrial Impact (Công Nghiệp & Cơ Giới)',
-    'commercial-spotlight': '10. Commercial Spotlight (Thương Mại & Chuyển Đổi)',
-  };
-
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
     setCopiedLink(true);
@@ -88,79 +56,44 @@ export const StudioToolbar: React.FC<StudioToolbarProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-4 relative">
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        
-        {/* Left: Studio Branding & Active Template Indicator */}
-        <div className="flex items-center gap-3">
-          <div 
-            className="w-11 h-11 rounded-2xl flex items-center justify-center text-white shadow-md shrink-0"
-            style={{ backgroundColor: activeColor.primary }}
-          >
-            <Sparkles className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm sm:text-base font-black text-slate-900 tracking-tight">Profile Studio</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5 flex-wrap">
-              <span>Mẫu đang dùng:</span>
-              {activeEditorTab === 'company' ? (
-                <strong className="text-blue-900 font-bold flex items-center gap-1 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200">
-                  Doanh nghiệp: {companyTemplateNames[config.activeCompanyTemplateId || 'corporate-flagship']}
-                </strong>
-              ) : (
-                <strong className="text-indigo-900 font-bold flex items-center gap-1 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200">
-                  Saleman: {templateNames[config.activeTemplateId]}
-                </strong>
-              )}
-              <span>•</span>
-              <span className="flex items-center gap-1">
-                Tông màu:
-                <span 
-                  className="w-2.5 h-2.5 rounded-full inline-block"
-                  style={{ backgroundColor: activeColor.primary }}
-                />
-                <span className="font-semibold text-slate-700">{activeColor.name}</span>
-              </span>
-            </div>
-          </div>
-        </div>
+    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm px-4 py-3 relative">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight whitespace-nowrap">
+          Profile Studio
+        </h2>
 
-        {/* Right: Action Buttons TopCV Bar */}
-        <div className="flex items-center flex-wrap gap-2.5">
+        <div className="flex items-center justify-end gap-1.5 flex-wrap">
           
           {/* 1. Button Đổi Mẫu CV/Profile / Company */}
           <button
             type="button"
             onClick={onOpenTemplateModal}
-            className="px-3.5 py-2 bg-slate-100 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 text-slate-800 hover:text-indigo-800 text-xs font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-2xs"
+            title={activeEditorTab === 'company' ? 'Đổi mẫu doanh nghiệp' : 'Đổi mẫu giao diện'}
+            aria-label={activeEditorTab === 'company' ? 'Đổi mẫu doanh nghiệp' : 'Đổi mẫu giao diện'}
+            className="w-9 h-9 bg-slate-100 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 text-indigo-600 rounded-lg transition-all flex items-center justify-center cursor-pointer"
           >
-            <Layout className="w-4 h-4 text-indigo-600" />
-            <span>
-              {activeEditorTab === 'company' ? 'Đổi Mẫu Doanh Nghiệp' : 'Đổi Mẫu Giao Diện'}
-            </span>
+            <Layout className="w-4 h-4" />
           </button>
 
           {/* 2. Button Tông Màu Dropdown */}
           <div className="relative">
             <button
               type="button"
-              onClick={() => setIsColorDropdownOpen(!isColorDropdownOpen)}
-              className="px-3 py-2 bg-slate-100 hover:bg-slate-200/80 border border-slate-200 text-slate-800 text-xs font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-2xs"
+              onClick={() => {
+                setIsColorDropdownOpen(!isColorDropdownOpen);
+                setIsSectionsDrawerOpen(false);
+              }}
+              title={`Tông màu: ${activeColor.name}`}
+              aria-label={`Tông màu: ${activeColor.name}`}
+              aria-expanded={isColorDropdownOpen}
+              className="w-9 h-9 bg-slate-100 hover:bg-slate-200/80 border border-slate-200 rounded-lg transition-all flex items-center justify-center cursor-pointer"
             >
-              <Palette className="w-4 h-4 text-indigo-600" />
-              <span>Tông Màu</span>
-              <span 
-                className="w-3.5 h-3.5 rounded-full border border-white shadow-2xs shrink-0"
-                style={{ backgroundColor: activeColor.primary }}
-              />
-              <ChevronDown className="w-3 h-3 text-slate-500" />
+              <Palette className="w-4 h-4" style={{ color: activeColor.primary }} />
             </button>
 
             {isColorDropdownOpen && (
               <div 
-                className="absolute left-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-slate-200 p-2 z-30 animate-in fade-in zoom-in-95 duration-100"
+                className="absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-slate-200 p-2 z-30 animate-in fade-in zoom-in-95 duration-100"
                 onClick={() => setIsColorDropdownOpen(false)}
               >
                 <div className="text-[10px] font-bold text-slate-400 uppercase px-2 py-1">Chọn Tông Màu Chủ Đạo</div>
@@ -195,12 +128,16 @@ export const StudioToolbar: React.FC<StudioToolbarProps> = ({
           <div className="relative">
             <button
               type="button"
-              onClick={() => setIsSectionsDrawerOpen(!isSectionsDrawerOpen)}
-              className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200/80 border border-slate-200 text-slate-800 text-xs font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-2xs"
+              onClick={() => {
+                setIsSectionsDrawerOpen(!isSectionsDrawerOpen);
+                setIsColorDropdownOpen(false);
+              }}
+              title="Bố cục và mục hiển thị"
+              aria-label="Bố cục và mục hiển thị"
+              aria-expanded={isSectionsDrawerOpen}
+              className="w-9 h-9 bg-slate-100 hover:bg-slate-200/80 border border-slate-200 text-indigo-600 rounded-lg transition-all flex items-center justify-center cursor-pointer"
             >
-              <Layers className="w-4 h-4 text-indigo-600" />
-              <span>Bố Cục & Mục Hiển Thị</span>
-              <ChevronDown className="w-3 h-3 text-slate-500" />
+              <Layers className="w-4 h-4" />
             </button>
 
             {isSectionsDrawerOpen && (
@@ -274,25 +211,30 @@ export const StudioToolbar: React.FC<StudioToolbarProps> = ({
             )}
           </div>
 
-          {/* 4. Button Sao Chép Link */}
-          <button
-            type="button"
-            onClick={handleCopyLink}
-            className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200/80 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
-            title="Sao chép liên kết Landing Page để gửi cho khách hàng"
-          >
-            {copiedLink ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> : <Share2 className="w-3.5 h-3.5 text-slate-500" />}
-            <span>{copiedLink ? 'Đã Chép Link!' : 'Chia Sẻ'}</span>
-          </button>
-
-          {/* 5. Button Xem Trước Public Landing Page */}
+          {/* 4. Button Xem Trước Public Landing Page */}
           <button
             type="button"
             onClick={onPreview}
-            className="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-800 text-xs font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-2xs"
+            title="Xem trước hồ sơ Public"
+            aria-label="Xem trước hồ sơ Public"
+            className="w-9 h-9 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-600 rounded-lg transition-all flex items-center justify-center cursor-pointer"
           >
-            <Eye className="w-4 h-4 text-indigo-600" />
-            <span>Xem Trước Public</span>
+            <Eye className="w-4 h-4" />
+          </button>
+
+          {/* 5. Button Sao Chép Link */}
+          <button
+            type="button"
+            onClick={handleCopyLink}
+            title={copiedLink ? 'Đã chép liên kết' : 'Chia sẻ hồ sơ'}
+            aria-label={copiedLink ? 'Đã chép liên kết' : 'Chia sẻ hồ sơ'}
+            className={`w-9 h-9 border rounded-lg transition-all flex items-center justify-center cursor-pointer ${
+              copiedLink
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-600'
+                : 'bg-slate-100 hover:bg-slate-200/80 border-slate-200 text-slate-600'
+            }`}
+          >
+            {copiedLink ? <CheckCircle2 className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
           </button>
 
           {/* 6. Button Lưu Hồ Sơ */}
@@ -300,10 +242,11 @@ export const StudioToolbar: React.FC<StudioToolbarProps> = ({
             type="button"
             onClick={onSave}
             disabled={isSaving}
-            className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-extrabold rounded-xl transition-all flex items-center gap-2 cursor-pointer shadow-md"
+            title={isSaving ? 'Đang lưu hồ sơ' : 'Lưu hồ sơ'}
+            aria-label={isSaving ? 'Đang lưu hồ sơ' : 'Lưu hồ sơ'}
+            className="w-9 h-9 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-lg transition-all flex items-center justify-center cursor-pointer shadow-sm"
           >
-            <Save className="w-4 h-4" />
-            <span>{isSaving ? 'Đang Lưu...' : 'Lưu Hồ Sơ'}</span>
+            <Save className={`w-4 h-4 ${isSaving ? 'animate-pulse' : ''}`} />
           </button>
         </div>
       </div>

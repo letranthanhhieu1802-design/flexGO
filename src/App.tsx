@@ -1197,6 +1197,7 @@ export function App() {
           return (
             <SupplierProfileEditPage
               onNavigate={setCurrentView}
+              initialTab={currentView.params?.editorTab}
             />
           );
 

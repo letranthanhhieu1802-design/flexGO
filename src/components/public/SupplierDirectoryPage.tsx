@@ -1,8 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { 
   Building2, 
-  Search, 
-  Filter, 
   Star, 
   ShieldCheck, 
   MapPin, 
@@ -11,7 +9,6 @@ import {
   Plane, 
   ArrowRight, 
   Plus, 
-  Send,
   ChevronRight,
   User,
   Award,
@@ -26,7 +23,6 @@ import {
   DollarSign,
   Calculator,
   ThumbsUp,
-  Check,
   Copy,
   ExternalLink,
   Share2,
@@ -43,22 +39,31 @@ import {
   BadgeCheck,
   PhoneCall,
   LayoutGrid,
-  Users,
   TableProperties,
   ArrowUpRight,
   Shield,
   Zap,
-  SlidersHorizontal,
-  Bookmark,
   CheckCircle,
   Eye,
   Flame,
-  Activity,
-  UserCheck
+  Activity
 } from 'lucide-react';
-import { SupplierCompany, CurrentView, SalesSpecialistProfile } from '../../types';
+import { SupplierCompany, CurrentView, ServiceType } from '../../types';
 import { mockSalesSpecialists } from '../../data/mockSalesSpecialists';
 import { SupplierProfileDetailPage } from './SupplierProfileDetailPage';
+
+const SERVICE_TYPE_LABELS: Record<ServiceType, string> = {
+  Trucking: 'Đường bộ',
+  'Sea Freight (FCL)': 'Đường biển FCL',
+  'Sea Freight (LCL)': 'Đường biển LCL',
+  'Air Freight': 'Hàng không',
+  'Rail Freight': 'Đường sắt',
+  Warehousing: 'Kho bãi',
+  'Customs Clearance': 'Thủ tục hải quan',
+  'Cross-border': 'Vận tải xuyên biên giới',
+  'Project Cargo': 'Hàng dự án',
+  'Cold Chain': 'Vận tải lạnh',
+};
 
 interface SupplierDirectoryPageProps {
   suppliers: SupplierCompany[];
@@ -96,109 +101,14 @@ export const SupplierDirectoryPage: React.FC<SupplierDirectoryPageProps> = ({
     }
   }, [initialSpecialistId, initialViewState]);
 
-  // Display mode in directory: 'gallery' (salesman cards), 'compact' (compact list), 'table' (matrix)
-  const [displayMode, setDisplayMode] = useState<'gallery' | 'compact' | 'table'>('gallery');
-
-  // Filter & Search states
-  const [searchTerm, setSearchTerm] = useState<string>('');
-  const [selectedService, setSelectedService] = useState<string>('ALL');
-  const [selectedCompany, setSelectedCompany] = useState<string>('ALL');
-  const [onlyVerified, setOnlyVerified] = useState<boolean>(false);
-  const [onlyOnline, setOnlyOnline] = useState<boolean>(false);
-  const [sortBy, setSortBy] = useState<'rating' | 'views' | 'experience' | 'response' | 'shipments'>('rating');
-
-  // Quick RFQ Modal state for a specific Salesperson
-  const [isQuickRFQModalOpen, setIsQuickRFQModalOpen] = useState<boolean>(false);
-  const [targetSpecialistForRFQ, setTargetSpecialistForRFQ] = useState<SalesSpecialistProfile | null>(null);
-
-  // Bookmarks state (specialist IDs)
-  const [bookmarkedSpecialistIds, setBookmarkedSpecialistIds] = useState<string[]>(['sales-minh-tran']);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3000);
-  };
-
-  const toggleBookmark = (id: string, name: string) => {
-    if (bookmarkedSpecialistIds.includes(id)) {
-      setBookmarkedSpecialistIds(bookmarkedSpecialistIds.filter((bId) => bId !== id));
-      showToast(`Đã bỏ lưu hồ sơ ${name}`);
-    } else {
-      setBookmarkedSpecialistIds([...bookmarkedSpecialistIds, id]);
-      showToast(`Đã lưu hồ sơ ${name} vào danh bạ yêu thích`);
-    }
-  };
-
-  // Distinct company list for filtering
-  const distinctCompanies = useMemo(() => {
-    const map = new Map<string, string>();
-    mockSalesSpecialists.forEach(s => {
-      map.set(s.companyId, s.companyName);
-    });
-    return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
-  }, []);
-
-  // Filtered and sorted Sales Specialists (Individual PIC Profiles)
-  const filteredSpecialists = useMemo(() => {
-    return mockSalesSpecialists
-      .filter((spec) => {
-        const searchLower = searchTerm.toLowerCase();
-        const matchesSearch = 
-          !searchTerm ||
-          spec.vietnameseName.toLowerCase().includes(searchLower) ||
-          spec.name.toLowerCase().includes(searchLower) ||
-          spec.title.toLowerCase().includes(searchLower) ||
-          spec.companyName.toLowerCase().includes(searchLower) ||
-          spec.location.toLowerCase().includes(searchLower) ||
-          spec.specialties.some((s) => s.toLowerCase().includes(searchLower)) ||
-          spec.services.some((srv) => srv.title.toLowerCase().includes(searchLower) || srv.serviceType.toLowerCase().includes(searchLower)) ||
-          spec.rateCard.some((rc) => rc.routeOrService.toLowerCase().includes(searchLower));
-
-        const matchesService = 
-          selectedService === 'ALL' ||
-          spec.services.some((srv) => srv.serviceType.toLowerCase().includes(selectedService.toLowerCase())) ||
-          spec.specialties.some((sp) => sp.toLowerCase().includes(selectedService.toLowerCase()));
-
-        const matchesCompany = 
-          selectedCompany === 'ALL' ||
-          spec.companyId === selectedCompany;
-
-        const matchesVerified = !onlyVerified || spec.verifiedStatus;
-        const matchesOnline = !onlyOnline || spec.onlineStatus === 'ONLINE';
-
-        return matchesSearch && matchesService && matchesCompany && matchesVerified && matchesOnline;
-      })
-      .sort((a, b) => {
-        if (sortBy === 'rating') return b.rating - a.rating;
-        if (sortBy === 'views') {
-          return (b.profileViews || 0) - (a.profileViews || 0);
-        }
-        if (sortBy === 'experience') {
-          return b.yearsOfExperience - a.yearsOfExperience;
-        }
-        if (sortBy === 'response') {
-          return a.keyMetrics.rfqResponseAvgMins - b.keyMetrics.rfqResponseAvgMins;
-        }
-        if (sortBy === 'shipments') {
-          const numA = parseInt(a.keyMetrics.shipmentsCount.replace(/[^0-9]/g, '') || '0');
-          const numB = parseInt(b.keyMetrics.shipmentsCount.replace(/[^0-9]/g, '') || '0');
-          return numB - numA;
-        }
-        return 0;
-      });
-  }, [searchTerm, selectedService, selectedCompany, onlyVerified, onlyOnline, sortBy]);
+  const [displayMode, setDisplayMode] = useState<'gallery' | 'table'>('gallery');
+  const filteredSpecialists = [...mockSalesSpecialists].sort((a, b) => b.rating - a.rating);
 
   // Handle open full detail
   const handleOpenDetail = (specialistId: string) => {
     setSelectedSpecialistId(specialistId);
     setViewState('detail');
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleOpenQuickRFQ = (specialist: SalesSpecialistProfile) => {
-    setTargetSpecialistForRFQ(specialist);
-    setIsQuickRFQModalOpen(true);
   };
 
   // If in Detail view, render the comprehensive Profile Detail Component
@@ -223,243 +133,103 @@ export const SupplierDirectoryPage: React.FC<SupplierDirectoryPageProps> = ({
 
   return (
     <div id="supplier-directory-gallery-page" className="min-h-screen bg-slate-50/70 pb-20">
-      {/* Toast Alert */}
-      {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-sm font-medium text-white shadow-2xl animate-in fade-in slide-in-from-bottom-5">
-          <Check className="h-4 w-4 text-emerald-400" />
-          <span>{toastMessage}</span>
-        </div>
-      )}
+      <section className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 pt-6">
+        <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+          <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-500/20 via-transparent to-transparent pointer-events-none" />
 
-      {/* =========================================================================
-          HERO BANNER: SALESMAN-CENTRIC PIC PROFILES
-         ========================================================================= */}
-      <section className="border-b border-slate-200 bg-linear-to-b from-white via-slate-50 to-slate-100/80 pt-8 pb-9">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-            <div className="space-y-2.5 max-w-3xl">
-              <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3.5 py-1 text-xs font-bold text-blue-700 border border-blue-200/80 shadow-2xs">
-                <UserCheck className="h-4 w-4 text-blue-600" />
-                <span>Hồ Sơ Năng Lực & Uy Tín Cá Nhân Chuyên Viên Logistics (PIC)</span>
-              </div>
-              <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
-                Danh Bạ Chuyên Viên Logistics & Bảng Giá Niêm Yết
-              </h1>
-              <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-                Mỗi Chuyên viên Kinh doanh (Salesman/PIC) trực tiếp chăm sóc và cập nhật biểu giá, năng lực vận hành, tuyến thế mạnh và chỉ số uy tín cá nhân của mình. Kết nối trực tiếp với người phụ trách thực tế để nhận tư vấn cước nhanh trong 15 phút.
-              </p>
-            </div>
-
-            {/* Quick Actions */}
-            <div className="flex flex-wrap items-center gap-3 shrink-0">
-              <button
-                onClick={onOpenCreateInquiry}
-                id="directory-create-inquiry-btn"
-                className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 active:scale-[0.99] transition-all"
-              >
-                <Plus className="h-4 w-4" />
-                <span>Phát Hành RFQ Đến Tất Cả Sales</span>
-              </button>
-            </div>
+          <div className="relative z-10 max-w-3xl space-y-2">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+              Danh bạ nhà cung cấp
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+              Tổng hợp các đối tác uy tín và đáng tin cậy được flexGO xác nhận.
+            </p>
           </div>
 
-          {/* Quick Value Metrics Bar */}
-          <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-4">
-            <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-                <Users className="h-5 w-5" />
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 mt-6 pt-6 border-t border-white/10 relative z-10">
+            <div className="bg-slate-800/60 backdrop-blur-md rounded-2xl p-4 border border-white/10 hover:border-emerald-500/40 transition-all group">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-slate-300">Nhà cung cấp xác thực</span>
+                <div className="w-7 h-7 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                </div>
               </div>
-              <div>
-                <p className="text-base sm:text-lg font-bold text-slate-900">{mockSalesSpecialists.length}+ Chuyên Viên</p>
-                <p className="text-xs text-slate-500">Cập nhật hồ sơ cá nhân</p>
+              <div className="mt-2 flex items-baseline gap-1.5">
+                <span className="text-2xl font-black text-emerald-400 tracking-tight">{mockSalesSpecialists.length}+</span>
+                <span className="text-xs font-bold text-emerald-300/90">đối tác</span>
               </div>
+              <p className="mt-1 text-[11px] text-slate-400 font-medium">Đã được flexGO xác nhận</p>
             </div>
 
-            <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
-                <ShieldCheck className="h-5 w-5" />
+            <div className="bg-slate-800/60 backdrop-blur-md rounded-2xl p-4 border border-white/10 hover:border-cyan-500/40 transition-all group">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-slate-300">Nhóm dịch vụ</span>
+                <div className="w-7 h-7 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
+                  <Layers className="w-3.5 h-3.5" />
+                </div>
               </div>
-              <div>
-                <p className="text-base sm:text-lg font-bold text-emerald-700">100% Xác Thực</p>
-                <p className="text-xs text-slate-500">Kinh nghiệm & Doanh nghiệp</p>
+              <div className="mt-2 flex items-baseline gap-1.5">
+                <span className="text-2xl font-black text-cyan-400 tracking-tight">8</span>
+                <span className="text-xs font-bold text-cyan-300/90">nhóm</span>
               </div>
+              <p className="mt-1 text-[11px] text-slate-400 font-medium">Dịch vụ logistics & vận tải</p>
             </div>
 
-            <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
-                <Zap className="h-5 w-5" />
+            <div className="bg-slate-800/60 backdrop-blur-md rounded-2xl p-4 border border-white/10 hover:border-purple-500/40 transition-all group">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-slate-300">Biểu giá niêm yết</span>
+                <div className="w-7 h-7 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+                  <FileText className="w-3.5 h-3.5" />
+                </div>
               </div>
-              <div>
-                <p className="text-base sm:text-lg font-bold text-slate-900">&lt; 15 Phút</p>
-                <p className="text-xs text-slate-500">Tốc độ phản hồi báo giá</p>
+              <div className="mt-2 flex items-baseline gap-1.5">
+                <span className="text-2xl font-black text-purple-300 tracking-tight">45+</span>
+                <span className="text-xs font-bold text-purple-200/90">biểu giá</span>
               </div>
+              <p className="mt-1 text-[11px] text-slate-400 font-medium">Niêm yết công khai, minh bạch</p>
             </div>
 
-            <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
-                <FileText className="h-5 w-5" />
+            <div className="bg-slate-800/60 backdrop-blur-md rounded-2xl p-4 border border-white/10 hover:border-amber-500/40 transition-all group">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-slate-300">Thời gian phản hồi</span>
+                <div className="w-7 h-7 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
+                  <Zap className="w-3.5 h-3.5" />
+                </div>
               </div>
-              <div>
-                <p className="text-base sm:text-lg font-bold text-slate-900">45+ Biểu Giá Tuyến</p>
-                <p className="text-xs text-slate-500">Niêm yết công khai minh bạch</p>
+              <div className="mt-2 flex items-baseline gap-1.5">
+                <span className="text-2xl font-black text-amber-400 tracking-tight">&lt; 15</span>
+                <span className="text-xs font-bold text-amber-300/90">phút</span>
               </div>
+              <p className="mt-1 text-[11px] text-slate-400 font-medium">Phản hồi yêu cầu báo giá</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* =========================================================================
-          TOOLBAR: SEARCH, FILTERS, COMPANY SELECTOR & SORT
-         ========================================================================= */}
-      <section className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 backdrop-blur-md py-3 shadow-xs">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            {/* Search Input */}
-            <div className="relative flex-1 max-w-lg">
-              <Search className="absolute left-3.5 top-2.5 h-4 w-4 text-slate-400" />
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Tìm tên Salesman, dịch vụ, tuyến vận chuyển, công ty..."
-                className="w-full rounded-xl border border-slate-200 bg-slate-50/80 pl-10 pr-4 py-2 text-xs sm:text-sm text-slate-800 focus:border-blue-500 focus:bg-white focus:outline-none"
-              />
-              {searchTerm && (
-                <button
-                  onClick={() => setSearchTerm('')}
-                  className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
-            </div>
-
-            {/* Filter by Company & Sort */}
-            <div className="flex flex-wrap items-center justify-between lg:justify-end gap-2.5">
-              {/* Company Filter Dropdown */}
-              <div className="flex items-center gap-1.5 text-xs">
-                <span className="text-slate-500 hidden sm:inline">Công ty:</span>
-                <select
-                  value={selectedCompany}
-                  onChange={(e) => setSelectedCompany(e.target.value)}
-                  className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs focus:border-blue-500 focus:outline-none max-w-[180px] truncate"
-                >
-                  <option value="ALL">🏢 Tất cả công ty</option>
-                  {distinctCompanies.map(c => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Sort By Dropdown */}
-              <div className="flex items-center gap-1.5 text-xs">
-                <span className="text-slate-500 hidden sm:inline">Sắp xếp:</span>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as any)}
-                  className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs focus:border-blue-500 focus:outline-none"
-                >
-                  <option value="rating">⭐ Đánh giá uy tín cao nhất</option>
-                  <option value="views">👁️ Lượt xem Profile nhiều nhất</option>
-                  <option value="experience">💼 Thâm niên kinh nghiệm</option>
-                  <option value="response">⚡ Tốc độ phản hồi nhanh nhất</option>
-                  <option value="shipments">🏆 Số chuyến / Lô đã xử lý</option>
-                </select>
-              </div>
-
-              {/* View Modes */}
-              <div className="flex items-center rounded-lg border border-slate-200 bg-slate-100 p-0.5 text-xs font-semibold shadow-2xs">
-                <button
-                  onClick={() => setDisplayMode('gallery')}
-                  className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 transition-all ${
-                    displayMode === 'gallery'
-                      ? 'bg-white text-blue-600 shadow-xs font-bold'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                  title="Xem dạng thẻ cá nhân (Gallery)"
-                >
-                  <LayoutGrid className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Thẻ Cá Nhân</span>
-                </button>
-
-                <button
-                  onClick={() => setDisplayMode('compact')}
-                  className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 transition-all ${
-                    displayMode === 'compact'
-                      ? 'bg-white text-blue-600 shadow-xs font-bold'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                  title="Xem danh sách thu gọn"
-                >
-                  <Users className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Danh Sách</span>
-                </button>
-
-                <button
-                  onClick={() => setDisplayMode('table')}
-                  className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 transition-all ${
-                    displayMode === 'table'
-                      ? 'bg-white text-blue-600 shadow-xs font-bold'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                  title="Xem bảng đối chiếu chỉ số"
-                >
-                  <TableProperties className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Bảng Đối Chiếu</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Service Filter Chips */}
-          <div className="mt-3 flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
-            <span className="text-slate-400 font-medium shrink-0">Chuyên môn:</span>
-            {[
-              { id: 'ALL', label: 'Tất cả' },
-              { id: 'Trucking', label: '🚛 Đường bộ FTL/LTL' },
-              { id: 'Sea Freight', label: '🚢 Đường biển FCL' },
-              { id: 'Cold Chain', label: '❄️ Vận tải lạnh' },
-              { id: 'Air Freight', label: '✈️ Hàng không' },
-              { id: 'Customs', label: '📋 Thủ tục hải quan' },
-              { id: 'Warehousing', label: '🏬 Kho bãi 3PL' },
-              { id: 'Cross-border', label: '🌐 Xuyên biên giới' },
-            ].map((srv) => (
-              <button
-                key={srv.id}
-                onClick={() => setSelectedService(srv.id)}
-                className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
-                  selectedService === srv.id
-                    ? 'bg-blue-600 text-white shadow-2xs'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                }`}
-              >
-                {srv.label}
-              </button>
-            ))}
-
-            {/* Quick Online & Verified filter tags */}
+      <section className="border-b border-slate-200 bg-white py-3">
+        <div className="mx-auto flex max-w-7xl justify-end px-4 sm:px-6 lg:px-8">
+          <div className="inline-flex items-center rounded-xl border border-slate-200 bg-slate-100 p-1 text-xs font-semibold shadow-2xs">
             <button
-              onClick={() => setOnlyOnline(!onlyOnline)}
-              className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold transition-colors flex items-center gap-1 ${
-                onlyOnline
-                  ? 'bg-emerald-600 text-white'
-                  : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
+              onClick={() => setDisplayMode('gallery')}
+              className={`flex items-center gap-1.5 rounded-lg px-3 py-2 transition-all ${
+                displayMode === 'gallery'
+                  ? 'bg-white font-bold text-blue-600 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span>Đang Online</span>
+              <LayoutGrid className="h-3.5 w-3.5" />
+              <span>Thẻ cá nhân</span>
             </button>
-
             <button
-              onClick={() => setOnlyVerified(!onlyVerified)}
-              className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold transition-colors flex items-center gap-1 ${
-                onlyVerified
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200'
+              onClick={() => setDisplayMode('table')}
+              className={`flex items-center gap-1.5 rounded-lg px-3 py-2 transition-all ${
+                displayMode === 'table'
+                  ? 'bg-white font-bold text-blue-600 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <BadgeCheck className="h-3.5 w-3.5" />
-              <span>Đã xác thực</span>
+              <TableProperties className="h-3.5 w-3.5" />
+              <span>Bảng đối chiếu</span>
             </button>
           </div>
         </div>
@@ -469,219 +239,82 @@ export const SupplierDirectoryPage: React.FC<SupplierDirectoryPageProps> = ({
           MAIN CONTENT AREA (SALESMAN-CENTRIC PIC GALLERY)
          ========================================================================= */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-8">
-        {/* Results Count & Active Filters Indicator */}
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-600">
-          <p>
-            Tìm thấy <strong className="text-slate-900 font-bold">{filteredSpecialists.length}</strong> chuyên viên kinh doanh & quản trị giải pháp logistics
-          </p>
-          {(searchTerm || selectedService !== 'ALL' || selectedCompany !== 'ALL' || onlyVerified || onlyOnline) && (
-            <button
-              onClick={() => {
-                setSearchTerm('');
-                setSelectedService('ALL');
-                setSelectedCompany('ALL');
-                setOnlyVerified(false);
-                setOnlyOnline(false);
-              }}
-              className="inline-flex items-center gap-1 font-semibold text-blue-600 hover:underline"
-            >
-              <X className="h-3.5 w-3.5" />
-              <span>Xóa tất cả bộ lọc</span>
-            </button>
-          )}
-        </div>
+        <p className="mb-6 text-xs text-slate-600">
+          Tìm thấy <strong className="font-bold text-slate-900">{filteredSpecialists.length}</strong> chuyên viên kinh doanh & quản trị giải pháp logistics
+        </p>
 
         {/* -----------------------------------------------------------------------
             MODE 1: SALESMAN-CENTRIC GALLERY CARDS (TRỌNG TÂM CÁ NHÂN PIC)
            ----------------------------------------------------------------------- */}
         {displayMode === 'gallery' && (
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div className="mx-auto grid max-w-6xl auto-rows-fr grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 xl:gap-8">
             {filteredSpecialists.map((specialist) => {
-              const isBookmarked = bookmarkedSpecialistIds.includes(specialist.id);
+              const primaryServiceType = specialist.services[0]?.serviceType;
+              const primaryService = primaryServiceType ? SERVICE_TYPE_LABELS[primaryServiceType] : 'Logistics';
+              const managedRevenue = specialist.keyMetrics.revenueManagedVND.split('(')[0].trim();
 
               return (
                 <div
                   key={specialist.id}
                   id={`salesman-card-${specialist.id}`}
-                  className="flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xs hover:shadow-md hover:border-blue-300 transition-all group"
+                  className="group relative flex min-h-108 min-w-0 cursor-pointer flex-col rounded-2xl border border-slate-700 bg-[linear-gradient(160deg,#334155_0%,#172033_34%,#020b07_66%,#020704_100%)] p-5 text-white shadow-lg transition-all hover:-translate-y-1 hover:border-orange-500/60 hover:shadow-2xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange-400"
+                  onClick={() => handleOpenDetail(specialist.id)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      handleOpenDetail(specialist.id);
+                    }
+                  }}
+                  role="button"
+                  aria-label={`Xem hồ sơ ${specialist.vietnameseName}`}
+                  tabIndex={0}
                 >
-                  <div>
-                    {/* Top Card Header: SALESMAN IDENTITY AS PRIMARY FOCUS */}
-                    <div className="border-b border-slate-100 p-5 bg-linear-to-r from-slate-50/90 via-white to-slate-50/60">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-start gap-4">
-                          {/* Salesman Personal Avatar with Online Badge */}
-                          <div className="relative shrink-0">
-                            <div className="flex h-15 w-15 items-center justify-center rounded-2xl bg-linear-to-tr from-blue-700 via-indigo-600 to-indigo-800 font-bold text-white shadow-sm text-xl ring-2 ring-white">
-                              {specialist.avatarInitial}
-                            </div>
-                            {specialist.onlineStatus === 'ONLINE' && (
-                              <span 
-                                className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 ring-2 ring-white" 
-                                title="Đang trực tuyến (Sẵn sàng nhận RFQ)"
-                              >
-                                <span className="h-2 w-2 rounded-full bg-white"></span>
-                              </span>
-                            )}
-                          </div>
-                          
-                          <div className="space-y-1">
-                            {/* Personal Name & Verified Badge */}
-                            <div className="flex flex-wrap items-center gap-2">
-                              <h3 
-                                onClick={() => handleOpenDetail(specialist.id)}
-                                className="text-lg font-bold text-slate-900 group-hover:text-blue-600 cursor-pointer transition-colors"
-                              >
-                                {specialist.vietnameseName}
-                              </h3>
-                              <span className="text-xs text-slate-400 font-medium">({specialist.name})</span>
-                              {specialist.verifiedStatus && (
-                                <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-700 border border-emerald-200">
-                                  <BadgeCheck className="h-3.5 w-3.5 text-emerald-600" />
-                                  Chuyên viên Uy tín
-                                </span>
-                              )}
-                            </div>
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-40 rounded-t-2xl bg-[radial-gradient(circle_at_30%_0%,rgba(251,146,60,0.2),transparent_58%)]" />
 
-                            {/* Salesman Professional Title */}
-                            <p className="text-xs font-semibold text-blue-700 line-clamp-1">
-                              {specialist.title}
-                            </p>
-
-                            {/* Secondary Affiliation: Đang công tác tại Công ty logistics */}
-                            <div className="flex items-center gap-1.5 text-xs text-slate-600 pt-0.5">
-                              <span className="text-slate-400">Công tác tại:</span>
-                              <div className="inline-flex items-center gap-1.5 rounded-md bg-slate-100 px-2 py-0.5 font-medium text-slate-800 border border-slate-200/60">
-                                <div className="flex h-4 w-4 items-center justify-center rounded bg-blue-600 text-[9px] font-bold text-white">
-                                  {specialist.companyLogo}
-                                </div>
-                                <span className="font-semibold">{specialist.companyName}</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Bookmark Button */}
-                        <button
-                          onClick={() => toggleBookmark(specialist.id, specialist.vietnameseName)}
-                          className={`rounded-lg p-2 transition-colors ${
-                            isBookmarked
-                              ? 'text-amber-500 bg-amber-50'
-                              : 'text-slate-400 hover:bg-slate-100 hover:text-slate-600'
-                          }`}
-                          title={isBookmarked ? 'Bỏ lưu' : 'Lưu hồ sơ chuyên viên'}
-                        >
-                          <Bookmark className={`h-4 w-4 ${isBookmarked ? 'fill-amber-500' : ''}`} />
-                        </button>
-                      </div>
-
-                      {/* Personal Performance Metric Row: Views, Rating, Deals, Response Time */}
-                      <div className="mt-4 grid grid-cols-4 gap-1.5 rounded-xl bg-white p-2.5 border border-slate-100 text-center text-xs">
-                        <div>
-                          <span className="text-[10px] text-slate-400 block font-medium">Lượt xem hồ sơ</span>
-                          <span className="font-bold text-indigo-700 flex items-center justify-center gap-0.5 mt-0.5 text-[11px] sm:text-xs">
-                            <Eye className="h-3 w-3 text-indigo-600 shrink-0" />
-                            {(specialist.profileViews || 14820).toLocaleString('vi-VN')}
-                          </span>
-                        </div>
-                        <div className="border-l border-slate-100">
-                          <span className="text-[10px] text-slate-400 block font-medium">Đánh giá</span>
-                          <span className="font-bold text-slate-900 flex items-center justify-center gap-0.5 mt-0.5 text-[11px] sm:text-xs">
-                            <Star className="h-3 w-3 fill-amber-400 text-amber-400 shrink-0" />
-                            {specialist.rating} ({specialist.reviewsCount})
-                          </span>
-                        </div>
-                        <div className="border-l border-slate-100">
-                          <span className="text-[10px] text-slate-400 block font-medium">Kinh nghiệm</span>
-                          <span className="font-bold text-slate-900 mt-0.5 block text-[11px] sm:text-xs">
-                            {specialist.yearsOfExperience}+ Năm
-                          </span>
-                        </div>
-                        <div className="border-l border-slate-100">
-                          <span className="text-[10px] text-slate-400 block font-medium">Phản hồi RFQ</span>
-                          <span className="font-bold text-emerald-600 mt-0.5 block text-[11px] sm:text-xs">
-                            {specialist.responseTime}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Middle Section: Personal Motto, Specialties & Published Tariff Count */}
-                    <div className="p-5 space-y-4">
-                      {/* Personal Motto / Cam kết dịch vụ cá nhân */}
-                      <div className="rounded-xl bg-slate-50/80 p-3 text-xs italic text-slate-700 border border-slate-100/90 flex items-start gap-2">
-                        <Sparkles className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
-                        <div>
-                          <strong className="not-italic font-semibold text-slate-900 block mb-0.5">Cam kết dịch vụ:</strong>
-                          <span>{specialist.motto}</span>
-                        </div>
-                      </div>
-
-                      {/* Personal Specialties & Strengths (Thế mạnh & Chuyên môn vận hành) */}
-                      <div className="space-y-2">
-                        <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
-                          Thế mạnh & Chuyên môn vận hành:
-                        </span>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                          {specialist.specialties.slice(0, 4).map((specItem, idx) => (
-                            <div 
-                              key={idx} 
-                              className="flex items-start gap-2 rounded-xl bg-slate-50/90 border border-slate-200/70 p-2.5 text-slate-700 hover:bg-white hover:border-blue-200 transition-colors"
-                            >
-                              <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
-                              <span className="font-medium leading-relaxed">{specItem}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Published Tariff Count Badge (Chỉ số lượng dịch vụ có bảng cước niêm yết) */}
-                      {specialist.rateCard && specialist.rateCard.length > 0 && (
-                        <div 
-                          onClick={() => handleOpenDetail(specialist.id)}
-                          className="flex items-center justify-between rounded-xl border border-blue-100 bg-gradient-to-r from-blue-50/80 via-indigo-50/50 to-blue-50/80 p-3 text-xs cursor-pointer hover:border-blue-300 hover:shadow-xs transition-all group/rate"
-                        >
-                          <div className="flex items-center gap-2.5">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-600 text-white font-bold shadow-xs shrink-0">
-                              <DollarSign className="h-4 w-4" />
-                            </div>
-                            <div>
-                              <span className="font-bold text-slate-900 block">
-                                Đã công bố {specialist.rateCard.length} bảng cước vận chuyển chuẩn
-                              </span>
-                              <span className="text-[11px] text-slate-500">
-                                Biểu phí tham chiếu minh bạch • Tra cứu trực tiếp
-                              </span>
-                            </div>
-                          </div>
-                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-700 group-hover/rate:text-blue-900 shrink-0">
-                            <span>Xem biểu phí</span>
-                            <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover/rate:translate-x-0.5" />
-                          </span>
+                  <div className="relative flex items-start justify-between">
+                    <div className="relative">
+                      {specialist.avatarUrl ? (
+                        <img
+                          src={specialist.avatarUrl}
+                          alt={specialist.vietnameseName}
+                          className="h-32 w-32 rounded-full border-4 border-slate-500/60 object-cover shadow-lg"
+                        />
+                      ) : (
+                        <div className="flex h-32 w-32 items-center justify-center rounded-full border-4 border-slate-500/60 bg-linear-to-tr from-blue-700 via-indigo-600 to-indigo-800 text-3xl font-black text-white shadow-lg">
+                          {specialist.avatarInitial}
                         </div>
                       )}
+                      {specialist.onlineStatus === 'ONLINE' && (
+                        <span className="absolute bottom-1 right-1 h-5 w-5 rounded-full bg-emerald-500 ring-3 ring-slate-800" title="Đang trực tuyến" />
+                      )}
                     </div>
+
                   </div>
 
-                  {/* Card Action Footer: Tinh gọn chỉ 2 nút chuyển đổi trọng tâm */}
-                  <div className="border-t border-slate-100 p-4 bg-slate-50/60 flex items-center justify-between gap-3">
-                    <button
-                      onClick={() => handleOpenQuickRFQ(specialist)}
-                      className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-blue-200 bg-white px-4 py-2 text-xs font-bold text-blue-700 shadow-2xs hover:bg-blue-50 hover:border-blue-300 transition-all active:scale-[0.99] cursor-pointer"
-                    >
-                      <Send className="h-3.5 w-3.5" />
-                      <span>Gửi RFQ Cho PIC</span>
-                    </button>
-
-                    <button
-                      onClick={() => handleOpenDetail(specialist.id)}
-                      id={`view-detail-btn-${specialist.id}`}
-                      className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-blue-700 transition-all active:scale-[0.99] cursor-pointer"
-                    >
-                      <span>Xem Profile & Bảng Giá</span>
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </button>
+                  <div className="relative mt-4">
+                    <h3 className="text-xl font-black leading-tight break-words text-white transition-colors group-hover:text-orange-300">
+                      {specialist.vietnameseName}
+                    </h3>
+                    <p className="mt-2 text-xs font-extrabold leading-5 break-words text-orange-500">
+                      {specialist.companyName}
+                    </p>
                   </div>
+
+                  <dl className="relative mt-5 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-start gap-x-2 gap-y-2 text-xs leading-5 break-words">
+                    <dt className="text-slate-400">Lượt xem</dt>
+                    <dd className="text-right font-black text-slate-100">{specialist.profileViews?.toLocaleString('vi-VN') ?? '—'}</dd>
+                    <dt className="text-slate-400">Yêu cầu báo giá</dt>
+                    <dd className="text-right font-black text-slate-100">{specialist.viewerInteractions?.rfqRequestsCount.toLocaleString('vi-VN') ?? '—'}</dd>
+                    <dt className="text-slate-400">Số báo giá</dt>
+                    <dd className="text-right font-black text-slate-100">{specialist.keyMetrics.quotesCount?.toLocaleString('vi-VN') ?? '—'}</dd>
+                    <dt className="text-slate-400">Số đơn hàng</dt>
+                    <dd className="text-right font-black text-slate-100">{specialist.keyMetrics.ordersCount?.toLocaleString('vi-VN') ?? '—'}</dd>
+                    <dt className="text-slate-400">Giá trị</dt>
+                    <dd className="text-right font-black text-slate-100">{managedRevenue}</dd>
+                    <dt className="text-slate-400">Dịch vụ niêm yết</dt>
+                    <dd className="text-right font-black text-slate-100">{primaryService}</dd>
+                  </dl>
+
                 </div>
               );
             })}
@@ -689,81 +322,7 @@ export const SupplierDirectoryPage: React.FC<SupplierDirectoryPageProps> = ({
         )}
 
         {/* -----------------------------------------------------------------------
-            MODE 2: COMPACT LIST VIEW
-           ----------------------------------------------------------------------- */}
-        {displayMode === 'compact' && (
-          <div className="space-y-4">
-            {filteredSpecialists.map((specialist) => (
-              <div
-                key={specialist.id}
-                className="flex flex-col md:flex-row md:items-center md:justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-2xs hover:border-blue-300 transition-all gap-4"
-              >
-                <div className="flex items-start sm:items-center gap-4">
-                  <div className="relative shrink-0">
-                    <div className="flex h-13 w-13 items-center justify-center rounded-xl bg-linear-to-tr from-blue-700 to-indigo-700 font-bold text-white text-lg">
-                      {specialist.avatarInitial}
-                    </div>
-                    {specialist.onlineStatus === 'ONLINE' && (
-                      <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-emerald-500 ring-2 ring-white"></span>
-                    )}
-                  </div>
-
-                  <div className="space-y-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h3 
-                        onClick={() => handleOpenDetail(specialist.id)}
-                        className="text-base font-bold text-slate-900 hover:text-blue-600 cursor-pointer"
-                      >
-                        {specialist.vietnameseName}
-                      </h3>
-                      <span className="text-xs text-slate-400">({specialist.name})</span>
-                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-500 bg-amber-50 px-2 py-0.5 rounded border border-amber-200/50">
-                        <Star className="h-3 w-3 fill-amber-400" />
-                        {specialist.rating} ({specialist.reviewsCount})
-                      </span>
-                    </div>
-
-                    <p className="text-xs font-semibold text-blue-700">{specialist.title}</p>
-                    
-                    <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                      <span className="flex items-center gap-1">
-                        <Building2 className="h-3.5 w-3.5 text-slate-400" />
-                        Công tác tại: <strong>{specialist.companyName}</strong>
-                      </span>
-                      <span>•</span>
-                      <span>{specialist.yearsOfExperience}+ năm kinh nghiệm</span>
-                      <span>•</span>
-                      <span className="text-emerald-700 font-medium">Phản hồi {specialist.responseTime}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
-                  <span className="text-xs text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-lg font-bold flex items-center gap-1">
-                    <Eye className="h-3 w-3" />
-                    {(specialist.profileViews || 14820).toLocaleString('vi-VN')} views
-                  </span>
-                  <button
-                    onClick={() => handleOpenQuickRFQ(specialist)}
-                    className="rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-100"
-                  >
-                    Gửi RFQ
-                  </button>
-                  <button
-                    onClick={() => handleOpenDetail(specialist.id)}
-                    className="inline-flex items-center gap-1 rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-blue-700"
-                  >
-                    <span>Xem Hồ Sơ</span>
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* -----------------------------------------------------------------------
-            MODE 3: COMPARATIVE TABLE VIEW (BẢNG SO SÁNH NĂNG LỰC CÁ NHÂN PIC)
+            MODE 2: COMPARATIVE TABLE VIEW (BẢNG SO SÁNH NĂNG LỰC CÁ NHÂN PIC)
            ----------------------------------------------------------------------- */}
         {displayMode === 'table' && (
           <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xs">
@@ -852,116 +411,6 @@ export const SupplierDirectoryPage: React.FC<SupplierDirectoryPageProps> = ({
         )}
       </div>
 
-      {/* =========================================================================
-          MODAL: DIRECT RFQ FOR SELECTED SALESPERSON (PIC)
-         ========================================================================= */}
-      {isQuickRFQModalOpen && targetSpecialistForRFQ && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs">
-          <div className="relative w-full max-w-lg overflow-hidden rounded-2xl bg-white p-6 shadow-2xl animate-in zoom-in-95">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600 text-white font-bold">
-                  {targetSpecialistForRFQ.avatarInitial}
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-slate-900">
-                    Gửi Yêu Cầu Báo Giá Trực Tiếp Cho PIC
-                  </h3>
-                  <p className="text-xs text-blue-700 font-semibold">
-                    {targetSpecialistForRFQ.vietnameseName} ({targetSpecialistForRFQ.companyName})
-                  </p>
-                </div>
-              </div>
-              <button 
-                onClick={() => setIsQuickRFQModalOpen(false)}
-                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                alert(`Đã gửi yêu cầu báo giá thành công đến chuyên viên ${targetSpecialistForRFQ.vietnameseName} (${targetSpecialistForRFQ.companyName})! Chuyên viên sẽ liên hệ lại trong vòng 15 phút.`);
-                setIsQuickRFQModalOpen(false);
-              }}
-              className="mt-4 space-y-4 text-xs"
-            >
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Công ty / Người liên hệ *</label>
-                  <input
-                    required
-                    type="text"
-                    defaultValue="ABC Manufacturing Co., Ltd."
-                    className="w-full rounded-lg border border-slate-200 bg-slate-50 p-2.5 text-xs text-slate-800 focus:border-blue-500 focus:bg-white focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Số điện thoại / Zalo *</label>
-                  <input
-                    required
-                    type="tel"
-                    defaultValue="0918 888 999"
-                    className="w-full rounded-lg border border-slate-200 bg-slate-50 p-2.5 text-xs text-slate-800 focus:border-blue-500 focus:bg-white focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Tuyến xuất phát</label>
-                  <input
-                    type="text"
-                    defaultValue="TP. Hồ Chí Minh / Bình Dương"
-                    className="w-full rounded-lg border border-slate-200 bg-slate-50 p-2.5 text-xs text-slate-800 focus:border-blue-500 focus:bg-white focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Tuyến đích</label>
-                  <input
-                    type="text"
-                    defaultValue="Hà Nội / Hải Phòng"
-                    className="w-full rounded-lg border border-slate-200 bg-slate-50 p-2.5 text-xs text-slate-800 focus:border-blue-500 focus:bg-white focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Chi tiết hàng hóa & Yêu cầu vận chuyển</label>
-                <textarea
-                  rows={3}
-                  defaultValue="Cần báo giá cước vận chuyển 15 tấn hàng định kỳ 4 chuyến/tuần. Yêu cầu xe thùng kín bảo đảm GPS và bảo hiểm hàng hóa."
-                  className="w-full rounded-lg border border-slate-200 bg-slate-50 p-2.5 text-xs text-slate-800 focus:border-blue-500 focus:bg-white focus:outline-none"
-                />
-              </div>
-
-              <div className="flex items-center justify-between border-t border-slate-100 pt-4">
-                <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
-                  <Zap className="h-3.5 w-3.5" />
-                  {targetSpecialistForRFQ.vietnameseName} phản hồi trong {targetSpecialistForRFQ.responseTime}
-                </span>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setIsQuickRFQModalOpen(false)}
-                    className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50"
-                  >
-                    Hủy
-                  </button>
-                  <button
-                    type="submit"
-                    className="rounded-lg bg-blue-600 px-5 py-2 text-xs font-bold text-white shadow-sm hover:bg-blue-700"
-                  >
-                    Gửi Trực Tiếp Cho PIC
-                  </button>
-                </div>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

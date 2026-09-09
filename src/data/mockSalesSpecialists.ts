@@ -40,6 +40,8 @@ export const mockSalesSpecialists: SalesSpecialistProfile[] = [
       viewsLast7Days: [320, 345, 380, 410, 390, 440, 485]
     },
     keyMetrics: {
+      quotesCount: 221,
+      ordersCount: 126,
       shipmentsCount: '1,450+ TEUs / Chuyến',
       revenueManagedVND: '92.5 Tỷ VND (~$3.8M)',
       onTimeDeliveryRate: '99.6%',
@@ -730,6 +732,8 @@ export const mockSalesSpecialists: SalesSpecialistProfile[] = [
       viewsLast7Days: [210, 230, 245, 260, 280, 310, 340]
     },
     keyMetrics: {
+      quotesCount: 152,
+      ordersCount: 94,
       shipmentsCount: '890+ Chuyến xe lạnh',
       revenueManagedVND: '54.0 Tỷ VND',
       onTimeDeliveryRate: '99.8%',
@@ -863,6 +867,8 @@ export const mockSalesSpecialists: SalesSpecialistProfile[] = [
       viewsLast7Days: [280, 295, 310, 340, 360, 390, 420]
     },
     keyMetrics: {
+      quotesCount: 189,
+      ordersCount: 112,
       shipmentsCount: '2,800+ TEUs Ocean',
       revenueManagedVND: '145 Tỷ VND (~$5.8M)',
       onTimeDeliveryRate: '99.4%',
@@ -996,6 +1002,8 @@ export const mockSalesSpecialists: SalesSpecialistProfile[] = [
       viewsLast7Days: [160, 175, 190, 210, 225, 250, 270]
     },
     keyMetrics: {
+      quotesCount: 108,
+      ordersCount: 67,
       shipmentsCount: '1,120+ Đơn hàng kho & xe',
       revenueManagedVND: '68.0 Tỷ VND',
       onTimeDeliveryRate: '98.9%',
@@ -1129,6 +1137,8 @@ export const mockSalesSpecialists: SalesSpecialistProfile[] = [
       viewsLast7Days: [140, 155, 160, 180, 195, 220, 240]
     },
     keyMetrics: {
+      quotesCount: 81,
+      ordersCount: 49,
       shipmentsCount: '1,800+ Lô hàng AWB',
       revenueManagedVND: '110 Tỷ VND (~$4.4M)',
       onTimeDeliveryRate: '99.7%',
@@ -1262,6 +1272,8 @@ export const mockSalesSpecialists: SalesSpecialistProfile[] = [
       viewsLast7Days: [180, 195, 210, 240, 260, 290, 310]
     },
     keyMetrics: {
+      quotesCount: 127,
+      ordersCount: 73,
       shipmentsCount: '320+ Chuyến OOG/Siêu trường',
       revenueManagedVND: '64.0 Tỷ VND',
       onTimeDeliveryRate: '99.2%',
@@ -1363,6 +1375,8 @@ export const mockSalesSpecialists: SalesSpecialistProfile[] = [
       viewsLast7Days: [220, 240, 270, 310, 330, 360, 390]
     },
     keyMetrics: {
+      quotesCount: 178,
+      ordersCount: 116,
       shipmentsCount: '2,100+ Tờ khai Hải quan',
       revenueManagedVND: '78.0 Tỷ VND',
       onTimeDeliveryRate: '99.8%',

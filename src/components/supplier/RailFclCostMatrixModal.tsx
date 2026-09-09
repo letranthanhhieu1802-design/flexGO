@@ -609,9 +609,9 @@ export const RailFclCostMatrixModal: React.FC<RailFclCostMatrixModalProps> = ({
   return (
     <div
       {...getReadOnlyMatrixInteractionProps(isReadOnly)}
-      className="fixed inset-0 z-[140] flex items-center justify-center p-3 sm:p-5 bg-slate-900/70 backdrop-blur-xs animate-in fade-in duration-150"
+      className="fixed inset-0 z-[140] flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xs animate-in fade-in duration-150"
     >
-      <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-6xl max-h-[92vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-150">
+      <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 max-w-7xl w-full max-h-[96vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-150">
         
         {/* =========================================================================
             1. MODAL HEADER (ĐỒNG BỘ 1:1 VỚI OCEAN FCL)
