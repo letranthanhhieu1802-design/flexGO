@@ -6963,7 +6963,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
   return (
     <div className={isInline ? "w-full relative" : "fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 overflow-y-auto animate-in fade-in duration-150"}>
       <div 
-        className={isInline ? "bg-white w-full rounded-3xl shadow-xs border border-slate-200 overflow-hidden flex flex-col text-slate-800" : "bg-white w-full max-w-7xl rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[94vh] text-slate-800"}
+        className={isInline ? "bg-white w-full rounded-3xl shadow-xs border border-slate-200 overflow-hidden flex flex-col text-slate-800" : "bg-white w-full max-w-[96vw] xl:max-w-[1720px] rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[94vh] text-slate-800"}
         onClick={(e) => e.stopPropagation()}
       >
         {/* =========================================================================
@@ -7002,10 +7002,10 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
         {/* =========================================================================
             SPLIT VIEW BODY (Left: Tree, Right: 4 Structured Sections)
         ========================================================================= */}
-        <div className={`grid grid-cols-1 md:grid-cols-12 flex-1 overflow-hidden ${isInline ? 'min-h-[620px] h-[820px]' : 'min-h-[550px]'}`}>
+        <div className={`flex flex-col md:flex-row flex-1 overflow-hidden ${isInline ? 'min-h-[620px] h-[820px]' : 'min-h-[550px]'}`}>
           
-          {/* 🌿 LEFT: CÂY DANH MỤC DỊCH VỤ (MASTER TREE) - 3.5 cols */}
-          <div className="md:col-span-4 lg:col-span-3 border-r border-slate-200 bg-slate-50/40 p-3.5 overflow-y-auto space-y-2 select-none">
+          {/* 🌿 LEFT: CÂY DANH MỤC DỊCH VỤ (MASTER TREE) - 280px */}
+          <div className="w-full md:w-64 lg:w-72 shrink-0 border-r border-slate-200 bg-slate-50/40 p-3.5 overflow-y-auto space-y-2 select-none">
             <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-2 mb-2">
               Danh Mục Dịch Vụ
             </div>
@@ -7154,8 +7154,8 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
             })}
           </div>
 
-          {/* 📝 RIGHT: THÔNG TIN KHAI BÁO 4 PHẦN (DETAIL WORKSPACE) - 8.5 cols */}
-          <div className="md:col-span-8 lg:col-span-9 p-5 sm:p-6 overflow-y-auto space-y-6 bg-white">
+          {/* 📝 RIGHT: THÔNG TIN KHAI BÁO 4 PHẦN (DETAIL WORKSPACE) */}
+          <div className="flex-1 min-w-0 p-4 sm:p-6 overflow-y-auto space-y-6 bg-white">
             {activeModel ? (
               <div className="space-y-6">
                 
@@ -7328,28 +7328,29 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                             if (isLtlTable) {
                               return (
                                 <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
-                                  <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
-                                  <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-indigo-50/70 text-indigo-950 font-black">Mã Tuyến</th>
-                                  <th className="py-2.5 px-2.5 min-w-[160px] bg-indigo-50/70 text-indigo-950 font-black">Hành Lang Tuyến</th>
-                                  <th className="py-2.5 px-2.5 min-w-[140px]">Điểm Đầu (Điểm Đi)</th>
-                                  <th className="py-2.5 px-2.5 min-w-[140px]">Điểm Cuối (Điểm Đến)</th>
-                                  <th className="py-2.5 px-2.5 min-w-[190px]">Loại Thùng Phương Tiện</th>
-                                  <th className="py-2.5 px-2.5 min-w-[210px]">Phân Khúc Tải Trọng</th>
-                                  <th className="py-2.5 px-2.5 min-w-[140px] text-center bg-indigo-100/80 text-indigo-950 font-black">Chi Tiết Biểu Phí</th>
-                                  <th className="py-2.5 px-2 text-center w-16 min-w-[65px]">Action</th>
+                                  <th className="py-2.5 px-2 text-center w-9 bg-slate-100">STT</th>
+                                  <th className="py-2.5 px-2 text-center w-24 bg-indigo-50/70 text-indigo-950 font-black">Mã Tuyến</th>
+                                  <th className="py-2.5 px-2.5 bg-indigo-50/70 text-indigo-950 font-black">Hành Lang Tuyến</th>
+                                  <th className="py-2.5 px-2">Điểm Đầu (Đi)</th>
+                                  <th className="py-2.5 px-2">Điểm Cuối (Đến)</th>
+                                  <th className="py-2.5 px-2">Loại Thùng</th>
+                                  <th className="py-2.5 px-2">Phân Khúc Tải Trọng</th>
+                                  <th className="py-2.5 px-2 text-center w-20">ĐVT</th>
+                                  <th className="py-2.5 px-2 text-center w-24 bg-indigo-100/80 text-indigo-950 font-black">Biểu Phí</th>
+                                  <th className="py-2.5 px-2 text-center w-14">Action</th>
                                 </tr>
                               );
                             }
                             if (isTruckingFtlTable) {
                               return (
                                 <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
-                                  <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
-                                  <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-indigo-50/70 text-indigo-950 font-black">Mã Tuyến</th>
-                                  <th className="py-2.5 px-2.5 min-w-[160px] bg-indigo-50/70 text-indigo-950 font-black">Hành Lang Tuyến</th>
-                                  <th className="py-2.5 px-2.5 min-w-[140px]">Điểm Đi</th>
-                                  <th className="py-2.5 px-2.5 min-w-[140px]">Điểm Đến</th>
-                                  <th className="py-2.5 px-2.5 min-w-[190px] text-center bg-indigo-100/80 text-indigo-950 font-black">Chi Tiết Biểu Phí</th>
-                                  <th className="py-2.5 px-2 text-center w-16 min-w-[65px]">Action</th>
+                                  <th className="py-2.5 px-2 text-center w-9 bg-slate-100">STT</th>
+                                  <th className="py-2.5 px-2 text-center w-24 bg-indigo-50/70 text-indigo-950 font-black">Mã Tuyến</th>
+                                  <th className="py-2.5 px-2.5 bg-indigo-50/70 text-indigo-950 font-black">Hành Lang Tuyến</th>
+                                  <th className="py-2.5 px-2">Điểm Đi</th>
+                                  <th className="py-2.5 px-2">Điểm Đến</th>
+                                  <th className="py-2.5 px-2 text-center w-28 bg-indigo-100/80 text-indigo-950 font-black">Chi Tiết Biểu Phí</th>
+                                  <th className="py-2.5 px-2 text-center w-14">Action</th>
                                 </tr>
                               );
                             }
@@ -7358,14 +7359,14 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                             if (isOceanFclTable) {
                               return (
                                 <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
-                                  <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
-                                  <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-sky-50/70 text-sky-950 font-black">Mã Tuyến</th>
-                                  <th className="py-2.5 px-2.5 min-w-[130px] bg-sky-50/70 text-sky-950 font-black">Khu Vực</th>
-                                  <th className="py-2.5 px-2.5 min-w-[150px]">Cảng Đi (POL)</th>
-                                  <th className="py-2.5 px-2.5 min-w-[150px]">Cảng Đến (POD)</th>
-                                  <th className="py-2.5 px-2.5 min-w-[160px]">Hãng Tàu</th>
-                                  <th className="py-2.5 px-2.5 min-w-[190px] text-center bg-sky-100/80 text-sky-950 font-black">Chi Tiết Biểu Phí</th>
-                                  <th className="py-2.5 px-2 text-center w-16 min-w-[65px]">Action</th>
+                                  <th className="py-2.5 px-2 text-center w-9 bg-slate-100">STT</th>
+                                  <th className="py-2.5 px-2 text-center w-24 bg-sky-50/70 text-sky-950 font-black">Mã Tuyến</th>
+                                  <th className="py-2.5 px-2 bg-sky-50/70 text-sky-950 font-black">Khu Vực</th>
+                                  <th className="py-2.5 px-2">Cảng Đi (POL)</th>
+                                  <th className="py-2.5 px-2">Cảng Đến (POD)</th>
+                                  <th className="py-2.5 px-2">Hãng Tàu</th>
+                                  <th className="py-2.5 px-2 text-center w-28 bg-sky-100/80 text-sky-950 font-black">Chi Tiết Biểu Phí</th>
+                                  <th className="py-2.5 px-2 text-center w-14">Action</th>
                                 </tr>
                               );
                             }
@@ -7373,15 +7374,16 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                             if (isOceanLclTable) {
                               return (
                                 <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
-                                  <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
-                                  <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-sky-50/70 text-sky-950 font-black">Mã Tuyến</th>
-                                  <th className="py-2.5 px-2.5 min-w-[130px] bg-sky-50/70 text-sky-950 font-black">Khu Vực</th>
-                                  <th className="py-2.5 px-2.5 min-w-[160px] bg-sky-50/70 text-sky-950 font-black">Hành Lang Tuyến</th>
-                                  <th className="py-2.5 px-2.5 min-w-[150px]">Kho CFS / Điểm Đi</th>
-                                  <th className="py-2.5 px-2.5 min-w-[150px]">Kho CFS / Cảng Đến</th>
-                                  <th className="py-2.5 px-2.5 min-w-[160px]">Hãng Tàu / Co-Loader</th>
-                                  <th className="py-2.5 px-2.5 min-w-[140px] text-center bg-sky-100/80 text-sky-950 font-black">Chi Tiết Biểu Phí</th>
-                                  <th className="py-2.5 px-2 text-center w-16 min-w-[65px]">Action</th>
+                                  <th className="py-2.5 px-2 text-center w-9 bg-slate-100">STT</th>
+                                  <th className="py-2.5 px-2 text-center w-24 bg-sky-50/70 text-sky-950 font-black">Mã Tuyến</th>
+                                  <th className="py-2.5 px-2 bg-sky-50/70 text-sky-950 font-black">Khu Vực</th>
+                                  <th className="py-2.5 px-2 bg-sky-50/70 text-sky-950 font-black">Hành Lang Tuyến</th>
+                                  <th className="py-2.5 px-2">Kho CFS / Điểm Đi</th>
+                                  <th className="py-2.5 px-2">Kho CFS / Cảng Đến</th>
+                                  <th className="py-2.5 px-2">Hãng Tàu / Co-Loader</th>
+                                  <th className="py-2.5 px-2 text-center w-24">ĐVT</th>
+                                  <th className="py-2.5 px-2 text-center w-24 bg-sky-100/80 text-sky-950 font-black">Biểu Phí</th>
+                                  <th className="py-2.5 px-2 text-center w-14">Action</th>
                                 </tr>
                               );
                             }
@@ -7389,15 +7391,16 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                             if (isAirCargoTable) {
                               return (
                                 <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
-                                  <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
-                                  <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-sky-50/70 text-sky-950 font-black">Mã Tuyến</th>
-                                  <th className="py-2.5 px-2.5 min-w-[130px] bg-sky-50/70 text-sky-950 font-black">Khu Vực</th>
-                                  <th className="py-2.5 px-2.5 min-w-[160px] bg-sky-50/70 text-sky-950 font-black">Hành Lang Tuyến</th>
-                                  <th className="py-2.5 px-2.5 min-w-[150px]">Sân Bay Đi (AOD)</th>
-                                  <th className="py-2.5 px-2.5 min-w-[150px]">Sân Bay Đến (AOA)</th>
-                                  <th className="py-2.5 px-2.5 min-w-[170px]">Hãng Bay (Airline)</th>
-                                  <th className="py-2.5 px-2.5 min-w-[140px] text-center bg-sky-100/80 text-sky-950 font-black">Chi Tiết Biểu Phí</th>
-                                  <th className="py-2.5 px-2 text-center w-16 min-w-[65px]">Action</th>
+                                  <th className="py-2.5 px-2 text-center w-9 bg-slate-100">STT</th>
+                                  <th className="py-2.5 px-2 text-center w-24 bg-sky-50/70 text-sky-950 font-black">Mã Tuyến</th>
+                                  <th className="py-2.5 px-2 bg-sky-50/70 text-sky-950 font-black">Khu Vực</th>
+                                  <th className="py-2.5 px-2 bg-sky-50/70 text-sky-950 font-black">Hành Lang Tuyến</th>
+                                  <th className="py-2.5 px-2">Sân Bay Đi (AOD)</th>
+                                  <th className="py-2.5 px-2">Sân Bay Đến (AOA)</th>
+                                  <th className="py-2.5 px-2">Hãng Bay (Airline)</th>
+                                  <th className="py-2.5 px-2 text-center w-20">ĐVT</th>
+                                  <th className="py-2.5 px-2 text-center w-24 bg-sky-100/80 text-sky-950 font-black">Biểu Phí</th>
+                                  <th className="py-2.5 px-2 text-center w-14">Action</th>
                                 </tr>
                               );
                             }
@@ -7405,15 +7408,32 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                             if (isExpressTable) {
                               return (
                                 <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
-                                  <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
-                                  <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-amber-50/80 text-amber-950 font-black">Mã Tuyến</th>
-                                  <th className="py-2.5 px-2.5 min-w-[130px] bg-amber-50/80 text-amber-950 font-black">Khu Vực</th>
-                                  <th className="py-2.5 px-2.5 min-w-[160px] bg-amber-50/80 text-amber-950 font-black">Hành Lang Tuyến</th>
-                                  <th className="py-2.5 px-2.5 min-w-[150px]">Điểm Lấy (Door Origin)</th>
-                                  <th className="py-2.5 px-2.5 min-w-[150px]">Điểm Phát (Door Destination)</th>
-                                  <th className="py-2.5 px-2.5 min-w-[170px]">Hãng Chuyển Phát (Carrier)</th>
-                                  <th className="py-2.5 px-2.5 min-w-[140px] text-center bg-amber-100/90 text-amber-950 font-black">Chi Tiết Biểu Phí</th>
-                                  <th className="py-2.5 px-2 text-center w-16 min-w-[65px]">Action</th>
+                                  <th className="py-2.5 px-2 text-center w-9 bg-slate-100">STT</th>
+                                  <th className="py-2.5 px-2 text-center w-24 bg-amber-50/80 text-amber-950 font-black">Mã Tuyến</th>
+                                  <th className="py-2.5 px-2 bg-amber-50/80 text-amber-950 font-black">Khu Vực</th>
+                                  <th className="py-2.5 px-2 bg-amber-50/80 text-amber-950 font-black">Hành Lang Tuyến</th>
+                                  <th className="py-2.5 px-2">Điểm Lấy (Door Origin)</th>
+                                  <th className="py-2.5 px-2">Điểm Phát (Door Destination)</th>
+                                  <th className="py-2.5 px-2">Hãng Chuyển Phát (Carrier)</th>
+                                  <th className="py-2.5 px-2 text-center w-20">ĐVT</th>
+                                  <th className="py-2.5 px-2 text-center w-24 bg-amber-100/90 text-amber-950 font-black">Biểu Phí</th>
+                                  <th className="py-2.5 px-2 text-center w-14">Action</th>
+                                </tr>
+                              );
+                            }
+
+                            if (isRailLclTable) {
+                              return (
+                                <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
+                                  <th className="py-2.5 px-2 text-center w-9 bg-slate-100">STT</th>
+                                  <th className="py-2.5 px-2 text-center w-24 bg-emerald-50/70 text-emerald-950 font-black">Mã Tuyến</th>
+                                  <th className="py-2.5 px-2 bg-emerald-50/70 text-emerald-950 font-black">Hành Lang Tuyến</th>
+                                  <th className="py-2.5 px-2">Ga Đi (POL)</th>
+                                  <th className="py-2.5 px-2">Ga Đến (POD)</th>
+                                  <th className="py-2.5 px-2">Đơn Vị Vận Hành</th>
+                                  <th className="py-2.5 px-2 text-center w-20">ĐVT</th>
+                                  <th className="py-2.5 px-2 text-center w-24 bg-emerald-100/80 text-emerald-950 font-black">Biểu Phí</th>
+                                  <th className="py-2.5 px-2 text-center w-14">Action</th>
                                 </tr>
                               );
                             }
@@ -7422,14 +7442,14 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                             if (isRailAnyTable) {
                               return (
                                 <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
-                                  <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
-                                  <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-emerald-50/70 text-emerald-950 font-black">Mã Tuyến</th>
-                                  <th className="py-2.5 px-2.5 min-w-[170px] bg-emerald-50/70 text-emerald-950 font-black">Hành Lang Tuyến</th>
-                                  <th className="py-2.5 px-2.5 min-w-[140px]">Ga Đi (POL)</th>
-                                  <th className="py-2.5 px-2.5 min-w-[140px]">Ga Đến (POD)</th>
-                                  <th className="py-2.5 px-2.5 min-w-[160px]">Đơn Vị Vận Hành</th>
-                                  <th className="py-2.5 px-2.5 min-w-[190px] text-center bg-emerald-100/80 text-emerald-950 font-black">Chi Tiết Biểu Phí</th>
-                                  <th className="py-2.5 px-2 text-center w-16 min-w-[65px]">Action</th>
+                                  <th className="py-2.5 px-2 text-center w-9 bg-slate-100">STT</th>
+                                  <th className="py-2.5 px-2 text-center w-24 bg-emerald-50/70 text-emerald-950 font-black">Mã Tuyến</th>
+                                  <th className="py-2.5 px-2 bg-emerald-50/70 text-emerald-950 font-black">Hành Lang Tuyến</th>
+                                  <th className="py-2.5 px-2">Ga Đi (POL)</th>
+                                  <th className="py-2.5 px-2">Ga Đến (POD)</th>
+                                  <th className="py-2.5 px-2">Đơn Vị Vận Hành</th>
+                                  <th className="py-2.5 px-2 text-center w-28 bg-emerald-100/80 text-emerald-950 font-black">Chi Tiết Biểu Phí</th>
+                                  <th className="py-2.5 px-2 text-center w-14">Action</th>
                                 </tr>
                               );
                             }
@@ -7441,14 +7461,14 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                               if (isBonded) {
                                 return (
                                   <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
-                                    <th className="py-2.5 px-2 text-center w-12 min-w-[48px] bg-slate-100">STT</th>
-                                    <th className="py-2.5 px-3 min-w-[140px] text-center bg-indigo-50/80 text-indigo-950 font-black">Mã Kho HQ</th>
-                                    <th className="py-2.5 px-3 min-w-[220px]">Tên Kho Ngoại Quan / CFS</th>
-                                    <th className="py-2.5 px-3 min-w-[240px] bg-amber-50/80 text-amber-950 font-black">Chi Cục Hải Quan Quản Lý</th>
-                                    <th className="py-2.5 px-3 min-w-[140px]">Tỉnh / TP</th>
-                                    <th className="py-2.5 px-3 min-w-[260px]">Địa Chỉ</th>
-                                    <th className="py-2.5 px-3 min-w-[200px] text-center bg-indigo-50/70 text-indigo-950 font-black">Chi Tiết</th>
-                                    <th className="py-2.5 px-2 text-center w-20 min-w-[80px]">Action</th>
+                                    <th className="py-2.5 px-2 text-center w-10 bg-slate-100">STT</th>
+                                    <th className="py-2.5 px-2 text-center w-28 bg-indigo-50/80 text-indigo-950 font-black">Mã Kho HQ</th>
+                                    <th className="py-2.5 px-2">Tên Kho Ngoại Quan / CFS</th>
+                                    <th className="py-2.5 px-2 bg-amber-50/80 text-amber-950 font-black">Chi Cục Hải Quan Quản Lý</th>
+                                    <th className="py-2.5 px-2 w-28">Tỉnh / TP</th>
+                                    <th className="py-2.5 px-2">Địa Chỉ</th>
+                                    <th className="py-2.5 px-2 text-center w-24 bg-indigo-50/70 text-indigo-950 font-black">Chi Tiết</th>
+                                    <th className="py-2.5 px-2 text-center w-16">Action</th>
                                   </tr>
                                 );
                               }
@@ -7456,13 +7476,13 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                               if (isFulfillment) {
                                 return (
                                   <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
-                                    <th className="py-2.5 px-2 text-center w-12 min-w-[48px] bg-slate-100">STT</th>
-                                    <th className="py-2.5 px-3 min-w-[140px] text-center bg-purple-50/80 text-purple-950 font-black">Mã kho</th>
-                                    <th className="py-2.5 px-3 min-w-[240px]">Tên</th>
-                                    <th className="py-2.5 px-3 min-w-[140px]">Tỉnh/TP</th>
-                                    <th className="py-2.5 px-3 min-w-[260px]">Địa chỉ</th>
-                                    <th className="py-2.5 px-3 min-w-[200px] text-center bg-purple-50/70 text-purple-950 font-black">Chi tiết</th>
-                                    <th className="py-2.5 px-2 text-center w-20 min-w-[80px]">Thao tác</th>
+                                    <th className="py-2.5 px-2 text-center w-10 bg-slate-100">STT</th>
+                                    <th className="py-2.5 px-2 text-center w-28 bg-purple-50/80 text-purple-950 font-black">Mã kho</th>
+                                    <th className="py-2.5 px-2">Tên</th>
+                                    <th className="py-2.5 px-2 w-28">Tỉnh/TP</th>
+                                    <th className="py-2.5 px-2">Địa chỉ</th>
+                                    <th className="py-2.5 px-2 text-center w-24 bg-purple-50/70 text-purple-950 font-black">Chi tiết</th>
+                                    <th className="py-2.5 px-2 text-center w-16">Thao tác</th>
                                   </tr>
                                 );
                               }
@@ -7471,26 +7491,26 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                               if (isSelfStorage) {
                                 return (
                                   <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
-                                    <th className="py-2.5 px-2 text-center w-12 min-w-[48px] bg-slate-100">STT</th>
-                                    <th className="py-2.5 px-3 min-w-[140px] text-center bg-amber-50/80 text-amber-950 font-black">Mã Kho</th>
-                                    <th className="py-2.5 px-3 min-w-[220px]">Tên Cơ Sở</th>
-                                    <th className="py-2.5 px-3 min-w-[140px]">Tỉnh/Thành Phố</th>
-                                    <th className="py-2.5 px-3 min-w-[260px]">Địa Chỉ Chi Tiết</th>
-                                    <th className="py-2.5 px-3 min-w-[200px] text-center bg-amber-50/70 text-amber-950 font-black">Chi Tiết</th>
-                                    <th className="py-2.5 px-2 text-center w-20 min-w-[80px]">Action</th>
+                                    <th className="py-2.5 px-2 text-center w-10 bg-slate-100">STT</th>
+                                    <th className="py-2.5 px-2 text-center w-28 bg-amber-50/80 text-amber-950 font-black">Mã Kho</th>
+                                    <th className="py-2.5 px-2">Tên Cơ Sở</th>
+                                    <th className="py-2.5 px-2 w-28">Tỉnh/Thành Phố</th>
+                                    <th className="py-2.5 px-2">Địa Chỉ Chi Tiết</th>
+                                    <th className="py-2.5 px-2 text-center w-24 bg-amber-50/70 text-amber-950 font-black">Chi Tiết</th>
+                                    <th className="py-2.5 px-2 text-center w-16">Action</th>
                                   </tr>
                                 );
                               }
 
                               return (
                                 <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
-                                  <th className="py-2.5 px-2 text-center w-12 min-w-[48px] bg-slate-100">STT</th>
-                                  <th className="py-2.5 px-3 min-w-[130px] text-center bg-indigo-50/70 text-indigo-950 font-black">Mã Kho</th>
-                                  <th className="py-2.5 px-3 min-w-[240px]">Tên Kho</th>
-                                  <th className="py-2.5 px-3 min-w-[160px]">Tỉnh</th>
-                                  <th className="py-2.5 px-3 min-w-[300px]">Địa Chỉ Chi Tiết</th>
-                                  <th className="py-2.5 px-3 min-w-[160px] text-center bg-indigo-50/70 text-indigo-950 font-black">Chi Tiết</th>
-                                  <th className="py-2.5 px-2 text-center w-20 min-w-[80px]">Action</th>
+                                  <th className="py-2.5 px-2 text-center w-10 bg-slate-100">STT</th>
+                                  <th className="py-2.5 px-2 text-center w-28 bg-indigo-50/70 text-indigo-950 font-black">Mã Kho</th>
+                                  <th className="py-2.5 px-2">Tên Kho</th>
+                                  <th className="py-2.5 px-2 w-28">Tỉnh</th>
+                                  <th className="py-2.5 px-2">Địa Chỉ Chi Tiết</th>
+                                  <th className="py-2.5 px-2 text-center w-24 bg-indigo-50/70 text-indigo-950 font-black">Chi Tiết</th>
+                                  <th className="py-2.5 px-2 text-center w-16">Action</th>
                                 </tr>
                               );
                             }
@@ -7498,22 +7518,22 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                             if (isXdockTable) {
                               return (
                                 <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
-                                  <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
-                                  <th className="py-2.5 px-2.5 min-w-[105px] text-center bg-purple-50/80 text-purple-950 font-black">Mã Trạm X-Dock</th>
-                                  <th className="py-2.5 px-2.5 min-w-[195px]">Tên Trạm Cross-Dock / Hub</th>
-                                  <th className="py-2.5 px-2.5 min-w-[130px]">Tỉnh / Thành Phố</th>
-                                  <th className="py-2.5 px-2.5 min-w-[150px]">KCN / Vị Trí Trạm</th>
-                                  <th className="py-2.5 px-2.5 min-w-[140px] text-right bg-blue-50/70 text-blue-950 font-black">Công Suất Sàn</th>
-                                  <th className="py-2.5 px-2 text-right min-w-[110px] bg-emerald-50/90 text-emerald-950 font-black">Đơn Giá Kg</th>
-                                  <th className="py-2.5 px-2 text-right min-w-[115px] bg-emerald-50/90 text-emerald-950 font-black">Đơn Giá CBM</th>
-                                  <th className="py-2.5 px-2 text-right min-w-[120px] bg-emerald-50/90 text-emerald-950 font-black">Đơn Giá Pallet</th>
-                                  <th className="py-2.5 px-2 text-right min-w-[125px] bg-amber-50/80 text-amber-950 font-black">Cước Sàn (Min/Lô)</th>
-                                  <th className="py-2.5 px-2 w-20 min-w-[80px] text-center">Tiền Tệ</th>
-                                  <th className="py-2.5 px-2.5 min-w-[130px] text-center">SLA Giải Phóng</th>
-                                  <th className="py-2.5 px-2.5 min-w-[125px] text-center">Hạn Giá</th>
-                                  <th className="py-2.5 px-2 min-w-[85px] text-center">Promotion</th>
-                                  <th className="py-2.5 px-2.5 text-center min-w-[140px] bg-indigo-50/80 text-indigo-950 font-black">Chi Tiết (Specs, Ảnh, VAS)</th>
-                                  <th className="py-2.5 px-2 text-center w-16 min-w-[65px]">Action</th>
+                                  <th className="py-2.5 px-2 text-center w-9 bg-slate-100">STT</th>
+                                  <th className="py-2.5 px-2 text-center w-24 bg-purple-50/80 text-purple-950 font-black">Mã Trạm X-Dock</th>
+                                  <th className="py-2.5 px-2">Tên Trạm Cross-Dock / Hub</th>
+                                  <th className="py-2.5 px-2 w-28">Tỉnh / Thành Phố</th>
+                                  <th className="py-2.5 px-2">KCN / Vị Trí Trạm</th>
+                                  <th className="py-2.5 px-2 text-right w-24 bg-blue-50/70 text-blue-950 font-black">Công Suất</th>
+                                  <th className="py-2.5 px-2 text-right w-20 bg-emerald-50/90 text-emerald-950 font-black">Đơn Giá Kg</th>
+                                  <th className="py-2.5 px-2 text-right w-20 bg-emerald-50/90 text-emerald-950 font-black">Đơn Giá CBM</th>
+                                  <th className="py-2.5 px-2 text-right w-20 bg-emerald-50/90 text-emerald-950 font-black">Đơn Giá Pallet</th>
+                                  <th className="py-2.5 px-2 text-right w-24 bg-amber-50/80 text-amber-950 font-black">Cước Sàn Min</th>
+                                  <th className="py-2.5 px-2 w-16 text-center">Tiền Tệ</th>
+                                  <th className="py-2.5 px-2 text-center w-24">SLA Giải Phóng</th>
+                                  <th className="py-2.5 px-2 text-center w-24">Hạn Giá</th>
+                                  <th className="py-2.5 px-2 w-16 text-center">KM (%)</th>
+                                  <th className="py-2.5 px-2 text-center w-24 bg-indigo-50/80 text-indigo-950 font-black">Chi Tiết</th>
+                                  <th className="py-2.5 px-2 text-center w-14">Action</th>
                                 </tr>
                               );
                             }
@@ -7521,21 +7541,21 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                             if (isPortTable) {
                               return (
                                 <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
-                                  <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
-                                  <th className="py-2.5 px-2.5 min-w-[105px] text-center bg-sky-50/80 text-sky-950 font-black">Mã Cảng / ICD</th>
-                                  <th className="py-2.5 px-2.5 min-w-[200px]">Tên Cảng / Cảng Cạn ICD / Depot</th>
-                                  <th className="py-2.5 px-2.5 min-w-[135px]">Tỉnh / Thành Phố</th>
-                                  <th className="py-2.5 px-2.5 min-w-[160px]">Vị Trí / Khu Bến Cảng</th>
-                                  <th className="py-2.5 px-2.5 min-w-[130px] text-right bg-blue-50/70 text-blue-950 font-black">Sức Chứa Bãi (TEU)</th>
-                                  <th className="py-2.5 px-2 text-right min-w-[135px] bg-emerald-50/90 text-emerald-950 font-black">Shuttle Cont 20ft</th>
-                                  <th className="py-2.5 px-2 text-right min-w-[135px] bg-emerald-50/90 text-emerald-950 font-black">Shuttle Cont 40ft</th>
-                                  <th className="py-2.5 px-2 text-right min-w-[130px] bg-amber-50/80 text-amber-950 font-black">Nâng Hạ (Lift On/Off)</th>
-                                  <th className="py-2.5 px-2 w-20 min-w-[80px] text-center">Tiền Tệ</th>
-                                  <th className="py-2.5 px-2.5 min-w-[135px] text-center">SLA Luân Chuyển</th>
-                                  <th className="py-2.5 px-2.5 min-w-[125px] text-center">Hạn Giá</th>
-                                  <th className="py-2.5 px-2 min-w-[85px] text-center">Promotion</th>
-                                  <th className="py-2.5 px-2.5 text-center min-w-[140px] bg-indigo-50/80 text-indigo-950 font-black">Chi Tiết (Specs, Ảnh, VAS)</th>
-                                  <th className="py-2.5 px-2 text-center w-16 min-w-[65px]">Action</th>
+                                  <th className="py-2.5 px-2 text-center w-9 bg-slate-100">STT</th>
+                                  <th className="py-2.5 px-2 text-center w-24 bg-sky-50/80 text-sky-950 font-black">Mã Cảng / ICD</th>
+                                  <th className="py-2.5 px-2">Tên Cảng / ICD / Depot</th>
+                                  <th className="py-2.5 px-2 w-28">Tỉnh / TP</th>
+                                  <th className="py-2.5 px-2">Vị Trí / Khu Bến</th>
+                                  <th className="py-2.5 px-2 text-right w-24 bg-blue-50/70 text-blue-950 font-black">Sức Chứa (TEU)</th>
+                                  <th className="py-2.5 px-2 text-right w-24 bg-emerald-50/90 text-emerald-950 font-black">Shuttle 20ft</th>
+                                  <th className="py-2.5 px-2 text-right w-24 bg-emerald-50/90 text-emerald-950 font-black">Shuttle 40ft</th>
+                                  <th className="py-2.5 px-2 text-right w-24 bg-amber-50/80 text-amber-950 font-black">Nâng Hạ</th>
+                                  <th className="py-2.5 px-2 w-16 text-center">Tiền Tệ</th>
+                                  <th className="py-2.5 px-2 text-center w-24">SLA</th>
+                                  <th className="py-2.5 px-2 text-center w-24">Hạn Giá</th>
+                                  <th className="py-2.5 px-2 w-16 text-center">KM (%)</th>
+                                  <th className="py-2.5 px-2 text-center w-24 bg-indigo-50/80 text-indigo-950 font-black">Chi Tiết</th>
+                                  <th className="py-2.5 px-2 text-center w-14">Action</th>
                                 </tr>
                               );
                             }
@@ -7543,14 +7563,15 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                             if (isCrossBorderLtl) {
                               return (
                                 <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
-                                  <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
-                                  <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-orange-50/80 text-orange-950 font-black">Mã Tuyến LTL</th>
-                                  <th className="py-2.5 px-2.5 min-w-[180px] bg-orange-50/80 text-orange-950 font-black">Hành Lang Tuyến XBG</th>
-                                  <th className="py-2.5 px-2.5 min-w-[200px] bg-amber-50/80 text-amber-950 font-black">Cửa Khẩu Biên Giới (Border Gate)</th>
-                                  <th className="py-2.5 px-2.5 min-w-[150px]">Kho Gom Hàng (Origin CFS/Hub)</th>
-                                  <th className="py-2.5 px-2.5 min-w-[150px]">Kho Giao Hàng (Destination CFS/Hub)</th>
-                                  <th className="py-2.5 px-2.5 min-w-[170px] text-center bg-orange-100/80 text-orange-950 font-black">Chi Tiết Biểu Phí</th>
-                                  <th className="py-2.5 px-2 text-center w-16 min-w-[65px]">Action</th>
+                                  <th className="py-2.5 px-2 text-center w-9 bg-slate-100">STT</th>
+                                  <th className="py-2.5 px-2 text-center w-24 bg-orange-50/80 text-orange-950 font-black">Mã Tuyến LTL</th>
+                                  <th className="py-2.5 px-2 bg-orange-50/80 text-orange-950 font-black">Hành Lang Tuyến XBG</th>
+                                  <th className="py-2.5 px-2 bg-amber-50/80 text-amber-950 font-black">Cửa Khẩu Biên Giới</th>
+                                  <th className="py-2.5 px-2">Kho Gom Hàng (Origin CFS)</th>
+                                  <th className="py-2.5 px-2">Kho Giao Hàng (Dest CFS)</th>
+                                  <th className="py-2.5 px-2 text-center w-20">ĐVT</th>
+                                  <th className="py-2.5 px-2 text-center w-24 bg-orange-100/80 text-orange-950 font-black">Biểu Phí</th>
+                                  <th className="py-2.5 px-2 text-center w-14">Action</th>
                                 </tr>
                               );
                             }
@@ -7558,14 +7579,14 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                             if (isCrossBorderFtl) {
                               return (
                                 <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
-                                  <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
-                                  <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-orange-50/80 text-orange-950 font-black">Mã Tuyến XBG</th>
-                                  <th className="py-2.5 px-2.5 min-w-[180px] bg-orange-50/80 text-orange-950 font-black">Hành Lang Tuyến XBG</th>
-                                  <th className="py-2.5 px-2.5 min-w-[200px] bg-amber-50/80 text-amber-950 font-black">Cửa Khẩu Biên Giới (Border Gate)</th>
-                                  <th className="py-2.5 px-2.5 min-w-[140px]">Điểm Đi (Origin)</th>
-                                  <th className="py-2.5 px-2.5 min-w-[140px]">Điểm Đến (Destination)</th>
-                                  <th className="py-2.5 px-2.5 min-w-[170px] text-center bg-orange-100/80 text-orange-950 font-black">Chi Tiết Biểu Phí</th>
-                                  <th className="py-2.5 px-2 text-center w-16 min-w-[65px]">Action</th>
+                                  <th className="py-2.5 px-2 text-center w-9 bg-slate-100">STT</th>
+                                  <th className="py-2.5 px-2 text-center w-24 bg-orange-50/80 text-orange-950 font-black">Mã Tuyến XBG</th>
+                                  <th className="py-2.5 px-2 bg-orange-50/80 text-orange-950 font-black">Hành Lang Tuyến XBG</th>
+                                  <th className="py-2.5 px-2 bg-amber-50/80 text-amber-950 font-black">Cửa Khẩu Biên Giới</th>
+                                  <th className="py-2.5 px-2">Điểm Đi (Origin)</th>
+                                  <th className="py-2.5 px-2">Điểm Đến (Destination)</th>
+                                  <th className="py-2.5 px-2 text-center w-28 bg-orange-100/80 text-orange-950 font-black">Chi Tiết Biểu Phí</th>
+                                  <th className="py-2.5 px-2 text-center w-14">Action</th>
                                 </tr>
                               );
                             }
@@ -7573,79 +7594,79 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                             if (isCustomsTable) {
                               return (
                                 <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
-                                  <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
-                                  <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-amber-50/80 text-amber-950 font-black">Mã Dịch Vụ</th>
-                                  <th className="py-2.5 px-2.5 min-w-[230px] bg-amber-50/70 text-amber-950 font-black">Chi Cục Hải Quan Mở Tờ Khai</th>
-                                  <th className="py-2.5 px-2.5 min-w-[175px]">Khu Vực / Cửa Khẩu / Cảng / KCN</th>
-                                  <th className="py-2.5 px-2.5 min-w-[200px]">Loại Hình Tờ Khai Áp Dụng</th>
-                                  <th className="py-2.5 px-2 w-20 min-w-[80px] text-center">ĐVT</th>
-                                  <th className="py-2.5 px-2 w-20 min-w-[80px] text-center">Tiền Tệ</th>
-                                  <th className="py-2.5 px-2 text-right min-w-[160px] bg-emerald-50/90 text-emerald-950 font-black">Phí Khai Chuẩn (Xanh/Vàng)</th>
-                                  <th className="py-2.5 px-2 text-right min-w-[145px] bg-emerald-50/70 text-emerald-950">Phí Tờ Khai Phụ (/Tờ)</th>
-                                  <th className="py-2.5 px-2 text-right min-w-[160px] bg-rose-50/80 text-rose-950 font-bold">Phí Kiểm Hóa Luồng Đỏ (/Lô)</th>
-                                  <th className="py-2.5 px-2.5 min-w-[130px] text-center">SLA Thông Quan</th>
-                                  <th className="py-2.5 px-2.5 min-w-[155px] text-center">Hình Thức Khai Báo</th>
-                                  <th className="py-2.5 px-2.5 min-w-[130px] text-center">Hạn Giá</th>
-                                  <th className="py-2.5 px-2 min-w-[85px] text-center">Promotion</th>
-                                  <th className="py-2.5 px-2 text-center w-16 min-w-[65px]">Action</th>
+                                  <th className="py-2.5 px-2 text-center w-9 bg-slate-100">STT</th>
+                                  <th className="py-2.5 px-2 text-center w-24 bg-amber-50/80 text-amber-950 font-black">Mã Dịch Vụ</th>
+                                  <th className="py-2.5 px-2 bg-amber-50/70 text-amber-950 font-black">Chi Cục Hải Quan Mở Tờ Khai</th>
+                                  <th className="py-2.5 px-2">Khu Vực / Cửa Khẩu / Cảng / KCN</th>
+                                  <th className="py-2.5 px-2">Loại Hình Tờ Khai</th>
+                                  <th className="py-2.5 px-2 w-16 text-center">ĐVT</th>
+                                  <th className="py-2.5 px-2 w-16 text-center">Tiền Tệ</th>
+                                  <th className="py-2.5 px-2 text-right w-28 bg-emerald-50/90 text-emerald-950 font-black">Phí Chuẩn</th>
+                                  <th className="py-2.5 px-2 text-right w-24 bg-emerald-50/70 text-emerald-950">Phí Phụ</th>
+                                  <th className="py-2.5 px-2 text-right w-24 bg-rose-50/80 text-rose-950 font-bold">Phí Luồng Đỏ</th>
+                                  <th className="py-2.5 px-2 text-center w-20">SLA</th>
+                                  <th className="py-2.5 px-2 text-center w-24">Hình Thức</th>
+                                  <th className="py-2.5 px-2 text-center w-24">Hạn Giá</th>
+                                  <th className="py-2.5 px-2 w-16 text-center">KM (%)</th>
+                                  <th className="py-2.5 px-2 text-center w-14">Action</th>
                                 </tr>
                               );
                             }
 
                             return (
                               <tr className="bg-slate-100 border-b border-slate-300 divide-x divide-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
-                                <th className="py-2.5 px-2 text-center w-9 min-w-[36px] bg-slate-100">STT</th>
-                                <th className="py-2.5 px-2.5 min-w-[110px] text-center bg-slate-100">Mã Tuyến</th>
+                                <th className="py-2.5 px-2 text-center w-9 bg-slate-100">STT</th>
+                                <th className="py-2.5 px-2 text-center w-24 bg-slate-100">Mã Tuyến</th>
                                 {(isOceanTable || isAirTable) && (
-                                  <th className="py-2.5 px-2.5 min-w-[140px]">Khu Vực</th>
+                                  <th className="py-2.5 px-2 w-28">Khu Vực</th>
                                 )}
-                                <th className="py-2.5 px-2.5 min-w-[135px]">Hành Lang Tuyến</th>
-                                <th className="py-2.5 px-2.5 min-w-[130px]">{isRailLclTable ? 'Kho Bãi Ga / Ga Đi' : (isOceanLclTable ? 'Kho CFS / Điểm Đi' : (isAirCargoTable ? 'Sân Bay Đi' : (isExpressTable ? 'Điểm Lấy Hàng (Đi)' : 'Điểm Đi')))}</th>
-                                <th className="py-2.5 px-2.5 min-w-[130px]">{isRailLclTable ? 'Kho Bãi Ga / Ga Đến' : (isOceanLclTable ? 'Kho CFS / Cảng Đến' : (isAirCargoTable ? 'Sân Bay Đến' : (isExpressTable ? 'Quốc Gia / Điểm Đến' : 'Điểm Đến')))}</th>
+                                <th className="py-2.5 px-2">Hành Lang Tuyến</th>
+                                <th className="py-2.5 px-2">{isRailLclTable ? 'Kho Bãi Ga / Ga Đi' : (isOceanLclTable ? 'Kho CFS / Điểm Đi' : (isAirCargoTable ? 'Sân Bay Đi' : (isExpressTable ? 'Điểm Lấy Hàng (Đi)' : 'Điểm Đi')))}</th>
+                                <th className="py-2.5 px-2">{isRailLclTable ? 'Kho Bãi Ga / Ga Đến' : (isOceanLclTable ? 'Kho CFS / Cảng Đến' : (isAirCargoTable ? 'Sân Bay Đến' : (isExpressTable ? 'Quốc Gia / Điểm Đến' : 'Điểm Đến')))}</th>
                                 {isOceanTable && isFclTable && (
                                   <>
-                                    <th className="py-2.5 px-2.5 min-w-[170px]">Hãng Tàu</th>
-                                    <th className="py-2.5 px-2.5 min-w-[180px]">Loại Vỏ Container</th>
+                                    <th className="py-2.5 px-2">Hãng Tàu</th>
+                                    <th className="py-2.5 px-2 w-28">Loại Vỏ Cont</th>
                                   </>
                                 )}
                                 {isOceanTable && isOceanLclTable && (
-                                  <th className="py-2.5 px-2.5 min-w-[180px]">Hãng Tàu / Co-loader</th>
+                                  <th className="py-2.5 px-2">Hãng Tàu / Co-loader</th>
                                 )}
                                 {isRailTable && isFclTable && (
-                                  <th className="py-2.5 px-2.5 min-w-[180px]">Loại Vỏ Container</th>
+                                  <th className="py-2.5 px-2 w-28">Loại Vỏ Cont</th>
                                 )}
                                 {isRailTable && isRailLclTable && (
-                                  <th className="py-2.5 px-2.5 min-w-[180px]">Đơn Vị Vận Hành</th>
+                                  <th className="py-2.5 px-2">Đơn Vị Vận Hành</th>
                                 )}
                                 {isAirCargoTable && (
-                                  <th className="py-2.5 px-2.5 min-w-[180px]">Hãng Bay (Airline)</th>
+                                  <th className="py-2.5 px-2">Hãng Bay (Airline)</th>
                                 )}
                                 {isExpressTable && (
-                                  <th className="py-2.5 px-2.5 min-w-[180px]">Hãng Chuyển Phát</th>
+                                  <th className="py-2.5 px-2">Hãng Chuyển Phát</th>
                                 )}
                                 {isTruckingTable && (
                                   <>
-                                    <th className="py-2.5 px-2.5 min-w-[200px]">Loại Thùng Phương Tiện</th>
-                                    <th className="py-2.5 px-2.5 min-w-[210px]">Phân Khúc Tải Trọng</th>
+                                    <th className="py-2.5 px-2">Loại Thùng</th>
+                                    <th className="py-2.5 px-2">Tải Trọng</th>
                                   </>
                                 )}
-                                <th className="py-2.5 px-2 w-20 min-w-[80px] text-center">ĐVT</th>
-                                <th className="py-2.5 px-2 w-20 min-w-[80px] text-center">Tiền Tệ</th>
-                                <th className="py-2.5 px-2.5 min-w-[160px] text-right">
+                                <th className="py-2.5 px-2 w-16 text-center">ĐVT</th>
+                                <th className="py-2.5 px-2 w-16 text-center">Tiền Tệ</th>
+                                <th className="py-2.5 px-2 text-right w-28">
                                   {isAirCargoTable ? 'Đơn Giá (+100kg Base)' : (isExpressTable ? 'Đơn Giá (+45kg Base)' : 'Đơn Giá')}
                                 </th>
-                                <th className={`py-2.5 px-2 text-center ${(isAirCargoTable || isExpressTable) ? 'min-w-[165px]' : (isLtlOrLclTable ? 'min-w-[160px]' : 'min-w-[90px]')}`}>
-                                  {(isAirCargoTable || isExpressTable) ? 'Lịch Bay & Cut-off' : (isLtlOrLclTable ? 'Lịch Chạy & Cut-off' : 'SLA')}
+                                <th className="py-2.5 px-2 text-center w-24">
+                                  {(isAirCargoTable || isExpressTable) ? 'Lịch Bay' : (isLtlOrLclTable ? 'Lịch Chạy' : 'SLA')}
                                 </th>
                                 {!isExpressTable && (
-                                  <th className="py-2.5 px-2.5 min-w-[135px] text-center">Loại Tuyến</th>
+                                  <th className="py-2.5 px-2 text-center w-24">Loại Tuyến</th>
                                 )}
                                 {isFclTable && (
-                                  <th className="py-2.5 px-2.5 min-w-[145px] text-center">Free Dem/Det</th>
+                                  <th className="py-2.5 px-2 text-center w-24">Free Dem/Det</th>
                                 )}
-                                <th className="py-2.5 px-2.5 min-w-[130px] text-center">Hạn Giá</th>
-                                <th className="py-2.5 px-2 min-w-[85px] text-center">Promotion</th>
-                                <th className="py-2.5 px-2 text-center w-16 min-w-[65px]">Action</th>
+                                <th className="py-2.5 px-2 text-center w-24">Hạn Giá</th>
+                                <th className="py-2.5 px-2 w-16 text-center">KM (%)</th>
+                                <th className="py-2.5 px-2 text-center w-14">Action</th>
                               </tr>
                             );
                           })()}
@@ -8243,6 +8264,21 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                         placeholder="Kho Bằng Tường / Quảng Châu (TQ)..."
                                         className="w-full px-2 py-1.5 font-semibold text-slate-800 bg-transparent focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 rounded text-xs"
                                       />
+                                    </td>
+
+                                    {/* 6b. ĐVT */}
+                                    <td className="p-0 align-middle text-center">
+                                      <select
+                                        value={route.pricingUnit || 'Kg/CBM'}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'pricingUnit', e.target.value)}
+                                        className="w-full px-1.5 py-2 text-xs font-semibold text-center text-slate-800 bg-transparent cursor-pointer focus:bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 rounded"
+                                      >
+                                        <option value="Kg/CBM">Kg / CBM</option>
+                                        <option value="Kg">Kg</option>
+                                        <option value="CBM">CBM</option>
+                                        <option value="Tấn">Tấn</option>
+                                        <option value="Kiện">Kiện</option>
+                                      </select>
                                     </td>
 
                                     {/* 7. Chi Tiết (Mở Ma Trận Biểu Phí XBG LTL) */}
@@ -9241,6 +9277,22 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                       </select>
                                     </td>
 
+                                    {/* 7b. ĐVT */}
+                                    <td className="p-0 align-top text-center">
+                                      <select
+                                        value={route.pricingUnit || 'Kg/CBM'}
+                                        onChange={(e) => handleUpdateRouteRow(route.id, 'pricingUnit', e.target.value)}
+                                        className="w-full px-1.5 py-2.5 text-xs font-semibold text-center text-slate-800 bg-transparent cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-600 transition-all"
+                                      >
+                                        <option value="Kg/CBM">Kg / CBM</option>
+                                        <option value="Kg">Kg</option>
+                                        <option value="CBM">CBM</option>
+                                        <option value="Tấn">Tấn</option>
+                                        <option value="Kiện">Kiện</option>
+                                        <option value="Chuyến">Chuyến</option>
+                                      </select>
+                                    </td>
+
                                     {/* 8. Chi Tiết Biểu Phí */}
                                     <td className="p-2 text-center align-middle bg-indigo-50/20">
                                       <button
@@ -9466,6 +9518,21 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                         </select>
                                       </td>
 
+                                      {/* 7b. ĐVT */}
+                                      <td className="p-0 align-top text-center">
+                                        <select
+                                          value={route.pricingUnit || 'Kg'}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'pricingUnit', e.target.value)}
+                                          className="w-full px-1.5 py-2.5 text-xs font-semibold text-center text-slate-800 bg-transparent cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-sky-600 transition-all"
+                                        >
+                                          <option value="Kg">Kg</option>
+                                          <option value="CBM">CBM</option>
+                                          <option value="Tấn">Tấn</option>
+                                          <option value="Kiện">Kiện</option>
+                                          <option value="Shipment">Shipment</option>
+                                        </select>
+                                      </td>
+
                                       {/* 8. Chi Tiết Biểu Phí */}
                                       <td className="p-2 text-center align-middle bg-sky-50/20">
                                         <button
@@ -9599,6 +9666,20 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                         </select>
                                       </td>
 
+                                      {/* 7b. ĐVT */}
+                                      <td className="p-0 align-top text-center">
+                                        <select
+                                          value={route.pricingUnit || 'Kg'}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'pricingUnit', e.target.value)}
+                                          className="w-full px-1.5 py-2.5 text-xs font-semibold text-center text-slate-800 bg-transparent cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-amber-600 transition-all"
+                                        >
+                                          <option value="Kg">Kg</option>
+                                          <option value="Lô">Lô</option>
+                                          <option value="Kiện">Kiện</option>
+                                          <option value="Tài liệu/Doc">Tài liệu/Doc</option>
+                                        </select>
+                                      </td>
+
                                       {/* 8. Chi Tiết Biểu Phí */}
                                       <td className="p-2 text-center align-middle bg-amber-50/30">
                                         <button
@@ -9729,6 +9810,22 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                           {shippingLov.map((s, sIdx) => (
                                             <option key={sIdx} value={s}>{s}</option>
                                           ))}
+                                        </select>
+                                      </td>
+
+                                      {/* 7b. ĐVT */}
+                                      <td className="p-0 align-top text-center">
+                                        <select
+                                          value={route.pricingUnit || 'CBM/RT'}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'pricingUnit', e.target.value)}
+                                          className="w-full px-1.5 py-2.5 text-xs font-semibold text-center text-slate-800 bg-transparent cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-sky-600 transition-all"
+                                        >
+                                          <option value="CBM/RT">CBM / RT</option>
+                                          <option value="CBM">CBM</option>
+                                          <option value="RT">RT (Revenue Ton)</option>
+                                          <option value="Kg">Kg</option>
+                                          <option value="Tấn">Tấn</option>
+                                          <option value="Kiện">Kiện</option>
                                         </select>
                                       </td>
 
@@ -10026,7 +10123,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                             className="w-full px-2.5 py-2.5 bg-transparent text-slate-800 text-xs font-semibold cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-emerald-600 transition-all"
                                           >
                                             {operatorLov.map((line, lIdx) => (
-                                              <option key={lIdx} value={line}>{line}</option>
+                                              <option key={line} value={line}>{line}</option>
                                             ))}
                                           </select>
 
@@ -10050,6 +10147,22 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
                                             </div>
                                           )}
                                         </div>
+                                      </td>
+
+                                      {/* 6b. ĐVT */}
+                                      <td className="p-0 align-top text-center">
+                                        <select
+                                          value={route.pricingUnit || 'Tấn/CBM'}
+                                          onChange={(e) => handleUpdateRouteRow(route.id, 'pricingUnit', e.target.value)}
+                                          className="w-full px-1.5 py-2.5 text-xs font-semibold text-center text-slate-800 bg-transparent cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-emerald-600 transition-all"
+                                        >
+                                          <option value="Tấn/CBM">Tấn / CBM</option>
+                                          <option value="Tấn">Tấn</option>
+                                          <option value="CBM">CBM</option>
+                                          <option value="Kg">Kg</option>
+                                          <option value="Toa">Toa</option>
+                                          <option value="Kiện">Kiện</option>
+                                        </select>
                                       </td>
 
                                       {/* 7. Chi Tiết (Mở Popup Ma Trận Chi Phí Hàng Lẻ Đường Sắt LCL) */}

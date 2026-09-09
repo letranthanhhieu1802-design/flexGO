@@ -652,36 +652,9 @@ export const OceanFclCostMatrixModal: React.FC<OceanFclCostMatrixModalProps> = (
               <Ship className="w-5 h-5" />
             </div>
             <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="text-base font-black tracking-tight flex items-center gap-2">
-                  <span>Ma Trận Biểu Phí Đường Biển FCL (Nguyên Container)</span>
-                </h3>
-                <span className={`px-2 py-0.5 text-[10px] font-bold rounded-md uppercase tracking-wider ${
-                  effectiveCargoType === 'reefer'
-                    ? 'bg-blue-500/20 text-blue-300 border border-blue-400/30'
-                    : effectiveCargoType === 'hazmat'
-                    ? 'bg-amber-500/20 text-amber-300 border border-amber-400/30'
-                    : 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/30'
-                }`}>
-                  {effectiveCargoType === 'reefer'
-                    ? 'Container Lạnh (Reefer FCL)'
-                    : effectiveCargoType === 'hazmat'
-                    ? 'Container Nguy Hiểm (IMO / DG FCL)'
-                    : 'Container Hàng Thường (Dry FCL)'}
-                </span>
-                {route.shippingLine && (
-                  <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-white/10 text-slate-200 border border-white/20">
-                    Hãng tàu: {route.shippingLine}
-                  </span>
-                )}
-              </div>
-              <p className="text-xs text-sky-200/80 mt-0.5 flex items-center gap-2">
-                <span>Tuyến: <strong className="text-white">{route.origin} (POL) ⇄ {route.destination} (POD)</strong></span>
-                <span className="text-slate-400">•</span>
-                <span>Mã tuyến: <code className="text-sky-300 font-mono font-bold">{route.routeCode || 'RC-FCL-001'}</code></span>
-                <span className="text-slate-400">•</span>
-                <span>Đơn vị: <span className="text-emerald-400 font-bold">USD / Container</span></span>
-              </p>
+              <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <span>Biểu Phí Vận Tải Biển FCL (Nguyên Container)</span>
+              </h3>
             </div>
           </div>
 
@@ -689,10 +662,10 @@ export const OceanFclCostMatrixModal: React.FC<OceanFclCostMatrixModalProps> = (
             <button
               type="button"
               onClick={handleAddColumn}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-sky-600/20 cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-sky-600/20 cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5 stroke-[3]" />
-              <span>Thêm Cấu Hình Cont</span>
+              <span>+ Thêm Cấu Hình Cont</span>
             </button>
 
             <button
@@ -706,21 +679,55 @@ export const OceanFclCostMatrixModal: React.FC<OceanFclCostMatrixModalProps> = (
           </div>
         </div>
 
+        {/* ROUTE SUMMARY BREADCRUMB BANNER */}
+        <div className="px-5 py-2 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs shrink-0 select-none">
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10.5px] font-bold text-slate-500 uppercase">Mã Tuyến:</span>
+              <span className="font-mono font-bold text-sky-700 bg-white px-2 py-0.5 rounded-md border border-slate-200 text-xs shadow-2xs">
+                {route.routeCode || 'RC-FCL-001'}
+              </span>
+            </div>
+            <div className="h-4 w-px bg-slate-200 hidden sm:block" />
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10.5px] font-bold text-slate-500 uppercase">Hành Lang:</span>
+              <strong className="text-slate-900 font-bold">{route.route || `${route.origin} ⇄ ${route.destination}`}</strong>
+            </div>
+            <div className="h-4 w-px bg-slate-200 hidden sm:block" />
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10.5px] font-bold text-slate-500 uppercase">Hành Trình:</span>
+              <span className="text-slate-800 font-semibold">{route.origin} (POL) ➔ {route.destination} (POD)</span>
+            </div>
+          </div>
+        </div>
+
         {/* =========================================================================
             2. MODAL BODY (SCROLLABLE DATA MATRIX TABLE)
         ========================================================================= */}
         <div ref={scrollContainerRef} className="flex-1 overflow-auto p-4 sm:p-6 bg-slate-50/50">
-          <table className="w-full border-separate border-spacing-0 text-xs text-slate-800 bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+          <table className="border-collapse text-xs text-left border-spacing-0 table-fixed bg-white rounded-2xl border border-slate-200 shadow-xs" style={{ width: 'max-content' }}>
+            {/* COLUMN WIDTH DEFINITIONS */}
+            <colgroup>
+              <col style={{ width: '320px', minWidth: '320px', maxWidth: '320px' }} />
+              <col style={{ width: '110px', minWidth: '110px', maxWidth: '110px' }} />
+              {columns.map(col => (
+                <col key={`col-spec-${col.id}`} style={{ width: '280px', minWidth: '280px', maxWidth: '280px' }} />
+              ))}
+            </colgroup>
+
             <thead>
               {/* CÁC CỘT CONTAINER */}
               <tr className="bg-slate-100 border-b border-slate-200">
-                <th className="sticky left-0 z-30 bg-slate-100 text-left px-4 py-3.5 font-black text-slate-700 text-xs uppercase tracking-wider w-72 min-w-[280px] border-r border-slate-200">
-                  Hạng Mục / Cấu Hình Container
+                <th className="sticky left-0 z-30 bg-slate-100 text-left px-4 py-3.5 font-black text-slate-700 text-xs uppercase tracking-wider border-r border-slate-200 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)]">
+                  CỘT 1: HẠNG MỤC CHI PHÍ BÁO GIÁ
+                </th>
+                <th className="sticky left-[320px] z-30 bg-slate-100 text-center px-3 py-3.5 font-bold text-slate-700 text-xs uppercase tracking-wider border-r border-slate-200 shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)]">
+                  CỘT 2: ĐVT
                 </th>
                 {columns.map((col, idx) => (
                   <th
                     key={col.id}
-                    className="px-4 py-3 text-center border-r last:border-r-0 border-slate-200 min-w-[240px] max-w-[280px] bg-slate-100/90"
+                    className="px-4 py-3 text-center border-r last:border-r-0 border-slate-200 bg-slate-100/90"
                   >
                     <div className="flex items-center justify-between gap-1 pb-1">
                       <span className="text-[10.5px] font-black text-sky-800 bg-sky-100 px-2 py-0.5 rounded-md">
@@ -759,14 +766,17 @@ export const OceanFclCostMatrixModal: React.FC<OceanFclCostMatrixModalProps> = (
 
               {/* TỔNG CƯỚC THAM CHIẾU (ALL-IN) */}
               <tr className="bg-sky-50/80 border-b border-sky-200">
-                <td className="sticky left-0 z-30 bg-sky-50 text-left px-4 py-3 font-black text-sky-950 text-xs border-r border-slate-200">
+                <td className="sticky left-0 z-30 bg-sky-50 text-left px-4 py-3 font-black text-sky-950 text-xs border-r border-slate-200 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)]">
                   <div className="flex items-center gap-1.5">
                     <DollarSign className="w-4 h-4 text-sky-600" />
-                    <span>TỔNG CƯỚC DỰ KIẾN (OF + PHỤ PHÍ)</span>
+                    <span>Tổng Cước Dự Kiến (All-in Freight)</span>
                   </div>
                   <p className="text-[10px] text-slate-500 font-normal mt-0.5">
                     Cước biển cơ bản cộng toàn bộ phụ phí bắt buộc
                   </p>
+                </td>
+                <td className="sticky left-[320px] z-30 bg-sky-50 text-center px-3 py-3 text-sky-900 font-bold text-xs border-r border-slate-200 shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)]">
+                  USD / Cont
                 </td>
                 {columns.map((col) => (
                   <td
@@ -789,7 +799,7 @@ export const OceanFclCostMatrixModal: React.FC<OceanFclCostMatrixModalProps> = (
                   CƯỚC BIỂN CƠ BẢN (BASE OCEAN FREIGHT - OF)
               =================================================================== */}
               <tr className="bg-white hover:bg-slate-50/60 transition-colors">
-                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-bold text-slate-900">
+                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-bold text-slate-900 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)]">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
                       <Ship className="w-3.5 h-3.5 text-sky-600" />
@@ -800,8 +810,11 @@ export const OceanFclCostMatrixModal: React.FC<OceanFclCostMatrixModalProps> = (
                     </span>
                   </div>
                   <p className="text-[10px] text-slate-400 font-normal mt-0.5">
-                    Đơn giá cước vận chuyển chặng biển (USD / Cont)
+                    Đơn giá cước vận chuyển chặng biển
                   </p>
+                </td>
+                <td className="sticky left-[320px] z-20 bg-slate-50 border-r border-slate-200 px-3 py-2.5 text-center text-slate-600 font-semibold text-xs shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)] select-none">
+                  USD / Cont
                 </td>
                 {columns.map((col) => (
                   <td
@@ -828,7 +841,7 @@ export const OceanFclCostMatrixModal: React.FC<OceanFclCostMatrixModalProps> = (
               =================================================================== */}
               <tr className="bg-slate-100/90 border-y border-slate-200">
                 <td
-                  colSpan={columns.length + 1}
+                  colSpan={columns.length + 2}
                   className="px-4 py-2 font-black text-slate-700 text-[11px] tracking-wide uppercase bg-slate-100"
                 >
                   <div className="sticky left-4 inline-flex items-center gap-2">
@@ -848,25 +861,23 @@ export const OceanFclCostMatrixModal: React.FC<OceanFclCostMatrixModalProps> = (
 
                 return (
                   <tr key={`surcharge-row-${surcharge.id}`} className="hover:bg-sky-50/20 transition-colors">
-                    <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2 font-medium text-slate-800">
-                      <div className="flex items-center justify-between gap-1.5">
-                        <div className="flex items-center gap-1.5 min-w-0">
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteSurcharge(surcharge.id)}
-                            className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors cursor-pointer shrink-0"
-                            title={`Xóa phụ phí "${lovItem.name}"`}
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                          <span className="truncate text-xs font-semibold text-slate-800" title={lovItem.name}>
-                            {lovItem.name}
-                          </span>
-                        </div>
-                        <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded shrink-0 border border-slate-200">
-                          {lovItem.unit}
+                    <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2 font-medium text-slate-800 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)]">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteSurcharge(surcharge.id)}
+                          className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors cursor-pointer shrink-0"
+                          title={`Xóa phụ phí "${lovItem.name}"`}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                        <span className="truncate text-xs font-semibold text-slate-800" title={lovItem.name}>
+                          {lovItem.name}
                         </span>
                       </div>
+                    </td>
+                    <td className="sticky left-[320px] z-20 bg-slate-50 border-r border-slate-200 px-3 py-2 text-center text-slate-600 font-medium text-xs shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)] select-none">
+                      {lovItem.unit}
                     </td>
 
                     {columns.map((col) => {
@@ -900,7 +911,7 @@ export const OceanFclCostMatrixModal: React.FC<OceanFclCostMatrixModalProps> = (
 
               {/* HÀNG THÊM PHỤ PHÍ TỪ LOV */}
               <tr data-readonly-hide="true" className="bg-slate-50/80 border-b border-sky-100 hover:bg-sky-50/30 transition-colors">
-                <td className="sticky left-0 z-20 bg-slate-50/95 border-r border-slate-200 px-4 py-2">
+                <td className="sticky left-0 z-20 bg-slate-50/95 border-r border-slate-200 px-4 py-2 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)]">
                   {(() => {
                     const activeIds = (columns[0]?.activeSurcharges || []).map(a => a.id);
                     const unadded = activeSurchargesLov.filter(l => !activeIds.includes(l.id));
@@ -939,6 +950,9 @@ export const OceanFclCostMatrixModal: React.FC<OceanFclCostMatrixModalProps> = (
                     );
                   })()}
                 </td>
+                <td className="sticky left-[320px] z-20 bg-slate-50/95 border-r border-slate-200 px-2 py-2 text-center text-slate-400 text-[10px] font-medium italic shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)] select-none">
+                  Theo LOV
+                </td>
                 {columns.map((col) => (
                   <td key={`add-surch-placeholder-${col.id}`} className="border-r last:border-r-0 border-slate-200 bg-slate-50/30"></td>
                 ))}
@@ -949,7 +963,7 @@ export const OceanFclCostMatrixModal: React.FC<OceanFclCostMatrixModalProps> = (
               =================================================================== */}
               <tr className="bg-slate-100/90 border-y border-slate-200">
                 <td
-                  colSpan={columns.length + 1}
+                  colSpan={columns.length + 2}
                   className="px-4 py-2 font-black text-slate-700 text-[11px] tracking-wide uppercase bg-slate-100"
                 >
                   <div className="sticky left-4 inline-flex items-center gap-2">
@@ -970,25 +984,23 @@ export const OceanFclCostMatrixModal: React.FC<OceanFclCostMatrixModalProps> = (
 
                 return (
                   <tr key={`vas-row-${vas.id}`} className="hover:bg-indigo-50/20 transition-colors">
-                    <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2 font-medium text-slate-800">
-                      <div className="flex items-center justify-between gap-1.5">
-                        <div className="flex items-center gap-1.5 min-w-0">
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteVas(vas.id)}
-                            className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors cursor-pointer shrink-0"
-                            title={`Xóa dịch vụ "${lovItem.name}"`}
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                          <span className="truncate text-xs font-semibold text-slate-800" title={lovItem.name}>
-                            {lovItem.name}
-                          </span>
-                        </div>
-                        <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded shrink-0 border border-slate-200">
-                          {lovItem.unit}
+                    <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2 font-medium text-slate-800 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)]">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteVas(vas.id)}
+                          className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors cursor-pointer shrink-0"
+                          title={`Xóa dịch vụ "${lovItem.name}"`}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                        <span className="truncate text-xs font-semibold text-slate-800" title={lovItem.name}>
+                          {lovItem.name}
                         </span>
                       </div>
+                    </td>
+                    <td className="sticky left-[320px] z-20 bg-slate-50 border-r border-slate-200 px-3 py-2 text-center text-slate-600 font-medium text-xs shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)] select-none">
+                      {lovItem.unit}
                     </td>
 
                     {columns.map((col) => {
@@ -1022,7 +1034,7 @@ export const OceanFclCostMatrixModal: React.FC<OceanFclCostMatrixModalProps> = (
 
               {/* HÀNG THÊM VAS TỪ LOV */}
               <tr data-readonly-hide="true" className="bg-slate-50/80 border-b border-indigo-100 hover:bg-indigo-50/30 transition-colors">
-                <td className="sticky left-0 z-20 bg-slate-50/95 border-r border-slate-200 px-4 py-2">
+                <td className="sticky left-0 z-20 bg-slate-50/95 border-r border-slate-200 px-4 py-2 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)]">
                   {(() => {
                     const activeIds = (columns[0]?.activeVas || []).map(a => a.id);
                     const unadded = activeVasLov.filter(l => !activeIds.includes(l.id));
@@ -1061,6 +1073,9 @@ export const OceanFclCostMatrixModal: React.FC<OceanFclCostMatrixModalProps> = (
                     );
                   })()}
                 </td>
+                <td className="sticky left-[320px] z-20 bg-slate-50/95 border-r border-slate-200 px-2 py-2 text-center text-slate-400 text-[10px] font-medium italic shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)] select-none">
+                  Theo LOV
+                </td>
                 {columns.map((col) => (
                   <td key={`add-vas-placeholder-${col.id}`} className="border-r last:border-r-0 border-slate-200 bg-slate-50/30"></td>
                 ))}
@@ -1071,7 +1086,7 @@ export const OceanFclCostMatrixModal: React.FC<OceanFclCostMatrixModalProps> = (
               =================================================================== */}
               <tr className="bg-slate-100/90 border-y border-slate-200">
                 <td
-                  colSpan={columns.length + 1}
+                  colSpan={columns.length + 2}
                   className="px-4 py-2 font-black text-slate-700 text-[11px] tracking-wide uppercase bg-slate-100"
                 >
                   <div className="sticky left-4 inline-flex items-center gap-2">
@@ -1083,7 +1098,7 @@ export const OceanFclCostMatrixModal: React.FC<OceanFclCostMatrixModalProps> = (
 
               {/* 1. Lịch tàu chạy & Giờ cắt máng (Schedule & Cut-off) */}
               <tr className="hover:bg-slate-50/60 transition-colors">
-                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-bold text-slate-900">
+                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-bold text-slate-900 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)]">
                   <div className="flex items-center gap-1.5">
                     <Calendar className="w-3.5 h-3.5 text-sky-600" />
                     <span>1. Lịch Tàu Chạy & Giờ Cắt Máng (Closing/Cut-off)</span>
@@ -1091,6 +1106,9 @@ export const OceanFclCostMatrixModal: React.FC<OceanFclCostMatrixModalProps> = (
                   <p className="text-[10px] text-slate-400 font-normal mt-0.5">
                     Ngày tàu chạy trong tuần và giờ hạn chót giao cont cảng
                   </p>
+                </td>
+                <td className="sticky left-[320px] z-20 bg-slate-50 border-r border-slate-200 px-3 py-2.5 text-center text-slate-600 font-semibold text-xs shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)] select-none">
+                  Lịch chạy
                 </td>
                 {columns.map((col) => (
                   <td
@@ -1114,7 +1132,7 @@ export const OceanFclCostMatrixModal: React.FC<OceanFclCostMatrixModalProps> = (
 
               {/* 2. Loại Tuyến (Transit Type): Direct hoặc Transit ⭐ YÊU CẦU CỦA USER ⭐ */}
               <tr className="hover:bg-slate-50/60 transition-colors bg-sky-50/20">
-                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-bold text-slate-900">
+                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-bold text-slate-900 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)]">
                   <div className="flex items-center gap-1.5">
                     <Ship className="w-3.5 h-3.5 text-sky-600" />
                     <span>2. Loại Tuyến (Transit Type)</span>
@@ -1122,6 +1140,9 @@ export const OceanFclCostMatrixModal: React.FC<OceanFclCostMatrixModalProps> = (
                   <p className="text-[10px] text-slate-400 font-normal mt-0.5">
                     Tàu chạy thẳng trực tiếp hay có ghé cảng chuyển tải
                   </p>
+                </td>
+                <td className="sticky left-[320px] z-20 bg-slate-50 border-r border-slate-200 px-3 py-2.5 text-center text-slate-600 font-semibold text-xs shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)] select-none">
+                  Transit
                 </td>
                 {columns.map((col) => (
                   <td
@@ -1146,7 +1167,7 @@ export const OceanFclCostMatrixModal: React.FC<OceanFclCostMatrixModalProps> = (
 
               {/* 3. Thời Gian Hành Trình (Transit Time) */}
               <tr className="hover:bg-slate-50/60 transition-colors">
-                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-bold text-slate-900">
+                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-bold text-slate-900 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)]">
                   <div className="flex items-center gap-1.5">
                     <Clock className="w-3.5 h-3.5 text-sky-600" />
                     <span>3. Thời Gian Hành Trình (Transit Time)</span>
@@ -1154,6 +1175,9 @@ export const OceanFclCostMatrixModal: React.FC<OceanFclCostMatrixModalProps> = (
                   <p className="text-[10px] text-slate-400 font-normal mt-0.5">
                     Số ngày tàu chạy từ cảng bốc đến cảng đích
                   </p>
+                </td>
+                <td className="sticky left-[320px] z-20 bg-slate-50 border-r border-slate-200 px-3 py-2.5 text-center text-slate-600 font-semibold text-xs shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)] select-none">
+                  Ngày
                 </td>
                 {columns.map((col) => (
                   <td
@@ -1173,14 +1197,17 @@ export const OceanFclCostMatrixModal: React.FC<OceanFclCostMatrixModalProps> = (
 
               {/* 4. Số Ngày Free Demurrage & Detention */}
               <tr className="hover:bg-slate-50/60 transition-colors">
-                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-bold text-slate-900">
+                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-bold text-slate-900 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)]">
                   <div className="flex items-center gap-1.5">
                     <ShieldCheck className="w-3.5 h-3.5 text-sky-600" />
                     <span>4. Số Ngày Miễn Phí Lưu Bãi & Vỏ (Free Dem/Det)</span>
                   </div>
                   <p className="text-[10px] text-slate-400 font-normal mt-0.5">
-                    Số ngày lưu container miễn phí tại cảng đến (Ngày)
+                    Số ngày lưu container miễn phí tại cảng đến
                   </p>
+                </td>
+                <td className="sticky left-[320px] z-20 bg-slate-50 border-r border-slate-200 px-3 py-2.5 text-center text-slate-600 font-semibold text-xs shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)] select-none">
+                  Ngày
                 </td>
                 {columns.map((col) => (
                   <td
@@ -1204,7 +1231,7 @@ export const OceanFclCostMatrixModal: React.FC<OceanFclCostMatrixModalProps> = (
 
               {/* 5. Thời Hạn Hiệu Lực Giá */}
               <tr className="hover:bg-slate-50/60 transition-colors">
-                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-bold text-slate-900">
+                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-bold text-slate-900 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)]">
                   <div className="flex items-center gap-1.5">
                     <Calendar className="w-3.5 h-3.5 text-sky-600" />
                     <span>5. Thời Hạn Hiệu Lực Giá (Valid Until)</span>
@@ -1212,6 +1239,9 @@ export const OceanFclCostMatrixModal: React.FC<OceanFclCostMatrixModalProps> = (
                   <p className="text-[10px] text-slate-400 font-normal mt-0.5">
                     Mốc ngày kết thúc áp dụng biểu cước này
                   </p>
+                </td>
+                <td className="sticky left-[320px] z-20 bg-slate-50 border-r border-slate-200 px-3 py-2.5 text-center text-slate-600 font-semibold text-xs shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)] select-none">
+                  Ngày hết hạn
                 </td>
                 {columns.map((col) => (
                   <td
@@ -1234,31 +1264,25 @@ export const OceanFclCostMatrixModal: React.FC<OceanFclCostMatrixModalProps> = (
         {/* =========================================================================
             3. MODAL FOOTER
         ========================================================================= */}
-        <div className="px-6 py-3.5 bg-slate-100 border-t border-slate-200 flex items-center justify-between shrink-0">
-          <div className="text-xs text-slate-500">
-            Đang cấu hình <strong className="text-slate-800">{columns.length}</strong> loại container cho tuyến này.
-          </div>
+        <div className="px-5 py-3 bg-white border-t border-slate-200 flex items-center justify-end gap-2 shrink-0 shadow-lg select-none">
+          <button
+            type="button"
+            onClick={onClose}
+            data-readonly-allow="true"
+            className="px-4 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl transition-all cursor-pointer"
+          >
+            {isReadOnly ? 'Đóng' : 'Hủy Bỏ'}
+          </button>
 
-          <div className="flex items-center gap-2.5">
-            <button
-              type="button"
-              onClick={onClose}
-              data-readonly-allow="true"
-              className="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer"
-            >
-              Đóng
-            </button>
-
-            <button
-              type="button"
-              onClick={handleSave}
-              data-readonly-hide="true"
-              className="inline-flex items-center gap-1.5 px-5 py-2 text-xs font-bold text-white bg-sky-600 hover:bg-sky-700 rounded-xl transition-all shadow-md shadow-sky-600/20 cursor-pointer"
-            >
-              <Save className="w-4 h-4" />
-              <span>Lưu Ma Trận Biểu Phí Cont</span>
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={handleSave}
+            data-readonly-hide="true"
+            className="inline-flex items-center gap-1.5 px-6 py-2 text-xs font-black text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl transition-all shadow hover:shadow-emerald-600/30 cursor-pointer"
+          >
+            <Save className="w-4 h-4" />
+            <span>Lưu Cấu Hình Biểu Phí</span>
+          </button>
         </div>
 
 

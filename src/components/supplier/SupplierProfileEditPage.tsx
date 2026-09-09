@@ -419,7 +419,7 @@ export const SupplierProfileEditPage: React.FC<SupplierProfileEditPageProps> = (
   // RENDER SUPPLIER PROFILE EDITOR
   // =========================================================================
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div className="w-full max-w-[1720px] mx-auto px-2 sm:px-4 lg:px-6 py-6 space-y-6 animate-in fade-in duration-200">
       {/* Toast Alert */}
       {saveToast && (
         <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl border border-emerald-500/50 flex items-center space-x-3 animate-in fade-in slide-in-from-bottom-4 duration-300">
@@ -555,40 +555,6 @@ export const SupplierProfileEditPage: React.FC<SupplierProfileEditPageProps> = (
           setStudioConfig((prev) => ({ ...prev, themeColor: cId }));
         }}
       />
-
-      {/* Bottom Sticky Floating Save Bar */}
-      <div className="p-4 bg-slate-900 text-white rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl border border-slate-800">
-        <div className="flex items-center space-x-3 text-xs">
-          <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-            <CheckCircle2 className="w-5 h-5" />
-          </div>
-          <div>
-            <span className="font-bold text-white block">Tất Cả Dữ Liệu Hồ Sơ Được Đồng Bộ Theo Thời Gian Thực</span>
-            <span className="text-slate-400 text-[11px]">Bấm Xem Trước để kiểm tra trải nghiệm khách hàng trước khi phát hành</span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-          <button
-            type="button"
-            onClick={() => setViewMode('preview')}
-            className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all flex items-center gap-2 cursor-pointer"
-          >
-            <Eye className="w-4 h-4 text-indigo-300" />
-            <span>Xem Trước (Preview)</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => handleSaveProfile()}
-            className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold transition-all flex items-center gap-2 cursor-pointer shadow-lg"
-          >
-            <Save className="w-4 h-4" />
-            <span>Lưu & Công Khai Hồ Sơ</span>
-          </button>
-        </div>
-      </div>
-
-
     </div>
   );
 };

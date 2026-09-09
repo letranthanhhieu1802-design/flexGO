@@ -487,8 +487,8 @@ export const OceanLclCostMatrixModal: React.FC<OceanLclCostMatrixModalProps> = (
     setVasItems(vasItems.map(v => v.id === id ? { ...v, price } : v));
   };
 
-  // TỔNG SỐ CỘT PHÍA BÊN PHẢI (Volume Tiers + Min CBM + Weight Tiers + Min Kg)
-  const totalDataCols = volumeTiers.length + 1 + weightTiers.length + 1;
+  // TỔNG SỐ CỘT PHÍA BÊN PHẢI (ĐVT CBM + Volume Tiers + Min CBM + ĐVT Kg + Weight Tiers + Min Kg)
+  const totalDataCols = (volumeTiers.length + 2) + (weightTiers.length + 2);
 
   // LƯU TOÀN BỘ MA TRẬN
   const handleConfirmSave = () => {
@@ -536,69 +536,25 @@ export const OceanLclCostMatrixModal: React.FC<OceanLclCostMatrixModalProps> = (
         {/* =========================================================================
             MODAL HEADER (CHUẨN FCL & LCL UNIFIED)
         ========================================================================= */}
-        <div className="px-6 py-4 bg-gradient-to-r from-slate-900 via-sky-950 to-indigo-950 text-white flex items-center justify-between border-b border-slate-800 shadow-md shrink-0">
+        <div className="px-5 py-3 bg-gradient-to-r from-slate-900 via-sky-950 to-indigo-950 text-white flex items-center justify-between border-b border-slate-800 shadow-md shrink-0 select-none">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-sky-500/20 text-sky-400 flex items-center justify-center border border-sky-400/30 shadow-inner shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center border border-sky-400/30 shadow-inner shrink-0">
               <Ship className="w-5 h-5" />
             </div>
             <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-sky-500 text-slate-950">
-                  Biểu Phí Chi Tiết
-                </span>
-                <h3 className="text-base font-black tracking-tight text-white">
-                  Ma Trận Biểu Phí Hàng Lẻ Đóng Ghép Đa Bậc (Ocean LCL Matrix)
-                </h3>
-                <span className="text-xs font-bold text-sky-300 bg-sky-950/80 px-2 py-0.5 rounded border border-sky-800">
-                  {currency === 'VND' ? 'VND (₫)' : 'USD ($)'}
-                </span>
-              </div>
-              <div className="text-xs text-slate-300 mt-1 flex items-center gap-3 flex-wrap font-medium">
-                <span>Tuyến: <strong className="text-white">{route.route || route.routeCode}</strong></span>
-                <span>• Từ: <strong>{route.origin}</strong></span>
-                <span>➔ Đến: <strong>{route.destination}</strong></span>
-                <span className="bg-sky-900/60 text-sky-200 text-[11px] font-bold px-2 py-0.5 rounded border border-sky-700/50">
-                  Hãng Tàu/Co-loader: {route.vehicleType || 'Maersk Line'}
-                </span>
-                <span className="bg-emerald-950/70 text-emerald-300 text-[11px] font-bold px-2 py-0.5 rounded border border-emerald-800/60 flex items-center gap-1">
-                  <Scale className="w-3.5 h-3.5" />
-                  {wmRatio}
-                </span>
-              </div>
+              <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <span>Biểu Phí Gom Hàng Lẻ Biển (Ocean LCL)</span>
+              </h3>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              data-readonly-allow="true"
-              className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all cursor-pointer"
-              title="Đóng cửa sổ"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-
-        {/* =========================================================================
-            SUBHEADER: ĐIỀU KHIỂN BẬC & TIỀN TỆ
-        ========================================================================= */}
-        <div className="px-6 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between flex-wrap gap-2 text-xs shrink-0">
-          <div className="flex items-center gap-3 text-slate-600 font-medium">
-            <Layers className="w-4 h-4 text-sky-600" />
-            <span>Khai báo song song 2 chiều: <strong className="text-sky-700">Thể Tích ({volumeTiers.length} bậc CBM)</strong> & <strong className="text-indigo-700">Khối Lượng ({weightTiers.length} bậc Kg)</strong></span>
-            <span className="text-slate-300">|</span>
-            <span className="text-slate-500 font-normal">Đồng bộ chuẩn hiển thị & thêm phụ phí theo FCL</span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <div className="inline-flex rounded-xl bg-slate-200/80 p-0.5 border border-slate-300">
+            <div className="inline-flex rounded-xl bg-slate-800/80 p-0.5 border border-slate-700 mr-1">
               <button
                 type="button"
                 onClick={() => setCurrency('VND')}
                 className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  currency === 'VND' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                  currency === 'VND' ? 'bg-sky-600 text-white shadow-xs' : 'text-slate-300 hover:text-white'
                 }`}
               >
                 VND (₫)
@@ -607,7 +563,7 @@ export const OceanLclCostMatrixModal: React.FC<OceanLclCostMatrixModalProps> = (
                 type="button"
                 onClick={() => setCurrency('USD')}
                 className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  currency === 'USD' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                  currency === 'USD' ? 'bg-sky-600 text-white shadow-xs' : 'text-slate-300 hover:text-white'
                 }`}
               >
                 USD ($)
@@ -617,20 +573,52 @@ export const OceanLclCostMatrixModal: React.FC<OceanLclCostMatrixModalProps> = (
             <button
               type="button"
               onClick={handleAddVolumeTier}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-50 text-sky-800 border border-sky-300 hover:bg-sky-100 font-bold transition-all shadow-2xs cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-600/90 hover:bg-sky-500 text-white text-xs font-bold transition-all shadow-sm cursor-pointer"
             >
-              <Plus className="w-3.5 h-3.5 text-sky-600" />
-              <span>Thêm Bậc Thể Tích (CBM)</span>
+              <Plus className="w-3.5 h-3.5" />
+              <span>+ Thêm Bậc Thể Tích (CBM)</span>
             </button>
 
             <button
               type="button"
               onClick={handleAddWeightTier}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 text-indigo-800 border border-indigo-300 hover:bg-indigo-100 font-bold transition-all shadow-2xs cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600/90 hover:bg-indigo-500 text-white text-xs font-bold transition-all shadow-sm cursor-pointer"
             >
-              <Plus className="w-3.5 h-3.5 text-indigo-600" />
-              <span>Thêm Bậc Khối Lượng (Kg)</span>
+              <Plus className="w-3.5 h-3.5" />
+              <span>+ Thêm Bậc Khối Lượng (Kg)</span>
             </button>
+
+            <button
+              type="button"
+              onClick={onClose}
+              data-readonly-allow="true"
+              className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors cursor-pointer ml-1"
+              title="Đóng cửa sổ"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* ROUTE SUMMARY BREADCRUMB BANNER */}
+        <div className="px-5 py-2 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs shrink-0 select-none">
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10.5px] font-bold text-slate-500 uppercase">Mã Tuyến:</span>
+              <span className="font-mono font-bold text-sky-700 bg-white px-2 py-0.5 rounded-md border border-slate-200 text-xs shadow-2xs">
+                {route.routeCode || 'RC-LCL-001'}
+              </span>
+            </div>
+            <div className="h-4 w-px bg-slate-200 hidden sm:block" />
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10.5px] font-bold text-slate-500 uppercase">Hành Lang:</span>
+              <strong className="text-slate-900 font-bold">{route.route || `${route.origin} ⇄ ${route.destination}`}</strong>
+            </div>
+            <div className="h-4 w-px bg-slate-200 hidden sm:block" />
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10.5px] font-bold text-slate-500 uppercase">Hành Trình:</span>
+              <span className="text-slate-800 font-semibold">{route.origin} (POL) ➔ {route.destination} (POD)</span>
+            </div>
           </div>
         </div>
 
@@ -660,38 +648,37 @@ export const OceanLclCostMatrixModal: React.FC<OceanLclCostMatrixModalProps> = (
             <thead>
               {/* TẦNG 1: NHÃN CỘT THỂ TÍCH & TRỌNG LƯỢNG */}
               <tr className="border-b border-slate-300 text-center font-bold">
-                <th rowSpan={2} className="sticky left-0 z-30 bg-slate-100 text-slate-800 px-4 py-3 border-r-2 border-slate-300 text-xs w-[340px] min-w-[340px] shadow-[2px_0_5px_rgba(0,0,0,0.06)]">
-                  DÒNG BIỂU PHÍ & DỊCH VỤ
+                <th rowSpan={2} className="sticky left-0 z-30 bg-slate-100 text-slate-800 px-4 py-3 border-r-2 border-slate-300 text-xs w-[340px] min-w-[340px] shadow-[2px_0_5px_rgba(0,0,0,0.06)] align-middle">
+                  HẠNG MỤC CHI PHÍ BÁO GIÁ LCL
                 </th>
                 
                 {/* KHỐI 1: THỂ TÍCH (CBM) */}
-                <th colSpan={volumeTiers.length + 1} className="bg-sky-50 text-sky-950 py-2.5 px-3 border-r-2 border-slate-300">
+                <th colSpan={volumeTiers.length + 2} className="bg-sky-50 text-sky-950 py-2.5 px-3 border-r-2 border-slate-300">
                   <div className="flex items-center justify-center gap-2">
                     <Box className="w-4 h-4 text-sky-600" />
                     <span className="font-black tracking-wide uppercase">BIỂU GIÁ THEO THỂ TÍCH (CUBIC METER - CBM)</span>
-                    <span className="text-[10.5px] font-normal text-sky-800 bg-sky-100 px-2 py-0.5 rounded border border-sky-300">
-                      {currency === 'VND' ? 'đ/CBM' : 'USD/CBM'}
-                    </span>
                   </div>
                 </th>
 
                 {/* KHỐI 2: TRỌNG LƯỢNG (KG) */}
-                <th colSpan={weightTiers.length + 1} className="bg-indigo-50 text-indigo-950 py-2.5 px-3">
+                <th colSpan={weightTiers.length + 2} className="bg-indigo-50 text-indigo-950 py-2.5 px-3">
                   <div className="flex items-center justify-center gap-2">
                     <Layers className="w-4 h-4 text-indigo-600" />
                     <span className="font-black tracking-wide uppercase">BIỂU GIÁ THEO TRỌNG LƯỢNG (REVENUE TON / KG)</span>
-                    <span className="text-[10.5px] font-normal text-indigo-800 bg-indigo-100 px-2 py-0.5 rounded border border-indigo-300">
-                      {currency === 'VND' ? 'đ/kg' : 'USD/kg'}
-                    </span>
                   </div>
                 </th>
               </tr>
 
-              {/* TẦNG 2: CHI TIẾT CÁC CỘT BẬC */}
-              <tr className="border-b border-slate-300 divide-x divide-slate-200 text-center font-bold">
+              {/* TẦNG 2: CỘT ĐVT, CHI TIẾT CÁC CỘT BẬC VÀ CỘT MIN CHARGE */}
+              <tr className="border-b border-slate-300 text-center font-bold select-none text-[11px]">
+                {/* Khối CBM: ĐVT */}
+                <th className="bg-sky-50/80 border-r border-sky-200 px-2.5 py-2 text-center w-20 min-w-[75px] text-sky-950 font-bold">
+                  ĐVT
+                </th>
+
                 {/* CBM Columns */}
                 {volumeTiers.map((t, idx) => (
-                  <th key={t.id} className="bg-sky-50/70 py-2 px-2 text-slate-800 font-bold min-w-[105px] max-w-[125px]">
+                  <th key={t.id} className="bg-sky-50/70 py-2 px-2 text-slate-800 font-bold min-w-[105px] max-w-[125px] border-r border-sky-200">
                     <div className="flex items-center justify-between text-[11px] text-sky-900 font-extrabold">
                       <span>BẬC #{idx + 1}</span>
                       {volumeTiers.length > 1 && (
@@ -721,9 +708,14 @@ export const OceanLclCostMatrixModal: React.FC<OceanLclCostMatrixModalProps> = (
                   <div className="text-[9.5px] font-normal text-slate-500">Tối thiểu / Lô</div>
                 </th>
 
+                {/* Khối Kg: ĐVT */}
+                <th className="bg-indigo-50/80 border-r border-indigo-200 px-2.5 py-2 text-center w-20 min-w-[75px] text-indigo-950 font-bold">
+                  ĐVT
+                </th>
+
                 {/* Kg Columns */}
                 {weightTiers.map((t, idx) => (
-                  <th key={t.id} className="bg-indigo-50/70 py-2 px-2 text-slate-800 font-bold min-w-[105px] max-w-[125px]">
+                  <th key={t.id} className="bg-indigo-50/70 py-2 px-2 text-slate-800 font-bold min-w-[105px] max-w-[125px] border-r border-indigo-200">
                     <div className="flex items-center justify-between text-[11px] text-indigo-900 font-extrabold">
                       <span>BẬC #{idx + 1}</span>
                       {weightTiers.length > 1 && (
@@ -771,28 +763,34 @@ export const OceanLclCostMatrixModal: React.FC<OceanLclCostMatrixModalProps> = (
                   </p>
                 </td>
 
+                {/* Khối CBM: ĐVT */}
+                <td className="border-r border-sky-200 px-2 py-2 text-center font-bold text-sky-900 bg-sky-50/70">
+                  {currency === 'VND' ? 'đ/CBM' : '$/CBM'}
+                </td>
+
                 {/* All-in CBM */}
                 {volumeTiers.map((t) => (
                   <td key={`total-cbm-${t.id}`} className="p-2 text-center font-black text-sky-950 bg-sky-50/50 font-mono text-[13px] border-r border-slate-200">
                     {getAllInPriceCbm(t.id).toLocaleString()} {currency === 'VND' ? '₫' : '$'}
-                    <div className="text-[9.5px] font-bold text-sky-700 font-sans">/ CBM</div>
                   </td>
                 ))}
                 <td className="p-2 text-center font-bold text-sky-950 border-r-2 border-slate-300 bg-sky-100/40 font-mono text-xs">
                   {minChargeCbm.toLocaleString()} {currency === 'VND' ? '₫' : '$'}
-                  <div className="text-[9px] font-normal text-slate-500 font-sans">Min/Lô</div>
+                </td>
+
+                {/* Khối Kg: ĐVT */}
+                <td className="border-r border-indigo-200 px-2 py-2 text-center font-bold text-indigo-900 bg-indigo-50/70">
+                  {currency === 'VND' ? 'đ/kg' : '$/kg'}
                 </td>
 
                 {/* All-in Kg */}
                 {weightTiers.map((t) => (
                   <td key={`total-kg-${t.id}`} className="p-2 text-center font-black text-indigo-950 bg-indigo-50/50 font-mono text-[13px] border-r border-slate-200">
                     {getAllInPriceKg(t.id).toLocaleString()} {currency === 'VND' ? '₫' : '$'}
-                    <div className="text-[9.5px] font-bold text-indigo-700 font-sans">/ kg</div>
                   </td>
                 ))}
                 <td className="p-2 text-center font-bold text-indigo-950 bg-indigo-100/40 font-mono text-xs">
                   {minChargeKg.toLocaleString()} {currency === 'VND' ? '₫' : '$'}
-                  <div className="text-[9px] font-normal text-slate-500 font-sans">Min/Lô</div>
                 </td>
               </tr>
             </thead>
@@ -813,8 +811,13 @@ export const OceanLclCostMatrixModal: React.FC<OceanLclCostMatrixModalProps> = (
                     </span>
                   </div>
                   <p className="text-[10px] text-slate-400 font-normal mt-0.5">
-                    Đơn giá cước vận chuyển chặng biển ({currency === 'VND' ? 'VND / CBM & VND / kg' : 'USD / CBM & USD / kg'})
+                    Đơn giá cước vận chuyển chặng biển
                   </p>
+                </td>
+
+                {/* Khối CBM: ĐVT */}
+                <td className="border-r border-sky-200 px-2 py-2 text-center text-slate-600 font-semibold bg-sky-50/20">
+                  {currency === 'VND' ? 'đ/CBM' : '$/CBM'}
                 </td>
 
                 {/* Base Prices CBM */}
@@ -837,6 +840,11 @@ export const OceanLclCostMatrixModal: React.FC<OceanLclCostMatrixModalProps> = (
                     onChange={(e) => setMinChargeCbm(Number(e.target.value) || 0)}
                     className="w-full text-center px-1.5 py-1 text-xs font-bold text-sky-950 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 font-mono shadow-2xs"
                   />
+                </td>
+
+                {/* Khối Kg: ĐVT */}
+                <td className="border-r border-indigo-200 px-2 py-2 text-center text-slate-600 font-semibold bg-indigo-50/20">
+                  {currency === 'VND' ? 'đ/kg' : '$/kg'}
                 </td>
 
                 {/* Base Prices Kg */}
@@ -882,24 +890,24 @@ export const OceanLclCostMatrixModal: React.FC<OceanLclCostMatrixModalProps> = (
                 <tr key={`surcharge-row-${surcharge.id}`} className="hover:bg-sky-50/20 transition-colors">
                   {/* CỘT TIÊU ĐỀ TRÁI STICKY */}
                   <td className="sticky left-0 z-20 bg-white border-r-2 border-slate-300 px-4 py-2 font-medium text-slate-800 shadow-[2px_0_5px_rgba(0,0,0,0.06)]">
-                    <div className="flex items-center justify-between gap-1.5">
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteSurcharge(surcharge.id)}
-                          className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors cursor-pointer shrink-0"
-                          title={`Xóa phụ phí "${surcharge.name}"`}
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                        <span className="truncate text-xs font-semibold text-slate-800" title={surcharge.name}>
-                          {surcharge.name}
-                        </span>
-                      </div>
-                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 border text-sky-800 bg-sky-50 border-sky-200">
-                        {surcharge.unit}
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteSurcharge(surcharge.id)}
+                        className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors cursor-pointer shrink-0"
+                        title={`Xóa phụ phí "${surcharge.name}"`}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                      <span className="truncate text-xs font-semibold text-slate-800" title={surcharge.name}>
+                        {surcharge.name}
                       </span>
                     </div>
+                  </td>
+
+                  {/* Khối CBM: ĐVT */}
+                  <td className="border-r border-sky-200 px-2 py-2 text-center text-slate-600 font-semibold bg-sky-50/10">
+                    {currency === 'VND' ? 'đ/CBM' : '$/CBM'}
                   </td>
 
                   {/* CBM Tier Inputs */}
@@ -927,6 +935,11 @@ export const OceanLclCostMatrixModal: React.FC<OceanLclCostMatrixModalProps> = (
                     );
                   })}
                   <td className="px-2 py-1.5 text-center text-slate-400 border-r-2 border-slate-300 font-mono bg-slate-50/20">-</td>
+
+                  {/* Khối Kg: ĐVT */}
+                  <td className="border-r border-indigo-200 px-2 py-2 text-center text-slate-600 font-semibold bg-indigo-50/10">
+                    {currency === 'VND' ? 'đ/kg' : '$/kg'}
+                  </td>
 
                   {/* Kg Tier Inputs */}
                   {weightTiers.map((t) => {
@@ -1040,28 +1053,28 @@ export const OceanLclCostMatrixModal: React.FC<OceanLclCostMatrixModalProps> = (
                 <tr key={`surcharge-row-${surcharge.id}`} className="hover:bg-slate-50/50 transition-colors">
                   {/* CỘT TIÊU ĐỀ TRÁI STICKY */}
                   <td className="sticky left-0 z-20 bg-white border-r-2 border-slate-300 px-4 py-2 font-medium text-slate-800 shadow-[2px_0_5px_rgba(0,0,0,0.06)]">
-                    <div className="flex items-center justify-between gap-1.5">
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteSurcharge(surcharge.id)}
-                          className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors cursor-pointer shrink-0"
-                          title={`Xóa phụ phí "${surcharge.name}"`}
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                        <span className="truncate text-xs font-semibold text-slate-800" title={surcharge.name}>
-                          {surcharge.name}
-                        </span>
-                      </div>
-                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 border text-slate-600 bg-slate-100 border-slate-200">
-                        {surcharge.unit}
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteSurcharge(surcharge.id)}
+                        className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors cursor-pointer shrink-0"
+                        title={`Xóa phụ phí "${surcharge.name}"`}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                      <span className="truncate text-xs font-semibold text-slate-800" title={surcharge.name}>
+                        {surcharge.name}
                       </span>
                     </div>
                   </td>
 
-                  {/* DỮ LIỆU ĐƠN GIÁ CỐ ĐỊNH MỞ RỘNG TOÀN BỘ CỘT */}
-                  <td colSpan={totalDataCols} className="px-4 py-1.5 bg-slate-50/40 text-center border-r last:border-r-0 border-slate-200">
+                  {/* CỘT ĐVT RIÊNG */}
+                  <td className="border-r border-slate-200 px-2 py-2 text-center text-slate-700 font-bold bg-slate-50/60">
+                    {surcharge.unit.replace(/^(VND|USD)\s*\/\s*/i, (currency === 'VND' ? 'đ/' : '$/')) || surcharge.unit}
+                  </td>
+
+                  {/* DỮ LIỆU ĐƠN GIÁ CỐ ĐỊNH MỞ RỘNG TOÀN BỘ CỘT CÒN LẠI */}
+                  <td colSpan={totalDataCols - 1} className="px-4 py-1.5 bg-slate-50/40 text-center border-r last:border-r-0 border-slate-200">
                     <div className="flex items-center justify-center gap-3">
                       <span className="text-[11px] text-slate-500 font-medium">Mức thu cố định:</span>
                       <div className="relative w-48">
@@ -1182,27 +1195,28 @@ export const OceanLclCostMatrixModal: React.FC<OceanLclCostMatrixModalProps> = (
               {vasItems.map((vas) => (
                 <tr key={`vas-row-${vas.id}`} className="hover:bg-indigo-50/20 transition-colors">
                   <td className="sticky left-0 z-20 bg-white border-r-2 border-slate-300 px-4 py-2 font-medium text-slate-800 shadow-[2px_0_5px_rgba(0,0,0,0.06)]">
-                    <div className="flex items-center justify-between gap-1.5">
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteVas(vas.id)}
-                          className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors cursor-pointer shrink-0"
-                          title={`Xóa dịch vụ "${vas.name}"`}
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                        <span className="truncate text-xs font-semibold text-slate-800" title={vas.name}>
-                          {vas.name}
-                        </span>
-                      </div>
-                      <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded shrink-0 border border-slate-200">
-                        {vas.unit}
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteVas(vas.id)}
+                        className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors cursor-pointer shrink-0"
+                        title={`Xóa dịch vụ "${vas.name}"`}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                      <span className="truncate text-xs font-semibold text-slate-800" title={vas.name}>
+                        {vas.name}
                       </span>
                     </div>
                   </td>
 
-                  <td colSpan={totalDataCols} className="px-4 py-1.5 text-center border-r last:border-r-0 border-slate-200">
+                  {/* CỘT ĐVT RIÊNG */}
+                  <td className="border-r border-slate-200 px-2 py-2 text-center text-slate-700 font-bold bg-slate-50/60">
+                    {vas.unit.replace(/^(VND|USD)\s*\/\s*/i, (currency === 'VND' ? 'đ/' : '$/')) || vas.unit}
+                  </td>
+
+                  {/* DỮ LIỆU ĐƠN GIÁ VAS MỞ RỘNG TOÀN BỘ CỘT CÒN LẠI */}
+                  <td colSpan={totalDataCols - 1} className="px-4 py-1.5 text-center border-r last:border-r-0 border-slate-200">
                     <div className="flex items-center justify-center gap-3">
                       <div className="relative w-44">
                         <input
@@ -1458,31 +1472,25 @@ export const OceanLclCostMatrixModal: React.FC<OceanLclCostMatrixModalProps> = (
         {/* =========================================================================
             MODAL FOOTER (CHUẨN FCL & LCL UNIFIED)
         ========================================================================= */}
-        <div className="px-6 py-3.5 bg-slate-100 border-t border-slate-200 flex items-center justify-between shrink-0">
-          <div className="text-xs text-slate-500">
-            Đang cấu hình <strong className="text-slate-800">{volumeTiers.length} bậc CBM</strong> & <strong className="text-slate-800">{weightTiers.length} bậc Kg</strong> cho tuyến này.
-          </div>
+        <div className="px-5 py-3 bg-white border-t border-slate-200 flex items-center justify-end gap-2 shrink-0 shadow-lg select-none">
+          <button
+            type="button"
+            onClick={onClose}
+            data-readonly-allow="true"
+            className="px-4 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl transition-all cursor-pointer"
+          >
+            {isReadOnly ? 'Đóng' : 'Hủy Bỏ'}
+          </button>
 
-          <div className="flex items-center gap-2.5">
-            <button
-              type="button"
-              onClick={onClose}
-              data-readonly-allow="true"
-              className="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer"
-            >
-              Đóng
-            </button>
-
-            <button
-              type="button"
-              onClick={handleConfirmSave}
-              data-readonly-hide="true"
-              className="inline-flex items-center gap-1.5 px-5 py-2 text-xs font-bold text-white bg-sky-600 hover:bg-sky-700 rounded-xl transition-all shadow-md shadow-sky-600/20 cursor-pointer"
-            >
-              <Save className="w-4 h-4" />
-              <span>Lưu Ma Trận Biểu Phí LCL</span>
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={handleConfirmSave}
+            data-readonly-hide="true"
+            className="inline-flex items-center gap-1.5 px-6 py-2 text-xs font-black text-white bg-sky-600 hover:bg-sky-500 rounded-xl transition-all shadow hover:shadow-sky-600/30 cursor-pointer"
+          >
+            <Save className="w-4 h-4" />
+            <span>Lưu Cấu Hình Biểu Phí</span>
+          </button>
         </div>
 
       </div>

@@ -851,15 +851,8 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
               <Truck className="w-5 h-5" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="px-2 py-0.2 text-[10px] font-black bg-indigo-500/30 text-indigo-200 border border-indigo-400/40 rounded uppercase tracking-wider">
-                  Biểu Phí Chi Tiết
-                </span>
-                <span className="text-xs text-slate-300">Trucking FTL Studio</span>
-              </div>
-              <h3 className="text-base font-bold text-white flex items-center gap-2 mt-0.5">
-                <span>Bảng Khai Báo Biểu Phí Đa Phương Tiện Tuyến Vận Tải</span>
-                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <span>Biểu Phí Vận Tải Đường Bộ FTL</span>
               </h3>
             </div>
           </div>
@@ -906,13 +899,6 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
               <span className="text-[10.5px] font-bold text-slate-500 uppercase">Hành Trình:</span>
               <span className="text-slate-800 font-semibold">{route.origin} ➔ {route.destination}</span>
             </div>
-            <div className="h-4 w-px bg-slate-200 hidden sm:block" />
-            <div className="flex items-center gap-1.5">
-              <span className="text-[10.5px] font-bold text-slate-500 uppercase">Lịch Chạy:</span>
-              <span className="font-semibold text-slate-700 bg-white px-2 py-0.5 rounded-md border border-slate-200 text-xs">
-                {route.departureSchedule || route.sla || 'Hàng ngày'}
-              </span>
-            </div>
           </div>
         </div>
 
@@ -922,13 +908,13 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
           className="custom-matrix-scroll flex-1 min-h-0 w-full overflow-x-auto overflow-y-auto bg-white relative select-text"
           style={{ scrollbarGutter: 'stable' }}
         >
-          <table className="border-collapse text-xs text-left border-spacing-0 w-max min-w-full table-fixed">
+          <table className="border-collapse text-xs text-left border-spacing-0 table-fixed" style={{ width: 'max-content' }}>
             {/* COLUMN WIDTH DEFINITIONS */}
             <colgroup>
-              <col style={{ width: '320px', minWidth: '320px' }} />
-              <col style={{ width: '110px', minWidth: '110px' }} />
+              <col style={{ width: '320px', minWidth: '320px', maxWidth: '320px' }} />
+              <col style={{ width: '110px', minWidth: '110px', maxWidth: '110px' }} />
               {columns.map(col => (
-                <col key={`col-spec-${col.id}`} style={{ width: '270px', minWidth: '270px' }} />
+                <col key={`col-spec-${col.id}`} style={{ width: '280px', minWidth: '280px', maxWidth: '280px' }} />
               ))}
             </colgroup>
 

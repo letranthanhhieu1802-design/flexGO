@@ -622,36 +622,9 @@ export const RailFclCostMatrixModal: React.FC<RailFclCostMatrixModalProps> = ({
               <Train className="w-5 h-5" />
             </div>
             <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="text-base font-black tracking-tight flex items-center gap-2">
-                  <span>Ma Trận Biểu Phí Đường Sắt FCL (Nguyên Toa / Container)</span>
-                </h3>
-                <span className={`px-2 py-0.5 text-[10px] font-bold rounded-md uppercase tracking-wider ${
-                  effectiveCargoType === 'reefer'
-                    ? 'bg-blue-500/20 text-blue-300 border border-blue-400/30'
-                    : effectiveCargoType === 'hazmat'
-                    ? 'bg-amber-500/20 text-amber-300 border border-amber-400/30'
-                    : 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/30'
-                }`}>
-                  {effectiveCargoType === 'reefer'
-                    ? 'Container Lạnh Đường Sắt (Reefer Rail FCL)'
-                    : effectiveCargoType === 'hazmat'
-                    ? 'Toa Xe / Cont Nguy Hiểm (Hazmat Rail FCL)'
-                    : 'Container Hàng Thường (Dry Rail FCL)'}
-                </span>
-                {route.shippingLine && (
-                  <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-white/10 text-slate-200 border border-white/20">
-                    Đơn vị vận hành: {route.shippingLine}
-                  </span>
-                )}
-              </div>
-              <p className="text-xs text-emerald-200/80 mt-0.5 flex items-center gap-2 flex-wrap">
-                <span>Tuyến: <strong className="text-white">{route.origin} (Ga Đi) ⇄ {route.destination} (Ga Đến)</strong></span>
-                <span className="text-slate-400">•</span>
-                <span>Mã tuyến: <code className="text-emerald-300 font-mono font-bold">{route.routeCode || 'RC-RAIL-001'}</code></span>
-                <span className="text-slate-400">•</span>
-                <span>Đơn vị: <span className="text-emerald-400 font-bold">VND / Container</span></span>
-              </p>
+              <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <span>Biểu Phí Vận Tải Đường Sắt Rail FCL</span>
+              </h3>
             </div>
           </div>
 
@@ -659,10 +632,10 @@ export const RailFclCostMatrixModal: React.FC<RailFclCostMatrixModalProps> = ({
             <button
               type="button"
               onClick={handleAddColumn}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-emerald-600/20 cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-emerald-600/20 cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5 stroke-[3]" />
-              <span>Thêm Cấu Hình Cont / Toa</span>
+              <span>+ Thêm Cấu Hình Cont / Toa</span>
             </button>
 
             <button
@@ -676,21 +649,55 @@ export const RailFclCostMatrixModal: React.FC<RailFclCostMatrixModalProps> = ({
           </div>
         </div>
 
+        {/* ROUTE SUMMARY BREADCRUMB BANNER */}
+        <div className="px-5 py-2 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs shrink-0 select-none">
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10.5px] font-bold text-slate-500 uppercase">Mã Tuyến:</span>
+              <span className="font-mono font-bold text-emerald-700 bg-white px-2 py-0.5 rounded-md border border-slate-200 text-xs shadow-2xs">
+                {route.routeCode || 'RC-RAIL-001'}
+              </span>
+            </div>
+            <div className="h-4 w-px bg-slate-200 hidden sm:block" />
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10.5px] font-bold text-slate-500 uppercase">Hành Lang:</span>
+              <strong className="text-slate-900 font-bold">{route.route || `${route.origin} ⇄ ${route.destination}`}</strong>
+            </div>
+            <div className="h-4 w-px bg-slate-200 hidden sm:block" />
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10.5px] font-bold text-slate-500 uppercase">Hành Trình:</span>
+              <span className="text-slate-800 font-semibold">{route.origin} (Ga Đi) ➔ {route.destination} (Ga Đến)</span>
+            </div>
+          </div>
+        </div>
+
         {/* =========================================================================
             2. MODAL BODY (SCROLLABLE DATA MATRIX TABLE - ĐỒNG BỘ 1:1 OCEAN FCL)
         ========================================================================= */}
         <div ref={scrollContainerRef} className="flex-1 overflow-auto p-4 sm:p-6 bg-slate-50/50">
-          <table className="w-full border-separate border-spacing-0 text-xs text-slate-800 bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+          <table className="border-collapse text-xs text-left border-spacing-0 table-fixed bg-white rounded-2xl border border-slate-200 shadow-xs" style={{ width: 'max-content' }}>
+            {/* COLUMN WIDTH DEFINITIONS */}
+            <colgroup>
+              <col style={{ width: '320px', minWidth: '320px', maxWidth: '320px' }} />
+              <col style={{ width: '110px', minWidth: '110px', maxWidth: '110px' }} />
+              {columns.map(col => (
+                <col key={`col-spec-${col.id}`} style={{ width: '280px', minWidth: '280px', maxWidth: '280px' }} />
+              ))}
+            </colgroup>
+
             <thead>
               {/* CÁC CỘT CONTAINER / TOA XE */}
               <tr className="bg-slate-100 border-b border-slate-200">
-                <th className="sticky left-0 z-30 bg-slate-100 text-left px-4 py-3.5 font-black text-slate-700 text-xs uppercase tracking-wider w-72 min-w-[280px] border-r border-slate-200">
-                  Hạng Mục / Cấu Hình Container
+                <th className="sticky left-0 z-30 bg-slate-100 text-left px-4 py-3.5 font-black text-slate-700 text-xs uppercase tracking-wider border-r border-slate-200 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)]">
+                  CỘT 1: HẠNG MỤC CHI PHÍ BÁO GIÁ
+                </th>
+                <th className="sticky left-[320px] z-30 bg-slate-100 text-center px-3 py-3.5 font-bold text-slate-700 text-xs uppercase tracking-wider border-r border-slate-200 shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)]">
+                  CỘT 2: ĐVT
                 </th>
                 {columns.map((col, idx) => (
                   <th
                     key={col.id}
-                    className="px-4 py-3 text-center border-r last:border-r-0 border-slate-200 min-w-[240px] max-w-[280px] bg-slate-100/90"
+                    className="px-4 py-3 text-center border-r last:border-r-0 border-slate-200 bg-slate-100/90"
                   >
                     <div className="flex items-center justify-between gap-1 pb-1">
                       <span className="text-[10.5px] font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md">
@@ -729,14 +736,17 @@ export const RailFclCostMatrixModal: React.FC<RailFclCostMatrixModalProps> = ({
 
               {/* TỔNG CƯỚC DỰ KIẾN (ALL-IN - ĐẶT NGAY TRÊN ĐẦU BẢNG NHƯ ĐƯỜNG BIỂN) */}
               <tr className="bg-emerald-50/80 border-b border-emerald-200">
-                <td className="sticky left-0 z-30 bg-emerald-50 text-left px-4 py-3 font-black text-emerald-950 text-xs border-r border-slate-200">
+                <td className="sticky left-0 z-30 bg-emerald-50 text-left px-4 py-3 font-black text-emerald-950 text-xs border-r border-slate-200 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)]">
                   <div className="flex items-center gap-1.5">
                     <DollarSign className="w-4 h-4 text-emerald-600" />
-                    <span>TỔNG CƯỚC DỰ KIẾN (CƯỚC ĐƯỜNG RAY + PHỤ PHÍ)</span>
+                    <span>Tổng Cước Dự Kiến (All-in Freight)</span>
                   </div>
                   <p className="text-[10px] text-slate-500 font-normal mt-0.5">
                     Cước đường ray cơ bản cộng toàn bộ phụ phí bắt buộc
                   </p>
+                </td>
+                <td className="sticky left-[320px] z-30 bg-emerald-50 text-center px-3 py-3 text-emerald-900 font-bold text-xs border-r border-slate-200 shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)]">
+                  VND / Cont
                 </td>
                 {columns.map((col) => (
                   <td
@@ -759,7 +769,7 @@ export const RailFclCostMatrixModal: React.FC<RailFclCostMatrixModalProps> = ({
                   CƯỚC ĐƯỜNG RAY CƠ BẢN (BASE RAIL FREIGHT)
               =================================================================== */}
               <tr className="bg-white hover:bg-slate-50/60 transition-colors">
-                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-bold text-slate-900">
+                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-bold text-slate-900 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)]">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
                       <Train className="w-3.5 h-3.5 text-emerald-600" />
@@ -770,8 +780,11 @@ export const RailFclCostMatrixModal: React.FC<RailFclCostMatrixModalProps> = ({
                     </span>
                   </div>
                   <p className="text-[10px] text-slate-400 font-normal mt-0.5">
-                    Đơn giá cước vận chuyển chặng đường ray ga-ga (VND / Cont)
+                    Đơn giá cước vận chuyển chặng đường ray ga-ga
                   </p>
+                </td>
+                <td className="sticky left-[320px] z-20 bg-slate-50 border-r border-slate-200 px-3 py-2.5 text-center text-slate-600 font-semibold text-xs shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)] select-none">
+                  VND / Cont
                 </td>
                 {columns.map((col) => (
                   <td
@@ -799,7 +812,7 @@ export const RailFclCostMatrixModal: React.FC<RailFclCostMatrixModalProps> = ({
               =================================================================== */}
               <tr className="bg-slate-100/90 border-y border-slate-200">
                 <td
-                  colSpan={columns.length + 1}
+                  colSpan={columns.length + 2}
                   className="px-4 py-2 font-black text-slate-700 text-[11px] tracking-wide uppercase bg-slate-100"
                 >
                   <div className="sticky left-4 inline-flex items-center gap-2">
@@ -819,25 +832,23 @@ export const RailFclCostMatrixModal: React.FC<RailFclCostMatrixModalProps> = ({
 
                 return (
                   <tr key={`surcharge-row-${surcharge.id}`} className="hover:bg-emerald-50/20 transition-colors">
-                    <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2 font-medium text-slate-800">
-                      <div className="flex items-center justify-between gap-1.5">
-                        <div className="flex items-center gap-1.5 min-w-0">
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteSurcharge(surcharge.id)}
-                            className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors cursor-pointer shrink-0"
-                            title={`Xóa phụ phí "${lovItem.name}"`}
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                          <span className="truncate text-xs font-semibold text-slate-800" title={lovItem.name}>
-                            {lovItem.name}
-                          </span>
-                        </div>
-                        <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded shrink-0 border border-slate-200">
-                          {lovItem.unit}
+                    <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2 font-medium text-slate-800 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)]">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteSurcharge(surcharge.id)}
+                          className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors cursor-pointer shrink-0"
+                          title={`Xóa phụ phí "${lovItem.name}"`}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                        <span className="truncate text-xs font-semibold text-slate-800" title={lovItem.name}>
+                          {lovItem.name}
                         </span>
                       </div>
+                    </td>
+                    <td className="sticky left-[320px] z-20 bg-slate-50 border-r border-slate-200 px-3 py-2 text-center text-slate-600 font-medium text-xs shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)] select-none">
+                      {lovItem.unit}
                     </td>
 
                     {columns.map((col) => {
@@ -870,7 +881,7 @@ export const RailFclCostMatrixModal: React.FC<RailFclCostMatrixModalProps> = ({
 
               {/* HÀNG THÊM PHỤ PHÍ GA / ĐƯỜNG SẮT TỪ LOV */}
               <tr data-readonly-hide="true" className="bg-slate-50/60 border-b border-slate-200">
-                <td className="sticky left-0 z-20 bg-slate-50 px-4 py-2.5 border-r border-slate-200">
+                <td className="sticky left-0 z-20 bg-slate-50 px-4 py-2.5 border-r border-slate-200 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)]">
                   {(() => {
                     const currentIds = (columns[0]?.activeSurcharges || []).map((s) => s.id);
                     const unadded = activeSurchargesLov.filter((it) => !currentIds.includes(it.id));
@@ -908,6 +919,9 @@ export const RailFclCostMatrixModal: React.FC<RailFclCostMatrixModalProps> = ({
                     );
                   })()}
                 </td>
+                <td className="sticky left-[320px] z-20 bg-slate-50 border-r border-slate-200 px-2 py-2 text-center text-slate-400 text-[10px] font-medium italic shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)] select-none">
+                  Theo LOV
+                </td>
                 {columns.map((col) => (
                   <td key={`add-surch-placeholder-${col.id}`} className="border-r last:border-r-0 border-slate-200 bg-slate-50/30"></td>
                 ))}
@@ -918,7 +932,7 @@ export const RailFclCostMatrixModal: React.FC<RailFclCostMatrixModalProps> = ({
               =================================================================== */}
               <tr className="bg-slate-100/90 border-y border-slate-200">
                 <td
-                  colSpan={columns.length + 1}
+                  colSpan={columns.length + 2}
                   className="px-4 py-2 font-black text-slate-700 text-[11px] tracking-wide uppercase bg-slate-100"
                 >
                   <div className="sticky left-4 inline-flex items-center gap-2">
@@ -939,25 +953,23 @@ export const RailFclCostMatrixModal: React.FC<RailFclCostMatrixModalProps> = ({
 
                 return (
                   <tr key={`vas-row-${vas.id}`} className="hover:bg-indigo-50/20 transition-colors">
-                    <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2 font-medium text-slate-800">
-                      <div className="flex items-center justify-between gap-1.5">
-                        <div className="flex items-center gap-1.5 min-w-0">
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteVas(vas.id)}
-                            className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors cursor-pointer shrink-0"
-                            title={`Xóa dịch vụ "${lovItem.name}"`}
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                          <span className="truncate text-xs font-semibold text-slate-800" title={lovItem.name}>
-                            {lovItem.name}
-                          </span>
-                        </div>
-                        <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded shrink-0 border border-slate-200">
-                          {lovItem.unit}
+                    <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2 font-medium text-slate-800 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)]">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteVas(vas.id)}
+                          className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors cursor-pointer shrink-0"
+                          title={`Xóa dịch vụ "${lovItem.name}"`}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                        <span className="truncate text-xs font-semibold text-slate-800" title={lovItem.name}>
+                          {lovItem.name}
                         </span>
                       </div>
+                    </td>
+                    <td className="sticky left-[320px] z-20 bg-slate-50 border-r border-slate-200 px-3 py-2 text-center text-slate-600 font-medium text-xs shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)] select-none">
+                      {lovItem.unit}
                     </td>
 
                     {columns.map((col) => {
@@ -990,7 +1002,7 @@ export const RailFclCostMatrixModal: React.FC<RailFclCostMatrixModalProps> = ({
 
               {/* HÀNG THÊM TIỆN ÍCH VAS TỪ LOV */}
               <tr data-readonly-hide="true" className="bg-slate-50/60 border-b border-slate-200">
-                <td className="sticky left-0 z-20 bg-slate-50 px-4 py-2.5 border-r border-slate-200">
+                <td className="sticky left-0 z-20 bg-slate-50 px-4 py-2.5 border-r border-slate-200 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)]">
                   {(() => {
                     const currentIds = (columns[0]?.activeVas || []).map((v) => v.id);
                     const unadded = activeVasLov.filter((it) => !currentIds.includes(it.id));
@@ -1028,6 +1040,9 @@ export const RailFclCostMatrixModal: React.FC<RailFclCostMatrixModalProps> = ({
                     );
                   })()}
                 </td>
+                <td className="sticky left-[320px] z-20 bg-slate-50 border-r border-slate-200 px-2 py-2 text-center text-slate-400 text-[10px] font-medium italic shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)] select-none">
+                  Theo LOV
+                </td>
                 {columns.map((col) => (
                   <td key={`add-vas-placeholder-${col.id}`} className="border-r last:border-r-0 border-slate-200 bg-slate-50/30"></td>
                 ))}
@@ -1038,7 +1053,7 @@ export const RailFclCostMatrixModal: React.FC<RailFclCostMatrixModalProps> = ({
               =================================================================== */}
               <tr className="bg-slate-100/90 border-y border-slate-200">
                 <td
-                  colSpan={columns.length + 1}
+                  colSpan={columns.length + 2}
                   className="px-4 py-2 font-black text-slate-700 text-[11px] tracking-wide uppercase bg-slate-100"
                 >
                   <div className="sticky left-4 inline-flex items-center gap-2">
@@ -1050,7 +1065,7 @@ export const RailFclCostMatrixModal: React.FC<RailFclCostMatrixModalProps> = ({
 
               {/* 1. Lịch tàu chạy & Giờ cắt hàng bãi ga (Schedule & Cut-off) */}
               <tr className="hover:bg-slate-50/60 transition-colors">
-                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-bold text-slate-900">
+                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-bold text-slate-900 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)]">
                   <div className="flex items-center gap-1.5">
                     <Calendar className="w-3.5 h-3.5 text-emerald-600" />
                     <span>1. Lịch Tàu Chạy & Giờ Cắt Hàng Bãi Ga (Closing/Cut-off)</span>
@@ -1058,6 +1073,9 @@ export const RailFclCostMatrixModal: React.FC<RailFclCostMatrixModalProps> = ({
                   <p className="text-[10px] text-slate-400 font-normal mt-0.5">
                     Ngày tàu chạy trong tuần và giờ hạn chót hạ bãi ga
                   </p>
+                </td>
+                <td className="sticky left-[320px] z-20 bg-slate-50 border-r border-slate-200 px-3 py-2.5 text-center text-slate-600 font-semibold text-xs shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)] select-none">
+                  Lịch chạy
                 </td>
                 {columns.map((col) => (
                   <td
@@ -1081,7 +1099,7 @@ export const RailFclCostMatrixModal: React.FC<RailFclCostMatrixModalProps> = ({
 
               {/* 2. Loại Tuyến (Transit Type): Direct hoặc Transit ⭐ YÊU CẦU CỦA USER ⭐ */}
               <tr className="hover:bg-slate-50/60 transition-colors bg-emerald-50/20">
-                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-bold text-slate-900">
+                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-bold text-slate-900 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)]">
                   <div className="flex items-center gap-1.5">
                     <Train className="w-3.5 h-3.5 text-emerald-600" />
                     <span>2. Loại Tuyến (Transit Type)</span>
@@ -1089,6 +1107,9 @@ export const RailFclCostMatrixModal: React.FC<RailFclCostMatrixModalProps> = ({
                   <p className="text-[10px] text-slate-400 font-normal mt-0.5">
                     Đoàn tàu chạy thẳng suốt tuyến hay có sang toa / chuyển ga
                   </p>
+                </td>
+                <td className="sticky left-[320px] z-20 bg-slate-50 border-r border-slate-200 px-3 py-2.5 text-center text-slate-600 font-semibold text-xs shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)] select-none">
+                  Transit
                 </td>
                 {columns.map((col) => (
                   <td
@@ -1113,7 +1134,7 @@ export const RailFclCostMatrixModal: React.FC<RailFclCostMatrixModalProps> = ({
 
               {/* 3. Thời Gian Hành Trình (Transit Time) */}
               <tr className="hover:bg-slate-50/60 transition-colors">
-                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-bold text-slate-900">
+                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-bold text-slate-900 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)]">
                   <div className="flex items-center gap-1.5">
                     <Clock className="w-3.5 h-3.5 text-emerald-600" />
                     <span>3. Thời Gian Hành Trình (Transit Time)</span>
@@ -1121,6 +1142,9 @@ export const RailFclCostMatrixModal: React.FC<RailFclCostMatrixModalProps> = ({
                   <p className="text-[10px] text-slate-400 font-normal mt-0.5">
                     Thời gian đoàn tàu di chuyển từ ga bốc đến ga dỡ
                   </p>
+                </td>
+                <td className="sticky left-[320px] z-20 bg-slate-50 border-r border-slate-200 px-3 py-2.5 text-center text-slate-600 font-semibold text-xs shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)] select-none">
+                  Thời gian
                 </td>
                 {columns.map((col) => (
                   <td
@@ -1140,14 +1164,17 @@ export const RailFclCostMatrixModal: React.FC<RailFclCostMatrixModalProps> = ({
 
               {/* 4. Số Ngày Free Demurrage Bãi Ga */}
               <tr className="hover:bg-slate-50/60 transition-colors">
-                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-bold text-slate-900">
+                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-bold text-slate-900 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)]">
                   <div className="flex items-center gap-1.5">
                     <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
                     <span>4. Số Ngày Miễn Phí Lưu Bãi Ga (Free Demurrage Bãi Ga)</span>
                   </div>
                   <p className="text-[10px] text-slate-400 font-normal mt-0.5">
-                    Số ngày lưu container / toa xe miễn phí tại bãi ga (Ngày)
+                    Số ngày lưu container / toa xe miễn phí tại bãi ga
                   </p>
+                </td>
+                <td className="sticky left-[320px] z-20 bg-slate-50 border-r border-slate-200 px-3 py-2.5 text-center text-slate-600 font-semibold text-xs shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)] select-none">
+                  Ngày
                 </td>
                 {columns.map((col) => (
                   <td
@@ -1170,7 +1197,7 @@ export const RailFclCostMatrixModal: React.FC<RailFclCostMatrixModalProps> = ({
 
               {/* 5. Thời Hạn Hiệu Lực Giá */}
               <tr className="hover:bg-slate-50/60 transition-colors">
-                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-bold text-slate-900">
+                <td className="sticky left-0 z-20 bg-white border-r border-slate-200 px-4 py-2.5 font-bold text-slate-900 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)]">
                   <div className="flex items-center gap-1.5">
                     <Calendar className="w-3.5 h-3.5 text-emerald-600" />
                     <span>5. Thời Hạn Hiệu Lực Giá (Valid Until)</span>
@@ -1178,6 +1205,9 @@ export const RailFclCostMatrixModal: React.FC<RailFclCostMatrixModalProps> = ({
                   <p className="text-[10px] text-slate-400 font-normal mt-0.5">
                     Mức giá trên có giá trị áp dụng đến ngày
                   </p>
+                </td>
+                <td className="sticky left-[320px] z-20 bg-slate-50 border-r border-slate-200 px-3 py-2.5 text-center text-slate-600 font-semibold text-xs shadow-[3px_0_6px_-2px_rgba(0,0,0,0.08)] select-none">
+                  Ngày hết hạn
                 </td>
                 {columns.map((col) => (
                   <td
@@ -1200,31 +1230,25 @@ export const RailFclCostMatrixModal: React.FC<RailFclCostMatrixModalProps> = ({
         {/* =========================================================================
             3. MODAL FOOTER (ĐỒNG BỘ 1:1 OCEAN FCL)
         ========================================================================= */}
-        <div className="px-6 py-4 bg-slate-100 border-t border-slate-200 flex items-center justify-between shrink-0">
-          <p className="text-xs text-slate-500">
-            Đang cấu hình <strong className="text-slate-800">{columns.length}</strong> loại container/toa xe cho tuyến này.
-          </p>
+        <div className="px-5 py-3 bg-white border-t border-slate-200 flex items-center justify-end gap-2 shrink-0 shadow-lg select-none">
+          <button
+            type="button"
+            onClick={onClose}
+            data-readonly-allow="true"
+            className="px-4 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl transition-all cursor-pointer"
+          >
+            {isReadOnly ? 'Đóng' : 'Hủy Bỏ'}
+          </button>
 
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              data-readonly-allow="true"
-              className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer"
-            >
-              Đóng
-            </button>
-
-            <button
-              type="button"
-              onClick={handleSave}
-              data-readonly-hide="true"
-              className="inline-flex items-center gap-1.5 px-5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-all shadow-md shadow-emerald-600/20 cursor-pointer"
-            >
-              <Check className="w-4 h-4" />
-              <span>Lưu Ma Trận Biểu Phí Đường Sắt</span>
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={handleSave}
+            data-readonly-hide="true"
+            className="inline-flex items-center gap-1.5 px-6 py-2 text-xs font-black text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl transition-all shadow hover:shadow-emerald-600/30 cursor-pointer"
+          >
+            <Check className="w-4 h-4" />
+            <span>Lưu Cấu Hình Biểu Phí</span>
+          </button>
         </div>
 
         {/* =========================================================================

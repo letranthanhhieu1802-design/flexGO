@@ -16,7 +16,8 @@ import {
   ShieldCheck, 
   ChevronRight, 
   Eye, 
-  Upload 
+  Upload,
+  Save
 } from 'lucide-react';
 import { 
   WarehousePricingContinuousTable,
@@ -123,32 +124,15 @@ export const WarehouseDetailModal: React.FC<WarehouseDetailModalProps> = ({
     <div className="fixed inset-0 z-[120] flex items-center justify-center p-2.5 sm:p-4 bg-slate-950/75 backdrop-blur-xs overflow-hidden animate-in fade-in duration-150">
       <div className="w-full max-w-[96vw] 2xl:max-w-[1560px] h-[94vh] max-h-[95vh] bg-white rounded-2xl shadow-2xl border border-slate-200/80 overflow-hidden flex flex-col my-auto animate-in zoom-in-95 duration-150">
             {/* 1. Modal Header */}
-            <div className="px-6 py-4 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex items-center justify-between border-b border-slate-800 shrink-0">
-              <div className="flex items-center gap-3.5">
-                <div className="w-11 h-11 rounded-2xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center shrink-0 shadow-inner">
-                  <Building2 className="w-6 h-6" />
+            <div className="px-5 py-3 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex items-center justify-between border-b border-indigo-900/50 shrink-0 select-none">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 flex items-center justify-center shrink-0 shadow-inner">
+                  <Building2 className="w-5 h-5 text-indigo-200" />
                 </div>
                 <div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-base font-black tracking-tight text-white">
-                      {localData.warehouseName}
-                    </h3>
-                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-lg bg-indigo-500/30 text-indigo-200 border border-indigo-400/30">
-                      Mã: {localData.warehouseCode}
-                    </span>
-                    {localData.isColdStorage && (
-                      <span className="text-[11px] font-bold px-2 py-0.5 rounded-lg bg-cyan-500/20 text-cyan-200 border border-cyan-400/30 flex items-center gap-1">
-                        <Thermometer className="w-3 h-3 text-cyan-300" />
-                        Kho Lạnh
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs text-slate-300 mt-0.5 flex items-center gap-1.5 flex-wrap">
-                    <MapPin className="w-3.5 h-3.5 text-rose-400 shrink-0" />
-                    <span>{localData.address}, {localData.province}</span>
-                    <span className="text-slate-500">•</span>
-                    <span className="text-indigo-300 font-medium">Chi tiết Specs, Album ảnh, Phụ phí & Dịch vụ VAS</span>
-                  </p>
+                  <h3 className="text-base font-bold text-white flex items-center gap-2">
+                    <span>Biểu Phí & Hồ Sơ Cơ Sở Kho</span>
+                  </h3>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -165,10 +149,32 @@ export const WarehouseDetailModal: React.FC<WarehouseDetailModalProps> = ({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="w-9 h-9 rounded-xl bg-slate-800/80 hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 flex items-center justify-center transition-all cursor-pointer border border-slate-700/60"
+                  className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
+              </div>
+            </div>
+
+            {/* ROUTE / WAREHOUSE SUMMARY BREADCRUMB BANNER */}
+            <div className="px-5 py-2 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs shrink-0 select-none">
+              <div className="flex items-center gap-4 flex-wrap">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10.5px] font-bold text-slate-500 uppercase">Mã Kho:</span>
+                  <span className="font-mono font-bold text-indigo-700 bg-white px-2 py-0.5 rounded-md border border-slate-200 text-xs shadow-2xs">
+                    {localData.warehouseCode || 'WH-001'}
+                  </span>
+                </div>
+                <div className="h-4 w-px bg-slate-200 hidden sm:block" />
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10.5px] font-bold text-slate-500 uppercase">Tên Kho:</span>
+                  <strong className="text-slate-900 font-bold">{localData.warehouseName}</strong>
+                </div>
+                <div className="h-4 w-px bg-slate-200 hidden sm:block" />
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10.5px] font-bold text-slate-500 uppercase">Vị Trí:</span>
+                  <span className="text-slate-800 font-semibold">{localData.address}, {localData.province}</span>
+                </div>
               </div>
             </div>
 
@@ -2139,47 +2145,36 @@ export const WarehouseDetailModal: React.FC<WarehouseDetailModalProps> = ({
             </div>
 
             {/* 4. Modal Footer */}
-            <div className="px-6 py-3.5 bg-white border-t border-slate-200 flex items-center justify-between shrink-0">
-              <div className="text-[11px] text-slate-500 flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4 text-indigo-600 shrink-0" />
-                <span>
-                  {isReadOnly 
-                    ? 'Cần tham quan khảo sát trực tiếp cơ sở kho? Hãy liên hệ chuyên viên để sắp xếp lịch hẹn.'
-                    : 'Toàn bộ ảnh, thông số kỹ thuật, phụ phí & VAS sẽ được tự động đồng bộ vào Hồ Sơ Năng Lực của cơ sở này.'}
-                </span>
-              </div>
+            <div className="px-5 py-3 bg-white border-t border-slate-200 flex items-center justify-end gap-2 shrink-0 shadow-lg select-none">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl transition-all cursor-pointer"
+              >
+                {isReadOnly ? 'Đóng' : 'Hủy Bỏ'}
+              </button>
 
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
-                >
-                  {isReadOnly ? 'Đóng' : 'Hủy Bỏ'}
-                </button>
-
-                {isReadOnly ? (
-                  onRequestQuote && (
-                    <button
-                      type="button"
-                      onClick={() => onRequestQuote(localData)}
-                      className="inline-flex items-center gap-1.5 px-5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-95 rounded-xl transition-all shadow-md shadow-emerald-600/20 cursor-pointer"
-                    >
-                      <Send className="w-4 h-4" />
-                      <span>Yêu Cầu Báo Giá Cơ Sở Kho Này</span>
-                    </button>
-                  )
-                ) : (
+              {isReadOnly ? (
+                onRequestQuote && (
                   <button
                     type="button"
-                    onClick={() => onSave && onSave(localData)}
-                    className="inline-flex items-center gap-1.5 px-5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-md shadow-indigo-600/20 cursor-pointer"
+                    onClick={() => onRequestQuote(localData)}
+                    className="inline-flex items-center gap-1.5 px-6 py-2 text-xs font-black text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl transition-all shadow hover:shadow-emerald-600/30 cursor-pointer"
                   >
-                    <Check className="w-4 h-4" />
-                    <span>Xác Nhận & Lưu Chi Tiết Cơ Sở Kho</span>
+                    <Send className="w-4 h-4" />
+                    <span>Yêu Cầu Báo Giá Kho Này</span>
                   </button>
-                )}
-              </div>
+                )
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => onSave && onSave(localData)}
+                  className="inline-flex items-center gap-1.5 px-6 py-2 text-xs font-black text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl transition-all shadow hover:shadow-indigo-600/30 cursor-pointer"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>Lưu Cấu Hình Biểu Phí</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
