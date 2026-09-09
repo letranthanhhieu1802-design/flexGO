@@ -214,6 +214,7 @@ export const HotPromotionRateDetailCard: React.FC<HotPromotionRateDetailCardProp
 
   const isLCL = serviceModel.includes('LCL') || serviceModel.includes('CFS') || titleLower.includes('lcl') || titleLower.includes('cfs');
   const isFCL = !isLCL;
+  const isAirExpress = isAir && (serviceModel.includes('EXPRESS') || titleLower.includes('express') || titleLower.includes('hỏa tốc'));
 
   const isColdCargo = cargoGroup.includes('lạnh') || cargoGroup.includes('cold') || cargoGroup.includes('reefer') || (item.badgeLabel || '').toLowerCase().includes('lạnh');
   const isHazmatCargo = cargoGroup.includes('nguy hiểm') || cargoGroup.includes('dg') || cargoGroup.includes('imo') || (item.badgeLabel || '').toLowerCase().includes('nguy hiểm');
@@ -1241,6 +1242,7 @@ export const HotPromotionRateDetailCard: React.FC<HotPromotionRateDetailCardProp
               onClose={() => setIsFullModalOpen(false)}
               route={declaredRoute || ({ id: item.id, routeCode: item.code, origin: item.origin, destination: item.destination } as any)}
               onSave={() => {}}
+              isReadOnly
               cargoType={isColdCargo ? 'reefer' : (isHazmatCargo ? 'hazmat' : 'general')}
             />
           )}
@@ -1251,6 +1253,7 @@ export const HotPromotionRateDetailCard: React.FC<HotPromotionRateDetailCardProp
               onClose={() => setIsFullModalOpen(false)}
               route={declaredRoute || ({ id: item.id, routeCode: item.code, origin: item.origin, destination: item.destination } as any)}
               onSave={() => {}}
+              isReadOnly
               cargoType={isColdCargo ? 'reefer' : 'general'}
             />
           )}
@@ -1261,6 +1264,7 @@ export const HotPromotionRateDetailCard: React.FC<HotPromotionRateDetailCardProp
               onClose={() => setIsFullModalOpen(false)}
               route={declaredRoute || ({ id: item.id, routeCode: item.code, origin: item.origin, destination: item.destination } as any)}
               onSave={() => {}}
+              isReadOnly
               cargoType={isColdCargo ? 'reefer' : (isHazmatCargo ? 'hazmat' : 'general')}
             />
           )}
@@ -1271,6 +1275,7 @@ export const HotPromotionRateDetailCard: React.FC<HotPromotionRateDetailCardProp
               onClose={() => setIsFullModalOpen(false)}
               route={declaredRoute || ({ id: item.id, routeCode: item.code, origin: item.origin, destination: item.destination } as any)}
               onSave={() => {}}
+              isReadOnly
             />
           )}
 
@@ -1280,6 +1285,7 @@ export const HotPromotionRateDetailCard: React.FC<HotPromotionRateDetailCardProp
               onClose={() => setIsFullModalOpen(false)}
               route={declaredRoute || ({ id: item.id, routeCode: item.code, origin: item.origin, destination: item.destination } as any)}
               onSave={() => {}}
+              isReadOnly
               cargoType={isColdCargo ? 'reefer' : 'general'}
             />
           )}
@@ -1290,17 +1296,29 @@ export const HotPromotionRateDetailCard: React.FC<HotPromotionRateDetailCardProp
               onClose={() => setIsFullModalOpen(false)}
               route={declaredRoute || ({ id: item.id, routeCode: item.code, origin: item.origin, destination: item.destination } as any)}
               onSave={() => {}}
+              isReadOnly
               cargoType="general"
             />
           )}
 
-          {isAir && (
+          {isAir && !isAirExpress && (
             <AirCargoCostMatrixModal
               isOpen={isFullModalOpen}
               onClose={() => setIsFullModalOpen(false)}
               route={declaredRoute || ({ id: item.id, routeCode: item.code, origin: item.origin, destination: item.destination } as any)}
               onSave={() => {}}
-              cargoType="general"
+              isReadOnly
+              cargoType={isColdCargo ? 'reefer' : (isHazmatCargo ? 'hazmat' : 'general')}
+            />
+          )}
+
+          {isAirExpress && (
+            <AirExpressCostMatrixModal
+              isOpen={isFullModalOpen}
+              onClose={() => setIsFullModalOpen(false)}
+              route={declaredRoute || ({ id: item.id, routeCode: item.code, origin: item.origin, destination: item.destination } as any)}
+              onSave={() => {}}
+              isReadOnly
             />
           )}
 
@@ -1310,7 +1328,8 @@ export const HotPromotionRateDetailCard: React.FC<HotPromotionRateDetailCardProp
               onClose={() => setIsFullModalOpen(false)}
               route={declaredRoute || ({ id: item.id, routeCode: item.code, origin: item.origin, destination: item.destination } as any)}
               onSave={() => {}}
-              cargoType="general"
+              isReadOnly
+              cargoType={isColdCargo ? 'reefer' : (isHazmatCargo ? 'hazmat' : 'general')}
             />
           )}
 
@@ -1320,6 +1339,7 @@ export const HotPromotionRateDetailCard: React.FC<HotPromotionRateDetailCardProp
               onClose={() => setIsFullModalOpen(false)}
               route={declaredRoute || ({ id: item.id, routeCode: item.code, origin: item.origin, destination: item.destination } as any)}
               onSave={() => {}}
+              isReadOnly
               cargoType="general"
             />
           )}

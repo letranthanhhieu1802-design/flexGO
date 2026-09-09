@@ -20,6 +20,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { CapabilityRouteItem } from './SupplierServiceCapabilityModal';
+import { getReadOnlyMatrixInteractionProps } from './readOnlyCostMatrix';
 
 export interface LOVItem {
   id: string;
@@ -412,6 +413,7 @@ interface CrossBorderFtlCostMatrixModalProps {
   route: CapabilityRouteItem | null;
   onSave: (routeId: string, matrix: CrossBorderVehiclePricingMatrixColumn[]) => void;
   cargoType?: 'general' | 'reefer' | 'hazmat';
+  isReadOnly?: boolean;
 }
 
 export const CrossBorderFtlCostMatrixModal: React.FC<CrossBorderFtlCostMatrixModalProps> = ({
@@ -420,6 +422,7 @@ export const CrossBorderFtlCostMatrixModal: React.FC<CrossBorderFtlCostMatrixMod
   route,
   onSave,
   cargoType,
+  isReadOnly = false,
 }) => {
   const [selectedCargoTab, setSelectedCargoTab] = useState<'general' | 'reefer' | 'hazmat'>('general');
 
@@ -850,7 +853,10 @@ export const CrossBorderFtlCostMatrixModal: React.FC<CrossBorderFtlCostMatrixMod
   };
 
   return (
-    <div className="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-hidden animate-fadeIn">
+    <div
+      {...getReadOnlyMatrixInteractionProps(isReadOnly)}
+      className="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-hidden animate-fadeIn"
+    >
       <div className="bg-white w-full max-w-[97vw] 2xl:max-w-[1580px] h-[92vh] max-h-[950px] rounded-2xl shadow-2xl flex flex-col border border-slate-200 overflow-hidden">
         
         {/* TOP HEADER - ĐỒNG BỘ PHONG CÁCH TRUCKING FTL STUDIO */}
@@ -932,6 +938,7 @@ export const CrossBorderFtlCostMatrixModal: React.FC<CrossBorderFtlCostMatrixMod
             <button
               type="button"
               onClick={onClose}
+              data-readonly-allow="true"
               className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
               title="Đóng (Esc)"
             >
@@ -1218,7 +1225,7 @@ export const CrossBorderFtlCostMatrixModal: React.FC<CrossBorderFtlCostMatrixMod
               })}
 
               {/* HÀNG THÊM PHỤ PHÍ TỪ DANH MỤC LOV */}
-              <tr className="bg-slate-50/80 border-b border-indigo-100 hover:bg-indigo-50/30 transition-colors">
+              <tr data-readonly-hide="true" className="bg-slate-50/80 border-b border-indigo-100 hover:bg-indigo-50/30 transition-colors">
                 <td className="sticky left-0 z-20 bg-slate-50/95 border-r border-slate-200 px-4 py-2">
                   {(() => {
                     const activeIds = (columns[0]?.activeSurcharges || []).map(a => a.id);
@@ -1350,7 +1357,7 @@ export const CrossBorderFtlCostMatrixModal: React.FC<CrossBorderFtlCostMatrixMod
               })}
 
               {/* HÀNG THÊM DỊCH VỤ VAS TỪ DANH MỤC LOV */}
-              <tr className="bg-slate-50/80 border-b border-indigo-100 hover:bg-indigo-50/30 transition-colors">
+              <tr data-readonly-hide="true" className="bg-slate-50/80 border-b border-indigo-100 hover:bg-indigo-50/30 transition-colors">
                 <td className="sticky left-0 z-20 bg-slate-50/95 border-r border-slate-200 px-4 py-2">
                   {(() => {
                     const activeIds = (columns[0]?.activeVas || []).map(a => a.id);
@@ -1610,13 +1617,15 @@ export const CrossBorderFtlCostMatrixModal: React.FC<CrossBorderFtlCostMatrixMod
             <button
               type="button"
               onClick={onClose}
+              data-readonly-allow="true"
               className="px-4 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl transition-all cursor-pointer"
             >
-              Hủy Bỏ
+              {isReadOnly ? 'Đóng' : 'Hủy Bỏ'}
             </button>
             <button
               type="button"
               onClick={handleSaveMatrix}
+              data-readonly-hide="true"
               className="inline-flex items-center gap-1.5 px-6 py-2 text-xs font-black text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl transition-all shadow hover:shadow-emerald-600/30 cursor-pointer"
             >
               <Save className="w-4 h-4" />

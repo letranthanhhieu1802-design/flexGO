@@ -14,6 +14,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { CapabilityRouteItem } from './SupplierServiceCapabilityModal';
+import { getReadOnlyMatrixInteractionProps } from './readOnlyCostMatrix';
 
 // ==========================================
 // 1. CONTAINER & TOA XE LOV BY CARGO GROUP (ĐƯỜNG SẮT)
@@ -267,6 +268,7 @@ export interface RailFclCostMatrixModalProps {
   route: CapabilityRouteItem | null;
   onSave: (routeId: string, matrix: RailContainerPricingMatrixColumn[]) => void;
   cargoType?: 'general' | 'reefer' | 'hazmat';
+  isReadOnly?: boolean;
 }
 
 export const RailFclCostMatrixModal: React.FC<RailFclCostMatrixModalProps> = ({
@@ -275,6 +277,7 @@ export const RailFclCostMatrixModal: React.FC<RailFclCostMatrixModalProps> = ({
   route,
   onSave,
   cargoType = 'general',
+  isReadOnly = false,
 }) => {
   const [columns, setColumns] = useState<RailContainerPricingMatrixColumn[]>([]);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -604,7 +607,10 @@ export const RailFclCostMatrixModal: React.FC<RailFclCostMatrixModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-[140] flex items-center justify-center p-3 sm:p-5 bg-slate-900/70 backdrop-blur-xs animate-in fade-in duration-150">
+    <div
+      {...getReadOnlyMatrixInteractionProps(isReadOnly)}
+      className="fixed inset-0 z-[140] flex items-center justify-center p-3 sm:p-5 bg-slate-900/70 backdrop-blur-xs animate-in fade-in duration-150"
+    >
       <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-6xl max-h-[92vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-150">
         
         {/* =========================================================================
@@ -662,6 +668,7 @@ export const RailFclCostMatrixModal: React.FC<RailFclCostMatrixModalProps> = ({
             <button
               type="button"
               onClick={onClose}
+              data-readonly-allow="true"
               className="p-1.5 text-slate-400 hover:text-white hover:bg-white/10 rounded-xl transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
@@ -862,7 +869,7 @@ export const RailFclCostMatrixModal: React.FC<RailFclCostMatrixModalProps> = ({
               })}
 
               {/* HÀNG THÊM PHỤ PHÍ GA / ĐƯỜNG SẮT TỪ LOV */}
-              <tr className="bg-slate-50/60 border-b border-slate-200">
+              <tr data-readonly-hide="true" className="bg-slate-50/60 border-b border-slate-200">
                 <td className="sticky left-0 z-20 bg-slate-50 px-4 py-2.5 border-r border-slate-200">
                   {(() => {
                     const currentIds = (columns[0]?.activeSurcharges || []).map((s) => s.id);
@@ -982,7 +989,7 @@ export const RailFclCostMatrixModal: React.FC<RailFclCostMatrixModalProps> = ({
               })}
 
               {/* HÀNG THÊM TIỆN ÍCH VAS TỪ LOV */}
-              <tr className="bg-slate-50/60 border-b border-slate-200">
+              <tr data-readonly-hide="true" className="bg-slate-50/60 border-b border-slate-200">
                 <td className="sticky left-0 z-20 bg-slate-50 px-4 py-2.5 border-r border-slate-200">
                   {(() => {
                     const currentIds = (columns[0]?.activeVas || []).map((v) => v.id);
@@ -1202,6 +1209,7 @@ export const RailFclCostMatrixModal: React.FC<RailFclCostMatrixModalProps> = ({
             <button
               type="button"
               onClick={onClose}
+              data-readonly-allow="true"
               className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer"
             >
               Đóng
@@ -1210,6 +1218,7 @@ export const RailFclCostMatrixModal: React.FC<RailFclCostMatrixModalProps> = ({
             <button
               type="button"
               onClick={handleSave}
+              data-readonly-hide="true"
               className="inline-flex items-center gap-1.5 px-5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-all shadow-md shadow-emerald-600/20 cursor-pointer"
             >
               <Check className="w-4 h-4" />

@@ -19,6 +19,7 @@ import {
 import {
   SCHEDULE_DAYS_OF_WEEK,
 } from './TruckingFtlCostMatrixModal';
+import { getReadOnlyMatrixInteractionProps } from './readOnlyCostMatrix';
 
 export const LCL_CLOSING_TIMES = [
   { time: '17:00', label: '17:00 (Cắt máng CFS ca chiều)' },
@@ -80,6 +81,7 @@ interface OceanLclCostMatrixModalProps {
   route: any;
   onSave: (routeId: string, updatedData: any) => void;
   cargoType?: string;
+  isReadOnly?: boolean;
 }
 
 // =========================================================================
@@ -133,6 +135,7 @@ export const OceanLclCostMatrixModal: React.FC<OceanLclCostMatrixModalProps> = (
   onClose,
   route,
   onSave,
+  isReadOnly = false,
 }) => {
   if (!isOpen || !route) return null;
 
@@ -524,7 +527,10 @@ export const OceanLclCostMatrixModal: React.FC<OceanLclCostMatrixModalProps> = (
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
+    <div
+      {...getReadOnlyMatrixInteractionProps(isReadOnly)}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150"
+    >
       <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 max-w-7xl w-full max-h-[96vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-150">
         
         {/* =========================================================================
@@ -566,6 +572,7 @@ export const OceanLclCostMatrixModal: React.FC<OceanLclCostMatrixModalProps> = (
             <button
               type="button"
               onClick={onClose}
+              data-readonly-allow="true"
               className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all cursor-pointer"
               title="Đóng cửa sổ"
             >
@@ -950,7 +957,7 @@ export const OceanLclCostMatrixModal: React.FC<OceanLclCostMatrixModalProps> = (
               ))}
 
               {/* HÀNG THÊM PHỤ PHÍ BIẾN ĐỔI 1A TỪ DANH MỤC LOV */}
-              <tr className="bg-slate-50/80 border-b border-sky-100 hover:bg-sky-50/30 transition-colors">
+              <tr data-readonly-hide="true" className="bg-slate-50/80 border-b border-sky-100 hover:bg-sky-50/30 transition-colors">
                 <td className="sticky left-0 z-20 bg-slate-50/95 border-r-2 border-slate-300 px-4 py-2 shadow-[2px_0_5px_rgba(0,0,0,0.06)]">
                   {(() => {
                     const activeIds = activeSurcharges.map(a => a.id);
@@ -1093,7 +1100,7 @@ export const OceanLclCostMatrixModal: React.FC<OceanLclCostMatrixModalProps> = (
               ))}
 
               {/* HÀNG THÊM PHỤ PHÍ CỐ ĐỊNH 1B TỪ DANH MỤC LOV */}
-              <tr className="bg-slate-50/80 border-b border-indigo-100 hover:bg-indigo-50/30 transition-colors">
+              <tr data-readonly-hide="true" className="bg-slate-50/80 border-b border-indigo-100 hover:bg-indigo-50/30 transition-colors">
                 <td className="sticky left-0 z-20 bg-slate-50/95 border-r-2 border-slate-300 px-4 py-2 shadow-[2px_0_5px_rgba(0,0,0,0.06)]">
                   {(() => {
                     const activeIds = activeSurcharges.map(a => a.id);
@@ -1225,7 +1232,7 @@ export const OceanLclCostMatrixModal: React.FC<OceanLclCostMatrixModalProps> = (
               ))}
 
               {/* HÀNG THÊM VAS TỪ DANH MỤC LOV (CHUẨN FCL SELECT DASHED) */}
-              <tr className="bg-slate-50/80 border-b border-indigo-100 hover:bg-indigo-50/30 transition-colors">
+              <tr data-readonly-hide="true" className="bg-slate-50/80 border-b border-indigo-100 hover:bg-indigo-50/30 transition-colors">
                 <td className="sticky left-0 z-20 bg-slate-50/95 border-r-2 border-slate-300 px-4 py-2 shadow-[2px_0_5px_rgba(0,0,0,0.06)]">
                   {(() => {
                     const activeIds = vasItems.map(a => a.id);
@@ -1460,6 +1467,7 @@ export const OceanLclCostMatrixModal: React.FC<OceanLclCostMatrixModalProps> = (
             <button
               type="button"
               onClick={onClose}
+              data-readonly-allow="true"
               className="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer"
             >
               Đóng
@@ -1468,6 +1476,7 @@ export const OceanLclCostMatrixModal: React.FC<OceanLclCostMatrixModalProps> = (
             <button
               type="button"
               onClick={handleConfirmSave}
+              data-readonly-hide="true"
               className="inline-flex items-center gap-1.5 px-5 py-2 text-xs font-bold text-white bg-sky-600 hover:bg-sky-700 rounded-xl transition-all shadow-md shadow-sky-600/20 cursor-pointer"
             >
               <Save className="w-4 h-4" />

@@ -19,6 +19,7 @@ import {
   SlidersHorizontal
 } from 'lucide-react';
 import { CapabilityRouteItem } from './SupplierServiceCapabilityModal';
+import { getReadOnlyMatrixInteractionProps } from './readOnlyCostMatrix';
 import {
   SCHEDULE_DAYS_OF_WEEK,
   SCHEDULE_FREQUENCY_PRESETS,
@@ -101,6 +102,7 @@ interface CrossBorderLtlCostMatrixModalProps {
   route: CapabilityRouteItem | null;
   onSave: (routeId: string, updatedData: Partial<CapabilityRouteItem>) => void;
   cargoType?: 'general' | 'reefer' | 'hazmat';
+  isReadOnly?: boolean;
 }
 
 export const CrossBorderLtlCostMatrixModal: React.FC<CrossBorderLtlCostMatrixModalProps> = ({
@@ -109,6 +111,7 @@ export const CrossBorderLtlCostMatrixModal: React.FC<CrossBorderLtlCostMatrixMod
   route,
   onSave,
   cargoType = 'general',
+  isReadOnly = false,
 }) => {
   if (!isOpen || !route) return null;
 
@@ -516,7 +519,10 @@ export const CrossBorderLtlCostMatrixModal: React.FC<CrossBorderLtlCostMatrixMod
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+    <div
+      {...getReadOnlyMatrixInteractionProps(isReadOnly)}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto"
+    >
       <div className="relative w-full max-w-[96vw] xl:max-w-[1550px] max-h-[94vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-slate-200 animate-in fade-in zoom-in-95 duration-200">
         
         {/* MODAL HEADER */}
@@ -555,6 +561,7 @@ export const CrossBorderLtlCostMatrixModal: React.FC<CrossBorderLtlCostMatrixMod
             <button
               type="button"
               onClick={onClose}
+              data-readonly-allow="true"
               className="p-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
               title="Đóng hộp thoại"
             >
@@ -968,7 +975,7 @@ export const CrossBorderLtlCostMatrixModal: React.FC<CrossBorderLtlCostMatrixMod
                 })}
 
                 {/* HÀNG CHỌN THÊM PHỤ PHÍ TỪ LOV */}
-                <tr className="bg-slate-50/60">
+                <tr data-readonly-hide="true" className="bg-slate-50/60">
                   <td colSpan={1 + (weightTiers.length + 2) + (volumeTiers.length + 2)} className="px-4 py-2">
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-slate-500 font-medium">Thêm phụ phí LTL từ danh mục:</span>
@@ -1058,7 +1065,7 @@ export const CrossBorderLtlCostMatrixModal: React.FC<CrossBorderLtlCostMatrixMod
                 ))}
 
                 {/* HÀNG THÊM TIỆN ÍCH VAS */}
-                <tr className="bg-slate-50/60">
+                <tr data-readonly-hide="true" className="bg-slate-50/60">
                   <td colSpan={1 + (weightTiers.length + 2) + (volumeTiers.length + 2)} className="px-4 py-2">
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-slate-500 font-medium">Thêm dịch vụ VAS từ danh mục chuẩn:</span>
@@ -1304,14 +1311,16 @@ export const CrossBorderLtlCostMatrixModal: React.FC<CrossBorderLtlCostMatrixMod
             <button
               type="button"
               onClick={onClose}
+              data-readonly-allow="true"
               className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-200 transition-colors cursor-pointer"
             >
-              Hủy Bỏ
+              {isReadOnly ? 'Đóng' : 'Hủy Bỏ'}
             </button>
 
             <button
               type="button"
               onClick={handleSaveMatrix}
+              data-readonly-hide="true"
               className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all shadow-md hover:shadow-lg cursor-pointer flex items-center gap-1.5"
             >
               <Save className="w-4 h-4" />

@@ -19,6 +19,7 @@ import {
   DollarSign
 } from 'lucide-react';
 import { CapabilityRouteItem } from './SupplierServiceCapabilityModal';
+import { getReadOnlyMatrixInteractionProps } from './readOnlyCostMatrix';
 
 export interface LOVItem {
   id: string;
@@ -295,6 +296,7 @@ export interface OceanFclCostMatrixModalProps {
   route: CapabilityRouteItem | null;
   onSave: (routeId: string, matrix: ContainerPricingMatrixColumn[]) => void;
   cargoType?: 'general' | 'reefer' | 'hazmat';
+  isReadOnly?: boolean;
 }
 
 export const OceanFclCostMatrixModal: React.FC<OceanFclCostMatrixModalProps> = ({
@@ -303,6 +305,7 @@ export const OceanFclCostMatrixModal: React.FC<OceanFclCostMatrixModalProps> = (
   route,
   onSave,
   cargoType = 'general',
+  isReadOnly = false,
 }) => {
   const [columns, setColumns] = useState<ContainerPricingMatrixColumn[]>([]);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -634,7 +637,10 @@ export const OceanFclCostMatrixModal: React.FC<OceanFclCostMatrixModalProps> = (
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 overflow-hidden animate-in fade-in duration-200">
+    <div
+      {...getReadOnlyMatrixInteractionProps(isReadOnly)}
+      className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 overflow-hidden animate-in fade-in duration-200"
+    >
       <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-7xl max-h-[95vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-150">
         
         {/* =========================================================================
@@ -692,6 +698,7 @@ export const OceanFclCostMatrixModal: React.FC<OceanFclCostMatrixModalProps> = (
             <button
               type="button"
               onClick={onClose}
+              data-readonly-allow="true"
               className="p-1.5 text-slate-400 hover:text-white hover:bg-white/10 rounded-xl transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
@@ -892,7 +899,7 @@ export const OceanFclCostMatrixModal: React.FC<OceanFclCostMatrixModalProps> = (
               })}
 
               {/* HÀNG THÊM PHỤ PHÍ TỪ LOV */}
-              <tr className="bg-slate-50/80 border-b border-sky-100 hover:bg-sky-50/30 transition-colors">
+              <tr data-readonly-hide="true" className="bg-slate-50/80 border-b border-sky-100 hover:bg-sky-50/30 transition-colors">
                 <td className="sticky left-0 z-20 bg-slate-50/95 border-r border-slate-200 px-4 py-2">
                   {(() => {
                     const activeIds = (columns[0]?.activeSurcharges || []).map(a => a.id);
@@ -1014,7 +1021,7 @@ export const OceanFclCostMatrixModal: React.FC<OceanFclCostMatrixModalProps> = (
               })}
 
               {/* HÀNG THÊM VAS TỪ LOV */}
-              <tr className="bg-slate-50/80 border-b border-indigo-100 hover:bg-indigo-50/30 transition-colors">
+              <tr data-readonly-hide="true" className="bg-slate-50/80 border-b border-indigo-100 hover:bg-indigo-50/30 transition-colors">
                 <td className="sticky left-0 z-20 bg-slate-50/95 border-r border-slate-200 px-4 py-2">
                   {(() => {
                     const activeIds = (columns[0]?.activeVas || []).map(a => a.id);
@@ -1236,6 +1243,7 @@ export const OceanFclCostMatrixModal: React.FC<OceanFclCostMatrixModalProps> = (
             <button
               type="button"
               onClick={onClose}
+              data-readonly-allow="true"
               className="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer"
             >
               Đóng
@@ -1244,6 +1252,7 @@ export const OceanFclCostMatrixModal: React.FC<OceanFclCostMatrixModalProps> = (
             <button
               type="button"
               onClick={handleSave}
+              data-readonly-hide="true"
               className="inline-flex items-center gap-1.5 px-5 py-2 text-xs font-bold text-white bg-sky-600 hover:bg-sky-700 rounded-xl transition-all shadow-md shadow-sky-600/20 cursor-pointer"
             >
               <Save className="w-4 h-4" />

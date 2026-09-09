@@ -1686,6 +1686,7 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
               onClose={() => setActiveMatrixModalRoute(null)}
               route={activeMatrixModalRoute}
               onSave={() => {}}
+              isReadOnly
               cargoType={activeMatrixModalRoute?.cargoType as any}
             />
           )}
@@ -1696,6 +1697,7 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
               onClose={() => setActiveMatrixModalRoute(null)}
               route={activeMatrixModalRoute}
               onSave={() => {}}
+              isReadOnly
             />
           )}
 
@@ -1705,6 +1707,7 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
               onClose={() => setActiveMatrixModalRoute(null)}
               route={activeMatrixModalRoute}
               onSave={() => {}}
+              isReadOnly
               cargoType={activeMatrixModalRoute?.cargoType as any}
             />
           )}
@@ -1715,6 +1718,7 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
               onClose={() => setActiveMatrixModalRoute(null)}
               route={activeMatrixModalRoute}
               onSave={() => {}}
+              isReadOnly
               cargoType={activeMatrixModalRoute?.cargoType as any}
             />
           )}
@@ -1725,6 +1729,7 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
               onClose={() => setActiveMatrixModalRoute(null)}
               route={activeMatrixModalRoute}
               onSave={() => {}}
+              isReadOnly
               cargoType={activeMatrixModalRoute?.cargoType as any}
             />
           )}
@@ -1735,6 +1740,7 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
               onClose={() => setActiveMatrixModalRoute(null)}
               route={activeMatrixModalRoute}
               onSave={() => {}}
+              isReadOnly
               cargoType={activeMatrixModalRoute?.cargoType as any}
             />
           )}
@@ -1745,6 +1751,7 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
               onClose={() => setActiveMatrixModalRoute(null)}
               route={activeMatrixModalRoute}
               onSave={() => {}}
+              isReadOnly
               cargoType={activeMatrixModalRoute?.cargoType as any}
             />
           )}
@@ -1755,6 +1762,7 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
               onClose={() => setActiveMatrixModalRoute(null)}
               route={activeMatrixModalRoute}
               onSave={() => {}}
+              isReadOnly
             />
           )}
 
@@ -1764,6 +1772,7 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
               onClose={() => setActiveMatrixModalRoute(null)}
               route={activeMatrixModalRoute}
               onSave={() => {}}
+              isReadOnly
               cargoType={activeMatrixModalRoute?.cargoType as any}
             />
           )}
@@ -1774,6 +1783,7 @@ export const SupplierDeclaredServicesView: React.FC<SupplierDeclaredServicesView
               onClose={() => setActiveMatrixModalRoute(null)}
               route={activeMatrixModalRoute}
               onSave={() => {}}
+              isReadOnly
               cargoType={activeMatrixModalRoute?.cargoType as any}
             />
           )}

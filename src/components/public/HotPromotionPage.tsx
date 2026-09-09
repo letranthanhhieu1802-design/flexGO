@@ -56,8 +56,7 @@ import {
   RotateCcw
 } from 'lucide-react';
 import { HotPromotionItem, PromotionCategory, PromotionBadgeType, ServiceType, CurrentView, UserProfile } from '../../types';
-import { allAggregatedPromotions } from '../../data/mockAggregatedRates';
-import { mockPromotions } from '../../data/mockPromotions';
+import { mockPromotionAuditData } from '../../data/mockPromotionAuditData';
 import { HotPromotionRateDetailCard } from './HotPromotionRateDetailCard';
 
 interface HotPromotionPageProps {
@@ -89,17 +88,8 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
   onOpenCreateInquiry,
   onIncrementPromotionViews,
 }) => {
-  // Combine custom declared promotions with the aggregated rate cards from verified supplier profiles
-  const initialCombined = useMemo(() => {
-    const combined = [...mockPromotions, ...allAggregatedPromotions];
-    // Remove duplicates by ID if any
-    const seen = new Set<string>();
-    return combined.filter(item => {
-      if (seen.has(item.id)) return false;
-      seen.add(item.id);
-      return true;
-    });
-  }, []);
+  // Audit fixture: one promotion for every valid Supplier service/cargo/model combination.
+  const initialCombined = useMemo(() => mockPromotionAuditData, []);
 
   const [promotionsList, setPromotionsList] = useState<HotPromotionItem[]>(initialCombined);
   

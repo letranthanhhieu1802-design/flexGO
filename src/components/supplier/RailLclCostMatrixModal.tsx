@@ -17,6 +17,7 @@ import {
 import {
   SCHEDULE_DAYS_OF_WEEK,
 } from './TruckingFtlCostMatrixModal';
+import { getReadOnlyMatrixInteractionProps } from './readOnlyCostMatrix';
 
 export const RAIL_LCL_CLOSING_TIMES = [
   { time: '17:00', label: '17:00 (Cắt máng CFS ga ca chiều)' },
@@ -82,6 +83,7 @@ interface RailLclCostMatrixModalProps {
   route: any;
   onSave: (routeId: string, updatedData: any) => void;
   cargoType?: string;
+  isReadOnly?: boolean;
 }
 
 // =========================================================================
@@ -131,6 +133,7 @@ export const RailLclCostMatrixModal: React.FC<RailLclCostMatrixModalProps> = ({
   onClose,
   route,
   onSave,
+  isReadOnly = false,
 }) => {
   if (!isOpen || !route) return null;
 
@@ -527,7 +530,10 @@ export const RailLclCostMatrixModal: React.FC<RailLclCostMatrixModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
+    <div
+      {...getReadOnlyMatrixInteractionProps(isReadOnly)}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150"
+    >
       <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 max-w-7xl w-full max-h-[96vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-150">
         
         {/* =========================================================================
@@ -569,6 +575,7 @@ export const RailLclCostMatrixModal: React.FC<RailLclCostMatrixModalProps> = ({
             <button
               type="button"
               onClick={onClose}
+              data-readonly-allow="true"
               className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all cursor-pointer"
               title="Đóng cửa sổ"
             >
@@ -953,7 +960,7 @@ export const RailLclCostMatrixModal: React.FC<RailLclCostMatrixModalProps> = ({
               ))}
 
               {/* HÀNG THÊM PHỤ PHÍ BIẾN ĐỔI 1A TỪ DANH MỤC LOV */}
-              <tr className="bg-slate-50/80 border-b border-emerald-100 hover:bg-emerald-50/30 transition-colors">
+              <tr data-readonly-hide="true" className="bg-slate-50/80 border-b border-emerald-100 hover:bg-emerald-50/30 transition-colors">
                 <td className="sticky left-0 z-20 bg-slate-50/95 border-r-2 border-slate-300 px-4 py-2 shadow-[2px_0_5px_rgba(0,0,0,0.06)]">
                   {(() => {
                     const activeIds = activeSurcharges.map(a => a.id);
@@ -1096,7 +1103,7 @@ export const RailLclCostMatrixModal: React.FC<RailLclCostMatrixModalProps> = ({
               ))}
 
               {/* HÀNG THÊM PHỤ PHÍ CỐ ĐỊNH 1B TỪ DANH MỤC LOV */}
-              <tr className="bg-slate-50/80 border-b border-teal-100 hover:bg-teal-50/30 transition-colors">
+              <tr data-readonly-hide="true" className="bg-slate-50/80 border-b border-teal-100 hover:bg-teal-50/30 transition-colors">
                 <td className="sticky left-0 z-20 bg-slate-50/95 border-r-2 border-slate-300 px-4 py-2 shadow-[2px_0_5px_rgba(0,0,0,0.06)]">
                   {(() => {
                     const activeIds = activeSurcharges.map(a => a.id);
@@ -1228,7 +1235,7 @@ export const RailLclCostMatrixModal: React.FC<RailLclCostMatrixModalProps> = ({
               ))}
 
               {/* HÀNG THÊM VAS TỪ DANH MỤC LOV */}
-              <tr className="bg-slate-50/80 border-b border-amber-100 hover:bg-amber-50/30 transition-colors">
+              <tr data-readonly-hide="true" className="bg-slate-50/80 border-b border-amber-100 hover:bg-amber-50/30 transition-colors">
                 <td className="sticky left-0 z-20 bg-slate-50/95 border-r-2 border-slate-300 px-4 py-2 shadow-[2px_0_5px_rgba(0,0,0,0.06)]">
                   {(() => {
                     const activeIds = vasItems.map(a => a.id);
@@ -1501,6 +1508,7 @@ export const RailLclCostMatrixModal: React.FC<RailLclCostMatrixModalProps> = ({
             <button
               type="button"
               onClick={onClose}
+              data-readonly-allow="true"
               className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-800 hover:bg-slate-200/80 transition-colors cursor-pointer"
             >
               Đóng
@@ -1508,6 +1516,7 @@ export const RailLclCostMatrixModal: React.FC<RailLclCostMatrixModalProps> = ({
             <button
               type="button"
               onClick={handleConfirmSave}
+              data-readonly-hide="true"
               className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md hover:shadow-lg transition-all cursor-pointer"
             >
               <Save className="w-4 h-4" />

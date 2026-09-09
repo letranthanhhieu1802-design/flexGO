@@ -20,3 +20,26 @@
 .hide-horizontal-scrollbar::-webkit-scrollbar-track {
   display: none !important;
 }
+
+/* Public supplier profile: preserve declared values while removing structural edit actions. */
+[data-cost-matrix-read-only="true"] [data-readonly-hide="true"],
+[data-cost-matrix-read-only="true"] button:not([data-readonly-allow="true"]):has(.lucide-plus),
+[data-cost-matrix-read-only="true"] button:not([data-readonly-allow="true"]):has(.lucide-trash-2),
+[data-cost-matrix-read-only="true"] button:not([data-readonly-allow="true"]):has(.lucide-x),
+[data-cost-matrix-read-only="true"] button:not([data-readonly-allow="true"]):has(.lucide-save) {
+  display: none !important;
+}
+
+[data-cost-matrix-read-only="true"] button:not([data-readonly-allow="true"]) {
+  cursor: default !important;
+}
+
+[data-cost-matrix-read-only="true"] input,
+[data-cost-matrix-read-only="true"] select,
+[data-cost-matrix-read-only="true"] textarea,
+[data-cost-matrix-read-only="true"] [contenteditable="true"] {
+  pointer-events: none !important;
+  cursor: default !important;
+  caret-color: transparent !important;
+  background-color: #f8fafc !important;
+}

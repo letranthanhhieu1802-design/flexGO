@@ -25,6 +25,7 @@ import {
 import {
   SCHEDULE_DAYS_OF_WEEK,
 } from './TruckingFtlCostMatrixModal';
+import { getReadOnlyMatrixInteractionProps } from './readOnlyCostMatrix';
 
 export const AIR_CUTOFF_TIMES = [
   { time: '18:00', label: '18:00 (Cắt hàng ga TCS / SCSC Tân Sơn Nhất)' },
@@ -93,6 +94,7 @@ interface AirCargoCostMatrixModalProps {
   route: any;
   onSave: (routeId: string, updatedData: any) => void;
   cargoType?: 'general' | 'perishable' | 'dangerous' | string;
+  isReadOnly?: boolean;
 }
 
 // =========================================================================
@@ -182,6 +184,7 @@ export const AirCargoCostMatrixModal: React.FC<AirCargoCostMatrixModalProps> = (
   route,
   onSave,
   cargoType = 'general',
+  isReadOnly = false,
 }) => {
   if (!isOpen || !route) return null;
 
@@ -710,7 +713,10 @@ export const AirCargoCostMatrixModal: React.FC<AirCargoCostMatrixModalProps> = (
   const HeaderIcon = cargoHeaderConfig.icon;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
+    <div
+      {...getReadOnlyMatrixInteractionProps(isReadOnly)}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150"
+    >
       <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 max-w-7xl w-full max-h-[96vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-150">
         
         {/* =========================================================================
@@ -752,6 +758,7 @@ export const AirCargoCostMatrixModal: React.FC<AirCargoCostMatrixModalProps> = (
             <button
               type="button"
               onClick={onClose}
+              data-readonly-allow="true"
               className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all cursor-pointer"
               title="Đóng cửa sổ"
             >
@@ -1144,7 +1151,7 @@ export const AirCargoCostMatrixModal: React.FC<AirCargoCostMatrixModalProps> = (
               ))}
 
               {/* DÒNG NÉT ĐỨT THÊM PHỤ PHÍ BIẾN ĐỔI */}
-              <tr className="border-b border-slate-200">
+              <tr data-readonly-hide="true" className="border-b border-slate-200">
                 <td colSpan={totalDataCols + 1} className="p-2 bg-sky-50/30">
                   <div className="flex items-center gap-2">
                     <select
@@ -1264,7 +1271,7 @@ export const AirCargoCostMatrixModal: React.FC<AirCargoCostMatrixModalProps> = (
               })}
 
               {/* DÒNG NÉT ĐỨT THÊM PHỤ PHÍ CỐ ĐỊNH */}
-              <tr className="border-b border-slate-200">
+              <tr data-readonly-hide="true" className="border-b border-slate-200">
                 <td colSpan={totalDataCols + 1} className="p-2 bg-emerald-50/30">
                   <div className="flex items-center gap-2">
                     <select
@@ -1370,7 +1377,7 @@ export const AirCargoCostMatrixModal: React.FC<AirCargoCostMatrixModalProps> = (
               })}
 
               {/* DÒNG THÊM VAS */}
-              <tr className="border-b border-slate-200">
+              <tr data-readonly-hide="true" className="border-b border-slate-200">
                 <td colSpan={totalDataCols + 1} className="p-2 bg-purple-50/30">
                   <select
                     onChange={(e) => {
@@ -1728,13 +1735,15 @@ export const AirCargoCostMatrixModal: React.FC<AirCargoCostMatrixModalProps> = (
             <button
               type="button"
               onClick={onClose}
+              data-readonly-allow="true"
               className="px-4 py-2 text-xs font-bold text-slate-700 bg-white border border-slate-300 hover:bg-slate-100 rounded-xl transition-all cursor-pointer shadow-2xs"
             >
-              Hủy
+              {isReadOnly ? 'Đóng' : 'Hủy'}
             </button>
             <button
               type="button"
               onClick={handleConfirmSave}
+              data-readonly-hide="true"
               className="inline-flex items-center gap-1.5 px-6 py-2 text-xs font-bold text-white bg-sky-600 hover:bg-sky-700 rounded-xl transition-all shadow-md cursor-pointer shadow-sky-600/20"
             >
               <Save className="w-4 h-4" />

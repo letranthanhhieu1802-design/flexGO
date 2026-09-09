@@ -18,6 +18,7 @@ import {
   Check
 } from 'lucide-react';
 import { CapabilityRouteItem } from './SupplierServiceCapabilityModal';
+import { getReadOnlyMatrixInteractionProps } from './readOnlyCostMatrix';
 
 export interface LOVItem {
   id: string;
@@ -412,6 +413,7 @@ interface TruckingFtlCostMatrixModalProps {
   route: CapabilityRouteItem | null;
   onSave: (routeId: string, matrix: VehiclePricingMatrixColumn[]) => void;
   cargoType?: 'general' | 'reefer' | 'hazmat';
+  isReadOnly?: boolean;
 }
 
 export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProps> = ({
@@ -420,6 +422,7 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
   route,
   onSave,
   cargoType,
+  isReadOnly = false,
 }) => {
   const effectiveCargoType: 'general' | 'reefer' | 'hazmat' = 
     cargoType || 
@@ -814,7 +817,10 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/80 backdrop-blur-xs overflow-hidden animate-in fade-in duration-200">
+      <div
+        {...getReadOnlyMatrixInteractionProps(isReadOnly)}
+        className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/80 backdrop-blur-xs overflow-hidden animate-in fade-in duration-200"
+      >
       <style>{`
         .custom-matrix-scroll::-webkit-scrollbar {
           width: 10px;
@@ -872,6 +878,7 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
             <button
               type="button"
               onClick={onClose}
+              data-readonly-allow="true"
               className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
               title="Đóng (Esc)"
             >
@@ -1150,7 +1157,7 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
               })}
 
               {/* HÀNG THÊM PHỤ PHÍ TỪ DANH MỤC LOV */}
-              <tr className="bg-slate-50/80 border-b border-indigo-100 hover:bg-indigo-50/30 transition-colors">
+              <tr data-readonly-hide="true" className="bg-slate-50/80 border-b border-indigo-100 hover:bg-indigo-50/30 transition-colors">
                 <td className="sticky left-0 z-20 bg-slate-50/95 border-r border-slate-200 px-4 py-2">
                   {(() => {
                     const activeIds = (columns[0]?.activeSurcharges || []).map(a => a.id);
@@ -1282,7 +1289,7 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
               })}
 
               {/* HÀNG THÊM DỊCH VỤ VAS TỪ DANH MỤC LOV */}
-              <tr className="bg-slate-50/80 border-b border-indigo-100 hover:bg-indigo-50/30 transition-colors">
+              <tr data-readonly-hide="true" className="bg-slate-50/80 border-b border-indigo-100 hover:bg-indigo-50/30 transition-colors">
                 <td className="sticky left-0 z-20 bg-slate-50/95 border-r border-slate-200 px-4 py-2">
                   {(() => {
                     const activeIds = (columns[0]?.activeVas || []).map(a => a.id);
@@ -1484,13 +1491,15 @@ export const TruckingFtlCostMatrixModal: React.FC<TruckingFtlCostMatrixModalProp
           <button
             type="button"
             onClick={onClose}
+            data-readonly-allow="true"
             className="px-4 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl transition-all cursor-pointer"
           >
-            Hủy Bỏ
+            {isReadOnly ? 'Đóng' : 'Hủy Bỏ'}
           </button>
           <button
             type="button"
             onClick={handleSaveMatrix}
+            data-readonly-hide="true"
             className="inline-flex items-center gap-1.5 px-6 py-2 text-xs font-black text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl transition-all shadow hover:shadow-emerald-600/30 cursor-pointer"
           >
             <Save className="w-4 h-4" />

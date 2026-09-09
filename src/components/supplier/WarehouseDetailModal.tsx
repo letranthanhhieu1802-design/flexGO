@@ -2107,6 +2107,7 @@ export const WarehouseDetailModal: React.FC<WarehouseDetailModalProps> = ({
                 <WarehousePricingContinuousTable
                   data={localData}
                   setData={setLocalData}
+                  isReadOnly={isReadOnly}
                   surchargesLov={
                     localData.isBondedStorage
                       ? (localData.isColdStorage
