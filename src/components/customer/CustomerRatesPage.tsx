@@ -249,99 +249,145 @@ export const CustomerRatesPage: React.FC<CustomerRatesPageProps> = ({
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-200">
+    <div className="w-full max-w-[1720px] mx-auto px-2 sm:px-4 lg:px-6 py-6 animate-in fade-in duration-200 space-y-5">
       {/* ========================================================= */}
-      {/* 1. PAGE HEADER & ACTIONS */}
+      {/* 1. HERO HEADER BLOCK & KPI TILES (LeadBoard Dark Style) */}
       {/* ========================================================= */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-xs">
-        <div>
-          <div className="flex items-center gap-2 mb-1 text-xs font-semibold text-indigo-600">
-            <span>CUSTOMER WORKSPACE</span>
-            <span>•</span>
-            <span className="text-slate-400">LOGISTICS RATE CARD & PRICE MASTER</span>
-          </div>
-          <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-xs">
-              <FileSpreadsheet className="w-4 h-4" />
+      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+        <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-500/20 via-transparent to-transparent pointer-events-none" />
+
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 relative z-10">
+          <div className="space-y-2 max-w-3xl">
+            <div className="flex items-center space-x-2 text-xs font-semibold text-indigo-300 uppercase tracking-wider mb-1">
+              <span>Customer Workspace</span>
+              <ChevronRight className="w-3.5 h-3.5 text-indigo-400" />
+              <span className="text-indigo-400 font-bold">Logistics Rate Card & Price Master</span>
             </div>
-            <span>My Rates (Bảng Quản Lý Biểu Giá Dịch Vụ)</span>
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
-            Quản lý tập trung toàn bộ biểu giá cước logistics doanh nghiệp đang sử dụng. Lưu trữ giá hợp đồng nội bộ và đồng bộ tự động giá từ các gói trao thầu (Awarded RFQ).
-          </p>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-indigo-500/30 border border-indigo-400/40 text-indigo-300 flex items-center justify-center shadow-xs shrink-0">
+                <FileSpreadsheet className="w-5 h-5 text-indigo-200" />
+              </div>
+              <span>My Rates (Bảng Quản Lý Biểu Giá Dịch Vụ)</span>
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+              Quản lý tập trung toàn bộ biểu giá cước logistics doanh nghiệp đang sử dụng. Lưu trữ giá hợp đồng nội bộ và đồng bộ tự động giá từ các gói trao thầu (Awarded RFQ).
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
+            <button
+              id="export-rates-csv-btn"
+              onClick={handleExportCSV}
+              className="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-slate-200 bg-white/10 hover:bg-white/20 border border-white/15 rounded-xl transition-all shadow-xs cursor-pointer"
+              title="Tải bảng giá định dạng Excel/CSV"
+            >
+              <Download className="w-4 h-4 text-slate-300" />
+              <span>Xuất Excel/CSV</span>
+            </button>
+
+            <button
+              id="create-new-rate-btn"
+              onClick={handleOpenCreateModal}
+              className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-white bg-indigo-500 hover:bg-indigo-600 active:bg-indigo-700 rounded-xl transition-all shadow-lg shadow-indigo-600/30 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>+ Khai Báo Biểu Giá Mới</span>
+            </button>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2.5 flex-wrap">
-          <button
-            id="export-rates-csv-btn"
-            onClick={handleExportCSV}
-            className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 rounded-xl transition-all shadow-2xs cursor-pointer"
-            title="Tải bảng giá định dạng Excel/CSV"
+        {/* 4 Interactive KPI Cards in LeadBoard Dark Style */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mt-6 pt-6 border-t border-white/10 relative z-10">
+          {/* Card 1: Tổng Tuyến / Biểu Giá */}
+          <div 
+            onClick={() => { setStatusFilter('ALL'); setSourceFilter('ALL'); }}
+            className={`backdrop-blur-md rounded-2xl p-4 border transition-all cursor-pointer group select-none ${
+              statusFilter === 'ALL' && sourceFilter === 'ALL'
+                ? 'bg-slate-800/90 border-cyan-400 ring-2 ring-cyan-400/40 shadow-lg shadow-cyan-950/40'
+                : 'bg-slate-800/60 border-white/10 hover:border-cyan-500/40'
+            }`}
           >
-            <Download className="w-3.5 h-3.5 text-slate-500" />
-            <span>Xuất Excel/CSV</span>
-          </button>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-300">Tổng Tuyến / Biểu Giá</span>
+              <div className="w-7 h-7 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
+                <Layers className="w-3.5 h-3.5" />
+              </div>
+            </div>
+            <div className="mt-2 flex items-baseline gap-1.5">
+              <span className="text-2xl font-black text-cyan-400 tracking-tight">{stats.total}</span>
+              <span className="text-xs font-bold text-cyan-300/90">tuyến / biểu giá</span>
+            </div>
+            <p className="mt-1 text-[11px] text-slate-400 font-medium">
+              {stats.manualCount > 0 || stats.awardedCount > 0 
+                ? `• ${stats.manualCount} tự khai báo • ${stats.awardedCount} trao thầu` 
+                : 'Đã số hóa trên hệ thống'}
+            </p>
+          </div>
 
-          <button
-            id="create-new-rate-btn"
-            onClick={handleOpenCreateModal}
-            className="inline-flex items-center gap-2 px-4 py-2 text-xs font-black text-white bg-indigo-600 hover:bg-indigo-700 active:scale-98 rounded-xl transition-all shadow-md hover:shadow-lg cursor-pointer"
+          {/* Card 2: Đang Có Hiệu Lực */}
+          <div 
+            onClick={() => { setStatusFilter('Active'); setSourceFilter('ALL'); }}
+            className={`backdrop-blur-md rounded-2xl p-4 border transition-all cursor-pointer group select-none ${
+              statusFilter === 'Active'
+                ? 'bg-slate-800/90 border-emerald-400 ring-2 ring-emerald-400/40 shadow-lg shadow-emerald-950/40'
+                : 'bg-slate-800/60 border-white/10 hover:border-emerald-500/40'
+            }`}
           >
-            <Plus className="w-4 h-4" />
-            <span>+ Khai Báo Biểu Giá Mới</span>
-          </button>
-        </div>
-      </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-300">Đang Có Hiệu Lực</span>
+              <div className="w-7 h-7 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+              </div>
+            </div>
+            <div className="mt-2 flex items-baseline gap-1.5">
+              <span className="text-2xl font-black text-emerald-400 tracking-tight">{stats.active}</span>
+              <span className="text-xs font-bold text-emerald-300/90">sẵn sàng áp dụng</span>
+            </div>
+            <p className="mt-1 text-[11px] text-slate-400 font-medium">Sẵn sàng vận hành & đối soát cước</p>
+          </div>
 
-      {/* ========================================================= */}
-      {/* 2. STATS KPI TILES */}
-      {/* ========================================================= */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-        {/* Total Rates */}
-        <div className="p-4 sm:p-5 bg-white rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
-          <div>
-            <span className="text-xs font-semibold text-slate-500 block">Tổng Tuyến / Biểu Giá</span>
-            <div className="text-2xl font-black text-slate-900 mt-1">{stats.total}</div>
-            <span className="text-[11px] text-slate-400 mt-0.5 block">Đã số hóa trên hệ thống</span>
+          {/* Card 3: Sắp Hết Hạn / Hết Hạn */}
+          <div 
+            onClick={() => { setStatusFilter('ExpiringSoon'); setSourceFilter('ALL'); }}
+            className={`backdrop-blur-md rounded-2xl p-4 border transition-all cursor-pointer group select-none ${
+              statusFilter === 'ExpiringSoon' || statusFilter === 'Expired'
+                ? 'bg-slate-800/90 border-amber-400 ring-2 ring-amber-400/40 shadow-lg shadow-amber-950/40'
+                : 'bg-slate-800/60 border-white/10 hover:border-amber-500/40'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-300">Sắp Hết Hạn / Hết Hạn</span>
+              <div className="w-7 h-7 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
+                <AlertTriangle className="w-3.5 h-3.5" />
+              </div>
+            </div>
+            <div className="mt-2 flex items-baseline gap-1.5">
+              <span className="text-2xl font-black text-amber-400 tracking-tight">{stats.expiringSoon + stats.expired}</span>
+              <span className="text-xs font-bold text-amber-300/90">cần đàm phán lại</span>
+            </div>
+            <p className="mt-1 text-[11px] text-slate-400 font-medium">Cần gia hạn HĐ hoặc tạo RFQ mới</p>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
-            <Layers className="w-5 h-5" />
-          </div>
-        </div>
 
-        {/* Active Rates */}
-        <div className="p-4 sm:p-5 bg-white rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
-          <div>
-            <span className="text-xs font-semibold text-emerald-700 block">Đang Có Hiệu Lực</span>
-            <div className="text-2xl font-black text-emerald-600 mt-1">{stats.active}</div>
-            <span className="text-[11px] text-emerald-600/80 mt-0.5 block">Sẵn sàng vận hành</span>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
-            <CheckCircle2 className="w-5 h-5" />
-          </div>
-        </div>
-
-        {/* Expiring Soon */}
-        <div className="p-4 sm:p-5 bg-white rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
-          <div>
-            <span className="text-xs font-semibold text-amber-700 block">Sắp Hết Hạn / Hết Hạn</span>
-            <div className="text-2xl font-black text-amber-600 mt-1">{stats.expiringSoon + stats.expired}</div>
-            <span className="text-[11px] text-amber-600/80 mt-0.5 block">Cần đàm phán lại biểu giá</span>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
-            <AlertTriangle className="w-5 h-5" />
-          </div>
-        </div>
-
-        {/* Awarded from RFQ */}
-        <div className="p-4 sm:p-5 bg-white rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
-          <div>
-            <span className="text-xs font-semibold text-purple-700 block">Đồng Bộ Trao Thầu (Awarded)</span>
-            <div className="text-2xl font-black text-purple-700 mt-1">{stats.awardedCount}</div>
-            <span className="text-[11px] text-purple-600/80 mt-0.5 block">Từ các gói Inquiry trên sàn</span>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold">
-            <Sparkles className="w-5 h-5" />
+          {/* Card 4: Đồng Bộ Trao Thầu (Awarded) */}
+          <div 
+            onClick={() => { setSourceFilter('AWARDED_INQUIRY'); setStatusFilter('ALL'); }}
+            className={`backdrop-blur-md rounded-2xl p-4 border transition-all cursor-pointer group select-none ${
+              sourceFilter === 'AWARDED_INQUIRY'
+                ? 'bg-slate-800/90 border-purple-400 ring-2 ring-purple-400/40 shadow-lg shadow-purple-950/40'
+                : 'bg-slate-800/60 border-white/10 hover:border-purple-500/40'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-300">Đồng Bộ Trao Thầu (Awarded)</span>
+              <div className="w-7 h-7 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+                <Sparkles className="w-3.5 h-3.5" />
+              </div>
+            </div>
+            <div className="mt-2 flex items-baseline gap-1.5">
+              <span className="text-2xl font-black text-purple-300 tracking-tight">{stats.awardedCount}</span>
+              <span className="text-xs font-bold text-purple-200/90">từ trao thầu sàn</span>
+            </div>
+            <p className="mt-1 text-[11px] text-slate-400 font-medium">Tự động lưu từ các Inquiry đã chốt</p>
           </div>
         </div>
       </div>

@@ -485,43 +485,43 @@ export const SupplierDirectoryPage: React.FC<SupplierDirectoryPageProps> = ({
            ----------------------------------------------------------------------- */}
         {displayMode === 'table' && (
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden w-full flex flex-col">
-            <div className="overflow-x-auto w-full">
+            <div className="w-full overflow-x-auto">
               <table className="w-full text-left border-collapse table-auto" id="supplier-comparison-table">
                 {/* Table Header */}
                 <thead className="bg-slate-100 shadow-xs border-b border-slate-200">
-                  <tr className="bg-slate-100 text-[10.5px] font-bold text-slate-600 uppercase tracking-wider select-none">
+                  <tr className="bg-slate-100 text-[10px] font-bold text-slate-600 uppercase tracking-wider select-none">
                     {/* 1. STT */}
-                    <th className="py-3 px-2 w-10 text-center sticky top-0 bg-slate-100 border-b border-slate-200">
+                    <th className="py-2.5 px-1.5 w-8 text-center sticky top-0 bg-slate-100 border-b border-slate-200">
                       STT
                     </th>
 
                     {/* 2. PIC */}
                     <th 
-                      className="py-3 px-3 min-w-[220px] cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 bg-slate-100 border-b border-slate-200"
+                      className="py-2.5 px-2.5 cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 bg-slate-100 border-b border-slate-200"
                       onClick={() => handleSort('name')}
                     >
                       <div className="flex items-center gap-1">
-                        <span>PIC</span>
+                        <span>Chuyên Viên (PIC)</span>
                         <ArrowUpDown className="w-3 h-3 text-slate-400" />
                       </div>
                     </th>
 
                     {/* 3. Đơn Vị */}
-                    <th className="py-3 px-3 min-w-[170px] whitespace-nowrap sticky top-0 bg-slate-100 border-b border-slate-200">
+                    <th className="py-2.5 px-2 whitespace-nowrap sticky top-0 bg-slate-100 border-b border-slate-200">
                       <span>Đơn Vị</span>
                     </th>
 
                     {/* 4. Dịch Vụ (Cấu trúc: Nhóm / Nhóm Hàng / Mô Hình) */}
-                    <th className="py-3 px-3 min-w-[280px] sticky top-0 bg-slate-100 border-b border-slate-200">
-                      <span>Dịch Vụ</span>
+                    <th className="py-2.5 px-2 sticky top-0 bg-slate-100 border-b border-slate-200">
+                      <span>Dịch Vụ Niêm Yết</span>
                     </th>
 
                     {/* 5. Lượt Xem */}
                     <th 
-                      className="py-3 px-2 text-center cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 bg-slate-100 border-b border-slate-200"
+                      className="py-2.5 px-1.5 text-center cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 bg-slate-100 border-b border-slate-200"
                       onClick={() => handleSort('profileViews')}
                     >
-                      <div className="flex items-center justify-center gap-1">
+                      <div className="flex items-center justify-center gap-0.5">
                         <span>Lượt Xem</span>
                         <ArrowUpDown className="w-3 h-3 text-slate-400" />
                       </div>
@@ -529,55 +529,55 @@ export const SupplierDirectoryPage: React.FC<SupplierDirectoryPageProps> = ({
 
                     {/* 6. Yêu Cầu Báo Giá */}
                     <th 
-                      className="py-3 px-2 text-center cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 bg-slate-100 border-b border-slate-200"
+                      className="py-2.5 px-1.5 text-center cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 bg-slate-100 border-b border-slate-200"
                       onClick={() => handleSort('rfqRequests')}
                     >
-                      <div className="flex items-center justify-center gap-1">
-                        <span>Yêu Cầu Báo Giá</span>
+                      <div className="flex items-center justify-center gap-0.5">
+                        <span>Yêu Cầu</span>
                         <ArrowUpDown className="w-3 h-3 text-slate-400" />
                       </div>
                     </th>
 
                     {/* 7. Số Báo Giá */}
                     <th 
-                      className="py-3 px-2 text-center cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 bg-slate-100 border-b border-slate-200"
+                      className="py-2.5 px-1.5 text-center cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 bg-slate-100 border-b border-slate-200"
                       onClick={() => handleSort('quotesCount')}
                     >
-                      <div className="flex items-center justify-center gap-1">
-                        <span>Số Báo Giá</span>
+                      <div className="flex items-center justify-center gap-0.5">
+                        <span>Báo Giá</span>
                         <ArrowUpDown className="w-3 h-3 text-slate-400" />
                       </div>
                     </th>
 
                     {/* 8. Số Đơn Hàng (Cột mới) */}
                     <th 
-                      className="py-3 px-2 text-center cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 bg-slate-100 border-b border-slate-200"
+                      className="py-2.5 px-1.5 text-center cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 bg-slate-100 border-b border-slate-200"
                       onClick={() => handleSort('ordersCount')}
                     >
-                      <div className="flex items-center justify-center gap-1">
-                        <span>Số Đơn Hàng</span>
+                      <div className="flex items-center justify-center gap-0.5">
+                        <span>Đơn Hàng</span>
                         <ArrowUpDown className="w-3 h-3 text-slate-400" />
                       </div>
                     </th>
 
                     {/* 9. Giá Trị */}
-                    <th className="py-3 px-3 text-right whitespace-nowrap sticky top-0 bg-slate-100 border-b border-slate-200">
-                      <span>Giá Trị</span>
+                    <th className="py-2.5 px-2 text-right whitespace-nowrap sticky top-0 bg-slate-100 border-b border-slate-200">
+                      <span>Quản Lý Doanh Số</span>
                     </th>
 
                     {/* 10. Đánh Giá */}
                     <th 
-                      className="py-3 px-2 text-center cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 bg-slate-100 border-b border-slate-200"
+                      className="py-2.5 px-1.5 text-center cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 bg-slate-100 border-b border-slate-200"
                       onClick={() => handleSort('rating')}
                     >
-                      <div className="flex items-center justify-center gap-1">
+                      <div className="flex items-center justify-center gap-0.5">
                         <span>Đánh Giá</span>
                         <ArrowUpDown className="w-3 h-3 text-slate-400" />
                       </div>
                     </th>
 
                     {/* 11. Thao Tác */}
-                    <th className="py-3 px-3 text-center whitespace-nowrap sticky top-0 bg-slate-100 border-b border-slate-200">
+                    <th className="py-2.5 px-2 text-center whitespace-nowrap sticky top-0 bg-slate-100 border-b border-slate-200">
                       <span>Thao Tác</span>
                     </th>
                   </tr>
@@ -596,21 +596,21 @@ export const SupplierDirectoryPage: React.FC<SupplierDirectoryPageProps> = ({
                         className="hover:bg-indigo-50/40 transition-colors group"
                       >
                         {/* 1. STT */}
-                        <td className="py-3.5 px-2 text-center font-mono text-slate-500 font-bold text-xs select-none">
+                        <td className="py-2.5 px-1.5 text-center font-mono text-slate-500 font-bold text-xs select-none">
                           {itemIndex}
                         </td>
 
                         {/* 2. PIC (Tên tĩnh, Avatar, Chức danh) */}
-                        <td className="py-3.5 px-3">
-                          <div className="flex items-center gap-3">
-                            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-700 to-indigo-600 font-bold text-white text-xs shadow-2xs shrink-0">
+                        <td className="py-2.5 px-2.5">
+                          <div className="flex items-start gap-2.5">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-tr from-blue-700 to-indigo-600 font-bold text-white text-xs shadow-2xs shrink-0 mt-0.5">
                               {spec.avatarInitial}
                             </div>
                             <div className="min-w-0">
-                              <p className="font-bold text-slate-900 text-[13px] leading-tight truncate">
+                              <p className="font-bold text-slate-900 text-xs leading-snug break-words">
                                 {spec.vietnameseName}
                               </p>
-                              <p className="text-[11px] text-slate-500 font-medium leading-tight truncate mt-0.5" title={spec.title}>
+                              <p className="text-[10.5px] text-slate-500 font-medium leading-snug break-words mt-0.5" title={spec.title}>
                                 {spec.title}
                               </p>
                             </div>
@@ -618,22 +618,22 @@ export const SupplierDirectoryPage: React.FC<SupplierDirectoryPageProps> = ({
                         </td>
 
                         {/* 3. Đơn Vị */}
-                        <td className="py-3.5 px-3 whitespace-nowrap">
-                          <div className="flex items-center gap-1.5">
-                            <Building2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                            <span className="font-semibold text-slate-800 text-xs truncate max-w-[180px]" title={spec.companyName}>
+                        <td className="py-2.5 px-2">
+                          <div className="flex items-start gap-1.5">
+                            <Building2 className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
+                            <span className="font-semibold text-slate-800 text-xs break-words leading-snug">
                               {spec.companyName}
                             </span>
                           </div>
                         </td>
 
                         {/* 4. Dịch Vụ: Dạng [Nhóm / Loại hàng / Mô hình] */}
-                        <td className="py-3.5 px-3">
-                          <div className="flex flex-wrap gap-1.5 max-w-[340px]">
+                        <td className="py-2.5 px-2">
+                          <div className="flex flex-wrap gap-1">
                             {declaredBadges.map((badge, bIdx) => (
                               <span
                                 key={bIdx}
-                                className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10.5px] font-bold border tracking-tight ${badge.badgeClass}`}
+                                className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9.5px] font-bold border tracking-tight leading-tight ${badge.badgeClass}`}
                               >
                                 {badge.fullText}
                               </span>
@@ -642,63 +642,63 @@ export const SupplierDirectoryPage: React.FC<SupplierDirectoryPageProps> = ({
                         </td>
 
                         {/* 5. Lượt Xem */}
-                        <td className="py-3.5 px-2 text-center whitespace-nowrap">
-                          <span className="inline-flex items-center gap-1 font-bold text-indigo-800 bg-indigo-50/80 px-2 py-0.5 rounded-md border border-indigo-100 text-[11px]">
+                        <td className="py-2.5 px-1.5 text-center whitespace-nowrap">
+                          <span className="inline-flex items-center gap-1 font-bold text-indigo-800 bg-indigo-50/80 px-1.5 py-0.5 rounded-md border border-indigo-100 text-[10.5px]">
                             <Eye className="h-3 w-3 text-indigo-600 shrink-0" />
                             {(viewsCountMap[spec.id] ?? (spec.profileViews || 14820)).toLocaleString('vi-VN')}
                           </span>
                         </td>
 
                         {/* 6. Yêu Cầu Báo Giá */}
-                        <td className="py-3.5 px-2 text-center whitespace-nowrap">
-                          <span className="inline-block px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                        <td className="py-2.5 px-1.5 text-center whitespace-nowrap">
+                          <span className="inline-block px-2 py-0.5 rounded-md text-[10.5px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
                             {(spec.viewerInteractions?.rfqRequestsCount || 180).toLocaleString('vi-VN')} yêu cầu
                           </span>
                         </td>
 
                         {/* 7. Số Báo Giá */}
-                        <td className="py-3.5 px-2 text-center whitespace-nowrap">
-                          <span className="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/80">
+                        <td className="py-2.5 px-1.5 text-center whitespace-nowrap">
+                          <span className="inline-block px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/80">
                             {(spec.keyMetrics.quotesCount || 150).toLocaleString('vi-VN')} báo giá
                           </span>
                         </td>
 
                         {/* 8. Số Đơn Hàng */}
-                        <td className="py-3.5 px-2 text-center whitespace-nowrap">
-                          <span className="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                        <td className="py-2.5 px-1.5 text-center whitespace-nowrap">
+                          <span className="inline-block px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
                             {(spec.keyMetrics.ordersCount || 95).toLocaleString('vi-VN')} đơn hàng
                           </span>
                         </td>
 
                         {/* 9. Giá Trị */}
-                        <td className="py-3.5 px-3 text-right whitespace-nowrap">
+                        <td className="py-2.5 px-2 text-right whitespace-nowrap">
                           <div className="space-y-0.5">
-                            <span className="text-[12.5px] font-black text-emerald-700 block tracking-tight">
+                            <span className="text-[12px] font-black text-emerald-700 block tracking-tight">
                               {managedRevenue}
                             </span>
-                            <span className="text-[9.5px] font-semibold text-slate-400 block">
+                            <span className="text-[9px] font-semibold text-slate-400 block">
                               Quản lý doanh số
                             </span>
                           </div>
                         </td>
 
                         {/* 10. Đánh Giá */}
-                        <td className="py-3.5 px-2 text-center whitespace-nowrap">
-                          <div className="inline-flex items-center gap-1 font-bold text-slate-900 bg-amber-50/50 px-2 py-0.5 rounded-md border border-amber-200/60">
-                            <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400 shrink-0" />
+                        <td className="py-2.5 px-1.5 text-center whitespace-nowrap">
+                          <div className="inline-flex items-center gap-1 font-bold text-slate-900 bg-amber-50/50 px-1.5 py-0.5 rounded-md border border-amber-200/60 text-[10.5px]">
+                            <Star className="h-3 w-3 fill-amber-400 text-amber-400 shrink-0" />
                             <span>{spec.rating}</span>
-                            <span className="text-[10px] text-slate-400 font-normal">({spec.reviewsCount || 120})</span>
+                            <span className="text-[9.5px] text-slate-400 font-normal">({spec.reviewsCount || 120})</span>
                           </div>
                         </td>
 
                         {/* 11. Thao Tác */}
-                        <td className="py-3.5 px-3 text-center whitespace-nowrap">
+                        <td className="py-2.5 px-2 text-center whitespace-nowrap">
                           <button
                             onClick={() => handleOpenDetail(spec.id)}
-                            className="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white text-xs font-bold transition-all border border-indigo-200/80 hover:border-indigo-600 shadow-2xs cursor-pointer"
+                            className="inline-flex items-center justify-center gap-0.5 px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white text-xs font-bold transition-all border border-indigo-200/80 hover:border-indigo-600 shadow-2xs cursor-pointer"
                           >
                             <span>Xem Profile</span>
-                            <ChevronRight className="h-3.5 w-3.5" />
+                            <ChevronRight className="h-3 w-3" />
                           </button>
                         </td>
                       </tr>

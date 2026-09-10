@@ -255,163 +255,149 @@ export const MySuppliersPage: React.FC<MySuppliersPageProps> = ({
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-200">
-      {/* Breadcrumb */}
-      <div className="flex items-center space-x-2 text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wider">
-        <span>Customer Workspace</span>
-        <ChevronRight className="w-3.5 h-3.5" />
-        <span className="text-indigo-600">My Suppliers (CRM Mạng Lưới Nhà Cung Cấp)</span>
-      </div>
+    <div className="w-full max-w-[1720px] mx-auto px-2 sm:px-4 lg:px-6 py-6 animate-in fade-in duration-200 space-y-5">
+      {/* ========================================================= */}
+      {/* 1. HERO HEADER BLOCK & KPI TILES (LeadBoard Dark Style) */}
+      {/* ========================================================= */}
+      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+        <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-500/20 via-transparent to-transparent pointer-events-none" />
 
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-slate-200">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">My Suppliers</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Quản lý tập trung mạng lưới nhà cung cấp từ 3 nguồn: <strong>Trao thầu Báo giá</strong>, <strong>Yêu cầu Profile Trực tiếp</strong> và <strong>Current Supplier (Khai báo giá vận hành)</strong>.
-          </p>
-        </div>
-
-        <div className="flex items-center space-x-3 flex-wrap">
-          <button
-            id="declare-current-supplier-btn"
-            onClick={() => setIsAddSupplierModalOpen(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2.5 text-xs font-bold text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-200 rounded-xl transition-all cursor-pointer shadow-2xs"
-          >
-            <Plus className="w-3.5 h-3.5 text-sky-600" />
-            <span>+ Khai Báo Current Supplier</span>
-          </button>
-
-          <button
-            id="browse-public-suppliers-btn"
-            onClick={() => onNavigate({ type: 'public', tab: 'supplier-profile' })}
-            className="px-3.5 py-2.5 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer flex items-center gap-1.5"
-          >
-            <Globe className="w-3.5 h-3.5 text-slate-500" />
-            <span>Danh Bạ Nhà Xe Công Khai</span>
-          </button>
-
-          <button
-            id="create-rfq-for-suppliers-btn"
-            onClick={() => onOpenCreateInquiry()}
-            className="flex items-center space-x-2 px-4 py-2.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Create Supplier RFQ</span>
-          </button>
-        </div>
-      </div>
-
-      {/* 3 Supplier Sourcing & Acquisition Channels Explanation Banner */}
-      <div className="my-6 p-4.5 rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white shadow-md border border-slate-800">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 text-[10px] font-black uppercase tracking-wider bg-indigo-500/30 text-indigo-200 rounded-md border border-indigo-400/30">
-                Supplier Sourcing Engine
-              </span>
-              <span className="text-xs text-indigo-200 font-semibold">3 Nguồn Nhà Cung Cấp Vận Tải: Awarded • Direct RFQ • Current Supplier</span>
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 relative z-10">
+          <div className="space-y-2 max-w-3xl">
+            <div className="flex items-center space-x-2 text-xs font-semibold text-indigo-300 uppercase tracking-wider mb-1">
+              <span>Customer Workspace</span>
+              <ChevronRight className="w-3.5 h-3.5 text-indigo-400" />
+              <span className="text-indigo-400 font-bold">My Suppliers (CRM Mạng Lưới Nhà Cung Cấp)</span>
             </div>
-            <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
-              Mạng lưới nhà cung cấp được tổng hợp từ các báo giá trúng thầu (Awarded), yêu cầu chào giá 1-1 qua hồ sơ (Direct RFQ), và các nhà cung cấp tự khai báo (Current Supplier).
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-indigo-500/30 border border-indigo-400/40 text-indigo-300 flex items-center justify-center shadow-xs shrink-0">
+                <Building2 className="w-5 h-5 text-indigo-200" />
+              </div>
+              <span>My Suppliers</span>
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+              Quản lý tập trung mạng lưới nhà cung cấp từ 3 nguồn: <strong>Trao thầu Báo giá (Awarded)</strong>, <strong>Yêu cầu Profile Trực tiếp (Direct RFQ)</strong> và <strong>Current Supplier (Khai báo giá vận hành)</strong>.
             </p>
           </div>
 
-          <div className="grid grid-cols-3 gap-2 sm:gap-3 text-center shrink-0">
-            {/* Awarded */}
-            <div 
-              onClick={() => setSourceFilter(sourceFilter === 'AWARDED_QUOTE' ? 'ALL' : 'AWARDED_QUOTE')}
-              className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
-                sourceFilter === 'AWARDED_QUOTE' 
-                  ? 'bg-indigo-500/30 border-indigo-400 text-indigo-200 ring-2 ring-indigo-400/40' 
-                  : 'bg-white/5 border-white/10 hover:bg-white/10'
-              }`}
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+            <button
+              id="declare-current-supplier-btn"
+              onClick={() => setIsAddSupplierModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 text-xs font-bold text-sky-200 bg-sky-500/20 hover:bg-sky-500/30 border border-sky-400/30 rounded-xl transition-all cursor-pointer shadow-xs"
             >
-              <div className="flex items-center justify-center gap-1 text-[11px] font-bold text-indigo-300">
-                <Trophy className="w-3 h-3 text-indigo-400" />
-                <span>Awarded</span>
-              </div>
-              <p className="text-base font-black text-white mt-0.5">{awardedCount}</p>
-            </div>
+              <Plus className="w-3.5 h-3.5 text-sky-300" />
+              <span>+ Khai Báo Current Supplier</span>
+            </button>
 
-            {/* Direct Profile */}
-            <div 
-              onClick={() => setSourceFilter(sourceFilter === 'DIRECT_PROFILE_REQUEST' ? 'ALL' : 'DIRECT_PROFILE_REQUEST')}
-              className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
-                sourceFilter === 'DIRECT_PROFILE_REQUEST' 
-                  ? 'bg-emerald-500/30 border-emerald-400 text-emerald-200 ring-2 ring-emerald-400/40' 
-                  : 'bg-white/5 border-white/10 hover:bg-white/10'
-              }`}
+            <button
+              id="browse-public-suppliers-btn"
+              onClick={() => onNavigate({ type: 'public', tab: 'supplier-profile' })}
+              className="px-3.5 py-2.5 text-xs font-bold text-slate-200 bg-white/10 hover:bg-white/20 border border-white/15 rounded-xl transition-all shadow-xs cursor-pointer flex items-center gap-1.5"
             >
-              <div className="flex items-center justify-center gap-1 text-[11px] font-bold text-emerald-300">
-                <Globe className="w-3 h-3 text-emerald-400" />
-                <span>Direct RFQ</span>
-              </div>
-              <p className="text-base font-black text-white mt-0.5">{directProfileCount}</p>
-            </div>
+              <Globe className="w-3.5 h-3.5 text-slate-300" />
+              <span>Danh Bạ Nhà Xe Công Khai</span>
+            </button>
 
-            {/* Current Supplier */}
-            <div 
-              onClick={() => setSourceFilter(sourceFilter === 'CURRENT_SUPPLIER' ? 'ALL' : 'CURRENT_SUPPLIER')}
-              className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
-                sourceFilter === 'CURRENT_SUPPLIER' 
-                  ? 'bg-sky-500/30 border-sky-400 text-sky-200 ring-2 ring-sky-400/40' 
-                  : 'bg-white/5 border-white/10 hover:bg-white/10'
-              }`}
+            <button
+              id="create-rfq-for-suppliers-btn"
+              onClick={() => onOpenCreateInquiry()}
+              className="flex items-center space-x-2 px-5 py-2.5 text-xs font-bold text-white bg-indigo-500 hover:bg-indigo-600 active:bg-indigo-700 rounded-xl shadow-lg shadow-indigo-600/30 transition-all cursor-pointer"
             >
-              <div className="flex items-center justify-center gap-1 text-[11px] font-bold text-sky-300">
-                <FileText className="w-3 h-3 text-sky-400" />
-                <span>Current Supplier</span>
+              <Plus className="w-4 h-4" />
+              <span>+ Create Supplier RFQ</span>
+            </button>
+          </div>
+        </div>
+
+        {/* 4 Interactive KPI Cards in LeadBoard Dark Style */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mt-6 pt-6 border-t border-white/10 relative z-10">
+          {/* Card 1: Tổng Nhà Cung Cấp */}
+          <div 
+            onClick={() => setSourceFilter('ALL')}
+            className={`backdrop-blur-md rounded-2xl p-4 border transition-all cursor-pointer group select-none ${
+              sourceFilter === 'ALL'
+                ? 'bg-slate-800/90 border-cyan-400 ring-2 ring-cyan-400/40 shadow-lg shadow-cyan-950/40'
+                : 'bg-slate-800/60 border-white/10 hover:border-cyan-500/40'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-300">Tổng Nhà Cung Cấp</span>
+              <div className="w-7 h-7 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
+                <Layers className="w-3.5 h-3.5" />
               </div>
-              <p className="text-base font-black text-white mt-0.5">{currentSupplierCount}</p>
             </div>
+            <div className="mt-2 flex items-baseline gap-1.5">
+              <span className="text-2xl font-black text-cyan-400 tracking-tight">{totalCount}</span>
+              <span className="text-xs font-bold text-cyan-300/90">đối tác vận tải</span>
+            </div>
+            <p className="mt-1 text-[11px] text-slate-400 font-medium">Toàn bộ mạng lưới nhà xe & forwarder</p>
           </div>
-        </div>
-      </div>
 
-      {/* KPI Overview Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tổng Nhà Cung Cấp</p>
-            <p className="text-2xl font-black text-slate-900 mt-1">{totalCount}</p>
-            <p className="text-[11px] text-slate-400 mt-0.5">Toàn bộ đối tác vận tải</p>
+          {/* Card 2: Awarded */}
+          <div 
+            onClick={() => setSourceFilter('AWARDED_QUOTE')}
+            className={`backdrop-blur-md rounded-2xl p-4 border transition-all cursor-pointer group select-none ${
+              sourceFilter === 'AWARDED_QUOTE'
+                ? 'bg-slate-800/90 border-indigo-400 ring-2 ring-indigo-400/40 shadow-lg shadow-indigo-950/40'
+                : 'bg-slate-800/60 border-white/10 hover:border-indigo-500/40'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-300">Awarded (Trúng Thầu)</span>
+              <div className="w-7 h-7 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
+                <Trophy className="w-3.5 h-3.5" />
+              </div>
+            </div>
+            <div className="mt-2 flex items-baseline gap-1.5">
+              <span className="text-2xl font-black text-indigo-300 tracking-tight">{awardedCount}</span>
+              <span className="text-xs font-bold text-indigo-200/90">nhà cung cấp</span>
+            </div>
+            <p className="mt-1 text-[11px] text-slate-400 font-medium">Trao thầu từ Inquiry trên sàn</p>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700">
-            <Building2 className="w-6 h-6" />
-          </div>
-        </div>
 
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold text-indigo-600 uppercase tracking-wider">Awarded</p>
-            <p className="text-2xl font-black text-slate-900 mt-1">{awardedCount}</p>
-            <p className="text-[11px] text-indigo-600 font-medium mt-0.5">Trao thầu từ Inquiry</p>
+          {/* Card 3: Direct RFQ */}
+          <div 
+            onClick={() => setSourceFilter('DIRECT_PROFILE_REQUEST')}
+            className={`backdrop-blur-md rounded-2xl p-4 border transition-all cursor-pointer group select-none ${
+              sourceFilter === 'DIRECT_PROFILE_REQUEST'
+                ? 'bg-slate-800/90 border-emerald-400 ring-2 ring-emerald-400/40 shadow-lg shadow-emerald-950/40'
+                : 'bg-slate-800/60 border-white/10 hover:border-emerald-500/40'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-300">Direct RFQ (Trực Tiếp)</span>
+              <div className="w-7 h-7 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+                <Globe className="w-3.5 h-3.5" />
+              </div>
+            </div>
+            <div className="mt-2 flex items-baseline gap-1.5">
+              <span className="text-2xl font-black text-emerald-400 tracking-tight">{directProfileCount}</span>
+              <span className="text-xs font-bold text-emerald-300/90">nhà cung cấp</span>
+            </div>
+            <p className="mt-1 text-[11px] text-slate-400 font-medium">Yêu cầu chào giá 1-1 qua Profile</p>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
-            <Trophy className="w-6 h-6" />
-          </div>
-        </div>
 
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold text-emerald-600 uppercase tracking-wider">Direct RFQ</p>
-            <p className="text-2xl font-black text-slate-900 mt-1">{directProfileCount}</p>
-            <p className="text-[11px] text-emerald-600 font-medium mt-0.5">Yêu cầu báo giá 1-1</p>
-          </div>
-          <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
-            <Globe className="w-6 h-6" />
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold text-sky-600 uppercase tracking-wider">Current Supplier</p>
-            <p className="text-2xl font-black text-slate-900 mt-1">{currentSupplierCount}</p>
-            <p className="text-[11px] text-sky-600 font-medium mt-0.5">Khai báo giá vận hành</p>
-          </div>
-          <div className="w-12 h-12 rounded-xl bg-sky-50 flex items-center justify-center text-sky-600">
-            <FileText className="w-6 h-6" />
+          {/* Card 4: Current Supplier */}
+          <div 
+            onClick={() => setSourceFilter('CURRENT_SUPPLIER')}
+            className={`backdrop-blur-md rounded-2xl p-4 border transition-all cursor-pointer group select-none ${
+              sourceFilter === 'CURRENT_SUPPLIER'
+                ? 'bg-slate-800/90 border-sky-400 ring-2 ring-sky-400/40 shadow-lg shadow-sky-950/40'
+                : 'bg-slate-800/60 border-white/10 hover:border-sky-500/40'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-300">Current Supplier</span>
+              <div className="w-7 h-7 rounded-xl bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-sky-400 group-hover:scale-110 transition-transform">
+                <FileText className="w-3.5 h-3.5" />
+              </div>
+            </div>
+            <div className="mt-2 flex items-baseline gap-1.5">
+              <span className="text-2xl font-black text-sky-400 tracking-tight">{currentSupplierCount}</span>
+              <span className="text-xs font-bold text-sky-300/90">nhà cung cấp</span>
+            </div>
+            <p className="mt-1 text-[11px] text-slate-400 font-medium">Khai báo giá vận hành nội bộ</p>
           </div>
         </div>
       </div>

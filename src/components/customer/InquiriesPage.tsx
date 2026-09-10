@@ -7,7 +7,16 @@ import {
   ChevronUp,
   Building2,
   X,
-  ArrowUpDown
+  ArrowUpDown,
+  Layers,
+  Flame,
+  FileText,
+  Trophy,
+  CheckCircle2,
+  Zap,
+  TrendingUp,
+  ShieldCheck,
+  Clock
 } from 'lucide-react';
 import { InquiryItem, InquiryStatus, ServiceType, CurrentView, SupplierLeadItem, QuotationItem, SupplierCompany } from '../../types';
 import { LeadInquiryDetailCard } from '../public/LeadInquiryDetailCard';
@@ -389,104 +398,142 @@ export const InquiriesPage: React.FC<InquiriesPageProps> = ({
     return 0;
   });
 
+  // Tổng hợp các chỉ số nghiệp vụ cho Hero KPI cards (LeadBoard style)
+  const allCount = inquiries.length;
+  const contractCount = inquiries.filter((i) => 
+    (i.contractTerm && i.contractTerm !== 'Spot' && i.contractTerm !== 'Theo chuyến' && i.contractTerm !== 'Theo lô') || 
+    i.pricingType === 'Contract'
+  ).length;
+  const spotCount = allCount - contractCount;
+  const openCount = inquiries.filter((i) => i.status === 'Open').length;
+  const quotedCount = inquiries.filter((i) => i.status === 'Quoted').length;
+  const totalQuotesReceived = quotations.length || inquiries.reduce((sum, i) => sum + (i.responsesCount || 0), 0);
+  const awardedCount = inquiries.filter((i) => i.status === 'Awarded').length;
+
   return (
     <div className="w-full max-w-[1720px] mx-auto px-2 sm:px-4 lg:px-6 py-6 animate-in fade-in duration-200 space-y-5">
-      {/* Breadcrumb & Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-200">
-        <div>
-          <div className="flex items-center space-x-2 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
-            <span>Customer Workspace</span>
-            <ChevronRight className="w-3.5 h-3.5" />
-            <span className="text-indigo-600">My Inquiries</span>
+      {/* Hero Header Block (Đồng bộ phong cách khối LeadBoard) */}
+      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+        <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-500/20 via-transparent to-transparent pointer-events-none" />
+
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 relative z-10">
+          <div className="space-y-2 max-w-3xl">
+            <div className="flex items-center space-x-2 text-xs font-semibold text-indigo-300 uppercase tracking-wider mb-1">
+              <span>Customer Workspace</span>
+              <ChevronRight className="w-3.5 h-3.5 text-indigo-400" />
+              <span className="text-indigo-400 font-bold">My Inquiries</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+              Yêu Cầu Báo Giá Của Tôi (My Inquiries)
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+              Quản lý hồ sơ yêu cầu chào giá, theo dõi phản hồi báo giá từ các nhà cung cấp và đối soát Ma trận để Trao thầu.
+            </p>
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Yêu Cầu Báo Giá Của Tôi (My Inquiries)</h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-            Quản lý hồ sơ yêu cầu chào giá, theo dõi phản hồi báo giá từ các nhà cung cấp và đối soát Ma trận để Trao thầu.
-          </p>
+
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
+            <button
+              id="create-inquiry-top-btn"
+              onClick={onOpenCreateModal}
+              className="px-5 py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-lg shadow-indigo-600/30"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Tạo Yêu Cầu Báo Giá Mới</span>
+            </button>
+          </div>
         </div>
 
-        <div className="flex items-center space-x-3 shrink-0">
-          <button
-            id="create-inquiry-top-btn"
-            onClick={onOpenCreateModal}
-            className="flex items-center space-x-2 px-4 py-2.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 rounded-xl shadow-xs transition-all cursor-pointer"
+        {/* 4 Interactive KPI Cards in LeadBoard Dark Style */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mt-6 pt-6 border-t border-white/10 relative z-10">
+          {/* Card 1: Tổng Yêu Cầu */}
+          <div 
+            onClick={() => setStatusFilter('ALL')}
+            className={`backdrop-blur-md rounded-2xl p-4 border transition-all cursor-pointer group select-none ${
+              statusFilter === 'ALL'
+                ? 'bg-slate-800/90 border-cyan-400 ring-2 ring-cyan-400/40 shadow-lg shadow-cyan-950/40'
+                : 'bg-slate-800/60 border-white/10 hover:border-cyan-500/40'
+            }`}
           >
-            <Plus className="w-4 h-4" />
-            <span>Tạo Yêu Cầu Báo Giá Mới</span>
-          </button>
-        </div>
-      </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-300">Tổng Yêu Cầu Hiện Tại</span>
+              <div className="w-7 h-7 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
+                <Layers className="w-3.5 h-3.5" />
+              </div>
+            </div>
+            <div className="mt-2 flex items-baseline gap-1.5">
+              <span className="text-2xl font-black text-cyan-400 tracking-tight">{allCount}</span>
+              <span className="text-xs font-bold text-cyan-300/90">yêu cầu</span>
+            </div>
+            <p className="mt-1 text-[11px] text-slate-400 font-medium">
+              {contractCount > 0 || spotCount > 0 ? `• ${contractCount} Hợp đồng • ${spotCount} Theo lô` : 'Tất cả hồ sơ RFQ đã tạo'}
+            </p>
+          </div>
 
-      {/* Quick Summary Status Counters */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-        <div 
-          onClick={() => setStatusFilter('ALL')}
-          className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
-            statusFilter === 'ALL' ? 'bg-indigo-50/80 border-indigo-300 ring-2 ring-indigo-500/20 shadow-xs' : 'bg-white border-slate-200/90 hover:bg-slate-50'
-          }`}
-        >
-          <span className="text-xs font-semibold text-slate-500">Tất cả Yêu cầu</span>
-          <p className="text-xl font-black text-slate-900 mt-1">{inquiries.length}</p>
-        </div>
+          {/* Card 2: Đang Mở Chào Giá */}
+          <div 
+            onClick={() => setStatusFilter('Open')}
+            className={`backdrop-blur-md rounded-2xl p-4 border transition-all cursor-pointer group select-none ${
+              statusFilter === 'Open'
+                ? 'bg-slate-800/90 border-emerald-400 ring-2 ring-emerald-400/40 shadow-lg shadow-emerald-950/40'
+                : 'bg-slate-800/60 border-white/10 hover:border-emerald-500/40'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-300">Đang Mở Chào Giá</span>
+              <div className="w-7 h-7 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+                <Flame className="w-3.5 h-3.5" />
+              </div>
+            </div>
+            <div className="mt-2 flex items-baseline gap-1.5">
+              <span className="text-2xl font-black text-emerald-400 tracking-tight">{openCount}</span>
+              <span className="text-xs font-bold text-emerald-300/90">lead mở</span>
+            </div>
+            <p className="mt-1 text-[11px] text-slate-400 font-medium">Đang tiếp nhận chào giá từ các NCC</p>
+          </div>
 
-        <div 
-          onClick={() => setStatusFilter('Open')}
-          className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
-            statusFilter === 'Open' ? 'bg-blue-50/80 border-blue-300 ring-2 ring-blue-500/20 shadow-xs' : 'bg-white border-slate-200/90 hover:bg-slate-50'
-          }`}
-        >
-          <span className="text-xs font-semibold text-blue-700 flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-            <span>Đang mở chào giá</span>
-          </span>
-          <p className="text-xl font-black text-blue-600 mt-1">
-            {inquiries.filter((i) => i.status === 'Open').length}
-          </p>
-        </div>
+          {/* Card 3: Đã Có Báo Giá */}
+          <div 
+            onClick={() => setStatusFilter('Quoted')}
+            className={`backdrop-blur-md rounded-2xl p-4 border transition-all cursor-pointer group select-none ${
+              statusFilter === 'Quoted'
+                ? 'bg-slate-800/90 border-purple-400 ring-2 ring-purple-400/40 shadow-lg shadow-purple-950/40'
+                : 'bg-slate-800/60 border-white/10 hover:border-purple-500/40'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-300">Đã Có Báo Giá</span>
+              <div className="w-7 h-7 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+                <FileText className="w-3.5 h-3.5" />
+              </div>
+            </div>
+            <div className="mt-2 flex items-baseline gap-1.5">
+              <span className="text-2xl font-black text-purple-300 tracking-tight">{quotedCount}</span>
+              <span className="text-xs font-bold text-purple-200/90">inquiries ({totalQuotesReceived} báo giá)</span>
+            </div>
+            <p className="mt-1 text-[11px] text-slate-400 font-medium">Sẵn sàng đối soát & so sánh giá</p>
+          </div>
 
-        <div 
-          onClick={() => setStatusFilter('Quoted')}
-          className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
-            statusFilter === 'Quoted' ? 'bg-purple-50/80 border-purple-300 ring-2 ring-purple-500/20 shadow-xs' : 'bg-white border-slate-200/90 hover:bg-slate-50'
-          }`}
-        >
-          <span className="text-xs font-semibold text-purple-700 flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-purple-500"></span>
-            <span>Đã có báo giá</span>
-          </span>
-          <p className="text-xl font-black text-purple-600 mt-1">
-            {inquiries.filter((i) => i.status === 'Quoted').length}
-          </p>
-        </div>
-
-        <div 
-          onClick={() => setStatusFilter('Awarded')}
-          className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
-            statusFilter === 'Awarded' ? 'bg-emerald-50/80 border-emerald-300 ring-2 ring-emerald-500/20 shadow-xs' : 'bg-white border-slate-200/90 hover:bg-slate-50'
-          }`}
-        >
-          <span className="text-xs font-semibold text-emerald-700 flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-            <span>Đã trao thầu</span>
-          </span>
-          <p className="text-xl font-black text-emerald-600 mt-1">
-            {inquiries.filter((i) => i.status === 'Awarded').length}
-          </p>
-        </div>
-
-        <div 
-          onClick={() => setStatusFilter('Closed')}
-          className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
-            statusFilter === 'Closed' ? 'bg-slate-100 border-slate-300 ring-2 ring-slate-400/20 shadow-xs' : 'bg-white border-slate-200/90 hover:bg-slate-50'
-          }`}
-        >
-          <span className="text-xs font-semibold text-slate-500 flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-slate-400"></span>
-            <span>Đã đóng / Hết hạn</span>
-          </span>
-          <p className="text-xl font-black text-slate-600 mt-1">
-            {inquiries.filter((i) => i.status === 'Closed').length}
-          </p>
+          {/* Card 4: Đã Trao Thầu */}
+          <div 
+            onClick={() => setStatusFilter('Awarded')}
+            className={`backdrop-blur-md rounded-2xl p-4 border transition-all cursor-pointer group select-none ${
+              statusFilter === 'Awarded'
+                ? 'bg-slate-800/90 border-amber-400 ring-2 ring-amber-400/40 shadow-lg shadow-amber-950/40'
+                : 'bg-slate-800/60 border-white/10 hover:border-amber-500/40'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-300">Đã Trao Thầu</span>
+              <div className="w-7 h-7 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
+                <Trophy className="w-3.5 h-3.5" />
+              </div>
+            </div>
+            <div className="mt-2 flex items-baseline gap-1.5">
+              <span className="text-2xl font-black text-amber-400 tracking-tight">{awardedCount}</span>
+              <span className="text-xs font-bold text-amber-300/90">đã trao thầu</span>
+            </div>
+            <p className="mt-1 text-[11px] text-slate-400 font-medium">Đã chốt đối tác & ký hợp đồng</p>
+          </div>
         </div>
       </div>
 
