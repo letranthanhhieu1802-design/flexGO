@@ -138,87 +138,92 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
   }, [specs.dimensionsCm, specs.packageCount, specs.grossWeightKgs, isExpress]);
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-200">
+    <div className="space-y-5 animate-in fade-in duration-200">
       {/* 1. TOP SERVICE TYPE SELECTOR: Air Cargo vs Express / Courier */}
-      <div className="p-1.5 bg-slate-100/80 rounded-2xl border border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-2">
-        <button
-          type="button"
-          onClick={() => {
-            onChange({
-              ...specs,
-              airServiceType: 'Air Freight / Cargo',
-              originServiceTerm: specs.originServiceTerm || 'AIRPORT',
-              destinationServiceTerm: specs.destinationServiceTerm || 'AIRPORT',
-            });
-          }}
-          className={`p-3 rounded-xl text-left cursor-pointer transition-all flex items-start gap-3 ${
-            isCargo
-              ? 'bg-white border border-sky-400 ring-2 ring-sky-500/20 shadow-xs text-sky-950'
-              : 'bg-transparent border border-transparent hover:bg-white/60 text-slate-700'
-          }`}
-        >
-          <div className={`p-2.5 rounded-xl shrink-0 ${isCargo ? 'bg-sky-600 text-white shadow-xs' : 'bg-slate-200 text-slate-600'}`}>
-            <Plane className="w-5 h-5" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-black tracking-wide">1. Air Freight / Cargo</span>
-              {isCargo && <span className="text-[10px] font-extrabold bg-sky-100 text-sky-800 px-2 py-0.5 rounded-md">Đang chọn</span>}
+      <div className="space-y-1.5">
+        <label className="block text-xs font-bold text-slate-800">
+          Loại Hình Dịch Vụ Vận Tải Hàng Không *
+        </label>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <button
+            type="button"
+            onClick={() => {
+              onChange({
+                ...specs,
+                airServiceType: 'Air Freight / Cargo',
+                originServiceTerm: specs.originServiceTerm || 'AIRPORT',
+                destinationServiceTerm: specs.destinationServiceTerm || 'AIRPORT',
+              });
+            }}
+            className={`p-3 rounded-xl text-left cursor-pointer transition-all flex items-start gap-3 border ${
+              isCargo
+                ? 'bg-sky-50/70 border-sky-600 text-sky-950 shadow-2xs'
+                : 'bg-white border-slate-200 hover:border-slate-300 text-slate-700'
+            }`}
+          >
+            <div className={`p-2 rounded-lg shrink-0 ${isCargo ? 'bg-sky-600 text-white' : 'bg-slate-100 text-slate-500'}`}>
+              <Plane className="w-4 h-4" />
             </div>
-            <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">
-              Hàng không thương mại B2B (từ vài chục kg đến hàng tấn), bay theo lịch chuyến MAWB/HAWB.
-            </p>
-          </div>
-        </button>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold">1. Air Freight / Cargo</span>
+                {isCargo && <span className="text-[10px] font-bold bg-sky-100 text-sky-800 px-2 py-0.5 rounded-md">Đang chọn</span>}
+              </div>
+              <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">
+                Hàng không thương mại B2B, bay theo lịch MAWB/HAWB.
+              </p>
+            </div>
+          </button>
 
-        <button
-          type="button"
-          onClick={() => {
-            onChange({
-              ...specs,
-              airServiceType: 'Express / Courier',
-              originServiceTerm: 'DOOR',
-              destinationServiceTerm: 'DOOR',
-              expressPackageType: specs.expressPackageType || 'Parcel / Package (Bưu phẩm / Hàng mẫu đóng hộp)',
-              expressSpeedLevel: specs.expressSpeedLevel || 'Express Tiêu Chuẩn (2-3 ngày)',
-            });
-          }}
-          className={`p-3 rounded-xl text-left cursor-pointer transition-all flex items-start gap-3 ${
-            isExpress
-              ? 'bg-white border border-amber-400 ring-2 ring-amber-500/20 shadow-xs text-amber-950'
-              : 'bg-transparent border border-transparent hover:bg-white/60 text-slate-700'
-          }`}
-        >
-          <div className={`p-2.5 rounded-xl shrink-0 ${isExpress ? 'bg-amber-500 text-white shadow-xs' : 'bg-slate-200 text-slate-600'}`}>
-            <Zap className="w-5 h-5" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-black tracking-wide">2. Express / Courier</span>
-              {isExpress && <span className="text-[10px] font-extrabold bg-amber-100 text-amber-900 px-2 py-0.5 rounded-md">Đang chọn</span>}
+          <button
+            type="button"
+            onClick={() => {
+              onChange({
+                ...specs,
+                airServiceType: 'Express / Courier',
+                originServiceTerm: 'DOOR',
+                destinationServiceTerm: 'DOOR',
+                expressPackageType: specs.expressPackageType || 'Parcel / Package (Bưu phẩm / Hàng mẫu đóng hộp)',
+                expressSpeedLevel: specs.expressSpeedLevel || 'Express Tiêu Chuẩn (2-3 ngày)',
+              });
+            }}
+            className={`p-3 rounded-xl text-left cursor-pointer transition-all flex items-start gap-3 border ${
+              isExpress
+                ? 'bg-amber-50/70 border-amber-500 text-amber-950 shadow-2xs'
+                : 'bg-white border-slate-200 hover:border-slate-300 text-slate-700'
+            }`}
+          >
+            <div className={`p-2 rounded-lg shrink-0 ${isExpress ? 'bg-amber-500 text-white' : 'bg-slate-100 text-slate-500'}`}>
+              <Zap className="w-4 h-4" />
             </div>
-            <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">
-              Chuyển phát nhanh Door-to-Door, bưu phẩm, tài liệu, hàng mẫu TMĐT hỏa tốc.
-            </p>
-          </div>
-        </button>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold">2. Express / Courier</span>
+                {isExpress && <span className="text-[10px] font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded-md">Đang chọn</span>}
+              </div>
+              <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">
+                Chuyển phát nhanh Door-to-Door bưu phẩm, tài liệu, hàng mẫu.
+              </p>
+            </div>
+          </button>
+        </div>
       </div>
 
       {/* 2. TRADE ROLE SELECTION */}
-      <div>
-        <div className="flex items-center justify-between mb-1.5">
-          <label className="block text-xs font-bold text-slate-700 flex items-center gap-1.5">
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between">
+          <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
             <ArrowLeftRight className="w-3.5 h-3.5 text-sky-700" />
             <span>Vai Trò Của Doanh Nghiệp Trong Lô Hàng (Trade Role) *</span>
           </label>
-          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md ${
-            isExpress ? 'text-amber-900 bg-amber-100/70' : 'text-sky-800 bg-sky-100/70'
+          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border ${
+            isExpress ? 'text-amber-900 bg-amber-50 border-amber-200' : 'text-sky-800 bg-sky-50 border-sky-200'
           }`}>
             {specs.tradeRole === 'Nhập khẩu (Import)'
-              ? '🛬 Doanh nghiệp mua / nhập hàng về VN'
+              ? '🛬 Mua / nhập hàng về VN'
               : specs.tradeRole === 'Nội địa (Domestic)'
-              ? '🇻🇳 Hàng không nội địa Bắc - Nam'
-              : '🛫 Doanh nghiệp bán / xuất hàng ra nước ngoài'}
+              ? '🇻🇳 Tuyến bay nội địa'
+              : '🛫 Bán / xuất khẩu ra nước ngoài'}
           </span>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
@@ -233,11 +238,11 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
                 type="button"
                 key={item.role}
                 onClick={() => updateSpec('tradeRole', item.role as any)}
-                className={`p-2.5 rounded-2xl border text-left cursor-pointer transition-all ${
+                className={`p-2.5 rounded-xl border text-left cursor-pointer transition-all ${
                   isSelected
                     ? isExpress
-                      ? 'border-amber-500 bg-amber-50/80 ring-2 ring-amber-500/25 font-bold text-amber-950 shadow-2xs'
-                      : 'border-sky-600 bg-sky-50/80 ring-2 ring-sky-500/25 font-bold text-sky-950 shadow-2xs'
+                      ? 'border-amber-500 bg-amber-50/70 font-bold text-amber-950 shadow-2xs'
+                      : 'border-sky-600 bg-sky-50/70 font-bold text-sky-950 shadow-2xs'
                     : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
                 }`}
               >
@@ -262,7 +267,7 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
       {isCargo && (
         <div className="space-y-4 animate-in fade-in duration-150">
           {/* Movement Terms: Receiving & Delivery Terms */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
                 <span className="flex items-center gap-1.5">
@@ -276,7 +281,7 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
               <select
                 value={specs.originServiceTerm || 'AIRPORT'}
                 onChange={(e) => updateSpec('originServiceTerm', e.target.value as any)}
-                className="w-full px-3.5 py-2.5 text-xs bg-white border border-sky-300 rounded-xl focus:border-sky-500 font-bold text-slate-900 shadow-2xs cursor-pointer"
+                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-sky-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
               >
                 <option value="Door">🚪 Door (Lấy tận kho người gửi / Shipper)</option>
                 <option value="Airport">✈️ Airport (Nhận tại ga hàng hóa sân bay đi / AOD)</option>
@@ -296,7 +301,7 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
               <select
                 value={specs.destinationServiceTerm || 'AIRPORT'}
                 onChange={(e) => updateSpec('destinationServiceTerm', e.target.value as any)}
-                className="w-full px-3.5 py-2.5 text-xs bg-white border border-indigo-300 rounded-xl focus:border-indigo-500 font-bold text-slate-900 shadow-2xs cursor-pointer"
+                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
               >
                 <option value="Door">🚪 Door (Giao tận kho người nhận / Consignee)</option>
                 <option value="Airport">✈️ Airport (Giao tại ga hàng hóa sân bay đến / AOA)</option>
@@ -305,9 +310,9 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
           </div>
 
           {/* Warehouse Addresses: Shipper & Consignee */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+              <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
                 <MapPin className="w-3.5 h-3.5 text-sky-600" />
                 <span>Địa Chỉ Kho Lấy Hàng (Shipper Warehouse / Pickup Address)</span>
               </label>
@@ -316,12 +321,12 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
                 value={specs.pickupAddress || ''}
                 onChange={(e) => updateSpec('pickupAddress', e.target.value)}
                 placeholder="VD: Kho KCN Tân Bình, Tây Thạnh, Tân Phú, TP.HCM..."
-                className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-sky-500 font-medium text-slate-800"
+                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-sky-500 text-slate-900 shadow-2xs"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+              <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
                 <MapPin className="w-3.5 h-3.5 text-indigo-600" />
                 <span>Địa Chỉ Giao Hàng (Consignee Warehouse / Delivery Address)</span>
               </label>
@@ -330,15 +335,15 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
                 value={specs.deliveryAddress || ''}
                 onChange={(e) => updateSpec('deliveryAddress', e.target.value)}
                 placeholder="VD: 12-4 Haneda Airport Blvd, Ota City, Tokyo, Japan..."
-                className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-medium text-slate-800"
+                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 text-slate-900 shadow-2xs"
               />
             </div>
           </div>
 
           {/* Airports (AOD & AOA) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+              <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
                 <Plane className="w-3.5 h-3.5 text-sky-600" />
                 <span>Sân Bay Đi (AOD - Airport of Departure) *</span>
               </label>
@@ -351,12 +356,12 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
                   updateSpec('originAirport', e.target.value);
                 }}
                 placeholder="VD: SGN (Sân bay Tân Sơn Nhất, TP.HCM) hoặc HAN (Nội Bài)"
-                className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-sky-500 focus:outline-hidden font-medium text-slate-800"
+                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-sky-500 text-slate-900 shadow-2xs"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+              <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
                 <Plane className="w-3.5 h-3.5 text-indigo-600" />
                 <span>Sân Bay Đến (AOA - Airport of Arrival) *</span>
               </label>
@@ -369,7 +374,7 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
                   updateSpec('destinationAirport', e.target.value);
                 }}
                 placeholder="VD: NRT (Tokyo Narita) hoặc FRA (Frankfurt), LAX (Los Angeles)"
-                className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-sky-500 focus:outline-hidden font-medium text-slate-800"
+                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 text-slate-900 shadow-2xs"
               />
             </div>
           </div>
@@ -382,8 +387,8 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
       {isExpress && (
         <div className="space-y-4 animate-in fade-in duration-150">
           {/* Express Package Classification */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
+          <div className="space-y-1.5">
+            <label className="block text-xs font-bold text-slate-800">
               Phân Loại Bưu Kiện Chuyển Phát (Express Package Type) *
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -405,8 +410,8 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
                     key={item.id}
                     className={`p-3 rounded-xl border cursor-pointer flex items-start gap-2.5 transition-all ${
                       isSelected
-                        ? 'border-amber-500 bg-amber-50/70 ring-2 ring-amber-500/20 text-amber-950'
-                        : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'
+                        ? 'border-amber-500 bg-amber-50/70 text-amber-950 shadow-2xs'
+                        : 'border-slate-200 bg-white hover:border-slate-300 text-slate-700'
                     }`}
                   >
                     <input
@@ -427,17 +432,17 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
           </div>
 
           {/* Door-to-Door Pickup & Delivery with Postal Code */}
-          <div className="p-3.5 bg-amber-50/40 border border-amber-200/80 rounded-2xl space-y-3">
-            <span className="text-xs font-extrabold text-amber-950 uppercase tracking-wider flex items-center gap-1.5">
+          <div className="space-y-3 pt-1">
+            <span className="text-xs font-bold text-amber-950 uppercase tracking-wider flex items-center gap-1.5">
               <MapPin className="w-3.5 h-3.5 text-amber-600" />
               <span>Địa Chỉ Giao Nhận Tận Tay (Door-to-Door Courier)</span>
             </span>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Pickup info */}
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
                     Địa Chỉ Lấy Hàng Tận Nơi (Pickup Address) *
                   </label>
                   <input
@@ -449,11 +454,11 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
                       updateSpec('pickupAddress', e.target.value);
                     }}
                     placeholder="VD: Số 45 Lê Duẩn, P. Bến Nghé, Quận 1, TP.HCM..."
-                    className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-300 rounded-xl focus:border-amber-500 font-medium text-slate-900 shadow-2xs"
+                    className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-amber-500 text-slate-900 shadow-2xs"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-semibold text-slate-600 mb-0.5">
+                  <label className="block text-[11px] font-semibold text-slate-600 mb-1">
                     Mã Bưu Chính Đi (Origin Zip/Postal Code)
                   </label>
                   <input
@@ -461,15 +466,15 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
                     value={specs.originPostalCode || ''}
                     onChange={(e) => updateSpec('originPostalCode', e.target.value)}
                     placeholder="VD: 700000 (TP.HCM) hoặc 100000 (Hà Nội)"
-                    className="w-full px-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:border-amber-500 font-mono"
+                    className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-amber-500 font-mono shadow-2xs"
                   />
                 </div>
               </div>
 
               {/* Delivery info */}
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
                     Địa Chỉ Giao Hàng Tận Nơi (Delivery Address) *
                   </label>
                   <input
@@ -481,11 +486,11 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
                       updateSpec('deliveryAddress', e.target.value);
                     }}
                     placeholder="VD: 100-0001 Chiyoda-ku, Tokyo, Japan (hoặc bang/thành phố đích)..."
-                    className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-300 rounded-xl focus:border-amber-500 font-medium text-slate-900 shadow-2xs"
+                    className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-amber-500 text-slate-900 shadow-2xs"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-semibold text-slate-600 mb-0.5">
+                  <label className="block text-[11px] font-semibold text-slate-600 mb-1">
                     Mã Bưu Chính Đến (Destination Zip/Postal Code) *
                   </label>
                   <input
@@ -493,7 +498,7 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
                     value={specs.destinationPostalCode || ''}
                     onChange={(e) => updateSpec('destinationPostalCode', e.target.value)}
                     placeholder="VD: 90001 (US), 100-0001 (JP), 04510 (KR)..."
-                    className="w-full px-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:border-amber-500 font-mono"
+                    className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-amber-500 font-mono shadow-2xs"
                   />
                 </div>
               </div>
@@ -505,21 +510,21 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
       {/* ========================================================================= */}
       {/* SECTION C: PACKAGE SPECS, DIMENSIONS & CHARGEABLE WEIGHT CALCULATION */}
       {/* ========================================================================= */}
-      <div className={`p-3.5 rounded-2xl border ${isExpress ? 'bg-amber-50/30 border-amber-200' : 'bg-sky-50/30 border-sky-200'} space-y-3`}>
+      <div className="space-y-4 pt-1">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-extrabold uppercase tracking-wider flex items-center gap-1.5 text-slate-900">
+          <span className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 text-slate-800">
             <Scale className="w-3.5 h-3.5 text-indigo-600" />
             <span>Khai Báo Kích Thước & Trọng Lượng Tính Cước</span>
           </span>
-          <span className="text-[10.5px] font-bold px-2 py-0.5 rounded-md bg-white border border-slate-200 text-slate-700">
-            {isExpress ? '⚡ Chuẩn Courier: 1 m³ = 200 Kg (L×W×H / 5.000)' : '✈️ Chuẩn IATA: 1 m³ = 167 Kg (L×W×H / 6.000)'}
+          <span className="text-[11px] font-medium text-slate-500">
+            {isExpress ? 'Tỷ lệ quy đổi Courier: 1 m³ = 200 kg (/5.000)' : 'Tỷ lệ quy đổi IATA: 1 m³ = 167 kg (/6.000)'}
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
-              {isExpress ? 'Số Lượng Gói / Hộp *' : 'Số Kiện Hàng (Pieces) *'}
+              {isExpress ? 'Số Lượng Hộp *' : 'Số Kiện Hàng *'}
             </label>
             <input
               type="text"
@@ -528,8 +533,8 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
                 const val = e.target.value.replace(/\D/g, '');
                 updateSpec('packageCount', val ? Number(val) : undefined);
               }}
-              placeholder={isExpress ? 'VD: 2 hộp' : 'VD: 10 kiện'}
-              className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-300 rounded-xl focus:border-indigo-500 font-bold text-slate-900 text-center shadow-2xs"
+              placeholder={isExpress ? 'VD: 2' : 'VD: 10'}
+              className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-bold text-slate-900 text-center shadow-2xs"
             />
           </div>
 
@@ -542,13 +547,13 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
               value={specs.dimensionsCm || ''}
               onChange={(e) => updateSpec('dimensionsCm', e.target.value)}
               placeholder="VD: 50x40x30"
-              className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-300 rounded-xl focus:border-indigo-500 font-mono text-center shadow-2xs font-bold"
+              className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-mono text-center shadow-2xs font-bold"
             />
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Tổng Cân Nặng Thực (Gross Kg) *
+              Tổng Trọng Lượng Thực (Gross Kg) *
             </label>
             <input
               type="text"
@@ -558,23 +563,23 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
                 updateSpec('grossWeightKgs', val ? Number(val) : undefined);
               }}
               placeholder="VD: 25"
-              className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-300 rounded-xl focus:border-indigo-500 font-bold text-slate-900 text-center shadow-2xs"
+              className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-bold text-slate-900 text-center shadow-2xs"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-indigo-950 mb-1 flex items-center justify-between">
-              <span>Trọng Lượng Tính Cước (CW)</span>
+            <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center justify-between">
+              <span>Trọng Lượng Tính Cước</span>
               <span className="text-[10px] text-indigo-600 font-normal">Tự tính</span>
             </label>
-            <div className="w-full px-3.5 py-2.5 text-xs bg-indigo-100/70 border border-indigo-200 rounded-xl font-black text-indigo-950 text-center flex items-center justify-center">
+            <div className="w-full h-10 px-3.5 text-xs bg-indigo-50 border border-indigo-200 rounded-xl font-extrabold text-indigo-950 text-center flex items-center justify-center">
               {specs.chargeableWeightKgs ? `${specs.chargeableWeightKgs.toLocaleString('vi-VN')} Kg CW` : '-- Kg CW'}
             </div>
           </div>
         </div>
 
         {/* Stackable Toggle */}
-        <div className="flex items-center gap-2 p-2.5 bg-white border border-slate-200 rounded-xl shadow-2xs">
+        <div className="flex items-center gap-2 h-10 px-3.5 bg-white border border-slate-200 rounded-xl shadow-2xs">
           <input
             type="checkbox"
             id="airStackableCheck"
@@ -583,57 +588,55 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
             className="rounded-sm text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer"
           />
           <label htmlFor="airStackableCheck" className="text-xs font-semibold text-slate-800 cursor-pointer">
-            Hàng có thể chồng tầng (Stackable) <span className="text-slate-500 font-normal">(Nếu không thể chồng tầng, cước đóng mâm ULD / hầm hàng có thể tính thêm hệ số sàn máy bay)</span>
+            Hàng có thể chồng tầng (Stackable) <span className="text-slate-500 font-normal">(Nếu không chồng tầng, cước mâm ULD có thể tính thêm phụ phí diện tích sàn)</span>
           </label>
         </div>
 
         {/* Air Shipment Count & Frequency */}
-        <div className="pt-2 border-t border-slate-200/80">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                1. Số Lượng Chuyến Hàng Không *
-              </label>
-              <input
-                type="text"
-                inputMode="numeric"
-                value={specs.shipmentCount !== undefined && specs.shipmentCount !== null ? (specs.shipmentCount === 0 ? '' : specs.shipmentCount) : 1}
-                onChange={(e) => {
-                  const raw = e.target.value.replace(/\D/g, '');
-                  updateSpec('shipmentCount', raw === '' ? 0 : parseInt(raw, 10));
-                }}
-                onBlur={() => {
-                  if (!specs.shipmentCount || specs.shipmentCount < 1) {
-                    updateSpec('shipmentCount', 1);
-                  }
-                }}
-                placeholder="VD: 1, 2, 5, 10..."
-                className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-300 rounded-xl focus:border-indigo-500 font-bold text-slate-900 shadow-2xs"
-              />
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">
+              Số Lượng Chuyến Hàng Không *
+            </label>
+            <input
+              type="text"
+              inputMode="numeric"
+              value={specs.shipmentCount !== undefined && specs.shipmentCount !== null ? (specs.shipmentCount === 0 ? '' : specs.shipmentCount) : ''}
+              onChange={(e) => {
+                const raw = e.target.value.replace(/\D/g, '');
+                updateSpec('shipmentCount', raw === '' ? 0 : parseInt(raw, 10));
+              }}
+              onBlur={() => {
+                if (!specs.shipmentCount || specs.shipmentCount < 1) {
+                  updateSpec('shipmentCount', 1);
+                }
+              }}
+              placeholder="VD: 1"
+              className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-bold text-slate-900 shadow-2xs"
+            />
+          </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                2. Đơn Vị (Tần Suất Vận Chuyển) *
-              </label>
-              <select
-                value={specs.frequencyUnit || 'Chuyến / Tháng'}
-                onChange={(e) => updateSpec('frequencyUnit', e.target.value)}
-                className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-300 rounded-xl focus:border-indigo-500 font-bold text-slate-900 shadow-2xs cursor-pointer"
-              >
-                <option value="Chuyến / Ngày">📅 Ngày (Chuyến / Ngày)</option>
-                <option value="Chuyến / Tuần">📆 Tuần (Chuyến / Tuần)</option>
-                <option value="Chuyến / Tháng">🗓️ Tháng (Chuyến / Tháng)</option>
-                <option value="Chuyến / Năm">📈 Năm (Chuyến / Năm)</option>
-                <option value="Chuyến (Một lần)">⚡ Chuyến (Một lần / Spot)</option>
-              </select>
-            </div>
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">
+              Đơn Vị (Tần Suất Vận Chuyển) *
+            </label>
+            <select
+              value={specs.frequencyUnit || 'Chuyến / Tháng'}
+              onChange={(e) => updateSpec('frequencyUnit', e.target.value)}
+              className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
+            >
+              <option value="Chuyến / Ngày">Chuyến / Ngày</option>
+              <option value="Chuyến / Tuần">Chuyến / Tuần</option>
+              <option value="Chuyến / Tháng">Chuyến / Tháng</option>
+              <option value="Chuyến / Năm">Chuyến / Năm</option>
+              <option value="Chuyến (Một lần)">Chuyến (Một lần / Spot)</option>
+            </select>
           </div>
         </div>
 
         {/* Extra Courier Features */}
         {isExpress && (
-          <div className="pt-2 border-t border-amber-200/60 flex flex-wrap gap-4 text-xs">
+          <div className="pt-2 border-t border-slate-200 flex flex-wrap gap-4 text-xs">
             <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-800">
               <input
                 type="checkbox"

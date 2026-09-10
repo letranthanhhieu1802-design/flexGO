@@ -749,7 +749,7 @@ interface SurchargesSectionProps {
   serviceType: ServiceType;
   warehouseType?: string;
   cargoClassification?: string;
-  quotationScope: QuotationScope;
+  quotationScope?: QuotationScope | '';
   onChangeQuotationScope: (scope: QuotationScope) => void;
   selectedSurcharges: string[];
   onChangeSelectedSurcharges: (surcharges: string[]) => void;
@@ -837,98 +837,6 @@ export const SurchargesSection: React.FC<SurchargesSectionProps> = ({
 
   return (
     <div className="space-y-4 animate-in fade-in duration-200">
-      {/* Scope Header Card */}
-      <div className="p-4 bg-slate-50/90 rounded-2xl border border-slate-200 space-y-3.5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div>
-            <span className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-              <Receipt className="w-4 h-4 text-indigo-600" />
-              <span>Yêu Cầu Hình Thức Báo Giá (Quotation Scope)</span>
-            </span>
-            <p className="text-[11px] text-slate-500 mt-0.5">
-              {serviceType === 'Warehousing'
-                ? 'Quy định cách nhà cung cấp kho bãi / 3PL chào giá nhằm đảm bảo tính minh bạch và dễ so sánh đối chiếu.'
-                : 'Quy định cách nhà vận tải chào giá nhằm đảm bảo tính minh bạch và dễ so sánh đối chiếu.'}
-            </p>
-          </div>
-          <span className={`text-xs px-2.5 py-1 rounded-lg font-bold border shrink-0 ${
-            quotationScope === 'ALL_IN'
-              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-              : 'bg-blue-50 text-blue-800 border-blue-200'
-          }`}>
-            {quotationScope === 'ALL_IN' ? '✓ Trọn Gói All-in' : '📋 Tách Mục Itemized'}
-          </span>
-        </div>
-
-        {/* 2 Scope Options */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {/* Option 1: ALL-IN */}
-          <button
-            type="button"
-            onClick={() => onChangeQuotationScope('ALL_IN')}
-            className={`p-3.5 rounded-2xl border text-left cursor-pointer transition-all ${
-              quotationScope === 'ALL_IN'
-                ? 'border-emerald-500 bg-emerald-50/70 ring-2 ring-emerald-500/25 shadow-xs'
-                : 'border-slate-200 bg-white hover:border-slate-300'
-            }`}
-          >
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <span className={`w-4 h-4 rounded-full flex items-center justify-center border ${
-                  quotationScope === 'ALL_IN' ? 'border-emerald-600 bg-emerald-600 text-white' : 'border-slate-300 bg-white'
-                }`}>
-                  {quotationScope === 'ALL_IN' && <Check className="w-3 h-3 stroke-[3]" />}
-                </span>
-                <span className="text-xs font-black text-slate-900">
-                  Báo Giá Trọn Gói (All-in Rate)
-                </span>
-              </div>
-              <span className="text-[10px] font-black uppercase px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-md">
-                Khuyên Dùng
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-600 mt-2 leading-relaxed pl-6">
-              {serviceType === 'Warehousing' ? (
-                <>Bao gồm <strong>Phí lưu kho chính</strong> + Đầy đủ phụ phí bốc xếp, quản lý được tích chọn bên dưới. <strong>Không phát sinh chi phí ẩn</strong> ngoài thỏa thuận.</>
-              ) : (
-                <>Bao gồm <strong>Cước vận chuyển chính</strong> + Đầy đủ phụ phí được tích chọn bên dưới. <strong>Không phát sinh chi phí ẩn</strong> ngoài thỏa thuận.</>
-              )}
-            </p>
-          </button>
-
-          {/* Option 2: ITEMIZED */}
-          <button
-            type="button"
-            onClick={() => onChangeQuotationScope('ITEMIZED')}
-            className={`p-3.5 rounded-2xl border text-left cursor-pointer transition-all ${
-              quotationScope === 'ITEMIZED'
-                ? 'border-blue-500 bg-blue-50/70 ring-2 ring-blue-500/25 shadow-xs'
-                : 'border-slate-200 bg-white hover:border-slate-300'
-            }`}
-          >
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <span className={`w-4 h-4 rounded-full flex items-center justify-center border ${
-                  quotationScope === 'ITEMIZED' ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-300 bg-white'
-                }`}>
-                  {quotationScope === 'ITEMIZED' && <Check className="w-3 h-3 stroke-[3]" />}
-                </span>
-                <span className="text-xs font-black text-slate-900">
-                  Báo Giá Tách Dòng (Itemized Surcharges)
-                </span>
-              </div>
-            </div>
-            <p className="text-[11px] text-slate-600 mt-2 leading-relaxed pl-6">
-              {serviceType === 'Warehousing'
-                ? 'Nhà cung cấp tách riêng phí lưu kho và liệt kê biểu phí bốc xếp nâng hạ, quản lý WMS, phụ phí vận hành chi tiết từng đầu mục.'
-                : serviceType.startsWith('Sea')
-                ? 'Nhà cung cấp tách riêng cước chính và liệt kê biểu phí phụ phí chi tiết từng đầu mục theo hóa đơn cảng/hãng tàu.'
-                : 'Nhà cung cấp tách riêng cước chính và liệt kê biểu phí phụ phí chi tiết từng đầu mục theo hóa đơn vận hành thực tế.'}
-            </p>
-          </button>
-        </div>
-      </div>
-
       {/* Surcharges Checklist Box */}
       <div className="p-4 bg-white rounded-2xl border border-slate-200/90 shadow-2xs space-y-3.5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-slate-100">

@@ -148,35 +148,20 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
   };
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-200">
-      {/* Service Header Info */}
-      <div className="p-3.5 bg-cyan-50/70 border border-cyan-200/80 rounded-2xl flex items-start gap-3">
-        <div className="p-2 rounded-xl bg-cyan-700 text-white shrink-0">
-          <Ship className="w-5 h-5" />
-        </div>
-        <div className="text-xs text-cyan-950 flex-1">
-          <span className="font-bold block text-sm text-cyan-900">
-            Dịch Vụ Vận Tải Đường Biển Quốc Tế & Nội Địa (Ocean Freight)
-          </span>
-          <p className="text-cyan-800/80 mt-0.5">
-            Lựa chọn phương thức nguyên container FCL hoặc hàng lẻ gom kho CFS. Cung cấp cảng bốc POL, cảng dỡ POD và điều kiện Incoterms 2020.
-          </p>
-        </div>
-      </div>
-
-      {/* Trade Role Selection: Xuất Khẩu vs Nhập Khẩu vs Nội Địa */}
-      <div>
-        <div className="flex items-center justify-between mb-1.5">
-          <label className="block text-xs font-bold text-slate-700 flex items-center gap-1.5">
+    <div className="space-y-5 animate-in fade-in duration-200">
+      {/* Trade Role Selection */}
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between">
+          <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
             <ArrowLeftRight className="w-3.5 h-3.5 text-cyan-700" />
             <span>Vai Trò Của Doanh Nghiệp Trong Lô Hàng (Trade Role) *</span>
           </label>
-          <span className="text-[10px] font-semibold text-cyan-800 bg-cyan-100/70 px-2 py-0.5 rounded-md">
+          <span className="text-[10px] font-semibold text-cyan-800 bg-cyan-50 px-2 py-0.5 rounded-md border border-cyan-100">
             {specs.tradeRole === 'Nhập khẩu (Import)'
-              ? '🛬 Doanh nghiệp mua / nhập hàng về VN'
+              ? '🛬 Mua / nhập hàng về VN'
               : specs.tradeRole === 'Nội địa (Domestic)'
-              ? '🇻🇳 Vận tải đường biển nội địa Bắc - Nam'
-              : '🛫 Doanh nghiệp bán / xuất hàng ra nước ngoài'}
+              ? '🇻🇳 Vận tải ven biển nội địa'
+              : '🛫 Bán / xuất khẩu ra quốc tế'}
           </span>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
@@ -203,9 +188,9 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
                 type="button"
                 key={item.role}
                 onClick={() => updateSpec('tradeRole', item.role as any)}
-                className={`p-2.5 rounded-2xl border text-left cursor-pointer transition-all ${
+                className={`p-2.5 rounded-xl border text-left cursor-pointer transition-all ${
                   isSelected
-                    ? 'border-cyan-600 bg-cyan-50/80 ring-2 ring-cyan-500/25 font-bold text-cyan-950 shadow-2xs'
+                    ? 'border-cyan-600 bg-cyan-50/70 font-bold text-cyan-950 shadow-2xs'
                     : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
                 }`}
               >
@@ -226,13 +211,16 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
 
       {/* Mode Selector: FCL vs LCL */}
       <div className="space-y-2">
+        <label className="block text-xs font-bold text-slate-800">
+          Hình Thức Đóng Hàng Biển (FCL / LCL) *
+        </label>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <button
             type="button"
             onClick={() => updateSpec('mode', 'FCL (Full Container)')}
-            className={`p-3 rounded-2xl border text-left cursor-pointer transition-all ${
+            className={`p-3 rounded-xl border text-left cursor-pointer transition-all ${
               isFCL
-                ? 'border-cyan-600 bg-cyan-50/70 ring-2 ring-cyan-500/20 font-bold text-cyan-950'
+                ? 'border-cyan-600 bg-cyan-50/70 font-bold text-cyan-950 shadow-2xs'
                 : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
             }`}
           >
@@ -240,7 +228,7 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
               <span className="text-xs font-bold">🚢 FCL (Full Container Load)</span>
               {isFCL && <span className="text-[10px] bg-cyan-600 text-white px-2 py-0.5 rounded-md font-bold">Đang chọn</span>}
             </div>
-            <p className="text-[11px] text-slate-500 mt-1 font-normal">
+            <p className="text-[11px] text-slate-500 mt-0.5 font-normal">
               Nguyên cont 20ft / 40ft / 40HC / Reefer
             </p>
           </button>
@@ -258,11 +246,11 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
                 ? `Hàng ${cargoClassification === 'Reefer' ? 'Lạnh (Reefer)' : 'Nguy Hiểm (DG/IMO)'} bắt buộc vận chuyển FCL nguyên container, không hỗ trợ ghép LCL CFS`
                 : 'Gom hàng lẻ CFS tính theo CBM / Tấn'
             }
-            className={`p-3 rounded-2xl border text-left transition-all ${
+            className={`p-3 rounded-xl border text-left transition-all ${
               isLclDisabled
                 ? 'border-slate-200 bg-slate-100/80 opacity-60 cursor-not-allowed text-slate-400'
                 : !isFCL
-                ? 'border-cyan-600 bg-cyan-50/70 ring-2 ring-cyan-500/20 font-bold text-cyan-950 cursor-pointer'
+                ? 'border-cyan-600 bg-cyan-50/70 font-bold text-cyan-950 cursor-pointer shadow-2xs'
                 : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 cursor-pointer'
             }`}
           >
@@ -278,7 +266,7 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
                 </span>
               ) : null}
             </div>
-            <p className={`text-[11px] mt-1 font-normal ${isLclDisabled ? 'text-rose-600/90 font-medium' : 'text-slate-500'}`}>
+            <p className={`text-[11px] mt-0.5 font-normal ${isLclDisabled ? 'text-rose-600/90 font-medium' : 'text-slate-500'}`}>
               {isLclDisabled
                 ? `Hàng ${cargoClassification === 'Reefer' ? 'Lạnh' : 'Nguy Hiểm'} bắt buộc đi FCL nguyên cont`
                 : 'Gom hàng lẻ CFS tính theo CBM / Tấn'}
@@ -297,7 +285,7 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
       </div>
 
       {/* Movement Terms: Receiving & Delivery Terms */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
             <span className="flex items-center gap-1.5">
@@ -311,7 +299,7 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
           <select
             value={specs.originServiceTerm || (isFCL ? 'CY' : 'CFS')}
             onChange={(e) => updateSpec('originServiceTerm', e.target.value as any)}
-            className="w-full px-3.5 py-2.5 text-xs bg-white border border-cyan-300 rounded-xl focus:border-cyan-500 font-bold text-slate-900 shadow-2xs cursor-pointer"
+            className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-cyan-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
           >
             <option value="Door">🚪 Door (Nhận tại kho người gửi / Shipper)</option>
             <option value="CY">⚓ CY (Nhận tại bãi container cảng bốc / CY)</option>
@@ -332,7 +320,7 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
           <select
             value={specs.destinationServiceTerm || (isFCL ? 'CY' : 'CFS')}
             onChange={(e) => updateSpec('destinationServiceTerm', e.target.value as any)}
-            className="w-full px-3.5 py-2.5 text-xs bg-white border border-rose-300 rounded-xl focus:border-rose-500 font-bold text-slate-900 shadow-2xs cursor-pointer"
+            className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-rose-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
           >
             <option value="Door">🚪 Door (Giao tại kho người nhận / Consignee)</option>
             <option value="CY">⚓ CY (Giao tại bãi container cảng dỡ / CY)</option>
@@ -342,9 +330,9 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
       </div>
 
       {/* Warehouse Addresses: Pickup & Delivery */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+          <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
             <MapPin className="w-3.5 h-3.5 text-cyan-600" />
             <span>Địa Chỉ Kho Lấy Hàng (Shipper Warehouse / Pickup Address)</span>
           </label>
@@ -353,12 +341,12 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
             value={specs.pickupAddress || ''}
             onChange={(e) => updateSpec('pickupAddress', e.target.value)}
             placeholder="VD: Kho KCN Sóng Thần 1, Dĩ An, Bình Dương (hoặc nhà máy người bán)..."
-            className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-cyan-500 focus:outline-hidden"
+            className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-cyan-500 text-slate-900 shadow-2xs"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+          <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
             <MapPin className="w-3.5 h-3.5 text-rose-600" />
             <span>Địa Chỉ Giao Hàng (Consignee Warehouse / Delivery Address)</span>
           </label>
@@ -367,15 +355,15 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
             value={specs.deliveryAddress || ''}
             onChange={(e) => updateSpec('deliveryAddress', e.target.value)}
             placeholder="VD: 1420 Harbor Blvd, Long Beach, CA 90802, USA (hoặc kho người nhận)..."
-            className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-cyan-500 focus:outline-hidden"
+            className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-rose-500 text-slate-900 shadow-2xs"
           />
         </div>
       </div>
 
       {/* Ports / CFS Route */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+          <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
             {isFCL ? (
               <>
                 <Anchor className="w-3.5 h-3.5 text-cyan-600" />
@@ -398,12 +386,12 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
                 ? 'VD: Cảng Cát Lái, Cảng Cái Mép, Cảng Hải Phòng...'
                 : 'VD: Kho CFS Cát Lái, CFS Tân Cảng Sóng Thần, CFS Hải Phòng...'
             }
-            className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-cyan-500 focus:outline-hidden"
+            className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-cyan-500 text-slate-900 shadow-2xs"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+          <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
             {isFCL ? (
               <>
                 <Anchor className="w-3.5 h-3.5 text-rose-600" />
@@ -426,23 +414,30 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
                 ? 'VD: Port of Los Angeles (USLAX), Hamburg, Singapore...'
                 : 'VD: Kho CFS Port of Los Angeles (USLAX), CFS Singapore, CFS Hamburg...'
             }
-            className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-cyan-500 focus:outline-hidden"
+            className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-cyan-500 text-slate-900 shadow-2xs"
           />
         </div>
       </div>
 
       {/* Container Type, Dem/Det & Quantity/Frequency for FCL */}
       {isFCL && (
-        <div className="p-4 bg-cyan-50/50 border border-cyan-200/80 rounded-2xl space-y-3.5">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+        <div className="space-y-4 pt-1">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+              <Ship className="w-3.5 h-3.5 text-cyan-700" />
+              <span>Cấu Hình Vỏ Container & Dem/Det (FCL)</span>
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
                 Loại Vỏ Container *
               </label>
               <select
                 value={specs.containerType || '40ft High Cube (40HC)'}
                 onChange={(e) => updateSpec('containerType', e.target.value as any)}
-                className="w-full px-3.5 py-2.5 text-xs bg-white border border-cyan-300 rounded-xl focus:border-cyan-500 font-bold text-cyan-900 shadow-2xs"
+                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-cyan-500 font-semibold text-cyan-950 shadow-2xs cursor-pointer"
               >
                 <option value="20ft General (20DC)">20ft General (20DC)</option>
                 <option value="40ft General (40DC)">40ft General (40DC)</option>
@@ -455,13 +450,13 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
-                Thời Gian Free Dem/Det Yêu Cầu
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Thời Gian Miễn Phí Lưu Cont / Bãi (Free Dem/Det)
               </label>
               <select
                 value={specs.freeDemDetDaysRequested || 14}
                 onChange={(e) => updateSpec('freeDemDetDaysRequested', parseInt(e.target.value) || 14)}
-                className="w-full px-3.5 py-2.5 text-xs bg-white border border-cyan-300 rounded-xl focus:border-cyan-500 font-semibold shadow-2xs"
+                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-cyan-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
               >
                 <option value={7}>7 Ngày (Chuẩn hãng tàu)</option>
                 <option value={14}>14 Ngày Free Dem/Det (Khuyên dùng)</option>
@@ -472,46 +467,44 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
           </div>
 
           {/* FCL Container Quantity & Frequency */}
-          <div className="pt-2 border-t border-cyan-200/70">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  1. Số Lượng Container Cần Thuê *
-                </label>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  value={specs.containerCount !== undefined && specs.containerCount !== null ? (specs.containerCount === 0 ? '' : specs.containerCount) : 1}
-                  onChange={(e) => {
-                    const raw = e.target.value.replace(/\D/g, '');
-                    updateSpec('containerCount', raw === '' ? 0 : parseInt(raw, 10));
-                  }}
-                  onBlur={() => {
-                    if (!specs.containerCount || specs.containerCount < 1) {
-                      updateSpec('containerCount', 1);
-                    }
-                  }}
-                  placeholder="VD: 1, 5, 10, 30..."
-                  className="w-full px-3.5 py-2.5 text-xs bg-white border border-cyan-300 rounded-xl focus:border-cyan-500 font-bold text-slate-900 shadow-2xs"
-                />
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Số Lượng Container Cần Thuê *
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={specs.containerCount !== undefined && specs.containerCount !== null ? (specs.containerCount === 0 ? '' : specs.containerCount) : ''}
+                onChange={(e) => {
+                  const raw = e.target.value.replace(/\D/g, '');
+                  updateSpec('containerCount', raw === '' ? 0 : parseInt(raw, 10));
+                }}
+                onBlur={() => {
+                  if (!specs.containerCount || specs.containerCount < 1) {
+                    updateSpec('containerCount', 1);
+                  }
+                }}
+                placeholder="VD: 1"
+                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-cyan-500 font-bold text-slate-900 shadow-2xs"
+              />
+            </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  2. Đơn Vị (Tần Suất Vận Chuyển) *
-                </label>
-                <select
-                  value={specs.containerCountUnit || 'Container / Tháng'}
-                  onChange={(e) => updateSpec('containerCountUnit', e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-xs bg-white border border-cyan-300 rounded-xl focus:border-cyan-500 font-bold text-slate-900 shadow-2xs cursor-pointer"
-                >
-                  <option value="Container / Ngày">📅 Ngày (Container / Ngày)</option>
-                  <option value="Container / Tuần">📆 Tuần (Container / Tuần)</option>
-                  <option value="Container / Tháng">🗓️ Tháng (Container / Tháng)</option>
-                  <option value="Container / Năm">📈 Năm (Container / Năm)</option>
-                  <option value="Container (Một lần)">⚡ Container (Một lần / Spot)</option>
-                </select>
-              </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Đơn Vị (Tần Suất Vận Chuyển) *
+              </label>
+              <select
+                value={specs.containerCountUnit || 'Container / Tháng'}
+                onChange={(e) => updateSpec('containerCountUnit', e.target.value)}
+                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-cyan-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
+              >
+                <option value="Container / Ngày">Container / Ngày</option>
+                <option value="Container / Tuần">Container / Tuần</option>
+                <option value="Container / Tháng">Container / Tháng</option>
+                <option value="Container / Năm">Container / Năm</option>
+                <option value="Container (Một lần)">Container (Một lần / Spot)</option>
+              </select>
             </div>
           </div>
         </div>
@@ -519,49 +512,60 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
 
       {/* LCL CFS CONFIGURATION (Dimensions, Weight, CBM, Chargeable Weight & Stackable) */}
       {!isFCL && (
-        <div className="p-4 bg-cyan-50/60 border border-cyan-200 rounded-2xl space-y-3.5 animate-in fade-in duration-150">
+        <div className="space-y-4 pt-1 animate-in fade-in duration-150">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <span className="text-xs font-extrabold text-cyan-950 uppercase tracking-wider flex items-center gap-1.5">
+            <span className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
               <Box className="w-4 h-4 text-cyan-700" />
               <span>Khai Báo Kích Thước & Trọng Lượng Gom Hàng LCL (CFS)</span>
             </span>
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] text-cyan-900 bg-cyan-100 font-bold px-2 py-0.5 rounded-md">
-                1 CBM = 1.000 Kg (Chuẩn W/M Hải Vận)
-              </span>
-              <span className="text-[11px] text-slate-600 bg-white border border-cyan-200 font-semibold px-2 py-0.5 rounded-md flex items-center gap-1">
-                <Info className="w-3 h-3 text-cyan-700" />
-                Tính theo RT (Revenue Ton)
-              </span>
+            <span className="text-[11px] text-slate-500 font-medium">
+              Tỷ lệ quy đổi hải vận: 1 CBM = 1.000 kg (W/M)
+            </span>
+          </div>
+
+          {/* Row 1: LCL Pieces & Stackable */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Số Lượng Kiện / Pallet Cần Gom Ghép *
+              </label>
+              <input
+                type="text"
+                value={specs.lclPieces ? specs.lclPieces.toLocaleString('vi-VN') : ''}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, '');
+                  handleLclPiecesChange(val ? parseInt(val, 10) : 1);
+                }}
+                placeholder="VD: 4"
+                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-cyan-500 font-bold text-slate-900 shadow-2xs"
+              />
+            </div>
+
+            <div className="flex flex-col justify-end">
+              <label className="flex items-center gap-2 h-10 px-3.5 bg-white border border-slate-200 rounded-xl cursor-pointer">
+                <input
+                  type="checkbox"
+                  id="lclStackableCheck"
+                  checked={specs.lclStackable ?? true}
+                  onChange={(e) => updateSpec('lclStackable', e.target.checked)}
+                  className="rounded-sm text-cyan-600 focus:ring-cyan-500 w-4 h-4 cursor-pointer"
+                />
+                <span className="text-xs text-slate-800 font-semibold">
+                  Hàng có thể chồng tầng (Stackable)
+                </span>
+              </label>
             </div>
           </div>
 
-          {/* LCL Package Details: Number of pieces */}
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Số Lượng Kiện / Pallet Cần Gom Ghép *
-            </label>
-            <input
-              type="text"
-              value={specs.lclPieces ? specs.lclPieces.toLocaleString('vi-VN') : ''}
-              onChange={(e) => {
-                const val = e.target.value.replace(/\D/g, '');
-                handleLclPiecesChange(val ? parseInt(val, 10) : 1);
-              }}
-              placeholder="VD: 4"
-              className="w-full px-3.5 py-2 text-xs bg-white border border-cyan-300 rounded-xl focus:border-cyan-500 font-bold text-slate-900"
-            />
-          </div>
-
-          {/* Dimension Inputs (L x W x H cm) */}
-          <div className="p-3 bg-white border border-cyan-200 rounded-xl space-y-2">
+          {/* Row 2: Dimension Inputs (L x W x H cm) */}
+          <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-cyan-950">Kích Thước 1 Kiện (Dài x Rộng x Cao cm)</span>
-              <span className="text-[11px] font-normal text-slate-500">Tự động tính Tổng Thể Tích CBM</span>
+              <span className="text-xs font-semibold text-slate-700">Kích Thước 1 Kiện (Dài x Rộng x Cao cm)</span>
+              <span className="text-[11px] text-slate-400">Tự động tính Tổng Thể Tích CBM</span>
             </div>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-3">
               <div>
-                <span className="text-[10px] text-slate-500 block mb-0.5">Dài (L) cm</span>
+                <span className="text-[10px] text-slate-500 block mb-1 font-medium">Dài (L) cm</span>
                 <input
                   type="text"
                   value={specs.lclDimensions?.lengthCm ? specs.lclDimensions.lengthCm.toLocaleString('vi-VN') : ''}
@@ -569,12 +573,12 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
                     const val = e.target.value.replace(/\D/g, '');
                     handleLclDimChange('lengthCm', val ? parseInt(val, 10) : 0);
                   }}
-                  placeholder="120"
-                  className="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-center font-bold"
+                  placeholder="VD: 120"
+                  className="w-full h-10 px-3 text-xs bg-white border border-slate-200 rounded-xl text-center font-bold text-slate-900 focus:border-cyan-500 shadow-2xs"
                 />
               </div>
               <div>
-                <span className="text-[10px] text-slate-500 block mb-0.5">Rộng (W) cm</span>
+                <span className="text-[10px] text-slate-500 block mb-1 font-medium">Rộng (W) cm</span>
                 <input
                   type="text"
                   value={specs.lclDimensions?.widthCm ? specs.lclDimensions.widthCm.toLocaleString('vi-VN') : ''}
@@ -582,12 +586,12 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
                     const val = e.target.value.replace(/\D/g, '');
                     handleLclDimChange('widthCm', val ? parseInt(val, 10) : 0);
                   }}
-                  placeholder="100"
-                  className="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-center font-bold"
+                  placeholder="VD: 100"
+                  className="w-full h-10 px-3 text-xs bg-white border border-slate-200 rounded-xl text-center font-bold text-slate-900 focus:border-cyan-500 shadow-2xs"
                 />
               </div>
               <div>
-                <span className="text-[10px] text-slate-500 block mb-0.5">Cao (H) cm</span>
+                <span className="text-[10px] text-slate-500 block mb-1 font-medium">Cao (H) cm</span>
                 <input
                   type="text"
                   value={specs.lclDimensions?.heightCm ? specs.lclDimensions.heightCm.toLocaleString('vi-VN') : ''}
@@ -595,14 +599,14 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
                     const val = e.target.value.replace(/\D/g, '');
                     handleLclDimChange('heightCm', val ? parseInt(val, 10) : 0);
                   }}
-                  placeholder="150"
-                  className="w-full px-2.5 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-center font-bold"
+                  placeholder="VD: 150"
+                  className="w-full h-10 px-3 text-xs bg-white border border-slate-200 rounded-xl text-center font-bold text-slate-900 focus:border-cyan-500 shadow-2xs"
                 />
               </div>
             </div>
           </div>
 
-          {/* Weight & Stackable & Chargeable Weight Output */}
+          {/* Row 3: Weight & Calculations */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
@@ -616,7 +620,7 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
                   handleLclWeightChange(val ? parseFloat(val) : 0);
                 }}
                 placeholder="VD: 1.200"
-                className="w-full px-3 py-2 text-xs bg-white border border-cyan-300 rounded-xl focus:border-cyan-500 font-bold text-slate-900"
+                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-cyan-500 font-bold text-slate-900 shadow-2xs"
               />
             </div>
 
@@ -624,8 +628,8 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
               <label className="block text-xs font-semibold text-slate-700 mb-1">
                 Tổng Thể Tích Tính Toán (CBM)
               </label>
-              <div className="px-3 py-2 text-xs bg-cyan-100/60 border border-cyan-200 rounded-xl font-extrabold text-cyan-900">
-                {specs.lclCbm || 7.2} CBM
+              <div className="h-10 px-3.5 text-xs bg-slate-100 border border-slate-200 rounded-xl font-extrabold text-slate-800 flex items-center">
+                {specs.lclCbm || 0} CBM
               </div>
             </div>
 
@@ -633,68 +637,52 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
               <label className="block text-xs font-semibold text-slate-700 mb-1">
                 Trọng Lượng Tính Cước (Chargeable W/M)
               </label>
-              <div className="px-3 py-2 text-xs bg-indigo-100/60 border border-indigo-200 rounded-xl font-extrabold text-indigo-900 flex items-center justify-between">
-                <span>{specs.lclChargeableWeightKg ? specs.lclChargeableWeightKg.toLocaleString('vi-VN') : '7.200'} Kg</span>
-                <span className="text-[10px] text-indigo-700 font-medium">({specs.lclRevenueTon || 7.2} RT W/M)</span>
+              <div className="h-10 px-3.5 text-xs bg-cyan-50 border border-cyan-200 rounded-xl font-extrabold text-cyan-900 flex items-center justify-between">
+                <span>{specs.lclChargeableWeightKg ? specs.lclChargeableWeightKg.toLocaleString('vi-VN') : '0'} Kg</span>
+                <span className="text-[10px] text-cyan-700 font-normal">({specs.lclRevenueTon || 0} RT W/M)</span>
               </div>
             </div>
           </div>
 
-          {/* Stackable Toggle */}
-          <div className="flex items-center gap-2 p-2.5 bg-white border border-cyan-200 rounded-xl">
-            <input
-              type="checkbox"
-              id="lclStackableCheck"
-              checked={specs.lclStackable ?? true}
-              onChange={(e) => updateSpec('lclStackable', e.target.checked)}
-              className="rounded-sm text-cyan-600 focus:ring-cyan-500 w-4 h-4 cursor-pointer"
-            />
-            <label htmlFor="lclStackableCheck" className="text-xs font-semibold text-slate-800 cursor-pointer">
-              Hàng có thể chồng tầng (Stackable) <span className="text-slate-500 font-normal">(Nếu không thể chồng tầng, cước gom CFS có thể tính thêm hệ số sàn cont)</span>
-            </label>
-          </div>
+          {/* Row 4: LCL Shipment Count & Frequency */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Số Lượng Chuyến Ghép *
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={specs.lclShipmentCount !== undefined && specs.lclShipmentCount !== null ? (specs.lclShipmentCount === 0 ? '' : specs.lclShipmentCount) : ''}
+                onChange={(e) => {
+                  const raw = e.target.value.replace(/\D/g, '');
+                  updateSpec('lclShipmentCount', raw === '' ? 0 : parseInt(raw, 10));
+                }}
+                onBlur={() => {
+                  if (!specs.lclShipmentCount || specs.lclShipmentCount < 1) {
+                    updateSpec('lclShipmentCount', 1);
+                  }
+                }}
+                placeholder="VD: 1"
+                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-cyan-500 font-bold text-slate-900 shadow-2xs"
+              />
+            </div>
 
-          {/* LCL Shipment Count & Frequency */}
-          <div className="pt-2 border-t border-cyan-200/70">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  1. Số Lượng Chuyến Ghép *
-                </label>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  value={specs.lclShipmentCount !== undefined && specs.lclShipmentCount !== null ? (specs.lclShipmentCount === 0 ? '' : specs.lclShipmentCount) : 1}
-                  onChange={(e) => {
-                    const raw = e.target.value.replace(/\D/g, '');
-                    updateSpec('lclShipmentCount', raw === '' ? 0 : parseInt(raw, 10));
-                  }}
-                  onBlur={() => {
-                    if (!specs.lclShipmentCount || specs.lclShipmentCount < 1) {
-                      updateSpec('lclShipmentCount', 1);
-                    }
-                  }}
-                  placeholder="VD: 1, 2, 5, 10..."
-                  className="w-full px-3.5 py-2.5 text-xs bg-white border border-cyan-300 rounded-xl focus:border-cyan-500 font-bold text-slate-900 shadow-2xs"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  2. Đơn Vị (Tần Suất Vận Chuyển) *
-                </label>
-                <select
-                  value={specs.lclFrequencyUnit || 'Chuyến / Tháng'}
-                  onChange={(e) => updateSpec('lclFrequencyUnit', e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-xs bg-white border border-cyan-300 rounded-xl focus:border-cyan-500 font-bold text-slate-900 shadow-2xs cursor-pointer"
-                >
-                  <option value="Chuyến / Ngày">📅 Ngày (Chuyến / Ngày)</option>
-                  <option value="Chuyến / Tuần">📆 Tuần (Chuyến / Tuần)</option>
-                  <option value="Chuyến / Tháng">🗓️ Tháng (Chuyến / Tháng)</option>
-                  <option value="Chuyến / Năm">📈 Năm (Chuyến / Năm)</option>
-                  <option value="Chuyến (Một lần)">⚡ Chuyến (Một lần / Spot)</option>
-                </select>
-              </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Đơn Vị (Tần Suất Vận Chuyển) *
+              </label>
+              <select
+                value={specs.lclFrequencyUnit || 'Chuyến / Tháng'}
+                onChange={(e) => updateSpec('lclFrequencyUnit', e.target.value)}
+                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-cyan-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
+              >
+                <option value="Chuyến / Ngày">Chuyến / Ngày</option>
+                <option value="Chuyến / Tuần">Chuyến / Tuần</option>
+                <option value="Chuyến / Tháng">Chuyến / Tháng</option>
+                <option value="Chuyến / Năm">Chuyến / Năm</option>
+                <option value="Chuyến (Một lần)">Chuyến (Một lần / Spot)</option>
+              </select>
             </div>
           </div>
         </div>
@@ -702,13 +690,13 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
 
       {/* Incoterms */}
       <div>
-        <label className="block text-xs font-bold text-slate-700 mb-1">
+        <label className="block text-xs font-semibold text-slate-700 mb-1">
           Điều Kiện Thương Mại (Incoterms 2020) *
         </label>
         <select
           value={specs.incoterm || 'FOB'}
           onChange={(e) => updateSpec('incoterm', e.target.value as any)}
-          className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-cyan-500 font-bold text-cyan-900"
+          className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-cyan-500 font-semibold text-cyan-950 shadow-2xs cursor-pointer"
         >
           <option value="FOB">FOB - Free on Board (Giao lên tàu cảng bốc)</option>
           <option value="CIF">CIF - Cost, Insurance and Freight (Giao cảng dỡ kèm BH)</option>

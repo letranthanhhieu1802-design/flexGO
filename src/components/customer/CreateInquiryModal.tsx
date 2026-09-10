@@ -34,7 +34,9 @@ import {
   Tag,
   Droplets,
   Flame,
-  CheckCircle2
+  CheckCircle2,
+  Lock,
+  ChevronRight
 } from 'lucide-react';
 import { 
   ServiceType, 
@@ -209,22 +211,33 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
   currentUser,
   initialBenchmarkRate,
 }) => {
-  // SECTION 1: Service Category Selection (8 core services)
-  const [serviceType, setServiceType] = useState<ServiceType>('Trucking');
+  // SECTION 1: Service Category Selection (8 core services) - No pre-selected default
+  const [serviceType, setServiceType] = useState<ServiceType | ''>('');
+  const [activeTab, setActiveTab] = useState<number>(1);
 
-  // SECTION 2: Pricing Type & Contract Term
-  const [pricingType, setPricingType] = useState<PricingType>('SPOT');
-  const [contractTerm, setContractTerm] = useState('Hợp đồng 12 tháng');
-  const [committedFrequency, setCommittedFrequency] = useState('2 - 3 chuyến / tuần');
+  const TABS = [
+    { id: 1, label: '1. Loại hình dịch vụ' },
+    { id: 2, label: '2. Hình thức báo giá' },
+    { id: 3, label: '3. Hàng hóa & Đóng gói' },
+    { id: 4, label: '4. Tuyến đường & Phương tiện' },
+    { id: 5, label: '5. Phụ phí & Điều khoản' },
+    { id: 6, label: '6. Dịch vụ gia tăng (VAS)' },
+    { id: 7, label: '7. Ngân sách & Đính kèm' },
+  ];
 
-  // SECTION 3: Cargo Classification & Details
-  const [cargoClassification, setCargoClassification] = useState<CargoClassification>('General');
+  // SECTION 2: Pricing Type & Contract Term - No pre-selected default
+  const [pricingType, setPricingType] = useState<PricingType | ''>('');
+  const [contractTerm, setContractTerm] = useState('');
+  const [committedFrequency, setCommittedFrequency] = useState('');
+
+  // SECTION 3: Cargo Classification & Details - No pre-selected default
+  const [cargoClassification, setCargoClassification] = useState<CargoClassification | ''>('');
   const [industry, setIndustry] = useState('');
   const [cargoType, setCargoType] = useState('');
   const [hsCode, setHsCode] = useState('');
   const [cargoValue, setCargoValue] = useState('');
   const [cargoValueCurrency, setCargoValueCurrency] = useState<'USD' | 'VND' | 'EUR' | 'CNY' | 'JPY'>('USD');
-  const [packagePackaging, setPackagePackaging] = useState('Đóng Pallet gỗ tiêu chuẩn');
+  const [packagePackaging, setPackagePackaging] = useState('');
   const [customPackaging, setCustomPackaging] = useState('');
   const [isStackable, setIsStackable] = useState(true);
   const [weightKg, setWeightKg] = useState('');
@@ -236,11 +249,11 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
   const [needContinuousGenset, setNeedContinuousGenset] = useState(true);
 
   // Hazmat / DG Specific Specs
-  const [dgClassIMO, setDgClassIMO] = useState('Class 3 - Chất lỏng dễ cháy (Flammable Liquids)');
+  const [dgClassIMO, setDgClassIMO] = useState('');
   const [unNumber, setUnNumber] = useState('');
   const [packingGroup, setPackingGroup] = useState('PG II (Mức độ nguy hiểm trung bình)');
   const [flashPoint, setFlashPoint] = useState<string>('');
-  const [msdsFileName, setMsdsFileName] = useState<string>('MSDS_Safety_Data_Sheet.pdf');
+  const [msdsFileName, setMsdsFileName] = useState<string>('');
 
   // SECTION 4: Service Specific Routes & Technical Specs
   const [origin, setOrigin] = useState('');
@@ -462,30 +475,21 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
     selectedVAS: [],
   });
 
-  // SECTION 5: Surcharges & Local Charges State
-  const [quotationScope, setQuotationScope] = useState<QuotationScope>('ALL_IN');
-  const [requestedSurcharges, setRequestedSurcharges] = useState<string[]>([
-    'Phí xếp dỡ tại cảng bốc (Terminal Handling Charge - POL)',
-    'Phí chứng từ & Vận đơn đường biển (Bill of Lading / Documentation Fee)',
-    'Phí kẹp chì niêm phong (Container Seal Fee)',
-    'Phí khai báo tải trọng xác thực (Verified Gross Mass - VGM)',
-    'Lệnh giao hàng đầu dỡ (Delivery Order - D/O Fee)',
-    'Phí xếp dỡ tại cảng dỡ (Terminal Handling Charge - POD)',
-    'Phí vệ sinh container (Container Cleaning / Washing Fee)',
-    'Phụ phí biến động nhiên liệu xanh (Bunker Adjustment / Low Sulphur)',
-  ]);
+  // SECTION 5: Surcharges & Local Charges State - No pre-selected default
+  const [quotationScope, setQuotationScope] = useState<QuotationScope | ''>('');
+  const [requestedSurcharges, setRequestedSurcharges] = useState<string[]>([]);
   const [surchargesNotes, setSurchargesNotes] = useState<string>('');
 
-  // SECTION 6: VAS Selection State per Service
+  // SECTION 6: VAS Selection State per Service - No pre-selected default
   const [selectedVASList, setSelectedVASList] = useState<string[]>([]);
 
-  // SECTION 7: Budget, Currency, Exchange Rate, Dates & Notes
+  // SECTION 7: Budget, Currency, Exchange Rate, Dates & Notes - No pre-filled dates
   const [currency, setCurrency] = useState<'VND' | 'USD' | 'EUR' | 'CNY' | 'JPY'>('VND');
   const [exchangeRate, setExchangeRate] = useState<number>(25450);
   const [targetBudget, setTargetBudget] = useState('');
-  const [pickupDate, setPickupDate] = useState('2026-08-28');
-  const [deliveryDate, setDeliveryDate] = useState('2026-08-30');
-  const [expiryDate, setExpiryDate] = useState('2026-08-27');
+  const [pickupDate, setPickupDate] = useState('');
+  const [deliveryDate, setDeliveryDate] = useState('');
+  const [expiryDate, setExpiryDate] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
 
@@ -554,26 +558,268 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
 
   if (!isOpen) return null;
 
-  // 8 Core services list defined by the user
+  // 8 Core services list styled like the Leadboard cards
   const servicesList: { 
     type: ServiceType; 
     icon: React.ComponentType<{ className?: string }>; 
     label: string; 
     badge: string; 
     subtext: string;
+    subtypesCount: number;
+    iconColor: string;
+    iconBg: string;
     themeColor: 'blue' | 'cyan' | 'teal' | 'sky' | 'emerald' | 'purple' | 'amber' | 'orange' | 'indigo';
   }[] = [
-    { type: 'Trucking', icon: Truck, label: 'Đường Bộ', badge: 'LTL / FTL', subtext: 'Xe tải thùng kín, bạt, đầu kéo cont', themeColor: 'indigo' },
-    { type: 'Sea Freight (FCL)', icon: Ship, label: 'Đường Biển', badge: 'FCL / LCL', subtext: 'Cảng đi - Cảng đến quốc tế & nội địa', themeColor: 'blue' },
-    { type: 'Air Freight', icon: Plane, label: 'Hàng Không', badge: 'Cargo / Express', subtext: 'Chuyển phát nhanh & Air Cargo hỏa tốc', themeColor: 'sky' },
-    { type: 'Rail Freight', icon: Train, label: 'Đường Sắt', badge: 'FCL / LCL Ga', subtext: 'Tuyến Bắc Nam & Ga liên vận', themeColor: 'blue' },
-    { type: 'Warehousing', icon: Building2, label: 'Kho Bãi 3PL', badge: '6 Loại hình kho', subtext: 'Kho thường, ngoại quan, lạnh, DG, TMĐT', themeColor: 'purple' },
-    { type: 'Customs Clearance', icon: FileText, label: 'Thủ Tục Hải Quan', badge: 'Khai báo & C/O', subtext: 'Thông quan cảng, sân bay, KCN, DNCX', themeColor: 'amber' },
-    { type: 'Cross-border', icon: Globe, label: 'Cross-Border', badge: 'VN ↔ GMS / TQ', subtext: 'Vận tải bộ xuyên biên giới liên vận', themeColor: 'orange' },
-    { type: 'Project Cargo', icon: Layers, label: 'Integrated / Dự Án', badge: 'OOG / Đa PT', subtext: 'Hàng siêu trường siêu trọng, nhà máy', themeColor: 'indigo' },
+    { 
+      type: 'Trucking', 
+      icon: Truck, 
+      label: 'Đường Bộ', 
+      badge: 'LTL / FTL', 
+      subtypesCount: 5,
+      subtext: 'Xe tải thùng kín, bạt, đông lạnh...', 
+      iconColor: 'text-blue-600', 
+      iconBg: 'bg-blue-50 border-blue-100',
+      themeColor: 'indigo'
+    },
+    { 
+      type: 'Sea Freight (FCL)', 
+      icon: Ship, 
+      label: 'Đường Biển', 
+      badge: 'FCL / LCL', 
+      subtypesCount: 5,
+      subtext: 'Cảng đi - Cảng đến quốc tế & nội địa', 
+      iconColor: 'text-cyan-600', 
+      iconBg: 'bg-cyan-50 border-cyan-100',
+      themeColor: 'blue'
+    },
+    { 
+      type: 'Air Freight', 
+      icon: Plane, 
+      label: 'Hàng Không', 
+      badge: 'Cargo / Express', 
+      subtypesCount: 4,
+      subtext: 'Chuyển phát nhanh & Air Cargo', 
+      iconColor: 'text-sky-600', 
+      iconBg: 'bg-sky-50 border-sky-100',
+      themeColor: 'sky'
+    },
+    { 
+      type: 'Rail Freight', 
+      icon: Train, 
+      label: 'Đường Sắt', 
+      badge: 'FCL / LCL Ga', 
+      subtypesCount: 4,
+      subtext: 'Tuyến Bắc Nam & Ga liên vận', 
+      iconColor: 'text-emerald-600', 
+      iconBg: 'bg-emerald-50 border-emerald-100',
+      themeColor: 'emerald'
+    },
+    { 
+      type: 'Warehousing', 
+      icon: Building2, 
+      label: 'Kho Bãi 3PL', 
+      badge: '6 Loại hình kho', 
+      subtypesCount: 5,
+      subtext: 'Kho thường, ngoại quan, lạnh...', 
+      iconColor: 'text-purple-600', 
+      iconBg: 'bg-purple-50 border-purple-100',
+      themeColor: 'purple'
+    },
+    { 
+      type: 'Customs Clearance', 
+      icon: FileText, 
+      label: 'Thủ Tục Hải Quan', 
+      badge: 'Khai báo & C/O', 
+      subtypesCount: 4,
+      subtext: 'Thông quan cảng, sân bay, cửa khẩu', 
+      iconColor: 'text-amber-600', 
+      iconBg: 'bg-amber-50 border-amber-100',
+      themeColor: 'amber'
+    },
+    { 
+      type: 'Cross-border', 
+      icon: Globe, 
+      label: 'Cross-Border', 
+      badge: 'VN ↔ GMS / TQ', 
+      subtypesCount: 3,
+      subtext: 'Vận tải bộ xuyên biên giới', 
+      iconColor: 'text-orange-600', 
+      iconBg: 'bg-orange-50 border-orange-100',
+      themeColor: 'orange'
+    },
+    { 
+      type: 'Project Cargo', 
+      icon: Layers, 
+      label: 'Integrated / Dự Án', 
+      badge: 'OOG / Đa PT', 
+      subtypesCount: 4,
+      subtext: 'Hàng siêu trường siêu trọng, dự án', 
+      iconColor: 'text-indigo-600', 
+      iconBg: 'bg-indigo-50 border-indigo-100',
+      themeColor: 'indigo'
+    },
   ];
 
   const currentServiceDef = servicesList.find((s) => s.type === serviceType) || servicesList[0];
+
+  // Helper to check completion status for each tab based strictly on mandatory (*) fields
+  const isTabCompleted = (tabId: number): boolean => {
+    switch (tabId) {
+      // TAB 1: Service Type selection (*)
+      case 1:
+        return Boolean(serviceType);
+
+      // TAB 2: Pricing Type (*) and Contract Term (*) if CONTRACT
+      case 2: {
+        if (!pricingType) return false;
+        if (pricingType === 'CONTRACT') {
+          return Boolean(contractTerm);
+        }
+        return true;
+      }
+
+      // TAB 3: Cargo Classification (*), Industry/Commodity (*), Packaging (*), Weight OR Volume (*)
+      case 3: {
+        if (!cargoClassification) return false;
+        // Reefer must have temperature requirement
+        if (cargoClassification === 'Reefer' && !temperatureRequirement.trim()) return false;
+        // Hazmat must have IMO class and UN number
+        if (cargoClassification === 'Hazmat' && (!dgClassIMO || !unNumber.trim())) return false;
+        
+        const hasCommodity = Boolean(industry.trim() || cargoType.trim());
+        const hasPackaging = Boolean(packagePackaging && (packagePackaging !== 'Khác' || customPackaging.trim()));
+        const hasWeightOrVolume = Boolean(
+          (weightKg && parseFloat(weightKg.replace(/,/g, '')) > 0) || 
+          (volumeCbm && parseFloat(volumeCbm.replace(/,/g, '')) > 0)
+        );
+
+        if (serviceType === 'Warehousing') {
+          return Boolean(hasCommodity && hasPackaging);
+        }
+        if (serviceType === 'Customs Clearance') {
+          return Boolean(hasCommodity && (hasWeightOrVolume || hsCode.trim() || cargoValue.trim()));
+        }
+
+        return Boolean(hasCommodity && hasPackaging && hasWeightOrVolume);
+      }
+
+      // TAB 4: Route & Equipment Specs per Service (*)
+      case 4: {
+        if (!serviceType) return false;
+
+        // 1. Trucking Validation
+        if (serviceType === 'Trucking') {
+          const hasPickup = Boolean(
+            (truckingSpecs.pickupLocations && truckingSpecs.pickupLocations.some(l => l && l.trim().length > 0)) || 
+            origin.trim()
+          );
+          const hasDelivery = Boolean(
+            (truckingSpecs.deliveryLocations && truckingSpecs.deliveryLocations.some(l => l && l.trim().length > 0)) || 
+            destination.trim()
+          );
+          const hasTruckType = Boolean(truckingSpecs.truckType);
+          const isFTL = truckingSpecs.loadType !== 'LTL (Ghép hàng lẻ)';
+          
+          if (isFTL) {
+            const hasTonnage = Boolean(truckingSpecs.tonnageCategory);
+            const hasCount = (truckingSpecs.vehicleCount || 0) >= 1;
+            return Boolean(hasPickup && hasDelivery && hasTruckType && hasTonnage && hasCount);
+          } else {
+            return Boolean(hasPickup && hasDelivery && hasTruckType);
+          }
+        }
+
+        // 2. Sea Freight (FCL / LCL) Validation
+        if (serviceType === 'Sea Freight (FCL)' || serviceType === 'Sea Freight (LCL)') {
+          const hasPol = Boolean(oceanSpecs.polPort?.trim() || origin.trim());
+          const hasPod = Boolean(oceanSpecs.podPort?.trim() || destination.trim());
+          const hasIncoterms = Boolean(oceanSpecs.incoterms);
+          const isFCL = oceanSpecs.mode !== 'LCL (Hàng lẻ đóng ghép CFS)';
+          
+          if (isFCL) {
+            const hasCont = (oceanSpecs.containerCount || 0) >= 1;
+            return Boolean(hasPol && hasPod && hasIncoterms && hasCont);
+          } else {
+            return Boolean(hasPol && hasPod && hasIncoterms);
+          }
+        }
+
+        // 3. Air Freight Validation
+        if (serviceType === 'Air Freight') {
+          const hasAod = Boolean(airSpecs.originAirport?.trim() || origin.trim());
+          const hasAoa = Boolean(airSpecs.destinationAirport?.trim() || destination.trim());
+          return Boolean(hasAod && hasAoa);
+        }
+
+        // 4. Warehousing Validation
+        if (serviceType === 'Warehousing') {
+          const hasLocation = Boolean(warehousingSpecs.targetLocation?.trim() || origin.trim());
+          const hasWhType = Boolean(warehousingSpecs.warehouseType);
+          const hasCapacity = Boolean(
+            (warehousingSpecs.storageAreaSqm && warehousingSpecs.storageAreaSqm > 0) ||
+            (warehousingSpecs.palletPositions && warehousingSpecs.palletPositions > 0) ||
+            (warehousingSpecs.cbmVolume && warehousingSpecs.cbmVolume > 0) ||
+            (warehousingSpecs.dailyOrderCount && warehousingSpecs.dailyOrderCount > 0)
+          );
+          return Boolean(hasLocation && hasWhType && hasCapacity);
+        }
+
+        // 5. Customs Clearance Validation
+        if (serviceType === 'Customs Clearance') {
+          const hasSubDept = Boolean(customsSpecs.customsSubDepartment?.trim() || origin.trim());
+          const hasDeclType = Boolean(customsSpecs.customsDeclarationType);
+          const hasCount = (customsSpecs.declarationCount || 0) >= 1;
+          return Boolean(hasSubDept && hasDeclType && hasCount);
+        }
+
+        // 6. Rail Freight Validation
+        if (serviceType === 'Rail Freight') {
+          const hasDeparture = Boolean(railSpecs.departureStation?.trim() || railSpecs.originStation?.trim() || origin.trim());
+          const hasArrival = Boolean(railSpecs.arrivalStation?.trim() || railSpecs.destinationStation?.trim() || destination.trim());
+          const hasMode = Boolean(railSpecs.mode);
+          return Boolean(hasDeparture && hasArrival && hasMode);
+        }
+
+        // 7. Cross-Border Validation
+        if (serviceType === 'Cross-border') {
+          const hasGate = Boolean(crossBorderSpecs.borderGate?.trim());
+          const hasOrigin = Boolean(crossBorderSpecs.originCountryCity?.trim() || crossBorderSpecs.originProvince?.trim() || origin.trim());
+          const hasDest = Boolean(crossBorderSpecs.destinationCountryCity?.trim() || crossBorderSpecs.destinationProvince?.trim() || destination.trim());
+          return Boolean(hasGate && hasOrigin && hasDest);
+        }
+
+        // 8. Project Cargo Validation
+        if (serviceType === 'Project Cargo') {
+          const hasName = Boolean(projectSpecs.projectName?.trim() || title.trim());
+          const hasOrigin = Boolean(projectSpecs.originHub?.trim() || origin.trim());
+          const hasDest = Boolean(projectSpecs.destinationSite?.trim() || destination.trim());
+          return Boolean(hasName && hasOrigin && hasDest);
+        }
+
+        return false;
+      }
+
+      // TAB 5: Quotation Scope (*) - All-in or Itemized
+      case 5:
+        return Boolean(quotationScope);
+
+      // TAB 6: VAS is optional
+      case 6:
+        return Boolean(selectedVASList.length > 0);
+
+      // TAB 7: RFQ Expiry Date (*) and Pickup / Readiness Date (*)
+      case 7:
+        return Boolean(expiryDate && pickupDate);
+
+      default:
+        return false;
+    }
+  };
+
+  // Tạm thời mở khóa tất cả các tab theo yêu cầu người dùng để dễ dàng xem và điều chỉnh màn hình
+  const isTabUnlocked = (_tabId: number): boolean => {
+    return true;
+  };
 
   // Helper to determine budget label, placeholder and contextual badge based on service & mode
   const getTargetBudgetConfig = () => {
@@ -1214,25 +1460,69 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
         className="w-full max-w-[98vw] 2xl:max-w-[1680px] bg-white rounded-2xl md:rounded-3xl shadow-2xl border border-slate-200 overflow-hidden my-2 sm:my-3 flex flex-col h-[96vh] max-h-[96vh]"
       >
         {/* Modal Header */}
-        <div className="px-6 py-4 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex items-center justify-between shrink-0 border-b border-indigo-900/50">
-          <div>
-            <div className="flex items-center space-x-2">
-              <span className="px-2.5 py-0.5 text-[10px] font-extrabold bg-indigo-500/30 text-indigo-200 border border-indigo-400/40 rounded-full uppercase tracking-wider">
-                RFQ DISPATCHER
-              </span>
-              <span className="text-xs text-slate-300">Tạo Yêu Cầu Báo Giá Logistics Chuẩn Hóa 7 Bước</span>
-            </div>
-            <h3 className="text-lg font-bold text-white mt-1 flex items-center gap-2">
-              <span>Đăng Yêu Cầu Báo Giá Mới (Send RFQ)</span>
-              <Sparkles className="w-4 h-4 text-amber-400" />
-            </h3>
-          </div>
+        <div className="px-6 py-3 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex items-center justify-between shrink-0 border-b border-indigo-900/50">
+          <h3 className="text-base font-bold text-white tracking-wide uppercase">
+            YÊU CẦU BÁO GIÁ
+          </h3>
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-white/10 transition-colors cursor-pointer"
+            className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
+            title="Đóng"
           >
             <X className="w-5 h-5" />
           </button>
+        </div>
+
+        {/* Tab Navigation Bar - With Clean Progress Indicator Line Below Each Tab */}
+        <div className="bg-slate-50 border-b border-slate-200 px-4 sm:px-6 pt-3 pb-2.5 overflow-x-auto scrollbar-none flex items-center gap-2 shrink-0">
+          {TABS.map((tab) => {
+            const isCompleted = isTabCompleted(tab.id);
+            const isActive = activeTab === tab.id;
+
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className="group flex flex-col items-stretch text-left transition-all pb-0.5 cursor-pointer"
+                title={`Chuyển đến tab ${tab.label}`}
+              >
+                <div
+                  className={`px-3.5 py-1.5 text-xs font-bold rounded-xl whitespace-nowrap transition-all flex items-center gap-1.5 ${
+                    isActive
+                      ? 'bg-indigo-600 text-white shadow-xs'
+                      : isCompleted
+                      ? 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100/80 border border-emerald-200/60'
+                      : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/70 border border-slate-200/60 bg-white'
+                  }`}
+                >
+                  {isCompleted ? (
+                    <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center shrink-0 ${isActive ? 'bg-white/20 text-white' : 'bg-emerald-600 text-white'}`}>
+                      <Check className="w-2.5 h-2.5 stroke-[3]" />
+                    </span>
+                  ) : (
+                    <span className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 text-[10px] font-bold ${isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'}`}>
+                      {tab.id}
+                    </span>
+                  )}
+                  <span>{tab.label}</span>
+                </div>
+
+                {/* Small Progress Status Bar below each Tab */}
+                <div className="w-full px-1 mt-1.5">
+                  <div
+                    className={`h-[3px] rounded-full transition-all duration-300 ${
+                      isCompleted
+                        ? 'bg-emerald-500 shadow-xs'
+                        : isActive
+                        ? 'bg-indigo-600'
+                        : 'bg-slate-200 group-hover:bg-slate-300'
+                    }`}
+                  />
+                </div>
+              </button>
+            );
+          })}
         </div>
 
         {/* Modal Body with Scroll */}
@@ -1267,102 +1557,125 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
           )}
 
           {/* SECTION 1: Chọn Loại Hình Dịch Vụ */}
-          <div>
-            <div className="flex items-center justify-between mb-2.5">
-              <label className="block text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-bold flex items-center justify-center">1</span>
-                <span>Chọn Loại Hình Dịch Vụ</span>
-              </label>
-              <span className="text-[11px] font-medium text-slate-500 hidden sm:inline">
-                8 Dịch vụ vận tải & kho bãi chuyên sâu
-              </span>
-            </div>
+          {activeTab === 1 && (
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <label className="block text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-bold flex items-center justify-center">1</span>
+                  <span>Chọn Loại Hình Dịch Vụ</span>
+                </label>
+                <span className="text-[11px] font-semibold text-slate-500 hidden sm:inline">
+                  8 Dịch vụ vận tải & kho bãi chuyên sâu
+                </span>
+              </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-8 gap-2.5">
-              {servicesList.map((s) => {
-                const isSelected = serviceType === s.type || (s.type === 'Sea Freight (FCL)' && serviceType === 'Sea Freight (LCL)');
-                const IconComponent = s.icon;
-                return (
-                  <button
-                    key={s.type}
-                    type="button"
-                    onClick={() => handleSelectService(s.type)}
-                    className={`p-3 rounded-2xl border text-left cursor-pointer transition-all flex flex-col justify-between ${
-                      isSelected
-                        ? 'border-indigo-600 bg-indigo-50/80 ring-2 ring-indigo-500/20 shadow-xs'
-                        : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/60'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className={`p-2 rounded-xl ${isSelected ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'}`}>
-                        <IconComponent className="w-4 h-4" />
+              {/* 4 Cards Per Row Grid - Leadboard Style */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+                {servicesList.map((s) => {
+                  const isSelected = serviceType === s.type || (s.type === 'Sea Freight (FCL)' && serviceType === 'Sea Freight (LCL)');
+                  const IconComponent = s.icon;
+                  return (
+                    <button
+                      key={s.type}
+                      type="button"
+                      onClick={() => handleSelectService(s.type)}
+                      className={`p-4 sm:p-5 rounded-2xl md:rounded-3xl border text-left cursor-pointer transition-all duration-200 flex flex-col justify-between group relative ${
+                        isSelected
+                          ? 'border-indigo-600 bg-indigo-50/40 ring-2 ring-indigo-500/25 shadow-md -translate-y-0.5'
+                          : 'border-slate-200/90 bg-white hover:border-indigo-200 hover:bg-slate-50/80 shadow-xs hover:shadow-md hover:-translate-y-0.5'
+                      }`}
+                    >
+                      {/* Top Row: Icon on left, Badges on right */}
+                      <div className="flex items-center justify-between gap-3 w-full mb-3.5">
+                        <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl flex items-center justify-center border shadow-2xs transition-transform group-hover:scale-105 ${s.iconBg} ${s.iconColor}`}>
+                          <IconComponent className="w-5 h-5" />
+                        </div>
+
+                        <div className="flex items-center gap-1.5">
+                          <span className={`text-[11px] font-bold px-2.5 py-1 rounded-lg border transition-colors ${
+                            isSelected 
+                              ? 'bg-indigo-100/90 text-indigo-900 border-indigo-200' 
+                              : 'bg-slate-100 text-slate-700 border-slate-200/60'
+                          }`}>
+                            {s.badge}
+                          </span>
+                          {s.subtypesCount && (
+                            <span className={`text-[11px] font-extrabold w-6 h-6 rounded-lg flex items-center justify-center border transition-colors ${
+                              isSelected 
+                                ? 'bg-indigo-600 text-white border-indigo-600' 
+                                : 'bg-slate-100 text-slate-700 border-slate-200/60'
+                            }`}>
+                              {s.subtypesCount}
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${
-                        isSelected ? 'bg-indigo-200 text-indigo-900' : 'bg-slate-100 text-slate-600'
-                      }`}>
-                        {s.badge}
-                      </span>
-                    </div>
-                    <div className="mt-2">
-                      <span className={`text-xs font-bold block ${isSelected ? 'text-indigo-950' : 'text-slate-800'}`}>
-                        {s.label}
-                      </span>
-                      <span className="text-[10px] text-slate-500 block truncate mt-0.5">
-                        {s.subtext}
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
+
+                      {/* Bottom Row: Title + Subtext */}
+                      <div>
+                        <h4 className={`text-sm sm:text-base font-bold transition-colors ${isSelected ? 'text-indigo-950 font-black' : 'text-slate-900 group-hover:text-indigo-600'}`}>
+                          {s.label}
+                        </h4>
+                        <p className="text-xs text-slate-500 mt-1 line-clamp-1 leading-relaxed">
+                          {s.subtext}
+                        </p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* SECTION 2: Hình Thức Báo Giá / Loại Hình Hợp Đồng */}
-          <div className="pt-2 border-t border-slate-100">
-            <div className="flex items-center justify-between mb-3">
-              <label className="block text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-bold flex items-center justify-center">2</span>
-                <span>Hình Thức Báo Giá / Loại Hình Hợp Đồng</span>
-              </label>
-            </div>
+          {activeTab === 2 && (
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <label className="block text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-bold flex items-center justify-center">2</span>
+                  <span>Hình Thức Báo Giá / Loại Hình Hợp Đồng</span>
+                </label>
+              </div>
 
-            <PricingTypeSection
-              pricingType={pricingType}
-              onChangePricingType={(newType) => {
-                setPricingType(newType);
-                setWarehousingSpecs((prev) => ({
-                  ...prev,
-                  pricingType: newType,
-                  warehousingLeaseModel: newType === 'CONTRACT' ? 'LONG_TERM' : 'OVERFLOW',
-                }));
-                setCustomsSpecs((prev) => ({
-                  ...prev,
-                  pricingType: newType,
-                }));
-              }}
-              contractTerm={contractTerm}
-              onChangeContractTerm={setContractTerm}
-              committedVolume={customsSpecs.committedVolume}
-              onChangeCommittedVolume={(val) => setCustomsSpecs((prev) => ({ ...prev, committedVolume: val }))}
-              committedFrequency={customsSpecs.committedFrequency || committedFrequency}
-              onChangeCommittedFrequency={(val) => {
-                setCommittedFrequency(val);
-                setCustomsSpecs((prev) => ({ ...prev, committedFrequency: val }));
-              }}
-              serviceType={serviceType}
-              serviceLabel={currentServiceDef.label}
-              themeColor={currentServiceDef.themeColor}
-            />
-          </div>
+              <PricingTypeSection
+                pricingType={pricingType}
+                onChangePricingType={(newType) => {
+                  setPricingType(newType);
+                  setWarehousingSpecs((prev) => ({
+                    ...prev,
+                    pricingType: newType,
+                    warehousingLeaseModel: newType === 'CONTRACT' ? 'LONG_TERM' : 'OVERFLOW',
+                  }));
+                  setCustomsSpecs((prev) => ({
+                    ...prev,
+                    pricingType: newType,
+                  }));
+                }}
+                contractTerm={contractTerm}
+                onChangeContractTerm={setContractTerm}
+                committedVolume={customsSpecs.committedVolume}
+                onChangeCommittedVolume={(val) => setCustomsSpecs((prev) => ({ ...prev, committedVolume: val }))}
+                committedFrequency={customsSpecs.committedFrequency || committedFrequency}
+                onChangeCommittedFrequency={(val) => {
+                  setCommittedFrequency(val);
+                  setCustomsSpecs((prev) => ({ ...prev, committedFrequency: val }));
+                }}
+                serviceType={serviceType}
+                serviceLabel={currentServiceDef.label}
+                themeColor={currentServiceDef.themeColor}
+              />
+            </div>
+          )}
 
           {/* SECTION 3: Phân Nhóm Hàng Hóa & Quy Cách Đóng Gói */}
-          <div className="pt-2 border-t border-slate-100 space-y-4">
-            <div className="flex items-center justify-between">
-              <label className="block text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-bold flex items-center justify-center">3</span>
-                <span>Phân Nhóm Hàng Hóa & Quy Cách Đóng Gói</span>
-              </label>
-            </div>
+          {activeTab === 3 && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-bold flex items-center justify-center">3</span>
+                  <span>Phân Nhóm Hàng Hóa & Quy Cách Đóng Gói</span>
+                </label>
+              </div>
 
             {/* 3 Tabs for Cargo Group */}
             <div className="grid grid-cols-3 gap-2.5">
@@ -1480,21 +1793,14 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
 
             {/* Dynamic Specific Inputs for Reefer Cargo */}
             {cargoClassification === 'Reefer' && (
-              <div className="p-4 bg-cyan-50/70 border border-cyan-200 rounded-2xl space-y-3.5 animate-in fade-in duration-150">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-cyan-950">
-                    <ThermometerSnowflake className="w-4 h-4 text-cyan-700" />
-                    <span>
-                      {serviceType === 'Warehousing'
-                        ? 'Yêu Cầu Kiểm Soát Nhiệt Độ, Độ Ẩm & Bảo Quản Kho Lạnh *'
-                        : 'Yêu Cầu Kiểm Soát Nhiệt Độ & Bảo Quản Lạnh *'}
-                    </span>
-                  </div>
-                  {serviceType === 'Warehousing' && (
-                    <span className="text-[10px] font-bold text-cyan-800 bg-cyan-100/80 px-2 py-0.5 rounded-md border border-cyan-200">
-                      Cold Storage Product Specs
-                    </span>
-                  )}
+              <div className="p-4 bg-cyan-50/60 border border-cyan-200 rounded-2xl space-y-3.5 animate-in fade-in duration-150">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-cyan-950">
+                  <ThermometerSnowflake className="w-4 h-4 text-cyan-700" />
+                  <span>
+                    {serviceType === 'Warehousing'
+                      ? 'Yêu Cầu Kiểm Soát Nhiệt Độ, Độ Ẩm & Bảo Quản Kho Lạnh *'
+                      : 'Yêu Cầu Kiểm Soát Nhiệt Độ & Bảo Quản Lạnh *'}
+                  </span>
                 </div>
 
                 {serviceType === 'Customs Clearance' ? (
@@ -1508,16 +1814,16 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                     </div>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {/* Select LOV standard range */}
-                    <div className="lg:col-span-6">
+                    <div>
                       <label className="block text-xs font-semibold text-slate-700 mb-1">
                         Dải Nhiệt Độ Chuẩn *
                       </label>
                       <select
                         value={
                           REEFER_TEMPERATURE_RANGES_LOV.find((opt) => opt.value === temperatureRequirement)?.id ||
-                          (temperatureRequirement ? 'custom' : 'frozen-deep')
+                          (temperatureRequirement ? 'custom' : '')
                         }
                         onChange={(e) => {
                           const opt = REEFER_TEMPERATURE_RANGES_LOV.find((o) => o.id === e.target.value);
@@ -1527,8 +1833,9 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                             if (!temperatureRequirement) setTemperatureRequirement('');
                           }
                         }}
-                        className="w-full px-3.5 py-2.5 text-xs bg-white border border-cyan-300 rounded-xl font-bold text-cyan-950 focus:border-cyan-500 shadow-2xs"
+                        className="w-full h-10 px-3.5 text-xs bg-white border border-cyan-300 rounded-xl font-bold text-cyan-950 focus:border-cyan-500 cursor-pointer shadow-2xs"
                       >
+                        <option value="">-- Chọn dải nhiệt độ chuẩn (Bắt buộc) * --</option>
                         {REEFER_TEMPERATURE_RANGES_LOV.map((opt) => (
                           <option key={opt.id} value={opt.id}>
                             {opt.label}
@@ -1538,7 +1845,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                     </div>
 
                     {/* Refine / Custom manual input */}
-                    <div className="lg:col-span-6">
+                    <div>
                       <label className="block text-xs font-semibold text-slate-700 mb-1">
                         Chi Tiết Dải Cài Đặt Thực Tế (°C) *
                       </label>
@@ -1548,7 +1855,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                         value={temperatureRequirement}
                         onChange={(e) => setTemperatureRequirement(e.target.value)}
                         placeholder="VD: -18°C đến -22°C hoặc +2°C đến +8°C"
-                        className="w-full px-3.5 py-2.5 text-xs bg-white border border-cyan-300 rounded-xl font-bold text-cyan-900 focus:border-cyan-500 shadow-2xs"
+                        className="w-full h-10 px-3.5 text-xs bg-white border border-cyan-300 rounded-xl font-bold text-cyan-900 focus:border-cyan-500 shadow-2xs"
                       />
                     </div>
                   </div>
@@ -1556,32 +1863,32 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
 
                 {/* Additional Cold Storage Product Parameters (Humidity & Inbound State) */}
                 {serviceType === 'Warehousing' && (
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 pt-1 border-t border-cyan-200/60">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1 border-t border-cyan-200/60">
                     {/* 1. Humidity Control */}
-                    <div className="lg:col-span-6">
-                      <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1">
-                        <Droplets className="w-3.5 h-3.5 text-cyan-600" />
-                        <span>Yêu Cầu Kiểm Soát Độ Ẩm (Relative Humidity - % RH)</span>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        Yêu Cầu Kiểm Soát Độ Ẩm (Relative Humidity - % RH)
                       </label>
                       <select
-                        value={warehousingSpecs.humidityRequirement || 'Không yêu cầu kiểm soát độ ẩm đặc biệt (Chuẩn kho lạnh/mát)'}
+                        value={warehousingSpecs.humidityRequirement || ''}
                         onChange={(e) => setWarehousingSpecs({ ...warehousingSpecs, humidityRequirement: e.target.value })}
-                        className="w-full px-3.5 py-2.5 text-xs bg-white border border-cyan-300 rounded-xl font-bold text-cyan-950 focus:border-cyan-500 shadow-2xs cursor-pointer"
+                        className="w-full h-10 px-3.5 text-xs bg-white border border-cyan-300 rounded-xl font-semibold text-cyan-950 focus:border-cyan-500 shadow-2xs cursor-pointer"
                       >
+                        <option value="">-- Chọn yêu cầu kiểm soát độ ẩm (Tùy chọn) --</option>
                         <option value="Không yêu cầu kiểm soát độ ẩm đặc biệt (Chuẩn kho lạnh/mát)">
-                          ❄️ Không yêu cầu độ ẩm đặc biệt (Chuẩn kho đông/mát thông thường)
+                          Không yêu cầu độ ẩm đặc biệt (Chuẩn kho đông/mát thông thường)
                         </option>
                         <option value="Độ ẩm tiêu chuẩn (50% - 65% RH)">
-                          💧 Độ ẩm tiêu chuẩn (50% - 65% RH) - Hàng nông sản, trái cây
+                          Độ ẩm tiêu chuẩn (50% - 65% RH) - Hàng nông sản, trái cây
                         </option>
                         <option value="Kiểm soát độ ẩm khô khắt khe (< 45% RH)">
-                          🏜️ Kiểm soát độ ẩm khô khắt khe (&lt; 45% RH) - Dược phẩm, chip điện tử
+                          Kiểm soát độ ẩm khô khắt khe (&lt; 45% RH) - Dược phẩm, chip điện tử
                         </option>
                         <option value="Độ ẩm cao giữ ẩm (> 85% RH)">
-                          🌧️ Độ ẩm cao giữ ẩm (&gt; 85% RH) - Hoa tươi, rau củ quả lá
+                          Độ ẩm cao giữ ẩm (&gt; 85% RH) - Hoa tươi, rau củ quả lá
                         </option>
                         <option value="Tùy chỉnh riêng (% RH)">
-                          ✏️ Tùy chỉnh riêng (% RH)
+                          Tùy chỉnh riêng (% RH)
                         </option>
                       </select>
 
@@ -1593,68 +1900,57 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                             value={warehousingSpecs.customHumidity || ''}
                             onChange={(e) => setWarehousingSpecs({ ...warehousingSpecs, customHumidity: e.target.value })}
                             placeholder="Nhập dải độ ẩm yêu cầu (VD: 40% - 50% RH)..."
-                            className="w-full px-3 py-2 text-xs bg-white border border-cyan-400 rounded-xl focus:border-cyan-600 font-bold text-cyan-950 shadow-2xs placeholder:font-normal"
+                            className="w-full h-10 px-3.5 text-xs bg-white border border-cyan-400 rounded-xl focus:border-cyan-600 font-bold text-cyan-950 shadow-2xs"
                           />
                         </div>
                       )}
                     </div>
 
                     {/* 2. Inbound Cargo Temperature State */}
-                    <div className="lg:col-span-6">
-                      <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1">
-                        <Flame className="w-3.5 h-3.5 text-amber-500" />
-                        <span>Trạng Thái Nhiệt Độ Hàng Khi Đưa Vào Kho *</span>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        Trạng Thái Nhiệt Độ Hàng Khi Đưa Vào Kho *
                       </label>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <div className="grid grid-cols-2 gap-2">
                         <button
                           type="button"
                           onClick={() => setWarehousingSpecs({ ...warehousingSpecs, inboundTemperatureState: 'PRE_COOLED' })}
-                          className={`p-2.5 rounded-xl border text-left cursor-pointer transition-all ${
+                          className={`h-10 px-3 rounded-xl border text-left cursor-pointer transition-all flex items-center gap-2 ${
                             warehousingSpecs.inboundTemperatureState !== 'NEED_COOLING'
                               ? 'border-cyan-600 bg-white ring-2 ring-cyan-500/20 text-cyan-950 font-bold shadow-2xs'
                               : 'border-slate-200 bg-white/70 text-slate-600 hover:border-slate-300'
                           }`}
                         >
-                          <div className="flex items-center gap-1.5">
-                            <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center border ${
-                              warehousingSpecs.inboundTemperatureState !== 'NEED_COOLING' ? 'border-cyan-600 bg-cyan-600 text-white' : 'border-slate-300'
-                            }`}>
-                              {warehousingSpecs.inboundTemperatureState !== 'NEED_COOLING' && <CheckCircle2 className="w-2.5 h-2.5" />}
-                            </span>
-                            <span className="text-xs font-bold">Hàng đã đạt chuẩn</span>
-                          </div>
-                          <p className="text-[10px] text-slate-500 mt-1 pl-5 font-normal">
-                            Đã hạ nhiệt/cấp đông trước (Pre-cooled).
-                          </p>
+                          <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center border shrink-0 ${
+                            warehousingSpecs.inboundTemperatureState !== 'NEED_COOLING' ? 'border-cyan-600 bg-cyan-600 text-white' : 'border-slate-300'
+                          }`}>
+                            {warehousingSpecs.inboundTemperatureState !== 'NEED_COOLING' && <CheckCircle2 className="w-2.5 h-2.5" />}
+                          </span>
+                          <span className="text-xs font-bold truncate">Hàng đã đạt chuẩn</span>
                         </button>
 
                         <button
                           type="button"
                           onClick={() => setWarehousingSpecs({ ...warehousingSpecs, inboundTemperatureState: 'NEED_COOLING' })}
-                          className={`p-2.5 rounded-xl border text-left cursor-pointer transition-all ${
+                          className={`h-10 px-3 rounded-xl border text-left cursor-pointer transition-all flex items-center gap-2 ${
                             warehousingSpecs.inboundTemperatureState === 'NEED_COOLING'
                               ? 'border-amber-600 bg-amber-50/80 ring-2 ring-amber-500/20 text-amber-950 font-bold shadow-2xs'
                               : 'border-slate-200 bg-white/70 text-slate-600 hover:border-slate-300'
                           }`}
                         >
-                          <div className="flex items-center gap-1.5">
-                            <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center border ${
-                              warehousingSpecs.inboundTemperatureState === 'NEED_COOLING' ? 'border-amber-600 bg-amber-600 text-white' : 'border-slate-300'
-                            }`}>
-                              {warehousingSpecs.inboundTemperatureState === 'NEED_COOLING' && <CheckCircle2 className="w-2.5 h-2.5" />}
-                            </span>
-                            <span className="text-xs font-bold">Cần cấp đông tại kho</span>
-                          </div>
-                          <p className="text-[10px] text-slate-500 mt-1 pl-5 font-normal">
-                            Hàng tươi mới cần cấp đông gió.
-                          </p>
+                          <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center border shrink-0 ${
+                            warehousingSpecs.inboundTemperatureState === 'NEED_COOLING' ? 'border-amber-600 bg-amber-600 text-white' : 'border-slate-300'
+                          }`}>
+                            {warehousingSpecs.inboundTemperatureState === 'NEED_COOLING' && <CheckCircle2 className="w-2.5 h-2.5" />}
+                          </span>
+                          <span className="text-xs font-bold truncate">Cần cấp đông tại kho</span>
                         </button>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* Continuous Genset Checkbox - Only for transport services (hidden for Warehousing and Customs) */}
+                {/* Continuous Genset Checkbox - Only for transport services */}
                 {serviceType !== 'Warehousing' && serviceType !== 'Customs Clearance' && (
                   <div className="pt-1">
                     <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer bg-white p-2.5 rounded-xl border border-cyan-200 w-full hover:border-cyan-300 transition-colors">
@@ -1673,21 +1969,14 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
 
             {/* Dynamic Specific Inputs for Hazmat / DG Cargo */}
             {cargoClassification === 'Hazmat' && (
-              <div className="p-4 bg-amber-50/70 border border-amber-200 rounded-2xl space-y-3.5 animate-in fade-in duration-150">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-amber-950">
-                    <AlertTriangle className="w-4 h-4 text-amber-700" />
-                    <span>Khai Báo Thông Số Hàng Nguy Hiểm & Hóa Chất (IMO / GHS DG Class) *</span>
-                  </div>
-                  {serviceType === 'Warehousing' && (
-                    <span className="text-[10px] font-bold text-amber-800 bg-amber-100/80 px-2 py-0.5 rounded-md border border-amber-200">
-                      DG Warehouse Specs
-                    </span>
-                  )}
+              <div className="p-4 bg-amber-50/60 border border-amber-200 rounded-2xl space-y-3.5 animate-in fade-in duration-150">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-amber-950">
+                  <AlertTriangle className="w-4 h-4 text-amber-700" />
+                  <span>Khai Báo Thông Số Hàng Nguy Hiểm & Hóa Chất (IMO / GHS DG Class) *</span>
                 </div>
 
-                {/* Row 1: IMO Class, UN Number, Packing Group */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {/* Row 1: IMO Class & UN Number */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1">
                       Nhóm Nguy Hiểm (IMO Class) *
@@ -1695,8 +1984,9 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                     <select
                       value={dgClassIMO}
                       onChange={(e) => setDgClassIMO(e.target.value)}
-                      className="w-full px-3 py-2.5 text-xs bg-white border border-amber-200 rounded-xl font-bold text-amber-950 focus:border-amber-500 shadow-2xs cursor-pointer"
+                      className="w-full h-10 px-3.5 text-xs bg-white border border-amber-200 rounded-xl font-bold text-amber-950 focus:border-amber-500 shadow-2xs cursor-pointer"
                     >
+                      <option value="">-- Chọn nhóm IMO Class (Bắt buộc) * --</option>
                       <option value="Class 2.1 - Khí dễ cháy (Flammable Gas)">Class 2.1 - Khí dễ cháy</option>
                       <option value="Class 2.2 - Khí không cháy, không độc">Class 2.2 - Khí không độc hại</option>
                       <option value="Class 3 - Chất lỏng dễ cháy (Flammable Liquids)">Class 3 - Chất lỏng dễ cháy</option>
@@ -1721,10 +2011,13 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                       value={unNumber}
                       onChange={(e) => setUnNumber(e.target.value)}
                       placeholder="VD: UN 1263, UN 1993, UN 3480"
-                      className="w-full px-3 py-2.5 text-xs bg-white border border-amber-200 rounded-xl font-bold text-amber-900 focus:border-amber-500 shadow-2xs"
+                      className="w-full h-10 px-3.5 text-xs bg-white border border-amber-200 rounded-xl font-bold text-amber-900 focus:border-amber-500 shadow-2xs"
                     />
                   </div>
+                </div>
 
+                {/* Row 2: Packing Group & Flash Point */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1 border-t border-amber-200/60">
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1">
                       Nhóm Đóng Gói (Packing Group) *
@@ -1732,7 +2025,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                     <select
                       value={packingGroup}
                       onChange={(e) => setPackingGroup(e.target.value)}
-                      className="w-full px-3 py-2.5 text-xs bg-white border border-amber-200 rounded-xl font-bold text-amber-950 focus:border-amber-500 shadow-2xs cursor-pointer"
+                      className="w-full h-10 px-3.5 text-xs bg-white border border-amber-200 rounded-xl font-bold text-amber-950 focus:border-amber-500 shadow-2xs cursor-pointer"
                     >
                       <option value="PG I (Mức độ nguy hiểm cao)">PG I - Mức độ nguy hiểm cao</option>
                       <option value="PG II (Mức độ nguy hiểm trung bình)">PG II - Mức độ nguy hiểm trung bình</option>
@@ -1740,422 +2033,283 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                       <option value="Không áp dụng (Non-applicable / Pin Lithium / Khí nén)">Không áp dụng (Pin Lithium / Khí nén)</option>
                     </select>
                   </div>
-                </div>
 
-                {/* Row 2: Flash Point & MSDS File Upload */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 border-t border-amber-200/60">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1">
-                      <Flame className="w-3.5 h-3.5 text-amber-600" />
-                      <span>Điểm Chớp Cháy (Flash Point - °C)</span>
-                      {dgClassIMO.includes('Class 3') && (
-                        <span className="text-[10px] text-rose-600 font-bold ml-1">* Quan trọng cho PCCC Class 3</span>
-                      )}
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      Điểm Chớp Cháy (Flash Point - °C)
                     </label>
                     <input
                       type="text"
                       value={flashPoint}
                       onChange={(e) => setFlashPoint(e.target.value)}
                       placeholder={dgClassIMO.includes('Class 3') ? "VD: 18°C hoặc 23°C (Bắt buộc kiểm tra PCCC)" : "VD: 24°C, > 60°C hoặc Không áp dụng"}
-                      className="w-full px-3.5 py-2.5 text-xs bg-white border border-amber-200 rounded-xl font-bold text-amber-900 focus:border-amber-500 shadow-2xs"
+                      className="w-full h-10 px-3.5 text-xs bg-white border border-amber-200 rounded-xl font-bold text-amber-900 focus:border-amber-500 shadow-2xs"
                     />
                   </div>
+                </div>
 
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center justify-between">
-                      <span className="flex items-center gap-1">
-                        <Paperclip className="w-3.5 h-3.5 text-amber-600" />
-                        <span>Đính Kèm Bảng An Toàn Hóa Chất (MSDS / SDS)</span>
+                {/* Row 3: MSDS File Upload */}
+                <div className="pt-1 border-t border-amber-200/60">
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Đính Kèm Bảng An Toàn Hóa Chất (MSDS / SDS)
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 h-10 flex items-center gap-2 px-3.5 bg-white border border-amber-200 rounded-xl text-xs text-slate-700 truncate shadow-2xs">
+                      <Paperclip className="w-4 h-4 text-amber-600 shrink-0" />
+                      <span className="truncate font-semibold text-slate-800">
+                        {msdsFileName || 'Chưa tải file MSDS (Tùy chọn đính kèm)'}
                       </span>
-                      <span className="text-[10px] text-amber-700 font-normal">PDF, DOC</span>
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1 flex items-center gap-1.5 px-3 py-2 bg-white border border-amber-200 rounded-xl text-xs text-slate-700 truncate shadow-2xs">
-                        <Paperclip className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                        <span className="truncate font-semibold text-slate-800">
-                          {msdsFileName || 'MSDS_Chemical_Safety_Sheet.pdf'}
-                        </span>
-                      </div>
-                      <label className="px-3 py-2 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl text-xs font-bold border border-amber-300 cursor-pointer shrink-0 transition-colors shadow-2xs">
-                        <span>Đổi File</span>
-                        <input
-                          type="file"
-                          accept=".pdf,.doc,.docx"
-                          className="hidden"
-                          onChange={(e) => {
-                            if (e.target.files && e.target.files[0]) {
-                              setMsdsFileName(e.target.files[0].name);
-                            }
-                          }}
-                        />
-                      </label>
                     </div>
+                    <label className="h-10 px-4 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl text-xs font-bold border border-amber-300 cursor-pointer shrink-0 transition-colors flex items-center justify-center shadow-2xs">
+                      <span>{msdsFileName ? 'Đổi File' : 'Tải File'}</span>
+                      <input
+                        type="file"
+                        accept=".pdf,.doc,.docx"
+                        className="hidden"
+                        onChange={(e) => {
+                          if (e.target.files && e.target.files[0]) {
+                            setMsdsFileName(e.target.files[0].name);
+                          }
+                        }}
+                      />
+                    </label>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* General Cargo Info, Weight & Preservation Requirements */}
-            <div className="space-y-3">
-              <div className={`grid grid-cols-1 ${
-                serviceType === 'Warehousing'
-                  ? 'sm:grid-cols-3'
-                  : isImportExportService
-                  ? 'sm:grid-cols-2 lg:grid-cols-4'
-                  : 'sm:grid-cols-2'
-              } gap-3`}>
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="block text-xs font-semibold text-slate-700 flex items-center gap-1">
-                      <Building2 className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
-                      <span>Ngành Hàng (Industry) *</span>
-                    </label>
-                  </div>
-                  <select
-                    required
-                    value={industry}
-                    onChange={(e) => setIndustry(e.target.value)}
-                    className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 font-semibold text-slate-800 transition-colors"
-                  >
-                    <option value="">-- Chọn ngành hàng (Bắt buộc) * --</option>
-                    {LOGISTICS_INDUSTRY_LOV.map((item) => (
-                      <option key={item.id} value={item.name}>
-                        {item.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+            {/* General Cargo Info & Packaging - Unified 2-Column Balanced Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Row 1: Industry & Specific Commodity */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Ngành Hàng (Industry) *
+                </label>
+                <select
+                  required
+                  value={industry}
+                  onChange={(e) => setIndustry(e.target.value)}
+                  className="w-full h-10 px-3.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 font-semibold text-slate-800 transition-colors cursor-pointer"
+                >
+                  <option value="">-- Chọn ngành hàng (Bắt buộc) * --</option>
+                  {LOGISTICS_INDUSTRY_LOV.map((item) => (
+                    <option key={item.id} value={item.name}>
+                      {item.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="block text-xs font-semibold text-slate-700">
-                      Tên / Chủng Loại Hàng Hóa Cụ Thể
-                    </label>
-                  </div>
-                  <input
-                    type="text"
-                    value={cargoType}
-                    onChange={(e) => setCargoType(e.target.value)}
-                    placeholder="VD: Bao bì, bo mạch, hạt nhựa, nông sản... (Tùy chọn)"
-                    className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 font-medium text-slate-900"
-                  />
-                </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Tên / Chủng Loại Hàng Hóa Cụ Thể
+                </label>
+                <input
+                  type="text"
+                  value={cargoType}
+                  onChange={(e) => setCargoType(e.target.value)}
+                  placeholder="VD: Bao bì, bo mạch, hạt nhựa, nông sản..."
+                  className="w-full h-10 px-3.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 font-medium text-slate-900 transition-colors"
+                />
+              </div>
 
-                {serviceType === 'Warehousing' && (
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="block text-xs font-semibold text-slate-700">
-                        Quy Cách Đóng Gói (Packaging) *
-                      </label>
-                    </div>
-                    <select
-                      value={packagePackaging}
-                      onChange={(e) => {
-                        setPackagePackaging(e.target.value);
-                        if (e.target.value !== 'Khác') {
-                          setCustomPackaging('');
-                        }
-                      }}
-                      className="w-full px-3.5 py-2.5 text-xs bg-purple-50/50 border border-purple-200 rounded-xl focus:bg-white focus:border-purple-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
-                    >
-                      <option value="Đóng Pallet gỗ / nhựa tiêu chuẩn">🪵 Đóng Pallet gỗ / nhựa tiêu chuẩn (Palletized)</option>
-                      <option value="Thùng carton rời / Chưa lên pallet">📦 Thùng carton rời / Chưa lên pallet (Loose Cartons)</option>
-                      <option value="Kiện gỗ / Khung gỗ / Thùng gỗ kín">🪵 Kiện gỗ / Khung gỗ / Thùng gỗ kín (Wooden Crates)</option>
-                      <option value="Bao tải dệt / Bao Jumbo (FIBC)">🌾 Bao tải dệt / Bao Jumbo (FIBC Big Bags)</option>
-                      <option value="Thùng phi / Can nhựa / Bồn IBC">🛢️ Thùng phi / Can nhựa / Bồn IBC (Drums & IBCs)</option>
-                      <option value="Hàng cuộn / Ống / Bó thanh dài">🛞 Hàng cuộn / Ống / Bó thanh dài (Coils & Pipes)</option>
-                      <option value="Thiết bị / Máy móc nguyên chiếc">🚗 Thiết bị / Máy móc nguyên chiếc (Machinery & CBU)</option>
-                      <option value="Hàng rời không đóng gói">🛍️ Hàng rời không đóng gói (Bulk / Loose Cargo)</option>
-                      <option value="Khác">✏️ Khác (Tự nhập quy cách đóng gói...)</option>
-                    </select>
+              {/* Row 2: Packaging & Storage Requirement */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Quy Cách Đóng Gói (Packaging) *
+                </label>
+                <select
+                  value={packagePackaging}
+                  onChange={(e) => {
+                    setPackagePackaging(e.target.value);
+                    if (e.target.value !== 'Khác') {
+                      setCustomPackaging('');
+                    }
+                  }}
+                  className="w-full h-10 px-3.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 font-semibold text-slate-800 transition-colors cursor-pointer"
+                >
+                  <option value="">-- Chọn quy cách đóng gói (Bắt buộc) * --</option>
+                  <option value="Đóng Pallet gỗ / nhựa tiêu chuẩn">Đóng Pallet gỗ / nhựa tiêu chuẩn (Palletized)</option>
+                  <option value="Thùng carton rời / Chưa lên pallet">Thùng carton rời / Chưa lên pallet (Loose Cartons)</option>
+                  <option value="Kiện gỗ / Khung gỗ / Thùng gỗ kín">Kiện gỗ / Khung gỗ / Thùng gỗ kín (Wooden Crates)</option>
+                  <option value="Bao tải dệt / Bao Jumbo (FIBC)">Bao tải dệt / Bao Jumbo (FIBC Big Bags)</option>
+                  <option value="Thùng phi / Can nhựa / Bồn IBC">Thùng phi / Can nhựa / Bồn IBC (Drums & IBCs)</option>
+                  <option value="Hàng cuộn / Ống / Bó thanh dài">Hàng cuộn / Ống / Bó thanh dài (Coils & Pipes)</option>
+                  <option value="Thiết bị / Máy móc nguyên chiếc">Thiết bị / Máy móc nguyên chiếc (Machinery & CBU)</option>
+                  <option value="Hàng rời không đóng gói">Hàng rời không đóng gói (Bulk / Loose Cargo)</option>
+                  <option value="Khác">Khác (Tự nhập quy cách đóng gói...)</option>
+                </select>
 
-                    {packagePackaging === 'Khác' && (
-                      <div className="mt-2 animate-in fade-in slide-in-from-top-1 duration-150">
-                        <input
-                          type="text"
-                          required
-                          value={customPackaging}
-                          onChange={(e) => setCustomPackaging(e.target.value)}
-                          placeholder="Nhập quy cách đóng gói cụ thể (VD: Thùng mút xốp, Màng co PE, Cuộn Reel...)"
-                          className="w-full px-3 py-2 text-xs bg-amber-50/50 border border-amber-300 rounded-xl focus:bg-white focus:border-amber-500 font-medium text-slate-900 placeholder:text-slate-400"
-                        />
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {isImportExportService && (
-                  <div className="animate-in fade-in slide-in-from-top-1 duration-150">
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="block text-xs font-semibold text-slate-700 flex items-center gap-1.5">
-                        <Tag className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                        <span>Mã HS Code (Import/Export)</span>
-                      </label>
-                      <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
-                        4 - 8 chữ số
-                      </span>
-                    </div>
+                {packagePackaging === 'Khác' && (
+                  <div className="mt-2 animate-in fade-in slide-in-from-top-1 duration-150">
                     <input
                       type="text"
-                      value={hsCode}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setHsCode(val);
-                        if (serviceType === 'Customs Clearance') {
-                          setCustomsSpecs((prev) => ({ ...prev, hsCodePrimary: val }));
-                        }
-                        if (serviceType === 'Sea Freight (FCL)' || serviceType === 'Sea Freight (LCL)') {
-                          setOceanSpecs((prev) => ({ ...prev, hsCode: val }));
-                        }
-                        if (serviceType === 'Air Freight') {
-                          setAirSpecs((prev) => ({ ...prev, hsCode: val }));
-                        }
-                        if (serviceType === 'Cross-border') {
-                          setCrossBorderSpecs((prev) => ({ ...prev, hsCode: val }));
-                        }
-                      }}
-                      placeholder="VD: 8471.30.20, 8504.40..."
-                      className="w-full px-3.5 py-2.5 text-xs bg-amber-50/40 border border-amber-200 rounded-xl focus:bg-white focus:border-amber-500 font-mono font-bold text-amber-950 shadow-2xs placeholder:font-sans placeholder:font-normal placeholder:text-slate-400"
+                      required
+                      value={customPackaging}
+                      onChange={(e) => setCustomPackaging(e.target.value)}
+                      placeholder="Nhập quy cách đóng gói cụ thể (VD: Thùng mút xốp, Màng co PE...)"
+                      className="w-full h-10 px-3.5 text-xs bg-amber-50/50 border border-amber-300 rounded-xl focus:bg-white focus:border-amber-500 font-medium text-slate-900"
                     />
-                  </div>
-                )}
-
-                {isImportExportService && (
-                  <div className="animate-in fade-in slide-in-from-top-1 duration-150">
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="block text-xs font-semibold text-slate-700 flex items-center gap-1.5">
-                        <DollarSign className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                        <span>Giá Trị Hàng Hóa (Cargo Value)</span>
-                      </label>
-                      <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
-                        Khai báo / Bảo hiểm
-                      </span>
-                    </div>
-                    <div className="flex gap-1.5">
-                      <div className="relative flex-1">
-                        <input
-                          type="text"
-                          value={cargoValue}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            setCargoValue(val);
-                            if (serviceType === 'Sea Freight (FCL)' || serviceType === 'Sea Freight (LCL)') {
-                              setOceanSpecs((prev) => ({ ...prev, cargoValue: val, cargoValueCurrency }));
-                            }
-                            if (serviceType === 'Air Freight') {
-                              setAirSpecs((prev) => ({ ...prev, cargoValue: val, cargoValueCurrency }));
-                            }
-                            if (serviceType === 'Customs Clearance') {
-                              const numVal = parseFloat(val.replace(/,/g, '')) || 0;
-                              setCustomsSpecs((prev) => ({ ...prev, cargoValue: val, cargoValueCurrency, invoiceValueUSD: numVal }));
-                            }
-                            if (serviceType === 'Cross-border') {
-                              setCrossBorderSpecs((prev) => ({ ...prev, cargoValue: val, cargoValueCurrency }));
-                            }
-                          }}
-                          placeholder="VD: 50,000 / 1.200.000.000..."
-                          className="w-full px-3 py-2.5 text-xs bg-emerald-50/40 border border-emerald-200 rounded-xl focus:bg-white focus:border-emerald-500 font-mono font-bold text-emerald-950 shadow-2xs placeholder:font-sans placeholder:font-normal placeholder:text-slate-400"
-                        />
-                      </div>
-                      <select
-                        value={cargoValueCurrency}
-                        onChange={(e) => {
-                          const curr = e.target.value as any;
-                          setCargoValueCurrency(curr);
-                          if (serviceType === 'Sea Freight (FCL)' || serviceType === 'Sea Freight (LCL)') {
-                            setOceanSpecs((prev) => ({ ...prev, cargoValueCurrency: curr }));
-                          }
-                          if (serviceType === 'Air Freight') {
-                            setAirSpecs((prev) => ({ ...prev, cargoValueCurrency: curr }));
-                          }
-                          if (serviceType === 'Customs Clearance') {
-                            setCustomsSpecs((prev) => ({ ...prev, cargoValueCurrency: curr }));
-                          }
-                          if (serviceType === 'Cross-border') {
-                            setCrossBorderSpecs((prev) => ({ ...prev, cargoValueCurrency: curr }));
-                          }
-                        }}
-                        className="w-20 px-2 py-2.5 text-xs bg-emerald-50/50 border border-emerald-200 rounded-xl font-bold text-emerald-900 focus:bg-white focus:border-emerald-500 cursor-pointer"
-                      >
-                        <option value="USD">USD</option>
-                        <option value="VND">VND</option>
-                        <option value="EUR">EUR</option>
-                        <option value="CNY">CNY</option>
-                        <option value="JPY">JPY</option>
-                      </select>
-                    </div>
                   </div>
                 )}
               </div>
 
-              {/* Row 2 for standard freight services: Packaging, Weight, Volume */}
-              {serviceType !== 'Warehousing' && serviceType !== 'Project Cargo' && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="block text-xs font-semibold text-slate-700">
-                        Quy Cách Đóng Gói (Packaging)
-                      </label>
-                    </div>
-                    <select
-                      value={packagePackaging}
-                      onChange={(e) => {
-                        setPackagePackaging(e.target.value);
-                        if (e.target.value !== 'Khác') {
-                          setCustomPackaging('');
-                        }
-                      }}
-                      className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 font-semibold text-slate-800"
-                    >
-                      <option value="Đóng Pallet gỗ / nhựa tiêu chuẩn">🪵 Đóng Pallet gỗ / nhựa tiêu chuẩn (Palletized)</option>
-                      <option value="Thùng carton rời / Chưa lên pallet">📦 Thùng carton rời / Chưa lên pallet (Loose Cartons)</option>
-                      <option value="Kiện gỗ / Khung gỗ / Thùng gỗ kín">🪵 Kiện gỗ / Khung gỗ / Thùng gỗ kín (Wooden Crates)</option>
-                      <option value="Bao tải dệt / Bao Jumbo (FIBC)">🌾 Bao tải dệt / Bao Jumbo (FIBC Big Bags)</option>
-                      <option value="Thùng phi / Can nhựa / Bồn IBC">🛢️ Thùng phi / Can nhựa / Bồn IBC (Drums & IBCs)</option>
-                      <option value="Hàng cuộn / Ống / Bó thanh dài">🛞 Hàng cuộn / Ống / Bó thanh dài (Coils & Pipes)</option>
-                      <option value="Thiết bị / Máy móc nguyên chiếc">🚗 Thiết bị / Máy móc nguyên chiếc (Machinery & CBU)</option>
-                      <option value="Hàng rời không đóng gói">🛍️ Hàng rời không đóng gói (Bulk / Loose Cargo)</option>
-                      <option value="Khác">✏️ Khác (Tự nhập quy cách đóng gói...)</option>
-                    </select>
-
-                    {packagePackaging === 'Khác' && (
-                      <div className="mt-2 animate-in fade-in slide-in-from-top-1 duration-150">
-                        <input
-                          type="text"
-                          required
-                          value={customPackaging}
-                          onChange={(e) => setCustomPackaging(e.target.value)}
-                          placeholder="Nhập quy cách đóng gói cụ thể (VD: Thùng mút xốp, Màng co PE, Cuộn Reel...)"
-                          className="w-full px-3 py-2 text-xs bg-amber-50/50 border border-amber-300 rounded-xl focus:bg-white focus:border-amber-500 font-medium text-slate-900 placeholder:text-slate-400"
-                        />
-                      </div>
-                    )}
-                  </div>
-
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="block text-xs font-semibold text-slate-700 flex items-center gap-1.5">
-                        <Scale className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
-                        <span>Tổng Khối Lượng (kg) *</span>
-                      </label>
-                      <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded">
-                        Gross Weight
-                      </span>
-                    </div>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        required
-                        value={weightKg}
-                        onChange={(e) => handleWeightChange(e.target.value)}
-                        placeholder="VD: 15.000"
-                        className="w-full pl-3.5 pr-10 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 font-bold text-slate-900 shadow-2xs transition-colors"
-                      />
-                      <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 pointer-events-none">
-                        kg
-                      </span>
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="block text-xs font-semibold text-slate-700 flex items-center gap-1.5">
-                        <Box className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
-                        <span>Tổng Thể Tích (cbm) *</span>
-                      </label>
-                      <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded">
-                        Volume
-                      </span>
-                    </div>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        required
-                        value={volumeCbm}
-                        onChange={(e) => handleVolumeChange(e.target.value)}
-                        placeholder="VD: 45"
-                        className="w-full pl-3.5 pr-12 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 font-bold text-slate-900 shadow-2xs transition-colors"
-                      />
-                      <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 pointer-events-none">
-                        cbm
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Row 2 for Project Cargo: Packaging only (Full width, no Gross Weight / Volume) */}
-              {serviceType === 'Project Cargo' && (
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="block text-xs font-semibold text-slate-700">
-                      Quy Cách Đóng Gói Hàng Hóa Dự Án (Packaging)
-                    </label>
-                  </div>
-                  <select
-                    value={packagePackaging}
-                    onChange={(e) => {
-                      setPackagePackaging(e.target.value);
-                      if (e.target.value !== 'Khác') {
-                        setCustomPackaging('');
-                      }
-                    }}
-                    className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 font-semibold text-slate-800 cursor-pointer"
-                  >
-                    <option value="Đóng Pallet gỗ / nhựa tiêu chuẩn">🪵 Đóng Pallet gỗ / nhựa tiêu chuẩn (Palletized)</option>
-                    <option value="Thùng carton rời / Chưa lên pallet">📦 Thùng carton rời / Chưa lên pallet (Loose Cartons)</option>
-                    <option value="Kiện gỗ / Khung gỗ / Thùng gỗ kín">🪵 Kiện gỗ / Khung gỗ / Thùng gỗ kín (Wooden Crates)</option>
-                    <option value="Bao tải dệt / Bao Jumbo (FIBC)">🌾 Bao tải dệt / Bao Jumbo (FIBC Big Bags)</option>
-                    <option value="Thùng phi / Can nhựa / Bồn IBC">🛢️ Thùng phi / Can nhựa / Bồn IBC (Drums & IBCs)</option>
-                    <option value="Hàng cuộn / Ống / Bó thanh dài">🛞 Hàng cuộn / Ống / Bó thanh dài (Coils & Pipes)</option>
-                    <option value="Thiết bị / Máy móc nguyên chiếc">🚗 Thiết bị / Máy móc nguyên chiếc (Machinery & CBU)</option>
-                    <option value="Hàng rời không đóng gói">🛍️ Hàng rời không đóng gói (Bulk / Loose Cargo)</option>
-                    <option value="Khác">✏️ Khác (Tự nhập quy cách đóng gói...)</option>
-                  </select>
-
-                  {packagePackaging === 'Khác' && (
-                    <div className="mt-2 animate-in fade-in slide-in-from-top-1 duration-150">
-                      <input
-                        type="text"
-                        required
-                        value={customPackaging}
-                        onChange={(e) => setCustomPackaging(e.target.value)}
-                        placeholder="Nhập quy cách đóng gói cụ thể (VD: Thùng mút xốp, Màng co PE, Cuộn Reel...)"
-                        className="w-full px-3 py-2 text-xs bg-amber-50/50 border border-amber-300 rounded-xl focus:bg-white focus:border-amber-500 font-medium text-slate-900 placeholder:text-slate-400"
-                      />
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Trường Yêu Cầu Bảo Quản (Customer input) */}
               <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs font-semibold text-slate-700 flex items-center gap-1.5">
-                    <ShieldCheck className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
-                    <span>Yêu Cầu Bảo Quản (Storage & Preservation Requirements)</span>
-                  </label>
-                  <span className="text-[11px] text-slate-400">Tùy chọn ghi chú bảo quản</span>
-                </div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Yêu Cầu Bảo Quản & Xếp Dỡ
+                </label>
                 <input
                   type="text"
                   value={preservationRequirement}
                   onChange={(e) => setPreservationRequirement(e.target.value)}
-                  placeholder="VD: Che bạt kín chống ướt, bảo quản khô ráo, nhiệt độ thường (20°C - 30°C), không xếp chồng..."
-                  className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 font-medium text-slate-900 shadow-2xs"
+                  placeholder="VD: Che bạt kín chống ướt, bảo quản khô ráo, không xếp chồng..."
+                  className="w-full h-10 px-3.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 font-medium text-slate-900 transition-colors"
                 />
               </div>
+
+              {/* Row 3: Weight & Volume for Transport Services */}
+              {serviceType !== 'Warehousing' && (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Tổng Khối Lượng (kg) *
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={weightKg}
+                      onChange={(e) => handleWeightChange(e.target.value)}
+                      placeholder="VD: 15.000"
+                      className="w-full h-10 pl-3.5 pr-10 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 font-bold text-slate-900 transition-colors"
+                    />
+                    <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 pointer-events-none">
+                      kg
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {serviceType !== 'Warehousing' && (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Tổng Thể Tích (cbm) *
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={volumeCbm}
+                      onChange={(e) => handleVolumeChange(e.target.value)}
+                      placeholder="VD: 45"
+                      className="w-full h-10 pl-3.5 pr-12 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 font-bold text-slate-900 transition-colors"
+                    />
+                    <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 pointer-events-none">
+                      cbm
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Row 4: HS Code & Cargo Value (Import/Export services) */}
+              {isImportExportService && (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Mã HS Code (Import/Export)
+                  </label>
+                  <input
+                    type="text"
+                    value={hsCode}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setHsCode(val);
+                      if (serviceType === 'Customs Clearance') {
+                        setCustomsSpecs((prev) => ({ ...prev, hsCodePrimary: val }));
+                      }
+                      if (serviceType === 'Sea Freight (FCL)' || serviceType === 'Sea Freight (LCL)') {
+                        setOceanSpecs((prev) => ({ ...prev, hsCode: val }));
+                      }
+                      if (serviceType === 'Air Freight') {
+                        setAirSpecs((prev) => ({ ...prev, hsCode: val }));
+                      }
+                      if (serviceType === 'Cross-border') {
+                        setCrossBorderSpecs((prev) => ({ ...prev, hsCode: val }));
+                      }
+                    }}
+                    placeholder="VD: 8471.30.20, 8504.40..."
+                    className="w-full h-10 px-3.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 font-mono font-bold text-slate-900 transition-colors"
+                  />
+                </div>
+              )}
+
+              {isImportExportService && (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Giá Trị Hàng Hóa (Cargo Value)
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={cargoValue}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setCargoValue(val);
+                        if (serviceType === 'Sea Freight (FCL)' || serviceType === 'Sea Freight (LCL)') {
+                          setOceanSpecs((prev) => ({ ...prev, cargoValue: val, cargoValueCurrency }));
+                        }
+                        if (serviceType === 'Air Freight') {
+                          setAirSpecs((prev) => ({ ...prev, cargoValue: val, cargoValueCurrency }));
+                        }
+                        if (serviceType === 'Customs Clearance') {
+                          const numVal = parseFloat(val.replace(/,/g, '')) || 0;
+                          setCustomsSpecs((prev) => ({ ...prev, cargoValue: val, cargoValueCurrency, invoiceValueUSD: numVal }));
+                        }
+                        if (serviceType === 'Cross-border') {
+                          setCrossBorderSpecs((prev) => ({ ...prev, cargoValue: val, cargoValueCurrency }));
+                        }
+                      }}
+                      placeholder="VD: 50,000 hoặc 1.200.000.000"
+                      className="flex-1 h-10 px-3.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 font-mono font-bold text-slate-900 transition-colors"
+                    />
+                    <select
+                      value={cargoValueCurrency}
+                      onChange={(e) => {
+                        const curr = e.target.value as any;
+                        setCargoValueCurrency(curr);
+                        if (serviceType === 'Sea Freight (FCL)' || serviceType === 'Sea Freight (LCL)') {
+                          setOceanSpecs((prev) => ({ ...prev, cargoValueCurrency: curr }));
+                        }
+                        if (serviceType === 'Air Freight') {
+                          setAirSpecs((prev) => ({ ...prev, cargoValueCurrency: curr }));
+                        }
+                        if (serviceType === 'Customs Clearance') {
+                          setCustomsSpecs((prev) => ({ ...prev, cargoValueCurrency: curr }));
+                        }
+                        if (serviceType === 'Cross-border') {
+                          setCrossBorderSpecs((prev) => ({ ...prev, cargoValueCurrency: curr }));
+                        }
+                      }}
+                      className="w-24 h-10 px-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 focus:bg-white focus:border-indigo-500 cursor-pointer"
+                    >
+                      <option value="USD">USD</option>
+                      <option value="VND">VND</option>
+                      <option value="EUR">EUR</option>
+                      <option value="CNY">CNY</option>
+                      <option value="JPY">JPY</option>
+                    </select>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
+          )}
 
           {/* SECTION 4: Thông Tin Chi Tiết Yêu Cầu */}
-          <div className="pt-2 border-t border-slate-100">
-            <div className="flex items-center justify-between mb-3">
-              <label className="block text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-bold flex items-center justify-center">4</span>
-                <span>Thông Tin Chi Tiết Yêu Cầu ({serviceType.startsWith('Sea Freight') ? 'Sea Freight' : serviceType})</span>
-              </label>
-            </div>
+          {activeTab === 4 && (
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <label className="block text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-bold flex items-center justify-center">4</span>
+                  <span>Thông Tin Chi Tiết Yêu Cầu ({serviceType.startsWith('Sea Freight') ? 'Sea Freight' : serviceType})</span>
+                </label>
+              </div>
 
             {/* Dynamic Rendering of Specialized Forms */}
             {serviceType === 'Trucking' && (
@@ -2276,76 +2430,81 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
               />
             )}
           </div>
+          )}
 
           {/* SECTION 5: Yêu Cầu Phụ Phí & Điều Khoản Báo Giá (Local Charges & Surcharges) */}
-          <div className="pt-2 border-t border-slate-100">
-            <div className="flex items-center justify-between mb-3">
-              <label className="block text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-bold flex items-center justify-center">5</span>
-                <span>
-                  {serviceType === 'Warehousing'
-                    ? 'Yêu Cầu Phụ Phí & Điều Khoản Báo Giá Kho Bãi (Operational Surcharges)'
-                    : serviceType.startsWith('Sea Freight') || serviceType === 'Air Freight'
-                    ? 'Yêu Cầu Phụ Phí & Điều Khoản Báo Giá (Local Charges & Surcharges)'
-                    : 'Yêu Cầu Phụ Phí & Điều Khoản Báo Giá (Surcharges & Terms)'}
+          {activeTab === 5 && (
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <label className="block text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-bold flex items-center justify-center">5</span>
+                  <span>
+                    {serviceType === 'Warehousing'
+                      ? 'Yêu Cầu Phụ Phí & Điều Khoản Báo Giá Kho Bãi (Operational Surcharges)'
+                      : serviceType.startsWith('Sea Freight') || serviceType === 'Air Freight'
+                      ? 'Yêu Cầu Phụ Phí & Điều Khoản Báo Giá (Local Charges & Surcharges)'
+                      : 'Yêu Cầu Phụ Phí & Điều Khoản Báo Giá (Surcharges & Terms)'}
+                  </span>
+                </label>
+                <span className="text-[11px] font-semibold text-indigo-600">
+                  {requestedSurcharges.length} Phụ phí đã chọn
                 </span>
-              </label>
-              <span className="text-[11px] font-semibold text-indigo-600">
-                {quotationScope === 'ALL_IN' ? 'Gói Trọn Gói (All-in)' : 'Tách Mục (Itemized)'} • {requestedSurcharges.length} Phụ phí đã chọn
-              </span>
-            </div>
+              </div>
 
-            <SurchargesSection
-              serviceType={serviceType}
-              warehouseType={serviceType === 'Warehousing' ? warehousingSpecs.warehouseType : undefined}
-              cargoClassification={cargoClassification}
-              quotationScope={quotationScope}
-              onChangeQuotationScope={setQuotationScope}
-              selectedSurcharges={requestedSurcharges}
-              onChangeSelectedSurcharges={setRequestedSurcharges}
-              surchargesNotes={surchargesNotes}
-              onChangeSurchargesNotes={setSurchargesNotes}
-              themeColor={currentServiceDef.themeColor}
-            />
-          </div>
+              <SurchargesSection
+                serviceType={serviceType}
+                warehouseType={serviceType === 'Warehousing' ? warehousingSpecs.warehouseType : undefined}
+                cargoClassification={cargoClassification}
+                quotationScope={quotationScope}
+                onChangeQuotationScope={setQuotationScope}
+                selectedSurcharges={requestedSurcharges}
+                onChangeSelectedSurcharges={setRequestedSurcharges}
+                surchargesNotes={surchargesNotes}
+                onChangeSurchargesNotes={setSurchargesNotes}
+                themeColor={currentServiceDef.themeColor}
+              />
+            </div>
+          )}
 
           {/* SECTION 6: VAS (Dịch Vụ Giá Trị Gia Tăng) */}
-          <div className="pt-2 border-t border-slate-100">
-            <div className="flex items-center justify-between mb-3">
-              <label className="block text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-bold flex items-center justify-center">6</span>
-                <span>Dịch Vụ Giá Trị Gia Tăng (VAS)</span>
-              </label>
-              <span className="text-[11px] font-semibold text-indigo-600">
-                {selectedVASList.length} Dịch vụ đã chọn
-              </span>
-            </div>
+          {activeTab === 6 && (
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <label className="block text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-bold flex items-center justify-center">6</span>
+                  <span>Dịch Vụ Giá Trị Gia Tăng (VAS)</span>
+                </label>
+                <span className="text-[11px] font-semibold text-indigo-600">
+                  {selectedVASList.length} Dịch vụ đã chọn
+                </span>
+              </div>
 
-            <VASSection
-              items={getCurrentVASItems()}
-              selectedVAS={selectedVASList}
-              onToggleVAS={handleToggleVAS}
-              serviceTitle={`VAS Phù Hợp Cho ${currentServiceDef.label}`}
-              themeColor={currentServiceDef.themeColor}
-            />
-          </div>
+              <VASSection
+                items={getCurrentVASItems()}
+                selectedVAS={selectedVASList}
+                onToggleVAS={handleToggleVAS}
+                serviceTitle={`VAS Phù Hợp Cho ${currentServiceDef.label}`}
+                themeColor={currentServiceDef.themeColor}
+              />
+            </div>
+          )}
 
           {/* SECTION 7: Ngân Sách, Tiền Tệ, Tỉ Giá Và Thời Hạn Báo Giá */}
-          <div className="pt-2 border-t border-slate-100 space-y-3.5">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <label className="block text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-bold flex items-center justify-center">7</span>
-                <span>
-                  {serviceType === 'Project Cargo'
-                    ? (currency === 'VND' ? 'Giá Trị Dự Kiến & Thời Hạn Báo Giá' : 'Giá Trị Dự Kiến, Tiền Tệ & Thời Hạn Báo Giá')
-                    : (currency === 'VND' ? 'Đơn Giá Kỳ Vọng & Thời Hạn Báo Giá' : 'Đơn Giá Kỳ Vọng, Tiền Tệ & Thời Hạn Báo Giá')}
-                </span>
-              </label>
+          {activeTab === 7 && (
+            <div className="space-y-4 animate-in fade-in duration-150">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                  <span>
+                    {serviceType === 'Project Cargo'
+                      ? (currency === 'VND' ? 'Giá Trị Dự Kiến & Thời Hạn Báo Giá' : 'Giá Trị Dự Kiến, Tiền Tệ & Thời Hạn Báo Giá')
+                      : (currency === 'VND' ? 'Đơn Giá Kỳ Vọng & Thời Hạn Báo Giá' : 'Đơn Giá Kỳ Vọng, Tiền Tệ & Thời Hạn Báo Giá')}
+                  </span>
+                </label>
               {currency !== 'VND' && (
                 <div className="flex items-center gap-2 animate-in fade-in duration-200">
                   <span className="text-[11px] font-medium text-slate-500">Tỉ giá tham khảo:</span>
-                  <span className="text-[11px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100 flex items-center gap-1">
-                    <Banknote className="w-3 h-3 text-indigo-600" />
+                  <span className="text-[11px] font-bold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-100 flex items-center gap-1">
+                    <Banknote className="w-3.5 h-3.5 text-indigo-600" />
                     1 {currency} = {exchangeRate.toLocaleString('vi-VN')} ₫
                   </span>
                 </div>
@@ -2353,7 +2512,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
             </div>
 
             {/* Sub-grid 1: Currency, Target Budget, Exchange Rate, Conversion Preview */}
-            <div className="bg-slate-50/80 p-3.5 rounded-2xl border border-slate-200/80 space-y-3">
+            <div className="bg-slate-50/90 p-4 rounded-2xl border border-slate-200/90 space-y-3.5">
               <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
                 {/* Currency Selection */}
                 <div className={currency === 'VND' ? 'sm:col-span-4' : 'sm:col-span-3'}>
@@ -2364,7 +2523,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                   <select
                     value={currency}
                     onChange={(e) => handleCurrencyChange(e.target.value as any)}
-                    className="w-full px-3 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-bold text-slate-800 shadow-xs"
+                    className="w-full h-10 px-3 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-bold text-slate-800 shadow-2xs cursor-pointer"
                   >
                     {CURRENCY_OPTIONS_LOV.map((curr) => (
                       <option key={curr.code} value={curr.code}>
@@ -2381,19 +2540,14 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                       <DollarSign className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                       <span>{budgetConfig.label}</span>
                     </label>
-                    {budgetConfig.badge && (
-                      <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 shrink-0">
-                        {budgetConfig.badge}
-                      </span>
-                    )}
                   </div>
                   <div className="relative">
                     <input
                       type="text"
                       value={targetBudget}
                       onChange={(e) => handleTargetBudgetChange(e.target.value)}
-                      placeholder={budgetConfig.placeholder}
-                      className="w-full pl-3.5 pr-14 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-emerald-500 font-bold text-emerald-700 shadow-xs"
+                      placeholder={budgetConfig.placeholder || 'VD: 5.000.000'}
+                      className="w-full h-10 pl-3.5 pr-14 text-xs bg-white border border-slate-200 rounded-xl focus:border-emerald-500 font-bold text-emerald-700 shadow-2xs"
                     />
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
                       {currency}
@@ -2409,7 +2563,6 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                         <ArrowRightLeft className="w-3.5 h-3.5 text-blue-600" />
                         <span>Tỉ Giá Quy Đổi (1 {currency} / VND) *</span>
                       </label>
-                      <span className="text-[10px] text-slate-400 font-normal">Tự động / Tùy chỉnh</span>
                     </div>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400">
@@ -2422,8 +2575,8 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                           const digitsOnly = e.target.value.replace(/\D/g, '');
                           setExchangeRate(digitsOnly ? parseInt(digitsOnly, 10) : 0);
                         }}
-                        placeholder="25.450"
-                        className="w-full pl-16 pr-12 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-bold text-slate-800 shadow-xs text-right"
+                        placeholder="VD: 25.450"
+                        className="w-full h-10 pl-16 pr-12 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-bold text-slate-800 shadow-2xs text-right"
                       />
                       <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
                         VND
@@ -2435,11 +2588,11 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
 
               {/* Real-time Conversion Result Box - ONLY SHOWN FOR NON-VND */}
               {currency !== 'VND' && conversionCalc && (
-                <div className="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2 bg-emerald-50/70 border border-emerald-200/80 rounded-xl text-xs animate-in fade-in duration-200">
+                <div className="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2.5 bg-emerald-50/70 border border-emerald-200/80 rounded-xl text-xs animate-in fade-in duration-200">
                   <div className="flex items-center gap-2 text-emerald-900">
                     <Sparkles className="w-4 h-4 text-emerald-600 shrink-0" />
                     <span className="font-semibold">{conversionCalc.label}:</span>
-                    <span className="font-black text-emerald-700 text-sm bg-white px-2 py-0.5 rounded-lg border border-emerald-200 shadow-2xs">
+                    <span className="font-black text-emerald-700 text-sm bg-white px-2.5 py-0.5 rounded-lg border border-emerald-200 shadow-2xs">
                       {conversionCalc.value}
                     </span>
                   </div>
@@ -2451,7 +2604,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
             </div>
 
             {/* Sub-grid 2: Dates (Quote Expiry, Pickup, Delivery) */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1">
                   <Clock className="w-3.5 h-3.5 text-amber-600" />
@@ -2462,7 +2615,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                   required
                   value={expiryDate}
                   onChange={(e) => setExpiryDate(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-amber-500 font-medium"
+                  className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-amber-500 font-medium text-slate-800 shadow-2xs"
                 />
               </div>
 
@@ -2480,7 +2633,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                   required
                   value={pickupDate}
                   onChange={(e) => setPickupDate(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 font-medium"
+                  className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-medium text-slate-800 shadow-2xs"
                 />
               </div>
 
@@ -2498,27 +2651,9 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                   required
                   value={deliveryDate}
                   onChange={(e) => setDeliveryDate(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 font-medium"
+                  className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-medium text-slate-800 shadow-2xs"
                 />
               </div>
-            </div>
-
-            {/* Title / Inquiry Label (Optional) */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Tiêu Đề Yêu Cầu Báo Giá (Tùy chọn - Hệ thống tự động điền nếu để trống)
-              </label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder={
-                  cargoType && origin && destination
-                    ? `VD: Vận chuyển ${cargoType} tuyến ${origin.split(',')[0]} - ${destination.split(',')[0]}`
-                    : 'VD: Vận chuyển linh kiện điện tử KCN Tân Bình đi KCN Thăng Long'
-                }
-                className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 font-medium text-slate-900"
-              />
             </div>
 
             {/* Scope of Work / Notes */}
@@ -2530,8 +2665,8 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                 rows={2}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Ghi rõ yêu cầu đặc biệt về bảo quản, nâng hạ, bàn giao chứng từ POD gốc..."
-                className="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500"
+                placeholder="VD: Ghi rõ yêu cầu đặc biệt về bảo quản, nâng hạ, thời gian lưu bãi, bàn giao chứng từ POD gốc..."
+                className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-medium text-slate-800 shadow-2xs"
               />
             </div>
 
@@ -2576,7 +2711,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                   handleFileUpload(e.dataTransfer.files);
                 }}
                 onClick={() => fileInputRef.current?.click()}
-                className={`relative border-2 border-dashed rounded-xl p-3.5 transition-all cursor-pointer text-center ${
+                className={`relative border-2 border-dashed rounded-xl p-4 transition-all cursor-pointer text-center ${
                   isDraggingFile
                     ? 'border-indigo-500 bg-indigo-50/80 scale-[0.99]'
                     : 'border-slate-300 hover:border-indigo-400 bg-slate-50/70 hover:bg-indigo-50/30'
@@ -2660,9 +2795,8 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                 </div>
               )}
             </div>
-          </div>
 
-          {/* Supplier Matching Intelligence Preview */}
+            {/* Supplier Matching Intelligence Preview */}
           <div className="p-3.5 bg-gradient-to-r from-indigo-900 to-slate-900 rounded-2xl text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-xl bg-indigo-500/30 border border-indigo-400/30 text-indigo-300">
@@ -2690,7 +2824,9 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
               <span className="text-[11px] text-indigo-200 font-semibold ml-1">+{matchingSuppliersCount - 3} suppliers</span>
             </div>
           </div>
-        </form>
+        </div>
+        )}
+      </form>
 
         {/* Modal Footer Actions */}
         <div className="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between shrink-0">
@@ -2702,18 +2838,38 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
             Hủy Bỏ
           </button>
 
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-slate-500 hidden sm:inline">
-              Form chuẩn hóa 6 bước tinh gọn cho báo giá tự động
-            </span>
-            <button
-              type="button"
-              onClick={handleSubmit}
-              className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition-all shadow-md flex items-center space-x-2 cursor-pointer"
-            >
-              <Send className="w-4 h-4" />
-              <span>Phát Hành Yêu Cầu Báo Giá (Send RFQ)</span>
-            </button>
+          <div className="flex items-center gap-2.5">
+            {activeTab > 1 && (
+              <button
+                type="button"
+                onClick={() => setActiveTab((prev) => Math.max(prev - 1, 1))}
+                className="px-4 py-2 rounded-xl border border-slate-300 bg-white text-slate-700 text-xs font-bold hover:bg-slate-100 transition-colors cursor-pointer"
+              >
+                Quay lại
+              </button>
+            )}
+
+            {activeTab < 7 ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveTab((prev) => Math.min(prev + 1, 7));
+                }}
+                className="px-5 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white cursor-pointer shadow-md"
+              >
+                <span>Tiếp theo</span>
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleSubmit}
+                className="px-6 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white cursor-pointer shadow-md"
+              >
+                <Send className="w-4 h-4" />
+                <span>Phát Hành Yêu Cầu Báo Giá (Send RFQ)</span>
+              </button>
+            )}
           </div>
         </div>
       </div>

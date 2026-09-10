@@ -81,33 +81,18 @@ export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
   };
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-200">
-      {/* Service Header Info */}
-      <div className="p-3.5 bg-amber-50/70 border border-amber-200/80 rounded-2xl flex items-start gap-3">
-        <div className="p-2 rounded-xl bg-amber-600 text-white shrink-0">
-          <FileText className="w-5 h-5" />
-        </div>
-        <div className="text-xs text-amber-950 flex-1">
-          <span className="font-bold block text-sm text-amber-900">
-            Dịch Vụ Khai Báo Hải Quan & Thủ Tục Xuất Nhập Khẩu (Customs Brokerage & Clearance)
-          </span>
-          <p className="text-amber-800/80 mt-0.5">
-            Cung cấp mã loại hình tờ khai (A11, E21, E31, B11), Chi cục Hải quan mở tờ khai, Giấy chứng nhận xuất xứ (C/O) và Kiểm tra chuyên ngành.
-          </p>
-        </div>
-      </div>
-
+    <div className="space-y-5 animate-in fade-in duration-200">
       {/* 1. Trade Role Selection: Nhập Khẩu vs Xuất Khẩu */}
-      <div>
-        <div className="flex items-center justify-between mb-1.5">
-          <label className="block text-xs font-bold text-slate-700 flex items-center gap-1.5">
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between">
+          <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
             <ArrowLeftRight className="w-3.5 h-3.5 text-amber-700" />
-            <span>1. Vai Trò Doanh Nghiệp Trong Tờ Khai Hải Quan *</span>
+            <span>Vai Trò Doanh Nghiệp Trong Tờ Khai Hải Quan *</span>
           </label>
-          <span className="text-[10px] font-semibold text-amber-800 bg-amber-100/70 px-2 py-0.5 rounded-md">
+          <span className="text-[10px] font-semibold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
             {specs.tradeRole === 'Xuất khẩu (Export)'
-              ? '🛫 Mở tờ khai Hải quan đầu Xuất (Export Clearance)'
-              : '🛬 Mở tờ khai Hải quan đầu Nhập (Import Clearance)'}
+              ? '🛫 Đầu Xuất (Export Clearance)'
+              : '🛬 Đầu Nhập (Import Clearance)'}
           </span>
         </div>
         <div className="grid grid-cols-2 gap-2.5">
@@ -129,9 +114,9 @@ export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
                 type="button"
                 key={item.role}
                 onClick={() => updateSpec('tradeRole', item.role as any)}
-                className={`p-2.5 rounded-2xl border text-left cursor-pointer transition-all ${
+                className={`p-2.5 rounded-xl border text-left cursor-pointer transition-all ${
                   isSelected
-                    ? 'border-amber-600 bg-amber-50/80 ring-2 ring-amber-500/25 font-bold text-amber-950 shadow-2xs'
+                    ? 'border-amber-600 bg-amber-50/70 font-bold text-amber-950 shadow-2xs'
                     : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
                 }`}
               >
@@ -151,15 +136,15 @@ export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
       </div>
 
       {/* 2. Declaration Type & Customs Branch */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-bold text-slate-700 mb-1">
-            2. Loại Hình Tờ Khai Hải Quan (Declaration Type) *
+          <label className="block text-xs font-semibold text-slate-700 mb-1">
+            Loại Hình Tờ Khai Hải Quan (Declaration Type) *
           </label>
           <select
             value={specs.declarationType || 'Nhập khẩu kinh doanh (A11)'}
             onChange={(e) => updateSpec('declarationType', e.target.value as any)}
-            className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-amber-500 font-bold text-amber-900 shadow-2xs cursor-pointer"
+            className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-amber-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
           >
             <option value="Nhập khẩu kinh doanh (A11)">A11 - Nhập khẩu kinh doanh tiêu dùng</option>
             <option value="Nhập gia công (E21)">E21 - Nhập nguyên liệu gia công cho thương nhân nước ngoài</option>
@@ -172,9 +157,9 @@ export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+          <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
             <Landmark className="w-3.5 h-3.5 text-amber-600" />
-            <span>3. Chi Cục Hải Quan Mở Tờ Khai *</span>
+            <span>Chi Cục Hải Quan Mở Tờ Khai *</span>
           </label>
           <input
             type="text"
@@ -185,22 +170,22 @@ export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
               updateSpec('customsSubDepartment', e.target.value);
             }}
             placeholder="VD: Chi cục HQ Cửa khẩu Cảng Sài Gòn KV1 (Cát Lái) hoặc Cảng Hải Phòng KV3"
-            className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-amber-500 focus:outline-hidden font-medium shadow-2xs"
+            className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-amber-500 text-slate-900 shadow-2xs"
           />
         </div>
       </div>
 
       {/* 3. C/O Form & Specialized Inspection */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">
+          <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1">
             <Award className="w-3.5 h-3.5 text-amber-600" />
-            <span>4. Form C/O Ưu Đãi Yêu Cầu (Certificate of Origin)</span>
+            <span>Form C/O Ưu Đãi Yêu Cầu (Certificate of Origin)</span>
           </label>
           <select
             value={specs.coFormRequested || 'Không yêu cầu'}
             onChange={(e) => updateSpec('coFormRequested', e.target.value as any)}
-            className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-amber-500 font-medium shadow-2xs cursor-pointer"
+            className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-amber-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
           >
             <option value="Không yêu cầu">Không yêu cầu C/O</option>
             <option value="Form E (ASEAN-China)">Form E (ASEAN - Trung Quốc: ACFTA)</option>
@@ -212,14 +197,14 @@ export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">
+          <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1">
             <Microscope className="w-3.5 h-3.5 text-blue-600" />
-            <span>5. Thủ Tục Kiểm Tra Chuyên Ngành (Nếu có)</span>
+            <span>Thủ Tục Kiểm Tra Chuyên Ngành (Nếu có)</span>
           </label>
           <select
             value={specs.specializedInspectionType || 'Không có'}
             onChange={(e) => updateSpec('specializedInspectionType', e.target.value as any)}
-            className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-amber-500 font-medium shadow-2xs cursor-pointer"
+            className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-amber-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
           >
             <option value="Không có">Không có kiểm tra chuyên ngành</option>
             <option value="Kiểm dịch thực vật / động vật">🌿 Kiểm dịch Thực vật / Động vật (Phytosanitary/Veterinary)</option>
@@ -231,18 +216,18 @@ export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
       </div>
 
       {/* 4. Red Channel Inspection Support Checkbox */}
-      <div className="p-3 bg-amber-50/50 border border-amber-200/80 rounded-xl">
+      <div className="h-auto p-3 bg-white border border-slate-200 rounded-xl shadow-2xs">
         <label className="flex items-center gap-2.5 text-xs text-slate-700 cursor-pointer">
           <input
             type="checkbox"
             checked={!!specs.redChannelInspectionSupport}
             onChange={(e) => updateSpec('redChannelInspectionSupport', e.target.checked)}
-            className="rounded text-amber-600 focus:ring-amber-500 w-4 h-4"
+            className="rounded-sm text-amber-600 focus:ring-amber-500 w-4 h-4 cursor-pointer"
           />
           <div>
-            <span className="font-bold text-amber-950 block">Yêu Cầu Hỗ Trợ Kiểm Hóa Thực Tế Luồng Đỏ (Red Channel Support)</span>
-            <p className="text-[11px] text-amber-800/80 mt-0.5">
-              Bao gồm cử nhân sự hiện trường bốc xếp, cắt seal, mở thùng/container cùng công chức hải quan tại bãi kiểm hóa.
+            <span className="font-bold text-slate-900 block">Yêu Cầu Hỗ Trợ Kiểm Hóa Thực Tế Luồng Đỏ (Red Channel Support)</span>
+            <p className="text-[11px] text-slate-500 mt-0.5">
+              Cử nhân sự hiện trường bốc xếp, cắt seal, mở thùng/container cùng công chức hải quan tại bãi kiểm hóa.
             </p>
           </div>
         </label>

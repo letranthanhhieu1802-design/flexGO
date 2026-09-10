@@ -172,132 +172,141 @@ export const MiniCRMPage: React.FC<MiniCRMPageProps> = ({
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-200">
-      {/* Breadcrumb */}
-      <div className="flex items-center space-x-2 text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wider">
-        <span>Supplier Mini CRM</span>
-        <ChevronRight className="w-3.5 h-3.5" />
-        <span className="text-indigo-600">My Customers</span>
-      </div>
+    <div className="w-full max-w-[1720px] mx-auto px-2 sm:px-4 lg:px-6 py-6 animate-in fade-in duration-200 space-y-5">
+      {/* ========================================================= */}
+      {/* 1. HERO HEADER BLOCK & 4 KPI TILES (LeadBoard Dark Style) */}
+      {/* ========================================================= */}
+      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+        <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-500/20 via-transparent to-transparent pointer-events-none" />
 
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-slate-200">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">My Customers</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Quản lý tập trung tài khoản khách hàng từ 3 nguồn: <strong>Mở khóa FlexCredit</strong>, <strong>Landing Page Doanh nghiệp</strong> và <strong>Trao thầu Báo giá</strong>.
-          </p>
-        </div>
-
-        <div className="flex items-center space-x-3">
-          <button
-            onClick={() => onNavigate({ type: 'workspace', view: 'supplier-leads' })}
-            className="px-3.5 py-2.5 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer flex items-center gap-1.5"
-          >
-            <Zap className="w-3.5 h-3.5 text-amber-500" />
-            <span>Lead Board</span>
-          </button>
-
-          <button
-            onClick={() => onNavigate({ type: 'workspace', view: 'supplier-pipeline' })}
-            className="px-3.5 py-2.5 text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-xl hover:bg-indigo-100 transition-colors shadow-2xs cursor-pointer"
-          >
-            Sales Pipeline
-          </button>
-        </div>
-      </div>
-
-      {/* 3 Customer Acquisition Channels Explanation Banner */}
-      <div className="my-6 p-4 rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white shadow-md">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 text-[10px] font-black uppercase tracking-wider bg-indigo-500/30 text-indigo-200 rounded-md border border-indigo-400/30">
-                CRM Acquisition Engine
-              </span>
-              <span className="text-xs text-indigo-200 font-semibold">3 Kênh thu hút khách hàng độc quyền</span>
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 relative z-10">
+          <div className="space-y-2 max-w-3xl">
+            <div className="flex items-center space-x-2 text-xs font-semibold text-indigo-300 uppercase tracking-wider mb-1">
+              <span>Supplier Workspace</span>
+              <ChevronRight className="w-3.5 h-3.5 text-indigo-400" />
+              <span className="text-indigo-400 font-bold">My Customers (Mini CRM)</span>
             </div>
-            <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
-              Dữ liệu khách hàng được đồng bộ tự động khi bạn mở khóa lead thị trường, nhận yêu cầu trực tiếp qua Landing Page, hoặc khi chủ hàng chấp thuận trao thầu báo giá.
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-indigo-500/30 border border-indigo-400/40 text-indigo-300 flex items-center justify-center shadow-xs shrink-0">
+                <Users className="w-5 h-5 text-indigo-200" />
+              </div>
+              <span>My Customers</span>
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+              Quản lý tập trung tài khoản khách hàng từ 3 nguồn: <strong>Mở khóa FlexCredit</strong>, <strong>Landing Page Doanh nghiệp</strong> và <strong>Trao thầu Báo giá (Won)</strong>.
             </p>
           </div>
 
-          <div className="grid grid-cols-3 gap-2 sm:gap-3 text-center shrink-0">
-            <div 
-              onClick={() => setSourceFilter('FLEXCREDIT_UNLOCKED')}
-              className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
-                sourceFilter === 'FLEXCREDIT_UNLOCKED' ? 'bg-amber-500/20 border-amber-400 text-amber-200 ring-2 ring-amber-400/40' : 'bg-white/5 border-white/10 hover:bg-white/10'
-              }`}
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+            <button
+              id="goto-leadboard-btn"
+              onClick={() => onNavigate({ type: 'workspace', view: 'supplier-leads' })}
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold text-amber-200 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/30 rounded-xl transition-all cursor-pointer shadow-xs"
             >
-              <div className="flex items-center justify-center gap-1 text-[11px] font-bold text-amber-300">
-                <Coins className="w-3 h-3" />
-                <span>Lead Board</span>
-              </div>
-              <p className="text-base font-black text-white mt-0.5">{flexCreditCount}</p>
-            </div>
+              <Zap className="w-3.5 h-3.5 text-amber-400 fill-amber-400/30" />
+              <span>Sàn Lead Board</span>
+            </button>
 
-            <div 
-              onClick={() => setSourceFilter('DIRECT_PROFILE_REQUEST')}
-              className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
-                sourceFilter === 'DIRECT_PROFILE_REQUEST' ? 'bg-emerald-500/20 border-emerald-400 text-emerald-200 ring-2 ring-emerald-400/40' : 'bg-white/5 border-white/10 hover:bg-white/10'
-              }`}
+            <button
+              id="goto-sales-pipeline-btn"
+              onClick={() => onNavigate({ type: 'workspace', view: 'supplier-pipeline' })}
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold text-white bg-indigo-500 hover:bg-indigo-600 active:bg-indigo-700 rounded-xl shadow-lg shadow-indigo-600/30 transition-all cursor-pointer"
             >
-              <div className="flex items-center justify-center gap-1 text-[11px] font-bold text-emerald-300">
-                <Globe className="w-3 h-3" />
-                <span>Landing Page</span>
+              <TrendingUp className="w-4 h-4" />
+              <span>+ Sales Pipeline</span>
+            </button>
+          </div>
+        </div>
+
+        {/* 4 Interactive KPI Cards in LeadBoard Dark Style */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mt-6 pt-6 border-t border-white/10 relative z-10">
+          {/* Card 1: Tổng khách hàng */}
+          <div 
+            onClick={() => setSourceFilter('ALL')}
+            className={`backdrop-blur-md rounded-2xl p-4 border transition-all cursor-pointer group select-none ${
+              sourceFilter === 'ALL'
+                ? 'bg-slate-800/90 border-cyan-400 ring-2 ring-cyan-400/40 shadow-lg shadow-cyan-950/40'
+                : 'bg-slate-800/60 border-white/10 hover:border-cyan-500/40'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-300">Tổng Khách Hàng (Shippers)</span>
+              <div className="w-7 h-7 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
+                <Layers className="w-3.5 h-3.5" />
               </div>
-              <p className="text-base font-black text-white mt-0.5">{directProfileCount}</p>
             </div>
+            <div className="mt-2 flex items-baseline gap-1.5">
+              <span className="text-2xl font-black text-cyan-400 tracking-tight">{totalCount}</span>
+              <span className="text-xs font-bold text-cyan-300/90">chủ hàng</span>
+            </div>
+            <p className="mt-1 text-[11px] text-slate-400 font-medium">Toàn bộ tài khoản trong CRM</p>
+          </div>
 
-            <div 
-              onClick={() => setSourceFilter('AWARDED_QUOTE')}
-              className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
-                sourceFilter === 'AWARDED_QUOTE' ? 'bg-indigo-500/20 border-indigo-400 text-indigo-200 ring-2 ring-indigo-400/40' : 'bg-white/5 border-white/10 hover:bg-white/10'
-              }`}
-            >
-              <div className="flex items-center justify-center gap-1 text-[11px] font-bold text-indigo-300">
-                <Trophy className="w-3 h-3" />
-                <span>Trao Thầu</span>
+          {/* Card 2: Mở khóa Lead Board (FlexCredit) */}
+          <div 
+            onClick={() => setSourceFilter('FLEXCREDIT_UNLOCKED')}
+            className={`backdrop-blur-md rounded-2xl p-4 border transition-all cursor-pointer group select-none ${
+              sourceFilter === 'FLEXCREDIT_UNLOCKED'
+                ? 'bg-slate-800/90 border-amber-400 ring-2 ring-amber-400/40 shadow-lg shadow-amber-950/40'
+                : 'bg-slate-800/60 border-white/10 hover:border-amber-500/40'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-300">Mở Khóa Lead Board</span>
+              <div className="w-7 h-7 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
+                <Coins className="w-3.5 h-3.5" />
               </div>
-              <p className="text-base font-black text-white mt-0.5">{awardedCount}</p>
             </div>
+            <div className="mt-2 flex items-baseline gap-1.5">
+              <span className="text-2xl font-black text-amber-400 tracking-tight">{flexCreditCount}</span>
+              <span className="text-xs font-bold text-amber-300/90">khách hàng</span>
+            </div>
+            <p className="mt-1 text-[11px] text-slate-400 font-medium">Dùng FlexCredit mở khóa liên hệ</p>
           </div>
-        </div>
-      </div>
 
-      {/* KPI Overview Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs">
-          <span className="text-xs font-medium text-slate-500">Tổng khách hàng (Shippers)</span>
-          <p className="text-2xl font-black text-slate-900 mt-1">{totalCount}</p>
-          <span className="text-[11px] text-slate-400 mt-0.5 block">Tất cả tài khoản CRM</span>
-        </div>
-
-        <div className="p-4 rounded-2xl bg-white border border-amber-200 shadow-2xs bg-gradient-to-br from-white to-amber-50/40">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-amber-900">Mở khóa Lead Board</span>
-            <Coins className="w-4 h-4 text-amber-500" />
+          {/* Card 3: Landing Page / Profile Inbound */}
+          <div 
+            onClick={() => setSourceFilter('DIRECT_PROFILE_REQUEST')}
+            className={`backdrop-blur-md rounded-2xl p-4 border transition-all cursor-pointer group select-none ${
+              sourceFilter === 'DIRECT_PROFILE_REQUEST'
+                ? 'bg-slate-800/90 border-emerald-400 ring-2 ring-emerald-400/40 shadow-lg shadow-emerald-950/40'
+                : 'bg-slate-800/60 border-white/10 hover:border-emerald-500/40'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-300">Landing Page Doanh Nghiệp</span>
+              <div className="w-7 h-7 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+                <Globe className="w-3.5 h-3.5" />
+              </div>
+            </div>
+            <div className="mt-2 flex items-baseline gap-1.5">
+              <span className="text-2xl font-black text-emerald-400 tracking-tight">{directProfileCount}</span>
+              <span className="text-xs font-bold text-emerald-300/90">khách hàng</span>
+            </div>
+            <p className="mt-1 text-[11px] text-slate-400 font-medium">Inbound trực tiếp (0 Credit)</p>
           </div>
-          <p className="text-2xl font-black text-amber-800 mt-1">{flexCreditCount}</p>
-          <span className="text-[11px] text-amber-700/80 mt-0.5 block">Dùng FlexCredit mở khóa</span>
-        </div>
 
-        <div className="p-4 rounded-2xl bg-white border border-emerald-200 shadow-2xs bg-gradient-to-br from-white to-emerald-50/40">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-emerald-900">Supplier Landing Page</span>
-            <Globe className="w-4 h-4 text-emerald-500" />
+          {/* Card 4: Trao thầu Báo giá (Won) */}
+          <div 
+            onClick={() => setSourceFilter('AWARDED_QUOTE')}
+            className={`backdrop-blur-md rounded-2xl p-4 border transition-all cursor-pointer group select-none ${
+              sourceFilter === 'AWARDED_QUOTE'
+                ? 'bg-slate-800/90 border-indigo-400 ring-2 ring-indigo-400/40 shadow-lg shadow-indigo-950/40'
+                : 'bg-slate-800/60 border-white/10 hover:border-indigo-500/40'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-300">Trao Thầu Báo Giá (Won)</span>
+              <div className="w-7 h-7 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
+                <Trophy className="w-3.5 h-3.5" />
+              </div>
+            </div>
+            <div className="mt-2 flex items-baseline gap-1.5">
+              <span className="text-2xl font-black text-indigo-300 tracking-tight">{awardedCount}</span>
+              <span className="text-xs font-bold text-indigo-200/90">khách hàng</span>
+            </div>
+            <p className="mt-1 text-[11px] text-slate-400 font-medium">Ký kết hợp đồng vận chuyển thực tế</p>
           </div>
-          <p className="text-2xl font-black text-emerald-800 mt-1">{directProfileCount}</p>
-          <span className="text-[11px] text-emerald-700/80 mt-0.5 block">Inbound miễn phí (0 Credit)</span>
-        </div>
-
-        <div className="p-4 rounded-2xl bg-white border border-indigo-200 shadow-2xs bg-gradient-to-br from-white to-indigo-50/40">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-indigo-900">Trao thầu Báo giá (Won)</span>
-            <Trophy className="w-4 h-4 text-indigo-500" />
-          </div>
-          <p className="text-2xl font-black text-indigo-800 mt-1">{awardedCount}</p>
-          <span className="text-[11px] text-indigo-700/80 mt-0.5 block">Ký kết hợp đồng thực tế</span>
         </div>
       </div>
 

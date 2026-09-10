@@ -353,52 +353,37 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
   const isSelfStorage = specs.warehouseType === 'Kho tự quản (Self-Storage)';
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-200">
-      {/* Service Header Info */}
-      <div className="p-3.5 bg-purple-50/70 border border-purple-200/80 rounded-2xl flex items-start gap-3">
-        <div className="p-2 rounded-xl bg-purple-600 text-white shrink-0">
-          <Building2 className="w-5 h-5" />
-        </div>
-        <div className="text-xs text-purple-950 flex-1">
-          <span className="font-bold block text-sm text-purple-900">
-            Dịch Vụ Kho Bãi 3PL & Trung Tâm Phân Phối (3PL Warehousing & Distribution)
-          </span>
-          <p className="text-purple-800/80 mt-0.5">
-            Lựa chọn loại hình kho phù hợp: Kho Thường Grade A, Kho Ngoại Quan (Bonded), Kho Lạnh/Mát, Kho Hàng Nguy Hiểm (DG), Kho Fulfillment TMĐT hoặc Kho Tự Quản.
-          </p>
-        </div>
-      </div>
-
+    <div className="space-y-5 animate-in fade-in duration-200">
       {/* 1. Warehouse Model (6 Models with Conditional Restrictions) */}
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         <div className="flex items-center justify-between">
-          <label className="block text-xs font-bold text-slate-700 flex items-center gap-1.5">
-            <span>1. Mô Hình & Loại Hình Kho Bãi Chuyên Biệt (Warehouse Category) *</span>
+          <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
+            <span>Mô Hình & Loại Hình Kho Bãi Chuyên Biệt (Warehouse Category) *</span>
           </label>
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-purple-100 text-purple-800 border border-purple-200">
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-purple-50 text-purple-800 border border-purple-200">
             {cargoClassification === 'General'
-              ? '📦 Nhóm Hàng Thường'
+              ? '📦 Hàng Thường'
               : cargoClassification === 'Reefer'
-              ? '❄️ Nhóm Hàng Lạnh'
-              : '⚠️ Nhóm Hàng Nguy Hiểm'}
+              ? '❄️ Hàng Lạnh'
+              : '⚠️ Hàng Nguy Hiểm'}
           </span>
         </div>
 
         {/* Compatibility notification alerts */}
         {cargoClassification === 'General' && (
-          <div className="p-2.5 bg-blue-50/80 border border-blue-200 rounded-xl text-xs text-blue-900">
+          <div className="p-2.5 bg-blue-50/70 border border-blue-200 rounded-xl text-xs text-blue-900">
             <span className="font-bold">ℹ️ Quy định phân nhóm hàng thường:</span> Kho Thường Grade A, Kho Ngoại Quan, Kho TMĐT Fulfillment và Kho Tự Quản được mở. Kho Lạnh và Kho Hàng Nguy Hiểm bị khóa.
           </div>
         )}
 
         {cargoClassification === 'Reefer' && (
-          <div className="p-2.5 bg-cyan-50/80 border border-cyan-200 rounded-xl text-xs text-cyan-950 flex items-center gap-2">
+          <div className="p-2.5 bg-cyan-50/70 border border-cyan-200 rounded-xl text-xs text-cyan-950 flex items-center gap-2">
             <span className="font-bold">❄️ Quy định phân nhóm hàng lạnh:</span> Chỉ cho phép lưu kho tại <strong>Kho Lạnh / Mát</strong>, <strong>Kho Ngoại Quan</strong> (có phân khu lạnh) hoặc <strong>Kho Tự Quản</strong>.
           </div>
         )}
 
         {cargoClassification === 'Hazmat' && (
-          <div className="p-2.5 bg-amber-50/80 border border-amber-200 rounded-xl text-xs text-amber-950 flex items-center gap-2">
+          <div className="p-2.5 bg-amber-50/70 border border-amber-200 rounded-xl text-xs text-amber-950 flex items-center gap-2">
             <span className="font-bold">⚠️ Quy định phân nhóm hàng nguy hiểm (DG):</span> Chỉ cho phép lưu kho tại <strong>Kho Hàng Nguy Hiểm (DG)</strong>, <strong>Kho Ngoại Quan</strong> (đạt chuẩn DG) hoặc <strong>Kho Tự Quản</strong>.
           </div>
         )}
@@ -449,12 +434,12 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
                   }
                 }}
                 title={disabled ? disabledReason : item.title}
-                className={`p-3 rounded-2xl border transition-all text-left flex flex-col justify-between ${
+                className={`p-3 rounded-xl border transition-all text-left flex flex-col justify-between ${
                   disabled
                     ? 'border-slate-200 bg-slate-100/70 opacity-60 cursor-not-allowed text-slate-400'
                     : isSelected
-                    ? 'border-purple-600 bg-purple-50/80 ring-2 ring-purple-500/20 text-purple-950 shadow-xs cursor-pointer'
-                    : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70 text-slate-700 cursor-pointer'
+                    ? 'border-purple-600 bg-purple-50/70 font-bold text-purple-950 shadow-2xs cursor-pointer'
+                    : 'border-slate-200 bg-white hover:border-slate-300 text-slate-700 cursor-pointer'
                 }`}
               >
                 <div>
@@ -470,7 +455,7 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
                       <span className="w-2 h-2 rounded-full bg-purple-600"></span>
                     ) : null}
                   </div>
-                  <p className={`text-[11px] mt-1 leading-snug ${disabled ? 'text-slate-400' : 'text-slate-500'}`}>
+                  <p className={`text-[11px] mt-1 leading-snug font-normal ${disabled ? 'text-slate-400' : 'text-slate-500'}`}>
                     {disabled ? disabledReason : item.desc}
                   </p>
                 </div>
@@ -482,26 +467,26 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
 
       {/* 1.5 Thông Tin Hải Quan & Luồng Hàng Kho Ngoại Quan (Chỉ hiển thị khi chọn Kho Ngoại Quan) */}
       {(specs.warehouseType === 'Kho ngoại quan (Bonded)' || specs.warehouseType === 'Kho ngoại quan (Bonded Warehouse)') && (
-        <div className="p-4 bg-indigo-50/70 border border-indigo-200/90 rounded-2xl space-y-3.5 shadow-2xs animate-in fade-in duration-150">
+        <div className="space-y-3.5 pt-1 animate-in fade-in duration-150">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-extrabold text-indigo-950 uppercase tracking-wider flex items-center gap-1.5">
+            <span className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
               <ShieldCheck className="w-4 h-4 text-indigo-600" />
-              <span>Thông Tin Hải Quan & Luồng Hàng Kho Ngoại Quan (Bonded Specs)</span>
+              <span>Thông Tin Hải Quan & Luồng Hàng Kho Ngoại Quan</span>
             </span>
-            <span className="text-[10px] font-bold text-indigo-800 bg-indigo-100 px-2 py-0.5 rounded-md border border-indigo-200">
-              Customs Compliance & Fast Quotation
+            <span className="text-[10px] font-semibold text-indigo-800 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200">
+              Bonded Specs
             </span>
           </div>
 
           {/* Row 1: Bonded Flow Purpose */}
           <div>
-            <label className="block text-xs font-bold text-slate-800 mb-1 flex items-center gap-1">
-              <span>1. Mục Đích / Luồng Hàng Gửi Kho Ngoại Quan *</span>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">
+              Mục Đích / Luồng Hàng Gửi Kho Ngoại Quan *
             </label>
             <select
               value={specs.bondedPurpose || 'Hàng nhập khẩu chờ hoàn tất thủ tục thông quan vào nội địa'}
               onChange={(e) => updateSpec('bondedPurpose', e.target.value)}
-              className="w-full px-3 py-2.5 text-xs bg-white border border-indigo-300 rounded-xl focus:border-indigo-500 font-bold text-indigo-950 shadow-2xs cursor-pointer"
+              className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
             >
               <option value="Hàng nhập khẩu chờ hoàn tất thủ tục thông quan vào nội địa">
                 📥 Hàng nhập khẩu chờ hoàn tất thủ tục thông quan vào nội địa (Giải tỏa dần)
@@ -519,41 +504,28 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
           </div>
 
           {/* Row 2: HS Code & Cargo Value with Currency selector */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-1 border-t border-indigo-200/60">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* 2. HS Code */}
             <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="block text-xs font-bold text-slate-800 flex items-center gap-1">
-                  <Tag className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                  <span>2. Mã HS Code Đại Diện (HS Code)</span>
-                </label>
-                <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
-                  4 - 8 chữ số
-                </span>
-              </div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1">
+                <Tag className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                <span>Mã HS Code Đại Diện (HS Code)</span>
+              </label>
               <input
                 type="text"
                 value={specs.bondedHsCode || ''}
                 onChange={(e) => updateSpec('bondedHsCode', e.target.value)}
                 placeholder="VD: 8471.30.20, 8504.40..."
-                className="w-full px-3.5 py-2.5 text-xs bg-white border border-indigo-300 rounded-xl focus:border-indigo-500 font-mono font-bold text-slate-900 shadow-2xs placeholder:font-sans placeholder:font-normal"
+                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-mono font-bold text-slate-900 shadow-2xs placeholder:font-sans placeholder:font-normal"
               />
-              <p className="text-[10px] text-indigo-700/80 mt-1 font-medium">
-                💡 Đối chiếu danh mục cấm gửi kho ngoại quan & kiểm tra chuyên ngành.
-              </p>
             </div>
 
             {/* 3. Estimated Cargo Value with Currency */}
             <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="block text-xs font-bold text-slate-800 flex items-center gap-1">
-                  <DollarSign className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                  <span>3. Tổng Giá Trị Hàng Hóa Lưu Kho (Cargo Value) *</span>
-                </label>
-                <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
-                  Bảo hiểm / Bảo lãnh
-                </span>
-              </div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1">
+                <DollarSign className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                <span>Tổng Giá Trị Hàng Hóa Lưu Kho (Cargo Value) *</span>
+              </label>
               <div className="flex items-center gap-1.5">
                 <div className="flex-1">
                   <input
@@ -566,14 +538,14 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
                       updateSpec('bondedEstimatedValue', num);
                     }}
                     placeholder="VD: 250.000 hoặc 5.000.000.000"
-                    className="w-full px-3.5 py-2.5 text-xs bg-white border border-indigo-300 rounded-xl focus:border-indigo-500 font-bold text-slate-900 shadow-2xs"
+                    className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-bold text-slate-900 shadow-2xs"
                   />
                 </div>
                 <div className="w-24 shrink-0">
                   <select
                     value={specs.bondedEstimatedValueCurrency || 'USD'}
                     onChange={(e) => updateSpec('bondedEstimatedValueCurrency', e.target.value)}
-                    className="w-full px-2 py-2.5 text-xs bg-white border border-indigo-300 rounded-xl focus:border-indigo-500 font-bold text-indigo-950 shadow-2xs cursor-pointer"
+                    className="w-full h-10 px-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
                   >
                     <option value="USD">USD ($)</option>
                     <option value="VND">VND (₫)</option>
@@ -583,22 +555,21 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
                   </select>
                 </div>
               </div>
-              <p className="text-[10px] text-indigo-700/80 mt-1 font-medium">
-                💡 Để tính phí bảo hiểm rủi ro lưu kho & hạn mức bảo lãnh thuế hải quan.
-              </p>
             </div>
           </div>
         </div>
       )}
 
       {/* 2. Billing Unit Preference */}
-      <div>
-        <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center justify-between">
-          <span>2. Đơn Vị Tính Phí Thuê Kho Ưa Chuộng (Billing Preference) *</span>
-          <span className="text-[11px] font-normal text-purple-700 font-semibold bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between">
+          <label className="block text-xs font-bold text-slate-800">
+            Đơn Vị Tính Phí Thuê Kho Ưa Chuộng (Billing Preference) *
+          </label>
+          <span className="text-[10px] font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
             {specs.billingUnitPreference || 'm² (Diện tích sàn)'}
           </span>
-        </label>
+        </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
           {[
             {
@@ -627,7 +598,7 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
             {
               unit: 'Order (Hoàn tất đơn hàng TMĐT)',
               title: '⚡ Theo Đơn Hàng (B2C)',
-              sub: 'Lưu kho đệm + Pick + Pack + Giao tại kho',
+              sub: 'Lưu kho đệm + Pick + Pack + Giao',
               disabled: !isEcommerceWarehouse,
               disabledReason: '🚫 Chỉ dành riêng cho Kho TMĐT / Fulfillment',
             },
@@ -644,11 +615,11 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
                   }
                 }}
                 title={item.disabled ? item.disabledReason : item.title}
-                className={`p-2.5 rounded-2xl border text-left transition-all ${
+                className={`p-2.5 rounded-xl border text-left transition-all ${
                   item.disabled
                     ? 'border-slate-200 bg-slate-100/70 opacity-50 cursor-not-allowed text-slate-400'
                     : isSelected
-                    ? 'border-purple-600 bg-purple-50/80 ring-2 ring-purple-500/25 font-bold text-purple-950 shadow-2xs cursor-pointer'
+                    ? 'border-purple-600 bg-purple-50/70 font-bold text-purple-950 shadow-2xs cursor-pointer'
                     : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 cursor-pointer'
                 }`}
               >
@@ -670,281 +641,244 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
       </div>
 
       {/* 3. Storage Volume: Dynamically Bound to Billing Preference */}
-      <div className="p-4 bg-purple-50/50 border border-purple-200/80 rounded-2xl space-y-3.5">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <span className="text-xs font-extrabold text-purple-950 uppercase tracking-wider flex items-center gap-1.5">
-            <Box className="w-4 h-4 text-purple-700" />
-            <span>Khai Báo Quy Mô & Dung Lượng Lưu Trữ Dự Kiến</span>
-          </span>
-          <span className="text-[11px] text-purple-800 font-bold bg-purple-100 px-2 py-0.5 rounded-md">
-            Theo: {specs.billingUnitPreference || 'm² (Diện tích sàn)'}
-          </span>
-        </div>
+      <div className="space-y-3 pt-1">
+        <span className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 text-slate-800">
+          <Box className="w-4 h-4 text-purple-700" />
+          <span>Khai Báo Quy Mô & Dung Lượng Lưu Trữ</span>
+        </span>
 
         {/* TH 1: THEO DIỆN TÍCH (M²) */}
         {(specs.billingUnitPreference === 'm² (Diện tích sàn)' || (!specs.billingUnitPreference && !isEcommerceWarehouse)) && (
-          <div className="space-y-2.5 animate-in fade-in duration-150">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  1. Diện Tích Sàn Cần Thuê (m²) *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={specs.storageAreaSqm ? specs.storageAreaSqm.toLocaleString('vi-VN') : ''}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(/\D/g, '');
-                    updateSpec('storageAreaSqm', val ? parseInt(val, 10) : undefined);
-                  }}
-                  placeholder="VD: 500"
-                  className="w-full px-3.5 py-2.5 text-xs bg-white border border-purple-300 rounded-xl focus:border-purple-500 font-bold text-slate-900 shadow-2xs"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  2. Số Lượng Mã Hàng Quản Lý (SKUs) *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={specs.skuCount ? specs.skuCount.toLocaleString('vi-VN') : ''}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(/\D/g, '');
-                    updateSpec('skuCount', val ? parseInt(val, 10) : undefined);
-                  }}
-                  placeholder="VD: 150"
-                  className="w-full px-3.5 py-2.5 text-xs bg-white border border-purple-300 rounded-xl focus:border-purple-500 font-bold text-slate-900 shadow-2xs"
-                />
-              </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in duration-150">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Diện Tích Sàn Cần Thuê (m²) *
+              </label>
+              <input
+                type="text"
+                required
+                value={specs.storageAreaSqm ? specs.storageAreaSqm.toLocaleString('vi-VN') : ''}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, '');
+                  updateSpec('storageAreaSqm', val ? parseInt(val, 10) : undefined);
+                }}
+                placeholder="VD: 500"
+                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-bold text-slate-900 shadow-2xs"
+              />
             </div>
-            <p className="text-[11px] text-purple-900 bg-purple-100/60 px-3 py-1.5 rounded-xl border border-purple-200/80">
-              💡 <strong>Hình thức diện tích:</strong> Doanh nghiệp sẽ được khoanh vùng diện tích sàn riêng biệt, tính phí trọn gói theo <strong>m²/tháng</strong>.
-            </p>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Số Lượng Mã Hàng Quản Lý (SKUs) *
+              </label>
+              <input
+                type="text"
+                required
+                value={specs.skuCount ? specs.skuCount.toLocaleString('vi-VN') : ''}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, '');
+                  updateSpec('skuCount', val ? parseInt(val, 10) : undefined);
+                }}
+                placeholder="VD: 150"
+                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-bold text-slate-900 shadow-2xs"
+              />
+            </div>
           </div>
         )}
 
         {/* TH 2: THEO VỊ TRÍ PALLET */}
         {specs.billingUnitPreference === 'Pallet (Vị trí Pallet/tháng)' && (
-          <div className="space-y-2.5 animate-in fade-in duration-150">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  1. Số Vị Trí Pallet Cần Thuê (Slots) *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={specs.palletPositions ? specs.palletPositions.toLocaleString('vi-VN') : ''}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(/\D/g, '');
-                    updateSpec('palletPositions', val ? parseInt(val, 10) : undefined);
-                  }}
-                  placeholder="VD: 350"
-                  className="w-full px-3.5 py-2.5 text-xs bg-white border border-purple-300 rounded-xl focus:border-purple-500 font-bold text-slate-900 shadow-2xs"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  2. Số Lượng Mã Hàng (SKUs) *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={specs.skuCount ? specs.skuCount.toLocaleString('vi-VN') : ''}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(/\D/g, '');
-                    updateSpec('skuCount', val ? parseInt(val, 10) : undefined);
-                  }}
-                  placeholder="VD: 150"
-                  className="w-full px-3.5 py-2.5 text-xs bg-white border border-purple-300 rounded-xl focus:border-purple-500 font-bold text-slate-900 shadow-2xs"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  3. Quy Cách & Chiều Cao 1 Pallet
-                </label>
-                <input
-                  type="text"
-                  value={specs.palletSpecsDescription || ''}
-                  onChange={(e) => updateSpec('palletSpecsDescription', e.target.value)}
-                  placeholder="VD: 1.2m x 1.0m, cao 1.5m, max 800kg"
-                  className="w-full px-3.5 py-2.5 text-xs bg-white border border-purple-200 rounded-xl focus:border-purple-500 font-medium text-slate-800 shadow-2xs"
-                />
-              </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 animate-in fade-in duration-150">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Số Vị Trí Pallet Cần Thuê (Slots) *
+              </label>
+              <input
+                type="text"
+                required
+                value={specs.palletPositions ? specs.palletPositions.toLocaleString('vi-VN') : ''}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, '');
+                  updateSpec('palletPositions', val ? parseInt(val, 10) : undefined);
+                }}
+                placeholder="VD: 350"
+                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-bold text-slate-900 shadow-2xs"
+              />
             </div>
-            <p className="text-[11px] text-purple-900 bg-purple-100/60 px-3 py-1.5 rounded-xl border border-purple-200/80">
-              💡 <strong>Hình thức vị trí Pallet:</strong> Hàng hóa được quản lý trên hệ thống giá kệ Racking Selective/Drive-in, cước tính theo <strong>số Pallet/tháng hoặc Pallet/ngày</strong> thực tế lưu kho.
-            </p>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Số Lượng Mã Hàng (SKUs) *
+              </label>
+              <input
+                type="text"
+                required
+                value={specs.skuCount ? specs.skuCount.toLocaleString('vi-VN') : ''}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, '');
+                  updateSpec('skuCount', val ? parseInt(val, 10) : undefined);
+                }}
+                placeholder="VD: 150"
+                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-bold text-slate-900 shadow-2xs"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Quy Cách & Chiều Cao 1 Pallet
+              </label>
+              <input
+                type="text"
+                value={specs.palletSpecsDescription || ''}
+                onChange={(e) => updateSpec('palletSpecsDescription', e.target.value)}
+                placeholder="VD: 1.2m x 1.0m, cao 1.5m, max 800kg"
+                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-medium text-slate-800 shadow-2xs"
+              />
+            </div>
           </div>
         )}
 
         {/* TH 3: THEO THỂ TÍCH (CBM M³) */}
         {specs.billingUnitPreference === 'CBM (Thể tích thực m³)' && (
-          <div className="space-y-2.5 animate-in fade-in duration-150">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  1. Tổng Thể Tích Lưu Trữ Dự Kiến (CBM m³) *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={specs.cbmVolume ? specs.cbmVolume.toLocaleString('vi-VN') : ''}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(/\D/g, '');
-                    updateSpec('cbmVolume', val ? parseInt(val, 10) : undefined);
-                  }}
-                  placeholder="VD: 800"
-                  className="w-full px-3.5 py-2.5 text-xs bg-white border border-purple-300 rounded-xl focus:border-purple-500 font-bold text-slate-900 shadow-2xs"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  2. Số Lượng Mã Hàng Quản Lý (SKUs) *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={specs.skuCount ? specs.skuCount.toLocaleString('vi-VN') : ''}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(/\D/g, '');
-                    updateSpec('skuCount', val ? parseInt(val, 10) : undefined);
-                  }}
-                  placeholder="VD: 150"
-                  className="w-full px-3.5 py-2.5 text-xs bg-white border border-purple-300 rounded-xl focus:border-purple-500 font-bold text-slate-900 shadow-2xs"
-                />
-              </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in duration-150">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Tổng Thể Tích Lưu Trữ Dự Kiến (CBM m³) *
+              </label>
+              <input
+                type="text"
+                required
+                value={specs.cbmVolume ? specs.cbmVolume.toLocaleString('vi-VN') : ''}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, '');
+                  updateSpec('cbmVolume', val ? parseInt(val, 10) : undefined);
+                }}
+                placeholder="VD: 800"
+                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-bold text-slate-900 shadow-2xs"
+              />
             </div>
-            <p className="text-[11px] text-purple-900 bg-purple-100/60 px-3 py-1.5 rounded-xl border border-purple-200/80">
-              💡 <strong>Hình thức thể tích:</strong> Phù hợp cho hàng rời, hàng cồng kềnh, không đóng pallet quy chuẩn. Cước tính theo <strong>thể tích m³ chiếm dụng thực tế</strong>.
-            </p>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Số Lượng Mã Hàng Quản Lý (SKUs) *
+              </label>
+              <input
+                type="text"
+                required
+                value={specs.skuCount ? specs.skuCount.toLocaleString('vi-VN') : ''}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, '');
+                  updateSpec('skuCount', val ? parseInt(val, 10) : undefined);
+                }}
+                placeholder="VD: 150"
+                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-bold text-slate-900 shadow-2xs"
+              />
+            </div>
           </div>
         )}
 
         {/* TH 4: THEO ĐƠN HÀNG HOÀN TẤT TMĐT (FULFILLMENT) */}
         {(specs.billingUnitPreference === 'Order (Hoàn tất đơn hàng TMĐT)' || isEcommerceWarehouse) && (
-          <div className="space-y-2.5 animate-in fade-in duration-150">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  1. Số Lượng Mã Hàng Quản Lý (SKUs) *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={specs.skuCount ? specs.skuCount.toLocaleString('vi-VN') : ''}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(/\D/g, '');
-                    updateSpec('skuCount', val ? parseInt(val, 10) : undefined);
-                  }}
-                  placeholder="VD: 150"
-                  className="w-full px-3.5 py-2.5 text-xs bg-white border border-purple-300 rounded-xl focus:border-purple-500 font-bold text-slate-900 shadow-2xs"
-                />
-              </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in duration-150">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Số Lượng Mã Hàng Quản Lý (SKUs) *
+              </label>
+              <input
+                type="text"
+                required
+                value={specs.skuCount ? specs.skuCount.toLocaleString('vi-VN') : ''}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, '');
+                  updateSpec('skuCount', val ? parseInt(val, 10) : undefined);
+                }}
+                placeholder="VD: 150"
+                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-bold text-slate-900 shadow-2xs"
+              />
+            </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
-                  <span>2. Dung Lượng Lưu Kho Đệm (Buffer Stock) *</span>
-                  <span className="text-[10px] text-purple-700 font-semibold">
-                    {specs.bufferStorageQty ? `${specs.bufferStorageQty.toLocaleString('vi-VN')} ${specs.bufferStorageUnit || 'Pallet (Vị trí)'}` : (specs.bufferPalletPositions ? `${specs.bufferPalletPositions} Pallet` : 'Chưa nhập')}
-                  </span>
-                </label>
-                <div className="grid grid-cols-12 gap-1.5">
-                  <div className="col-span-5">
-                    <input
-                      type="text"
-                      required
-                      value={specs.bufferStorageQty !== undefined ? specs.bufferStorageQty.toLocaleString('vi-VN') : (specs.bufferPalletPositions ? specs.bufferPalletPositions.toLocaleString('vi-VN') : '')}
-                      onChange={(e) => {
-                        const val = e.target.value.replace(/\D/g, '');
-                        const num = val ? parseInt(val, 10) : undefined;
-                        const unit = specs.bufferStorageUnit || 'Pallet (Vị trí)';
-                        onChange({
-                          ...specs,
-                          bufferStorageQty: num,
-                          bufferStorageUnit: unit,
-                          bufferPalletPositions: unit.includes('Pallet') ? num : specs.bufferPalletPositions,
-                        });
-                      }}
-                      placeholder="Số lượng (VD: 20)"
-                      className="w-full px-3 py-2 text-xs bg-white border border-purple-300 rounded-xl focus:border-purple-500 font-bold text-slate-900 shadow-2xs"
-                    />
-                  </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Dung Lượng Lưu Kho Đệm (Buffer Stock) *
+              </label>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2/5">
+                  <input
+                    type="text"
+                    required
+                    value={specs.bufferStorageQty !== undefined ? specs.bufferStorageQty.toLocaleString('vi-VN') : (specs.bufferPalletPositions ? specs.bufferPalletPositions.toLocaleString('vi-VN') : '')}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, '');
+                      const num = val ? parseInt(val, 10) : undefined;
+                      const unit = specs.bufferStorageUnit || 'Pallet (Vị trí)';
+                      onChange({
+                        ...specs,
+                        bufferStorageQty: num,
+                        bufferStorageUnit: unit,
+                        bufferPalletPositions: unit.includes('Pallet') ? num : specs.bufferPalletPositions,
+                      });
+                    }}
+                    placeholder="VD: 20"
+                    className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-bold text-slate-900 shadow-2xs"
+                  />
+                </div>
 
-                  <div className="col-span-7">
-                    <select
-                      value={specs.bufferStorageUnit || 'Pallet (Vị trí)'}
-                      onChange={(e) => {
-                        const unit = e.target.value;
-                        onChange({
-                          ...specs,
-                          bufferStorageUnit: unit,
-                          bufferPalletPositions: unit.includes('Pallet') ? specs.bufferStorageQty : specs.bufferPalletPositions,
-                        });
-                      }}
-                      className="w-full px-2.5 py-2 text-xs bg-white border border-purple-300 rounded-xl focus:border-purple-500 font-bold text-purple-900 shadow-2xs cursor-pointer"
-                    >
-                      <option value="Pallet (Vị trí)">🪵 Pallet (Vị trí Pallet)</option>
-                      <option value="Ngăn Kệ / Ô Kệ (Shelving Bins)">🗄️ Ngăn Kệ / Ô Kệ (Shelving Bins)</option>
-                      <option value="Khay Nhựa / Thùng Tote (Totes)">🧺 Khay Nhựa / Thùng Tote (Totes)</option>
-                      <option value="m² (Diện tích sàn)">📐 Diện Tích Sàn (m²)</option>
-                      <option value="CBM (Thể tích thực m³)">📦 Thể Tích (CBM m³)</option>
-                    </select>
-                  </div>
+                <div className="w-3/5">
+                  <select
+                    value={specs.bufferStorageUnit || 'Pallet (Vị trí)'}
+                    onChange={(e) => {
+                      const unit = e.target.value;
+                      onChange({
+                        ...specs,
+                        bufferStorageUnit: unit,
+                        bufferPalletPositions: unit.includes('Pallet') ? specs.bufferStorageQty : specs.bufferPalletPositions,
+                      });
+                    }}
+                    className="w-full h-10 px-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
+                  >
+                    <option value="Pallet (Vị trí)">🪵 Pallet (Vị trí)</option>
+                    <option value="Ngăn Kệ / Ô Kệ (Shelving Bins)">🗄️ Ngăn Kệ / Ô Kệ</option>
+                    <option value="Khay Nhựa / Thùng Tote (Totes)">🧺 Khay Nhựa / Thùng Tote</option>
+                    <option value="m² (Diện tích sàn)">📐 Diện Tích Sàn (m²)</option>
+                    <option value="CBM (Thể tích thực m³)">📦 Thể Tích (CBM m³)</option>
+                  </select>
                 </div>
               </div>
             </div>
-            <p className="text-[11px] text-purple-900 bg-purple-100/60 px-3 py-1.5 rounded-xl border border-purple-200/80">
-              💡 <strong>Hình thức Fulfillment B2C:</strong> Gói dịch vụ toàn diện bao gồm: Lưu kho đệm + Quản lý phần mềm WMS + Nhặt hàng (Pick) + Đóng gói (Pack) + Bàn giao tại cửa kho cho các đơn vị vận chuyển. <em>Lưu lượng xuất đơn hàng được khai báo chi tiết tại Mục 4 bên dưới.</em>
-            </p>
           </div>
         )}
       </div>
 
       {/* 4. Operations & Inventory Method: Hidden for Self-Storage */}
       {isSelfStorage ? (
-        <div className="p-4 bg-amber-50/70 border border-amber-200/90 rounded-2xl flex items-start gap-3.5 shadow-2xs animate-in fade-in duration-150">
-          <div className="p-2.5 rounded-xl bg-amber-500 text-white shrink-0 shadow-xs">
-            <ShieldCheck className="w-5 h-5" />
+        <div className="h-auto p-3.5 bg-white border border-slate-200 rounded-xl flex items-start gap-3 shadow-2xs animate-in fade-in duration-150">
+          <div className="p-2 rounded-lg bg-amber-500 text-white shrink-0">
+            <ShieldCheck className="w-4 h-4" />
           </div>
-          <div className="text-xs text-amber-950 flex-1">
-            <span className="font-bold block text-sm text-amber-900">
+          <div className="text-xs text-slate-800 flex-1">
+            <span className="font-bold block text-xs text-slate-900">
               🔑 Đặc Thù Vận Hành Mô Hình Kho Tự Quản (Self-Storage)
             </span>
-            <p className="text-amber-800/90 mt-1 leading-relaxed">
-              • <strong>Bàn giao khoang sàn riêng biệt:</strong> Khách hàng giữ chìa khóa / thẻ từ riêng và chủ động 100% thời gian ra vào xuất nhập hàng hóa 24/7.<br />
-              • <strong>Tự quản lý & bốc dỡ hàng:</strong> Không áp dụng quy trình kiểm soát của thủ kho, không phát sinh phụ phí bốc xếp nâng hạ (Handling) hay phí phần mềm quản lý WMS của nhà kho 3PL.
+            <p className="text-slate-500 mt-0.5 leading-relaxed text-[11px]">
+              Bàn giao khoang sàn riêng biệt, khách hàng giữ chìa khóa / thẻ từ riêng và chủ động ra vào 24/7. Không tính phí bốc xếp nâng hạ hay phí phần mềm WMS.
             </p>
           </div>
         </div>
       ) : (
-        <div className="p-4 bg-white border border-slate-200 rounded-2xl space-y-3.5 shadow-2xs">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-              <RefreshCw className="w-4 h-4 text-purple-600" />
-              <span>Thông Số Vận Hành Nhập - Xuất & Quản Lý Tồn Kho</span>
-            </span>
-            <span className="text-[11px] text-purple-700 font-bold bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200">
-              Chuẩn hóa Số lượng • Đơn vị • Chu kỳ
-            </span>
-          </div>
+        <div className="space-y-3.5 pt-1">
+          <span className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 text-slate-800">
+            <RefreshCw className="w-4 h-4 text-purple-600" />
+            <span>Thông Số Vận Hành Nhập - Xuất & Tồn Kho</span>
+          </span>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3.5">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* 4.1 Inbound Flow */}
-            <div className="p-3 bg-purple-50/40 rounded-xl border border-purple-100 space-y-1.5">
-              <label className="block text-xs font-bold text-slate-800 flex items-center justify-between">
-                <span>📥 Lưu Lượng Nhập Kho (Inbound)</span>
-                <span className="text-[10px] text-purple-800 font-semibold">
-                  {specs.inboundQty ? `${specs.inboundQty.toLocaleString('vi-VN')} ${specs.inboundUnit || 'Pallet'} / ${specs.inboundPeriod || 'Tuần'}` : 'Chưa thiết lập'}
-                </span>
+            <div className="space-y-1">
+              <label className="block text-xs font-semibold text-slate-700">
+                Lưu Lượng Nhập Kho (Inbound)
               </label>
-              <div className="grid grid-cols-12 gap-1.5">
-                <div className="col-span-4">
+              <div className="flex items-center gap-1.5">
+                <div className="w-1/3">
                   <input
                     type="text"
                     value={specs.inboundQty ? specs.inboundQty.toLocaleString('vi-VN') : ''}
@@ -961,12 +895,12 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
                         dailyInboundVolume: qty ? `${qty.toLocaleString('vi-VN')} ${unit} / ${period}` : '',
                       });
                     }}
-                    placeholder="Số lượng (VD: 2)"
-                    className="w-full px-3 py-2 text-xs bg-white border border-purple-200 rounded-xl focus:border-purple-500 font-bold text-slate-900 shadow-2xs"
+                    placeholder="VD: 2"
+                    className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-bold text-slate-900 shadow-2xs text-center"
                   />
                 </div>
 
-                <div className="col-span-5">
+                <div className="w-5/12">
                   <select
                     value={specs.inboundUnit || 'Pallet'}
                     onChange={(e) => {
@@ -979,20 +913,20 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
                         dailyInboundVolume: qty ? `${qty.toLocaleString('vi-VN')} ${unit} / ${period}` : '',
                       });
                     }}
-                    className="w-full px-2.5 py-2 text-xs bg-white border border-purple-200 rounded-xl focus:border-purple-500 font-semibold text-slate-800 shadow-2xs cursor-pointer"
+                    className="w-full h-10 px-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
                   >
                     <option value="Pallet">🪵 Pallet</option>
-                    <option value="Container 40ft (FEU)">🚢 Container 40ft (FEU)</option>
-                    <option value="Container 20ft (TEU)">⚓ Container 20ft (TEU)</option>
-                    <option value="Chuyến xe tải (Trucks)">🚚 Chuyến xe tải (Trucks)</option>
-                    <option value="Thùng / Kiện (Cartons)">📦 Thùng / Kiện (Cartons)</option>
+                    <option value="Container 40ft (FEU)">🚢 Container 40ft</option>
+                    <option value="Container 20ft (TEU)">⚓ Container 20ft</option>
+                    <option value="Chuyến xe tải (Trucks)">🚚 Chuyến xe tải</option>
+                    <option value="Thùng / Kiện (Cartons)">📦 Thùng / Kiện</option>
                     <option value="Tấn (Tons)">⚖️ Tấn (Tons)</option>
-                    <option value="Thể tích (CBM m³)">📦 Thể tích (CBM m³)</option>
-                    <option value="Đơn hàng (Orders)">⚡ Đơn hàng (Orders)</option>
+                    <option value="Thể tích (CBM m³)">📦 Thể tích CBM</option>
+                    <option value="Đơn hàng (Orders)">⚡ Đơn hàng</option>
                   </select>
                 </div>
 
-                <div className="col-span-3">
+                <div className="w-1/4">
                   <select
                     value={specs.inboundPeriod || 'Tuần'}
                     onChange={(e) => {
@@ -1005,7 +939,7 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
                         dailyInboundVolume: qty ? `${qty.toLocaleString('vi-VN')} ${unit} / ${period}` : '',
                       });
                     }}
-                    className="w-full px-2 py-2 text-xs bg-white border border-purple-200 rounded-xl focus:border-purple-500 font-bold text-purple-900 shadow-2xs cursor-pointer"
+                    className="w-full h-10 px-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
                   >
                     <option value="Ngày">/ Ngày</option>
                     <option value="Tuần">/ Tuần</option>
@@ -1016,15 +950,12 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
             </div>
 
             {/* 4.2 Outbound Flow */}
-            <div className="p-3 bg-purple-50/40 rounded-xl border border-purple-100 space-y-1.5">
-              <label className="block text-xs font-bold text-slate-800 flex items-center justify-between">
-                <span>📤 Lưu Lượng Xuất Kho (Outbound)</span>
-                <span className="text-[10px] text-purple-800 font-semibold">
-                  {specs.outboundQty ? `${specs.outboundQty.toLocaleString('vi-VN')} ${specs.outboundUnit || (isEcommerceWarehouse ? 'Đơn hàng (Orders)' : 'Pallet')} / ${specs.outboundPeriod || 'Ngày'}` : 'Chưa thiết lập'}
-                </span>
+            <div className="space-y-1">
+              <label className="block text-xs font-semibold text-slate-700">
+                Lưu Lượng Xuất Kho (Outbound)
               </label>
-              <div className="grid grid-cols-12 gap-1.5">
-                <div className="col-span-4">
+              <div className="flex items-center gap-1.5">
+                <div className="w-1/3">
                   <input
                     type="text"
                     value={specs.outboundQty ? specs.outboundQty.toLocaleString('vi-VN') : ''}
@@ -1042,12 +973,12 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
                         dailyOutboundVolume: qty ? `${qty.toLocaleString('vi-VN')} ${unit} / ${period}` : '',
                       });
                     }}
-                    placeholder="Số lượng (VD: 40)"
-                    className="w-full px-3 py-2 text-xs bg-white border border-purple-200 rounded-xl focus:border-purple-500 font-bold text-slate-900 shadow-2xs"
+                    placeholder="VD: 40"
+                    className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-bold text-slate-900 shadow-2xs text-center"
                   />
                 </div>
 
-                <div className="col-span-5">
+                <div className="w-5/12">
                   <select
                     value={specs.outboundUnit || (isEcommerceWarehouse ? 'Đơn hàng (Orders)' : 'Pallet')}
                     onChange={(e) => {
@@ -1061,20 +992,20 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
                         dailyOutboundVolume: qty ? `${qty.toLocaleString('vi-VN')} ${unit} / ${period}` : '',
                       });
                     }}
-                    className="w-full px-2.5 py-2 text-xs bg-white border border-purple-200 rounded-xl focus:border-purple-500 font-semibold text-slate-800 shadow-2xs cursor-pointer"
+                    className="w-full h-10 px-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
                   >
                     <option value="Pallet">🪵 Pallet</option>
-                    <option value="Container 40ft (FEU)">🚢 Container 40ft (FEU)</option>
-                    <option value="Container 20ft (TEU)">⚓ Container 20ft (TEU)</option>
-                    <option value="Chuyến xe tải (Trucks)">🚚 Chuyến xe tải (Trucks)</option>
-                    <option value="Thùng / Kiện (Cartons)">📦 Thùng / Kiện (Cartons)</option>
+                    <option value="Container 40ft (FEU)">🚢 Container 40ft</option>
+                    <option value="Container 20ft (TEU)">⚓ Container 20ft</option>
+                    <option value="Chuyến xe tải (Trucks)">🚚 Chuyến xe tải</option>
+                    <option value="Thùng / Kiện (Cartons)">📦 Thùng / Kiện</option>
                     <option value="Tấn (Tons)">⚖️ Tấn (Tons)</option>
-                    <option value="Thể tích (CBM m³)">📦 Thể tích (CBM m³)</option>
-                    <option value="Đơn hàng (Orders)">⚡ Đơn hàng (Orders)</option>
+                    <option value="Thể tích (CBM m³)">📦 Thể tích CBM</option>
+                    <option value="Đơn hàng (Orders)">⚡ Đơn hàng</option>
                   </select>
                 </div>
 
-                <div className="col-span-3">
+                <div className="w-1/4">
                   <select
                     value={specs.outboundPeriod || 'Ngày'}
                     onChange={(e) => {
@@ -1087,7 +1018,7 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
                         dailyOutboundVolume: qty ? `${qty.toLocaleString('vi-VN')} ${unit} / ${period}` : '',
                       });
                     }}
-                    className="w-full px-2 py-2 text-xs bg-white border border-purple-200 rounded-xl focus:border-purple-500 font-bold text-purple-900 shadow-2xs cursor-pointer"
+                    className="w-full h-10 px-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
                   >
                     <option value="Ngày">/ Ngày</option>
                     <option value="Tuần">/ Tuần</option>
@@ -1099,34 +1030,34 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
           </div>
 
           {/* 4.3 Inventory Rule & WMS API */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
             <div className="sm:col-span-1">
-              <label className="block text-xs font-bold text-slate-700 mb-1">
-                Nguyên Tắc Quản Lý Hạn Dùng / Xuất Tồn
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Nguyên Tắc Quản Lý Hạn Dùng
               </label>
               <select
                 value={specs.inventoryMethod || 'FIFO (Nhập trước xuất trước)'}
                 onChange={(e) => updateSpec('inventoryMethod', e.target.value as any)}
-                className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:border-purple-500 font-bold text-slate-900 cursor-pointer"
+                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
               >
                 <option value="FIFO (Nhập trước xuất trước)">FIFO (Nhập trước - Xuất trước)</option>
-                <option value="FEFO (Hạn gần xuất trước)">FEFO (Hạn gần - Xuất trước cho Dược/Thực phẩm)</option>
-                <option value="Serial / Lot Tracking">Serial / Lot Tracking (Điện tử/Thiết bị)</option>
+                <option value="FEFO (Hạn gần xuất trước)">FEFO (Hạn gần - Xuất trước)</option>
+                <option value="Serial / Lot Tracking">Serial / Lot Tracking</option>
                 <option value="Tiêu chuẩn">Quản lý tiêu chuẩn theo mã SKU</option>
               </select>
             </div>
 
-            <div className="sm:col-span-2 flex items-center p-2.5 bg-purple-50/60 border border-purple-200/80 rounded-xl">
-              <label className="flex items-center gap-2.5 text-xs text-slate-800 cursor-pointer select-none">
+            <div className="sm:col-span-2 flex items-center h-10 px-3.5 bg-white border border-slate-200 rounded-xl shadow-2xs mt-auto">
+              <label className="flex items-center gap-2.5 text-xs text-slate-800 cursor-pointer select-none truncate">
                 <input
                   type="checkbox"
                   id="warehousingWmsIntegrationCheck"
                   checked={specs.wmsIntegrationNeeded ?? true}
                   onChange={(e) => updateSpec('wmsIntegrationNeeded', e.target.checked)}
-                  className="rounded text-purple-600 focus:ring-purple-500 w-4 h-4 cursor-pointer"
+                  className="rounded-sm text-purple-600 focus:ring-purple-500 w-4 h-4 cursor-pointer shrink-0"
                 />
-                <span className="font-semibold">
-                  Yêu cầu kết nối cổng API / EDI giữa phần mềm WMS của nhà kho với hệ thống ERP / SAP / Haravan / KiotViet của khách hàng (Báo cáo tồn kho thời gian thực)
+                <span className="font-medium truncate">
+                  Yêu cầu kết nối cổng API / EDI giữa phần mềm WMS kho với hệ thống ERP / SAP / TMĐT
                 </span>
               </label>
             </div>
@@ -1135,9 +1066,9 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
       )}
 
       {/* 5. Location Requirements: Desired Warehouse Location & Distribution Radius */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+          <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
             <MapPin className="w-3.5 h-3.5 text-purple-600" />
             <span>Khu Vực / Tỉnh Thành Mong Muốn Đặt Kho *</span>
           </label>
@@ -1147,12 +1078,12 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
             value={origin}
             onChange={(e) => setOrigin(e.target.value)}
             placeholder="VD: KCN Sóng Thần 1, Dĩ An, Bình Dương hoặc KCN Hiệp Phước, TP.HCM"
-            className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 focus:outline-hidden font-medium text-slate-800"
+            className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 text-slate-900 shadow-2xs"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+          <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
             <MapPin className="w-3.5 h-3.5 text-rose-600" />
             <span>Phạm Vi & Bán Kính Phân Phối Trọng Tâm *</span>
           </label>
@@ -1162,7 +1093,7 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
             value={destination}
             onChange={(e) => setDestination(e.target.value)}
             placeholder="VD: Toàn bộ khu vực TP.HCM, Bình Dương, Đồng Nai & Miền Tây"
-            className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 focus:outline-hidden font-medium text-slate-800"
+            className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 text-slate-900 shadow-2xs"
           />
         </div>
       </div>

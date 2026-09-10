@@ -3,7 +3,7 @@ import { FileCheck, Zap, Calendar, TrendingUp, Sparkles, Check, Building2, Layer
 import { PricingType, ServiceType } from '../../../types';
 
 interface PricingTypeSectionProps {
-  pricingType: PricingType;
+  pricingType: PricingType | '' | undefined;
   onChangePricingType: (val: PricingType) => void;
   contractTerm?: string;
   onChangeContractTerm: (val: string) => void;
@@ -33,20 +33,14 @@ export const PricingTypeSection: React.FC<PricingTypeSectionProps> = ({
   const isCustoms = serviceType === 'Customs Clearance';
   const isProject = serviceType === 'Project Cargo';
   const isContract = isProject ? true : pricingType === 'CONTRACT';
+  const isSpot = pricingType === 'SPOT';
 
   // Ensure default contract term is appropriate for the selected mode
   React.useEffect(() => {
     if (isProject && pricingType !== 'CONTRACT') {
       onChangePricingType('CONTRACT');
     }
-    if (isWarehousing) {
-      if (!isContract && (!contractTerm || contractTerm.includes('năm') || contractTerm.includes('12 tháng') || contractTerm.includes('24 tháng'))) {
-        onChangeContractTerm('3 Tháng (Quý cao điểm / Vụ mùa)');
-      } else if (isContract && (!contractTerm || contractTerm.includes('Lưu đệm') || contractTerm.includes('Vụ mùa') || contractTerm.includes('3 Tháng') || contractTerm.includes('1 Tháng'))) {
-        onChangeContractTerm('Hợp đồng 12 tháng (1 năm tiêu chuẩn)');
-      }
-    }
-  }, [isProject, isWarehousing, isContract, pricingType, contractTerm, onChangeContractTerm, onChangePricingType]);
+  }, [isProject, pricingType, onChangePricingType]);
 
   const colorStyles = {
     blue: {
@@ -154,14 +148,14 @@ export const PricingTypeSection: React.FC<PricingTypeSectionProps> = ({
           <div
             onClick={() => onChangePricingType('SPOT')}
             className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-start gap-3 relative ${
-              !isContract
+              isSpot
                 ? `${colorStyles.activeBorder} shadow-xs`
                 : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/80 text-slate-700'
             }`}
           >
             <div
               className={`p-2 rounded-xl shrink-0 ${
-                !isContract ? colorStyles.badgeActive : 'bg-slate-100 text-slate-500'
+                isSpot ? colorStyles.badgeActive : 'bg-slate-100 text-slate-500'
               }`}
             >
               {isWarehousing ? <Layers className="w-4 h-4" /> : <Zap className="w-4 h-4" />}
@@ -175,7 +169,7 @@ export const PricingTypeSection: React.FC<PricingTypeSectionProps> = ({
                     ? 'Theo Lô / Tờ Khai Đơn Lẻ (Spot Rate)'
                     : 'Theo Lô / Chuyến Lẻ (Spot Rate)'}
                 </span>
-                {!isContract && (
+                {isSpot && (
                   <span className="p-0.5 rounded-full bg-emerald-500 text-white text-[10px]">
                     <Check className="w-3 h-3" />
                   </span>

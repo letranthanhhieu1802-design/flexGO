@@ -97,89 +97,83 @@ export const ColdChainInquiryForm: React.FC<ColdChainInquiryFormProps> = ({
   };
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-200">
-      {/* Service Header Info */}
-      <div className="p-3.5 bg-emerald-50/70 border border-emerald-200/80 rounded-2xl flex items-start gap-3">
-        <div className="p-2 rounded-xl bg-emerald-600 text-white shrink-0">
-          <ThermometerSnowflake className="w-5 h-5" />
-        </div>
-        <div className="text-xs text-emerald-950 flex-1">
-          <span className="font-bold block text-sm text-emerald-900">
-            Dịch Vụ Chuỗi Cung Ứng & Vận Tải Lạnh (Cold Chain Logistics)
-          </span>
-          <p className="text-emerald-800/80 mt-0.5">
-            Kiểm soát dải nhiệt độ nghiêm ngặt cho Thủy hải sản đông lạnh, Thực phẩm tươi sống, Sữa tươi và Dược phẩm vắc-xin theo chuẩn GDP/WHO.
-          </p>
+    <div className="space-y-5 animate-in fade-in duration-200">
+      {/* 1. Cold Storage Route */}
+      <div className="space-y-1.5">
+        <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
+          <MapPin className="w-3.5 h-3.5 text-emerald-600" />
+          <span>Tuyến Đường & Địa Điểm Kho Lạnh (Cold Chain Corridor) *</span>
+        </label>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+              Kho Lạnh Xuất Phát (Cold Storage Origin) *
+            </label>
+            <input
+              type="text"
+              required
+              value={origin}
+              onChange={(e) => setOrigin(e.target.value)}
+              placeholder="VD: Kho Lạnh Hoàng Lai, KCN Tân Tạo, Bình Tân, TP.HCM"
+              className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-emerald-500 font-medium text-slate-900 shadow-2xs placeholder:text-slate-400"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+              Kho Lạnh Đích / Điểm Giao (Cold Storage Destination) *
+            </label>
+            <input
+              type="text"
+              required
+              value={destination}
+              onChange={(e) => setDestination(e.target.value)}
+              placeholder="VD: Trung tâm phân phối WinCommerce, KCN Quang Minh, Hà Nội"
+              className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-emerald-500 font-medium text-slate-900 shadow-2xs placeholder:text-slate-400"
+            />
+          </div>
         </div>
       </div>
 
-      {/* Corridor & Route */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-        <div>
-          <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1.5">
-            <MapPin className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Kho Lạnh Xuất Phát (Cold Storage Origin) *</span>
-          </label>
-          <input
-            type="text"
-            required
-            value={origin}
-            onChange={(e) => setOrigin(e.target.value)}
-            placeholder="VD: Kho Lạnh Hoàng Lai, KCN Tân Tạo, Bình Tân, TP.HCM"
-            className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-emerald-500 focus:outline-hidden"
-          />
-        </div>
+      {/* 2. Temperature Range & Vehicle Type */}
+      <div className="space-y-1.5">
+        <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
+          <ThermometerSnowflake className="w-3.5 h-3.5 text-emerald-600" />
+          <span>Yêu Cầu Nhiệt Độ & Cấu Hình Phương Tiện *</span>
+        </label>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+              Dải Nhiệt Độ Yêu Cầu (Temperature Category) *
+            </label>
+            <select
+              value={specs.temperatureCategory}
+              onChange={(e) => updateSpec('temperatureCategory', e.target.value as any)}
+              className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-emerald-500 font-bold text-emerald-950 shadow-2xs cursor-pointer"
+            >
+              <option value="Frozen (-25°C to -18°C: Kem, Thủy hải sản)">❄️ Đông Sâu (-25°C đến -18°C) - Thủy hải sản, Kem</option>
+              <option value="Chilled (0°C to +4°C: Thịt tươi, Sữa)">🥦 Hàng Mát (0°C đến +4°C) - Sữa chua, Trái cây, Thịt tươi</option>
+              <option value="Cool (+8°C to +15°C: Rau củ, Trái cây)">🍫 Mát Nhẹ (+8°C đến +15°C) - Socola, Bánh kẹo, Rượu vang</option>
+              <option value="Pharma GDP (+2°C to +8°C / +15°C to +25°C)">💊 Dược Phẩm GDP (+2°C đến +8°C) - Vắc-xin, Sinh phẩm</option>
+            </select>
+          </div>
 
-        <div>
-          <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1.5">
-            <MapPin className="w-3.5 h-3.5 text-rose-600" />
-            <span>Kho Lạnh Đích / Điểm Giao *</span>
-          </label>
-          <input
-            type="text"
-            required
-            value={destination}
-            onChange={(e) => setDestination(e.target.value)}
-            placeholder="VD: Trung tâm phân phối WinCommerce, KCN Quang Minh, Hà Nội"
-            className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-emerald-500 focus:outline-hidden"
-          />
-        </div>
-      </div>
-
-      {/* Temperature Range & Vehicle Type */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-        <div>
-          <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1.5">
-            <ThermometerSnowflake className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Dải Nhiệt Độ Yêu Cầu (Temperature Category) *</span>
-          </label>
-          <select
-            value={specs.temperatureCategory}
-            onChange={(e) => updateSpec('temperatureCategory', e.target.value as any)}
-            className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-emerald-500 font-bold text-emerald-950"
-          >
-            <option value="Frozen (-25°C to -18°C: Kem, Thủy hải sản)">❄️ Đông Sâu (-25°C đến -18°C) - Thủy hải sản, Kem</option>
-            <option value="Chilled (0°C to +4°C: Thịt tươi, Sữa)">🥦 Hàng Mát (0°C đến +4°C) - Sữa chua, Trái cây, Thịt tươi</option>
-            <option value="Cool (+8°C to +15°C: Rau củ, Trái cây)">🍫 Mát Nhẹ (+8°C đến +15°C) - Socola, Bánh kẹo, Rượu vang</option>
-            <option value="Pharma GDP (+2°C to +8°C / +15°C to +25°C)">💊 Dược Phẩm GDP (+2°C đến +8°C) - Vắc-xin, Sinh phẩm</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-xs font-bold text-slate-700 mb-1">
-            Loại Xe / Container Lạnh *
-          </label>
-          <select
-            value={specs.vehicleOrContType}
-            onChange={(e) => updateSpec('vehicleOrContType', e.target.value as any)}
-            className="w-full px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-emerald-500 font-bold text-slate-800"
-          >
-            <option value="Xe tải lạnh 1.5T">Xe Tải Lạnh 1.5T</option>
-            <option value="Xe tải lạnh 3.5T">Xe Tải Lạnh 3.5T</option>
-            <option value="Xe tải lạnh 8T-15T">Xe Tải Lạnh Nặng 8T - 15T</option>
-            <option value="Container Lạnh 20RF">Container Lạnh 20RF (Reefer)</option>
-            <option value="Container Lạnh 40RF">Container Lạnh 40RF (Reefer)</option>
-          </select>
+          <div>
+            <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+              Loại Xe / Container Lạnh *
+            </label>
+            <select
+              value={specs.vehicleOrContType}
+              onChange={(e) => updateSpec('vehicleOrContType', e.target.value as any)}
+              className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-emerald-500 font-bold text-slate-800 shadow-2xs cursor-pointer"
+            >
+              <option value="Xe tải lạnh 1.5T">Xe Tải Lạnh 1.5T</option>
+              <option value="Xe tải lạnh 3.5T">Xe Tải Lạnh 3.5T</option>
+              <option value="Xe tải lạnh 8T-15T">Xe Tải Lạnh Nặng 8T - 15T</option>
+              <option value="Container Lạnh 20RF">Container Lạnh 20RF (Reefer)</option>
+              <option value="Container Lạnh 40RF">Container Lạnh 40RF (Reefer)</option>
+            </select>
+          </div>
         </div>
       </div>
     </div>
