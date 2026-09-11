@@ -322,10 +322,11 @@ export const PricingTypeSection: React.FC<PricingTypeSectionProps> = ({
               </label>
               {isProject ? (
                 <select
-                  value={contractTerm || 'Hợp đồng 12 tháng (1 năm tiêu chuẩn đấu thầu)'}
+                  value={contractTerm || ''}
                   onChange={(e) => onChangeContractTerm(e.target.value)}
                   className={`w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white ${colorStyles.focusRing} font-bold text-slate-900 cursor-pointer`}
                 >
+                  <option value="">-- Chọn thời hạn hợp đồng dự án --</option>
                   <option value="Hợp đồng 12 tháng (1 năm tiêu chuẩn đấu thầu)">
                     📅 Hợp đồng 12 tháng (1 năm tiêu chuẩn đấu thầu dự án)
                   </option>
@@ -346,10 +347,11 @@ export const PricingTypeSection: React.FC<PricingTypeSectionProps> = ({
                 !isContract ? (
                   // Kho tràn: 1 - 6 tháng
                   <select
-                    value={contractTerm || '3 Tháng (Quý cao điểm / Vụ mùa)'}
+                    value={contractTerm || ''}
                     onChange={(e) => onChangeContractTerm(e.target.value)}
                     className={`w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white ${colorStyles.focusRing} font-bold text-slate-900 cursor-pointer`}
                   >
+                    <option value="">-- Chọn thời gian thuê kho tràn vụ --</option>
                     <option value="1 Tháng (Lưu đệm đột xuất / Thời vụ ngắn)">
                       🗓️ 1 Tháng (Lưu đệm đột xuất / Thời vụ ngắn)
                     </option>
@@ -366,10 +368,11 @@ export const PricingTypeSection: React.FC<PricingTypeSectionProps> = ({
                 ) : (
                   // Kho dài hạn: 1 - 5 năm
                   <select
-                    value={contractTerm || 'Hợp đồng 12 tháng (1 năm tiêu chuẩn)'}
+                    value={contractTerm || ''}
                     onChange={(e) => onChangeContractTerm(e.target.value)}
                     className={`w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white ${colorStyles.focusRing} font-bold text-slate-900 cursor-pointer`}
                   >
+                    <option value="">-- Chọn thời hạn hợp đồng kho dài hạn --</option>
                     <option value="Hợp đồng 12 tháng (1 năm tiêu chuẩn)">
                       📅 Hợp đồng 12 tháng (1 năm tiêu chuẩn doanh nghiệp)
                     </option>
@@ -387,10 +390,11 @@ export const PricingTypeSection: React.FC<PricingTypeSectionProps> = ({
               ) : (
                 // Các dịch vụ khác
                 <select
-                  value={contractTerm || 'Hợp đồng 12 tháng (1 năm tiêu chuẩn)'}
+                  value={contractTerm || ''}
                   onChange={(e) => onChangeContractTerm(e.target.value)}
                   className={`w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white ${colorStyles.focusRing} font-bold text-slate-900 cursor-pointer`}
                 >
+                  <option value="">-- Chọn thời hạn hợp đồng --</option>
                   <option value="Hợp đồng 3 tháng (Ngắn hạn / Thử nghiệm)">
                     📅 Hợp đồng 3 tháng (Ngắn hạn / Thử nghiệm)
                   </option>
@@ -438,10 +442,11 @@ export const PricingTypeSection: React.FC<PricingTypeSectionProps> = ({
                     3. Đơn Vị Tần Suất Khai Báo (Committed Frequency) *
                   </label>
                   <select
-                    value={committedFrequency || 'Tờ khai / Tháng'}
+                    value={committedFrequency || ''}
                     onChange={(e) => onChangeCommittedFrequency?.(e.target.value)}
                     className={`w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white ${colorStyles.focusRing} font-bold text-slate-900 cursor-pointer`}
                   >
+                    <option value="">-- Chọn đơn vị tần suất --</option>
                     <option value="Tờ khai / Tháng">📑 Tờ khai / Tháng (Phổ biến nhất)</option>
                     <option value="Tờ khai / Tuần">📑 Tờ khai / Tuần</option>
                     <option value="Tờ khai / Quý">📑 Tờ khai / Quý</option>

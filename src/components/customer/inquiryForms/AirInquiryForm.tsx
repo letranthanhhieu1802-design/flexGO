@@ -279,10 +279,11 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
                 </span>
               </label>
               <select
-                value={specs.originServiceTerm || 'AIRPORT'}
+                value={specs.originServiceTerm || ''}
                 onChange={(e) => updateSpec('originServiceTerm', e.target.value as any)}
                 className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-sky-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
               >
+                <option value="">-- Chọn Điều Kiện Nhận Hàng * --</option>
                 <option value="Door">🚪 Door (Lấy tận kho người gửi / Shipper)</option>
                 <option value="Airport">✈️ Airport (Nhận tại ga hàng hóa sân bay đi / AOD)</option>
               </select>
@@ -299,10 +300,11 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
                 </span>
               </label>
               <select
-                value={specs.destinationServiceTerm || 'AIRPORT'}
+                value={specs.destinationServiceTerm || ''}
                 onChange={(e) => updateSpec('destinationServiceTerm', e.target.value as any)}
                 className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
               >
+                <option value="">-- Chọn Điều Kiện Giao Hàng * --</option>
                 <option value="Door">🚪 Door (Giao tận kho người nhận / Consignee)</option>
                 <option value="Airport">✈️ Airport (Giao tại ga hàng hóa sân bay đến / AOA)</option>
               </select>
@@ -528,7 +530,8 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
             </label>
             <input
               type="text"
-              value={specs.packageCount ? specs.packageCount.toLocaleString('vi-VN') : ''}
+              inputMode="numeric"
+              value={specs.packageCount !== undefined && specs.packageCount !== null ? specs.packageCount : ''}
               onChange={(e) => {
                 const val = e.target.value.replace(/\D/g, '');
                 updateSpec('packageCount', val ? Number(val) : undefined);
@@ -557,7 +560,8 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
             </label>
             <input
               type="text"
-              value={specs.grossWeightKgs ? specs.grossWeightKgs.toLocaleString('vi-VN') : ''}
+              inputMode="numeric"
+              value={specs.grossWeightKgs !== undefined && specs.grossWeightKgs !== null ? specs.grossWeightKgs : ''}
               onChange={(e) => {
                 const val = e.target.value.replace(/\D/g, '');
                 updateSpec('grossWeightKgs', val ? Number(val) : undefined);
@@ -601,15 +605,10 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
             <input
               type="text"
               inputMode="numeric"
-              value={specs.shipmentCount !== undefined && specs.shipmentCount !== null ? (specs.shipmentCount === 0 ? '' : specs.shipmentCount) : ''}
+              value={specs.shipmentCount !== undefined && specs.shipmentCount !== null ? specs.shipmentCount : ''}
               onChange={(e) => {
                 const raw = e.target.value.replace(/\D/g, '');
-                updateSpec('shipmentCount', raw === '' ? 0 : parseInt(raw, 10));
-              }}
-              onBlur={() => {
-                if (!specs.shipmentCount || specs.shipmentCount < 1) {
-                  updateSpec('shipmentCount', 1);
-                }
+                updateSpec('shipmentCount', raw === '' ? undefined : parseInt(raw, 10));
               }}
               placeholder="VD: 1"
               className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-bold text-slate-900 shadow-2xs"
@@ -621,10 +620,11 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
               Đơn Vị (Tần Suất Vận Chuyển) *
             </label>
             <select
-              value={specs.frequencyUnit || 'Chuyến / Tháng'}
+              value={specs.frequencyUnit || ''}
               onChange={(e) => updateSpec('frequencyUnit', e.target.value)}
               className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
             >
+              <option value="">-- Chọn Đơn Vị Tần Suất --</option>
               <option value="Chuyến / Ngày">Chuyến / Ngày</option>
               <option value="Chuyến / Tuần">Chuyến / Tuần</option>
               <option value="Chuyến / Tháng">Chuyến / Tháng</option>

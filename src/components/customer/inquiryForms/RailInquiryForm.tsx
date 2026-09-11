@@ -101,60 +101,66 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
   const isFCL = specs.mode === 'FCL (Nguyên container ga - ga)';
 
   // Helper for LCL auto calculation
-  const handleLclDimChange = (dimKey: 'lengthCm' | 'widthCm' | 'heightCm', val: number) => {
-    const currentDims = specs.lclDimensions || { lengthCm: 120, widthCm: 100, heightCm: 150 };
-    const newDims = { ...currentDims, [dimKey]: val };
-    const pieces = specs.lclPieces || 1;
+  const handleLclDimChange = (dimKey: 'lengthCm' | 'widthCm' | 'heightCm', val: number | undefined) => {
+    const currentDims = specs.lclDimensions || { lengthCm: 0, widthCm: 0, heightCm: 0 };
+    const newDims = { ...currentDims, [dimKey]: val || 0 };
+    const pieces = specs.lclPieces || 0;
     
     // Calculate total CBM: (L * W * H / 1,000,000) * pieces
+    const hasAnyDim = (newDims.lengthCm > 0 || newDims.widthCm > 0 || newDims.heightCm > 0);
     const singleCbm = (newDims.lengthCm * newDims.widthCm * newDims.heightCm) / 1000000;
-    const totalCbm = parseFloat((singleCbm * pieces).toFixed(2));
+    const totalCbm = (singleCbm > 0 && pieces > 0) ? parseFloat((singleCbm * pieces).toFixed(2)) : undefined;
     
     // Standard Rail Freight LCL Chargeable Ratio W/M: 1 CBM = 1000 kg (1 RT - Revenue Ton)
-    const volumetricWeight = Math.round(totalCbm * 1000);
+    const volumetricWeight = totalCbm ? Math.round(totalCbm * 1000) : 0;
     const grossWeight = specs.lclGrossWeightKg || 0;
     const chargeableWeight = Math.max(grossWeight, volumetricWeight);
-    const revenueTon = parseFloat((chargeableWeight / 1000).toFixed(2));
+    const revenueTon = chargeableWeight > 0 ? parseFloat((chargeableWeight / 1000).toFixed(2)) : undefined;
 
     onChange({
       ...specs,
-      lclDimensions: newDims,
+      lclDimensions: hasAnyDim ? newDims : undefined,
       lclCbm: totalCbm,
-      lclChargeableWeightKg: chargeableWeight,
+      lclChargeableWeightKg: chargeableWeight > 0 ? chargeableWeight : (grossWeight > 0 ? grossWeight : undefined),
       lclRevenueTon: revenueTon,
       cbmVolume: totalCbm,
     });
   };
 
-  const handleLclPiecesChange = (pieces: number) => {
-    const dims = specs.lclDimensions || { lengthCm: 120, widthCm: 100, heightCm: 150 };
-    const singleCbm = (dims.lengthCm * dims.widthCm * dims.heightCm) / 1000000;
-    const totalCbm = parseFloat((singleCbm * pieces).toFixed(2));
-    const volumetricWeight = Math.round(totalCbm * 1000);
+  const handleLclPiecesChange = (pieces: number | undefined) => {
+    const dims = specs.lclDimensions;
+    let totalCbm: number | undefined = undefined;
+    if (dims && pieces && pieces > 0) {
+      const singleCbm = (dims.lengthCm * dims.widthCm * dims.heightCm) / 1000000;
+      if (singleCbm > 0) {
+        totalCbm = parseFloat((singleCbm * pieces).toFixed(2));
+      }
+    }
+    const volumetricWeight = totalCbm ? Math.round(totalCbm * 1000) : 0;
     const grossWeight = specs.lclGrossWeightKg || 0;
     const chargeableWeight = Math.max(grossWeight, volumetricWeight);
-    const revenueTon = parseFloat((chargeableWeight / 1000).toFixed(2));
+    const revenueTon = chargeableWeight > 0 ? parseFloat((chargeableWeight / 1000).toFixed(2)) : undefined;
 
     onChange({
       ...specs,
       lclPieces: pieces,
       lclCbm: totalCbm,
-      lclChargeableWeightKg: chargeableWeight,
+      lclChargeableWeightKg: chargeableWeight > 0 ? chargeableWeight : (grossWeight > 0 ? grossWeight : undefined),
       lclRevenueTon: revenueTon,
       cbmVolume: totalCbm,
     });
   };
 
-  const handleLclGrossWeightChange = (gwKg: number) => {
+  const handleLclGrossWeightChange = (gwKg: number | undefined) => {
     const cbm = specs.lclCbm || 0;
     const volumetricWeight = Math.round(cbm * 1000);
-    const chargeableWeight = Math.max(gwKg, volumetricWeight);
-    const revenueTon = parseFloat((chargeableWeight / 1000).toFixed(2));
+    const chargeableWeight = Math.max(gwKg || 0, volumetricWeight);
+    const revenueTon = chargeableWeight > 0 ? parseFloat((chargeableWeight / 1000).toFixed(2)) : undefined;
 
     onChange({
       ...specs,
       lclGrossWeightKg: gwKg,
-      lclChargeableWeightKg: chargeableWeight,
+      lclChargeableWeightKg: chargeableWeight > 0 ? chargeableWeight : undefined,
       lclRevenueTon: revenueTon,
       grossWeightKgs: gwKg,
     });
@@ -309,10 +315,11 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
               Điều Kiện Nhận Hàng (Origin Term) *
             </label>
             <select
-              value={specs.originServiceTerm || (isFCL ? 'CY' : 'CFS')}
+              value={specs.originServiceTerm || ''}
               onChange={(e) => updateSpec('originServiceTerm', e.target.value as any)}
               className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-bold text-slate-900 shadow-2xs cursor-pointer"
             >
+              <option value="">-- Chọn Điều Kiện Nhận Hàng * --</option>
               <option value="Door">🚪 Door (Lấy tận kho người gửi / Shipper)</option>
               <option value="CY">⚓ CY (Nhận tại bãi container ga xuất phát)</option>
               <option value="CFS">📦 CFS (Nhận tại kho hàng lẻ ga xuất phát)</option>
@@ -324,10 +331,11 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
               Điều Kiện Giao Hàng (Destination Term) *
             </label>
             <select
-              value={specs.destinationServiceTerm || (isFCL ? 'CY' : 'CFS')}
+              value={specs.destinationServiceTerm || ''}
               onChange={(e) => updateSpec('destinationServiceTerm', e.target.value as any)}
               className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-bold text-slate-900 shadow-2xs cursor-pointer"
             >
+              <option value="">-- Chọn Điều Kiện Giao Hàng * --</option>
               <option value="Door">🚪 Door (Giao tận kho người nhận / Consignee)</option>
               <option value="CY">⚓ CY (Giao tại bãi container ga đích đến)</option>
               <option value="CFS">📦 CFS (Giao tại kho hàng lẻ ga đích đến)</option>
@@ -431,10 +439,11 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
             <div>
               <label className="block text-[11px] font-semibold text-slate-600 mb-1">Loại Container / Toa Xe *</label>
               <select
-                value={specs.containerType || 'Cont 40ft HC'}
+                value={specs.containerType || ''}
                 onChange={(e) => updateSpec('containerType', e.target.value as any)}
                 className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-bold text-blue-950 shadow-2xs cursor-pointer"
               >
+                <option value="">-- Chọn Loại Container / Toa Xe * --</option>
                 <option value="Cont 40ft HC">Cont 40ft High Cube (40HC - Phổ biến nhất)</option>
                 <option value="Cont 20ft">Cont 20ft Thường (20DC)</option>
                 <option value="Cont Lạnh (Reefer Rail)">Container Lạnh 40RF (Có máy phát điện Genset)</option>
@@ -445,10 +454,11 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
             <div>
               <label className="block text-[11px] font-semibold text-slate-600 mb-1">Điều Khoản Thương Mại (Incoterms)</label>
               <select
-                value={specs.incoterm || 'DAP'}
+                value={specs.incoterm || ''}
                 onChange={(e) => updateSpec('incoterm', e.target.value)}
                 className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-medium text-slate-800 shadow-2xs cursor-pointer"
               >
+                <option value="">-- Chọn Incoterms (Tùy chọn) --</option>
                 <option value="DAP">DAP (Delivered at Place - Giao tại ga đích)</option>
                 <option value="FCA">FCA (Free Carrier - Giao cho bên vận chuyển ga đi)</option>
                 <option value="CPT">CPT (Carriage Paid To - Cước trả tới ga đến)</option>
@@ -463,20 +473,15 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                1. Số Lượng Container / Toa *
+                1. Số Lượng Container / Toa Xe *
               </label>
               <input
                 type="text"
                 inputMode="numeric"
-                value={specs.containerCount !== undefined && specs.containerCount !== null ? (specs.containerCount === 0 ? '' : specs.containerCount) : 1}
+                value={specs.containerCount !== undefined && specs.containerCount !== null ? specs.containerCount : ''}
                 onChange={(e) => {
                   const raw = e.target.value.replace(/\D/g, '');
-                  updateSpec('containerCount', raw === '' ? 0 : parseInt(raw, 10));
-                }}
-                onBlur={() => {
-                  if (!specs.containerCount || specs.containerCount < 1) {
-                    updateSpec('containerCount', 1);
-                  }
+                  updateSpec('containerCount', raw === '' ? undefined : parseInt(raw, 10));
                 }}
                 placeholder="VD: 1, 5, 10, 30..."
                 className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-bold text-slate-900 shadow-2xs"
@@ -488,10 +493,11 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
                 2. Đơn Vị (Tần Suất Vận Chuyển) *
               </label>
               <select
-                value={specs.containerCountUnit || 'Container / Tháng'}
+                value={specs.containerCountUnit || ''}
                 onChange={(e) => updateSpec('containerCountUnit', e.target.value)}
                 className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-bold text-slate-900 shadow-2xs cursor-pointer"
               >
+                <option value="">-- Chọn Đơn Vị Tần Suất --</option>
                 <option value="Container / Ngày">📅 Ngày (Container / Ngày)</option>
                 <option value="Container / Tuần">📆 Tuần (Container / Tuần)</option>
                 <option value="Container / Tháng">🗓️ Tháng (Container / Tháng)</option>
@@ -509,8 +515,9 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
                   type="number"
                   min="1"
                   max="60"
-                  value={specs.freeDemDetDaysRequested || 7}
-                  onChange={(e) => updateSpec('freeDemDetDaysRequested', parseInt(e.target.value, 10) || 7)}
+                  value={specs.freeDemDetDaysRequested || ''}
+                  onChange={(e) => updateSpec('freeDemDetDaysRequested', e.target.value ? parseInt(e.target.value, 10) : undefined)}
+                  placeholder="VD: 7"
                   className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-bold text-slate-800 pr-12 shadow-2xs"
                 />
                 <span className="absolute right-3 top-2.5 text-xs font-semibold text-slate-400">Ngày</span>
@@ -543,10 +550,11 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
               </label>
               <input
                 type="text"
-                value={specs.lclPieces ? specs.lclPieces.toLocaleString('vi-VN') : ''}
+                inputMode="numeric"
+                value={specs.lclPieces !== undefined && specs.lclPieces !== null ? specs.lclPieces : ''}
                 onChange={(e) => {
                   const val = e.target.value.replace(/\D/g, '');
-                  handleLclPiecesChange(val ? parseInt(val, 10) : 1);
+                  handleLclPiecesChange(val ? parseInt(val, 10) : undefined);
                 }}
                 placeholder="VD: 4"
                 className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-bold text-slate-900 shadow-2xs"
@@ -560,32 +568,35 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
               <div className="grid grid-cols-3 gap-2">
                 <input
                   type="text"
-                  value={specs.lclDimensions?.lengthCm ? specs.lclDimensions.lengthCm.toLocaleString('vi-VN') : ''}
+                  inputMode="numeric"
+                  value={specs.lclDimensions?.lengthCm !== undefined && specs.lclDimensions.lengthCm !== null && specs.lclDimensions.lengthCm > 0 ? specs.lclDimensions.lengthCm : ''}
                   onChange={(e) => {
                     const val = e.target.value.replace(/\D/g, '');
-                    handleLclDimChange('lengthCm', val ? parseInt(val, 10) : 0);
+                    handleLclDimChange('lengthCm', val ? parseInt(val, 10) : undefined);
                   }}
-                  placeholder="Dài 120cm"
+                  placeholder="Dài cm"
                   className="w-full h-10 px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-xl text-center font-bold text-slate-800 shadow-2xs"
                 />
                 <input
                   type="text"
-                  value={specs.lclDimensions?.widthCm ? specs.lclDimensions.widthCm.toLocaleString('vi-VN') : ''}
+                  inputMode="numeric"
+                  value={specs.lclDimensions?.widthCm !== undefined && specs.lclDimensions.widthCm !== null && specs.lclDimensions.widthCm > 0 ? specs.lclDimensions.widthCm : ''}
                   onChange={(e) => {
                     const val = e.target.value.replace(/\D/g, '');
-                    handleLclDimChange('widthCm', val ? parseInt(val, 10) : 0);
+                    handleLclDimChange('widthCm', val ? parseInt(val, 10) : undefined);
                   }}
-                  placeholder="Rộng 100cm"
+                  placeholder="Rộng cm"
                   className="w-full h-10 px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-xl text-center font-bold text-slate-800 shadow-2xs"
                 />
                 <input
                   type="text"
-                  value={specs.lclDimensions?.heightCm ? specs.lclDimensions.heightCm.toLocaleString('vi-VN') : ''}
+                  inputMode="numeric"
+                  value={specs.lclDimensions?.heightCm !== undefined && specs.lclDimensions.heightCm !== null && specs.lclDimensions.heightCm > 0 ? specs.lclDimensions.heightCm : ''}
                   onChange={(e) => {
                     const val = e.target.value.replace(/\D/g, '');
-                    handleLclDimChange('heightCm', val ? parseInt(val, 10) : 0);
+                    handleLclDimChange('heightCm', val ? parseInt(val, 10) : undefined);
                   }}
-                  placeholder="Cao 150cm"
+                  placeholder="Cao cm"
                   className="w-full h-10 px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-xl text-center font-bold text-slate-800 shadow-2xs"
                 />
               </div>
@@ -600,12 +611,13 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
               </label>
               <input
                 type="text"
-                value={specs.lclGrossWeightKg ? specs.lclGrossWeightKg.toLocaleString('vi-VN') : ''}
+                inputMode="numeric"
+                value={specs.lclGrossWeightKg !== undefined && specs.lclGrossWeightKg !== null && specs.lclGrossWeightKg > 0 ? specs.lclGrossWeightKg : ''}
                 onChange={(e) => {
                   const val = e.target.value.replace(/\D/g, '');
-                  handleLclGrossWeightChange(val ? parseInt(val, 10) : 0);
+                  handleLclGrossWeightChange(val ? parseInt(val, 10) : undefined);
                 }}
-                placeholder="VD: 1.000"
+                placeholder="VD: 1000"
                 className="w-full h-10 px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-bold text-slate-900 shadow-2xs"
               />
             </div>
@@ -615,7 +627,7 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
                 Tổng Thể Tích Tính Toán (CBM)
               </label>
               <div className="h-10 px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl font-bold text-blue-900 flex items-center">
-                {specs.lclCbm || 1.8} CBM
+                {specs.lclCbm !== undefined && specs.lclCbm !== null ? `${specs.lclCbm} CBM` : '-- CBM'}
               </div>
             </div>
 
@@ -624,8 +636,8 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
                 Trọng Lượng Tính Cước (Chargeable W/M)
               </label>
               <div className="h-10 px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl font-bold text-indigo-900 flex items-center justify-between">
-                <span>{specs.lclChargeableWeightKg ? specs.lclChargeableWeightKg.toLocaleString('vi-VN') : '1.800'} Kg</span>
-                <span className="text-[10px] text-indigo-600 font-medium">({specs.lclRevenueTon || 1.8} RT)</span>
+                <span>{specs.lclChargeableWeightKg !== undefined && specs.lclChargeableWeightKg !== null ? `${specs.lclChargeableWeightKg.toLocaleString('vi-VN')} Kg` : '-- Kg'}</span>
+                <span className="text-[10px] text-indigo-600 font-medium">({specs.lclRevenueTon !== undefined && specs.lclRevenueTon !== null ? `${specs.lclRevenueTon} RT` : '-- RT'})</span>
               </div>
             </div>
           </div>
@@ -653,15 +665,10 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
               <input
                 type="text"
                 inputMode="numeric"
-                value={specs.lclShipmentCount !== undefined && specs.lclShipmentCount !== null ? (specs.lclShipmentCount === 0 ? '' : specs.lclShipmentCount) : 1}
+                value={specs.lclShipmentCount !== undefined && specs.lclShipmentCount !== null ? specs.lclShipmentCount : ''}
                 onChange={(e) => {
                   const raw = e.target.value.replace(/\D/g, '');
-                  updateSpec('lclShipmentCount', raw === '' ? 0 : parseInt(raw, 10));
-                }}
-                onBlur={() => {
-                  if (!specs.lclShipmentCount || specs.lclShipmentCount < 1) {
-                    updateSpec('lclShipmentCount', 1);
-                  }
+                  updateSpec('lclShipmentCount', raw === '' ? undefined : parseInt(raw, 10));
                 }}
                 placeholder="VD: 1, 2, 5, 10..."
                 className="w-full h-10 px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-bold text-slate-900 shadow-2xs"
@@ -673,10 +680,11 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
                 2. Đơn Vị (Tần Suất Vận Chuyển) *
               </label>
               <select
-                value={specs.lclFrequencyUnit || 'Chuyến / Tháng'}
+                value={specs.lclFrequencyUnit || ''}
                 onChange={(e) => updateSpec('lclFrequencyUnit', e.target.value)}
                 className="w-full h-10 px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-bold text-slate-900 shadow-2xs cursor-pointer"
               >
+                <option value="">-- Chọn Đơn Vị Tần Suất --</option>
                 <option value="Chuyến / Ngày">📅 Ngày (Chuyến / Ngày)</option>
                 <option value="Chuyến / Tuần">📆 Tuần (Chuyến / Tuần)</option>
                 <option value="Chuyến / Tháng">🗓️ Tháng (Chuyến / Tháng)</option>

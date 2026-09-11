@@ -180,9 +180,11 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
 
   // Active pick-up and drop-off points
   const isTrucking = inquiry.serviceType === 'Trucking';
+  const isTruckingLtl = isTrucking && (trucking?.loadType?.includes('LTL') || inquiry.title?.toLowerCase().includes('ltl'));
   const isLcl = inquiry.serviceType === 'Sea Freight (LCL)' || ocean?.mode?.includes('LCL') || inquiry.title?.toLowerCase().includes('lcl');
   const isFcl = (inquiry.serviceType === 'Sea Freight (FCL)' || ocean?.mode?.includes('FCL')) && !isLcl;
   const isOcean = isFcl || isLcl;
+  const isRailLcl = inquiry.serviceType === 'Rail Freight' && (rail?.mode?.includes('LCL') || inquiry.title?.toLowerCase().includes('lcl'));
   const pickupList: string[] = isTrucking && trucking?.pickupLocations && trucking.pickupLocations.length > 0
     ? trucking.pickupLocations.map(l => l.trim()).filter(Boolean)
     : [inquiry.origin].filter(Boolean);
@@ -494,11 +496,6 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             </button>
           </div>
-
-          <div className="hidden sm:flex items-center gap-2 text-xs text-slate-400">
-            <span className="font-medium text-slate-300">Tuyến:</span>
-            <span className="text-slate-200 font-bold max-w-xs truncate" title={routeDisplay}>{routeDisplay}</span>
-          </div>
         </div>
 
         {/* Modal Scrollable Body */}
@@ -583,682 +580,544 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
           )}
 
           {/* ========================================================================= */}
-          {/* TAB 1: THÔNG TIN KHÁCH HÀNG & HÀNG HÓA (4 KHỐI THỐNG NHẤT LIỀN MẠCH)        */}
+          {/* TAB 1: THÔNG TIN CHI TIẾT YÊU CẦU BÁO GIÁ (4 NHÓM DỮ LIỆU LIỀN MẠCH)        */}
           {/* ========================================================================= */}
           {activeTab === 'profile_cargo' && (
-            <div className="space-y-4 animate-in fade-in duration-200">
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-7 text-xs text-slate-800 animate-in fade-in duration-150">
+              
               {/* ========================================================================= */}
-              {/* KHỐI 1: THÔNG TIN KHÁCH HÀNG (CUSTOMER PROFILE)                           */}
+              {/* NHÓM 1: THÔNG TIN KHÁCH HÀNG                                              */}
               {/* ========================================================================= */}
-              <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden">
-                <div className="px-4 py-3 bg-slate-50/80 border-b border-slate-100 flex items-center justify-between">
-                  <span className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                    <Building2 className="w-4 h-4 text-indigo-600" />
-                    <span>1. Thông Tin Khách Hàng (Customer Profile)</span>
-                  </span>
+              <div className="space-y-3">
+                <div className="pb-2 border-b border-slate-200">
+                  <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                    1. THÔNG TIN KHÁCH HÀNG
+                  </h3>
                 </div>
 
-                <div className="p-4 text-xs">
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-                    {/* Company Name & Tax ID */}
-                    <div className="md:col-span-6 space-y-1.5 border-b md:border-b-0 md:border-r border-slate-100 pb-3 md:pb-0 md:pr-4">
-                      <span className="text-[10.5px] font-bold text-slate-400 uppercase block">
-                        Đơn vị yêu cầu báo giá (Doanh nghiệp)
-                      </span>
-                      <p className="font-black text-slate-900 text-sm leading-snug">
-                        {customerCompanyName}
-                      </p>
-                      <div className="flex items-center gap-2 text-[11px] text-slate-500">
-                        <span>Mã số thuế (MST):</span>
-                        <strong className="text-slate-800 font-mono bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
-                          {inquiry.taxCode || '0314988234'}
-                        </strong>
-                      </div>
-                    </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2.5 gap-x-8 text-xs">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Đơn vị công tác:</span>
+                    <span className="font-bold text-slate-900">{customerCompanyName}</span>
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Mã số thuế (MST):</span>
+                    <span className="font-mono font-bold text-slate-800">{inquiry.taxCode || '0314988234'}</span>
+                  </div>
 
-                    {/* Contact Person & Roles & Direct Channels */}
-                    <div className="md:col-span-6 space-y-2">
-                      <div>
-                        <span className="text-[10.5px] font-bold text-slate-400 uppercase block">
-                          Người phụ trách & Đầu mối liên hệ
-                        </span>
-                      </div>
-                      <p className="font-extrabold text-slate-900 text-sm">
-                        {customerContactName}
-                      </p>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-                        <div className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-50 border border-slate-100 text-[11px] text-slate-700">
-                          <Phone className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
-                          <span className="font-bold">{customerPhone}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-50 border border-slate-100 text-[11px] text-slate-700 truncate">
-                          <Mail className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
-                          <span className="font-bold truncate" title={customerEmail}>{customerEmail}</span>
-                        </div>
-                      </div>
-                    </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Người phụ trách:</span>
+                    <span className="font-bold text-slate-900">{customerContactName}</span>
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Chức vụ:</span>
+                    <span className="font-semibold text-slate-800">{currentUser?.roleTitle || 'Supply Chain Lead / Logistics Manager'}</span>
+                  </div>
+
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Số điện thoại liên hệ:</span>
+                    <span className="font-bold text-indigo-950">{customerPhone}</span>
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Email liên hệ:</span>
+                    <span className="font-bold text-indigo-950 truncate" title={customerEmail}>{customerEmail}</span>
                   </div>
                 </div>
               </div>
 
               {/* ========================================================================= */}
-              {/* KHỐI 2: THÔNG TIN SẢN PHẨM & HÀNG HÓA (CARGO SPECIFICATIONS)              */}
+              {/* NHÓM 2: THÔNG TIN SẢN PHẨM & HÀNG HÓA                                     */}
               {/* ========================================================================= */}
-              <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden">
-                <div className="px-4 py-3 bg-slate-50/80 border-b border-slate-100 flex items-center justify-between">
-                  <span className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                    <Box className="w-4 h-4 text-indigo-600" />
-                    <span>2. Thông Tin Sản Phẩm & Quy Cách Hàng Hóa (Cargo Specifications)</span>
-                  </span>
-                  <span className={`text-[10.5px] font-bold px-2.5 py-0.5 rounded-md border ${
-                    inquiry.cargoClassification === 'Reefer'
-                      ? 'bg-cyan-50 text-cyan-800 border-cyan-200'
-                      : inquiry.cargoClassification === 'Hazmat'
-                      ? 'bg-rose-50 text-rose-800 border-rose-200'
-                      : 'bg-slate-100 text-slate-700 border-slate-200'
-                  }`}>
-                    {inquiry.cargoClassification === 'Reefer' ? '❄️ Hàng Đông Lạnh (Reefer)' : inquiry.cargoClassification === 'Hazmat' ? '⚠️ Hàng Nguy Hiểm (Hazmat/IMO)' : '📦 Hàng Thông Thường'}
-                  </span>
+              <div className="space-y-3 pt-2">
+                <div className="pb-2 border-b border-slate-200">
+                  <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                    2. THÔNG TIN SẢN PHẨM & HÀNG HÓA
+                  </h3>
                 </div>
 
-                {/* Technical Specifications Table */}
-                <div className="divide-y divide-slate-100 text-xs">
-                  
-                  {/* Row 1: Industry & Commodity Name */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
-                    <div className="p-3">
-                      <span className="text-slate-400 font-medium block text-[10.5px] uppercase">Ngành hàng</span>
-                      <span className="font-extrabold text-slate-900 mt-0.5 block">{inquiry.industry || 'Hàng tiêu dùng FMCG & Công nghiệp'}</span>
-                    </div>
-                    <div className="p-3 bg-slate-50/30">
-                      <span className="text-slate-400 font-medium block text-[10.5px] uppercase">Tên mặt hàng chi tiết</span>
-                      <span className="font-extrabold text-indigo-950 mt-0.5 block">{inquiry.cargoType || 'Theo danh mục khai báo'}</span>
-                    </div>
-                    <div className="p-3">
-                      <span className="text-slate-400 font-medium block text-[10.5px] uppercase">Quy cách đóng gói</span>
-                      <span className="font-extrabold text-slate-900 mt-0.5 block">{inquiry.packaging || 'Đóng Pallet tiêu chuẩn'}</span>
-                    </div>
-                    <div className="p-3 bg-slate-50/30">
-                      <span className="text-slate-400 font-medium block text-[10.5px] uppercase">Số lượng kiện / Pallet</span>
-                      <span className="font-extrabold text-indigo-900 mt-0.5 block">
-                        {inquiry.packageCount || ocean?.lclPieces || air?.packageCount 
-                          ? `${inquiry.packageCount || ocean?.lclPieces || air?.packageCount} Kiện / Pallet` 
-                          : 'Theo phiếu giao nhận'}
+                <div className="space-y-2.5">
+                  {/* Common cargo fields in sequence */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2.5 gap-x-8 text-xs">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Phân loại nhóm hàng:</span>
+                      <span className="font-bold text-slate-900">
+                        {inquiry.cargoClassification === 'Reefer'
+                          ? 'Hàng Đông Lạnh / Kiểm Soát Nhiệt Độ'
+                          : inquiry.cargoClassification === 'Hazmat'
+                          ? 'Hàng Nguy Hiểm & Hóa Chất (Hazmat/DG)'
+                          : 'Hàng Thông Thường (General Cargo)'}
                       </span>
                     </div>
-                  </div>
 
-                  {/* Row 2: Dimensions, Gross Weight, Volume & CW */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
-                    <div className="p-3">
-                      <span className="text-slate-400 font-medium block text-[10.5px] uppercase">Kích thước (D x R x C cm)</span>
-                      <span className="font-mono font-bold text-slate-800 mt-0.5 block">
-                        {(() => {
-                          const dims = inquiry.dimensionsCm || ocean?.lclDimensions || air?.dimensionsCm;
-                          if (typeof dims === 'string') return dims;
-                          if (dims?.lengthCm) return `${dims.lengthCm} x ${dims.widthCm || 100} x ${dims.heightCm || 150} cm`;
-                          return 'Tiêu chuẩn thùng xe / cont';
-                        })()}
-                      </span>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Ngành hàng:</span>
+                      <span className="font-bold text-slate-900">{inquiry.industry || 'Hàng tiêu dùng FMCG & Công nghiệp'}</span>
                     </div>
-                    <div className="p-3 bg-slate-50/30">
-                      <span className="text-slate-400 font-medium block text-[10.5px] uppercase">Khối lượng thực (Gross Weight)</span>
-                      <span className="font-extrabold text-emerald-800 mt-0.5 block">
-                        {inquiry.ftlWeightKg 
+
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Tên mặt hàng cụ thể:</span>
+                      <span className="font-black text-indigo-950">{inquiry.cargoType || 'Theo danh mục khai báo'}</span>
+                    </div>
+
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Quy cách đóng gói:</span>
+                      <span className="font-semibold text-slate-900">{inquiry.packaging || 'Đóng Pallet tiêu chuẩn'}</span>
+                    </div>
+
+                    {/* Khả năng xếp chồng: Only show if explicitly provided (e.g. LTL/LCL ghép hàng), do NOT show for FTL */}
+                    {inquiry.stackable !== undefined && (
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Khả năng xếp chồng:</span>
+                        <span className="font-semibold text-slate-900">
+                          {inquiry.stackable
+                            ? 'Có thể xếp chồng (Stackable)'
+                            : 'Không được xếp chồng'}
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Khối lượng Gross:</span>
+                      <span className="font-black text-slate-900">
+                        {isTruckingLtl && trucking?.ltlGrossWeightKg
+                          ? `${trucking.ltlGrossWeightKg.toLocaleString('vi-VN')} kg`
+                          : (inquiry.ftlWeightKg && inquiry.ftlWeightKg !== '0' && inquiry.ftlWeightKg !== '0.0')
                           ? `${inquiry.ftlWeightKg} kg` 
                           : ocean?.lclGrossWeightKg 
-                          ? `${ocean.lclGrossWeightKg} kg` 
+                          ? `${ocean.lclGrossWeightKg.toLocaleString('vi-VN')} kg` 
+                          : rail?.lclGrossWeightKg
+                          ? `${rail.lclGrossWeightKg.toLocaleString('vi-VN')} kg`
                           : air?.grossWeightKgs 
-                          ? `${air.grossWeightKgs} kg` 
-                          : inquiry.weightVolume || 'Theo tải trọng xe'}
+                          ? `${air.grossWeightKgs.toLocaleString('vi-VN')} kg` 
+                          : inquiry.weightVolume || 'Theo tải trọng phương tiện'}
                       </span>
                     </div>
-                    <div className="p-3">
-                      <span className="text-slate-400 font-medium block text-[10.5px] uppercase">Thể tích thực (Volume)</span>
-                      <span className="font-extrabold text-cyan-900 mt-0.5 block">
-                        {inquiry.ftlVolumeCbm 
+
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Tổng thể tích:</span>
+                      <span className="font-black text-slate-900">
+                        {isTruckingLtl && trucking?.ltlCbm
+                          ? `${trucking.ltlCbm} CBM`
+                          : inquiry.ftlVolumeCbm 
                           ? `${inquiry.ftlVolumeCbm} CBM` 
                           : ocean?.lclCbm 
                           ? `${ocean.lclCbm} CBM` 
-                          : 'Theo thùng xe'}
-                      </span>
-                    </div>
-                    <div className="p-3 bg-slate-50/30">
-                      <span className="text-slate-400 font-medium block text-[10.5px] uppercase">
-                        {inquiry.serviceType === 'Air Freight' ? 'Trọng lượng tính cước (CW)' : 'Revenue Ton / Slot Pallet'}
-                      </span>
-                      <span className="font-extrabold text-sky-900 mt-0.5 block">
-                        {air?.chargeableWeightKgs 
-                          ? `${air.chargeableWeightKgs} kg CW` 
-                          : ocean?.lclRevenueTon 
-                          ? `${ocean.lclRevenueTon} RT` 
-                          : warehousing?.palletPositions 
-                          ? `${warehousing.palletPositions} Pallets` 
-                          : 'Tiêu chuẩn'}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Row 3: HS Code & Trade Role & Invoice Value */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
-                    <div className="p-3">
-                      <span className="text-slate-400 font-medium block text-[10.5px] uppercase">Mã HS Code</span>
-                      <span className="font-mono font-bold text-amber-900 mt-0.5 block">
-                        {inquiry.hsCode || specs.customs?.hsCodePrimary || specs.ocean?.hsCode || specs.air?.hsCode || specs.crossBorder?.hsCode || 'Chưa khai báo'}
-                      </span>
-                    </div>
-                    <div className="p-3 bg-slate-50/30">
-                      <span className="text-slate-400 font-medium block text-[10.5px] uppercase">Trị giá khai báo (Invoice)</span>
-                      <span className="font-extrabold text-emerald-900 mt-0.5 block">
-                        {inquiry.cargoValue || specs.ocean?.cargoValue || specs.air?.cargoValue || specs.customs?.cargoValue 
-                          ? `${inquiry.cargoValue || specs.ocean?.cargoValue || specs.air?.cargoValue || specs.customs?.cargoValue} ${inquiry.cargoValueCurrency || specs.ocean?.cargoValueCurrency || 'USD'}`
-                          : 'Theo hóa đơn'}
-                      </span>
-                    </div>
-                    <div className="p-3">
-                      <span className="text-slate-400 font-medium block text-[10.5px] uppercase">Vai trò ngoại thương</span>
-                      <span className="font-extrabold text-slate-900 mt-0.5 block">
-                        {inquiry.tradeRole === 'EXPORTER' ? 'Doanh nghiệp Xuất khẩu' : inquiry.tradeRole === 'IMPORTER' ? 'Doanh nghiệp Nhập khẩu' : 'Vận tải Nội địa'}
-                      </span>
-                    </div>
-                    <div className="p-3 bg-slate-50/30">
-                      <span className="text-slate-400 font-medium block text-[10.5px] uppercase">Điều kiện Incoterms</span>
-                      <span className="font-extrabold text-indigo-900 mt-0.5 block">
-                        {inquiry.incoterm || ocean?.incoterm || air?.incoterm || 'FOB / CIF / Tiêu chuẩn'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Sub-Card: Điều kiện bảo quản đặc biệt (Hàng Lạnh hoặc Hàng Nguy Hiểm) */}
-                {(inquiry.cargoClassification === 'Reefer' || inquiry.cargoClassification === 'Hazmat' || coldChain) && (
-                  <div className={`p-4 border-t text-xs space-y-2.5 ${
-                    inquiry.cargoClassification === 'Reefer' || coldChain
-                      ? 'bg-cyan-50/60 border-cyan-200'
-                      : 'bg-rose-50/60 border-rose-200'
-                  }`}>
-                    <div className="flex items-center justify-between">
-                      <span className="font-black uppercase tracking-wider flex items-center gap-1.5 text-slate-900">
-                        {inquiry.cargoClassification === 'Reefer' || coldChain ? (
-                          <>
-                            <ThermometerSnowflake className="w-4 h-4 text-cyan-700" />
-                            <span>Quy Chuẩn Bảo Quản Lạnh & Nhiệt Độ (Reefer Standards)</span>
-                          </>
-                        ) : (
-                          <>
-                            <ShieldAlert className="w-4 h-4 text-rose-700" />
-                            <span>Quy Chuẩn An Toàn Hàng Nguy Hiểm (IMO / Hazmat Protocol)</span>
-                          </>
-                        )}
-                      </span>
-                      <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-white border border-current/20">
-                        Bắt buộc tuân thủ
+                          : rail?.lclCbm
+                          ? `${rail.lclCbm} CBM`
+                          : inquiry.cbmVolume
+                          ? `${inquiry.cbmVolume} CBM`
+                          : 'Theo dung tích thùng xe'}
                       </span>
                     </div>
 
-                    {/* Reefer Details */}
-                    {(inquiry.cargoClassification === 'Reefer' || coldChain) && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
-                        <div className="p-2.5 rounded-xl bg-white border border-cyan-200 shadow-2xs">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase block">Dải nhiệt độ cài đặt</span>
-                          <span className="font-extrabold text-cyan-950 mt-0.5 block">
-                            {inquiry.temperatureRequirement || coldChain?.temperatureCategory || 'Chưa cài đặt cụ thể'}
-                          </span>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-white border border-cyan-200 shadow-2xs">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase block">Kiểm soát độ ẩm (% RH)</span>
-                          <span className="font-extrabold text-cyan-950 mt-0.5 block">
-                            {warehousing?.customHumidity || warehousing?.humidityRequirement || (coldChain?.humidityControl ? `${coldChain.humidityPercentage || 65}% RH` : 'Theo chuẩn kho lạnh')}
-                          </span>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-white border border-cyan-200 shadow-2xs">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase block">Nhiệt độ hàng đầu vào</span>
-                          <span className="font-extrabold text-emerald-800 mt-0.5 block">
-                            {warehousing?.inboundTemperatureState === 'NEED_COOLING' ? '⚡ Cần làm lạnh cấp tốc' : '✓ Hàng đã đạt chuẩn'}
-                          </span>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-white border border-cyan-200 shadow-2xs">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase block">Máy phát Genset / GDP</span>
-                          <span className="font-extrabold text-slate-900 mt-0.5 block">
-                            {coldChain?.continuousGenset ? '✓ Genset liên tục' : coldChain?.gdpPharmaCompliant ? '✓ Chuẩn GDP Pharma' : '✓ Theo tiêu chuẩn lạnh'}
-                          </span>
-                        </div>
+                    {inquiry.hsCode && (
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Mã HS Code:</span>
+                        <span className="font-mono font-bold text-slate-800">{inquiry.hsCode}</span>
                       </div>
                     )}
 
-                    {/* Hazmat Details */}
-                    {inquiry.cargoClassification === 'Hazmat' && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
-                        <div className="p-2.5 rounded-xl bg-white border border-rose-200 shadow-2xs">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase block">Phân loại DG Class</span>
-                          <span className="font-extrabold text-rose-900 mt-0.5 block">{inquiry.dgClassIMO || 'Chưa khai báo'}</span>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-white border border-rose-200 shadow-2xs">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase block">Mã số UN</span>
-                          <span className="font-mono font-black text-slate-900 mt-0.5 block">{inquiry.unNumber || 'UN N/A'}</span>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-white border border-rose-200 shadow-2xs">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase block">Nhóm đóng gói</span>
-                          <span className="font-extrabold text-slate-900 mt-0.5 block">{inquiry.packingGroup || 'PG II'}</span>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-white border border-rose-200 shadow-2xs">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase block">Điểm chớp cháy / MSDS</span>
-                          <span className="font-extrabold text-slate-900 truncate mt-0.5 block" title={inquiry.msdsFileName || inquiry.flashPoint || ''}>
-                            {inquiry.flashPoint ? `Flash Point: ${inquiry.flashPoint}` : inquiry.msdsFileName ? `File: ${inquiry.msdsFileName}` : 'Đầy đủ hồ sơ'}
-                          </span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* ========================================================================= */}
-              {/* KHỐI 3: THÔNG TIN VẬN HÀNH & KỸ THUẬT (OPERATIONS & SERVICE SPECS)        */}
-              {/* ========================================================================= */}
-              <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden">
-                <div className="px-4 py-3 bg-slate-50/80 border-b border-slate-100 flex items-center justify-between">
-                  <span className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                    <SlidersHorizontal className="w-4 h-4 text-indigo-600" />
-                    <span>3. Thông Tin Vận Hành & Yêu Cầu Kỹ Thuật (Operations & Service Specs)</span>
-                  </span>
-                  <span className="text-[10.5px] font-bold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-md border border-indigo-200">
-                    {getServiceNameVi(inquiry.serviceType)}
-                  </span>
-                </div>
-
-                <div className="p-4 space-y-4 text-xs">
-                  
-                  {/* 3.1. Tuyến Đường & Hành Trình Vận Chuyển */}
-                  <div className="p-3.5 rounded-xl bg-slate-50/70 border border-slate-200/80 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                        <Route className="w-3.5 h-3.5 text-indigo-600" />
-                        <span>Hành Trình Tuyến Điểm & Điều Khoản Giao Nhận</span>
-                      </span>
-                      <span className="text-[10px] font-bold text-indigo-800 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200">
-                        {isMultiPoint ? `${totalPickupCount} Điểm Bốc ➔ ${totalDeliveryCount} Điểm Dỡ` : 'Tuyến Điểm - Điểm'}
-                      </span>
-                    </div>
-
-                    {/* Timeline Route Flow A -> B */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
-                      
-                      {/* Point A: Origin */}
-                      <div className="p-3 rounded-xl bg-white border border-emerald-200/90 shadow-2xs space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 flex items-center gap-1">
-                            <span className="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[9px] font-black">A</span>
-                            <span>
-                              {isOcean ? (isLcl ? 'Kho CFS Bốc Hàng (Origin CFS)' : 'Cảng Bốc Hàng (POL)') :
-                               inquiry.serviceType === 'Air Freight' ? 'Sân Bay Đi (AOD)' :
-                               inquiry.serviceType === 'Warehousing' ? 'Khu Vực Kho Cần Thuê' :
-                               inquiry.serviceType === 'Customs Clearance' ? 'Địa Điểm Làm Thủ Tục Hải Quan' :
-                               'Điểm Bốc Hàng (Origin)'}
-                            </span>
-                          </span>
-                          {(ocean?.originServiceTerm || air?.originServiceTerm) && (
-                            <span className="text-[9.5px] font-bold text-emerald-800 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
-                              Term: {ocean?.originServiceTerm || air?.originServiceTerm}
-                            </span>
-                          )}
-                        </div>
-                        <p className="font-black text-slate-900 text-xs">
-                          {inquiry.origin || 'Chưa chỉ định điểm đi'}
-                        </p>
-
-                        {/* Multi-pickup list if any */}
-                        {isTrucking && trucking?.pickupLocations && trucking.pickupLocations.length > 1 && (
-                          <div className="mt-2 pt-1.5 border-t border-emerald-100 space-y-0.5">
-                            <span className="text-[9.5px] font-black text-emerald-900 uppercase block">Lộ trình {trucking.pickupLocations.length} điểm bốc:</span>
-                            {trucking.pickupLocations.map((p, idx) => (
-                              <p key={idx} className="text-[10.5px] text-slate-700 font-medium truncate">• #{idx + 1}: {p}</p>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Point B: Destination */}
-                      <div className="p-3 rounded-xl bg-white border border-rose-200/90 shadow-2xs space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-rose-700 flex items-center gap-1">
-                            <span className="w-4 h-4 rounded-full bg-rose-600 text-white flex items-center justify-center text-[9px] font-black">B</span>
-                            <span>
-                              {isOcean ? (isLcl ? 'Kho CFS Đích (Destination CFS)' : 'Cảng Dỡ Hàng (POD)') :
-                               inquiry.serviceType === 'Air Freight' ? 'Sân Bay Đến (AOA)' :
-                               inquiry.serviceType === 'Warehousing' ? 'Phạm Vi Phân Phối Trọng Tâm' :
-                               inquiry.serviceType === 'Customs Clearance' ? 'Nơi Bàn Giao Hồ Sơ / Hàng' :
-                               'Điểm Giao Hàng (Destination)'}
-                            </span>
-                          </span>
-                          {(ocean?.destinationServiceTerm || air?.destinationServiceTerm) && (
-                            <span className="text-[9.5px] font-bold text-rose-800 bg-rose-50 px-1.5 py-0.2 rounded border border-rose-200">
-                              Term: {ocean?.destinationServiceTerm || air?.destinationServiceTerm}
-                            </span>
-                          )}
-                        </div>
-                        <p className="font-black text-slate-900 text-xs">
-                          {inquiry.destination || 'Chưa chỉ định điểm đến'}
-                        </p>
-
-                        {/* Multi-delivery list if any */}
-                        {isTrucking && trucking?.deliveryLocations && trucking.deliveryLocations.length > 1 && (
-                          <div className="mt-2 pt-1.5 border-t border-rose-100 space-y-0.5">
-                            <span className="text-[9.5px] font-black text-rose-900 uppercase block">Lộ trình {trucking.deliveryLocations.length} điểm giao:</span>
-                            {trucking.deliveryLocations.map((d, idx) => (
-                              <p key={idx} className="text-[10.5px] text-slate-700 font-medium truncate">• #{idx + 1}: {d}</p>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 3.2. Cấu Hình Kỹ Thuật & Phương Tiện Chuyên Sâu (Ánh Xạ Động Theo Dịch Vụ) */}
-                  <div className="space-y-2">
-                    <span className="text-[11px] font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                      <Truck className="w-3.5 h-3.5 text-indigo-600" />
-                      <span>Cấu Hình Phương Tiện & Nghiệp Vụ Chuyên Ngành</span>
-                    </span>
-
-                    {/* 1. TRUCKING */}
-                    {isTrucking && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
-                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase block">Hình thức vận tải</span>
-                          <span className="font-extrabold text-indigo-950 mt-0.5 block">{trucking?.loadType || 'FTL (Nguyên chuyến)'}</span>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase block">Loại xe / Thùng xe</span>
-                          <span className="font-extrabold text-slate-900 mt-0.5 block">{trucking?.truckType || 'Xe tải thùng kín tiêu chuẩn'}</span>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase block">Phân khúc tải trọng</span>
-                          <span className="font-extrabold text-slate-900 mt-0.5 block">{trucking?.tonnageCategory || '5.0 Tấn'}</span>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase block">Số lượng xe yêu cầu</span>
-                          <span className="font-extrabold text-indigo-900 mt-0.5 block">{trucking?.truckCount || 1} Xe</span>
-                        </div>
-                        {trucking?.vehicleSpecsRequirement && (
-                          <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 sm:col-span-2 lg:col-span-4">
-                            <span className="text-[10px] font-bold text-slate-400 uppercase block">Yêu cầu phương tiện đặc biệt</span>
-                            <span className="font-bold text-slate-800 mt-0.5 block">{trucking.vehicleSpecsRequirement}</span>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* 2. OCEAN FREIGHT */}
-                    {isOcean && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
-                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase block">Hình thức đóng cont</span>
-                          <span className="font-extrabold text-blue-900 mt-0.5 block">{ocean?.mode || (isLcl ? 'LCL (Hàng lẻ gom CFS)' : 'FCL (Full Container)')}</span>
-                        </div>
-                        {isFcl && (
-                          <>
-                            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                              <span className="text-[10px] font-bold text-slate-400 uppercase block">Loại vỏ Container</span>
-                              <span className="font-extrabold text-slate-900 mt-0.5 block">{ocean?.containerType || '40ft High Cube (40HC)'}</span>
-                            </div>
-                            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                              <span className="text-[10px] font-bold text-slate-400 uppercase block">Số lượng vỏ Cont</span>
-                              <span className="font-extrabold text-indigo-900 mt-0.5 block">{ocean?.containerCount || 1} Cont</span>
-                            </div>
-                            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                              <span className="text-[10px] font-bold text-slate-400 uppercase block">Yêu cầu Free Dem/Det</span>
-                              <span className="font-extrabold text-emerald-800 mt-0.5 block">{ocean?.freeDemDetDaysRequested ? `${ocean.freeDemDetDaysRequested} Ngày` : '14 Ngày'}</span>
-                            </div>
-                          </>
-                        )}
-                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase block">Điều khoản dịch vụ (Term)</span>
-                          <span className="font-extrabold text-slate-900 mt-0.5 block">{ocean?.serviceTerm || 'CY-CY (Cảng - Cảng)'}</span>
-                        </div>
-                        {ocean?.preferredCarrier && (
-                          <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 sm:col-span-2">
-                            <span className="text-[10px] font-bold text-slate-400 uppercase block">Hãng tàu chỉ định</span>
-                            <span className="font-bold text-slate-900 mt-0.5 block">{ocean.preferredCarrier}</span>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* 3. AIR FREIGHT */}
-                    {inquiry.serviceType === 'Air Freight' && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
-                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase block">Phân loại dịch vụ bay</span>
-                          <span className="font-extrabold text-sky-900 mt-0.5 block">{air?.serviceTypeCategory || 'Air Cargo Tiêu Chuẩn'}</span>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase block">Gói thời gian bay</span>
-                          <span className="font-extrabold text-slate-900 mt-0.5 block">{air?.serviceLevel || 'Standard (2-3 ngày)'}</span>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase block">Trọng lượng tính cước</span>
-                          <span className="font-extrabold text-sky-900 mt-0.5 block">{air?.chargeableWeightKgs ? `${air.chargeableWeightKgs} kg CW` : 'Theo thực tế'}</span>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase block">Ký nhận tận tay</span>
-                          <span className="font-bold text-emerald-800 mt-0.5 block">{air?.requireSignature ? '✓ Bắt buộc chữ ký' : 'Tiêu chuẩn'}</span>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* 4. WAREHOUSING */}
-                    {inquiry.serviceType === 'Warehousing' && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
-                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase block">Loại hình kho thuê</span>
-                          <span className="font-extrabold text-purple-950 mt-0.5 block">{warehousing?.warehouseType || 'Kho Thường Tiêu Chuẩn (Grade A)'}</span>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase block">Đơn vị tính thuê kho</span>
-                          <span className="font-extrabold text-slate-900 mt-0.5 block">{warehousing?.pricingMetric || 'Theo m² sàn / tháng'}</span>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase block">Quy mô diện tích / Pallet</span>
-                          <span className="font-extrabold text-indigo-900 mt-0.5 block">
-                            {warehousing?.storageAreaSqm ? `${warehousing.storageAreaSqm} m²` : warehousing?.palletPositions ? `${warehousing.palletPositions} Pallets` : '1.000 m²'}
-                          </span>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase block">Tích hợp WMS & SKU</span>
-                          <span className="font-bold text-emerald-800 mt-0.5 block">
-                            {warehousing?.skuCount ? `${warehousing.skuCount} SKU` : '✓ Tích hợp WMS'}
-                          </span>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* 5. CUSTOMS CLEARANCE */}
-                    {inquiry.serviceType === 'Customs Clearance' && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
-                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase block">Loại hình tờ khai</span>
-                          <span className="font-extrabold text-amber-900 mt-0.5 block">{customs?.declarationType || 'A11 (Nhập kinh doanh tiêu dùng)'}</span>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase block">Chi cục HQ mở tờ khai</span>
-                          <span className="font-extrabold text-slate-900 mt-0.5 block">{customs?.customsSubDepartment || inquiry.origin || 'Chi cục HQ Cát Lái'}</span>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase block">Chứng nhận xuất xứ (C/O)</span>
-                          <span className="font-bold text-indigo-900 mt-0.5 block">{customs?.coRequirement || 'Không yêu cầu'}</span>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase block">Kiểm tra chuyên ngành</span>
-                          <span className="font-bold text-rose-900 mt-0.5 block">{customs?.specializedInspection || 'Không có'}</span>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* 6. CROSS-BORDER */}
-                    {inquiry.serviceType === 'Cross-border' && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
-                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase block">Tuyến hành lang</span>
-                          <span className="font-extrabold text-orange-950 mt-0.5 block">{crossBorder?.countryPair || 'Vietnam - China'}</span>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase block">Cửa khẩu thông quan</span>
-                          <span className="font-extrabold text-slate-900 mt-0.5 block">{crossBorder?.borderGate || 'Cửa khẩu Quốc tế Hữu Nghị'}</span>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase block">Phương thức vận tải</span>
-                          <span className="font-bold text-slate-900 mt-0.5 block">{crossBorder?.cargoMode || 'Xe Liên Vận GMS'}</span>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase block">Thủ tục hải quan 2 đầu</span>
-                          <span className="font-bold text-slate-900 mt-0.5 block">{crossBorder?.transitCustomsScope || 'Thủ tục 2 đầu trọn gói'}</span>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* 7. RAIL FREIGHT */}
-                    {inquiry.serviceType === 'Rail Freight' && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
-                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase block">Hình thức vận tải ga</span>
-                          <span className="font-extrabold text-indigo-950 mt-0.5 block">{rail?.mode || 'FCL Ga - Ga'}</span>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase block">Hành lang đường sắt</span>
-                          <span className="font-extrabold text-slate-900 mt-0.5 block">{rail?.corridorType || 'Tuyến Bắc - Nam'}</span>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase block">Loại toa / Cont ga</span>
-                          <span className="font-bold text-slate-900 mt-0.5 block">{rail?.wagonOrContType || 'Cont 40HC Đường Sắt'}</span>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase block">Dịch vụ kéo Drayage</span>
-                          <span className="font-bold text-slate-900 mt-0.5 block">{rail?.drayageService || 'Door-to-Door'}</span>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* 8. PROJECT CARGO */}
-                    {inquiry.serviceType === 'Project Cargo' && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
-                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase block">Mô hình dự án</span>
-                          <span className="font-extrabold text-indigo-950 mt-0.5 block">{project?.projectType || 'Distribution Tender'}</span>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase block">Phạm vi công việc</span>
-                          <span className="font-bold text-slate-800 mt-0.5 block">{project?.scopeOfWork || 'Vận chuyển trọn gói'}</span>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase block">Cam kết đoàn xe</span>
-                          <span className="font-bold text-slate-800 mt-0.5 block">{project?.fleetCommitment || 'Theo kế hoạch'}</span>
-                        </div>
-                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase block">Tiêu chuẩn KPI/SLA</span>
-                          <span className="font-bold text-slate-800 mt-0.5 block">{project?.kpiSla || 'SLA 98%'}</span>
-                        </div>
+                    {inquiry.cargoValue && (
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Trị giá khai báo:</span>
+                        <span className="font-bold text-emerald-800">{inquiry.cargoValue} {inquiry.cargoValueCurrency || 'USD'}</span>
                       </div>
                     )}
                   </div>
 
-                </div>
-              </div>
-
-              {/* ========================================================================= */}
-              {/* KHỐI 4: THÔNG TIN KHÁC (COMMERCIAL TERMS, TIMINGS, NOTES & ATTACHMENTS)    */}
-              {/* ========================================================================= */}
-              <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden">
-                <div className="px-4 py-3 bg-slate-50/80 border-b border-slate-100 flex items-center justify-between">
-                  <span className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-indigo-600" />
-                    <span>4. Thông Tin Khác (Commercial Terms, Timings, Notes & Attachments)</span>
-                  </span>
-                  <span className="text-[10.5px] font-bold text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded-md border border-slate-200">
-                    Thời hạn & Hồ sơ khảo sát
-                  </span>
-                </div>
-
-                <div className="p-4 space-y-4 text-xs">
-                  
-                  {/* Row 1: Commercial Model & Key Dates */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase block">Mô hình báo giá</span>
-                      <div className="flex items-center justify-between mt-1">
-                        <span className="font-extrabold text-slate-900 text-xs">
-                          {inquiry.pricingType === 'CONTRACT' ? 'Hợp đồng dài hạn' : 'Chuyến đơn lẻ (Spot)'}
-                        </span>
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
-                          inquiry.pricingType === 'CONTRACT' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
-                        }`}>
-                          {inquiry.pricingType === 'CONTRACT' ? 'CONTRACT' : 'SPOT'}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase block">Kỳ hạn & Sản lượng cam kết</span>
-                      <span className="font-extrabold text-slate-800 text-xs mt-1 block">
-                        {inquiry.pricingType === 'CONTRACT' 
-                          ? `${inquiry.contractTerm || '12 tháng'} • ${inquiry.volumeCommitment || inquiry.contractVolume || 'Theo kế hoạch'}` 
-                          : 'Theo từng chuyến đặt xe'}
-                      </span>
-                    </div>
-
-                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase block">Thời gian lấy hàng dự kiến</span>
-                      <span className="font-extrabold text-slate-900 text-xs mt-1 block">
-                        {inquiry.pickupDate || 'Linh hoạt theo thỏa thuận'}
-                      </span>
-                    </div>
-
-                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase block">Hạn chót nhận báo giá</span>
-                      <span className="font-extrabold text-amber-800 text-xs mt-1 block">
-                        {inquiry.expiryDate || 'Trong 48 giờ'}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Row 2: Customer Special Notes (if any) */}
-                  {inquiry.description && (
-                    <div className="space-y-1.5 pt-1">
-                      <span className="text-[10.5px] font-bold text-slate-500 uppercase flex items-center gap-1.5">
-                        <FileText className="w-3.5 h-3.5 text-indigo-600" />
-                        <span>Ghi Chú Vận Hành & Dặn Dò Riêng Của Khách Hàng:</span>
-                      </span>
-                      <div className="p-3.5 rounded-xl bg-amber-50/40 border border-amber-200/60 italic text-slate-800 leading-relaxed text-xs">
-                        "{inquiry.description}"
+                  {/* LTL / LCL specific breakdown */}
+                  {(isTruckingLtl || isLcl || isRailLcl || inquiry.packageCount || Boolean(air?.packageCount)) && (
+                    <div className="mt-3 pt-2.5 border-t border-slate-100 space-y-2">
+                      <span className="text-[11px] font-bold text-indigo-900 block">Quy cách kiện ghép (LTL / LCL Specs):</span>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-y-2 gap-x-6 text-xs bg-slate-50/60 p-3 rounded-xl border border-slate-100">
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-slate-400 font-medium">Số lượng kiện:</span>
+                          <span className="font-bold text-slate-900">
+                            {trucking?.ltlPieces || ocean?.lclPieces || rail?.lclPieces || air?.packageCount || inquiry.packageCount || 1} Kiện / Pallet
+                          </span>
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-slate-400 font-medium">Kích thước từng kiện:</span>
+                          <span className="font-mono font-bold text-slate-900">
+                            {(() => {
+                              const dims = trucking?.ltlDimensions || ocean?.lclDimensions || rail?.lclDimensions || air?.dimensionsCm || inquiry.dimensionsCm;
+                              if (typeof dims === 'string' && dims) return dims;
+                              if (dims && typeof dims === 'object' && dims.lengthCm) {
+                                return `${dims.lengthCm} x ${dims.widthCm || 0} x ${dims.heightCm || 0} cm`;
+                              }
+                              return 'Tiêu chuẩn kiện hàng';
+                            })()}
+                          </span>
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-slate-400 font-medium">Trọng lượng tính cước (CW):</span>
+                          <span className="font-bold text-slate-900">
+                            {trucking?.ltlChargeableWeightKg || trucking?.chargeableWeightKg 
+                              ? `${(trucking.ltlChargeableWeightKg || trucking.chargeableWeightKg).toLocaleString('vi-VN')} kg (Quy đổi 1 CBM = 250 kg)` 
+                              : ocean?.lclRevenueTon 
+                              ? `${ocean.lclRevenueTon} RT (${ocean.lclChargeableWeightKg ? ocean.lclChargeableWeightKg.toLocaleString('vi-VN') + ' kg' : ''})` 
+                              : rail?.lclRevenueTon
+                              ? `${rail.lclRevenueTon} RT (${rail.lclChargeableWeightKg ? rail.lclChargeableWeightKg.toLocaleString('vi-VN') + ' kg' : ''})`
+                              : air?.chargeableWeightKgs 
+                              ? `${air.chargeableWeightKgs.toLocaleString('vi-VN')} kg CW` 
+                              : 'Theo thể tích thực tế'}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   )}
 
-                  {/* Row 3: Attachments List (if any) */}
-                  {inquiry.attachments && inquiry.attachments.length > 0 && (
-                    <div className="space-y-2 pt-1 border-t border-slate-100">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10.5px] font-bold text-slate-500 uppercase flex items-center gap-1.5">
-                          <Paperclip className="w-3.5 h-3.5 text-indigo-600" />
-                          <span>Hồ Sơ & Tài Liệu Đính Kèm Khảo Sát ({inquiry.attachments.length} tệp tin):</span>
+                  {/* Reefer specific properties */}
+                  {(inquiry.cargoClassification === 'Reefer' || coldChain) && (
+                    <div className="mt-3 pt-2.5 border-t border-slate-100 space-y-2">
+                      <span className="text-[11px] font-bold text-cyan-950 block">Yêu cầu bảo quản lạnh & nhiệt độ (Reefer Specs):</span>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-8 text-xs bg-cyan-50/40 p-3 rounded-xl border border-cyan-100">
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-cyan-800/70 font-medium min-w-[140px] shrink-0">Dải nhiệt độ yêu cầu:</span>
+                          <span className="font-black text-cyan-950">{inquiry.temperatureRequirement || coldChain?.temperatureCategory || '+2°C ~ +8°C'}</span>
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-cyan-800/70 font-medium min-w-[140px] shrink-0">Duy trì điện liên tục:</span>
+                          <span className="font-bold text-cyan-950">{coldChain?.continuousGenset ? 'Máy phát Clip-on Genset liên tục' : 'Cắm điện bãi Plug-in khi dừng đỗ'}</span>
+                        </div>
+                        {coldChain?.humidityControl && (
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-cyan-800/70 font-medium min-w-[140px] shrink-0">Kiểm soát độ ẩm:</span>
+                            <span className="font-bold text-cyan-950">{coldChain.humidityPercentage || 65}% RH</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Hazmat specific properties */}
+                  {inquiry.cargoClassification === 'Hazmat' && (
+                    <div className="mt-3 pt-2.5 border-t border-slate-100 space-y-2">
+                      <span className="text-[11px] font-bold text-rose-950 block">Thông số hàng nguy hiểm & hóa chất (Hazmat / DG Specs):</span>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-8 text-xs bg-rose-50/40 p-3 rounded-xl border border-rose-100">
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-rose-800/70 font-medium min-w-[140px] shrink-0">Nhóm nguy hiểm (IMO Class):</span>
+                          <span className="font-black text-rose-950">{inquiry.dgClassIMO || 'IMO Class 3 (Chất lỏng dễ cháy)'}</span>
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-rose-800/70 font-medium min-w-[140px] shrink-0">Mã số UN:</span>
+                          <span className="font-mono font-black text-rose-950">{inquiry.unNumber || 'UN 1263'}</span>
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-rose-800/70 font-medium min-w-[140px] shrink-0">Nhóm đóng gói:</span>
+                          <span className="font-bold text-rose-950">{inquiry.packingGroup || 'Packing Group II'}</span>
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-rose-800/70 font-medium min-w-[140px] shrink-0">Điểm chớp cháy:</span>
+                          <span className="font-bold text-rose-950">{inquiry.flashPoint ? `${inquiry.flashPoint}°C` : 'N/A'}</span>
+                        </div>
+                        {inquiry.msdsFileName && (
+                          <div className="flex items-baseline gap-2 md:col-span-2">
+                            <span className="text-rose-800/70 font-medium min-w-[140px] shrink-0">Tài liệu MSDS:</span>
+                            <span className="font-semibold text-rose-950">📄 {inquiry.msdsFileName}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Special preservation note if present */}
+                  {inquiry.specialHandlingInstructions && (
+                    <div className="flex items-baseline gap-2 pt-1 text-xs">
+                      <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Yêu cầu bảo quản riêng:</span>
+                      <span className="font-semibold text-slate-800">{inquiry.specialHandlingInstructions}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* ========================================================================= */}
+              {/* NHÓM 3: THÔNG TIN VẬN HÀNH & KỸ THUẬT                                     */}
+              {/* ========================================================================= */}
+              <div className="space-y-3 pt-2">
+                <div className="pb-2 border-b border-slate-200">
+                  <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                    3. THÔNG TIN VẬN HÀNH & KỸ THUẬT
+                  </h3>
+                </div>
+
+                <div className="space-y-4">
+                  {/* Service & Model */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2.5 gap-x-8 text-xs">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Loại hình dịch vụ:</span>
+                      <span className="font-bold text-slate-900">{getServiceNameVi(inquiry.serviceType)}</span>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Mô hình vận hành:</span>
+                      <span className="font-bold text-slate-900">
+                        {isTrucking 
+                          ? (trucking?.loadType || 'Nguyên Chuyến (FTL)')
+                          : isOcean 
+                          ? (isLcl ? 'Ghép Hàng Lẻ (LCL)' : 'Nguyên Container (FCL)')
+                          : inquiry.serviceType}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Route & Multi-stop details: Side-by-side parallel columns */}
+                  <div className="space-y-2 pt-1">
+                    <span className="text-[11px] font-bold text-slate-900 block uppercase tracking-wider">
+                      Hành trình giao nhận:
+                    </span>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-3.5 bg-slate-50/70 rounded-xl border border-slate-200/80">
+                      {/* Cột 1: Điểm Lấy Hàng (Pickup) */}
+                      <div className="space-y-2 border-l-2 border-emerald-500 pl-3">
+                        <div className="font-black text-xs text-emerald-900">
+                          Điểm Lấy Hàng (Pickup)
+                        </div>
+                        <div className="space-y-1.5 text-xs text-slate-800">
+                          <div>
+                            <span className="text-slate-500 font-medium block text-[11px]">• Địa chỉ kho xuất hàng chính:</span>
+                            <span className="font-bold text-slate-900 block pl-3">
+                              {inquiry.origin || 'Chưa chỉ định'}
+                            </span>
+                          </div>
+                          {isTrucking && trucking?.pickupLocations && trucking.pickupLocations.length > 1 && (
+                            <div className="space-y-1.5 pt-0.5">
+                              {trucking.pickupLocations.slice(1).map((p, idx) => (
+                                <div key={idx}>
+                                  <span className="text-slate-500 font-medium block text-[11px]">• Điểm lấy {idx + 2} (Kho phụ / Gom thêm):</span>
+                                  <span className="font-semibold text-slate-800 block pl-3">
+                                    {p || `Kho phụ ${idx + 2}`}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Cột 2: Điểm Giao Hàng (Delivery) - Song song cùng hàng */}
+                      <div className="space-y-2 border-l-2 border-rose-500 pl-3">
+                        <div className="font-black text-xs text-rose-900">
+                          Điểm Giao Hàng (Delivery)
+                        </div>
+                        <div className="space-y-1.5 text-xs text-slate-800">
+                          <div>
+                            <span className="text-slate-500 font-medium block text-[11px]">• Địa chỉ kho đích chính:</span>
+                            <span className="font-bold text-slate-900 block pl-3">
+                              {inquiry.destination || 'Chưa chỉ định'}
+                            </span>
+                          </div>
+                          {isTrucking && trucking?.deliveryLocations && trucking.deliveryLocations.length > 1 && (
+                            <div className="space-y-1.5 pt-0.5">
+                              {trucking.deliveryLocations.slice(1).map((d, idx) => (
+                                <div key={idx}>
+                                  <span className="text-slate-500 font-medium block text-[11px]">• Điểm giao {idx + 2} (Đại lý / Cửa hàng phụ):</span>
+                                  <span className="font-semibold text-slate-800 block pl-3">
+                                    {d || `Điểm giao ${idx + 2}`}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Vehicle configuration */}
+                  <div className="space-y-2 pt-1 text-xs">
+                    <span className="text-[11px] font-bold text-slate-900 block uppercase tracking-wider">
+                      Cấu hình phương tiện yêu cầu:
+                    </span>
+
+                    {isTrucking && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2.5 gap-x-8 text-xs">
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Loại Thùng Phương Tiện:</span>
+                          <span className="font-bold text-slate-900">{trucking?.truckType || 'Theo thỏa thuận'}</span>
+                        </div>
+                        
+                        {!isTruckingLtl && trucking?.tonnageCategory && (
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Phân Khúc Tải Trọng:</span>
+                            <span className="font-bold text-slate-900">{trucking.tonnageCategory}</span>
+                          </div>
+                        )}
+
+                        {!isTruckingLtl && trucking?.dimensionsMin && (
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Kích thước lòng thùng:</span>
+                            <span className="font-mono font-semibold text-slate-800">
+                              {trucking.dimensionsMin}
+                            </span>
+                          </div>
+                        )}
+
+                        {(trucking?.requestedLeadtime || trucking?.transitTimeMax) && (
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Thời Gian Giao Hàng (SLA):</span>
+                            <span className="font-bold text-slate-900">{trucking.requestedLeadtime || trucking.transitTimeMax}</span>
+                          </div>
+                        )}
+
+                        {trucking?.requestedLeadtimeNote && (
+                          <div className="flex items-baseline gap-2 md:col-span-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Ghi chú thời gian giao nhận:</span>
+                            <span className="font-semibold text-indigo-950">{trucking.requestedLeadtimeNote}</span>
+                          </div>
+                        )}
+
+                        {trucking?.vehicleSpecsRequirement && (
+                          <div className="flex items-baseline gap-2 md:col-span-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Yêu cầu dỡ hàng / Kỹ thuật:</span>
+                            <span className="font-semibold text-slate-800">{trucking.vehicleSpecsRequirement}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {isOcean && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2.5 gap-x-8 text-xs">
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Loại vỏ Container:</span>
+                          <span className="font-bold text-slate-900">{ocean?.containerType || (isLcl ? 'LCL CFS' : '40HC')}</span>
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Điều khoản dịch vụ:</span>
+                          <span className="font-bold text-slate-900">{ocean?.serviceTerm || 'CY-CY'}</span>
+                        </div>
+                        {ocean?.freeDemDetDaysRequested && (
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Yêu cầu Free Dem/Det:</span>
+                            <span className="font-bold text-emerald-800">{ocean.freeDemDetDaysRequested} Ngày</span>
+                          </div>
+                        )}
+                        {ocean?.preferredCarrier && (
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Hãng tàu chỉ định:</span>
+                            <span className="font-bold text-slate-900">{ocean.preferredCarrier}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {inquiry.serviceType === 'Air Freight' && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2.5 gap-x-8 text-xs">
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Gói dịch vụ bay:</span>
+                          <span className="font-bold text-slate-900">{air?.serviceTypeCategory || 'Air Cargo Tiêu Chuẩn'}</span>
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Tốc độ hành trình:</span>
+                          <span className="font-bold text-slate-900">{air?.serviceLevel || 'Standard (2-3 ngày)'}</span>
+                        </div>
+                      </div>
+                    )}
+
+                    {inquiry.serviceType === 'Warehousing' && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2.5 gap-x-8 text-xs">
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Loại hình kho:</span>
+                          <span className="font-bold text-slate-900">{warehousing?.warehouseType || 'Kho Thường Tiêu Chuẩn'}</span>
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Quy mô diện tích / Pallet:</span>
+                          <span className="font-bold text-slate-900">{warehousing?.storageAreaSqm ? `${warehousing.storageAreaSqm} m²` : `${warehousing?.palletPositions || 500} Pallets`}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* ========================================================================= */}
+              {/* NHÓM 4: THÔNG TIN LỊCH TRÌNH, SẢN LƯỢNG & MÔ HÌNH BÁO GIÁ                  */}
+              {/* ========================================================================= */}
+              <div className="space-y-3 pt-2">
+                <div className="pb-2 border-b border-slate-200">
+                  <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                    4. THÔNG TIN LỊCH TRÌNH, SẢN LƯỢNG & MÔ HÌNH BÁO GIÁ
+                  </h3>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2.5 gap-x-8 text-xs">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Hình thức báo giá:</span>
+                      <span className="font-bold text-slate-900">
+                        {inquiry.pricingType === 'CONTRACT' ? 'Hợp Đồng Dài Hạn (Contract / Tender)' : 'Chuyến Đơn Lẻ (Spot Quote)'}
+                      </span>
+                    </div>
+
+                    {isTrucking && (
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Số lượng chuyến cần thuê:</span>
+                        <span className="font-bold text-slate-900">
+                          {trucking?.loadType === 'LTL (Ghép hàng lẻ)'
+                            ? (trucking.ltlShipmentCount ? `${trucking.ltlShipmentCount} ${trucking.ltlFrequencyUnit || 'Chuyến / Tháng'}` : 'Chưa chỉ định')
+                            : (trucking?.vehicleCount ? `${trucking.vehicleCount} ${trucking?.vehicleCountUnit || 'Chuyến / Tháng'}` : 'Chưa chỉ định')}
                         </span>
                       </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                    )}
+
+                    {inquiry.pricingType === 'CONTRACT' && inquiry.contractTerm && (
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Thời hạn hợp đồng:</span>
+                        <span className="font-bold text-indigo-950">{inquiry.contractTerm}</span>
+                      </div>
+                    )}
+
+                    {inquiry.pricingType === 'CONTRACT' && (inquiry.volumeCommitment || inquiry.contractVolume) && (
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Tần suất cam kết:</span>
+                        <span className="font-bold text-slate-900">
+                          {inquiry.volumeCommitment || inquiry.contractVolume}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Schedule Timeline */}
+                  <div className="space-y-1.5 pt-1 text-xs">
+                    <span className="text-[11px] font-bold text-slate-900 block">Mốc thời gian cam kết:</span>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-y-2 gap-x-6 text-xs bg-slate-50/70 p-3 rounded-xl border border-slate-100">
+                      <div className="space-y-0.5">
+                        <span className="text-slate-400 text-[11px] block">Hạn chót nhận báo giá:</span>
+                        <span className="font-bold text-amber-900 block font-mono">{inquiry.expiryDate || 'Chưa thiết lập'}</span>
+                      </div>
+                      <div className="space-y-0.5">
+                        <span className="text-slate-400 text-[11px] block">Ngày lấy hàng dự kiến:</span>
+                        <span className="font-bold text-indigo-950 block font-mono">{inquiry.pickupDate || 'Theo thông báo giao nhận'}</span>
+                      </div>
+                      <div className="space-y-0.5">
+                        <span className="text-slate-400 text-[11px] block">Hạn chót giao hàng:</span>
+                        <span className="font-bold text-emerald-950 block font-mono">{inquiry.deliveryDate || 'Theo cam kết SLA tuyến'}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Customer special note */}
+                  {inquiry.description && (
+                    <div className="flex items-baseline gap-2 pt-1 text-xs">
+                      <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Ghi chú đặc thù:</span>
+                      <span className="font-semibold text-slate-900 italic">"{inquiry.description}"</span>
+                    </div>
+                  )}
+
+                  {/* Attachments */}
+                  {inquiry.attachments && inquiry.attachments.length > 0 && (
+                    <div className="pt-2 border-t border-slate-100 space-y-1.5">
+                      <span className="text-slate-400 font-medium block">Hồ sơ & Tài liệu đính kèm ({inquiry.attachments.length} tệp):</span>
+                      <div className="flex flex-wrap gap-2 pt-0.5">
                         {inquiry.attachments.map((att) => (
-                          <div key={att.id} className="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-50 border border-slate-200 group hover:border-indigo-300 transition-colors">
-                            <span className="p-1.5 bg-indigo-100 text-indigo-700 rounded-lg shrink-0">
-                              {att.type === 'excel' ? <FileSpreadsheet className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
-                            </span>
-                            <div className="min-w-0 flex-1">
-                              <p className="font-extrabold text-slate-800 truncate text-xs" title={att.name}>{att.name}</p>
-                              <p className="text-[10px] text-slate-400 mt-0.5">{att.size} • {att.uploadedDate}</p>
-                            </div>
+                          <div key={att.id} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs">
+                            <Paperclip className="w-3.5 h-3.5 text-indigo-600" />
+                            <span className="font-bold text-slate-800">{att.name}</span>
+                            <span className="text-[10px] text-slate-400">({att.size})</span>
                           </div>
                         ))}
                       </div>
                     </div>
                   )}
-
                 </div>
               </div>
 

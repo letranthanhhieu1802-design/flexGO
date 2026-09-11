@@ -142,10 +142,11 @@ export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
             Loại Hình Tờ Khai Hải Quan (Declaration Type) *
           </label>
           <select
-            value={specs.declarationType || 'Nhập khẩu kinh doanh (A11)'}
+            value={specs.declarationType || ''}
             onChange={(e) => updateSpec('declarationType', e.target.value as any)}
             className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-amber-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
           >
+            <option value="">-- Chọn Loại Hình Tờ Khai * --</option>
             <option value="Nhập khẩu kinh doanh (A11)">A11 - Nhập khẩu kinh doanh tiêu dùng</option>
             <option value="Nhập gia công (E21)">E21 - Nhập nguyên liệu gia công cho thương nhân nước ngoài</option>
             <option value="Nhập SXXK (E31)">E31 - Nhập nguyên liệu sản xuất xuất khẩu</option>
@@ -183,10 +184,11 @@ export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
             <span>Form C/O Ưu Đãi Yêu Cầu (Certificate of Origin)</span>
           </label>
           <select
-            value={specs.coFormRequested || 'Không yêu cầu'}
+            value={specs.coFormRequested || ''}
             onChange={(e) => updateSpec('coFormRequested', e.target.value as any)}
             className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-amber-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
           >
+            <option value="">-- Chọn Form C/O (Tùy chọn) --</option>
             <option value="Không yêu cầu">Không yêu cầu C/O</option>
             <option value="Form E (ASEAN-China)">Form E (ASEAN - Trung Quốc: ACFTA)</option>
             <option value="Form D (ASEAN)">Form D (Nội khối ASEAN: ATIGA)</option>
@@ -202,10 +204,11 @@ export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
             <span>Thủ Tục Kiểm Tra Chuyên Ngành (Nếu có)</span>
           </label>
           <select
-            value={specs.specializedInspectionType || 'Không có'}
+            value={specs.specializedInspectionType || ''}
             onChange={(e) => updateSpec('specializedInspectionType', e.target.value as any)}
             className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-amber-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
           >
+            <option value="">-- Chọn Kiểm Tra Chuyên Ngành (Tùy chọn) --</option>
             <option value="Không có">Không có kiểm tra chuyên ngành</option>
             <option value="Kiểm dịch thực vật / động vật">🌿 Kiểm dịch Thực vật / Động vật (Phytosanitary/Veterinary)</option>
             <option value="Vệ sinh An toàn Thực phẩm">🥗 Kiểm tra Vệ sinh An toàn Thực phẩm (Food Safety)</option>

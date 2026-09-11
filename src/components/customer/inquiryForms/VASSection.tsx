@@ -26,6 +26,8 @@ export const VASSection: React.FC<VASSectionProps> = ({
   serviceTitle = 'Dịch Vụ Giá Trị Gia Tăng (VAS)',
   themeColor = 'indigo',
 }) => {
+  const selectedInCurrentSection = items.filter((item) => selectedVAS.includes(item.name));
+
   const colorMap = {
     blue: {
       activeBorder: 'border-blue-600 bg-blue-50/60 ring-2 ring-blue-500/20 text-blue-950',
@@ -101,7 +103,7 @@ export const VASSection: React.FC<VASSectionProps> = ({
               {serviceTitle}
             </span>
             <span className="px-2 py-0.5 text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/80 rounded-full">
-              Đã chọn: {selectedVAS.length}/{items.length}
+              Đã chọn: {selectedInCurrentSection.length}/{items.length}
             </span>
           </div>
           <p className="text-[11px] text-slate-500 mt-0.5">
@@ -135,33 +137,14 @@ export const VASSection: React.FC<VASSectionProps> = ({
                 {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
               </div>
 
-              {/* Text content */}
+              {/* Text content - Only Title and Description */}
               <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between gap-1.5 flex-wrap">
-                  <span className={`text-xs font-bold leading-snug ${isSelected ? 'text-slate-900' : 'text-slate-800'}`}>
-                    {item.name}
-                  </span>
-                  <div className="flex items-center gap-1 shrink-0">
-                    {(item.freeTag || item.isFreeOrIncluded) && (
-                      <span className="px-1.5 py-0.5 text-[9px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-300 rounded-md">
-                        {item.freeTag || '🎁 Thường tặng kèm 0đ'}
-                      </span>
-                    )}
-                    {item.popular && (
-                      <span className="px-1.5 py-0.5 text-[9px] font-extrabold bg-amber-50 text-amber-800 border border-amber-200 rounded-md">
-                        Phổ biến
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <p className="text-[11px] text-slate-500 mt-0.5 leading-normal">
+                <span className={`block text-xs font-bold leading-snug ${isSelected ? 'text-slate-900' : 'text-slate-800'}`}>
+                  {item.name}
+                </span>
+                <p className="text-[11px] text-slate-500 mt-1 leading-normal">
                   {item.desc}
                 </p>
-                {item.tag && (
-                  <span className={`inline-block mt-1.5 px-1.5 py-0.5 text-[9px] font-semibold rounded-md border ${colorMap.tag}`}>
-                    {item.tag}
-                  </span>
-                )}
               </div>
             </div>
           );

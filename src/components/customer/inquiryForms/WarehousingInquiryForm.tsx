@@ -484,10 +484,11 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
               Mục Đích / Luồng Hàng Gửi Kho Ngoại Quan *
             </label>
             <select
-              value={specs.bondedPurpose || 'Hàng nhập khẩu chờ hoàn tất thủ tục thông quan vào nội địa'}
+              value={specs.bondedPurpose || ''}
               onChange={(e) => updateSpec('bondedPurpose', e.target.value)}
               className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
             >
+              <option value="">-- Chọn Mục Đích / Luồng Hàng Gửi Kho Ngoại Quan * --</option>
               <option value="Hàng nhập khẩu chờ hoàn tất thủ tục thông quan vào nội địa">
                 📥 Hàng nhập khẩu chờ hoàn tất thủ tục thông quan vào nội địa (Giải tỏa dần)
               </option>
@@ -1036,10 +1037,11 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
                 Nguyên Tắc Quản Lý Hạn Dùng
               </label>
               <select
-                value={specs.inventoryMethod || 'FIFO (Nhập trước xuất trước)'}
+                value={specs.inventoryMethod || ''}
                 onChange={(e) => updateSpec('inventoryMethod', e.target.value as any)}
                 className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
               >
+                <option value="">-- Chọn Nguyên Tắc Quản Lý --</option>
                 <option value="FIFO (Nhập trước xuất trước)">FIFO (Nhập trước - Xuất trước)</option>
                 <option value="FEFO (Hạn gần xuất trước)">FEFO (Hạn gần - Xuất trước)</option>
                 <option value="Serial / Lot Tracking">Serial / Lot Tracking</option>
@@ -1052,7 +1054,7 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
                 <input
                   type="checkbox"
                   id="warehousingWmsIntegrationCheck"
-                  checked={specs.wmsIntegrationNeeded ?? true}
+                  checked={specs.wmsIntegrationNeeded ?? false}
                   onChange={(e) => updateSpec('wmsIntegrationNeeded', e.target.checked)}
                   className="rounded-sm text-purple-600 focus:ring-purple-500 w-4 h-4 cursor-pointer shrink-0"
                 />

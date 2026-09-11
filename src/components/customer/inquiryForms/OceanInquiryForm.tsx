@@ -88,60 +88,66 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
   const isFCL = specs.mode === 'FCL (Full Container)';
 
   // Helper for LCL auto calculation
-  const handleLclDimChange = (dimKey: 'lengthCm' | 'widthCm' | 'heightCm', val: number) => {
-    const currentDims = specs.lclDimensions || { lengthCm: 120, widthCm: 100, heightCm: 150 };
-    const newDims = { ...currentDims, [dimKey]: val };
-    const pieces = specs.lclPieces || 1;
+  const handleLclDimChange = (dimKey: 'lengthCm' | 'widthCm' | 'heightCm', val: number | undefined) => {
+    const currentDims = specs.lclDimensions || { lengthCm: 0, widthCm: 0, heightCm: 0 };
+    const newDims = { ...currentDims, [dimKey]: val || 0 };
+    const pieces = specs.lclPieces || 0;
     
     // Calculate total CBM: (L * W * H / 1,000,000) * pieces
+    const hasAnyDim = (newDims.lengthCm > 0 || newDims.widthCm > 0 || newDims.heightCm > 0);
     const singleCbm = (newDims.lengthCm * newDims.widthCm * newDims.heightCm) / 1000000;
-    const totalCbm = parseFloat((singleCbm * pieces).toFixed(2));
+    const totalCbm = (singleCbm > 0 && pieces > 0) ? parseFloat((singleCbm * pieces).toFixed(2)) : undefined;
     
     // Standard Ocean Freight LCL Chargeable Ratio W/M: 1 CBM = 1000 kg (1 RT - Revenue Ton)
-    const volumetricWeight = Math.round(totalCbm * 1000);
+    const volumetricWeight = totalCbm ? Math.round(totalCbm * 1000) : 0;
     const grossWeight = specs.lclGrossWeightKg || 0;
     const chargeableWeight = Math.max(grossWeight, volumetricWeight);
-    const revenueTon = parseFloat((chargeableWeight / 1000).toFixed(2));
+    const revenueTon = chargeableWeight > 0 ? parseFloat((chargeableWeight / 1000).toFixed(2)) : undefined;
 
     onChange({
       ...specs,
-      lclDimensions: newDims,
+      lclDimensions: hasAnyDim ? newDims : undefined,
       lclCbm: totalCbm,
-      lclChargeableWeightKg: chargeableWeight,
+      lclChargeableWeightKg: chargeableWeight > 0 ? chargeableWeight : (grossWeight > 0 ? grossWeight : undefined),
       lclRevenueTon: revenueTon,
       cbmVolume: totalCbm,
     });
   };
 
-  const handleLclPiecesChange = (pieces: number) => {
-    const dims = specs.lclDimensions || { lengthCm: 120, widthCm: 100, heightCm: 150 };
-    const singleCbm = (dims.lengthCm * dims.widthCm * dims.heightCm) / 1000000;
-    const totalCbm = parseFloat((singleCbm * pieces).toFixed(2));
-    const volumetricWeight = Math.round(totalCbm * 1000);
+  const handleLclPiecesChange = (pieces: number | undefined) => {
+    const dims = specs.lclDimensions;
+    let totalCbm: number | undefined = undefined;
+    if (dims && pieces && pieces > 0) {
+      const singleCbm = (dims.lengthCm * dims.widthCm * dims.heightCm) / 1000000;
+      if (singleCbm > 0) {
+        totalCbm = parseFloat((singleCbm * pieces).toFixed(2));
+      }
+    }
+    const volumetricWeight = totalCbm ? Math.round(totalCbm * 1000) : 0;
     const grossWeight = specs.lclGrossWeightKg || 0;
     const chargeableWeight = Math.max(grossWeight, volumetricWeight);
-    const revenueTon = parseFloat((chargeableWeight / 1000).toFixed(2));
+    const revenueTon = chargeableWeight > 0 ? parseFloat((chargeableWeight / 1000).toFixed(2)) : undefined;
 
     onChange({
       ...specs,
       lclPieces: pieces,
       lclCbm: totalCbm,
-      lclChargeableWeightKg: chargeableWeight,
+      lclChargeableWeightKg: chargeableWeight > 0 ? chargeableWeight : (grossWeight > 0 ? grossWeight : undefined),
       lclRevenueTon: revenueTon,
       cbmVolume: totalCbm,
     });
   };
 
-  const handleLclWeightChange = (grossWeight: number) => {
-    const totalCbm = specs.lclCbm || 1.8;
+  const handleLclWeightChange = (grossWeight: number | undefined) => {
+    const totalCbm = specs.lclCbm || 0;
     const volumetricWeight = Math.round(totalCbm * 1000);
-    const chargeableWeight = Math.max(grossWeight, volumetricWeight);
-    const revenueTon = parseFloat((chargeableWeight / 1000).toFixed(2));
+    const chargeableWeight = Math.max(grossWeight || 0, volumetricWeight);
+    const revenueTon = chargeableWeight > 0 ? parseFloat((chargeableWeight / 1000).toFixed(2)) : undefined;
 
     onChange({
       ...specs,
       lclGrossWeightKg: grossWeight,
-      lclChargeableWeightKg: chargeableWeight,
+      lclChargeableWeightKg: chargeableWeight > 0 ? chargeableWeight : undefined,
       lclRevenueTon: revenueTon,
       grossWeightKgs: grossWeight,
     });
@@ -297,10 +303,11 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
             </span>
           </label>
           <select
-            value={specs.originServiceTerm || (isFCL ? 'CY' : 'CFS')}
+            value={specs.originServiceTerm || ''}
             onChange={(e) => updateSpec('originServiceTerm', e.target.value as any)}
             className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-cyan-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
           >
+            <option value="">-- Chọn Điều Kiện Nhận Hàng * --</option>
             <option value="Door">🚪 Door (Nhận tại kho người gửi / Shipper)</option>
             <option value="CY">⚓ CY (Nhận tại bãi container cảng bốc / CY)</option>
             <option value="CFS">📦 CFS (Nhận tại kho gom hàng lẻ / CFS)</option>
@@ -318,10 +325,11 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
             </span>
           </label>
           <select
-            value={specs.destinationServiceTerm || (isFCL ? 'CY' : 'CFS')}
+            value={specs.destinationServiceTerm || ''}
             onChange={(e) => updateSpec('destinationServiceTerm', e.target.value as any)}
             className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-rose-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
           >
+            <option value="">-- Chọn Điều Kiện Giao Hàng * --</option>
             <option value="Door">🚪 Door (Giao tại kho người nhận / Consignee)</option>
             <option value="CY">⚓ CY (Giao tại bãi container cảng dỡ / CY)</option>
             <option value="CFS">📦 CFS (Giao tại kho dỡ hàng lẻ / CFS)</option>
@@ -435,10 +443,11 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
                 Loại Vỏ Container *
               </label>
               <select
-                value={specs.containerType || '40ft High Cube (40HC)'}
+                value={specs.containerType || ''}
                 onChange={(e) => updateSpec('containerType', e.target.value as any)}
                 className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-cyan-500 font-semibold text-cyan-950 shadow-2xs cursor-pointer"
               >
+                <option value="">-- Chọn Loại Vỏ Container * --</option>
                 <option value="20ft General (20DC)">20ft General (20DC)</option>
                 <option value="40ft General (40DC)">40ft General (40DC)</option>
                 <option value="40ft High Cube (40HC)">40ft High Cube (40HC)</option>
@@ -475,15 +484,10 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
               <input
                 type="text"
                 inputMode="numeric"
-                value={specs.containerCount !== undefined && specs.containerCount !== null ? (specs.containerCount === 0 ? '' : specs.containerCount) : ''}
+                value={specs.containerCount !== undefined && specs.containerCount !== null ? specs.containerCount : ''}
                 onChange={(e) => {
                   const raw = e.target.value.replace(/\D/g, '');
-                  updateSpec('containerCount', raw === '' ? 0 : parseInt(raw, 10));
-                }}
-                onBlur={() => {
-                  if (!specs.containerCount || specs.containerCount < 1) {
-                    updateSpec('containerCount', 1);
-                  }
+                  updateSpec('containerCount', raw === '' ? undefined : parseInt(raw, 10));
                 }}
                 placeholder="VD: 1"
                 className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-cyan-500 font-bold text-slate-900 shadow-2xs"
@@ -495,10 +499,11 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
                 Đơn Vị (Tần Suất Vận Chuyển) *
               </label>
               <select
-                value={specs.containerCountUnit || 'Container / Tháng'}
+                value={specs.containerCountUnit || ''}
                 onChange={(e) => updateSpec('containerCountUnit', e.target.value)}
                 className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-cyan-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
               >
+                <option value="">-- Chọn Đơn Vị Tần Suất --</option>
                 <option value="Container / Ngày">Container / Ngày</option>
                 <option value="Container / Tuần">Container / Tuần</option>
                 <option value="Container / Tháng">Container / Tháng</option>
@@ -531,10 +536,11 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
               </label>
               <input
                 type="text"
-                value={specs.lclPieces ? specs.lclPieces.toLocaleString('vi-VN') : ''}
+                inputMode="numeric"
+                value={specs.lclPieces !== undefined && specs.lclPieces !== null ? specs.lclPieces : ''}
                 onChange={(e) => {
                   const val = e.target.value.replace(/\D/g, '');
-                  handleLclPiecesChange(val ? parseInt(val, 10) : 1);
+                  handleLclPiecesChange(val ? parseInt(val, 10) : undefined);
                 }}
                 placeholder="VD: 4"
                 className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-cyan-500 font-bold text-slate-900 shadow-2xs"
@@ -568,10 +574,11 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
                 <span className="text-[10px] text-slate-500 block mb-1 font-medium">Dài (L) cm</span>
                 <input
                   type="text"
-                  value={specs.lclDimensions?.lengthCm ? specs.lclDimensions.lengthCm.toLocaleString('vi-VN') : ''}
+                  inputMode="numeric"
+                  value={specs.lclDimensions?.lengthCm !== undefined && specs.lclDimensions.lengthCm !== null && specs.lclDimensions.lengthCm > 0 ? specs.lclDimensions.lengthCm : ''}
                   onChange={(e) => {
                     const val = e.target.value.replace(/\D/g, '');
-                    handleLclDimChange('lengthCm', val ? parseInt(val, 10) : 0);
+                    handleLclDimChange('lengthCm', val ? parseInt(val, 10) : undefined);
                   }}
                   placeholder="VD: 120"
                   className="w-full h-10 px-3 text-xs bg-white border border-slate-200 rounded-xl text-center font-bold text-slate-900 focus:border-cyan-500 shadow-2xs"
@@ -581,10 +588,11 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
                 <span className="text-[10px] text-slate-500 block mb-1 font-medium">Rộng (W) cm</span>
                 <input
                   type="text"
-                  value={specs.lclDimensions?.widthCm ? specs.lclDimensions.widthCm.toLocaleString('vi-VN') : ''}
+                  inputMode="numeric"
+                  value={specs.lclDimensions?.widthCm !== undefined && specs.lclDimensions.widthCm !== null && specs.lclDimensions.widthCm > 0 ? specs.lclDimensions.widthCm : ''}
                   onChange={(e) => {
                     const val = e.target.value.replace(/\D/g, '');
-                    handleLclDimChange('widthCm', val ? parseInt(val, 10) : 0);
+                    handleLclDimChange('widthCm', val ? parseInt(val, 10) : undefined);
                   }}
                   placeholder="VD: 100"
                   className="w-full h-10 px-3 text-xs bg-white border border-slate-200 rounded-xl text-center font-bold text-slate-900 focus:border-cyan-500 shadow-2xs"
@@ -594,10 +602,11 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
                 <span className="text-[10px] text-slate-500 block mb-1 font-medium">Cao (H) cm</span>
                 <input
                   type="text"
-                  value={specs.lclDimensions?.heightCm ? specs.lclDimensions.heightCm.toLocaleString('vi-VN') : ''}
+                  inputMode="numeric"
+                  value={specs.lclDimensions?.heightCm !== undefined && specs.lclDimensions.heightCm !== null && specs.lclDimensions.heightCm > 0 ? specs.lclDimensions.heightCm : ''}
                   onChange={(e) => {
                     const val = e.target.value.replace(/\D/g, '');
-                    handleLclDimChange('heightCm', val ? parseInt(val, 10) : 0);
+                    handleLclDimChange('heightCm', val ? parseInt(val, 10) : undefined);
                   }}
                   placeholder="VD: 150"
                   className="w-full h-10 px-3 text-xs bg-white border border-slate-200 rounded-xl text-center font-bold text-slate-900 focus:border-cyan-500 shadow-2xs"
@@ -614,12 +623,13 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
               </label>
               <input
                 type="text"
-                value={specs.lclGrossWeightKg ? specs.lclGrossWeightKg.toLocaleString('vi-VN') : ''}
+                inputMode="numeric"
+                value={specs.lclGrossWeightKg !== undefined && specs.lclGrossWeightKg !== null && specs.lclGrossWeightKg > 0 ? specs.lclGrossWeightKg : ''}
                 onChange={(e) => {
                   const val = e.target.value.replace(/\D/g, '');
-                  handleLclWeightChange(val ? parseFloat(val) : 0);
+                  handleLclWeightChange(val ? parseFloat(val) : undefined);
                 }}
-                placeholder="VD: 1.200"
+                placeholder="VD: 1200"
                 className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-cyan-500 font-bold text-slate-900 shadow-2xs"
               />
             </div>
@@ -629,7 +639,7 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
                 Tổng Thể Tích Tính Toán (CBM)
               </label>
               <div className="h-10 px-3.5 text-xs bg-slate-100 border border-slate-200 rounded-xl font-extrabold text-slate-800 flex items-center">
-                {specs.lclCbm || 0} CBM
+                {specs.lclCbm !== undefined && specs.lclCbm !== null ? `${specs.lclCbm} CBM` : '-- CBM'}
               </div>
             </div>
 
@@ -638,8 +648,8 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
                 Trọng Lượng Tính Cước (Chargeable W/M)
               </label>
               <div className="h-10 px-3.5 text-xs bg-cyan-50 border border-cyan-200 rounded-xl font-extrabold text-cyan-900 flex items-center justify-between">
-                <span>{specs.lclChargeableWeightKg ? specs.lclChargeableWeightKg.toLocaleString('vi-VN') : '0'} Kg</span>
-                <span className="text-[10px] text-cyan-700 font-normal">({specs.lclRevenueTon || 0} RT W/M)</span>
+                <span>{specs.lclChargeableWeightKg !== undefined && specs.lclChargeableWeightKg !== null ? `${specs.lclChargeableWeightKg.toLocaleString('vi-VN')} Kg` : '-- Kg'}</span>
+                <span className="text-[10px] text-cyan-700 font-normal">({specs.lclRevenueTon !== undefined && specs.lclRevenueTon !== null ? `${specs.lclRevenueTon} RT W/M` : '-- RT'})</span>
               </div>
             </div>
           </div>
@@ -653,15 +663,10 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
               <input
                 type="text"
                 inputMode="numeric"
-                value={specs.lclShipmentCount !== undefined && specs.lclShipmentCount !== null ? (specs.lclShipmentCount === 0 ? '' : specs.lclShipmentCount) : ''}
+                value={specs.lclShipmentCount !== undefined && specs.lclShipmentCount !== null ? specs.lclShipmentCount : ''}
                 onChange={(e) => {
                   const raw = e.target.value.replace(/\D/g, '');
-                  updateSpec('lclShipmentCount', raw === '' ? 0 : parseInt(raw, 10));
-                }}
-                onBlur={() => {
-                  if (!specs.lclShipmentCount || specs.lclShipmentCount < 1) {
-                    updateSpec('lclShipmentCount', 1);
-                  }
+                  updateSpec('lclShipmentCount', raw === '' ? undefined : parseInt(raw, 10));
                 }}
                 placeholder="VD: 1"
                 className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-cyan-500 font-bold text-slate-900 shadow-2xs"
@@ -673,10 +678,11 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
                 Đơn Vị (Tần Suất Vận Chuyển) *
               </label>
               <select
-                value={specs.lclFrequencyUnit || 'Chuyến / Tháng'}
+                value={specs.lclFrequencyUnit || ''}
                 onChange={(e) => updateSpec('lclFrequencyUnit', e.target.value)}
                 className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-cyan-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
               >
+                <option value="">-- Chọn Đơn Vị Tần Suất --</option>
                 <option value="Chuyến / Ngày">Chuyến / Ngày</option>
                 <option value="Chuyến / Tuần">Chuyến / Tuần</option>
                 <option value="Chuyến / Tháng">Chuyến / Tháng</option>
@@ -694,10 +700,11 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
           Điều Kiện Thương Mại (Incoterms 2020) *
         </label>
         <select
-          value={specs.incoterm || 'FOB'}
+          value={specs.incoterm || ''}
           onChange={(e) => updateSpec('incoterm', e.target.value as any)}
           className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-cyan-500 font-semibold text-cyan-950 shadow-2xs cursor-pointer"
         >
+          <option value="">-- Chọn Điều Kiện Thương Mại (Incoterms 2020) * --</option>
           <option value="FOB">FOB - Free on Board (Giao lên tàu cảng bốc)</option>
           <option value="CIF">CIF - Cost, Insurance and Freight (Giao cảng dỡ kèm BH)</option>
           <option value="CFR">CFR - Cost and Freight (Tiền hàng và cước biển)</option>

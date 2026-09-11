@@ -485,6 +485,10 @@ interface TruckingInquiryFormProps {
   destination: string;
   setDestination: (val: string) => void;
   cargoClassification?: CargoClassification;
+  weightKg?: string;
+  setWeightKg?: (val: string) => void;
+  volumeCbm?: string;
+  setVolumeCbm?: (val: string) => void;
 }
 
 export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
@@ -495,6 +499,10 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
   destination,
   setDestination,
   cargoClassification = 'General',
+  weightKg = '',
+  setWeightKg,
+  volumeCbm = '',
+  setVolumeCbm,
 }) => {
   const isReefer = cargoClassification === 'Reefer';
   const isHazmat = cargoClassification === 'Hazmat';
@@ -523,36 +531,37 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
     return GENERAL_FTL_TRUCK_BODIES;
   }, [isReefer, isHazmat]);
 
-  // Find active truck body
+  // Find active truck body (only if specs.truckType is selected)
   const selectedBody = useMemo(() => {
-    return currentTruckBodies.find((b) => b.name === specs.truckType) || currentTruckBodies[0];
+    if (!specs.truckType) return undefined;
+    return currentTruckBodies.find((b) => b.name === specs.truckType);
   }, [currentTruckBodies, specs.truckType]);
 
-  // Ensure default truck type is valid when switching cargo category or loadType
+  // Ensure truck type is reset if no longer valid when switching cargo category or loadType
   useEffect(() => {
+    if (!specs.truckType) return;
+
     if (isLTL) {
       const isValidLTL = LTL_TRUCK_OPTIONS.some((b) => b.name === specs.truckType);
-      if (!isValidLTL && LTL_TRUCK_OPTIONS.length > 0) {
+      if (!isValidLTL) {
         onChange({
           ...specs,
-          truckType: LTL_TRUCK_OPTIONS[0].name,
-          tonnageCategory: 'Theo kiện ghép LTL',
+          truckType: '',
+          tonnageCategory: '',
         });
       }
       return;
     }
 
     const isValidType = currentTruckBodies.some((b) => b.name === specs.truckType);
-    if (!isValidType && currentTruckBodies.length > 0) {
-      const defaultBody = currentTruckBodies[0];
-      const defaultTonnage = defaultBody.tonnages[0];
+    if (!isValidType) {
       onChange({
         ...specs,
-        truckType: defaultBody.name,
-        tonnageCategory: defaultTonnage ? defaultTonnage.label : '',
+        truckType: '',
+        tonnageCategory: '',
       });
     }
-  }, [currentTruckBodies, specs, onChange, isLTL]);
+  }, [currentTruckBodies, specs.truckType, onChange, isLTL]);
 
   const updateSpec = <K extends keyof TruckingInquirySpecs>(key: K, value: TruckingInquirySpecs[K]) => {
     onChange({
@@ -592,7 +601,7 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
       onChange({
         ...specs,
         loadType: newLoadType,
-        truckType: isCurrentTruckTypeLTL ? specs.truckType : LTL_TRUCK_OPTIONS[0].name,
+        truckType: isCurrentTruckTypeLTL ? specs.truckType : '',
         tonnageCategory: 'Theo kiện ghép LTL',
         pickupPointsCount: 1,
         pickupLocations: [firstPickup],
@@ -604,12 +613,11 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
       setDestination(firstDelivery);
     } else {
       const isCurrentTruckTypeFTL = currentTruckBodies.some((opt) => opt.name === specs.truckType);
-      const defaultBody = currentTruckBodies[0];
       onChange({
         ...specs,
         loadType: newLoadType,
-        truckType: isCurrentTruckTypeFTL ? specs.truckType : (defaultBody?.name || 'Xe Tải Thùng Kín (Dry Box Truck)'),
-        tonnageCategory: isCurrentTruckTypeFTL ? specs.tonnageCategory : (defaultBody?.tonnages[0]?.label || ''),
+        truckType: isCurrentTruckTypeFTL ? specs.truckType : '',
+        tonnageCategory: isCurrentTruckTypeFTL ? specs.tonnageCategory : '',
       });
     }
   };
@@ -722,33 +730,39 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
   };
 
   // Helper for LTL auto calculation
-  const handleLtlDimChange = (dimKey: 'lengthCm' | 'widthCm' | 'heightCm', val: number) => {
-    const currentDims = specs.ltlDimensions || { lengthCm: 120, widthCm: 100, heightCm: 150 };
-    const newDims = { ...currentDims, [dimKey]: val };
-    const pieces = specs.ltlPieces || 1;
+  const handleLtlDimChange = (dimKey: 'lengthCm' | 'widthCm' | 'heightCm', val: number | undefined) => {
+    const currentDims = specs.ltlDimensions || { lengthCm: 0, widthCm: 0, heightCm: 0 };
+    const newDims = { ...currentDims, [dimKey]: val || 0 };
+    const pieces = specs.ltlPieces || 0;
     
     // Calculate total CBM: (L * W * H / 1,000,000) * pieces
+    const hasAnyDim = (newDims.lengthCm > 0 || newDims.widthCm > 0 || newDims.heightCm > 0);
     const singleCbm = (newDims.lengthCm * newDims.widthCm * newDims.heightCm) / 1000000;
-    const totalCbm = parseFloat((singleCbm * pieces).toFixed(2));
+    const totalCbm = (singleCbm > 0 && pieces > 0) ? parseFloat((singleCbm * pieces).toFixed(2)) : undefined;
     
     // Standard Road Freight Chargeable Ratio: 1 CBM = 250 kg
-    const volumetricWeight = Math.round(totalCbm * 250);
+    const volumetricWeight = totalCbm ? Math.round(totalCbm * 250) : 0;
     const grossWeight = specs.ltlGrossWeightKg || 0;
     const chargeableWeight = Math.max(grossWeight, volumetricWeight);
 
     onChange({
       ...specs,
-      ltlDimensions: newDims,
+      ltlDimensions: hasAnyDim ? newDims : undefined,
       ltlCbm: totalCbm,
-      ltlChargeableWeightKg: chargeableWeight,
+      ltlChargeableWeightKg: chargeableWeight > 0 ? chargeableWeight : (grossWeight > 0 ? grossWeight : undefined),
     });
   };
 
-  const handleLtlPiecesChange = (pieces: number) => {
-    const dims = specs.ltlDimensions || { lengthCm: 120, widthCm: 100, heightCm: 150 };
-    const singleCbm = (dims.lengthCm * dims.widthCm * dims.heightCm) / 1000000;
-    const totalCbm = parseFloat((singleCbm * pieces).toFixed(2));
-    const volumetricWeight = Math.round(totalCbm * 250);
+  const handleLtlPiecesChange = (pieces: number | undefined) => {
+    const dims = specs.ltlDimensions;
+    let totalCbm: number | undefined = undefined;
+    if (dims && pieces && pieces > 0) {
+      const singleCbm = (dims.lengthCm * dims.widthCm * dims.heightCm) / 1000000;
+      if (singleCbm > 0) {
+        totalCbm = parseFloat((singleCbm * pieces).toFixed(2));
+      }
+    }
+    const volumetricWeight = totalCbm ? Math.round(totalCbm * 250) : 0;
     const grossWeight = specs.ltlGrossWeightKg || 0;
     const chargeableWeight = Math.max(grossWeight, volumetricWeight);
 
@@ -756,19 +770,19 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
       ...specs,
       ltlPieces: pieces,
       ltlCbm: totalCbm,
-      ltlChargeableWeightKg: chargeableWeight,
+      ltlChargeableWeightKg: chargeableWeight > 0 ? chargeableWeight : (grossWeight > 0 ? grossWeight : undefined),
     });
   };
 
-  const handleLtlWeightChange = (grossWeight: number) => {
-    const totalCbm = specs.ltlCbm || 1.8;
+  const handleLtlWeightChange = (grossWeight: number | undefined) => {
+    const totalCbm = specs.ltlCbm || 0;
     const volumetricWeight = Math.round(totalCbm * 250);
-    const chargeableWeight = Math.max(grossWeight, volumetricWeight);
+    const chargeableWeight = Math.max(grossWeight || 0, volumetricWeight);
 
     onChange({
       ...specs,
       ltlGrossWeightKg: grossWeight,
-      ltlChargeableWeightKg: chargeableWeight,
+      ltlChargeableWeightKg: chargeableWeight > 0 ? chargeableWeight : undefined,
     });
   };
 
@@ -1032,6 +1046,64 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
             </span>
           </div>
 
+          {/* Row: Weight & Volume for FTL */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Tổng Khối Lượng (kg) *
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={weightKg || ''}
+                  onChange={(e) => {
+                    const raw = e.target.value.replace(/[^0-9]/g, '');
+                    if (raw === '') {
+                      setWeightKg?.('');
+                      return;
+                    }
+                    const num = Number(raw);
+                    if (!isNaN(num)) {
+                      setWeightKg?.(num.toLocaleString('vi-VN'));
+                    }
+                  }}
+                  placeholder="VD: 15.000"
+                  className="w-full h-10 pl-3.5 pr-10 text-xs bg-white border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 font-bold text-slate-900 transition-colors shadow-2xs"
+                />
+                <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 pointer-events-none">
+                  kg
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Tổng Thể Tích (cbm) *
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={volumeCbm || ''}
+                  onChange={(e) => {
+                    const raw = e.target.value.replace(/[^0-9.]/g, '');
+                    if (raw === '') {
+                      setVolumeCbm?.('');
+                      return;
+                    }
+                    setVolumeCbm?.(raw);
+                  }}
+                  placeholder="VD: 50"
+                  className="w-full h-10 pl-3.5 pr-12 text-xs bg-white border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 font-bold text-slate-900 transition-colors shadow-2xs"
+                />
+                <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 pointer-events-none">
+                  cbm
+                </span>
+              </div>
+            </div>
+          </div>
+
           {/* Row 1: Body Type & Tonnage */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -1039,28 +1111,29 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
                 Loại Thùng Phương Tiện *
               </label>
               <select
-                value={specs.truckType}
+                value={specs.truckType || ''}
                 onChange={(e) => {
                   const newType = e.target.value;
-                  const newBodyObj = currentTruckBodies.find((b) => b.name === newType) || currentTruckBodies[0];
-                  const firstTonnage = newBodyObj.tonnages[0];
                   onChange({
                     ...specs,
                     truckType: newType,
-                    tonnageCategory: firstTonnage ? firstTonnage.label : '',
+                    tonnageCategory: '',
                   });
                 }}
                 className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
               >
+                <option value="">-- Chọn Loại Thùng Phương Tiện --</option>
                 {currentTruckBodies.map((body) => (
                   <option key={body.id} value={body.name}>
                     {body.name} - [{body.badge}]
                   </option>
                 ))}
               </select>
-              <p className="text-[11px] text-slate-500 mt-1 italic line-clamp-1">
-                {selectedBody.desc}
-              </p>
+              {selectedBody && (
+                <p className="text-[11px] text-slate-500 mt-1 italic line-clamp-1">
+                  {selectedBody.desc}
+                </p>
+              )}
             </div>
 
             <div>
@@ -1068,11 +1141,14 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
                 Phân Khúc Tải Trọng & Thể Tích Khả Dụng *
               </label>
               <select
-                value={specs.tonnageCategory}
+                value={specs.tonnageCategory || ''}
                 onChange={(e) => updateSpec('tonnageCategory', e.target.value)}
                 className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-semibold text-indigo-900 shadow-2xs cursor-pointer"
               >
-                {selectedBody.tonnages.map((t) => (
+                <option value="">
+                  {selectedBody ? '-- Chọn Phân Khúc Tải Trọng --' : '-- Vui lòng chọn Loại Thùng Phương Tiện trước --'}
+                </option>
+                {selectedBody?.tonnages.map((t) => (
                   <option key={t.id} value={t.label}>
                     {t.label} ── ({t.cbm})
                   </option>
@@ -1081,7 +1157,8 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
 
               {/* Tonnage Detail Inline Note */}
               {(() => {
-                const currentTonnageObj = selectedBody.tonnages.find((t) => t.label === specs.tonnageCategory) || selectedBody.tonnages[0];
+                if (!selectedBody) return null;
+                const currentTonnageObj = selectedBody.tonnages.find((t) => t.label === specs.tonnageCategory);
                 if (!currentTonnageObj) return null;
                 return (
                   <div className="mt-1 flex items-center justify-between text-[11px] text-slate-500">
@@ -1100,20 +1177,11 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
                 Thời Gian Giao Hàng Yêu Cầu (Leadtime SLA) *
               </label>
               <select
-                value={
-                  specs.requestedLeadtime === 'Hỏa tốc Bắc Nam 24 - 36 giờ (2 tài xế thay phiên)' ||
-                  specs.requestedLeadtime === 'Tiêu chuẩn Bắc Nam (60 - 72 giờ)' ||
-                  specs.requestedLeadtime === 'Giao trong ngày / Nội tỉnh (< 8 giờ)' ||
-                  specs.requestedLeadtime === 'Giao ngày kế tiếp / Next-Day (24 giờ)' ||
-                  specs.requestedLeadtime === 'Chính xác theo giờ hẹn trước (Fixed Slot Appointment)'
-                    ? specs.requestedLeadtime
-                    : specs.requestedLeadtime === 'Tùy chỉnh theo thỏa thuận' || (specs.requestedLeadtime && specs.requestedLeadtime !== '')
-                    ? 'Tùy chỉnh theo thỏa thuận'
-                    : 'Tiêu chuẩn Bắc Nam (60 - 72 giờ)'
-                }
+                value={specs.requestedLeadtime || ''}
                 onChange={(e) => updateSpec('requestedLeadtime', e.target.value)}
                 className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
               >
+                <option value="">-- Chọn Thời Gian Giao Hàng Yêu Cầu --</option>
                 <option value="Tiêu chuẩn Bắc Nam (60 - 72 giờ)">
                   Tiêu chuẩn Bắc Nam (60 - 72 giờ)
                 </option>
@@ -1161,12 +1229,7 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
                 value={specs.vehicleCount !== undefined && specs.vehicleCount !== null ? (specs.vehicleCount === 0 ? '' : specs.vehicleCount) : ''}
                 onChange={(e) => {
                   const raw = e.target.value.replace(/\D/g, '');
-                  updateSpec('vehicleCount', raw === '' ? 0 : parseInt(raw, 10));
-                }}
-                onBlur={() => {
-                  if (!specs.vehicleCount || specs.vehicleCount < 1) {
-                    updateSpec('vehicleCount', 1);
-                  }
+                  updateSpec('vehicleCount', raw === '' ? undefined : parseInt(raw, 10));
                 }}
                 placeholder="VD: 1"
                 className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-bold text-slate-900 shadow-2xs"
@@ -1178,10 +1241,11 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
                 Đơn Vị (Tần Suất Vận Chuyển) *
               </label>
               <select
-                value={specs.vehicleCountUnit || 'Chuyến / Tháng'}
+                value={specs.vehicleCountUnit || ''}
                 onChange={(e) => updateSpec('vehicleCountUnit', e.target.value)}
                 className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
               >
+                <option value="">-- Chọn Đơn Vị Tần Suất --</option>
                 <option value="Chuyến / Ngày">Chuyến / Ngày</option>
                 <option value="Chuyến / Tuần">Chuyến / Tuần</option>
                 <option value="Chuyến / Tháng">Chuyến / Tháng</option>
@@ -1247,10 +1311,11 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
               </label>
               <input
                 type="text"
-                value={specs.ltlPieces ? specs.ltlPieces.toLocaleString('vi-VN') : ''}
+                inputMode="numeric"
+                value={specs.ltlPieces !== undefined && specs.ltlPieces !== null ? specs.ltlPieces : ''}
                 onChange={(e) => {
                   const val = e.target.value.replace(/\D/g, '');
-                  handleLtlPiecesChange(val ? parseInt(val, 10) : 1);
+                  handleLtlPiecesChange(val ? parseInt(val, 10) : undefined);
                 }}
                 placeholder="VD: 4"
                 className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-emerald-500 font-bold text-slate-900 shadow-2xs"
@@ -1286,10 +1351,11 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
                 <span className="text-[10px] text-slate-500 block mb-1 font-medium">Dài (L) cm</span>
                 <input
                   type="text"
-                  value={specs.ltlDimensions?.lengthCm ? specs.ltlDimensions.lengthCm.toLocaleString('vi-VN') : ''}
+                  inputMode="numeric"
+                  value={specs.ltlDimensions?.lengthCm !== undefined && specs.ltlDimensions.lengthCm !== null && specs.ltlDimensions.lengthCm > 0 ? specs.ltlDimensions.lengthCm : ''}
                   onChange={(e) => {
                     const val = e.target.value.replace(/\D/g, '');
-                    handleLtlDimChange('lengthCm', val ? parseInt(val, 10) : 0);
+                    handleLtlDimChange('lengthCm', val ? parseInt(val, 10) : undefined);
                   }}
                   placeholder="VD: 120"
                   className="w-full h-10 px-3 text-xs bg-white border border-slate-200 rounded-xl text-center font-bold text-slate-900 focus:border-emerald-500 shadow-2xs"
@@ -1299,10 +1365,11 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
                 <span className="text-[10px] text-slate-500 block mb-1 font-medium">Rộng (W) cm</span>
                 <input
                   type="text"
-                  value={specs.ltlDimensions?.widthCm ? specs.ltlDimensions.widthCm.toLocaleString('vi-VN') : ''}
+                  inputMode="numeric"
+                  value={specs.ltlDimensions?.widthCm !== undefined && specs.ltlDimensions.widthCm !== null && specs.ltlDimensions.widthCm > 0 ? specs.ltlDimensions.widthCm : ''}
                   onChange={(e) => {
                     const val = e.target.value.replace(/\D/g, '');
-                    handleLtlDimChange('widthCm', val ? parseInt(val, 10) : 0);
+                    handleLtlDimChange('widthCm', val ? parseInt(val, 10) : undefined);
                   }}
                   placeholder="VD: 100"
                   className="w-full h-10 px-3 text-xs bg-white border border-slate-200 rounded-xl text-center font-bold text-slate-900 focus:border-emerald-500 shadow-2xs"
@@ -1312,10 +1379,11 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
                 <span className="text-[10px] text-slate-500 block mb-1 font-medium">Cao (H) cm</span>
                 <input
                   type="text"
-                  value={specs.ltlDimensions?.heightCm ? specs.ltlDimensions.heightCm.toLocaleString('vi-VN') : ''}
+                  inputMode="numeric"
+                  value={specs.ltlDimensions?.heightCm !== undefined && specs.ltlDimensions.heightCm !== null && specs.ltlDimensions.heightCm > 0 ? specs.ltlDimensions.heightCm : ''}
                   onChange={(e) => {
                     const val = e.target.value.replace(/\D/g, '');
-                    handleLtlDimChange('heightCm', val ? parseInt(val, 10) : 0);
+                    handleLtlDimChange('heightCm', val ? parseInt(val, 10) : undefined);
                   }}
                   placeholder="VD: 150"
                   className="w-full h-10 px-3 text-xs bg-white border border-slate-200 rounded-xl text-center font-bold text-slate-900 focus:border-emerald-500 shadow-2xs"
@@ -1332,12 +1400,13 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
               </label>
               <input
                 type="text"
-                value={specs.ltlGrossWeightKg ? specs.ltlGrossWeightKg.toLocaleString('vi-VN') : ''}
+                inputMode="numeric"
+                value={specs.ltlGrossWeightKg !== undefined && specs.ltlGrossWeightKg !== null && specs.ltlGrossWeightKg > 0 ? specs.ltlGrossWeightKg : ''}
                 onChange={(e) => {
                   const val = e.target.value.replace(/\D/g, '');
-                  handleLtlWeightChange(val ? parseFloat(val) : 0);
+                  handleLtlWeightChange(val ? parseFloat(val) : undefined);
                 }}
-                placeholder="VD: 1.200"
+                placeholder="VD: 1200"
                 className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-emerald-500 font-bold text-slate-900 shadow-2xs"
               />
             </div>
@@ -1347,7 +1416,7 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
                 Tổng Thể Tích Tính Toán (CBM)
               </label>
               <div className="h-10 px-3.5 text-xs bg-slate-100 border border-slate-200 rounded-xl font-extrabold text-slate-800 flex items-center">
-                {specs.ltlCbm || 0} CBM
+                {specs.ltlCbm !== undefined && specs.ltlCbm !== null ? `${specs.ltlCbm} CBM` : '-- CBM'}
               </div>
             </div>
 
@@ -1356,7 +1425,7 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
                 Trọng Lượng Tính Cước (Chargeable Kg)
               </label>
               <div className="h-10 px-3.5 text-xs bg-emerald-50 border border-emerald-200 rounded-xl font-extrabold text-emerald-900 flex items-center justify-between">
-                <span>{specs.ltlChargeableWeightKg || 0} Kg</span>
+                <span>{specs.ltlChargeableWeightKg !== undefined && specs.ltlChargeableWeightKg !== null ? `${specs.ltlChargeableWeightKg.toLocaleString('vi-VN')} Kg` : '-- Kg'}</span>
                 <span className="text-[10px] text-emerald-700 font-normal">(Max thực vs quy đổi)</span>
               </div>
             </div>
@@ -1371,15 +1440,10 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
               <input
                 type="text"
                 inputMode="numeric"
-                value={specs.ltlShipmentCount !== undefined && specs.ltlShipmentCount !== null ? (specs.ltlShipmentCount === 0 ? '' : specs.ltlShipmentCount) : ''}
+                value={specs.ltlShipmentCount !== undefined && specs.ltlShipmentCount !== null ? specs.ltlShipmentCount : ''}
                 onChange={(e) => {
                   const raw = e.target.value.replace(/\D/g, '');
-                  updateSpec('ltlShipmentCount', raw === '' ? 0 : parseInt(raw, 10));
-                }}
-                onBlur={() => {
-                  if (!specs.ltlShipmentCount || specs.ltlShipmentCount < 1) {
-                    updateSpec('ltlShipmentCount', 1);
-                  }
+                  updateSpec('ltlShipmentCount', raw === '' ? undefined : parseInt(raw, 10));
                 }}
                 placeholder="VD: 1"
                 className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-emerald-500 font-bold text-slate-900 shadow-2xs"
@@ -1391,10 +1455,11 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
                 Đơn Vị (Tần Suất Vận Chuyển) *
               </label>
               <select
-                value={specs.ltlFrequencyUnit || 'Chuyến / Tháng'}
+                value={specs.ltlFrequencyUnit || ''}
                 onChange={(e) => updateSpec('ltlFrequencyUnit', e.target.value)}
                 className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-emerald-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
               >
+                <option value="">-- Chọn Đơn Vị Tần Suất --</option>
                 <option value="Chuyến / Ngày">Chuyến / Ngày</option>
                 <option value="Chuyến / Tuần">Chuyến / Tuần</option>
                 <option value="Chuyến / Tháng">Chuyến / Tháng</option>

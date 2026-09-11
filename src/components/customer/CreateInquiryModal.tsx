@@ -239,19 +239,19 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
   const [cargoValueCurrency, setCargoValueCurrency] = useState<'USD' | 'VND' | 'EUR' | 'CNY' | 'JPY'>('USD');
   const [packagePackaging, setPackagePackaging] = useState('');
   const [customPackaging, setCustomPackaging] = useState('');
-  const [isStackable, setIsStackable] = useState(true);
+  const [isStackable, setIsStackable] = useState<boolean | undefined>(undefined);
   const [weightKg, setWeightKg] = useState('');
   const [volumeCbm, setVolumeCbm] = useState('');
   const [preservationRequirement, setPreservationRequirement] = useState('');
   
   // Reefer Specific Specs
   const [temperatureRequirement, setTemperatureRequirement] = useState('');
-  const [needContinuousGenset, setNeedContinuousGenset] = useState(true);
+  const [needContinuousGenset, setNeedContinuousGenset] = useState(false);
 
   // Hazmat / DG Specific Specs
   const [dgClassIMO, setDgClassIMO] = useState('');
   const [unNumber, setUnNumber] = useState('');
-  const [packingGroup, setPackingGroup] = useState('PG II (Mức độ nguy hiểm trung bình)');
+  const [packingGroup, setPackingGroup] = useState('');
   const [flashPoint, setFlashPoint] = useState<string>('');
   const [msdsFileName, setMsdsFileName] = useState<string>('');
 
@@ -261,25 +261,25 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
 
   const [truckingSpecs, setTruckingSpecs] = useState<TruckingInquirySpecs>({
     pricingType: 'SPOT',
-    truckType: 'Xe Tải Thùng Kín (Dry Box Truck)',
-    tonnageCategory: '15.0T (Tải nặng 3 chân)',
-    loadType: 'FTL (Nguyên chuyến)',
-    vehicleCount: 1,
-    vehicleCountUnit: 'Chuyến / Tháng',
+    truckType: '',
+    tonnageCategory: '',
+    loadType: '',
+    vehicleCount: undefined,
+    vehicleCountUnit: '',
     pickupPointsCount: 1,
     pickupLocations: [''],
     deliveryPointsCount: 1,
     deliveryLocations: [''],
     requestedLeadtime: '',
-    ltlPieces: 4,
-    ltlPackaging: 'Pallet chuẩn 120x100cm',
-    ltlDimensions: { lengthCm: 120, widthCm: 100, heightCm: 150 },
-    ltlCbm: 7.2,
-    ltlGrossWeightKg: 1200,
-    ltlChargeableWeightKg: 1800,
-    ltlStackable: true,
-    ltlShipmentCount: 1,
-    ltlFrequencyUnit: 'Chuyến / Tháng',
+    ltlPieces: undefined,
+    ltlPackaging: '',
+    ltlDimensions: undefined,
+    ltlCbm: undefined,
+    ltlGrossWeightKg: undefined,
+    ltlChargeableWeightKg: undefined,
+    ltlStackable: undefined,
+    ltlShipmentCount: undefined,
+    ltlFrequencyUnit: '',
     multiDropPoints: 1,
     loadingLaborRequired: false,
     unloadingLaborRequired: false,
@@ -322,35 +322,35 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
 
   const [oceanSpecs, setOceanSpecs] = useState<OceanInquirySpecs>({
     pricingType: 'SPOT',
-    tradeRole: 'Xuất khẩu (Export)',
-    mode: 'FCL (Full Container)',
-    originServiceTerm: 'CY',
-    destinationServiceTerm: 'CY',
-    containerType: '40ft High Cube (40HC)',
-    containerCount: 1,
-    containerCountUnit: 'Container / Tháng',
-    lclShipmentCount: 1,
-    lclFrequencyUnit: 'Chuyến / Tháng',
+    tradeRole: '',
+    mode: '',
+    originServiceTerm: '',
+    destinationServiceTerm: '',
+    containerType: '',
+    containerCount: undefined,
+    containerCountUnit: '',
+    lclShipmentCount: undefined,
+    lclFrequencyUnit: '',
     cbmVolume: undefined,
     grossWeightKgs: undefined,
     polPort: '',
     podPort: '',
-    incoterm: 'FOB',
-    commodityCategory: 'Electronics & High-Tech',
-    freeDemDetDaysRequested: 14,
-    packageType: 'Palletized',
+    incoterm: '',
+    commodityCategory: '',
+    freeDemDetDaysRequested: undefined,
+    packageType: '',
     selectedVAS: [],
   });
 
   const [airSpecs, setAirSpecs] = useState<AirInquirySpecs>({
     pricingType: 'SPOT',
-    airServiceType: 'Air Freight / Cargo',
-    tradeRole: 'Xuất khẩu (Export)',
-    serviceLevel: 'Standard Air Freight (3-4 days)',
-    originServiceTerm: 'AIRPORT',
-    destinationServiceTerm: 'AIRPORT',
-    expressPackageType: 'Parcel / Package (Bưu phẩm / Hàng mẫu đóng hộp)',
-    expressSpeedLevel: 'Express Tiêu Chuẩn (2-3 ngày)',
+    airServiceType: '',
+    tradeRole: '',
+    serviceLevel: '',
+    originServiceTerm: '',
+    destinationServiceTerm: '',
+    expressPackageType: '',
+    expressSpeedLevel: '',
     originAirport: '',
     destinationAirport: '',
     packageCount: undefined,
@@ -360,44 +360,44 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
     dimensionsCm: '',
     isDangerousGoods: false,
     isTemperatureSensitive: false,
-    customsAtAirport: true,
-    stackable: true,
-    shipmentCount: 1,
-    frequencyUnit: 'Chuyến / Tháng',
+    customsAtAirport: false,
+    stackable: undefined,
+    shipmentCount: undefined,
+    frequencyUnit: '',
     selectedVAS: [],
   });
 
   const [coldChainSpecs, setColdChainSpecs] = useState<ColdChainInquirySpecs>({
     pricingType: 'SPOT',
-    temperatureCategory: 'Frozen (-25°C to -18°C: Kem, Thủy hải sản)',
-    vehicleOrContType: 'Xe tải lạnh 8T-15T',
-    preCoolingRequested: true,
-    realtimeGpsTempLogging: true,
-    backupGensetIncluded: true,
+    temperatureCategory: '',
+    vehicleOrContType: '',
+    preCoolingRequested: false,
+    realtimeGpsTempLogging: false,
+    backupGensetIncluded: false,
     isPharmaCertifiedGDP: false,
     selectedVAS: [],
   });
 
   const [warehousingSpecs, setWarehousingSpecs] = useState<WarehousingInquirySpecs>({
     pricingType: 'SPOT',
-    warehousingLeaseModel: 'OVERFLOW',
-    warehouseType: 'Kho thường (Grade A Dry)',
-    billingUnitPreference: 'm² (Diện tích sàn)',
+    warehousingLeaseModel: undefined,
+    warehouseType: '',
+    billingUnitPreference: '',
     storageAreaSqm: undefined,
     palletPositions: undefined,
     cbmVolume: undefined,
     skuCount: undefined,
     bufferStorageQty: undefined,
-    bufferStorageUnit: 'Pallet (Vị trí)',
+    bufferStorageUnit: '',
     bufferPalletPositions: undefined,
-    rentalDurationMonths: 12,
+    rentalDurationMonths: undefined,
     inboundQty: undefined,
-    inboundUnit: 'Container 40ft (FEU)',
-    inboundPeriod: 'Tuần',
+    inboundUnit: '',
+    inboundPeriod: '',
     dailyInboundVolume: undefined,
     outboundQty: undefined,
-    outboundUnit: 'Pallet',
-    outboundPeriod: 'Ngày',
+    outboundUnit: '',
+    outboundPeriod: '',
     dailyOutboundVolume: undefined,
     inventoryMethod: undefined,
     wmsIntegrationNeeded: false,
@@ -406,72 +406,72 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
 
   const [customsSpecs, setCustomsSpecs] = useState<CustomsInquirySpecs>({
     pricingType: 'SPOT',
-    tradeRole: 'Nhập khẩu (Import)',
-    declarationType: 'Nhập khẩu kinh doanh (A11)',
+    tradeRole: '',
+    declarationType: '',
     customsSubDepartment: '',
     hsCodePrimary: '',
     itemDescription: '',
     invoiceValueUSD: undefined,
-    coFormRequested: 'Không yêu cầu',
+    coFormRequested: '',
     redChannelInspectionSupport: false,
     selectedVAS: [],
   });
 
   const [crossBorderSpecs, setCrossBorderSpecs] = useState<CrossBorderInquirySpecs>({
     pricingType: 'SPOT',
-    tradeRole: 'Xuất khẩu (Export)',
-    borderGate: 'Mộc Bài / Xa Mát (VN ↔ Campuchia)',
+    tradeRole: '',
+    borderGate: '',
     originCity: '',
     destinationCity: '',
-    cargoMode: 'Xe liên vận chạy thẳng (Direct GMS)',
-    vehicleCount: 1,
-    customsAtBorderIncluded: true,
-    transitPermitGMSNeeded: true,
+    cargoMode: '',
+    vehicleCount: undefined,
+    customsAtBorderIncluded: false,
+    transitPermitGMSNeeded: false,
     selectedVAS: [],
   });
 
   const [railSpecs, setRailSpecs] = useState<RailInquirySpecs>({
     pricingType: 'SPOT',
-    tradeRole: 'Nội địa Bắc - Nam (Domestic Rail)',
-    mode: 'FCL (Nguyên container ga - ga)',
-    originServiceTerm: 'CY',
-    destinationServiceTerm: 'CY',
-    containerType: 'Cont 40ft HC',
-    containerCount: 1,
-    containerCountUnit: 'Container / Tháng',
+    tradeRole: '',
+    mode: '',
+    originServiceTerm: '',
+    destinationServiceTerm: '',
+    containerType: '',
+    containerCount: undefined,
+    containerCountUnit: '',
     originStation: '',
     destinationStation: '',
-    incoterm: 'DAP',
-    freeDemDetDaysRequested: 7,
+    incoterm: '',
+    freeDemDetDaysRequested: undefined,
     lclPieces: undefined,
     lclDimensions: undefined,
     lclCbm: undefined,
     lclGrossWeightKg: undefined,
     lclChargeableWeightKg: undefined,
     lclRevenueTon: undefined,
-    lclStackable: true,
-    lclShipmentCount: 1,
-    lclFrequencyUnit: 'Chuyến / Tháng',
-    drayageFirstMile: true,
-    drayageLastMile: true,
+    lclStackable: undefined,
+    lclShipmentCount: undefined,
+    lclFrequencyUnit: '',
+    drayageFirstMile: false,
+    drayageLastMile: false,
     selectedVAS: [],
   });
 
   const [projectSpecs, setProjectSpecs] = useState<ProjectInquirySpecs>({
     pricingType: 'CONTRACT',
-    contractTerm: 'Hợp đồng 12 tháng (1 năm tiêu chuẩn đấu thầu)',
-    projectCategory: 'DISTRIBUTION',
-    distributionChannel: 'B2B / Siêu thị (Modern Trade)',
+    contractTerm: '',
+    projectCategory: '',
+    distributionChannel: '',
     originWarehouses: [''],
-    coverageScope: 'Toàn quốc (Bắc - Trung - Nam)',
-    fleetRequirements: ['🚚 Xe tải nhỏ 1.25T - 2.5T (Giao nội đô / Phố cấm giờ)', '🚚 Xe tải trung 5.0T - 8.0T (Tuyến vệ tinh liên tỉnh)'],
-    monthlyTripsOrVolume: '150 chuyến / tháng',
+    coverageScope: '',
+    fleetRequirements: [],
+    monthlyTripsOrVolume: '',
     xDockHubLocation: '',
-    xDockTemperature: 'Nhiệt độ thường (Ambient)',
-    inboundDailyVolume: '5 - 10 xe cont 40ft/ngày',
-    outboundMaxTurnaroundTime: 'Trong vòng 4 - 8 Giờ',
-    multimodalCombination: 'Đường Biển + Đường Bộ (Sea - Road Freight)',
-    multimodalContainerType: 'Container 40ft High Cube (40HC)',
+    xDockTemperature: '',
+    inboundDailyVolume: '',
+    outboundMaxTurnaroundTime: '',
+    multimodalCombination: '',
+    multimodalContainerType: '',
     selectedVAS: [],
   });
 
@@ -533,8 +533,8 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
   };
 
   // Common SLA compliance checkboxes
-  const [gpsRequired, setGpsRequired] = useState(true);
-  const [insuranceRequired, setInsuranceRequired] = useState(true);
+  const [gpsRequired, setGpsRequired] = useState(false);
+  const [insuranceRequired, setInsuranceRequired] = useState(false);
 
   // Validation and Summary Confirmation States
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
@@ -1058,7 +1058,6 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
     if (newService === 'Cold Chain') {
       setCargoClassification('Reefer');
     }
-    setRequestedSurcharges(getDefaultSurchargesForService(newService));
   };
 
   const validateInquiryForm = (): string[] => {
@@ -1142,12 +1141,13 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
       }
     }
 
-    // 5. Kiểm tra Trọng lượng / Thể tích (Miễn trừ cho Kho Bãi, Dự Án, Thủ Tục Hải Quan và FCL đã có số container)
+    // 5. Kiểm tra Trọng lượng / Thể tích (Miễn trừ cho Kho Bãi, Dự Án, Thủ Tục Hải Quan, FCL đã có số cont, và Trucking LTL đã khai báo ở cấu hình)
     const isWeightVolumeExempt = ['Warehousing', 'Project Cargo', 'Customs Clearance'].includes(serviceType);
     const hasOceanFclContainer = (serviceType === 'Sea Freight (FCL)' || (serviceType === 'Sea Freight (LCL)' && oceanSpecs.mode?.includes('FCL'))) && (oceanSpecs.containerCount || 0) > 0;
     const hasAirWeight = serviceType === 'Air Freight' && Boolean(airSpecs.grossWeightKgs || airSpecs.chargeableWeightKgs);
+    const isTruckingLtlConfigured = serviceType === 'Trucking' && truckingSpecs.loadType === 'LTL (Ghép hàng lẻ)' && Boolean(truckingSpecs.ltlGrossWeightKg || truckingSpecs.ltlCbm || truckingSpecs.ltlPieces);
 
-    if (!isWeightVolumeExempt && !hasOceanFclContainer && !hasAirWeight && !weightKg.trim() && !volumeCbm.trim()) {
+    if (!isWeightVolumeExempt && !hasOceanFclContainer && !hasAirWeight && !isTruckingLtlConfigured && !weightKg.trim() && !volumeCbm.trim()) {
       errors.push('Vui lòng nhập Khối lượng (kg) hoặc Thể tích (cbm) của hàng hóa.');
     }
 
@@ -1686,11 +1686,9 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                   if (serviceType === 'Trucking') {
                     setTruckingSpecs((prev) => ({
                       ...prev,
-                      truckType: 'Xe Tải Thùng Kín (Dry Box Truck)',
-                      tonnageCategory: '15.0T (Tải nặng 3 chân)',
-                      loadType: 'FTL (Nguyên chuyến)',
+                      truckType: '',
+                      tonnageCategory: '',
                     }));
-                    setSelectedVASList([TRUCKING_GENERAL_FTL_VAS[0].name, TRUCKING_GENERAL_FTL_VAS[5].name]);
                   }
                 }}
                 className={`p-3 rounded-2xl border text-left cursor-pointer transition-all flex items-center gap-2.5 ${
@@ -1715,11 +1713,10 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                   if (serviceType === 'Trucking') {
                     setTruckingSpecs((prev) => ({
                       ...prev,
-                      truckType: 'Xe Tải Thùng Đông Lạnh Trung (Regional Reefer)',
-                      tonnageCategory: '5.0T – 6.5T (Thùng dài 5.8m – 6.2m)',
+                      truckType: '',
+                      tonnageCategory: '',
                       loadType: 'FTL (Nguyên chuyến)',
                     }));
-                    setSelectedVASList([TRUCKING_REEFER_VAS[0].name, TRUCKING_REEFER_VAS[1].name]);
                   }
                   if (serviceType === 'Sea Freight (LCL)') {
                     setServiceType('Sea Freight (FCL)');
@@ -1727,12 +1724,12 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                   setOceanSpecs((prev) => ({
                     ...prev,
                     mode: 'FCL (Full Container)',
-                    containerType: prev.containerType?.includes('Reefer') ? prev.containerType : '40ft Reefer (40RF)',
+                    containerType: prev.containerType?.includes('Reefer') ? prev.containerType : '',
                   }));
                   setRailSpecs((prev) => ({
                     ...prev,
                     mode: 'FCL (Nguyên container ga - ga)',
-                    containerType: 'Cont Lạnh (Reefer Rail)',
+                    containerType: prev.containerType?.includes('Lạnh') ? prev.containerType : '',
                   }));
                 }}
                 className={`p-3 rounded-2xl border text-left cursor-pointer transition-all flex items-center gap-2.5 ${
@@ -1757,11 +1754,10 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                   if (serviceType === 'Trucking') {
                     setTruckingSpecs((prev) => ({
                       ...prev,
-                      truckType: 'Xe Tải Thùng Kín Chuyên Dụng Hóa Chất (DG Dry Box)',
-                      tonnageCategory: '5.0T – 8.0T (Hóa chất liên tỉnh)',
+                      truckType: '',
+                      tonnageCategory: '',
                       loadType: 'FTL (Nguyên chuyến)',
                     }));
-                    setSelectedVASList([TRUCKING_HAZMAT_VAS[0].name, TRUCKING_HAZMAT_VAS[2].name]);
                   }
                   if (serviceType === 'Sea Freight (LCL)') {
                     setServiceType('Sea Freight (FCL)');
@@ -2027,6 +2023,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                       onChange={(e) => setPackingGroup(e.target.value)}
                       className="w-full h-10 px-3.5 text-xs bg-white border border-amber-200 rounded-xl font-bold text-amber-950 focus:border-amber-500 shadow-2xs cursor-pointer"
                     >
+                      <option value="">-- Chọn Nhóm Đóng Gói (Bắt buộc) * --</option>
                       <option value="PG I (Mức độ nguy hiểm cao)">PG I - Mức độ nguy hiểm cao</option>
                       <option value="PG II (Mức độ nguy hiểm trung bình)">PG II - Mức độ nguy hiểm trung bình</option>
                       <option value="PG III (Mức độ nguy hiểm thấp)">PG III - Mức độ nguy hiểm thấp</option>
@@ -2167,8 +2164,8 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                 />
               </div>
 
-              {/* Row 3: Weight & Volume for Transport Services */}
-              {serviceType !== 'Warehousing' && (
+              {/* Row 3: Weight & Volume for Transport Services (Hidden for Warehousing and Trucking since Trucking FTL declares in Tab 4 and LTL declares in LTL specs) */}
+              {serviceType !== 'Warehousing' && serviceType !== 'Trucking' && (
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
                     Tổng Khối Lượng (kg) *
@@ -2188,7 +2185,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                 </div>
               )}
 
-              {serviceType !== 'Warehousing' && (
+              {serviceType !== 'Warehousing' && serviceType !== 'Trucking' && (
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
                     Tổng Thể Tích (cbm) *
@@ -2334,6 +2331,10 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                 destination={destination}
                 setDestination={setDestination}
                 cargoClassification={cargoClassification}
+                weightKg={weightKg}
+                setWeightKg={setWeightKg}
+                volumeCbm={volumeCbm}
+                setVolumeCbm={setVolumeCbm}
               />
             )}
 
@@ -2467,27 +2468,31 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
           )}
 
           {/* SECTION 6: VAS (Dịch Vụ Giá Trị Gia Tăng) */}
-          {activeTab === 6 && (
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <label className="block text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-bold flex items-center justify-center">6</span>
-                  <span>Dịch Vụ Giá Trị Gia Tăng (VAS)</span>
-                </label>
-                <span className="text-[11px] font-semibold text-indigo-600">
-                  {selectedVASList.length} Dịch vụ đã chọn
-                </span>
-              </div>
+          {activeTab === 6 && (() => {
+            const currentVASItems = getCurrentVASItems();
+            const activeVASCount = currentVASItems.filter((i) => selectedVASList.includes(i.name)).length;
+            return (
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <label className="block text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                    <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-bold flex items-center justify-center">6</span>
+                    <span>Dịch Vụ Giá Trị Gia Tăng (VAS)</span>
+                  </label>
+                  <span className="text-[11px] font-semibold text-indigo-600">
+                    {activeVASCount} Dịch vụ đã chọn
+                  </span>
+                </div>
 
-              <VASSection
-                items={getCurrentVASItems()}
-                selectedVAS={selectedVASList}
-                onToggleVAS={handleToggleVAS}
-                serviceTitle={`VAS Phù Hợp Cho ${currentServiceDef.label}`}
-                themeColor={currentServiceDef.themeColor}
-              />
-            </div>
-          )}
+                <VASSection
+                  items={currentVASItems}
+                  selectedVAS={selectedVASList}
+                  onToggleVAS={handleToggleVAS}
+                  serviceTitle={`VAS Phù Hợp Cho ${currentServiceDef.label}`}
+                  themeColor={currentServiceDef.themeColor}
+                />
+              </div>
+            );
+          })()}
 
           {/* SECTION 7: Ngân Sách, Tiền Tệ, Tỉ Giá Và Thời Hạn Báo Giá */}
           {activeTab === 7 && (
@@ -2795,35 +2800,6 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                 </div>
               )}
             </div>
-
-            {/* Supplier Matching Intelligence Preview */}
-          <div className="p-3.5 bg-gradient-to-r from-indigo-900 to-slate-900 rounded-2xl text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-indigo-500/30 border border-indigo-400/30 text-indigo-300">
-                <Users className="w-4 h-4" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-extrabold uppercase text-indigo-300">AI Supplier Match</span>
-                  <span className="px-2 py-0.5 text-[10px] bg-emerald-500/30 text-emerald-300 border border-emerald-400/30 rounded-full font-bold">
-                    {matchingSuppliersCount} Nhà Cung Cấp Đủ Điều Kiện
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-300 mt-0.5">
-                  Yêu cầu sẽ được gửi tới các đơn vị đã xác minh năng lực và hồ sơ phương tiện phù hợp.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-center">
-              <div className="flex -space-x-2 overflow-hidden">
-                <div className="inline-block h-6 w-6 rounded-full ring-2 ring-white bg-blue-600 text-white text-[9px] font-bold flex items-center justify-center">VT</div>
-                <div className="inline-block h-6 w-6 rounded-full ring-2 ring-white bg-emerald-600 text-white text-[9px] font-bold flex items-center justify-center">MK</div>
-                <div className="inline-block h-6 w-6 rounded-full ring-2 ring-white bg-purple-600 text-white text-[9px] font-bold flex items-center justify-center">GL</div>
-              </div>
-              <span className="text-[11px] text-indigo-200 font-semibold ml-1">+{matchingSuppliersCount - 3} suppliers</span>
-            </div>
-          </div>
         </div>
         )}
       </form>
