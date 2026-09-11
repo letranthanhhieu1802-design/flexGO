@@ -198,6 +198,7 @@ export interface AirInquirySpecs {
   committedFrequency?: string;
   airServiceType: 'Air Freight / Cargo' | 'Express / Courier';
   tradeRole?: 'Xuất khẩu (Export)' | 'Nhập khẩu (Import)' | 'Nội địa (Domestic)';
+  incoterm?: string;
   cargoValue?: number | string;
   cargoValueCurrency?: string;
   // Air Freight specific
@@ -221,6 +222,8 @@ export interface AirInquirySpecs {
   volumetricWeightKgs: number;
   chargeableWeightKgs: number;
   dimensionsCm: string; // L x W x H
+  airDimensions?: { lengthCm?: number; widthCm?: number; heightCm?: number };
+  cbmVolume?: number;
   isDangerousGoods: boolean;
   iataDGClass?: string;
   isTemperatureSensitive: boolean;
@@ -501,6 +504,10 @@ export interface InquiryItem {
   weightVolume: string;
   ftlWeightKg?: number | string;
   ftlVolumeCbm?: number | string;
+  cbmVolume?: number | string;
+  dimensionsCm?: string;
+  packageCount?: number;
+  stackable?: boolean;
   cargoWeight?: string;
   cargoDimensions?: string;
   incoterms?: string;

@@ -216,13 +216,13 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
   const [activeTab, setActiveTab] = useState<number>(1);
 
   const TABS = [
-    { id: 1, label: '1. Loại hình dịch vụ' },
-    { id: 2, label: '2. Hình thức báo giá' },
-    { id: 3, label: '3. Hàng hóa & Đóng gói' },
-    { id: 4, label: '4. Tuyến đường & Phương tiện' },
-    { id: 5, label: '5. Phụ phí & Điều khoản' },
-    { id: 6, label: '6. Dịch vụ gia tăng (VAS)' },
-    { id: 7, label: '7. Ngân sách & Đính kèm' },
+    { id: 1, label: 'Chọn dịch vụ' },
+    { id: 2, label: 'Hình thức giá' },
+    { id: 3, label: 'Thông tin sản phẩm' },
+    { id: 4, label: 'Thông tin vận hành' },
+    { id: 5, label: 'Thêm phụ phí' },
+    { id: 6, label: 'Thêm dịch vụ gia tăng' },
+    { id: 7, label: 'Giá và thời hạn' },
   ];
 
   // SECTION 2: Pricing Type & Contract Term - No pre-selected default
@@ -346,6 +346,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
     pricingType: 'SPOT',
     airServiceType: '',
     tradeRole: '',
+    incoterm: '',
     serviceLevel: '',
     originServiceTerm: '',
     destinationServiceTerm: '',
@@ -1242,6 +1243,8 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
     } else if (serviceType === 'Sea Freight (FCL)' || serviceType === 'Sea Freight (LCL)') {
       serviceSpecs.ocean = { 
         ...oceanSpecs, 
+        polPort: origin || oceanSpecs.polPort,
+        podPort: destination || oceanSpecs.podPort,
         tradeRole: oceanSpecs.tradeRole || 'Xuất khẩu (Export)',
         hsCode: hsCode.trim() || oceanSpecs.hsCode, 
         cargoValue: cargoValue.trim() || oceanSpecs.cargoValue,
@@ -1356,11 +1359,11 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
     }
 
     const activeTradeRole = isImportExportService 
-      ? (serviceSpecs.ocean?.tradeRole || serviceSpecs.air?.tradeRole || serviceSpecs.customs?.tradeRole || serviceSpecs.crossBorder?.tradeRole)
-      : undefined;
+      ? (serviceSpecs.ocean?.tradeRole || serviceSpecs.air?.tradeRole || serviceSpecs.customs?.tradeRole || serviceSpecs.crossBorder?.tradeRole || railSpecs.tradeRole)
+      : (serviceType === 'Rail Freight' ? railSpecs.tradeRole : undefined);
 
-    const activeOriginServiceTerm = serviceSpecs.ocean?.originServiceTerm || serviceSpecs.air?.originServiceTerm;
-    const activeDestinationServiceTerm = serviceSpecs.ocean?.destinationServiceTerm || serviceSpecs.air?.destinationServiceTerm;
+    const activeOriginServiceTerm = serviceSpecs.ocean?.originServiceTerm || serviceSpecs.air?.originServiceTerm || railSpecs.originServiceTerm;
+    const activeDestinationServiceTerm = serviceSpecs.ocean?.destinationServiceTerm || serviceSpecs.air?.destinationServiceTerm || railSpecs.destinationServiceTerm;
 
     const newInquiry: InquiryItem = {
       id: `draft-${Date.now()}`,
@@ -1382,21 +1385,26 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
       packingGroup: cargoClassification === 'Hazmat' ? packingGroup : undefined,
       flashPoint: cargoClassification === 'Hazmat' && flashPoint.trim() ? flashPoint.trim() : undefined,
       msdsFileName: cargoClassification === 'Hazmat' ? (msdsFileName || 'MSDS_Safety_Data_Sheet.pdf') : undefined,
-      origin: origin || (cleanedTruckingSpecs.pickupLocations?.[0] ?? 'Điểm đi'),
-      destination: destination || (cleanedTruckingSpecs.deliveryLocations?.[0] ?? 'Điểm đến'),
+      origin: origin || railSpecs.originStation || (cleanedTruckingSpecs.pickupLocations?.[0] ?? 'Điểm đi'),
+      destination: destination || railSpecs.destinationStation || (cleanedTruckingSpecs.deliveryLocations?.[0] ?? 'Điểm đến'),
       route: calculatedRoute,
       originServiceTerm: activeOriginServiceTerm,
       destinationServiceTerm: activeDestinationServiceTerm,
+      incoterms: serviceSpecs.air?.incoterm || serviceSpecs.ocean?.incoterm || railSpecs.incoterm || crossBorderSpecs.incoterms,
       industry: industry.trim() ? industry : undefined,
-      hsCode: isImportExportService ? (hsCode.trim() || undefined) : undefined,
+      hsCode: isImportExportService ? (hsCode.trim() || undefined) : (warehousingSpecs.bondedHsCode || undefined),
       tradeRole: activeTradeRole,
-      cargoValue: isImportExportService ? (cargoValue.trim() || undefined) : undefined,
-      cargoValueCurrency: isImportExportService && cargoValue.trim() ? cargoValueCurrency : undefined,
+      cargoValue: isImportExportService ? (cargoValue.trim() || undefined) : (warehousingSpecs.bondedEstimatedValue ? warehousingSpecs.bondedEstimatedValue.toString() : undefined),
+      cargoValueCurrency: isImportExportService && cargoValue.trim() ? cargoValueCurrency : (warehousingSpecs.bondedEstimatedValueCurrency || undefined),
       cargoType: finalCargoType,
       packaging: finalPackaging,
       weightVolume: finalWeightVolume,
       ftlWeightKg: weightKg.trim() || undefined,
       ftlVolumeCbm: volumeCbm.trim() || undefined,
+      cbmVolume: serviceSpecs.air?.cbmVolume || oceanSpecs.cbmVolume || oceanSpecs.lclCbm || railSpecs.cbmVolume || railSpecs.lclCbm || warehousingSpecs.cbmVolume || undefined,
+      dimensionsCm: serviceSpecs.air?.dimensionsCm || (railSpecs.lclDimensions ? `${railSpecs.lclDimensions.lengthCm}x${railSpecs.lclDimensions.widthCm}x${railSpecs.lclDimensions.heightCm}` : undefined),
+      packageCount: serviceSpecs.air?.packageCount || railSpecs.lclPieces || warehousingSpecs.palletPositions || undefined,
+      stackable: serviceSpecs.air?.stackable !== undefined ? serviceSpecs.air.stackable : (railSpecs.lclStackable !== undefined ? railSpecs.lclStackable : undefined),
       targetBudget: formattedTargetBudget,
       currency,
       exchangeRate: currency === 'VND' ? 1 : exchangeRate,
@@ -1473,56 +1481,58 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
           </button>
         </div>
 
-        {/* Tab Navigation Bar - With Clean Progress Indicator Line Below Each Tab */}
-        <div className="bg-slate-50 border-b border-slate-200 px-4 sm:px-6 pt-3 pb-2.5 overflow-x-auto scrollbar-none flex items-center gap-2 shrink-0">
-          {TABS.map((tab) => {
-            const isCompleted = isTabCompleted(tab.id);
-            const isActive = activeTab === tab.id;
+        {/* Tab Navigation Bar - 7 Equal Tabs Fitting Completely in 1 Popup View */}
+        <div className="bg-slate-50 border-b border-slate-200 px-3 sm:px-4 lg:px-5 pt-2.5 pb-2 shrink-0">
+          <div className="grid grid-cols-7 gap-1 sm:gap-1.5 w-full">
+            {TABS.map((tab) => {
+              const isCompleted = isTabCompleted(tab.id);
+              const isActive = activeTab === tab.id;
 
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className="group flex flex-col items-stretch text-left transition-all pb-0.5 cursor-pointer"
-                title={`Chuyển đến tab ${tab.label}`}
-              >
-                <div
-                  className={`px-3.5 py-1.5 text-xs font-bold rounded-xl whitespace-nowrap transition-all flex items-center gap-1.5 ${
-                    isActive
-                      ? 'bg-indigo-600 text-white shadow-xs'
-                      : isCompleted
-                      ? 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100/80 border border-emerald-200/60'
-                      : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/70 border border-slate-200/60 bg-white'
-                  }`}
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  className="group flex flex-col items-stretch text-center transition-all pb-0.5 cursor-pointer min-w-0"
+                  title={`Tab ${tab.id}: ${tab.label}`}
                 >
-                  {isCompleted ? (
-                    <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center shrink-0 ${isActive ? 'bg-white/20 text-white' : 'bg-emerald-600 text-white'}`}>
-                      <Check className="w-2.5 h-2.5 stroke-[3]" />
-                    </span>
-                  ) : (
-                    <span className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 text-[10px] font-bold ${isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'}`}>
-                      {tab.id}
-                    </span>
-                  )}
-                  <span>{tab.label}</span>
-                </div>
-
-                {/* Small Progress Status Bar below each Tab */}
-                <div className="w-full px-1 mt-1.5">
                   <div
-                    className={`h-[3px] rounded-full transition-all duration-300 ${
-                      isCompleted
-                        ? 'bg-emerald-500 shadow-xs'
-                        : isActive
-                        ? 'bg-indigo-600'
-                        : 'bg-slate-200 group-hover:bg-slate-300'
+                    className={`w-full px-1 sm:px-2 py-1.5 text-[11px] xl:text-xs font-bold rounded-xl whitespace-nowrap transition-all flex items-center justify-center gap-1 sm:gap-1.5 ${
+                      isActive
+                        ? 'bg-indigo-600 text-white shadow-xs'
+                        : isCompleted
+                        ? 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100/80 border border-emerald-200/60'
+                        : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/70 border border-slate-200/60 bg-white'
                     }`}
-                  />
-                </div>
-              </button>
-            );
-          })}
+                  >
+                    {isCompleted ? (
+                      <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center shrink-0 ${isActive ? 'bg-white/20 text-white' : 'bg-emerald-600 text-white'}`}>
+                        <Check className="w-2.5 h-2.5 stroke-[3]" />
+                      </span>
+                    ) : (
+                      <span className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 text-[10px] font-bold ${isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'}`}>
+                        {tab.id}
+                      </span>
+                    )}
+                    <span className="truncate">{tab.label}</span>
+                  </div>
+
+                  {/* Small Progress Status Bar below each Tab */}
+                  <div className="w-full px-0.5 mt-1.5">
+                    <div
+                      className={`h-[2.5px] rounded-full transition-all duration-300 ${
+                        isCompleted
+                          ? 'bg-emerald-500 shadow-xs'
+                          : isActive
+                          ? 'bg-indigo-600'
+                          : 'bg-slate-200 group-hover:bg-slate-300'
+                      }`}
+                    />
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Modal Body with Scroll */}
@@ -1556,13 +1566,13 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
             </div>
           )}
 
-          {/* SECTION 1: Chọn Loại Hình Dịch Vụ */}
+          {/* SECTION 1: Chọn Dịch Vụ */}
           {activeTab === 1 && (
             <div>
               <div className="flex items-center justify-between mb-4">
                 <label className="block text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                   <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-bold flex items-center justify-center">1</span>
-                  <span>Chọn Loại Hình Dịch Vụ</span>
+                  <span>Chọn Dịch Vụ</span>
                 </label>
                 <span className="text-[11px] font-semibold text-slate-500 hidden sm:inline">
                   8 Dịch vụ vận tải & kho bãi chuyên sâu
@@ -1627,13 +1637,13 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
             </div>
           )}
 
-          {/* SECTION 2: Hình Thức Báo Giá / Loại Hình Hợp Đồng */}
+          {/* SECTION 2: Hình Thức Giá */}
           {activeTab === 2 && (
             <div>
               <div className="flex items-center justify-between mb-3">
                 <label className="block text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                   <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-bold flex items-center justify-center">2</span>
-                  <span>Hình Thức Báo Giá / Loại Hình Hợp Đồng</span>
+                  <span>Hình Thức Giá</span>
                 </label>
               </div>
 
@@ -1667,7 +1677,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
             </div>
           )}
 
-          {/* SECTION 3: Phân Nhóm Hàng Hóa & Quy Cách Đóng Gói */}
+          {/* SECTION 3: Thông Tin Sản Phẩm */}
           {activeTab === 3 && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -2298,13 +2308,13 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
           </div>
           )}
 
-          {/* SECTION 4: Thông Tin Chi Tiết Yêu Cầu */}
+          {/* SECTION 4: Thông Tin Vận Hành */}
           {activeTab === 4 && (
             <div>
               <div className="flex items-center justify-between mb-3">
                 <label className="block text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                   <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-bold flex items-center justify-center">4</span>
-                  <span>Thông Tin Chi Tiết Yêu Cầu ({serviceType.startsWith('Sea Freight') ? 'Sea Freight' : serviceType})</span>
+                  <span>Thông Tin Vận Hành ({serviceType.startsWith('Sea Freight') ? 'Sea Freight' : serviceType})</span>
                 </label>
               </div>
 
@@ -2445,19 +2455,13 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
           </div>
           )}
 
-          {/* SECTION 5: Yêu Cầu Phụ Phí & Điều Khoản Báo Giá (Local Charges & Surcharges) */}
+          {/* SECTION 5: Thêm Phụ Phí */}
           {activeTab === 5 && (
             <div>
               <div className="flex items-center justify-between mb-3">
                 <label className="block text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                   <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-bold flex items-center justify-center">5</span>
-                  <span>
-                    {serviceType === 'Warehousing'
-                      ? 'Yêu Cầu Phụ Phí & Điều Khoản Báo Giá Kho Bãi (Operational Surcharges)'
-                      : serviceType.startsWith('Sea Freight') || serviceType === 'Air Freight'
-                      ? 'Yêu Cầu Phụ Phí & Điều Khoản Báo Giá (Local Charges & Surcharges)'
-                      : 'Yêu Cầu Phụ Phí & Điều Khoản Báo Giá (Surcharges & Terms)'}
-                  </span>
+                  <span>Thêm Phụ Phí</span>
                 </label>
                 <span className="text-[11px] font-semibold text-indigo-600">
                   {requestedSurcharges.length} Phụ phí đã chọn
@@ -2479,7 +2483,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
             </div>
           )}
 
-          {/* SECTION 6: VAS (Dịch Vụ Giá Trị Gia Tăng) */}
+          {/* SECTION 6: Thêm Dịch Vụ Gia Tăng (VAS) */}
           {activeTab === 6 && (() => {
             const currentVASItems = getCurrentVASItems();
             const activeVASCount = currentVASItems.filter((i) => selectedVASList.includes(i.name)).length;
@@ -2488,7 +2492,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                 <div className="flex items-center justify-between mb-3">
                   <label className="block text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                     <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-bold flex items-center justify-center">6</span>
-                    <span>Dịch Vụ Giá Trị Gia Tăng (VAS)</span>
+                    <span>Thêm Dịch Vụ Gia Tăng (VAS)</span>
                   </label>
                   <span className="text-[11px] font-semibold text-indigo-600">
                     {activeVASCount} Dịch vụ đã chọn
@@ -2506,22 +2510,18 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
             );
           })()}
 
-          {/* SECTION 7: Ngân Sách, Tiền Tệ, Tỉ Giá Và Thời Hạn Báo Giá */}
+          {/* SECTION 7: Giá Và Thời Hạn */}
           {activeTab === 7 && (
             <div className="space-y-4 animate-in fade-in duration-150">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
-                  <span>
-                    {serviceType === 'Project Cargo'
-                      ? (currency === 'VND' ? 'Giá Trị Dự Kiến & Thời Hạn Báo Giá' : 'Giá Trị Dự Kiến, Tiền Tệ & Thời Hạn Báo Giá')
-                      : (currency === 'VND' ? 'Đơn Giá Kỳ Vọng & Thời Hạn Báo Giá' : 'Đơn Giá Kỳ Vọng, Tiền Tệ & Thời Hạn Báo Giá')}
-                  </span>
+                  <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-bold flex items-center justify-center">7</span>
+                  <span>Giá Và Thời Hạn</span>
                 </label>
               {currency !== 'VND' && (
                 <div className="flex items-center gap-2 animate-in fade-in duration-200">
                   <span className="text-[11px] font-medium text-slate-500">Tỉ giá tham khảo:</span>
-                  <span className="text-[11px] font-bold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-100 flex items-center gap-1">
-                    <Banknote className="w-3.5 h-3.5 text-indigo-600" />
+                  <span className="text-[11px] font-bold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-100">
                     1 {currency} = {exchangeRate.toLocaleString('vi-VN')} ₫
                   </span>
                 </div>
@@ -2530,57 +2530,95 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
 
             {/* Sub-grid 1: Currency, Target Budget, Exchange Rate, Conversion Preview */}
             <div className="bg-slate-50/90 p-4 rounded-2xl border border-slate-200/90 space-y-3.5">
-              <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
-                {/* Currency Selection */}
-                <div className={currency === 'VND' ? 'sm:col-span-4' : 'sm:col-span-3'}>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1">
-                    <Coins className="w-3.5 h-3.5 text-amber-600" />
-                    <span>Đơn Vị Tiền Tệ *</span>
-                  </label>
-                  <select
-                    value={currency}
-                    onChange={(e) => handleCurrencyChange(e.target.value as any)}
-                    className="w-full h-10 px-3 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-bold text-slate-800 shadow-2xs cursor-pointer"
-                  >
-                    {CURRENCY_OPTIONS_LOV.map((curr) => (
-                      <option key={curr.code} value={curr.code}>
-                        {curr.flag} {curr.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Target Budget Input */}
-                <div className={currency === 'VND' ? 'sm:col-span-8' : 'sm:col-span-4'}>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="block text-xs font-semibold text-slate-700 flex items-center gap-1">
-                      <DollarSign className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                      <span>{budgetConfig.label}</span>
+              {currency === 'VND' ? (
+                /* VND Currency: standard 2-column single row */
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+                  {/* Currency Selection */}
+                  <div className="sm:col-span-4">
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      Đơn Vị Tiền Tệ *
                     </label>
+                    <select
+                      value={currency}
+                      onChange={(e) => handleCurrencyChange(e.target.value as any)}
+                      className="w-full h-10 px-3 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-bold text-slate-800 shadow-2xs cursor-pointer"
+                    >
+                      {CURRENCY_OPTIONS_LOV.map((curr) => (
+                        <option key={curr.code} value={curr.code}>
+                          {curr.flag} {curr.label}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={targetBudget}
-                      onChange={(e) => handleTargetBudgetChange(e.target.value)}
-                      placeholder={budgetConfig.placeholder || 'VD: 5.000.000'}
-                      className="w-full h-10 pl-3.5 pr-14 text-xs bg-white border border-slate-200 rounded-xl focus:border-emerald-500 font-bold text-emerald-700 shadow-2xs"
-                    />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
-                      {currency}
-                    </span>
-                  </div>
-                </div>
 
-                {/* Exchange Rate Input - ONLY SHOWN FOR NON-VND */}
-                {currency !== 'VND' && (
-                  <div className="sm:col-span-5 animate-in fade-in duration-200">
+                  {/* Target Budget Input */}
+                  <div className="sm:col-span-8">
                     <div className="flex items-center justify-between mb-1">
-                      <label className="block text-xs font-semibold text-slate-700 flex items-center gap-1">
-                        <ArrowRightLeft className="w-3.5 h-3.5 text-blue-600" />
-                        <span>Tỉ Giá Quy Đổi (1 {currency} / VND) *</span>
+                      <label className="block text-xs font-semibold text-slate-700">
+                        {budgetConfig.label}
                       </label>
                     </div>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={targetBudget}
+                        onChange={(e) => handleTargetBudgetChange(e.target.value)}
+                        placeholder={budgetConfig.placeholder || 'VD: 5.000.000'}
+                        className="w-full h-10 pl-3.5 pr-14 text-xs bg-white border border-slate-200 rounded-xl focus:border-emerald-500 font-bold text-emerald-700 shadow-2xs"
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
+                        {currency}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* Foreign Currency: 2 rows x 2 columns grid */
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Row 1, Col 1: Đơn Vị Tiền Tệ */}
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      Đơn Vị Tiền Tệ *
+                    </label>
+                    <select
+                      value={currency}
+                      onChange={(e) => handleCurrencyChange(e.target.value as any)}
+                      className="w-full h-10 px-3 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-bold text-slate-800 shadow-2xs cursor-pointer"
+                    >
+                      {CURRENCY_OPTIONS_LOV.map((curr) => (
+                        <option key={curr.code} value={curr.code}>
+                          {curr.flag} {curr.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Row 1, Col 2: Đơn Giá Kỳ Vọng */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-xs font-semibold text-slate-700">
+                        {budgetConfig.label}
+                      </label>
+                    </div>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={targetBudget}
+                        onChange={(e) => handleTargetBudgetChange(e.target.value)}
+                        placeholder={budgetConfig.placeholder || 'VD: 30'}
+                        className="w-full h-10 pl-3.5 pr-14 text-xs bg-white border border-slate-200 rounded-xl focus:border-emerald-500 font-bold text-emerald-700 shadow-2xs"
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
+                        {currency}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Row 2, Col 1: Tỉ Giá Quy Đổi */}
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      Tỉ Giá Quy Đổi (1 {currency} / VND) *
+                    </label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400">
                         1 {currency} =
@@ -2600,22 +2638,21 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                       </span>
                     </div>
                   </div>
-                )}
-              </div>
 
-              {/* Real-time Conversion Result Box - ONLY SHOWN FOR NON-VND */}
-              {currency !== 'VND' && conversionCalc && (
-                <div className="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2.5 bg-emerald-50/70 border border-emerald-200/80 rounded-xl text-xs animate-in fade-in duration-200">
-                  <div className="flex items-center gap-2 text-emerald-900">
-                    <Sparkles className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span className="font-semibold">{conversionCalc.label}:</span>
-                    <span className="font-black text-emerald-700 text-sm bg-white px-2.5 py-0.5 rounded-lg border border-emerald-200 shadow-2xs">
-                      {conversionCalc.value}
-                    </span>
+                  {/* Row 2, Col 2: Tương Đương VNĐ */}
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      Tương Đương VNĐ:
+                    </label>
+                    <div className="w-full h-10 px-3.5 bg-emerald-50/70 border border-emerald-200 rounded-xl flex items-center justify-between shadow-2xs">
+                      <span className="text-sm font-black text-emerald-700">
+                        {conversionCalc ? conversionCalc.value : '0 ₫'}
+                      </span>
+                      <span className="text-[11px] font-medium text-slate-400">
+                        (Áp dụng theo tỉ giá: 1 {currency} = {exchangeRate ? exchangeRate.toLocaleString('vi-VN') : '0'} ₫)
+                      </span>
+                    </div>
                   </div>
-                  <span className="text-[11px] font-medium text-slate-500">
-                    (Áp dụng theo tỉ giá: {conversionCalc.formula})
-                  </span>
                 </div>
               )}
             </div>

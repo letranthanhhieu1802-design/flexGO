@@ -226,6 +226,27 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
         </div>
       </div>
 
+      {/* Incoterms - Đưa lên phía trên Hình thức đóng hàng */}
+      <div>
+        <label className="block text-xs font-semibold text-slate-700 mb-1">
+          Điều Kiện Thương Mại (Incoterms 2020) *
+        </label>
+        <select
+          value={specs.incoterm || ''}
+          onChange={(e) => updateSpec('incoterm', e.target.value as any)}
+          className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-cyan-500 font-semibold text-cyan-950 shadow-2xs cursor-pointer"
+        >
+          <option value="">-- Chọn Điều Kiện Thương Mại (Incoterms 2020) * --</option>
+          <option value="FOB">FOB - Free on Board (Giao lên tàu cảng bốc)</option>
+          <option value="CIF">CIF - Cost, Insurance and Freight (Giao cảng dỡ kèm BH)</option>
+          <option value="CFR">CFR - Cost and Freight (Tiền hàng và cước biển)</option>
+          <option value="EXW">EXW - Ex Works (Nhận tại xưởng người bán)</option>
+          <option value="DDP">DDP - Delivered Duty Paid (Giao tận kho đã nộp thuế)</option>
+          <option value="DAP">DAP - Delivered at Place (Giao tận nơi chưa thông quan)</option>
+          <option value="FCA">FCA - Free Carrier (Giao cho người chuyên chở)</option>
+        </select>
+      </div>
+
       {/* Mode Selector: FCL vs LCL */}
       <div className="space-y-2">
         <label className="block text-xs font-bold text-slate-800">
@@ -243,7 +264,6 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
           >
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold">🚢 FCL (Full Container Load)</span>
-              {isFCL && <span className="text-[10px] bg-cyan-600 text-white px-2 py-0.5 rounded-md font-bold">Đang chọn</span>}
             </div>
             <p className="text-[11px] text-slate-500 mt-0.5 font-normal">
               Nguyên cont 20ft / 40ft / 40HC / Reefer
@@ -273,32 +293,12 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
           >
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold">📦 LCL (Hàng lẻ CFS)</span>
-              {isLclDisabled ? (
-                <span className="text-[10px] bg-rose-100 text-rose-700 px-2 py-0.5 rounded-md font-bold border border-rose-200">
-                  🚫 Không hỗ trợ
-                </span>
-              ) : isLCL ? (
-                <span className="text-[10px] bg-cyan-600 text-white px-2 py-0.5 rounded-md font-bold">
-                  Đang chọn
-                </span>
-              ) : null}
             </div>
-            <p className={`text-[11px] mt-0.5 font-normal ${isLclDisabled ? 'text-rose-600/90 font-medium' : 'text-slate-500'}`}>
-              {isLclDisabled
-                ? `Hàng ${cargoClassification === 'Reefer' ? 'Lạnh' : 'Nguy Hiểm'} bắt buộc đi FCL nguyên cont`
-                : 'Gom hàng lẻ CFS tính theo CBM / Tấn'}
+            <p className="text-[11px] text-slate-500 mt-0.5 font-normal">
+              Gom hàng lẻ CFS tính theo CBM / Tấn
             </p>
           </button>
         </div>
-
-        {isLclDisabled && (
-          <div className="p-2.5 bg-amber-50/80 border border-amber-200/90 rounded-xl flex items-center gap-2 text-xs text-amber-900 animate-in fade-in duration-150">
-            <Info className="w-4 h-4 text-amber-700 shrink-0" />
-            <p className="text-[11px]">
-              <span className="font-bold">Quy định an toàn & bảo quản:</span> Hàng <strong>{cargoClassification === 'Reefer' ? 'Lạnh (Reefer)' : 'Nguy Hiểm (DG/IMO)'}</strong> bắt buộc vận chuyển bằng phương thức <strong>FCL (Full Container)</strong> để cắm điện bảo quản lạnh / đảm bảo quy chuẩn phòng chống cháy nổ hàng hải, không thể đóng ghép chung kho CFS (LCL).
-            </p>
-          </div>
-        )}
       </div>
 
       {/* Movement Terms: Receiving & Delivery Terms */}
@@ -754,26 +754,7 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
         </div>
       )}
 
-      {/* Incoterms */}
-      <div>
-        <label className="block text-xs font-semibold text-slate-700 mb-1">
-          Điều Kiện Thương Mại (Incoterms 2020) *
-        </label>
-        <select
-          value={specs.incoterm || ''}
-          onChange={(e) => updateSpec('incoterm', e.target.value as any)}
-          className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-cyan-500 font-semibold text-cyan-950 shadow-2xs cursor-pointer"
-        >
-          <option value="">-- Chọn Điều Kiện Thương Mại (Incoterms 2020) * --</option>
-          <option value="FOB">FOB - Free on Board (Giao lên tàu cảng bốc)</option>
-          <option value="CIF">CIF - Cost, Insurance and Freight (Giao cảng dỡ kèm BH)</option>
-          <option value="CFR">CFR - Cost and Freight (Tiền hàng và cước biển)</option>
-          <option value="EXW">EXW - Ex Works (Nhận tại xưởng người bán)</option>
-          <option value="DDP">DDP - Delivered Duty Paid (Giao tận kho đã nộp thuế)</option>
-          <option value="DAP">DAP - Delivered at Place (Giao tận nơi chưa thông quan)</option>
-          <option value="FCA">FCA - Free Carrier (Giao cho người chuyên chở)</option>
-        </select>
-      </div>
+
     </div>
   );
 };

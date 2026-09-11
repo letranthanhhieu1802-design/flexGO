@@ -186,11 +186,11 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
           </label>
           <span className="text-[10px] font-bold text-blue-800 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200">
             {specs.tradeRole === 'Liên vận xuất khẩu (Export Rail)'
-              ? '🇨🇳 Liên vận xuất khẩu đi TQ / Châu Âu'
+              ? 'Liên vận xuất khẩu đi TQ / Châu Âu'
               : specs.tradeRole === 'Liên vận nhập khẩu (Import Rail)'
-              ? '🇻🇳 Liên vận nhập khẩu về VN'
+              ? 'Liên vận nhập khẩu về VN'
               : specs.tradeRole === 'Nội địa Bắc - Nam (Domestic Rail)'
-              ? '🚆 Tuyến đường sắt nội địa Bắc - Nam'
+              ? 'Tuyến đường sắt nội địa Bắc - Nam'
               : 'Chưa chọn'}
           </span>
         </div>
@@ -198,17 +198,17 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
           {[
             {
               role: 'Nội địa Bắc - Nam (Domestic Rail)',
-              title: '🚆 Nội Địa Bắc - Nam',
+              title: 'Nội Địa Bắc - Nam',
               sub: 'Tuyến Giáp Bát / Yên Viên ↔ Sóng Thần',
             },
             {
               role: 'Liên vận xuất khẩu (Export Rail)',
-              title: '🇨🇳 Liên Vận Xuất Khẩu',
+              title: 'Liên Vận Xuất Khẩu',
               sub: 'Hàng xuất đi TQ / Trung Á / Châu Âu',
             },
             {
               role: 'Liên vận nhập khẩu (Import Rail)',
-              title: '🇻🇳 Liên Vận Nhập Khẩu',
+              title: 'Liên Vận Nhập Khẩu',
               sub: 'Hàng nhập khẩu từ ga quốc tế về VN',
             },
           ].map((item) => {
@@ -255,7 +255,7 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
             }`}
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold">🚆 FCL (Nguyên Container / Toa Xe)</span>
+              <span className="text-xs font-bold">FCL (Nguyên Container / Toa Xe)</span>
               {isFCL && <span className="text-[10px] bg-blue-600 text-white px-2 py-0.5 rounded-md font-bold">Đang chọn</span>}
             </div>
             <p className="text-[11px] text-slate-500 mt-1 font-normal">
@@ -285,10 +285,10 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
             }`}
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold">📦 LCL (Hàng Lẻ Ghép Kho Ga)</span>
+              <span className="text-xs font-bold">LCL (Hàng Lẻ Ghép Kho Ga)</span>
               {isLclDisabled ? (
                 <span className="text-[10px] bg-rose-100 text-rose-700 px-2 py-0.5 rounded-md font-bold border border-rose-200">
-                  🚫 Không hỗ trợ
+                  Không hỗ trợ
                 </span>
               ) : isLCL ? (
                 <span className="text-[10px] bg-blue-600 text-white px-2 py-0.5 rounded-md font-bold">
@@ -331,9 +331,9 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
               className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-bold text-slate-900 shadow-2xs cursor-pointer"
             >
               <option value="">-- Chọn Điều Kiện Nhận Hàng * --</option>
-              <option value="Door">🚪 Door (Lấy tận kho người gửi / Shipper)</option>
-              <option value="CY">⚓ CY (Nhận tại bãi container ga xuất phát)</option>
-              <option value="CFS">📦 CFS (Nhận tại kho hàng lẻ ga xuất phát)</option>
+              <option value="Door">Door (Lấy tận kho người gửi / Shipper)</option>
+              <option value="CY">CY (Nhận tại bãi container ga xuất phát)</option>
+              <option value="CFS">CFS (Nhận tại kho hàng lẻ ga xuất phát)</option>
             </select>
           </div>
 
@@ -347,9 +347,9 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
               className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-bold text-slate-900 shadow-2xs cursor-pointer"
             >
               <option value="">-- Chọn Điều Kiện Giao Hàng * --</option>
-              <option value="Door">🚪 Door (Giao tận kho người nhận / Consignee)</option>
-              <option value="CY">⚓ CY (Giao tại bãi container ga đích đến)</option>
-              <option value="CFS">📦 CFS (Giao tại kho hàng lẻ ga đích đến)</option>
+              <option value="Door">Door (Giao tận kho người nhận / Consignee)</option>
+              <option value="CY">CY (Giao tại bãi container ga đích đến)</option>
+              <option value="CFS">CFS (Giao tại kho hàng lẻ ga đích đến)</option>
             </select>
           </div>
         </div>
@@ -558,11 +558,11 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
                 className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-bold text-slate-900 shadow-2xs cursor-pointer"
               >
                 <option value="">-- Chọn Đơn Vị Tần Suất --</option>
-                <option value="Container / Ngày">📅 Ngày (Container / Ngày)</option>
-                <option value="Container / Tuần">📆 Tuần (Container / Tuần)</option>
-                <option value="Container / Tháng">🗓️ Tháng (Container / Tháng)</option>
-                <option value="Container / Năm">📈 Năm (Container / Năm)</option>
-                <option value="Container (Một lần)">⚡ Container (Một lần / Spot)</option>
+                <option value="Container / Ngày">Ngày (Container / Ngày)</option>
+                <option value="Container / Tuần">Tuần (Container / Tuần)</option>
+                <option value="Container / Tháng">Tháng (Container / Tháng)</option>
+                <option value="Container / Năm">Năm (Container / Năm)</option>
+                <option value="Container (Một lần)">Container (Một lần / Spot)</option>
               </select>
             </div>
 
@@ -589,7 +589,7 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
 
       {/* 7. LCL SPECIFIC CONFIGURATION (Dimensions, Weight, CBM, Chargeable Weight & Stackable) */}
       {isLCL && (
-        <div className="space-y-3 animate-in fade-in duration-150">
+        <div className="space-y-3.5 animate-in fade-in duration-150">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
               <Box className="w-3.5 h-3.5 text-blue-700" />
@@ -602,8 +602,8 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
             </div>
           </div>
 
-          {/* LCL Package Details: Number of pieces */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {/* Hàng 1: Số kiện & Checkbox Stackable */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
             <div>
               <label className="block text-[11px] font-semibold text-slate-600 mb-1">
                 Số Lượng Kiện / Pallet Cần Ghép *
@@ -621,49 +621,66 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
               />
             </div>
 
-            <div className="sm:col-span-2">
-              <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                Kích Thước 1 Kiện (Dài x Rộng x Cao cm)
+            <div className="flex items-center gap-2 h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl">
+              <input
+                type="checkbox"
+                id="railLclStackableCheck"
+                checked={Boolean(specs.lclStackable)}
+                onChange={(e) => updateSpec('lclStackable', e.target.checked)}
+                className="rounded-sm text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer"
+              />
+              <label htmlFor="railLclStackableCheck" className="text-xs font-semibold text-slate-800 cursor-pointer select-none">
+                Hàng có thể chồng tầng (Stackable)
               </label>
-              <div className="grid grid-cols-3 gap-2">
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  value={specs.lclDimensions?.lengthCm !== undefined && specs.lclDimensions.lengthCm !== null && specs.lclDimensions.lengthCm > 0 ? specs.lclDimensions.lengthCm : ''}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(/\D/g, '');
-                    handleLclDimChange('lengthCm', val ? parseInt(val, 10) : undefined);
-                  }}
-                  placeholder="Dài cm"
-                  className="w-full h-10 px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-xl text-center font-bold text-slate-800 shadow-2xs"
-                />
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  value={specs.lclDimensions?.widthCm !== undefined && specs.lclDimensions.widthCm !== null && specs.lclDimensions.widthCm > 0 ? specs.lclDimensions.widthCm : ''}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(/\D/g, '');
-                    handleLclDimChange('widthCm', val ? parseInt(val, 10) : undefined);
-                  }}
-                  placeholder="Rộng cm"
-                  className="w-full h-10 px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-xl text-center font-bold text-slate-800 shadow-2xs"
-                />
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  value={specs.lclDimensions?.heightCm !== undefined && specs.lclDimensions.heightCm !== null && specs.lclDimensions.heightCm > 0 ? specs.lclDimensions.heightCm : ''}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(/\D/g, '');
-                    handleLclDimChange('heightCm', val ? parseInt(val, 10) : undefined);
-                  }}
-                  placeholder="Cao cm"
-                  className="w-full h-10 px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-xl text-center font-bold text-slate-800 shadow-2xs"
-                />
-              </div>
             </div>
           </div>
 
-          {/* Weight & Computed CBM, Chargeable Weight */}
+          {/* Hàng 2: Kích thước 3 ô Dài x Rộng x Cao cm */}
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-[11px] font-semibold text-slate-600">
+                Kích Thước 1 Kiện (Dài x Rộng x Cao cm)
+              </label>
+              <span className="text-[10px] text-slate-400 font-medium">Tự động tính Tổng Thể Tích CBM</span>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <input
+                type="text"
+                inputMode="numeric"
+                value={specs.lclDimensions?.lengthCm !== undefined && specs.lclDimensions.lengthCm !== null && specs.lclDimensions.lengthCm > 0 ? specs.lclDimensions.lengthCm : ''}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, '');
+                  handleLclDimChange('lengthCm', val ? parseInt(val, 10) : undefined);
+                }}
+                placeholder="Dài (L) cm"
+                className="w-full h-10 px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-xl text-center font-bold text-slate-800 shadow-2xs"
+              />
+              <input
+                type="text"
+                inputMode="numeric"
+                value={specs.lclDimensions?.widthCm !== undefined && specs.lclDimensions.widthCm !== null && specs.lclDimensions.widthCm > 0 ? specs.lclDimensions.widthCm : ''}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, '');
+                  handleLclDimChange('widthCm', val ? parseInt(val, 10) : undefined);
+                }}
+                placeholder="Rộng (W) cm"
+                className="w-full h-10 px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-xl text-center font-bold text-slate-800 shadow-2xs"
+              />
+              <input
+                type="text"
+                inputMode="numeric"
+                value={specs.lclDimensions?.heightCm !== undefined && specs.lclDimensions.heightCm !== null && specs.lclDimensions.heightCm > 0 ? specs.lclDimensions.heightCm : ''}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, '');
+                  handleLclDimChange('heightCm', val ? parseInt(val, 10) : undefined);
+                }}
+                placeholder="Cao (H) cm"
+                className="w-full h-10 px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-xl text-center font-bold text-slate-800 shadow-2xs"
+              />
+            </div>
+          </div>
+
+          {/* Hàng 3: 3 cột kết quả tính toán */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className="block text-[11px] font-semibold text-slate-600 mb-1">
@@ -686,7 +703,7 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
               <label className="block text-[11px] font-semibold text-slate-600 mb-1">
                 Tổng Thể Tích Tính Toán (CBM)
               </label>
-              <div className="h-10 px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl font-bold text-blue-900 flex items-center">
+              <div className="h-10 px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl font-bold text-blue-900 flex items-center shadow-2xs">
                 {specs.lclCbm !== undefined && specs.lclCbm !== null ? `${specs.lclCbm} CBM` : '-- CBM'}
               </div>
             </div>
@@ -695,28 +712,14 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
               <label className="block text-[11px] font-semibold text-slate-600 mb-1">
                 Trọng Lượng Tính Cước (Chargeable W/M)
               </label>
-              <div className="h-10 px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl font-bold text-indigo-900 flex items-center justify-between">
+              <div className="h-10 px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl font-bold text-indigo-900 flex items-center justify-between shadow-2xs">
                 <span>{specs.lclChargeableWeightKg !== undefined && specs.lclChargeableWeightKg !== null ? `${specs.lclChargeableWeightKg.toLocaleString('vi-VN')} Kg` : '-- Kg'}</span>
                 <span className="text-[10px] text-indigo-600 font-medium">({specs.lclRevenueTon !== undefined && specs.lclRevenueTon !== null ? `${specs.lclRevenueTon} RT` : '-- RT'})</span>
               </div>
             </div>
           </div>
 
-          {/* Stackable Toggle */}
-          <div className="flex items-center gap-2 py-1">
-            <input
-              type="checkbox"
-              id="railLclStackableCheck"
-              checked={Boolean(specs.lclStackable)}
-              onChange={(e) => updateSpec('lclStackable', e.target.checked)}
-              className="rounded-sm text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer"
-            />
-            <label htmlFor="railLclStackableCheck" className="text-xs font-semibold text-slate-800 cursor-pointer">
-              Hàng có thể chồng tầng (Stackable) <span className="text-slate-500 font-normal">(Nếu không chồng tầng có thể tính thêm hệ số sàn)</span>
-            </label>
-          </div>
-
-          {/* LCL Shipment Count & Frequency */}
+          {/* Hàng 4: Số lượng chuyến ghép & Tần suất */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-[11px] font-semibold text-slate-600 mb-1">
@@ -745,11 +748,11 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
                 className="w-full h-10 px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-bold text-slate-900 shadow-2xs cursor-pointer"
               >
                 <option value="">-- Chọn Đơn Vị Tần Suất --</option>
-                <option value="Chuyến / Ngày">📅 Ngày (Chuyến / Ngày)</option>
-                <option value="Chuyến / Tuần">📆 Tuần (Chuyến / Tuần)</option>
-                <option value="Chuyến / Tháng">🗓️ Tháng (Chuyến / Tháng)</option>
-                <option value="Chuyến / Năm">📈 Năm (Chuyến / Năm)</option>
-                <option value="Chuyến (Một lần)">⚡ Chuyến (Một lần / Spot)</option>
+                <option value="Chuyến / Ngày">Ngày (Chuyến / Ngày)</option>
+                <option value="Chuyến / Tuần">Tuần (Chuyến / Tuần)</option>
+                <option value="Chuyến / Tháng">Tháng (Chuyến / Tháng)</option>
+                <option value="Chuyến / Năm">Năm (Chuyến / Năm)</option>
+                <option value="Chuyến (Một lần)">Chuyến (Một lần / Spot)</option>
               </select>
             </div>
           </div>

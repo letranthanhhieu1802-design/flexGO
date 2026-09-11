@@ -259,20 +259,20 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
   const getDisabledReason = (type: string): string => {
     if (type === 'Kho ngoại quan (Bonded)' || type === 'Kho ngoại quan (Bonded Warehouse)') {
       if (isContractLease) {
-        return '🚫 Kho ngoại quan chỉ áp dụng thuê theo lô/mùa vụ (SPOT, tối đa 12 tháng)';
+        return 'Kho ngoại quan chỉ áp dụng thuê theo lô/mùa vụ (SPOT, tối đa 12 tháng)';
       }
     }
     if (cargoClassification === 'General') {
-      if (type === 'Kho lạnh / Kho mát (Cold Storage)') return '🚫 Hàng thường không lưu kho lạnh';
-      if (type === 'Kho hàng nguy hiểm (DG Warehouse)') return '🚫 Hàng thường không lưu kho DG';
+      if (type === 'Kho lạnh / Kho mát (Cold Storage)') return 'Hàng thường không lưu kho lạnh';
+      if (type === 'Kho hàng nguy hiểm (DG Warehouse)') return 'Hàng thường không lưu kho DG';
     }
     if (cargoClassification === 'Reefer') {
-      return '🚫 Hàng lạnh chỉ lưu kho lạnh/tự quản/ngoại quan';
+      return 'Hàng lạnh chỉ lưu kho lạnh/tự quản/ngoại quan';
     }
     if (cargoClassification === 'Hazmat') {
-      return '🚫 Hàng DG chỉ lưu kho nguy hiểm/ngoại quan/tự quản';
+      return 'Hàng DG chỉ lưu kho nguy hiểm/ngoại quan/tự quản';
     }
-    return '🚫 Không phù hợp nhóm hàng';
+    return 'Không phù hợp nhóm hàng';
   };
 
   // Tự động chuyển đổi fallback khi user đổi nhóm hàng hóa ở Mục 3 hoặc đổi loại hình kho
@@ -362,29 +362,29 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
           </label>
           <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-purple-50 text-purple-800 border border-purple-200">
             {cargoClassification === 'General'
-              ? '📦 Hàng Thường'
+              ? 'Hàng Thường'
               : cargoClassification === 'Reefer'
-              ? '❄️ Hàng Lạnh'
-              : '⚠️ Hàng Nguy Hiểm'}
+              ? 'Hàng Lạnh'
+              : 'Hàng Nguy Hiểm'}
           </span>
         </div>
 
         {/* Compatibility notification alerts */}
         {cargoClassification === 'General' && (
           <div className="p-2.5 bg-blue-50/70 border border-blue-200 rounded-xl text-xs text-blue-900">
-            <span className="font-bold">ℹ️ Quy định phân nhóm hàng thường:</span> Kho Thường Grade A, Kho Ngoại Quan, Kho TMĐT Fulfillment và Kho Tự Quản được mở. Kho Lạnh và Kho Hàng Nguy Hiểm bị khóa.
+            <span className="font-bold">Quy định phân nhóm hàng thường:</span> Kho Thường Grade A, Kho Ngoại Quan, Kho TMĐT Fulfillment và Kho Tự Quản được mở. Kho Lạnh và Kho Hàng Nguy Hiểm bị khóa.
           </div>
         )}
 
         {cargoClassification === 'Reefer' && (
           <div className="p-2.5 bg-cyan-50/70 border border-cyan-200 rounded-xl text-xs text-cyan-950 flex items-center gap-2">
-            <span className="font-bold">❄️ Quy định phân nhóm hàng lạnh:</span> Chỉ cho phép lưu kho tại <strong>Kho Lạnh / Mát</strong>, <strong>Kho Ngoại Quan</strong> (có phân khu lạnh) hoặc <strong>Kho Tự Quản</strong>.
+            <span className="font-bold">Quy định phân nhóm hàng lạnh:</span> Chỉ cho phép lưu kho tại <strong>Kho Lạnh / Mát</strong>, <strong>Kho Ngoại Quan</strong> (có phân khu lạnh) hoặc <strong>Kho Tự Quản</strong>.
           </div>
         )}
 
         {cargoClassification === 'Hazmat' && (
           <div className="p-2.5 bg-amber-50/70 border border-amber-200 rounded-xl text-xs text-amber-950 flex items-center gap-2">
-            <span className="font-bold">⚠️ Quy định phân nhóm hàng nguy hiểm (DG):</span> Chỉ cho phép lưu kho tại <strong>Kho Hàng Nguy Hiểm (DG)</strong>, <strong>Kho Ngoại Quan</strong> (đạt chuẩn DG) hoặc <strong>Kho Tự Quản</strong>.
+            <span className="font-bold">Quy định phân nhóm hàng nguy hiểm (DG):</span> Chỉ cho phép lưu kho tại <strong>Kho Hàng Nguy Hiểm (DG)</strong>, <strong>Kho Ngoại Quan</strong> (đạt chuẩn DG) hoặc <strong>Kho Tự Quản</strong>.
           </div>
         )}
 
@@ -392,32 +392,32 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
           {[
             {
               type: 'Kho thường (Grade A Dry)',
-              title: '🏬 Kho Thường Grade A',
+              title: 'Kho Thường Grade A',
               desc: 'Hàng bách hóa, tiêu dùng FMCG, máy móc công nghiệp, sàn bê tông chịu lực 5T/m2',
             },
             {
               type: 'Kho ngoại quan (Bonded)',
-              title: '🔒 Kho Ngoại Quan (Bonded)',
+              title: 'Kho Ngoại Quan (Bonded)',
               desc: 'Tạm hoãn thuế XNK, lưu trữ hàng chờ xuất khẩu hoặc chuyển khẩu quốc tế',
             },
             {
               type: 'Kho lạnh / Kho mát (Cold Storage)',
-              title: '❄️ Kho Lạnh / Mát (Reefer)',
+              title: 'Kho Lạnh / Mát (Reefer)',
               desc: 'Dải nhiệt kiểm soát -20°C đến +15°C cho thực phẩm, hóa mỹ phẩm & thuốc GDP',
             },
             {
               type: 'Kho hàng nguy hiểm (DG Warehouse)',
-              title: '⚠️ Kho Hàng Nguy Hiểm (DG)',
+              title: 'Kho Hàng Nguy Hiểm (DG)',
               desc: 'Hóa chất, sơn, dung môi, pin Lithium đạt chuẩn PCCC hóa chất chuyên dụng',
             },
             {
               type: 'Kho TMĐT / Fulfillment',
-              title: '📦 Kho Fulfillment TMĐT',
+              title: 'Kho Fulfillment TMĐT',
               desc: 'Tích hợp hệ thống WMS, chia chọn Pick & Pack xử lý đơn hàng B2C đa sàn',
             },
             {
               type: 'Kho tự quản (Self-Storage)',
-              title: '🔑 Kho Tự Quản (Self-Storage)',
+              title: 'Kho Tự Quản (Self-Storage)',
               desc: 'Phân lô khoang riêng biệt có khóa riêng cho khách hàng tự quản lý xuất nhập',
             },
           ].map((item) => {
@@ -449,7 +449,7 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
                     </span>
                     {disabled ? (
                       <span className="text-[10px] bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded font-bold border border-rose-200">
-                        🚫 Khóa
+                        Khóa
                       </span>
                     ) : isSelected ? (
                       <span className="w-2 h-2 rounded-full bg-purple-600"></span>
@@ -490,16 +490,16 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
             >
               <option value="">-- Chọn Mục Đích / Luồng Hàng Gửi Kho Ngoại Quan * --</option>
               <option value="Hàng nhập khẩu chờ hoàn tất thủ tục thông quan vào nội địa">
-                📥 Hàng nhập khẩu chờ hoàn tất thủ tục thông quan vào nội địa (Giải tỏa dần)
+                Hàng nhập khẩu chờ hoàn tất thủ tục thông quan vào nội địa (Giải tỏa dần)
               </option>
               <option value="Hàng chuyển khẩu, quá cảnh hoặc tái xuất sang nước thứ ba">
-                🔄 Hàng chuyển khẩu, quá cảnh hoặc tái xuất sang nước thứ ba
+                Hàng chuyển khẩu, quá cảnh hoặc tái xuất sang nước thứ ba
               </option>
               <option value="Hàng sản xuất trong nước đã làm xong thủ tục HQ xuất khẩu">
-                📤 Hàng sản xuất trong nước đã xong thủ tục HQ xuất khẩu chờ xuất
+                Hàng sản xuất trong nước đã xong thủ tục HQ xuất khẩu chờ xuất
               </option>
               <option value="Cung ứng nguyên vật liệu/linh kiện cho doanh nghiệp EPE / SXXK (VMI)">
-                🏭 Cung ứng nguyên liệu cho DN chế xuất EPE / SXXK (VMI - JIT Delivery)
+                Cung ứng nguyên liệu cho DN chế xuất EPE / SXXK (VMI - JIT Delivery)
               </option>
             </select>
           </div>
@@ -575,33 +575,33 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
           {[
             {
               unit: 'm² (Diện tích sàn)',
-              title: '📐 Theo Diện Tích (m²)',
+              title: 'Theo Diện Tích (m²)',
               sub: 'Khoanh vùng sàn cố định',
               disabled: isEcommerceWarehouse,
-              disabledReason: '🚫 Kho TMĐT chỉ tính theo Đơn hàng',
+              disabledReason: 'Kho TMĐT chỉ tính theo Đơn hàng',
             },
             {
               unit: 'Pallet (Vị trí Pallet/tháng)',
-              title: '🪵 Theo Pallet (Vị trí)',
+              title: 'Theo Pallet (Vị trí)',
               sub: 'Tính theo lượng tồn thực',
               disabled: isEcommerceWarehouse || isSelfStorage,
               disabledReason: isEcommerceWarehouse 
-                ? '🚫 Kho TMĐT chỉ tính theo Đơn hàng' 
-                : '🚫 Kho tự quản bàn giao mặt sàn riêng biệt',
+                ? 'Kho TMĐT chỉ tính theo Đơn hàng' 
+                : 'Kho tự quản bàn giao mặt sàn riêng biệt',
             },
             {
               unit: 'CBM (Thể tích thực m³)',
-              title: '📦 Theo Thể Tích (CBM)',
+              title: 'Theo Thể Tích (CBM)',
               sub: 'Hàng rời linh hoạt kích thước',
               disabled: isEcommerceWarehouse,
-              disabledReason: '🚫 Kho TMĐT chỉ tính theo Đơn hàng',
+              disabledReason: 'Kho TMĐT chỉ tính theo Đơn hàng',
             },
             {
               unit: 'Order (Hoàn tất đơn hàng TMĐT)',
-              title: '⚡ Theo Đơn Hàng (B2C)',
+              title: 'Theo Đơn Hàng (B2C)',
               sub: 'Lưu kho đệm + Pick + Pack + Giao',
               disabled: !isEcommerceWarehouse,
-              disabledReason: '🚫 Chỉ dành riêng cho Kho TMĐT / Fulfillment',
+              disabledReason: 'Chỉ dành riêng cho Kho TMĐT / Fulfillment',
             },
           ].map((item) => {
             const isSelected = (specs.billingUnitPreference || 'm² (Diện tích sàn)') === item.unit;
@@ -837,11 +837,11 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
                     }}
                     className="w-full h-10 px-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
                   >
-                    <option value="Pallet (Vị trí)">🪵 Pallet (Vị trí)</option>
-                    <option value="Ngăn Kệ / Ô Kệ (Shelving Bins)">🗄️ Ngăn Kệ / Ô Kệ</option>
-                    <option value="Khay Nhựa / Thùng Tote (Totes)">🧺 Khay Nhựa / Thùng Tote</option>
-                    <option value="m² (Diện tích sàn)">📐 Diện Tích Sàn (m²)</option>
-                    <option value="CBM (Thể tích thực m³)">📦 Thể Tích (CBM m³)</option>
+                    <option value="Pallet (Vị trí)">Pallet (Vị trí)</option>
+                    <option value="Ngăn Kệ / Ô Kệ (Shelving Bins)">Ngăn Kệ / Ô Kệ</option>
+                    <option value="Khay Nhựa / Thùng Tote (Totes)">Khay Nhựa / Thùng Tote</option>
+                    <option value="m² (Diện tích sàn)">Diện Tích Sàn (m²)</option>
+                    <option value="CBM (Thể tích thực m³)">Thể Tích (CBM m³)</option>
                   </select>
                 </div>
               </div>
@@ -858,7 +858,7 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
           </div>
           <div className="text-xs text-slate-800 flex-1">
             <span className="font-bold block text-xs text-slate-900">
-              🔑 Đặc Thù Vận Hành Mô Hình Kho Tự Quản (Self-Storage)
+              Đặc Thù Vận Hành Mô Hình Kho Tự Quản (Self-Storage)
             </span>
             <p className="text-slate-500 mt-0.5 leading-relaxed text-[11px]">
               Bàn giao khoang sàn riêng biệt, khách hàng giữ chìa khóa / thẻ từ riêng và chủ động ra vào 24/7. Không tính phí bốc xếp nâng hạ hay phí phần mềm WMS.
@@ -916,14 +916,14 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
                     }}
                     className="w-full h-10 px-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
                   >
-                    <option value="Pallet">🪵 Pallet</option>
-                    <option value="Container 40ft (FEU)">🚢 Container 40ft</option>
-                    <option value="Container 20ft (TEU)">⚓ Container 20ft</option>
-                    <option value="Chuyến xe tải (Trucks)">🚚 Chuyến xe tải</option>
-                    <option value="Thùng / Kiện (Cartons)">📦 Thùng / Kiện</option>
-                    <option value="Tấn (Tons)">⚖️ Tấn (Tons)</option>
-                    <option value="Thể tích (CBM m³)">📦 Thể tích CBM</option>
-                    <option value="Đơn hàng (Orders)">⚡ Đơn hàng</option>
+                    <option value="Pallet">Pallet</option>
+                    <option value="Container 40ft (FEU)">Container 40ft</option>
+                    <option value="Container 20ft (TEU)">Container 20ft</option>
+                    <option value="Chuyến xe tải (Trucks)">Chuyến xe tải</option>
+                    <option value="Thùng / Kiện (Cartons)">Thùng / Kiện</option>
+                    <option value="Tấn (Tons)">Tấn (Tons)</option>
+                    <option value="Thể tích (CBM m³)">Thể tích (CBM m³)</option>
+                    <option value="Đơn hàng (Orders)">Đơn hàng (Orders)</option>
                   </select>
                 </div>
 
@@ -995,14 +995,14 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
                     }}
                     className="w-full h-10 px-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
                   >
-                    <option value="Pallet">🪵 Pallet</option>
-                    <option value="Container 40ft (FEU)">🚢 Container 40ft</option>
-                    <option value="Container 20ft (TEU)">⚓ Container 20ft</option>
-                    <option value="Chuyến xe tải (Trucks)">🚚 Chuyến xe tải</option>
-                    <option value="Thùng / Kiện (Cartons)">📦 Thùng / Kiện</option>
-                    <option value="Tấn (Tons)">⚖️ Tấn (Tons)</option>
-                    <option value="Thể tích (CBM m³)">📦 Thể tích CBM</option>
-                    <option value="Đơn hàng (Orders)">⚡ Đơn hàng</option>
+                    <option value="Pallet">Pallet</option>
+                    <option value="Container 40ft (FEU)">Container 40ft</option>
+                    <option value="Container 20ft (TEU)">Container 20ft</option>
+                    <option value="Chuyến xe tải (Trucks)">Chuyến xe tải</option>
+                    <option value="Thùng / Kiện (Cartons)">Thùng / Kiện</option>
+                    <option value="Tấn (Tons)">Tấn (Tons)</option>
+                    <option value="Thể tích (CBM m³)">Thể tích (CBM m³)</option>
+                    <option value="Đơn hàng (Orders)">Đơn hàng (Orders)</option>
                   </select>
                 </div>
 

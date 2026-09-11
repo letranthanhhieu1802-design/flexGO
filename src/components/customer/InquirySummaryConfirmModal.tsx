@@ -184,7 +184,13 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
   const isLcl = inquiry.serviceType === 'Sea Freight (LCL)' || ocean?.mode?.includes('LCL') || inquiry.title?.toLowerCase().includes('lcl');
   const isFcl = (inquiry.serviceType === 'Sea Freight (FCL)' || ocean?.mode?.includes('FCL')) && !isLcl;
   const isOcean = isFcl || isLcl;
-  const isRailLcl = inquiry.serviceType === 'Rail Freight' && (rail?.mode?.includes('LCL') || inquiry.title?.toLowerCase().includes('lcl'));
+  const isAir = inquiry.serviceType === 'Air Freight' || inquiry.title?.toLowerCase().includes('air freight');
+  const isAirExpress = isAir && (air?.airServiceType === 'Express / Courier' || inquiry.title?.toLowerCase().includes('courier') || inquiry.title?.toLowerCase().includes('express'));
+  const isAirCargo = isAir && !isAirExpress;
+  const isRail = inquiry.serviceType === 'Rail Freight' || inquiry.title?.toLowerCase().includes('rail');
+  const isRailLcl = isRail && (rail?.mode?.includes('LCL') || inquiry.title?.toLowerCase().includes('lcl'));
+  const isRailFcl = isRail && !isRailLcl;
+  const isWarehousing = inquiry.serviceType === 'Warehousing' || inquiry.title?.toLowerCase().includes('kho');
   const pickupList: string[] = isTrucking && trucking?.pickupLocations && trucking.pickupLocations.length > 0
     ? trucking.pickupLocations.map(l => l.trim()).filter(Boolean)
     : [inquiry.origin].filter(Boolean);
@@ -203,45 +209,91 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
   const customerEmail = currentUser?.email || 'hieu.le@abcmfg.vn';
   const customerPhone = '+84 908 123 456';
 
-  // Tariff Unit calculation helper (Clean ĐVT column - without repeating currency)
+  // Helper to remove any emojis/icons from stored data strings
+  const cleanTextNoEmoji = (text?: string): string => {
+    if (!text) return '';
+    return text.replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}🚪⚓📦🚢🛫🛬🇻🇳]/gu, '').trim();
+  };
+
+  // Tariff Unit calculation helper (ĐVT column with currency and specific mode/container)
   const getTariffMainUnit = (): string => {
+    const curr = inquiry.currency || 'USD';
+
     switch (inquiry.serviceType) {
-      case 'Sea Freight (FCL)':
-        return ocean?.containerType ? ocean.containerType.split(' ')[0] : 'Cont 40HC';
+      case 'Sea Freight (FCL)': {
+        let contShort = 'Cont 20ft';
+        if (ocean?.containerType) {
+          const ct = ocean.containerType;
+          if (ct.includes('40HC') || ct.includes('40ft High Cube')) contShort = 'Cont 40HC';
+          else if (ct.includes('40RF') || (ct.includes('40') && ct.includes('Reefer'))) contShort = 'Cont 40RF';
+          else if (ct.includes('20RF') || (ct.includes('20') && ct.includes('Reefer'))) contShort = 'Cont 20RF';
+          else if (ct.includes('40GP') || ct.includes('40ft General') || ct.includes('40DC')) contShort = 'Cont 40ft';
+          else if (ct.includes('45HC') || ct.includes('45ft')) contShort = 'Cont 45HC';
+          else if (ct.includes('20ft') || ct.includes('20GP') || ct.includes('20DC')) contShort = 'Cont 20ft';
+          else if (ct.includes('Open Top') || ct.includes('OT')) contShort = `Cont ${ct.split(' ')[0]} OT`;
+          else if (ct.includes('Flat Rack') || ct.includes('FR')) contShort = `Cont ${ct.split(' ')[0]} FR`;
+          else if (ct.includes('Tank') || ct.includes('TK')) contShort = `Cont ${ct.split(' ')[0]} Tank`;
+          else contShort = `Cont ${ct.split(' ')[0]}`;
+        }
+        return `${curr} / ${contShort}`;
+      }
       case 'Sea Freight (LCL)':
-        return 'RT (CBM/Tấn)';
+        return `${curr} / kg`;
       case 'Air Freight':
-        return 'Kg (CW)';
+        return `${curr} / kg`;
       case 'Trucking':
         return trucking?.loadType?.includes('LTL') 
-          ? 'Kg (hoặc CBM)' 
-          : `Chuyến (${trucking?.truckType || 'Xe tải'})`;
+          ? `${curr} / kg` 
+          : `${curr} / Chuyến`;
       case 'Cold Chain':
-        return `Chuyến (${coldChain?.vehicleOrContType || 'Xe lạnh'})`;
+        return `${curr} / Chuyến`;
       case 'Rail Freight':
-        return rail?.mode?.includes('LCL') 
-          ? 'Kg (hoặc CBM)' 
-          : 'Cont / Toa';
+        return isRailLcl 
+          ? `${curr} / Tấn (RT)` 
+          : `${curr} / Cont`;
       case 'Warehousing':
-        return 'm² / Tháng (hoặc Pallet)';
+        if (warehousing?.billingUnitPreference?.includes('Pallet')) return `${curr} / Pallet / tháng`;
+        if (warehousing?.billingUnitPreference?.includes('CBM')) return `${curr} / CBM / tháng`;
+        if (warehousing?.billingUnitPreference?.includes('Order')) return `${curr} / Đơn hàng`;
+        return `${curr} / m² / tháng`;
       case 'Customs Clearance':
-        return 'Tờ khai';
+        return `${curr} / Tờ khai`;
       case 'Cross-border':
-        return 'Chuyến';
+        return `${curr} / Chuyến`;
       case 'Project Cargo':
-        return 'Trọn gói';
-      default:
-        return 'Đơn vị';
+        return `${curr} / Trọn gói`;
+      default: {
+        if (isFcl) {
+          let contShort = 'Cont 20ft';
+          if (ocean?.containerType) {
+            const ct = ocean.containerType;
+            if (ct.includes('40HC')) contShort = 'Cont 40HC';
+            else if (ct.includes('40RF')) contShort = 'Cont 40RF';
+            else if (ct.includes('20RF')) contShort = 'Cont 20RF';
+            else if (ct.includes('40')) contShort = 'Cont 40ft';
+            else if (ct.includes('20')) contShort = 'Cont 20ft';
+            else contShort = `Cont ${ct.split(' ')[0]}`;
+          }
+          return `${curr} / ${contShort}`;
+        }
+        if (isLcl) {
+          return `${curr} / kg`;
+        }
+        return `${curr} / Đơn vị`;
+      }
     }
   };
 
   const getSurchargeUnit = (surchargeName: string): string => {
     const s = surchargeName.toLowerCase();
+    if (s.includes('fsc') || s.includes('nhiên liệu') || s.includes('xăng dầu') || s.includes('ssc') || s.includes('an ninh') || s.includes('x-ray') || s.includes('soi chiếu') || s.includes('terminal')) {
+      return 'Kg';
+    }
+    if (s.includes('awb') || s.includes('b/l') || s.includes('vận đơn') || s.includes('tờ khai') || s.includes('hải quan') || s.includes('chứng từ') || s.includes('kiểm dịch') || s.includes('hun trùng') || s.includes('c/o') || s.includes('giấy phép')) {
+      return 'Set (Bộ)';
+    }
     if (s.includes('thc') || s.includes('nâng hạ') || s.includes('seal') || s.includes('chì') || s.includes('vệ sinh cont') || s.includes('cắm điện')) {
       return isOcean && isFcl ? (ocean?.containerType ? ocean.containerType.split(' ')[0] : 'Cont') : 'Chuyến';
-    }
-    if (s.includes('b/l') || s.includes('vận đơn') || s.includes('tờ khai') || s.includes('hải quan') || s.includes('chứng từ') || s.includes('kiểm dịch') || s.includes('hun trùng') || s.includes('c/o') || s.includes('giấy phép')) {
-      return 'Set (Bộ)';
     }
     if (s.includes('cbm') || s.includes('cfs') || s.includes('khối')) {
       return 'CBM';
@@ -253,8 +305,15 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
       return 'Pallet';
     }
     if (s.includes('bốc xếp') || s.includes('nhân công') || s.includes('bốc dỡ')) {
-      return 'Chuyến / Tấn';
+      return isWarehousing ? 'Pallet / Tấn' : 'Chuyến / Tấn';
     }
+    if (isWarehousing) {
+      if (s.includes('inbound') || s.includes('nhập kho') || s.includes('outbound') || s.includes('xuất kho')) return 'Pallet / Tấn';
+      if (s.includes('quản lý') || s.includes('wms')) return 'Tháng';
+      if (s.includes('đơn')) return 'Đơn hàng';
+      return 'Mục';
+    }
+    if (isAir) return 'Kg';
     return isOcean ? 'Cont' : 'Chuyến';
   };
 
@@ -410,14 +469,24 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
         };
       case 'Rail Freight':
         return {
-          tag: 'Cấu Hình Toa/Cont #1',
-          label: rail?.wagonOrContType || 'Container 40HC Đường Sắt',
+          tag: isRailFcl ? 'Toa / Cont #1' : 'Lô Hàng LCL Ga #1',
+          label: isRailFcl 
+            ? (rail?.containerType ? `${rail.containerType} —— (${rail.containerCount || 1} Cont/Toa)` : 'Container 40HC Đường Sắt')
+            : (rail?.lclCbm ? `${rail.lclCbm} CBM / ${rail.lclGrossWeightKg || 0} kg (${rail.lclRevenueTon || 0} RT)` : 'Hàng Lẻ Ga Đường Sắt (CFS)'),
         };
-      case 'Warehousing':
+      case 'Warehousing': {
+        const whScale = warehousing?.storageAreaSqm 
+          ? `${warehousing.storageAreaSqm.toLocaleString('vi-VN')} m² sàn` 
+          : warehousing?.palletPositions 
+          ? `${warehousing.palletPositions.toLocaleString('vi-VN')} Pallet slots` 
+          : warehousing?.cbmVolume 
+          ? `${warehousing.cbmVolume.toLocaleString('vi-VN')} CBM` 
+          : `${warehousing?.dailyOrderCount || 100} Đơn/ngày`;
         return {
-          tag: 'Gói Thuê Kho #1',
-          label: warehousing?.warehouseType ? `${warehousing.warehouseType} —— (${warehousing.storageAreaSqm || 1000} m²)` : 'Kho Thường Tiêu Chuẩn',
+          tag: 'Mô Hình Kho #1',
+          label: `${cleanTextNoEmoji(warehousing?.warehouseType) || 'Kho Thường Grade A'} (${whScale})`,
         };
+      }
       case 'Customs Clearance':
         return {
           tag: 'Hồ Sơ Tờ Khai #1',
@@ -661,12 +730,12 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       <span className="font-normal text-slate-800">{inquiry.packaging || 'Đóng Pallet tiêu chuẩn'}</span>
                     </div>
 
-                    {/* Khả năng xếp chồng: Only show if explicitly provided (e.g. LTL/LCL ghép hàng), do NOT show for FTL */}
-                    {inquiry.stackable !== undefined && (
+                    {/* Khả năng xếp chồng: Hiển thị ở Mục 2 */}
+                    {(inquiry.stackable !== undefined || ocean?.lclStackable !== undefined || air?.stackable !== undefined || trucking?.ltlStackable !== undefined || rail?.lclStackable !== undefined) && (
                       <div className="flex items-baseline gap-2">
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Khả năng xếp chồng:</span>
                         <span className="font-normal text-slate-800">
-                          {inquiry.stackable
+                          {(inquiry.stackable ?? ocean?.lclStackable ?? air?.stackable ?? trucking?.ltlStackable ?? rail?.lclStackable)
                             ? 'Có thể xếp chồng (Stackable)'
                             : 'Không được xếp chồng'}
                         </span>
@@ -686,6 +755,8 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                           ? `${rail.lclGrossWeightKg.toLocaleString('vi-VN')} kg`
                           : air?.grossWeightKgs 
                           ? `${air.grossWeightKgs.toLocaleString('vi-VN')} kg` 
+                          : isWarehousing
+                          ? (inquiry.weightVolume || 'Theo quy mô kho lưu trữ')
                           : inquiry.weightVolume || 'Theo tải trọng phương tiện'}
                       </span>
                     </div>
@@ -699,10 +770,16 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                           ? `${inquiry.ftlVolumeCbm} CBM` 
                           : ocean?.lclCbm 
                           ? `${ocean.lclCbm} CBM` 
-                          : rail?.lclCbm
-                          ? `${rail.lclCbm} CBM`
-                          : inquiry.cbmVolume
-                          ? `${inquiry.cbmVolume} CBM`
+                          : (rail?.lclCbm || rail?.cbmVolume)
+                          ? `${rail?.lclCbm || rail?.cbmVolume} CBM`
+                          : (isAir && (air?.cbmVolume || inquiry.cbmVolume))
+                          ? `${air?.cbmVolume || inquiry.cbmVolume} CBM`
+                          : (warehousing?.cbmVolume || inquiry.cbmVolume)
+                          ? `${warehousing?.cbmVolume || inquiry.cbmVolume} CBM`
+                          : isAir
+                          ? 'Chưa tính CBM'
+                          : isWarehousing
+                          ? 'Theo diện tích / vị trí pallet'
                           : 'Theo dung tích thùng xe'}
                       </span>
                     </div>
@@ -725,7 +802,9 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                   {/* LTL / LCL specific breakdown */}
                   {(isTruckingLtl || isLcl || isRailLcl || inquiry.packageCount || Boolean(air?.packageCount)) && (
                     <div className="mt-3 pt-2.5 border-t border-slate-100 space-y-2">
-                      <span className="text-[11px] font-bold text-indigo-900 block">Quy cách kiện ghép (LTL / LCL Specs):</span>
+                      <span className="text-[11px] font-bold text-indigo-900 block">
+                        {isAir ? 'Quy cách kiện hàng không (Air Cargo Specs):' : isRailLcl ? 'Quy cách kiện đường sắt (Rail LCL Specs):' : 'Quy cách kiện ghép (LTL / LCL Specs):'}
+                      </span>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-y-2 gap-x-6 text-xs bg-slate-50/60 p-3 rounded-xl border border-slate-100">
                         <div className="flex items-baseline gap-2">
                           <span className="text-slate-400 font-medium">Số lượng kiện:</span>
@@ -737,6 +816,9 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                           <span className="text-slate-400 font-medium">Kích thước từng kiện:</span>
                           <span className="font-normal text-slate-800">
                             {(() => {
+                              if (isAir && air?.airDimensions?.lengthCm) {
+                                return `${air.airDimensions.lengthCm} x ${air.airDimensions.widthCm || 0} x ${air.airDimensions.heightCm || 0} cm`;
+                              }
                               const dims = trucking?.ltlDimensions || ocean?.lclDimensions || rail?.lclDimensions || air?.dimensionsCm || inquiry.dimensionsCm;
                               if (typeof dims === 'string' && dims) return dims;
                               if (dims && typeof dims === 'object' && dims.lengthCm) {
@@ -754,7 +836,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                               : ocean?.lclRevenueTon 
                               ? `${ocean.lclRevenueTon} RT (${ocean.lclChargeableWeightKg ? ocean.lclChargeableWeightKg.toLocaleString('vi-VN') + ' kg' : ''})` 
                               : rail?.lclRevenueTon
-                              ? `${rail.lclRevenueTon} RT (${rail.lclChargeableWeightKg ? rail.lclChargeableWeightKg.toLocaleString('vi-VN') + ' kg' : ''})`
+                              ? `${rail.lclRevenueTon} RT (${rail.lclChargeableWeightKg ? rail.lclChargeableWeightKg.toLocaleString('vi-VN') + ' kg - Quy đổi 1 CBM = 1.000 kg' : ''})`
                               : air?.chargeableWeightKgs 
                               ? `${air.chargeableWeightKgs.toLocaleString('vi-VN')} kg CW` 
                               : 'Theo thể tích thực tế'}
@@ -839,190 +921,614 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                 </div>
 
                 <div className="space-y-4">
-                  {/* Service & Model */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2.5 gap-x-8 text-xs">
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Loại hình dịch vụ:</span>
-                      <span className="font-normal text-slate-800">{getServiceNameVi(inquiry.serviceType)}</span>
-                    </div>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Mô hình vận hành:</span>
-                      <span className="font-normal text-slate-800">
-                        {isTrucking 
-                          ? (trucking?.loadType || 'Nguyên Chuyến (FTL)')
-                          : isOcean 
-                          ? (isLcl ? 'Ghép Hàng Lẻ (LCL)' : 'Nguyên Container (FCL)')
-                          : inquiry.serviceType}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Route & Multi-stop details: Side-by-side parallel columns */}
-                  <div className="space-y-2 pt-1">
-                    <span className="text-[11px] font-bold text-slate-900 block uppercase tracking-wider">
-                      Hành trình giao nhận:
-                    </span>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-3.5 bg-slate-50/70 rounded-xl border border-slate-200/80">
-                      {/* Cột 1: Điểm Lấy Hàng (Pickup) */}
-                      <div className="space-y-2 border-l-2 border-emerald-500 pl-3">
-                        <div className="font-black text-xs text-emerald-900">
-                          Điểm Lấy Hàng (Pickup)
-                        </div>
-                        <div className="space-y-1.5 text-xs text-slate-800">
-                          <div>
-                            <span className="text-slate-500 font-medium block text-[11px]">• Địa chỉ kho xuất hàng chính:</span>
-                            <span className="font-normal text-slate-800 block pl-3">
-                              {inquiry.origin || 'Chưa chỉ định'}
-                            </span>
-                          </div>
-                          {isTrucking && trucking?.pickupLocations && trucking.pickupLocations.length > 1 && (
-                            <div className="space-y-1.5 pt-0.5">
-                              {trucking.pickupLocations.slice(1).map((p, idx) => (
-                                <div key={idx}>
-                                  <span className="text-slate-500 font-medium block text-[11px]">• Điểm lấy {idx + 2} (Kho phụ / Gom thêm):</span>
-                                  <span className="font-normal text-slate-800 block pl-3">
-                                    {p || `Kho phụ ${idx + 2}`}
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
+                  {isOcean ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2.5 gap-x-8 text-xs">
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Loại hình dịch vụ:</span>
+                        <span className="font-normal text-slate-800">{getServiceNameVi(inquiry.serviceType)}</span>
+                      </div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Hình Thức Đóng Hàng Biển (FCL / LCL):</span>
+                        <span className="font-normal text-slate-800">
+                          {isLcl ? 'LCL (Hàng lẻ đóng ghép CFS)' : 'FCL (Full Container)'}
+                        </span>
                       </div>
 
-                      {/* Cột 2: Điểm Giao Hàng (Delivery) - Song song cùng hàng */}
-                      <div className="space-y-2 border-l-2 border-rose-500 pl-3">
-                        <div className="font-black text-xs text-rose-900">
-                          Điểm Giao Hàng (Delivery)
-                        </div>
-                        <div className="space-y-1.5 text-xs text-slate-800">
-                          <div>
-                            <span className="text-slate-500 font-medium block text-[11px]">• Địa chỉ kho đích chính:</span>
-                            <span className="font-normal text-slate-800 block pl-3">
-                              {inquiry.destination || 'Chưa chỉ định'}
-                            </span>
-                          </div>
-                          {isTrucking && trucking?.deliveryLocations && trucking.deliveryLocations.length > 1 && (
-                            <div className="space-y-1.5 pt-0.5">
-                              {trucking.deliveryLocations.slice(1).map((d, idx) => (
-                                <div key={idx}>
-                                  <span className="text-slate-500 font-medium block text-[11px]">• Điểm giao {idx + 2} (Đại lý / Cửa hàng phụ):</span>
-                                  <span className="font-normal text-slate-800 block pl-3">
-                                    {d || `Điểm giao ${idx + 2}`}
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Vai Trò Của Doanh Nghiệp Trong Lô Hàng (Trade Role):</span>
+                        <span className="font-normal text-slate-800">
+                          {cleanTextNoEmoji(ocean?.tradeRole || inquiry.tradeRole || 'Xuất khẩu (Export)')}
+                        </span>
                       </div>
-                    </div>
-                  </div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Điều Kiện Thương Mại (Incoterms 2020):</span>
+                        <span className="font-normal text-slate-800">
+                          {cleanTextNoEmoji(ocean?.incoterm || inquiry.incoterms || 'FOB')}
+                        </span>
+                      </div>
 
-                  {/* Vehicle configuration */}
-                  <div className="space-y-2 pt-1 text-xs">
-                    <span className="text-[11px] font-bold text-slate-900 block uppercase tracking-wider">
-                      Cấu hình phương tiện yêu cầu:
-                    </span>
-
-                    {isTrucking && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2.5 gap-x-8 text-xs">
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Loại Thùng Phương Tiện:</span>
-                          <span className="font-normal text-slate-800">{trucking?.truckType || 'Theo thỏa thuận'}</span>
-                        </div>
-                        
-                        {!isTruckingLtl && trucking?.tonnageCategory && (
+                      {/* FCL Specific Fields: Loại Vỏ Container & Thời Gian Miễn Phí (Đưa lên trên Điều kiện nhận/giao hàng) */}
+                      {isFcl && (
+                        <>
                           <div className="flex items-baseline gap-2">
-                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Phân Khúc Tải Trọng:</span>
-                            <span className="font-normal text-slate-800">{trucking.tonnageCategory}</span>
-                          </div>
-                        )}
-
-                        {!isTruckingLtl && trucking?.dimensionsMin && (
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Kích thước lòng thùng:</span>
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Loại Vỏ Container:</span>
                             <span className="font-normal text-slate-800">
-                              {trucking.dimensionsMin}
+                              {ocean?.containerType || '40ft High Cube (40HC)'}
                             </span>
                           </div>
-                        )}
-
-                        {(trucking?.requestedLeadtime || trucking?.transitTimeMax) && (
                           <div className="flex items-baseline gap-2">
-                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Thời Gian Giao Hàng (SLA):</span>
-                            <span className="font-normal text-slate-800">{trucking.requestedLeadtime || trucking.transitTimeMax}</span>
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Thời Gian Miễn Phí Lưu Cont / Bãi (Free Dem/Det):</span>
+                            <span className="font-normal text-slate-800">
+                              {ocean?.freeDemDetDaysRequested ? `${ocean.freeDemDetDaysRequested} Ngày` : '14 Ngày'}
+                            </span>
                           </div>
-                        )}
+                        </>
+                      )}
 
-                        {trucking?.requestedLeadtimeNote && (
-                          <div className="flex items-baseline gap-2 md:col-span-2">
-                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Ghi chú thời gian giao nhận:</span>
-                            <span className="font-normal text-slate-800">{trucking.requestedLeadtimeNote}</span>
-                          </div>
-                        )}
+                      {/* LCL Specific Fields: Số Lượng Kiện (Đưa lên trên Điều kiện nhận/giao hàng) */}
+                      {isLcl && (
+                        <div className="flex items-baseline gap-2 md:col-span-2">
+                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Số Lượng Kiện / Pallet Cần Gom Ghép:</span>
+                          <span className="font-normal text-slate-800">
+                            {ocean?.lclPieces ? `${ocean.lclPieces} Kiện / Pallet` : 'Chưa chỉ định'}
+                          </span>
+                        </div>
+                      )}
 
-                        {trucking?.vehicleSpecsRequirement && (
-                          <div className="flex items-baseline gap-2 md:col-span-2">
-                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Yêu cầu dỡ hàng / Kỹ thuật:</span>
-                            <span className="font-normal text-slate-800">{trucking.vehicleSpecsRequirement}</span>
-                          </div>
-                        )}
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Điều Kiện Nhận Hàng (Origin Term):</span>
+                        <span className="font-normal text-slate-800">
+                          {cleanTextNoEmoji(ocean?.originServiceTerm || inquiry.originServiceTerm || 'CY')}
+                        </span>
                       </div>
-                    )}
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Điều Kiện Giao Hàng (Destination Term):</span>
+                        <span className="font-normal text-slate-800">
+                          {cleanTextNoEmoji(ocean?.destinationServiceTerm || inquiry.destinationServiceTerm || 'CY')}
+                        </span>
+                      </div>
 
-                    {isOcean && (
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">
+                          {isLcl ? 'Địa Chỉ Lấy Hàng Kho CFS (Origin CFS Warehouse):' : 'Cảng Bốc Hàng (Port of Loading - POL):'}
+                        </span>
+                        <span className="font-normal text-slate-800">
+                          {ocean?.polPort || inquiry.origin || 'Chưa chỉ định'}
+                        </span>
+                      </div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">
+                          {isLcl ? 'Địa Chỉ Giao Hàng Kho CFS (Destination CFS Warehouse):' : 'Cảng Dỡ Hàng (Port of Discharge - POD):'}
+                        </span>
+                        <span className="font-normal text-slate-800">
+                          {ocean?.podPort || inquiry.destination || 'Chưa chỉ định'}
+                        </span>
+                      </div>
+
+                      {/* Địa Chỉ Kho Lấy Hàng & Giao Hàng cùng 1 hàng */}
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Địa Chỉ Kho Lấy Hàng (Shipper Warehouse / Pickup Address):</span>
+                        <span className="font-normal text-slate-800">
+                          {ocean?.pickupAddress || 'Chưa chỉ định'}
+                        </span>
+                      </div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Địa Chỉ Giao Hàng (Consignee Warehouse / Delivery Address):</span>
+                        <span className="font-normal text-slate-800">
+                          {ocean?.deliveryAddress || 'Chưa chỉ định'}
+                        </span>
+                      </div>
+
+                      {/* Hãng Tàu Chỉ Định cho FCL */}
+                      {isFcl && Boolean(ocean?.preferredCarrier) && (
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Hãng Tàu Chỉ Định:</span>
+                          <span className="font-normal text-slate-800">{ocean?.preferredCarrier}</span>
+                        </div>
+                      )}
+
+                    </div>
+                  ) : isAir ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2.5 gap-x-8 text-xs">
+                      {/* Hàng 1: Loại hình dịch vụ & Hình thức dịch vụ bay */}
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Loại hình dịch vụ:</span>
+                        <span className="font-normal text-slate-800">{getServiceNameVi(inquiry.serviceType)}</span>
+                      </div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Hình Thức Dịch Vụ Bay:</span>
+                        <span className="font-normal text-slate-800">
+                          {isAirExpress ? 'Express / Courier (Chuyển phát nhanh)' : 'Air Freight / Cargo (Hàng không thương mại)'}
+                        </span>
+                      </div>
+
+                      {/* Hàng 2: Vai trò & Incoterms */}
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Vai Trò Của Doanh Nghiệp Trong Lô Hàng (Trade Role):</span>
+                        <span className="font-normal text-slate-800">
+                          {cleanTextNoEmoji(air?.tradeRole || inquiry.tradeRole || 'Xuất khẩu (Export)')}
+                        </span>
+                      </div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Điều Kiện Thương Mại (Incoterms 2020):</span>
+                        <span className="font-normal text-slate-800">
+                          {cleanTextNoEmoji(air?.incoterm || inquiry.incoterms || 'FCA')}
+                        </span>
+                      </div>
+
+                      {isAirCargo ? (
+                        <>
+                          {/* Hàng 3: Điều kiện nhận hàng & Giao hàng */}
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Điều Kiện Nhận Hàng (Origin Term):</span>
+                            <span className="font-normal text-slate-800">
+                              {cleanTextNoEmoji(air?.originServiceTerm || inquiry.originServiceTerm || 'Airport')}
+                            </span>
+                          </div>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Điều Kiện Giao Hàng (Destination Term):</span>
+                            <span className="font-normal text-slate-800">
+                              {cleanTextNoEmoji(air?.destinationServiceTerm || inquiry.destinationServiceTerm || 'Airport')}
+                            </span>
+                          </div>
+
+                          {/* Hàng 4: Sân bay đi & Sân bay đến */}
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Sân Bay Đi (AOD - Airport of Departure):</span>
+                            <span className="font-normal text-slate-800">
+                              {cleanTextNoEmoji(air?.originAirport || inquiry.origin || 'Chưa chỉ định')}
+                            </span>
+                          </div>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Sân Bay Đến (AOA - Airport of Arrival):</span>
+                            <span className="font-normal text-slate-800">
+                              {cleanTextNoEmoji(air?.destinationAirport || inquiry.destination || 'Chưa chỉ định')}
+                            </span>
+                          </div>
+
+                          {/* Hàng 5: Địa chỉ kho lấy hàng & Giao hàng cùng 1 hàng */}
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Địa Chỉ Kho Lấy Hàng (Shipper Warehouse / Pickup Address):</span>
+                            <span className="font-normal text-slate-800">
+                              {cleanTextNoEmoji(air?.pickupAddress || 'Chưa chỉ định')}
+                            </span>
+                          </div>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Địa Chỉ Giao Hàng (Consignee Warehouse / Delivery Address):</span>
+                            <span className="font-normal text-slate-800">
+                              {cleanTextNoEmoji(air?.deliveryAddress || 'Chưa chỉ định')}
+                            </span>
+                          </div>
+
+                        </>
+                      ) : (
+                        <>
+                          {/* Express Courier Specific Fields */}
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Phân Loại Bưu Kiện (Express Package Type):</span>
+                            <span className="font-normal text-slate-800">
+                              {cleanTextNoEmoji(air?.expressPackageType || 'Parcel / Package (Bưu phẩm / Hàng mẫu đóng hộp)')}
+                            </span>
+                          </div>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Cấp Độ Chuyển Phát (Speed Level):</span>
+                            <span className="font-normal text-slate-800">
+                              {cleanTextNoEmoji(air?.expressSpeedLevel || 'Express Tiêu Chuẩn (2-3 ngày)')}
+                            </span>
+                          </div>
+
+                          {/* Địa chỉ lấy hàng & Giao hàng tận nơi Door-to-Door cùng 1 hàng */}
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Địa Chỉ Lấy Hàng Tận Nơi (Pickup Address):</span>
+                            <span className="font-normal text-slate-800">
+                              {cleanTextNoEmoji(air?.pickupAddress || inquiry.origin || 'Chưa chỉ định')}
+                              {air?.originPostalCode ? ` (Mã Zip: ${air.originPostalCode})` : ''}
+                            </span>
+                          </div>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Địa Chỉ Giao Hàng Tận Nơi (Delivery Address):</span>
+                            <span className="font-normal text-slate-800">
+                              {cleanTextNoEmoji(air?.deliveryAddress || inquiry.destination || 'Chưa chỉ định')}
+                              {air?.destinationPostalCode ? ` (Mã Zip: ${air.destinationPostalCode})` : ''}
+                            </span>
+                          </div>
+
+                          {/* Yêu cầu ký nhận POD & Thủ tục hải quan */}
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Yêu Cầu Ký Nhận Tận Tay (POD):</span>
+                            <span className="font-normal text-slate-800">
+                              {air?.signatureRequired ? 'Yêu cầu ký nhận tận tay' : 'Không yêu cầu'}
+                            </span>
+                          </div>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Hỗ Trợ Thủ Tục Hải Quan:</span>
+                            <span className="font-normal text-slate-800">
+                              {air?.expressCustomsSupport ? 'Có hỗ trợ thủ tục hải quan trọn gói' : 'Tự thông quan'}
+                            </span>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ) : isRail ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2.5 gap-x-8 text-xs">
+                      {/* Hàng 1: Loại hình dịch vụ & Phương thức vận chuyển đường sắt */}
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Loại hình dịch vụ:</span>
+                        <span className="font-normal text-slate-800">{getServiceNameVi(inquiry.serviceType)}</span>
+                      </div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Phương Thức Vận Chuyển Đường Sắt (Mode of Rail Transport):</span>
+                        <span className="font-normal text-slate-800">
+                          {isRailLcl ? 'LCL (Hàng lẻ đóng ghép kho ga)' : 'FCL (Nguyên container ga - ga)'}
+                        </span>
+                      </div>
+
+                      {/* Hàng 2: Vai trò của doanh nghiệp & Điều kiện thương mại Incoterms */}
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Vai Trò Của Doanh Nghiệp Trong Lô Hàng (Trade Role):</span>
+                        <span className="font-normal text-slate-800">
+                          {cleanTextNoEmoji(rail?.tradeRole || inquiry.tradeRole || 'Nội địa Bắc - Nam (Domestic Rail)')}
+                        </span>
+                      </div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Điều Kiện Thương Mại (Incoterms 2020):</span>
+                        <span className="font-normal text-slate-800">
+                          {cleanTextNoEmoji(rail?.incoterm || inquiry.incoterms || 'DAP')}
+                        </span>
+                      </div>
+
+                      {/* Hàng 3: FCL Container Type & Free Dem/Det (Đưa lên trên Điều kiện nhận/giao hàng) */}
+                      {isRailFcl && (
+                        <>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Loại Container / Toa Xe:</span>
+                            <span className="font-normal text-slate-800">
+                              {rail?.containerType || 'Cont 40ft High Cube (40HC)'}
+                            </span>
+                          </div>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Thời Gian Miễn Phí Lưu Bãi Ga (Free Dem/Det):</span>
+                            <span className="font-normal text-slate-800">
+                              {rail?.freeDemDetDaysRequested ? `${rail.freeDemDetDaysRequested} Ngày` : '7 Ngày'}
+                            </span>
+                          </div>
+                        </>
+                      )}
+
+                      {/* Hàng 3: LCL Specific: Số Lượng Kiện Cần Ghép (Đưa lên trên Điều kiện nhận/giao hàng) */}
+                      {isRailLcl && (
+                        <div className="flex items-baseline gap-2 md:col-span-2">
+                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Số Lượng Kiện / Pallet Cần Ghép:</span>
+                          <span className="font-normal text-slate-800">
+                            {rail?.lclPieces ? `${rail.lclPieces} Kiện / Pallet` : 'Chưa chỉ định'}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Hàng 4: Điều kiện nhận hàng & Giao hàng */}
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Điều Kiện Nhận Hàng (Origin Term):</span>
+                        <span className="font-normal text-slate-800">
+                          {cleanTextNoEmoji(rail?.originServiceTerm || inquiry.originServiceTerm || 'CY')}
+                        </span>
+                      </div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Điều Kiện Giao Hàng (Destination Term):</span>
+                        <span className="font-normal text-slate-800">
+                          {cleanTextNoEmoji(rail?.destinationServiceTerm || inquiry.destinationServiceTerm || 'CY')}
+                        </span>
+                      </div>
+
+                      {/* Hàng 5: Ga xếp hàng (POL Ga) & Ga dỡ hàng (POD Ga) */}
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">
+                          {isRailLcl ? 'Địa Chỉ Kho Ga Nhận Hàng (Origin CFS Rail Station):' : 'Ga Xếp Hàng (Origin Rail Station / POL Ga):'}
+                        </span>
+                        <span className="font-normal text-slate-800">
+                          {cleanTextNoEmoji(rail?.originStation || inquiry.origin || 'Chưa chỉ định')}
+                        </span>
+                      </div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">
+                          {isRailLcl ? 'Địa Chỉ Kho Ga Trả Hàng (Destination CFS Rail Station):' : 'Ga Dỡ Hàng (Destination Rail Station / POD Ga):'}
+                        </span>
+                        <span className="font-normal text-slate-800">
+                          {cleanTextNoEmoji(rail?.destinationStation || inquiry.destination || 'Chưa chỉ định')}
+                        </span>
+                      </div>
+
+                      {/* Hàng 6: Địa chỉ kho lấy hàng & Địa chỉ kho giao hàng cùng 1 hàng */}
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Địa Chỉ Kho Lấy Hàng (Shipper Warehouse / Pickup Address):</span>
+                        <span className="font-normal text-slate-800">
+                          {cleanTextNoEmoji(rail?.pickupAddress || 'Chưa chỉ định')}
+                        </span>
+                      </div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Địa Chỉ Giao Hàng (Consignee Warehouse / Delivery Address):</span>
+                        <span className="font-normal text-slate-800">
+                          {cleanTextNoEmoji(rail?.deliveryAddress || 'Chưa chỉ định')}
+                        </span>
+                      </div>
+                    </div>
+                  ) : isWarehousing ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2.5 gap-x-8 text-xs">
+                      {/* Hàng 1: Loại hình dịch vụ & Mô hình kho bãi */}
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Loại hình dịch vụ:</span>
+                        <span className="font-normal text-slate-800">{getServiceNameVi(inquiry.serviceType)}</span>
+                      </div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Mô Hình & Loại Hình Kho Bãi:</span>
+                        <span className="font-normal text-slate-800">
+                          {cleanTextNoEmoji(warehousing?.warehouseType) || 'Kho thường (Grade A Dry)'}
+                        </span>
+                      </div>
+
+                      {/* Hàng 2: Đơn vị tính phí & Quy mô lưu trữ */}
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Đơn Vị Tính Phí Thuê Kho:</span>
+                        <span className="font-normal text-slate-800">
+                          {cleanTextNoEmoji(warehousing?.billingUnitPreference) || 'm² (Diện tích sàn)'}
+                        </span>
+                      </div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">
+                          {warehousing?.billingUnitPreference?.includes('Pallet') 
+                            ? 'Số Vị Trí Pallet Cần Thuê:' 
+                            : warehousing?.billingUnitPreference?.includes('CBM')
+                            ? 'Tổng Thể Tích Lưu Trữ:'
+                            : warehousing?.billingUnitPreference?.includes('Order')
+                            ? 'Dung Lượng Lưu Kho Đệm:'
+                            : 'Diện Tích Sàn Cần Thuê:'}
+                        </span>
+                        <span className="font-normal text-slate-800">
+                          {warehousing?.billingUnitPreference?.includes('Pallet')
+                            ? `${warehousing.palletPositions ? warehousing.palletPositions.toLocaleString('vi-VN') : 350} Pallet slots`
+                            : warehousing?.billingUnitPreference?.includes('CBM')
+                            ? `${warehousing.cbmVolume ? warehousing.cbmVolume.toLocaleString('vi-VN') : 800} CBM m³`
+                            : warehousing?.billingUnitPreference?.includes('Order')
+                            ? `${warehousing.bufferStorageQty ? warehousing.bufferStorageQty.toLocaleString('vi-VN') : (warehousing.bufferPalletPositions || 20)} ${cleanTextNoEmoji(warehousing.bufferStorageUnit) || 'Pallet'}`
+                            : `${warehousing?.storageAreaSqm ? warehousing.storageAreaSqm.toLocaleString('vi-VN') : 500} m² sàn`}
+                        </span>
+                      </div>
+
+                      {/* Hàng 3: SKUs & Chi tiết quy cách */}
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Số Lượng Mã Hàng Quản Lý (SKUs):</span>
+                        <span className="font-normal text-slate-800">
+                          {warehousing?.skuCount ? `${warehousing.skuCount.toLocaleString('vi-VN')} SKUs` : 'Theo thực tế nhập hàng'}
+                        </span>
+                      </div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">
+                          {warehousing?.billingUnitPreference?.includes('Pallet')
+                            ? 'Quy Cách & Chiều Cao 1 Pallet:'
+                            : warehousing?.warehouseType === 'Kho TMĐT / Fulfillment' || warehousing?.billingUnitPreference?.includes('Order')
+                            ? 'Số Lượng Đơn Xuất Trung Bình:'
+                            : 'Nguyên Tắc Quản Lý Hạn Dùng:'}
+                        </span>
+                        <span className="font-normal text-slate-800">
+                          {warehousing?.billingUnitPreference?.includes('Pallet')
+                            ? (cleanTextNoEmoji(warehousing.palletSpecsDescription) || '1.2m x 1.0m, cao 1.5m, max 800kg')
+                            : warehousing?.warehouseType === 'Kho TMĐT / Fulfillment' || warehousing?.billingUnitPreference?.includes('Order')
+                            ? `${warehousing?.dailyOrderCount || 100} Đơn / Ngày`
+                            : (cleanTextNoEmoji(warehousing?.inventoryMethod) || 'Tiêu chuẩn theo mã SKU')}
+                        </span>
+                      </div>
+
+                      {/* Hàng 4: Lưu lượng Nhập - Xuất Inbound/Outbound hoặc Đặc thù kho tự quản */}
+                      {warehousing?.warehouseType === 'Kho tự quản (Self-Storage)' ? (
+                        <div className="flex items-baseline gap-2 md:col-span-2">
+                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Đặc Thù Vận Hành Kho:</span>
+                          <span className="font-normal text-slate-800">
+                            Bàn giao khoang sàn riêng biệt, khách hàng giữ chìa khóa / thẻ từ riêng và chủ động ra vào 24/7. Không tính phí bốc xếp nâng hạ hay phí phần mềm WMS.
+                          </span>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Lưu Lượng Nhập Kho (Inbound):</span>
+                            <span className="font-normal text-slate-800">
+                              {cleanTextNoEmoji(warehousing?.dailyInboundVolume) || (warehousing?.inboundQty ? `${warehousing.inboundQty.toLocaleString('vi-VN')} ${cleanTextNoEmoji(warehousing.inboundUnit)} / ${warehousing.inboundPeriod}` : 'Theo nhu cầu nhập hàng')}
+                            </span>
+                          </div>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Lưu Lượng Xuất Kho (Outbound):</span>
+                            <span className="font-normal text-slate-800">
+                              {cleanTextNoEmoji(warehousing?.dailyOutboundVolume) || (warehousing?.outboundQty ? `${warehousing.outboundQty.toLocaleString('vi-VN')} ${cleanTextNoEmoji(warehousing.outboundUnit)} / ${warehousing.outboundPeriod}` : 'Theo nhu cầu xuất hàng')}
+                            </span>
+                          </div>
+                        </>
+                      )}
+
+                      {/* Hàng 5: Nguyên tắc quản lý tồn kho & Tích hợp phần mềm WMS API */}
+                      {warehousing?.warehouseType !== 'Kho tự quản (Self-Storage)' && (
+                        <>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Nguyên Tắc Quản Lý Hạn Dùng:</span>
+                            <span className="font-normal text-slate-800">
+                              {cleanTextNoEmoji(warehousing?.inventoryMethod) || 'FIFO (Nhập trước - Xuất trước)'}
+                            </span>
+                          </div>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Tích Hợp Phần Mềm WMS / API / EDI:</span>
+                            <span className="font-normal text-slate-800">
+                              {warehousing?.wmsIntegrationNeeded ? 'Yêu cầu kết nối cổng API / EDI giữa phần mềm WMS với ERP/SAP/TMĐT' : 'Quản lý theo cổng Portal chuẩn của nhà kho'}
+                            </span>
+                          </div>
+                        </>
+                      )}
+
+                      {/* Hàng 6: Khu vực đặt kho & Bán kính phân phối (2 cột song song trên cùng 1 hàng) */}
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Khu Vực / Tỉnh Thành Mong Muốn Đặt Kho:</span>
+                        <span className="font-normal text-slate-800">
+                          {cleanTextNoEmoji(inquiry.origin) || 'Chưa chỉ định'}
+                        </span>
+                      </div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Phạm Vi & Bán Kính Phân Phối Trọng Tâm:</span>
+                        <span className="font-normal text-slate-800">
+                          {cleanTextNoEmoji(inquiry.destination) || 'Chưa chỉ định'}
+                        </span>
+                      </div>
+
+                      {/* Trường hợp Kho Ngoại Quan (Bonded) */}
+                      {(warehousing?.warehouseType?.includes('Bonded') || warehousing?.warehouseType?.includes('ngoại quan')) && (
+                        <>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Mục Đích / Luồng Hàng Kho Ngoại Quan:</span>
+                            <span className="font-normal text-slate-800">
+                              {cleanTextNoEmoji(warehousing?.bondedPurpose) || 'Hàng nhập khẩu chờ hoàn tất thủ tục thông quan vào nội địa'}
+                            </span>
+                          </div>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Mã HS Code & Trị Giá Hàng Gửi Kho:</span>
+                            <span className="font-normal text-slate-800">
+                              {warehousing?.bondedHsCode ? `HS: ${warehousing.bondedHsCode}` : ''}
+                              {warehousing?.bondedEstimatedValue ? ` — ${typeof warehousing.bondedEstimatedValue === 'number' ? warehousing.bondedEstimatedValue.toLocaleString('vi-VN') : warehousing.bondedEstimatedValue} ${warehousing.bondedEstimatedValueCurrency || 'USD'}` : ''}
+                              {!warehousing?.bondedHsCode && !warehousing?.bondedEstimatedValue ? 'Chưa khai báo' : ''}
+                            </span>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ) : (
+                    <>
+                      {/* Service & Model */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2.5 gap-x-8 text-xs">
                         <div className="flex items-baseline gap-2">
-                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Loại vỏ Container:</span>
-                          <span className="font-normal text-slate-800">{ocean?.containerType || (isLcl ? 'LCL CFS' : '40HC')}</span>
+                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Loại hình dịch vụ:</span>
+                          <span className="font-normal text-slate-800">{getServiceNameVi(inquiry.serviceType)}</span>
                         </div>
                         <div className="flex items-baseline gap-2">
-                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Điều khoản dịch vụ:</span>
-                          <span className="font-normal text-slate-800">{ocean?.serviceTerm || 'CY-CY'}</span>
+                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Mô hình vận hành:</span>
+                          <span className="font-normal text-slate-800">
+                            {isTrucking 
+                              ? (trucking?.loadType || 'Nguyên Chuyến (FTL)')
+                              : inquiry.serviceType}
+                          </span>
                         </div>
-                        {ocean?.freeDemDetDaysRequested && (
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Yêu cầu Free Dem/Det:</span>
-                            <span className="font-normal text-slate-800">{ocean.freeDemDetDaysRequested} Ngày</span>
+                      </div>
+
+                      {/* Route & Multi-stop details: Side-by-side parallel columns */}
+                      <div className="space-y-2 pt-1">
+                        <span className="text-[11px] font-bold text-slate-900 block uppercase tracking-wider">
+                          Hành trình giao nhận:
+                        </span>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-3.5 bg-slate-50/70 rounded-xl border border-slate-200/80">
+                          {/* Cột 1: Điểm Lấy Hàng (Pickup) */}
+                          <div className="space-y-2 border-l-2 border-emerald-500 pl-3">
+                            <div className="font-black text-xs text-emerald-900">
+                              Điểm Lấy Hàng (Pickup)
+                            </div>
+                            <div className="space-y-1.5 text-xs text-slate-800">
+                              <div>
+                                <span className="text-slate-500 font-medium block text-[11px]">• Địa chỉ kho đi chính:</span>
+                                <span className="font-normal text-slate-800 block pl-3">
+                                  {inquiry.origin || 'Chưa chỉ định'}
+                                </span>
+                              </div>
+                              {isTrucking && trucking?.pickupLocations && trucking.pickupLocations.length > 1 && (
+                                <div className="space-y-1.5 pt-0.5">
+                                  {trucking.pickupLocations.slice(1).map((p, idx) => (
+                                    <div key={idx}>
+                                      <span className="text-slate-500 font-medium block text-[11px]">• Điểm lấy {idx + 2} (Kho phụ / Gom thêm):</span>
+                                      <span className="font-normal text-slate-800 block pl-3">
+                                        {p || `Kho phụ ${idx + 2}`}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Cột 2: Điểm Giao Hàng (Delivery) - Song song cùng hàng */}
+                          <div className="space-y-2 border-l-2 border-rose-500 pl-3">
+                            <div className="font-black text-xs text-rose-900">
+                              Điểm Giao Hàng (Delivery)
+                            </div>
+                            <div className="space-y-1.5 text-xs text-slate-800">
+                              <div>
+                                <span className="text-slate-500 font-medium block text-[11px]">• Địa chỉ kho đích chính:</span>
+                                <span className="font-normal text-slate-800 block pl-3">
+                                  {inquiry.destination || 'Chưa chỉ định'}
+                                </span>
+                              </div>
+                              {isTrucking && trucking?.deliveryLocations && trucking.deliveryLocations.length > 1 && (
+                                <div className="space-y-1.5 pt-0.5">
+                                  {trucking.deliveryLocations.slice(1).map((d, idx) => (
+                                    <div key={idx}>
+                                      <span className="text-slate-500 font-medium block text-[11px]">• Điểm giao {idx + 2} (Đại lý / Cửa hàng phụ):</span>
+                                      <span className="font-normal text-slate-800 block pl-3">
+                                        {d || `Điểm giao ${idx + 2}`}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Vehicle configuration */}
+                      <div className="space-y-2 pt-1 text-xs">
+                        <span className="text-[11px] font-bold text-slate-900 block uppercase tracking-wider">
+                          Cấu hình phương tiện yêu cầu:
+                        </span>
+
+                        {isTrucking && (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2.5 gap-x-8 text-xs">
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Loại Thùng Phương Tiện:</span>
+                              <span className="font-normal text-slate-800">{trucking?.truckType || 'Theo thỏa thuận'}</span>
+                            </div>
+                            
+                            {!isTruckingLtl && trucking?.tonnageCategory && (
+                              <div className="flex items-baseline gap-2">
+                                <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Phân Khúc Tải Trọng:</span>
+                                <span className="font-normal text-slate-800">{trucking.tonnageCategory}</span>
+                              </div>
+                            )}
+
+                            {!isTruckingLtl && trucking?.dimensionsMin && (
+                              <div className="flex items-baseline gap-2">
+                                <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Kích thước lòng thùng:</span>
+                                <span className="font-normal text-slate-800">
+                                  {trucking.dimensionsMin}
+                                </span>
+                              </div>
+                            )}
+
+                            {(trucking?.requestedLeadtime || trucking?.transitTimeMax) && (
+                              <div className="flex items-baseline gap-2">
+                                <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Thời Gian Giao Hàng (SLA):</span>
+                                <span className="font-normal text-slate-800">{trucking.requestedLeadtime || trucking.transitTimeMax}</span>
+                              </div>
+                            )}
+
+                            {trucking?.requestedLeadtimeNote && (
+                              <div className="flex items-baseline gap-2 md:col-span-2">
+                                <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Ghi chú thời gian giao nhận:</span>
+                                <span className="font-normal text-slate-800">{trucking.requestedLeadtimeNote}</span>
+                              </div>
+                            )}
+
+                            {trucking?.vehicleSpecsRequirement && (
+                              <div className="flex items-baseline gap-2 md:col-span-2">
+                                <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Yêu cầu dỡ hàng / Kỹ thuật:</span>
+                                <span className="font-normal text-slate-800">{trucking.vehicleSpecsRequirement}</span>
+                              </div>
+                            )}
                           </div>
                         )}
-                        {ocean?.preferredCarrier && (
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Hãng tàu chỉ định:</span>
-                            <span className="font-normal text-slate-800">{ocean.preferredCarrier}</span>
-                          </div>
-                        )}
                       </div>
-                    )}
-
-                    {inquiry.serviceType === 'Air Freight' && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2.5 gap-x-8 text-xs">
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Gói dịch vụ bay:</span>
-                          <span className="font-normal text-slate-800">{air?.serviceTypeCategory || 'Air Cargo Tiêu Chuẩn'}</span>
-                        </div>
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Tốc độ hành trình:</span>
-                          <span className="font-normal text-slate-800">{air?.serviceLevel || 'Standard (2-3 ngày)'}</span>
-                        </div>
-                      </div>
-                    )}
-
-                    {inquiry.serviceType === 'Warehousing' && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2.5 gap-x-8 text-xs">
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Loại hình kho:</span>
-                          <span className="font-normal text-slate-800">{warehousing?.warehouseType || 'Kho Thường Tiêu Chuẩn'}</span>
-                        </div>
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Quy mô diện tích / Pallet:</span>
-                          <span className="font-normal text-slate-800">{warehousing?.storageAreaSqm ? `${warehousing.storageAreaSqm} m²` : `${warehousing?.palletPositions || 500} Pallets`}</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -1056,7 +1562,75 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       </div>
                     )}
 
-                    {inquiry.pricingType === 'CONTRACT' && inquiry.contractTerm && (
+                    {isOcean && (
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">
+                          {isLcl ? 'Số Lượng Chuyến Ghép:' : 'Số Lượng Container Cần Thuê:'}
+                        </span>
+                        <span className="font-normal text-slate-800">
+                          {isLcl 
+                            ? (ocean?.lclShipmentCount ? `${ocean.lclShipmentCount} ${ocean.lclFrequencyUnit || 'Chuyến / Tháng'}` : '1 Chuyến (Một lần / Spot)')
+                            : (ocean?.containerCount ? `${ocean.containerCount} ${ocean.containerCountUnit || 'Container / Tháng'}` : '1 Container (Một lần / Spot)')}
+                        </span>
+                      </div>
+                    )}
+
+                    {isAir && (
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">
+                          Số Lượng Chuyến Hàng Không:
+                        </span>
+                        <span className="font-normal text-slate-800">
+                          {air?.shipmentCount 
+                            ? `${air.shipmentCount} ${air.frequencyUnit || 'Chuyến / Tháng'}` 
+                            : '1 Chuyến (Một lần / Spot)'}
+                        </span>
+                      </div>
+                    )}
+
+                    {isRail && (
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">
+                          {isRailLcl ? 'Số Lượng Chuyến Ghép:' : 'Số Lượng Container / Toa Xe Cần Thuê:'}
+                        </span>
+                        <span className="font-normal text-slate-800">
+                          {isRailLcl 
+                            ? (rail?.lclShipmentCount ? `${rail.lclShipmentCount} ${cleanTextNoEmoji(rail.lclFrequencyUnit) || 'Chuyến / Tháng'}` : '1 Chuyến (Một lần / Spot)')
+                            : (rail?.containerCount ? `${rail.containerCount} ${cleanTextNoEmoji(rail.containerCountUnit) || 'Container / Tháng'}` : '1 Container (Một lần / Spot)')}
+                        </span>
+                      </div>
+                    )}
+
+                    {isWarehousing && (
+                      <>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">
+                            Quy Mô Thuê Kho Cam Kết:
+                          </span>
+                          <span className="font-normal text-slate-800">
+                            {warehousing?.storageAreaSqm 
+                              ? `${warehousing.storageAreaSqm.toLocaleString('vi-VN')} m² sàn` 
+                              : warehousing?.palletPositions 
+                              ? `${warehousing.palletPositions.toLocaleString('vi-VN')} Pallet slots` 
+                              : warehousing?.cbmVolume 
+                              ? `${warehousing.cbmVolume.toLocaleString('vi-VN')} CBM` 
+                              : `${warehousing?.dailyOrderCount || 100} Đơn/ngày`}
+                          </span>
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">
+                            Thời Hạn Thuê Kho:
+                          </span>
+                          <span className="font-normal text-slate-800">
+                            {warehousing?.rentalDurationMonths 
+                              ? `${warehousing.rentalDurationMonths} Tháng` 
+                              : (inquiry.contractTerm || (inquiry.pricingType === 'CONTRACT' ? '12 Tháng' : 'Theo mùa vụ (Spot)'))}
+                          </span>
+                        </div>
+                      </>
+                    )}
+
+                    {inquiry.pricingType === 'CONTRACT' && inquiry.contractTerm && !isWarehousing && (
                       <div className="flex items-baseline gap-2">
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Thời hạn hợp đồng:</span>
                         <span className="font-normal text-slate-800">{inquiry.contractTerm}</span>
@@ -1082,12 +1656,16 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                         <span className="font-normal text-slate-800 block text-xs">{inquiry.expiryDate || 'Chưa thiết lập'}</span>
                       </div>
                       <div className="space-y-0.5">
-                        <span className="text-slate-400 text-[11px] block">Ngày lấy hàng dự kiến:</span>
-                        <span className="font-normal text-slate-800 block text-xs">{inquiry.pickupDate || 'Theo thông báo giao nhận'}</span>
+                        <span className="text-slate-400 text-[11px] block">
+                          {isWarehousing ? 'Ngày bắt đầu thuê kho dự kiến:' : 'Ngày lấy hàng dự kiến:'}
+                        </span>
+                        <span className="font-normal text-slate-800 block text-xs">{inquiry.pickupDate || (isWarehousing ? 'Theo thỏa thuận bàn giao' : 'Theo thông báo giao nhận')}</span>
                       </div>
                       <div className="space-y-0.5">
-                        <span className="text-slate-400 text-[11px] block">Hạn chót giao hàng:</span>
-                        <span className="font-normal text-slate-800 block text-xs">{inquiry.deliveryDate || 'Theo cam kết SLA tuyến'}</span>
+                        <span className="text-slate-400 text-[11px] block">
+                          {isWarehousing ? 'Hạn chót nghiệm thu / Vận hành:' : 'Hạn chót giao hàng:'}
+                        </span>
+                        <span className="font-normal text-slate-800 block text-xs">{inquiry.deliveryDate || (isWarehousing ? 'Theo hợp đồng thuê kho' : 'Theo cam kết SLA tuyến')}</span>
                       </div>
                     </div>
                   </div>
@@ -1170,10 +1748,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                             <span className="text-base font-black text-slate-900 tracking-tight">
                               {inquiry.targetBudget 
                                 ? (inquiry.targetBudget.toString().replace(/₫|VND|USD|\$/g, '').trim())
-                                : (isOcean ? '2,450' : 'Thỏa thuận theo tender')}
-                            </span>
-                            <span className="text-[10px] font-bold text-slate-400 mt-0.5">
-                              {getTariffMainUnit()}
+                                : '—'}
                             </span>
                           </div>
                         </td>
@@ -1193,9 +1768,8 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                           {getTariffMainUnit()}
                         </td>
                         <td className="py-3 px-4 text-center border-r border-slate-200">
-                          <div className="inline-flex items-center justify-center w-full bg-white border border-slate-300 rounded-lg px-3 py-1 shadow-2xs">
+                          <div className="inline-flex items-center justify-center w-full min-h-[30px] bg-white border border-slate-300 rounded-lg px-3 py-1 shadow-2xs">
                             <span className="font-mono font-bold text-slate-900 text-xs">
-                              {isOcean ? '2,215' : 'Supplier chào giá'}
                             </span>
                           </div>
                         </td>
@@ -1227,9 +1801,8 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                               {getSurchargeUnit(charge)}
                             </td>
                             <td className="py-2 px-4 text-center border-r border-slate-200">
-                              <div className="inline-flex items-center justify-center w-full bg-white border border-slate-200 rounded-lg px-3 py-1 shadow-2xs">
+                              <div className="inline-flex items-center justify-center w-full min-h-[30px] bg-white border border-slate-200 rounded-lg px-3 py-1 shadow-2xs">
                                 <span className="font-mono font-bold text-slate-700 text-xs">
-                                  {isOcean ? (charge.toLowerCase().includes('thc') ? '120' : charge.toLowerCase().includes('b/l') ? '40' : charge.toLowerCase().includes('seal') ? '10' : '65') : '0'}
                                 </span>
                               </div>
                             </td>
@@ -1242,8 +1815,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                           </td>
                           <td className="py-2.5 px-3 text-center border-r border-slate-200 text-slate-400">—</td>
                           <td className="py-2.5 px-4 text-center border-r border-slate-200">
-                            <div className="inline-flex items-center justify-center w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1 text-slate-500 font-medium text-xs">
-                              Chuẩn hãng
+                            <div className="inline-flex items-center justify-center w-full min-h-[30px] bg-slate-50 border border-slate-200 rounded-lg px-3 py-1 text-slate-500 font-medium text-xs">
                             </div>
                           </td>
                         </tr>
@@ -1275,8 +1847,8 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                               {getVasUnit(vas)}
                             </td>
                             <td className="py-2 px-4 text-center border-r border-slate-200">
-                              <div className="inline-flex items-center justify-center w-full bg-white border border-slate-200 rounded-lg px-3 py-1 shadow-2xs">
-                                <span className="font-mono font-bold text-slate-700 text-xs">0</span>
+                              <div className="inline-flex items-center justify-center w-full min-h-[30px] bg-white border border-slate-200 rounded-lg px-3 py-1 shadow-2xs">
+                                <span className="font-mono font-bold text-slate-700 text-xs"></span>
                               </div>
                             </td>
                           </tr>
@@ -1288,8 +1860,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                           </td>
                           <td className="py-2.5 px-3 text-center border-r border-slate-200 text-slate-400">—</td>
                           <td className="py-2.5 px-4 text-center border-r border-slate-200">
-                            <div className="inline-flex items-center justify-center w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1 text-slate-400 font-medium text-xs">
-                              Không áp dụng
+                            <div className="inline-flex items-center justify-center w-full min-h-[30px] bg-slate-50 border border-slate-200 rounded-lg px-3 py-1 text-slate-400 font-medium text-xs">
                             </div>
                           </td>
                         </tr>

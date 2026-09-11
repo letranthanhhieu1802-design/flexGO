@@ -111,31 +111,68 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
     });
   };
 
-  // Auto-calculate Volumetric Weight & Chargeable Weight:
-  // - Air Cargo: divisor = 6000 (1 CBM = 167 Kg)
-  // - Express / Courier: divisor = 5000 (1 CBM = 200 Kg)
-  useEffect(() => {
-    const divisor = isExpress ? 5000 : 6000;
-    const match = specs.dimensionsCm?.match(/(\d+)\s*[xX*]\s*(\d+)\s*[xX*]\s*(\d+)/);
-    if (match) {
-      const l = parseFloat(match[1]);
-      const w = parseFloat(match[2]);
-      const h = parseFloat(match[3]);
-      const count = specs.packageCount || 1;
-      const volPerPkg = (l * w * h) / divisor;
-      const totalVolWeight = Math.round(volPerPkg * count * 10) / 10;
-      const gw = specs.grossWeightKgs || 0;
-      const cw = Math.max(gw, totalVolWeight);
+  const handleDimChange = (dimField: 'lengthCm' | 'widthCm' | 'heightCm', val?: number) => {
+    const nextDims = {
+      lengthCm: dimField === 'lengthCm' ? val : (specs.airDimensions?.lengthCm),
+      widthCm: dimField === 'widthCm' ? val : (specs.airDimensions?.widthCm),
+      heightCm: dimField === 'heightCm' ? val : (specs.airDimensions?.heightCm),
+    };
+    calculateAirMetrics(nextDims, specs.packageCount, specs.grossWeightKgs);
+  };
 
-      if (totalVolWeight !== specs.volumetricWeightKgs || cw !== specs.chargeableWeightKgs) {
-        onChange({
-          ...specs,
-          volumetricWeightKgs: totalVolWeight,
-          chargeableWeightKgs: cw,
-        });
-      }
+  const handlePackageCountChange = (count?: number) => {
+    calculateAirMetrics(specs.airDimensions, count, specs.grossWeightKgs);
+  };
+
+  const handleGrossWeightChange = (gw?: number) => {
+    calculateAirMetrics(specs.airDimensions, specs.packageCount, gw);
+  };
+
+  const calculateAirMetrics = (
+    dims?: { lengthCm?: number; widthCm?: number; heightCm?: number },
+    count?: number,
+    gw?: number
+  ) => {
+    const l = dims?.lengthCm || 0;
+    const w = dims?.widthCm || 0;
+    const h = dims?.heightCm || 0;
+    const pCount = count || 1;
+    const divisor = isExpress ? 5000 : 6000;
+
+    let cbm: number | undefined = undefined;
+    let volWeight: number | undefined = undefined;
+    let cw: number | undefined = undefined;
+
+    if (l > 0 && w > 0 && h > 0) {
+      const singleCbm = (l * w * h) / 1000000;
+      cbm = parseFloat((singleCbm * pCount).toFixed(3));
+      const totalVolKg = (l * w * h * pCount) / divisor;
+      volWeight = Math.round(totalVolKg * 10) / 10;
     }
-  }, [specs.dimensionsCm, specs.packageCount, specs.grossWeightKgs, isExpress]);
+
+    if (gw !== undefined || volWeight !== undefined) {
+      const gross = gw || 0;
+      const vol = volWeight || 0;
+      cw = Math.max(gross, vol);
+    }
+
+    const dimsStr = (l > 0 && w > 0 && h > 0) ? `${l} x ${w} x ${h} cm` : (specs.dimensionsCm || '');
+
+    onChange({
+      ...specs,
+      airDimensions: dims,
+      dimensionsCm: dimsStr,
+      packageCount: count as any,
+      grossWeightKgs: gw as any,
+      cbmVolume: cbm,
+      volumetricWeightKgs: volWeight as any,
+      chargeableWeightKgs: cw as any,
+    });
+  };
+
+  const currentL = specs.airDimensions?.lengthCm ?? (specs.dimensionsCm?.match(/(\d+)\s*[xX*]\s*(\d+)\s*[xX*]\s*(\d+)/)?.[1] ? parseInt(specs.dimensionsCm.match(/(\d+)\s*[xX*]\s*(\d+)\s*[xX*]\s*(\d+)/)![1], 10) : undefined);
+  const currentW = specs.airDimensions?.widthCm ?? (specs.dimensionsCm?.match(/(\d+)\s*[xX*]\s*(\d+)\s*[xX*]\s*(\d+)/)?.[2] ? parseInt(specs.dimensionsCm.match(/(\d+)\s*[xX*]\s*(\d+)\s*[xX*]\s*(\d+)/)![2], 10) : undefined);
+  const currentH = specs.airDimensions?.heightCm ?? (specs.dimensionsCm?.match(/(\d+)\s*[xX*]\s*(\d+)\s*[xX*]\s*(\d+)/)?.[3] ? parseInt(specs.dimensionsCm.match(/(\d+)\s*[xX*]\s*(\d+)\s*[xX*]\s*(\d+)/)![3], 10) : undefined);
 
   return (
     <div className="space-y-5 animate-in fade-in duration-200">
@@ -166,8 +203,7 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold">1. Air Freight / Cargo</span>
-                {isCargo && <span className="text-[10px] font-bold bg-sky-100 text-sky-800 px-2 py-0.5 rounded-md">Đang chọn</span>}
+                <span className="text-xs font-bold">Air Freight / Cargo</span>
               </div>
               <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">
                 Hàng không thương mại B2B, bay theo lịch MAWB/HAWB.
@@ -198,8 +234,7 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold">2. Express / Courier</span>
-                {isExpress && <span className="text-[10px] font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded-md">Đang chọn</span>}
+                <span className="text-xs font-bold">Express / Courier</span>
               </div>
               <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">
                 Chuyển phát nhanh Door-to-Door bưu phẩm, tài liệu, hàng mẫu.
@@ -220,19 +255,19 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
             isExpress ? 'text-amber-900 bg-amber-50 border-amber-200' : 'text-sky-800 bg-sky-50 border-sky-200'
           }`}>
             {specs.tradeRole === 'Nhập khẩu (Import)'
-              ? '🛬 Mua / nhập hàng về VN'
+              ? 'Mua / nhập hàng về VN'
               : specs.tradeRole === 'Nội địa (Domestic)'
-              ? '🇻🇳 Tuyến bay nội địa'
+              ? 'Tuyến bay nội địa'
               : specs.tradeRole === 'Xuất khẩu (Export)'
-              ? '🛫 Bán / xuất khẩu ra nước ngoài'
+              ? 'Bán / xuất khẩu ra nước ngoài'
               : 'Chưa chọn'}
           </span>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
           {[
-            { role: 'Xuất khẩu (Export)', title: '🛫 Xuất Khẩu (Export)', sub: 'Gửi hàng từ VN đi quốc tế' },
-            { role: 'Nhập khẩu (Import)', title: '🛬 Nhập Khẩu (Import)', sub: 'Nhận hàng từ quốc tế về VN' },
-            { role: 'Nội địa (Domestic)', title: '🇻🇳 Nội Địa (Domestic)', sub: 'Tuyến HAN ↔ SGN ↔ DAD' },
+            { role: 'Xuất khẩu (Export)', title: 'Xuất Khẩu (Export)', sub: 'Gửi hàng từ VN đi quốc tế' },
+            { role: 'Nhập khẩu (Import)', title: 'Nhập Khẩu (Import)', sub: 'Nhận hàng từ quốc tế về VN' },
+            { role: 'Nội địa (Domestic)', title: 'Nội Địa (Domestic)', sub: 'Tuyến HAN ↔ SGN ↔ DAD' },
           ].map((item) => {
             const isSelected = specs.tradeRole === item.role;
             return (
@@ -263,6 +298,26 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
         </div>
       </div>
 
+      {/* 3. INCOTERMS 2020 */}
+      <div>
+        <label className="block text-xs font-semibold text-slate-700 mb-1">
+          Điều Kiện Thương Mại (Incoterms 2020) *
+        </label>
+        <select
+          value={specs.incoterm || ''}
+          onChange={(e) => updateSpec('incoterm', e.target.value as any)}
+          className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-sky-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
+        >
+          <option value="">-- Chọn Điều Kiện Thương Mại (Incoterms 2020) * --</option>
+          <option value="FCA">FCA - Free Carrier (Giao cho người chuyên chở tại sân bay đi)</option>
+          <option value="CIP">CIP - Carriage and Insurance Paid to (Cước và bảo hiểm trả tới sân bay đến)</option>
+          <option value="CPT">CPT - Carriage Paid to (Cước phí trả tới sân bay đến)</option>
+          <option value="DAP">DAP - Delivered at Place (Giao tại nơi đến chưa thông quan)</option>
+          <option value="DDP">DDP - Delivered Duty Paid (Giao tận nơi đã nộp thuế)</option>
+          <option value="EXW">EXW - Ex Works (Giao tại xưởng người bán)</option>
+        </select>
+      </div>
+
       {/* ========================================================================= */}
       {/* SECTION A: AIR FREIGHT / CARGO SPECIFIC FIELDS */}
       {/* ========================================================================= */}
@@ -286,8 +341,8 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
                 className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-sky-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
               >
                 <option value="">-- Chọn Điều Kiện Nhận Hàng * --</option>
-                <option value="Door">🚪 Door (Lấy tận kho người gửi / Shipper)</option>
-                <option value="Airport">✈️ Airport (Nhận tại ga hàng hóa sân bay đi / AOD)</option>
+                <option value="Door">Door (Lấy tận kho người gửi / Shipper)</option>
+                <option value="Airport">Airport (Nhận tại ga hàng hóa sân bay đi / AOD)</option>
               </select>
             </div>
 
@@ -307,8 +362,8 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
                 className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
               >
                 <option value="">-- Chọn Điều Kiện Giao Hàng * --</option>
-                <option value="Door">🚪 Door (Giao tận kho người nhận / Consignee)</option>
-                <option value="Airport">✈️ Airport (Giao tại ga hàng hóa sân bay đến / AOA)</option>
+                <option value="Door">Door (Giao tận kho người nhận / Consignee)</option>
+                <option value="Airport">Airport (Giao tại ga hàng hóa sân bay đến / AOA)</option>
               </select>
             </div>
           </div>
@@ -399,12 +454,12 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
               {[
                 {
                   id: 'Document / Letter (Tài liệu / Thư tín)',
-                  title: '📄 Tài Liệu / Thư Tín (Document / Letter)',
+                  title: 'Tài Liệu / Thư Tín (Document / Letter)',
                   desc: 'Hồ sơ, hợp đồng, chứng từ gốc, passport, không có giá trị thương mại.',
                 },
                 {
                   id: 'Parcel / Package (Bưu phẩm / Hàng mẫu đóng hộp)',
-                  title: '📦 Hàng Mẫu & Bưu Kiện (Parcel / Package)',
+                  title: 'Hàng Mẫu & Bưu Kiện (Parcel / Package)',
                   desc: 'Hàng mẫu thử, linh kiện, quà tặng, bưu phẩm thương mại đóng thùng carton.',
                 },
               ].map((item) => {
@@ -515,7 +570,7 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
       {/* SECTION C: PACKAGE SPECS, DIMENSIONS & CHARGEABLE WEIGHT CALCULATION */}
       {/* ========================================================================= */}
       <div className="space-y-4 pt-1">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <span className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 text-slate-800">
             <Scale className="w-3.5 h-3.5 text-indigo-600" />
             <span>Khai Báo Kích Thước & Trọng Lượng Tính Cước</span>
@@ -525,80 +580,133 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+        {/* Hàng 1 (2 cột): Số Lượng Kiện & Stackable Checkbox */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
-              {isExpress ? 'Số Lượng Hộp *' : 'Số Kiện Hàng *'}
+              {isExpress ? 'Số Lượng Hộp / Kiện Chuyển Phát *' : 'Số Lượng Kiện Hàng *'}
             </label>
             <input
               type="text"
               inputMode="numeric"
-              value={specs.packageCount !== undefined && specs.packageCount !== null ? specs.packageCount : ''}
+              value={specs.packageCount !== undefined && specs.packageCount !== null && specs.packageCount > 0 ? specs.packageCount : ''}
               onChange={(e) => {
                 const val = e.target.value.replace(/\D/g, '');
-                updateSpec('packageCount', val ? Number(val) : undefined);
+                handlePackageCountChange(val ? parseInt(val, 10) : undefined);
               }}
               placeholder={isExpress ? 'VD: 2' : 'VD: 10'}
-              className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-bold text-slate-900 text-center shadow-2xs"
+              className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-bold text-slate-900 shadow-2xs"
             />
           </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Kích Thước 1 Kiện (D x R x C cm)
+          <div className="flex flex-col justify-end">
+            <label className="flex items-center gap-2 h-10 px-3.5 bg-white border border-slate-200 rounded-xl cursor-pointer">
+              <input
+                type="checkbox"
+                id="airStackableCheck"
+                checked={Boolean(specs.stackable)}
+                onChange={(e) => updateSpec('stackable', e.target.checked)}
+                className="rounded-sm text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer"
+              />
+              <span className="text-xs text-slate-800 font-semibold">
+                Hàng có thể chồng tầng (Stackable)
+              </span>
             </label>
-            <input
-              type="text"
-              value={specs.dimensionsCm || ''}
-              onChange={(e) => updateSpec('dimensionsCm', e.target.value)}
-              placeholder="VD: 50x40x30"
-              className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-mono text-center shadow-2xs font-bold"
-            />
           </div>
+        </div>
 
+        {/* Hàng 2 (3 cột Dài x Rộng x Cao): Kích Thước 1 Kiện (cm) */}
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-700">Kích Thước 1 Kiện (Dài x Rộng x Cao cm)</span>
+            <span className="text-[11px] text-slate-400">Tự động tính Tổng Thể Tích CBM</span>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <span className="text-[10px] text-slate-500 block mb-1 font-medium">Dài (L) cm</span>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={currentL !== undefined && currentL > 0 ? currentL : ''}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, '');
+                  handleDimChange('lengthCm', val ? parseInt(val, 10) : undefined);
+                }}
+                placeholder="VD: 50"
+                className="w-full h-10 px-3 text-xs bg-white border border-slate-200 rounded-xl text-center font-bold text-slate-900 focus:border-indigo-500 shadow-2xs"
+              />
+            </div>
+            <div>
+              <span className="text-[10px] text-slate-500 block mb-1 font-medium">Rộng (W) cm</span>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={currentW !== undefined && currentW > 0 ? currentW : ''}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, '');
+                  handleDimChange('widthCm', val ? parseInt(val, 10) : undefined);
+                }}
+                placeholder="VD: 40"
+                className="w-full h-10 px-3 text-xs bg-white border border-slate-200 rounded-xl text-center font-bold text-slate-900 focus:border-indigo-500 shadow-2xs"
+              />
+            </div>
+            <div>
+              <span className="text-[10px] text-slate-500 block mb-1 font-medium">Cao (H) cm</span>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={currentH !== undefined && currentH > 0 ? currentH : ''}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, '');
+                  handleDimChange('heightCm', val ? parseInt(val, 10) : undefined);
+                }}
+                placeholder="VD: 30"
+                className="w-full h-10 px-3 text-xs bg-white border border-slate-200 rounded-xl text-center font-bold text-slate-900 focus:border-indigo-500 shadow-2xs"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Hàng 3 (3 cột): Trọng Lượng Thực, Tổng Thể Tích CBM, Trọng Lượng Tính Cước CW */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Tổng Trọng Lượng Thực (Gross Kg) *
+              Tổng Trọng Lượng Thực Tế (Gross Kg) *
             </label>
             <input
               type="text"
               inputMode="numeric"
-              value={specs.grossWeightKgs !== undefined && specs.grossWeightKgs !== null ? specs.grossWeightKgs : ''}
+              value={specs.grossWeightKgs !== undefined && specs.grossWeightKgs !== null && specs.grossWeightKgs > 0 ? specs.grossWeightKgs : ''}
               onChange={(e) => {
                 const val = e.target.value.replace(/\D/g, '');
-                updateSpec('grossWeightKgs', val ? Number(val) : undefined);
+                handleGrossWeightChange(val ? parseFloat(val) : undefined);
               }}
               placeholder="VD: 25"
-              className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-bold text-slate-900 text-center shadow-2xs"
+              className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-bold text-slate-900 shadow-2xs"
             />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">
+              Tổng Thể Tích Tính Toán (CBM)
+            </label>
+            <div className="h-10 px-3.5 text-xs bg-slate-100 border border-slate-200 rounded-xl font-extrabold text-slate-800 flex items-center">
+              {specs.cbmVolume !== undefined && specs.cbmVolume !== null && specs.cbmVolume > 0 ? `${specs.cbmVolume} CBM` : '-- CBM'}
+            </div>
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center justify-between">
-              <span>Trọng Lượng Tính Cước</span>
+              <span>Trọng Lượng Tính Cước (CW)</span>
               <span className="text-[10px] text-indigo-600 font-normal">Tự tính</span>
             </label>
-            <div className="w-full h-10 px-3.5 text-xs bg-indigo-50 border border-indigo-200 rounded-xl font-extrabold text-indigo-950 text-center flex items-center justify-center">
+            <div className="h-10 px-3.5 text-xs bg-indigo-50 border border-indigo-200 rounded-xl font-extrabold text-indigo-950 flex items-center justify-center">
               {specs.chargeableWeightKgs ? `${specs.chargeableWeightKgs.toLocaleString('vi-VN')} Kg CW` : '-- Kg CW'}
             </div>
           </div>
         </div>
 
-        {/* Stackable Toggle */}
-        <div className="flex items-center gap-2 h-10 px-3.5 bg-white border border-slate-200 rounded-xl shadow-2xs">
-          <input
-            type="checkbox"
-            id="airStackableCheck"
-            checked={Boolean(specs.stackable)}
-            onChange={(e) => updateSpec('stackable', e.target.checked)}
-            className="rounded-sm text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer"
-          />
-          <label htmlFor="airStackableCheck" className="text-xs font-semibold text-slate-800 cursor-pointer">
-            Hàng có thể chồng tầng (Stackable) <span className="text-slate-500 font-normal">(Nếu không chồng tầng, cước mâm ULD có thể tính thêm phụ phí diện tích sàn)</span>
-          </label>
-        </div>
-
-        {/* Air Shipment Count & Frequency */}
+        {/* Hàng 4 (2 cột): Số Lượng Chuyến & Tần Suất */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
