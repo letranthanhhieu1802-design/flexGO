@@ -92,7 +92,9 @@ export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
           <span className="text-[10px] font-semibold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
             {specs.tradeRole === 'Xuất khẩu (Export)'
               ? '🛫 Đầu Xuất (Export Clearance)'
-              : '🛬 Đầu Nhập (Import Clearance)'}
+              : specs.tradeRole === 'Nhập khẩu (Import)'
+              ? '🛬 Đầu Nhập (Import Clearance)'
+              : 'Chưa chọn'}
           </span>
         </div>
         <div className="grid grid-cols-2 gap-2.5">
@@ -108,7 +110,7 @@ export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
               sub: 'Mở tờ khai B11, E62, G11...',
             },
           ].map((item) => {
-            const isSelected = (specs.tradeRole || 'Nhập khẩu (Import)') === item.role;
+            const isSelected = specs.tradeRole === item.role;
             return (
               <button
                 type="button"

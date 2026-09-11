@@ -223,7 +223,9 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
               ? '🛬 Mua / nhập hàng về VN'
               : specs.tradeRole === 'Nội địa (Domestic)'
               ? '🇻🇳 Tuyến bay nội địa'
-              : '🛫 Bán / xuất khẩu ra nước ngoài'}
+              : specs.tradeRole === 'Xuất khẩu (Export)'
+              ? '🛫 Bán / xuất khẩu ra nước ngoài'
+              : 'Chưa chọn'}
           </span>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
@@ -232,7 +234,7 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
             { role: 'Nhập khẩu (Import)', title: '🛬 Nhập Khẩu (Import)', sub: 'Nhận hàng từ quốc tế về VN' },
             { role: 'Nội địa (Domestic)', title: '🇻🇳 Nội Địa (Domestic)', sub: 'Tuyến HAN ↔ SGN ↔ DAD' },
           ].map((item) => {
-            const isSelected = (specs.tradeRole || 'Xuất khẩu (Export)') === item.role;
+            const isSelected = specs.tradeRole === item.role;
             return (
               <button
                 type="button"
@@ -406,7 +408,7 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
                   desc: 'Hàng mẫu thử, linh kiện, quà tặng, bưu phẩm thương mại đóng thùng carton.',
                 },
               ].map((item) => {
-                const isSelected = (specs.expressPackageType || 'Parcel / Package (Bưu phẩm / Hàng mẫu đóng hộp)') === item.id;
+                const isSelected = specs.expressPackageType === item.id;
                 return (
                   <label
                     key={item.id}
@@ -587,7 +589,7 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
           <input
             type="checkbox"
             id="airStackableCheck"
-            checked={specs.stackable ?? true}
+            checked={Boolean(specs.stackable)}
             onChange={(e) => updateSpec('stackable', e.target.checked)}
             className="rounded-sm text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer"
           />
@@ -640,7 +642,7 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
             <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-800">
               <input
                 type="checkbox"
-                checked={specs.signatureRequired ?? true}
+                checked={Boolean(specs.signatureRequired)}
                 onChange={(e) => updateSpec('signatureRequired', e.target.checked)}
                 className="rounded-sm text-amber-600 focus:ring-amber-500 w-4 h-4 cursor-pointer"
               />
@@ -650,7 +652,7 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
             <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-800">
               <input
                 type="checkbox"
-                checked={specs.expressCustomsSupport ?? true}
+                checked={Boolean(specs.expressCustomsSupport)}
                 onChange={(e) => updateSpec('expressCustomsSupport', e.target.checked)}
                 className="rounded-sm text-amber-600 focus:ring-amber-500 w-4 h-4 cursor-pointer"
               />

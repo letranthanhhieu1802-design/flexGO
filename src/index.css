@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+/* Allow clicking anywhere on date input to trigger picker smoothly */
+input[type="date"] {
+  cursor: pointer;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+}
+
 /* Completely hide horizontal and full scrollbars for table viewport */
 .hide-horizontal-scrollbar {
   -ms-overflow-style: none !important; /* IE and Edge */

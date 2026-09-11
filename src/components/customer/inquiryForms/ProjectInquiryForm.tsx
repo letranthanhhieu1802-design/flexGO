@@ -108,7 +108,7 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
     });
   };
 
-  const projectCategory = specs.projectCategory || 'DISTRIBUTION';
+  const projectCategory = specs.projectCategory || '';
 
   // Determine available fleet items based on Cargo Classification
   const activeFleetItems = useMemo(() => {

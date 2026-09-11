@@ -329,6 +329,13 @@ export interface CrossBorderInquirySpecs {
   frequencyUnit?: string;
   leadtimeSLA?: string;
   leadtimeNote?: string;
+  grossWeightKgs?: number;
+  cbmVolume?: number;
+  ltlPieces?: number;
+  ltlDimensions?: { lengthCm: number; widthCm: number; heightCm: number };
+  ltlGrossWeightKg?: number;
+  ltlCbm?: number;
+  ltlChargeableWeightKg?: number;
   customsAtBorderIncluded?: boolean;
   transitPermitGMSNeeded?: boolean;
   hsCode?: string;

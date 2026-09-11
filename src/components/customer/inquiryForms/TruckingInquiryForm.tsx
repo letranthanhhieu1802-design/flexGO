@@ -1327,7 +1327,7 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
                 <input
                   type="checkbox"
                   id="ltlStackableCheck"
-                  checked={specs.ltlStackable ?? true}
+                  checked={Boolean(specs.ltlStackable)}
                   onChange={(e) => updateSpec('ltlStackable', e.target.checked)}
                   className="rounded text-emerald-600 focus:ring-emerald-500 cursor-pointer"
                 />

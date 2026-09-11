@@ -147,10 +147,11 @@ export const ColdChainInquiryForm: React.FC<ColdChainInquiryFormProps> = ({
               Dải Nhiệt Độ Yêu Cầu (Temperature Category) *
             </label>
             <select
-              value={specs.temperatureCategory}
+              value={specs.temperatureCategory || ''}
               onChange={(e) => updateSpec('temperatureCategory', e.target.value as any)}
               className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-emerald-500 font-bold text-emerald-950 shadow-2xs cursor-pointer"
             >
+              <option value="">-- Chọn Dải Nhiệt Độ --</option>
               <option value="Frozen (-25°C to -18°C: Kem, Thủy hải sản)">❄️ Đông Sâu (-25°C đến -18°C) - Thủy hải sản, Kem</option>
               <option value="Chilled (0°C to +4°C: Thịt tươi, Sữa)">🥦 Hàng Mát (0°C đến +4°C) - Sữa chua, Trái cây, Thịt tươi</option>
               <option value="Cool (+8°C to +15°C: Rau củ, Trái cây)">🍫 Mát Nhẹ (+8°C đến +15°C) - Socola, Bánh kẹo, Rượu vang</option>
@@ -163,10 +164,11 @@ export const ColdChainInquiryForm: React.FC<ColdChainInquiryFormProps> = ({
               Loại Xe / Container Lạnh *
             </label>
             <select
-              value={specs.vehicleOrContType}
+              value={specs.vehicleOrContType || ''}
               onChange={(e) => updateSpec('vehicleOrContType', e.target.value as any)}
               className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-emerald-500 font-bold text-slate-800 shadow-2xs cursor-pointer"
             >
+              <option value="">-- Chọn Loại Xe / Container Lạnh --</option>
               <option value="Xe tải lạnh 1.5T">Xe Tải Lạnh 1.5T</option>
               <option value="Xe tải lạnh 3.5T">Xe Tải Lạnh 3.5T</option>
               <option value="Xe tải lạnh 8T-15T">Xe Tải Lạnh Nặng 8T - 15T</option>

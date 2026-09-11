@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Globe, MapPin, Flag, ArrowLeftRight, Truck, Package, ShieldCheck, Clock, FileText, Anchor, Sparkles, Plus, Trash2 } from 'lucide-react';
+import { Globe, MapPin, Flag, ArrowLeftRight, Truck, Package, ShieldCheck, Clock, FileText, Anchor, Sparkles, Plus, Trash2, Box } from 'lucide-react';
 import { CrossBorderInquirySpecs } from '../../../types';
 import { VASItemDef } from './VASSection';
 
@@ -98,6 +98,10 @@ interface CrossBorderInquiryFormProps {
   setOrigin: (val: string) => void;
   destination: string;
   setDestination: (val: string) => void;
+  weightKg?: string;
+  setWeightKg?: (val: string) => void;
+  volumeCbm?: string;
+  setVolumeCbm?: (val: string) => void;
 }
 
 export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
@@ -107,6 +111,10 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
   setOrigin,
   destination,
   setDestination,
+  weightKg,
+  setWeightKg,
+  volumeCbm,
+  setVolumeCbm,
 }) => {
   const updateSpec = <K extends keyof CrossBorderInquirySpecs>(key: K, value: CrossBorderInquirySpecs[K]) => {
     onChange({
@@ -115,8 +123,76 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
     });
   };
 
-  const isFTL = specs.loadType !== 'LTL (Ghép hàng lẻ)';
+  const isFTL = specs.loadType === 'FTL (Nguyên chuyến / Nguyên cont)';
   const isLTL = specs.loadType === 'LTL (Ghép hàng lẻ)';
+
+  const handleLtlPiecesChange = (pieces?: number) => {
+    const l = specs.ltlDimensions?.lengthCm || 0;
+    const w = specs.ltlDimensions?.widthCm || 0;
+    const h = specs.ltlDimensions?.heightCm || 0;
+    const count = pieces || 0;
+    let cbm = 0;
+    if (l > 0 && w > 0 && h > 0 && count > 0) {
+      cbm = parseFloat(((l * w * h * count) / 1000000).toFixed(3));
+    }
+    const gross = specs.ltlGrossWeightKg || 0;
+    const volumetricKg = cbm * 250;
+    const chargeable = Math.max(gross, volumetricKg);
+
+    onChange({
+      ...specs,
+      ltlPieces: pieces,
+      ltlCbm: cbm > 0 ? cbm : undefined,
+      ltlChargeableWeightKg: chargeable > 0 ? Math.round(chargeable) : undefined,
+      cbmVolume: cbm > 0 ? cbm : undefined,
+    });
+    if (setVolumeCbm && cbm > 0) {
+      setVolumeCbm(cbm.toString());
+    }
+  };
+
+  const handleLtlDimChange = (dim: 'lengthCm' | 'widthCm' | 'heightCm', val?: number) => {
+    const currentDims = specs.ltlDimensions || { lengthCm: 0, widthCm: 0, heightCm: 0 };
+    const nextDims = {
+      ...currentDims,
+      [dim]: val || 0,
+    };
+    const count = specs.ltlPieces || 1;
+    let cbm = 0;
+    if (nextDims.lengthCm > 0 && nextDims.widthCm > 0 && nextDims.heightCm > 0) {
+      cbm = parseFloat(((nextDims.lengthCm * nextDims.widthCm * nextDims.heightCm * count) / 1000000).toFixed(3));
+    }
+    const gross = specs.ltlGrossWeightKg || 0;
+    const volumetricKg = cbm * 250;
+    const chargeable = Math.max(gross, volumetricKg);
+
+    onChange({
+      ...specs,
+      ltlDimensions: nextDims,
+      ltlCbm: cbm > 0 ? cbm : undefined,
+      ltlChargeableWeightKg: chargeable > 0 ? Math.round(chargeable) : undefined,
+      cbmVolume: cbm > 0 ? cbm : undefined,
+    });
+    if (setVolumeCbm && cbm > 0) {
+      setVolumeCbm(cbm.toString());
+    }
+  };
+
+  const handleLtlWeightChange = (grossKg?: number) => {
+    const cbm = specs.ltlCbm || 0;
+    const volumetricKg = cbm * 250;
+    const chargeable = Math.max(grossKg || 0, volumetricKg);
+
+    onChange({
+      ...specs,
+      ltlGrossWeightKg: grossKg,
+      grossWeightKgs: grossKg,
+      ltlChargeableWeightKg: chargeable > 0 ? Math.round(chargeable) : undefined,
+    });
+    if (setWeightKg && grossKg !== undefined) {
+      setWeightKg(grossKg.toLocaleString('vi-VN'));
+    }
+  };
 
   const pickupLocations = useMemo(() => {
     if (specs.pickupLocations && specs.pickupLocations.length > 0) {
@@ -217,7 +293,7 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
             <span>Hình Thức Vận Chuyển (Load Mode) *</span>
           </label>
           <span className="text-[10px] font-bold text-orange-800 bg-orange-50 px-2 py-0.5 rounded-md border border-orange-200">
-            {isFTL ? '🚚 Vận chuyển nguyên xe / cont' : '📦 Ghép hàng lẻ phân phối'}
+            {isFTL ? '🚚 Vận chuyển nguyên xe / cont' : isLTL ? '📦 Ghép hàng lẻ phân phối' : 'Chưa chọn'}
           </span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -233,7 +309,7 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
               desc: 'Tính cước theo CBM/Kg quy đổi. Cố định 1 điểm lấy - 1 điểm giao qua kho gom phân phối.',
             },
           ].map((item) => {
-            const isSelected = (specs.loadType || 'FTL (Nguyên chuyến / Nguyên cont)') === item.type;
+            const isSelected = specs.loadType === item.type;
             return (
               <button
                 type="button"
@@ -287,7 +363,7 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
                 { role: 'Xuất khẩu (Export)', title: '🛫 Tuyến Xuất Khẩu' },
                 { role: 'Nhập khẩu (Import)', title: '🛬 Tuyến Nhập Khẩu' },
               ].map((item) => {
-                const isSelected = (specs.tradeRole || 'Xuất khẩu (Export)') === item.role;
+                const isSelected = specs.tradeRole === item.role;
                 return (
                   <button
                     type="button"
@@ -312,10 +388,11 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
               Điều Kiện Thương Mại (Incoterms 2020) *
             </label>
             <select
-              value={specs.incoterms || 'DAP - Delivered at Place (Giao tại nơi đến)'}
+              value={specs.incoterms || ''}
               onChange={(e) => updateSpec('incoterms', e.target.value)}
               className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-bold text-orange-950 shadow-2xs cursor-pointer"
             >
+              <option value="">-- Chọn Điều Kiện Thương Mại --</option>
               <option value="DAP - Delivered at Place (Giao tại nơi đến)">DAP - Giao tại nơi đến (Nhà máy người mua)</option>
               <option value="DDP - Delivered Duty Paid (Giao đã nộp thuế trọn gói)">DDP - Giao hàng đã thông quan & nộp thuế</option>
               <option value="FCA - Free Carrier (Giao cho người chuyên chở tại kho xuất)">FCA - Giao cho người chuyên chở</option>
@@ -337,10 +414,11 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
           <span className="text-[10px] text-orange-700 font-normal">Cửa khẩu quốc tế làm thủ tục GMS</span>
         </label>
         <select
-          value={specs.borderGate || 'Mộc Bài / Xa Mát (Tây Ninh VN ↔ Bavet / Phnom Penh Campuchia)'}
+          value={specs.borderGate || ''}
           onChange={(e) => updateSpec('borderGate', e.target.value)}
           className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-bold text-orange-950 shadow-2xs cursor-pointer"
         >
+          <option value="">-- Chọn Cửa Khẩu Biên Giới --</option>
           <optgroup label="🇰🇭 Tuyến Cửa Khẩu Campuchia (Cambodia Route)">
             <option value="Mộc Bài / Xa Mát (Tây Ninh VN ↔ Bavet / Phnom Penh Campuchia)">
               🇰🇭 Cửa khẩu Quốc tế Mộc Bài / Xa Mát (Tây Ninh VN ↔ Bavet / Phnom Penh Campuchia)
@@ -403,10 +481,11 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
               </label>
               <div className="flex items-center gap-1.5">
                 <select
-                  value={specs.originTerm || 'Door (Lấy tận nơi)'}
+                  value={specs.originTerm || ''}
                   onChange={(e) => updateSpec('originTerm', e.target.value as any)}
                   className="text-[11px] h-6 px-2 py-0 bg-white border border-slate-300 rounded-md font-bold text-orange-950 cursor-pointer"
                 >
+                  <option value="">-- Điều kiện lấy --</option>
                   <option value="Door (Lấy tận nơi)">🏠 Door (Lấy tận nơi)</option>
                   <option value="Border (Giao tại bãi cửa khẩu)">🚩 Border (Tại bãi cửa khẩu)</option>
                 </select>
@@ -471,10 +550,11 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
               </label>
               <div className="flex items-center gap-1.5">
                 <select
-                  value={specs.destinationTerm || 'Door (Giao tận nơi)'}
+                  value={specs.destinationTerm || ''}
                   onChange={(e) => updateSpec('destinationTerm', e.target.value as any)}
                   className="text-[11px] h-6 px-2 py-0 bg-white border border-slate-300 rounded-md font-bold text-rose-950 cursor-pointer"
                 >
+                  <option value="">-- Điều kiện giao --</option>
                   <option value="Door (Giao tận nơi)">🏠 Door (Giao tận nơi)</option>
                   <option value="Border (Nhận tại bãi cửa khẩu)">🚩 Border (Tại bãi cửa khẩu)</option>
                 </select>
@@ -585,15 +665,65 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
         {isFTL ? (
           /* FTL Fleet & Trip Volume */
           <div className="space-y-3">
+            {/* Row: Total Weight & Volume for Cross-Border FTL */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                  Tổng Khối Lượng (kg) *
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={weightKg || (specs.grossWeightKgs ? specs.grossWeightKgs.toString() : '')}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (setWeightKg) setWeightKg(val);
+                      const num = parseFloat(val.replace(/\./g, '').replace(/,/g, '.'));
+                      updateSpec('grossWeightKgs', isNaN(num) ? undefined : num);
+                    }}
+                    placeholder="VD: 15.000"
+                    className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-bold text-slate-900 shadow-2xs"
+                  />
+                  <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 pointer-events-none">
+                    kg
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                  Tổng Thể Tích (cbm) *
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={volumeCbm || (specs.cbmVolume ? specs.cbmVolume.toString() : '')}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (setVolumeCbm) setVolumeCbm(val);
+                      const num = parseFloat(val.replace(/,/g, '.'));
+                      updateSpec('cbmVolume', isNaN(num) ? undefined : num);
+                    }}
+                    placeholder="VD: 45"
+                    className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-bold text-slate-900 shadow-2xs"
+                  />
+                  <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 pointer-events-none">
+                    cbm
+                  </span>
+                </div>
+              </div>
+            </div>
+
             <div>
               <label className="block text-[11px] font-semibold text-slate-600 mb-1">
                 Loại Phương Tiện / Container Xuyên Biên Giới *
               </label>
               <select
-                value={specs.vehicleType || CROSS_BORDER_VEHICLES[0].name}
+                value={specs.vehicleType || ''}
                 onChange={(e) => updateSpec('vehicleType', e.target.value)}
                 className="w-full h-10 px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-bold text-orange-950 shadow-2xs cursor-pointer"
               >
+                <option value="">-- Chọn Loại Phương Tiện --</option>
                 {CROSS_BORDER_VEHICLES.map((v) => (
                   <option key={v.id} value={v.name}>
                     {v.name}
@@ -611,7 +741,7 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
                   type="number"
                   min={1}
                   required
-                  value={specs.vehicleCount !== undefined && specs.vehicleCount !== null ? (specs.vehicleCount === 0 ? '' : specs.vehicleCount) : 1}
+                  value={specs.vehicleCount !== undefined && specs.vehicleCount !== null ? (specs.vehicleCount === 0 ? '' : specs.vehicleCount) : ''}
                   onChange={(e) => {
                     const val = e.target.value ? parseInt(e.target.value, 10) : undefined;
                     updateSpec('vehicleCount', val);
@@ -626,10 +756,11 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
                   Đơn Vị (Tần Suất Vận Chuyển) *
                 </label>
                 <select
-                  value={specs.frequencyUnit || 'Chuyến (Một lần duy nhất)'}
+                  value={specs.frequencyUnit || ''}
                   onChange={(e) => updateSpec('frequencyUnit', e.target.value)}
                   className="w-full h-10 px-3 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-bold text-orange-950 shadow-2xs cursor-pointer"
                 >
+                  <option value="">-- Chọn Đơn Vị Tần Suất --</option>
                   <option value="Chuyến (Một lần duy nhất)">Chuyến (Một lần duy nhất)</option>
                   <option value="Chuyến / Tuần">Chuyến / Tuần</option>
                   <option value="Chuyến / Tháng">Chuyến / Tháng</option>
@@ -646,10 +777,11 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
                   <span>Thời Gian Giao Hàng Yêu Cầu (Leadtime / Transit SLA) *</span>
                 </label>
                 <select
-                  value={specs.leadtimeSLA || '⚡ Hỏa Tốc / Express Xuyên Biên Giới (24h - 36h)'}
+                  value={specs.leadtimeSLA || ''}
                   onChange={(e) => updateSpec('leadtimeSLA', e.target.value)}
                   className="w-full h-10 px-3 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-bold text-orange-950 shadow-2xs cursor-pointer"
                 >
+                  <option value="">-- Chọn Thời Gian Giao Hàng --</option>
                   <option value="⚡ Hỏa Tốc / Express Xuyên Biên Giới (24h - 36h)">
                     ⚡ Hỏa Tốc / Express Xuyên Biên Giới (24h - 36h) — Tuyến gần Campuchia / Bằng Tường
                   </option>
@@ -680,39 +812,164 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
             </div>
           </div>
         ) : (
-          /* LTL Trip Volume */
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          /* LTL Trip Volume & Dimensions */
+          <div className="space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                <Box className="w-4 h-4 text-orange-600" />
+                <span>Khai Báo Kích Thước & Trọng Lượng Ghép Hàng LTL</span>
+              </span>
+              <span className="text-[11px] text-slate-500 font-medium">
+                Tỷ lệ quy đổi tiêu chuẩn: 1 CBM = 250 kg
+              </span>
+            </div>
+
+            {/* Row 1: Pieces */}
             <div>
               <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                Số Lượng Lô Hàng / Chuyến Ghép *
+                Số Lượng Kiện / Pallet Cần Ghép *
               </label>
               <input
-                type="number"
-                min={1}
-                required
-                value={specs.shipmentCount !== undefined && specs.shipmentCount !== null ? (specs.shipmentCount === 0 ? '' : specs.shipmentCount) : 1}
+                type="text"
+                inputMode="numeric"
+                value={specs.ltlPieces !== undefined && specs.ltlPieces !== null ? specs.ltlPieces : ''}
                 onChange={(e) => {
-                  const val = e.target.value ? parseInt(e.target.value, 10) : undefined;
-                  updateSpec('shipmentCount', val);
+                  const val = e.target.value.replace(/\D/g, '');
+                  handleLtlPiecesChange(val ? parseInt(val, 10) : undefined);
                 }}
-                placeholder="VD: 1, 2, 3..."
-                className="w-full h-10 px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-bold text-slate-900 shadow-2xs"
+                placeholder="VD: 4"
+                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-bold text-slate-900 shadow-2xs"
               />
             </div>
 
-            <div>
-              <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                Đơn Vị (Tần Suất Ghép Hàng) *
-              </label>
-              <select
-                value={specs.frequencyUnit || 'Lô hàng (Một lần duy nhất)'}
-                onChange={(e) => updateSpec('frequencyUnit', e.target.value)}
-                className="w-full h-10 px-3 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-bold text-orange-950 shadow-2xs cursor-pointer"
-              >
-                <option value="Lô hàng (Một lần duy nhất)">Lô hàng (Một lần duy nhất)</option>
-                <option value="Lô hàng / Tuần">Lô hàng / Tuần</option>
-                <option value="Lô hàng / Tháng">Lô hàng / Tháng</option>
-              </select>
+            {/* Row 2: Dimension Inputs (L x W x H cm) */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-semibold text-slate-600">
+                  Kích Thước 1 Kiện (Dài x Rộng x Cao cm)
+                </label>
+                <span className="text-[10px] text-slate-400">Tự động tính Tổng Thể Tích CBM</span>
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <span className="text-[10px] text-slate-500 block mb-1 font-medium">Dài (L) cm</span>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={specs.ltlDimensions?.lengthCm !== undefined && specs.ltlDimensions.lengthCm !== null && specs.ltlDimensions.lengthCm > 0 ? specs.ltlDimensions.lengthCm : ''}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, '');
+                      handleLtlDimChange('lengthCm', val ? parseInt(val, 10) : undefined);
+                    }}
+                    placeholder="VD: 120"
+                    className="w-full h-10 px-3 text-xs bg-white border border-slate-200 rounded-xl text-center font-bold text-slate-900 focus:border-orange-500 shadow-2xs"
+                  />
+                </div>
+                <div>
+                  <span className="text-[10px] text-slate-500 block mb-1 font-medium">Rộng (W) cm</span>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={specs.ltlDimensions?.widthCm !== undefined && specs.ltlDimensions.widthCm !== null && specs.ltlDimensions.widthCm > 0 ? specs.ltlDimensions.widthCm : ''}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, '');
+                      handleLtlDimChange('widthCm', val ? parseInt(val, 10) : undefined);
+                    }}
+                    placeholder="VD: 100"
+                    className="w-full h-10 px-3 text-xs bg-white border border-slate-200 rounded-xl text-center font-bold text-slate-900 focus:border-orange-500 shadow-2xs"
+                  />
+                </div>
+                <div>
+                  <span className="text-[10px] text-slate-500 block mb-1 font-medium">Cao (H) cm</span>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={specs.ltlDimensions?.heightCm !== undefined && specs.ltlDimensions.heightCm !== null && specs.ltlDimensions.heightCm > 0 ? specs.ltlDimensions.heightCm : ''}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, '');
+                      handleLtlDimChange('heightCm', val ? parseInt(val, 10) : undefined);
+                    }}
+                    placeholder="VD: 150"
+                    className="w-full h-10 px-3 text-xs bg-white border border-slate-200 rounded-xl text-center font-bold text-slate-900 focus:border-orange-500 shadow-2xs"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Row 3: Weight & Calculations */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                  Tổng Trọng Lượng Thực Tế (Gross Kg) *
+                </label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={specs.ltlGrossWeightKg !== undefined && specs.ltlGrossWeightKg !== null && specs.ltlGrossWeightKg > 0 ? specs.ltlGrossWeightKg : ''}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '');
+                    handleLtlWeightChange(val ? parseFloat(val) : undefined);
+                  }}
+                  placeholder="VD: 1200"
+                  className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-bold text-slate-900 shadow-2xs"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                  Tổng Thể Tích Tính Toán (CBM)
+                </label>
+                <div className="h-10 px-3.5 text-xs bg-slate-100 border border-slate-200 rounded-xl font-extrabold text-slate-800 flex items-center">
+                  {specs.ltlCbm !== undefined && specs.ltlCbm !== null ? `${specs.ltlCbm} CBM` : '-- CBM'}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                  Trọng Lượng Tính Cước (Chargeable Kg)
+                </label>
+                <div className="h-10 px-3.5 text-xs bg-orange-50 border border-orange-200 rounded-xl font-extrabold text-orange-900 flex items-center justify-between">
+                  <span>{specs.ltlChargeableWeightKg !== undefined && specs.ltlChargeableWeightKg !== null ? `${specs.ltlChargeableWeightKg.toLocaleString('vi-VN')} Kg` : '-- Kg'}</span>
+                  <span className="text-[10px] text-orange-700 font-normal">(Max thực vs quy đổi)</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Row 4: LTL Shipment Count & Frequency */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                  Số Lượng Lô Hàng / Chuyến Ghép *
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  required
+                  value={specs.shipmentCount !== undefined && specs.shipmentCount !== null ? (specs.shipmentCount === 0 ? '' : specs.shipmentCount) : ''}
+                  onChange={(e) => {
+                    const val = e.target.value ? parseInt(e.target.value, 10) : undefined;
+                    updateSpec('shipmentCount', val);
+                  }}
+                  placeholder="VD: 1, 2, 3..."
+                  className="w-full h-10 px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-bold text-slate-900 shadow-2xs"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                  Đơn Vị (Tần Suất Ghép Hàng) *
+                </label>
+                <select
+                  value={specs.frequencyUnit || ''}
+                  onChange={(e) => updateSpec('frequencyUnit', e.target.value)}
+                  className="w-full h-10 px-3 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-bold text-orange-950 shadow-2xs cursor-pointer"
+                >
+                  <option value="">-- Chọn Đơn Vị Tần Suất --</option>
+                  <option value="Lô hàng (Một lần duy nhất)">Lô hàng (Một lần duy nhất)</option>
+                  <option value="Lô hàng / Tuần">Lô hàng / Tuần</option>
+                  <option value="Lô hàng / Tháng">Lô hàng / Tháng</option>
+                </select>
+              </div>
             </div>
           </div>
         )}

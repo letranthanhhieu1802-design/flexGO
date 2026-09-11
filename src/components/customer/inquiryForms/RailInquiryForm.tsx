@@ -67,6 +67,10 @@ interface RailInquiryFormProps {
   destination: string;
   setDestination: (val: string) => void;
   cargoClassification?: 'General' | 'Reefer' | 'Hazmat';
+  weightKg?: string;
+  setWeightKg?: (val: string) => void;
+  volumeCbm?: string;
+  setVolumeCbm?: (val: string) => void;
 }
 
 export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
@@ -77,6 +81,10 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
   destination,
   setDestination,
   cargoClassification = 'General',
+  weightKg,
+  setWeightKg,
+  volumeCbm,
+  setVolumeCbm,
 }) => {
   const isLclDisabled = cargoClassification === 'Reefer' || cargoClassification === 'Hazmat';
 
@@ -99,6 +107,7 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
   };
 
   const isFCL = specs.mode === 'FCL (Nguyên container ga - ga)';
+  const isLCL = specs.mode === 'LCL (Hàng lẻ đóng ghép kho ga)';
 
   // Helper for LCL auto calculation
   const handleLclDimChange = (dimKey: 'lengthCm' | 'widthCm' | 'heightCm', val: number | undefined) => {
@@ -180,7 +189,9 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
               ? '🇨🇳 Liên vận xuất khẩu đi TQ / Châu Âu'
               : specs.tradeRole === 'Liên vận nhập khẩu (Import Rail)'
               ? '🇻🇳 Liên vận nhập khẩu về VN'
-              : '🚆 Tuyến đường sắt nội địa Bắc - Nam'}
+              : specs.tradeRole === 'Nội địa Bắc - Nam (Domestic Rail)'
+              ? '🚆 Tuyến đường sắt nội địa Bắc - Nam'
+              : 'Chưa chọn'}
           </span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
@@ -201,7 +212,7 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
               sub: 'Hàng nhập khẩu từ ga quốc tế về VN',
             },
           ].map((item) => {
-            const isSelected = (specs.tradeRole || 'Nội địa Bắc - Nam (Domestic Rail)') === item.role;
+            const isSelected = specs.tradeRole === item.role;
             return (
               <button
                 type="button"
@@ -268,7 +279,7 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
             className={`p-3 rounded-xl border text-left transition-all ${
               isLclDisabled
                 ? 'border-slate-200 bg-slate-100/80 opacity-60 cursor-not-allowed text-slate-400'
-                : !isFCL
+                : isLCL
                 ? 'border-blue-600 bg-blue-50/70 font-bold text-blue-950 cursor-pointer shadow-2xs'
                 : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 cursor-pointer'
             }`}
@@ -279,7 +290,7 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
                 <span className="text-[10px] bg-rose-100 text-rose-700 px-2 py-0.5 rounded-md font-bold border border-rose-200">
                   🚫 Không hỗ trợ
                 </span>
-              ) : !isFCL ? (
+              ) : isLCL ? (
                 <span className="text-[10px] bg-blue-600 text-white px-2 py-0.5 rounded-md font-bold">
                   Đang chọn
                 </span>
@@ -435,6 +446,55 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
             </span>
           </div>
 
+          {/* Row: Total Weight & Volume for Rail FCL */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                Tổng Khối Lượng (kg) *
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={weightKg || (specs.grossWeightKgs ? specs.grossWeightKgs.toString() : '')}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (setWeightKg) setWeightKg(val);
+                    const num = parseFloat(val.replace(/\./g, '').replace(/,/g, '.'));
+                    updateSpec('grossWeightKgs', isNaN(num) ? undefined : num);
+                  }}
+                  placeholder="VD: 15.000"
+                  className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-bold text-slate-900 shadow-2xs"
+                />
+                <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 pointer-events-none">
+                  kg
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                Tổng Thể Tích (cbm) *
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={volumeCbm || (specs.cbmVolume ? specs.cbmVolume.toString() : '')}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (setVolumeCbm) setVolumeCbm(val);
+                    const num = parseFloat(val.replace(/,/g, '.'));
+                    updateSpec('cbmVolume', isNaN(num) ? undefined : num);
+                  }}
+                  placeholder="VD: 45"
+                  className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-bold text-slate-900 shadow-2xs"
+                />
+                <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 pointer-events-none">
+                  cbm
+                </span>
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-[11px] font-semibold text-slate-600 mb-1">Loại Container / Toa Xe *</label>
@@ -528,7 +588,7 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
       )}
 
       {/* 7. LCL SPECIFIC CONFIGURATION (Dimensions, Weight, CBM, Chargeable Weight & Stackable) */}
-      {!isFCL && (
+      {isLCL && (
         <div className="space-y-3 animate-in fade-in duration-150">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
@@ -647,7 +707,7 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
             <input
               type="checkbox"
               id="railLclStackableCheck"
-              checked={specs.lclStackable ?? true}
+              checked={Boolean(specs.lclStackable)}
               onChange={(e) => updateSpec('lclStackable', e.target.checked)}
               className="rounded-sm text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer"
             />

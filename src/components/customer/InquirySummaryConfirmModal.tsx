@@ -471,29 +471,26 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
               type="button"
               id="tab-btn-customer-cargo"
               onClick={() => setActiveTab('profile_cargo')}
-              className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 cursor-pointer ${
+              className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
                 activeTab === 'profile_cargo'
                   ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30 ring-1 ring-indigo-400/30'
                   : 'text-slate-300 hover:text-white hover:bg-slate-800'
               }`}
             >
-              <Box className="w-4 h-4" />
-              <span>Tab 1: Khách Hàng & Hàng Hóa</span>
+              <span>Tab 1: Thông tin yêu cầu</span>
             </button>
 
             <button
               type="button"
               id="tab-btn-tariff-sheet"
               onClick={() => setActiveTab('tariff_sheet')}
-              className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 cursor-pointer ${
+              className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
                 activeTab === 'tariff_sheet'
                   ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30 ring-1 ring-indigo-400/30'
                   : 'text-slate-300 hover:text-white hover:bg-slate-800'
               }`}
             >
-              <FileSpreadsheet className="w-4 h-4" />
-              <span>Tab 2: Bảng Niêm Yết & Cấu Trúc Báo Giá</span>
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>Tab 2: Chi tiết báo giá</span>
             </button>
           </div>
         </div>
@@ -598,29 +595,29 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2.5 gap-x-8 text-xs">
                   <div className="flex items-baseline gap-2">
                     <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Đơn vị công tác:</span>
-                    <span className="font-bold text-slate-900">{customerCompanyName}</span>
+                    <span className="font-normal text-slate-800">{customerCompanyName}</span>
                   </div>
                   <div className="flex items-baseline gap-2">
                     <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Mã số thuế (MST):</span>
-                    <span className="font-mono font-bold text-slate-800">{inquiry.taxCode || '0314988234'}</span>
+                    <span className="font-normal text-slate-800">{inquiry.taxCode || '0314988234'}</span>
                   </div>
 
                   <div className="flex items-baseline gap-2">
                     <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Người phụ trách:</span>
-                    <span className="font-bold text-slate-900">{customerContactName}</span>
+                    <span className="font-normal text-slate-800">{customerContactName}</span>
                   </div>
                   <div className="flex items-baseline gap-2">
                     <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Chức vụ:</span>
-                    <span className="font-semibold text-slate-800">{currentUser?.roleTitle || 'Supply Chain Lead / Logistics Manager'}</span>
+                    <span className="font-normal text-slate-800">{currentUser?.roleTitle || 'Supply Chain Lead / Logistics Manager'}</span>
                   </div>
 
                   <div className="flex items-baseline gap-2">
                     <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Số điện thoại liên hệ:</span>
-                    <span className="font-bold text-indigo-950">{customerPhone}</span>
+                    <span className="font-normal text-slate-800">{customerPhone}</span>
                   </div>
                   <div className="flex items-baseline gap-2">
                     <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Email liên hệ:</span>
-                    <span className="font-bold text-indigo-950 truncate" title={customerEmail}>{customerEmail}</span>
+                    <span className="font-normal text-slate-800 truncate" title={customerEmail}>{customerEmail}</span>
                   </div>
                 </div>
               </div>
@@ -640,7 +637,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2.5 gap-x-8 text-xs">
                     <div className="flex items-baseline gap-2">
                       <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Phân loại nhóm hàng:</span>
-                      <span className="font-bold text-slate-900">
+                      <span className="font-normal text-slate-800">
                         {inquiry.cargoClassification === 'Reefer'
                           ? 'Hàng Đông Lạnh / Kiểm Soát Nhiệt Độ'
                           : inquiry.cargoClassification === 'Hazmat'
@@ -651,24 +648,24 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
 
                     <div className="flex items-baseline gap-2">
                       <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Ngành hàng:</span>
-                      <span className="font-bold text-slate-900">{inquiry.industry || 'Hàng tiêu dùng FMCG & Công nghiệp'}</span>
+                      <span className="font-normal text-slate-800">{inquiry.industry || 'Hàng tiêu dùng FMCG & Công nghiệp'}</span>
                     </div>
 
                     <div className="flex items-baseline gap-2">
                       <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Tên mặt hàng cụ thể:</span>
-                      <span className="font-black text-indigo-950">{inquiry.cargoType || 'Theo danh mục khai báo'}</span>
+                      <span className="font-normal text-slate-800">{inquiry.cargoType || 'Theo danh mục khai báo'}</span>
                     </div>
 
                     <div className="flex items-baseline gap-2">
                       <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Quy cách đóng gói:</span>
-                      <span className="font-semibold text-slate-900">{inquiry.packaging || 'Đóng Pallet tiêu chuẩn'}</span>
+                      <span className="font-normal text-slate-800">{inquiry.packaging || 'Đóng Pallet tiêu chuẩn'}</span>
                     </div>
 
                     {/* Khả năng xếp chồng: Only show if explicitly provided (e.g. LTL/LCL ghép hàng), do NOT show for FTL */}
                     {inquiry.stackable !== undefined && (
                       <div className="flex items-baseline gap-2">
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Khả năng xếp chồng:</span>
-                        <span className="font-semibold text-slate-900">
+                        <span className="font-normal text-slate-800">
                           {inquiry.stackable
                             ? 'Có thể xếp chồng (Stackable)'
                             : 'Không được xếp chồng'}
@@ -678,7 +675,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
 
                     <div className="flex items-baseline gap-2">
                       <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Khối lượng Gross:</span>
-                      <span className="font-black text-slate-900">
+                      <span className="font-normal text-slate-800">
                         {isTruckingLtl && trucking?.ltlGrossWeightKg
                           ? `${trucking.ltlGrossWeightKg.toLocaleString('vi-VN')} kg`
                           : (inquiry.ftlWeightKg && inquiry.ftlWeightKg !== '0' && inquiry.ftlWeightKg !== '0.0')
@@ -695,7 +692,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
 
                     <div className="flex items-baseline gap-2">
                       <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Tổng thể tích:</span>
-                      <span className="font-black text-slate-900">
+                      <span className="font-normal text-slate-800">
                         {isTruckingLtl && trucking?.ltlCbm
                           ? `${trucking.ltlCbm} CBM`
                           : inquiry.ftlVolumeCbm 
@@ -713,14 +710,14 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                     {inquiry.hsCode && (
                       <div className="flex items-baseline gap-2">
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Mã HS Code:</span>
-                        <span className="font-mono font-bold text-slate-800">{inquiry.hsCode}</span>
+                        <span className="font-normal text-slate-800">{inquiry.hsCode}</span>
                       </div>
                     )}
 
                     {inquiry.cargoValue && (
                       <div className="flex items-baseline gap-2">
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Trị giá khai báo:</span>
-                        <span className="font-bold text-emerald-800">{inquiry.cargoValue} {inquiry.cargoValueCurrency || 'USD'}</span>
+                        <span className="font-normal text-slate-800">{inquiry.cargoValue} {inquiry.cargoValueCurrency || 'USD'}</span>
                       </div>
                     )}
                   </div>
@@ -732,13 +729,13 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-y-2 gap-x-6 text-xs bg-slate-50/60 p-3 rounded-xl border border-slate-100">
                         <div className="flex items-baseline gap-2">
                           <span className="text-slate-400 font-medium">Số lượng kiện:</span>
-                          <span className="font-bold text-slate-900">
+                          <span className="font-normal text-slate-800">
                             {trucking?.ltlPieces || ocean?.lclPieces || rail?.lclPieces || air?.packageCount || inquiry.packageCount || 1} Kiện / Pallet
                           </span>
                         </div>
                         <div className="flex items-baseline gap-2">
                           <span className="text-slate-400 font-medium">Kích thước từng kiện:</span>
-                          <span className="font-mono font-bold text-slate-900">
+                          <span className="font-normal text-slate-800">
                             {(() => {
                               const dims = trucking?.ltlDimensions || ocean?.lclDimensions || rail?.lclDimensions || air?.dimensionsCm || inquiry.dimensionsCm;
                               if (typeof dims === 'string' && dims) return dims;
@@ -751,7 +748,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                         </div>
                         <div className="flex items-baseline gap-2">
                           <span className="text-slate-400 font-medium">Trọng lượng tính cước (CW):</span>
-                          <span className="font-bold text-slate-900">
+                          <span className="font-normal text-slate-800">
                             {trucking?.ltlChargeableWeightKg || trucking?.chargeableWeightKg 
                               ? `${(trucking.ltlChargeableWeightKg || trucking.chargeableWeightKg).toLocaleString('vi-VN')} kg (Quy đổi 1 CBM = 250 kg)` 
                               : ocean?.lclRevenueTon 
@@ -774,16 +771,16 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-8 text-xs bg-cyan-50/40 p-3 rounded-xl border border-cyan-100">
                         <div className="flex items-baseline gap-2">
                           <span className="text-cyan-800/70 font-medium min-w-[140px] shrink-0">Dải nhiệt độ yêu cầu:</span>
-                          <span className="font-black text-cyan-950">{inquiry.temperatureRequirement || coldChain?.temperatureCategory || '+2°C ~ +8°C'}</span>
+                          <span className="font-normal text-slate-800">{inquiry.temperatureRequirement || coldChain?.temperatureCategory || '+2°C ~ +8°C'}</span>
                         </div>
                         <div className="flex items-baseline gap-2">
                           <span className="text-cyan-800/70 font-medium min-w-[140px] shrink-0">Duy trì điện liên tục:</span>
-                          <span className="font-bold text-cyan-950">{coldChain?.continuousGenset ? 'Máy phát Clip-on Genset liên tục' : 'Cắm điện bãi Plug-in khi dừng đỗ'}</span>
+                          <span className="font-normal text-slate-800">{coldChain?.continuousGenset ? 'Máy phát Clip-on Genset liên tục' : 'Cắm điện bãi Plug-in khi dừng đỗ'}</span>
                         </div>
                         {coldChain?.humidityControl && (
                           <div className="flex items-baseline gap-2">
                             <span className="text-cyan-800/70 font-medium min-w-[140px] shrink-0">Kiểm soát độ ẩm:</span>
-                            <span className="font-bold text-cyan-950">{coldChain.humidityPercentage || 65}% RH</span>
+                            <span className="font-normal text-slate-800">{coldChain.humidityPercentage || 65}% RH</span>
                           </div>
                         )}
                       </div>
@@ -797,24 +794,24 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-8 text-xs bg-rose-50/40 p-3 rounded-xl border border-rose-100">
                         <div className="flex items-baseline gap-2">
                           <span className="text-rose-800/70 font-medium min-w-[140px] shrink-0">Nhóm nguy hiểm (IMO Class):</span>
-                          <span className="font-black text-rose-950">{inquiry.dgClassIMO || 'IMO Class 3 (Chất lỏng dễ cháy)'}</span>
+                          <span className="font-normal text-slate-800">{inquiry.dgClassIMO || 'IMO Class 3 (Chất lỏng dễ cháy)'}</span>
                         </div>
                         <div className="flex items-baseline gap-2">
                           <span className="text-rose-800/70 font-medium min-w-[140px] shrink-0">Mã số UN:</span>
-                          <span className="font-mono font-black text-rose-950">{inquiry.unNumber || 'UN 1263'}</span>
+                          <span className="font-normal text-slate-800">{inquiry.unNumber || 'UN 1263'}</span>
                         </div>
                         <div className="flex items-baseline gap-2">
                           <span className="text-rose-800/70 font-medium min-w-[140px] shrink-0">Nhóm đóng gói:</span>
-                          <span className="font-bold text-rose-950">{inquiry.packingGroup || 'Packing Group II'}</span>
+                          <span className="font-normal text-slate-800">{inquiry.packingGroup || 'Packing Group II'}</span>
                         </div>
                         <div className="flex items-baseline gap-2">
                           <span className="text-rose-800/70 font-medium min-w-[140px] shrink-0">Điểm chớp cháy:</span>
-                          <span className="font-bold text-rose-950">{inquiry.flashPoint ? `${inquiry.flashPoint}°C` : 'N/A'}</span>
+                          <span className="font-normal text-slate-800">{inquiry.flashPoint ? `${inquiry.flashPoint}°C` : 'N/A'}</span>
                         </div>
                         {inquiry.msdsFileName && (
                           <div className="flex items-baseline gap-2 md:col-span-2">
                             <span className="text-rose-800/70 font-medium min-w-[140px] shrink-0">Tài liệu MSDS:</span>
-                            <span className="font-semibold text-rose-950">📄 {inquiry.msdsFileName}</span>
+                            <span className="font-normal text-slate-800">📄 {inquiry.msdsFileName}</span>
                           </div>
                         )}
                       </div>
@@ -825,7 +822,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                   {inquiry.specialHandlingInstructions && (
                     <div className="flex items-baseline gap-2 pt-1 text-xs">
                       <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Yêu cầu bảo quản riêng:</span>
-                      <span className="font-semibold text-slate-800">{inquiry.specialHandlingInstructions}</span>
+                      <span className="font-normal text-slate-800">{inquiry.specialHandlingInstructions}</span>
                     </div>
                   )}
                 </div>
@@ -846,11 +843,11 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2.5 gap-x-8 text-xs">
                     <div className="flex items-baseline gap-2">
                       <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Loại hình dịch vụ:</span>
-                      <span className="font-bold text-slate-900">{getServiceNameVi(inquiry.serviceType)}</span>
+                      <span className="font-normal text-slate-800">{getServiceNameVi(inquiry.serviceType)}</span>
                     </div>
                     <div className="flex items-baseline gap-2">
                       <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Mô hình vận hành:</span>
-                      <span className="font-bold text-slate-900">
+                      <span className="font-normal text-slate-800">
                         {isTrucking 
                           ? (trucking?.loadType || 'Nguyên Chuyến (FTL)')
                           : isOcean 
@@ -875,7 +872,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                         <div className="space-y-1.5 text-xs text-slate-800">
                           <div>
                             <span className="text-slate-500 font-medium block text-[11px]">• Địa chỉ kho xuất hàng chính:</span>
-                            <span className="font-bold text-slate-900 block pl-3">
+                            <span className="font-normal text-slate-800 block pl-3">
                               {inquiry.origin || 'Chưa chỉ định'}
                             </span>
                           </div>
@@ -884,7 +881,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                               {trucking.pickupLocations.slice(1).map((p, idx) => (
                                 <div key={idx}>
                                   <span className="text-slate-500 font-medium block text-[11px]">• Điểm lấy {idx + 2} (Kho phụ / Gom thêm):</span>
-                                  <span className="font-semibold text-slate-800 block pl-3">
+                                  <span className="font-normal text-slate-800 block pl-3">
                                     {p || `Kho phụ ${idx + 2}`}
                                   </span>
                                 </div>
@@ -902,7 +899,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                         <div className="space-y-1.5 text-xs text-slate-800">
                           <div>
                             <span className="text-slate-500 font-medium block text-[11px]">• Địa chỉ kho đích chính:</span>
-                            <span className="font-bold text-slate-900 block pl-3">
+                            <span className="font-normal text-slate-800 block pl-3">
                               {inquiry.destination || 'Chưa chỉ định'}
                             </span>
                           </div>
@@ -911,7 +908,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                               {trucking.deliveryLocations.slice(1).map((d, idx) => (
                                 <div key={idx}>
                                   <span className="text-slate-500 font-medium block text-[11px]">• Điểm giao {idx + 2} (Đại lý / Cửa hàng phụ):</span>
-                                  <span className="font-semibold text-slate-800 block pl-3">
+                                  <span className="font-normal text-slate-800 block pl-3">
                                     {d || `Điểm giao ${idx + 2}`}
                                   </span>
                                 </div>
@@ -933,20 +930,20 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2.5 gap-x-8 text-xs">
                         <div className="flex items-baseline gap-2">
                           <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Loại Thùng Phương Tiện:</span>
-                          <span className="font-bold text-slate-900">{trucking?.truckType || 'Theo thỏa thuận'}</span>
+                          <span className="font-normal text-slate-800">{trucking?.truckType || 'Theo thỏa thuận'}</span>
                         </div>
                         
                         {!isTruckingLtl && trucking?.tonnageCategory && (
                           <div className="flex items-baseline gap-2">
                             <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Phân Khúc Tải Trọng:</span>
-                            <span className="font-bold text-slate-900">{trucking.tonnageCategory}</span>
+                            <span className="font-normal text-slate-800">{trucking.tonnageCategory}</span>
                           </div>
                         )}
 
                         {!isTruckingLtl && trucking?.dimensionsMin && (
                           <div className="flex items-baseline gap-2">
                             <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Kích thước lòng thùng:</span>
-                            <span className="font-mono font-semibold text-slate-800">
+                            <span className="font-normal text-slate-800">
                               {trucking.dimensionsMin}
                             </span>
                           </div>
@@ -955,21 +952,21 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                         {(trucking?.requestedLeadtime || trucking?.transitTimeMax) && (
                           <div className="flex items-baseline gap-2">
                             <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Thời Gian Giao Hàng (SLA):</span>
-                            <span className="font-bold text-slate-900">{trucking.requestedLeadtime || trucking.transitTimeMax}</span>
+                            <span className="font-normal text-slate-800">{trucking.requestedLeadtime || trucking.transitTimeMax}</span>
                           </div>
                         )}
 
                         {trucking?.requestedLeadtimeNote && (
                           <div className="flex items-baseline gap-2 md:col-span-2">
                             <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Ghi chú thời gian giao nhận:</span>
-                            <span className="font-semibold text-indigo-950">{trucking.requestedLeadtimeNote}</span>
+                            <span className="font-normal text-slate-800">{trucking.requestedLeadtimeNote}</span>
                           </div>
                         )}
 
                         {trucking?.vehicleSpecsRequirement && (
                           <div className="flex items-baseline gap-2 md:col-span-2">
                             <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Yêu cầu dỡ hàng / Kỹ thuật:</span>
-                            <span className="font-semibold text-slate-800">{trucking.vehicleSpecsRequirement}</span>
+                            <span className="font-normal text-slate-800">{trucking.vehicleSpecsRequirement}</span>
                           </div>
                         )}
                       </div>
@@ -979,22 +976,22 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2.5 gap-x-8 text-xs">
                         <div className="flex items-baseline gap-2">
                           <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Loại vỏ Container:</span>
-                          <span className="font-bold text-slate-900">{ocean?.containerType || (isLcl ? 'LCL CFS' : '40HC')}</span>
+                          <span className="font-normal text-slate-800">{ocean?.containerType || (isLcl ? 'LCL CFS' : '40HC')}</span>
                         </div>
                         <div className="flex items-baseline gap-2">
                           <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Điều khoản dịch vụ:</span>
-                          <span className="font-bold text-slate-900">{ocean?.serviceTerm || 'CY-CY'}</span>
+                          <span className="font-normal text-slate-800">{ocean?.serviceTerm || 'CY-CY'}</span>
                         </div>
                         {ocean?.freeDemDetDaysRequested && (
                           <div className="flex items-baseline gap-2">
                             <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Yêu cầu Free Dem/Det:</span>
-                            <span className="font-bold text-emerald-800">{ocean.freeDemDetDaysRequested} Ngày</span>
+                            <span className="font-normal text-slate-800">{ocean.freeDemDetDaysRequested} Ngày</span>
                           </div>
                         )}
                         {ocean?.preferredCarrier && (
                           <div className="flex items-baseline gap-2">
                             <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Hãng tàu chỉ định:</span>
-                            <span className="font-bold text-slate-900">{ocean.preferredCarrier}</span>
+                            <span className="font-normal text-slate-800">{ocean.preferredCarrier}</span>
                           </div>
                         )}
                       </div>
@@ -1004,11 +1001,11 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2.5 gap-x-8 text-xs">
                         <div className="flex items-baseline gap-2">
                           <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Gói dịch vụ bay:</span>
-                          <span className="font-bold text-slate-900">{air?.serviceTypeCategory || 'Air Cargo Tiêu Chuẩn'}</span>
+                          <span className="font-normal text-slate-800">{air?.serviceTypeCategory || 'Air Cargo Tiêu Chuẩn'}</span>
                         </div>
                         <div className="flex items-baseline gap-2">
                           <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Tốc độ hành trình:</span>
-                          <span className="font-bold text-slate-900">{air?.serviceLevel || 'Standard (2-3 ngày)'}</span>
+                          <span className="font-normal text-slate-800">{air?.serviceLevel || 'Standard (2-3 ngày)'}</span>
                         </div>
                       </div>
                     )}
@@ -1017,11 +1014,11 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2.5 gap-x-8 text-xs">
                         <div className="flex items-baseline gap-2">
                           <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Loại hình kho:</span>
-                          <span className="font-bold text-slate-900">{warehousing?.warehouseType || 'Kho Thường Tiêu Chuẩn'}</span>
+                          <span className="font-normal text-slate-800">{warehousing?.warehouseType || 'Kho Thường Tiêu Chuẩn'}</span>
                         </div>
                         <div className="flex items-baseline gap-2">
                           <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Quy mô diện tích / Pallet:</span>
-                          <span className="font-bold text-slate-900">{warehousing?.storageAreaSqm ? `${warehousing.storageAreaSqm} m²` : `${warehousing?.palletPositions || 500} Pallets`}</span>
+                          <span className="font-normal text-slate-800">{warehousing?.storageAreaSqm ? `${warehousing.storageAreaSqm} m²` : `${warehousing?.palletPositions || 500} Pallets`}</span>
                         </div>
                       </div>
                     )}
@@ -1043,7 +1040,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2.5 gap-x-8 text-xs">
                     <div className="flex items-baseline gap-2">
                       <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Hình thức báo giá:</span>
-                      <span className="font-bold text-slate-900">
+                      <span className="font-normal text-slate-800">
                         {inquiry.pricingType === 'CONTRACT' ? 'Hợp Đồng Dài Hạn (Contract / Tender)' : 'Chuyến Đơn Lẻ (Spot Quote)'}
                       </span>
                     </div>
@@ -1051,7 +1048,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                     {isTrucking && (
                       <div className="flex items-baseline gap-2">
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Số lượng chuyến cần thuê:</span>
-                        <span className="font-bold text-slate-900">
+                        <span className="font-normal text-slate-800">
                           {trucking?.loadType === 'LTL (Ghép hàng lẻ)'
                             ? (trucking.ltlShipmentCount ? `${trucking.ltlShipmentCount} ${trucking.ltlFrequencyUnit || 'Chuyến / Tháng'}` : 'Chưa chỉ định')
                             : (trucking?.vehicleCount ? `${trucking.vehicleCount} ${trucking?.vehicleCountUnit || 'Chuyến / Tháng'}` : 'Chưa chỉ định')}
@@ -1062,14 +1059,14 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                     {inquiry.pricingType === 'CONTRACT' && inquiry.contractTerm && (
                       <div className="flex items-baseline gap-2">
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Thời hạn hợp đồng:</span>
-                        <span className="font-bold text-indigo-950">{inquiry.contractTerm}</span>
+                        <span className="font-normal text-slate-800">{inquiry.contractTerm}</span>
                       </div>
                     )}
 
                     {inquiry.pricingType === 'CONTRACT' && (inquiry.volumeCommitment || inquiry.contractVolume) && (
                       <div className="flex items-baseline gap-2">
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Tần suất cam kết:</span>
-                        <span className="font-bold text-slate-900">
+                        <span className="font-normal text-slate-800">
                           {inquiry.volumeCommitment || inquiry.contractVolume}
                         </span>
                       </div>
@@ -1082,15 +1079,15 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-y-2 gap-x-6 text-xs bg-slate-50/70 p-3 rounded-xl border border-slate-100">
                       <div className="space-y-0.5">
                         <span className="text-slate-400 text-[11px] block">Hạn chót nhận báo giá:</span>
-                        <span className="font-bold text-amber-900 block font-mono">{inquiry.expiryDate || 'Chưa thiết lập'}</span>
+                        <span className="font-normal text-slate-800 block text-xs">{inquiry.expiryDate || 'Chưa thiết lập'}</span>
                       </div>
                       <div className="space-y-0.5">
                         <span className="text-slate-400 text-[11px] block">Ngày lấy hàng dự kiến:</span>
-                        <span className="font-bold text-indigo-950 block font-mono">{inquiry.pickupDate || 'Theo thông báo giao nhận'}</span>
+                        <span className="font-normal text-slate-800 block text-xs">{inquiry.pickupDate || 'Theo thông báo giao nhận'}</span>
                       </div>
                       <div className="space-y-0.5">
                         <span className="text-slate-400 text-[11px] block">Hạn chót giao hàng:</span>
-                        <span className="font-bold text-emerald-950 block font-mono">{inquiry.deliveryDate || 'Theo cam kết SLA tuyến'}</span>
+                        <span className="font-normal text-slate-800 block text-xs">{inquiry.deliveryDate || 'Theo cam kết SLA tuyến'}</span>
                       </div>
                     </div>
                   </div>
@@ -1099,7 +1096,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                   {inquiry.description && (
                     <div className="flex items-baseline gap-2 pt-1 text-xs">
                       <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Ghi chú đặc thù:</span>
-                      <span className="font-semibold text-slate-900 italic">"{inquiry.description}"</span>
+                      <span className="font-normal text-slate-800 italic">"{inquiry.description}"</span>
                     </div>
                   )}
 
@@ -1111,7 +1108,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                         {inquiry.attachments.map((att) => (
                           <div key={att.id} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs">
                             <Paperclip className="w-3.5 h-3.5 text-indigo-600" />
-                            <span className="font-bold text-slate-800">{att.name}</span>
+                            <span className="font-normal text-slate-800">{att.name}</span>
                             <span className="text-[10px] text-slate-400">({att.size})</span>
                           </div>
                         ))}
@@ -1120,7 +1117,6 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                   )}
                 </div>
               </div>
-
             </div>
           )}
 
@@ -1142,20 +1138,14 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                     <thead>
                       <tr className="bg-slate-100/90 border-b border-slate-200 text-slate-700 font-extrabold uppercase tracking-wider text-[11px]">
                         <th className="py-3 px-4 border-r border-slate-200">
-                          <div className="flex items-center gap-1.5">
-                            <FileText className="w-3.5 h-3.5 text-indigo-700" />
-                            <span>CỘT 1: HẠNG MỤC CHI PHÍ BÁO GIÁ</span>
-                          </div>
+                          <span>CỘT 1: HẠNG MỤC CHI PHÍ BÁO GIÁ</span>
                         </th>
                         <th className="py-3 px-3 text-center border-r border-slate-200">
                           CỘT 2: ĐVT
                         </th>
                         <th className="py-2.5 px-3 text-center bg-indigo-50/60 border-r border-slate-200">
                           <div className="flex flex-col items-center justify-center">
-                            <span className="text-[10px] font-black text-indigo-700 bg-indigo-100/80 border border-indigo-200 px-2 py-0.5 rounded-md uppercase tracking-wider mb-1">
-                              {getCol3HeaderConfig().tag}
-                            </span>
-                            <div className="inline-flex items-center gap-1.5 font-extrabold text-slate-800 bg-white border border-slate-300 px-2.5 py-0.5 rounded-lg text-xs shadow-2xs max-w-full truncate">
+                            <div className="inline-flex items-center gap-1.5 font-extrabold text-slate-800 bg-white border border-slate-300 px-2.5 py-1 rounded-lg text-xs shadow-2xs max-w-full truncate">
                               <span className="truncate">{getCol3HeaderConfig().label}</span>
                             </div>
                           </div>
@@ -1167,11 +1157,8 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       {/* TỔNG CƯỚC DỰ KIẾN (ALL-IN FREIGHT) */}
                       <tr className="bg-sky-50/60 hover:bg-sky-50/90 transition-colors">
                         <td className="py-3 px-4 border-r border-slate-200 font-black text-slate-900">
-                          <div className="flex items-center gap-2">
-                            <DollarSign className="w-4 h-4 text-indigo-600 shrink-0" />
-                            <span className="text-xs font-black text-slate-900">Tổng Cước Dự Kiến (All-in Freight)</span>
-                          </div>
-                          <p className="text-[10.5px] text-slate-500 font-normal mt-0.5 pl-6">
+                          <span className="text-xs font-black text-slate-900">Tổng Cước Dự Kiến (All-in Freight)</span>
+                          <p className="text-[10.5px] text-slate-500 font-normal mt-0.5">
                             Cước cơ bản cộng toàn bộ phụ phí theo tender
                           </p>
                         </td>
@@ -1181,7 +1168,9 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                         <td className="py-3 px-4 text-center border-r border-slate-200">
                           <div className="flex flex-col items-center justify-center">
                             <span className="text-base font-black text-slate-900 tracking-tight">
-                              {inquiry.targetBudget ? `${inquiry.targetBudget} ${inquiry.currency || ''}` : (isOcean ? '$2,450' : 'Thỏa thuận theo tender')}
+                              {inquiry.targetBudget 
+                                ? (inquiry.targetBudget.toString().replace(/₫|VND|USD|\$/g, '').trim())
+                                : (isOcean ? '2,450' : 'Thỏa thuận theo tender')}
                             </span>
                             <span className="text-[10px] font-bold text-slate-400 mt-0.5">
                               {getTariffMainUnit()}
@@ -1193,16 +1182,10 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       {/* CƯỚC VẬN CHUYỂN CƠ BẢN */}
                       <tr className="hover:bg-slate-50/80 transition-colors">
                         <td className="py-3 px-4 border-r border-slate-200">
-                          <div className="font-bold text-slate-900 flex items-center gap-2">
-                            {getServiceIcon(inquiry.serviceType)}
-                            <span className="font-black text-slate-900 text-xs">
-                              {getServiceMainFreightTitle()}
-                            </span>
-                            <span className="px-1.5 py-0.5 text-[9.5px] bg-rose-50 text-rose-700 font-bold rounded border border-rose-200">
-                              Bắt buộc
-                            </span>
+                          <div className="font-black text-slate-900 text-xs">
+                            {getServiceMainFreightTitle()}
                           </div>
-                          <p className="text-[10.5px] text-slate-500 mt-0.5 pl-6">
+                          <p className="text-[10.5px] text-slate-500 mt-0.5">
                             Đơn giá cước vận chuyển chặng chính
                           </p>
                         </td>
@@ -1210,8 +1193,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                           {getTariffMainUnit()}
                         </td>
                         <td className="py-3 px-4 text-center border-r border-slate-200">
-                          <div className="inline-flex items-center justify-between gap-2 w-full bg-white border border-slate-300 rounded-lg px-3 py-1 shadow-2xs">
-                            <span className="text-slate-400 font-bold">{isOcean ? '$' : '₫'}</span>
+                          <div className="inline-flex items-center justify-center w-full bg-white border border-slate-300 rounded-lg px-3 py-1 shadow-2xs">
                             <span className="font-mono font-bold text-slate-900 text-xs">
                               {isOcean ? '2,215' : 'Supplier chào giá'}
                             </span>
@@ -1223,7 +1205,6 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       <tr className="bg-slate-100/90 font-black text-slate-800 text-[11px] uppercase tracking-wider border-t-2 border-slate-200">
                         <td colSpan={3} className="py-2 px-4 border-r border-slate-200">
                           <div className="flex items-center gap-2">
-                            <Receipt className="w-3.5 h-3.5 text-indigo-600" />
                             <span>{getServiceSection1Title()}</span>
                             {inquiry.requestedSurcharges && inquiry.requestedSurcharges.length > 0 && (
                               <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200 lowercase tracking-normal">
@@ -1238,8 +1219,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                         inquiry.requestedSurcharges.map((charge, idx) => (
                           <tr key={idx} className="hover:bg-slate-50/80 transition-colors">
                             <td className="py-2 px-4 border-r border-slate-200">
-                              <div className="font-medium text-slate-800 flex items-center gap-2 pl-2">
-                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                              <div className="font-medium text-slate-800">
                                 <span>{charge}</span>
                               </div>
                             </td>
@@ -1247,8 +1227,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                               {getSurchargeUnit(charge)}
                             </td>
                             <td className="py-2 px-4 text-center border-r border-slate-200">
-                              <div className="inline-flex items-center justify-between gap-2 w-full bg-white border border-slate-200 rounded-lg px-3 py-1 shadow-2xs">
-                                <span className="text-slate-400 font-bold">{isOcean ? '$' : '₫'}</span>
+                              <div className="inline-flex items-center justify-center w-full bg-white border border-slate-200 rounded-lg px-3 py-1 shadow-2xs">
                                 <span className="font-mono font-bold text-slate-700 text-xs">
                                   {isOcean ? (charge.toLowerCase().includes('thc') ? '120' : charge.toLowerCase().includes('b/l') ? '40' : charge.toLowerCase().includes('seal') ? '10' : '65') : '0'}
                                 </span>
@@ -1258,7 +1237,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                         ))
                       ) : (
                         <tr className="hover:bg-slate-50/80 transition-colors">
-                          <td className="py-2.5 px-4 border-r border-slate-200 font-semibold text-slate-600 italic pl-6">
+                          <td className="py-2.5 px-4 border-r border-slate-200 font-semibold text-slate-600 italic">
                             Theo biểu phí phụ phí chuẩn ban hành của nhà vận tải / cảng biển.
                           </td>
                           <td className="py-2.5 px-3 text-center border-r border-slate-200 text-slate-400">—</td>
@@ -1274,7 +1253,6 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       <tr className="bg-purple-50/70 font-black text-slate-800 text-[11px] uppercase tracking-wider border-t-2 border-purple-100">
                         <td colSpan={3} className="py-2 px-4 border-r border-slate-200">
                           <div className="flex items-center gap-2">
-                            <Sparkles className="w-3.5 h-3.5 text-purple-600" />
                             <span>{getServiceSection2Title()}</span>
                             {inquiry.selectedVAS && inquiry.selectedVAS.length > 0 && (
                               <span className="text-[10px] font-bold text-purple-700 bg-purple-100/70 px-2 py-0.5 rounded-md border border-purple-200 lowercase tracking-normal">
@@ -1289,8 +1267,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                         inquiry.selectedVAS.map((vas, idx) => (
                           <tr key={idx} className="hover:bg-slate-50/80 transition-colors">
                             <td className="py-2 px-4 border-r border-slate-200">
-                              <div className="font-medium text-slate-800 flex items-center gap-2 pl-2">
-                                <Check className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                              <div className="font-medium text-slate-800">
                                 <span>{vas}</span>
                               </div>
                             </td>
@@ -1298,8 +1275,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                               {getVasUnit(vas)}
                             </td>
                             <td className="py-2 px-4 text-center border-r border-slate-200">
-                              <div className="inline-flex items-center justify-between gap-2 w-full bg-white border border-slate-200 rounded-lg px-3 py-1 shadow-2xs">
-                                <span className="text-slate-400 font-bold">{isOcean ? '$' : '₫'}</span>
+                              <div className="inline-flex items-center justify-center w-full bg-white border border-slate-200 rounded-lg px-3 py-1 shadow-2xs">
                                 <span className="font-mono font-bold text-slate-700 text-xs">0</span>
                               </div>
                             </td>
@@ -1307,7 +1283,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                         ))
                       ) : (
                         <tr className="hover:bg-slate-50/80 transition-colors">
-                          <td className="py-2.5 px-4 border-r border-slate-200 font-semibold text-slate-500 italic pl-6">
+                          <td className="py-2.5 px-4 border-r border-slate-200 font-semibold text-slate-500 italic">
                             Không yêu cầu thêm dịch vụ giá trị gia tăng phụ trợ.
                           </td>
                           <td className="py-2.5 px-3 text-center border-r border-slate-200 text-slate-400">—</td>
@@ -1352,15 +1328,6 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
           </div>
 
           <div className="flex items-center gap-2.5">
-            {/* Quick tab switcher in footer */}
-            <button
-              type="button"
-              onClick={() => setActiveTab(activeTab === 'profile_cargo' ? 'tariff_sheet' : 'profile_cargo')}
-              className="px-4 py-2.5 rounded-xl border border-indigo-200 bg-indigo-50 text-indigo-700 text-xs font-bold hover:bg-indigo-100 transition-colors cursor-pointer hidden sm:flex items-center gap-1.5"
-            >
-              <span>Xem {activeTab === 'profile_cargo' ? 'Tab 2: Bảng Niêm Yết Giá →' : '← Tab 1: Khách Hàng & Hàng Hóa'}</span>
-            </button>
-
             {isPublished ? (
               <button
                 type="button"
@@ -1392,7 +1359,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                 className="px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs sm:text-sm font-black rounded-xl transition-all shadow-lg shadow-emerald-600/20 flex items-center space-x-2 cursor-pointer scale-100 hover:scale-[1.02] active:scale-[0.98]"
               >
                 <Send className="w-4 h-4" />
-                <span>Xác Nhận Phát Hành Yêu Cầu (Confirm & Publish)</span>
+                <span>Xác nhận</span>
               </button>
             )}
           </div>

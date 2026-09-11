@@ -54,6 +54,10 @@ interface OceanInquiryFormProps {
   destination: string;
   setDestination: (val: string) => void;
   cargoClassification?: 'General' | 'Reefer' | 'Hazmat';
+  weightKg?: string;
+  setWeightKg?: (val: string) => void;
+  volumeCbm?: string;
+  setVolumeCbm?: (val: string) => void;
 }
 
 export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
@@ -64,6 +68,10 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
   destination,
   setDestination,
   cargoClassification = 'General',
+  weightKg,
+  setWeightKg,
+  volumeCbm,
+  setVolumeCbm,
 }) => {
   const isLclDisabled = cargoClassification === 'Reefer' || cargoClassification === 'Hazmat';
 
@@ -86,6 +94,7 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
   };
 
   const isFCL = specs.mode === 'FCL (Full Container)';
+  const isLCL = specs.mode === 'LCL (Hàng lẻ đóng ghép CFS)';
 
   // Helper for LCL auto calculation
   const handleLclDimChange = (dimKey: 'lengthCm' | 'widthCm' | 'heightCm', val: number | undefined) => {
@@ -167,7 +176,9 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
               ? '🛬 Mua / nhập hàng về VN'
               : specs.tradeRole === 'Nội địa (Domestic)'
               ? '🇻🇳 Vận tải ven biển nội địa'
-              : '🛫 Bán / xuất khẩu ra quốc tế'}
+              : specs.tradeRole === 'Xuất khẩu (Export)'
+              ? '🛫 Bán / xuất khẩu ra quốc tế'
+              : 'Chưa chọn'}
           </span>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
@@ -188,7 +199,7 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
               sub: 'Tuyến Bắc - Trung - Nam',
             },
           ].map((item) => {
-            const isSelected = (specs.tradeRole || 'Xuất khẩu (Export)') === item.role;
+            const isSelected = specs.tradeRole === item.role;
             return (
               <button
                 type="button"
@@ -255,7 +266,7 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
             className={`p-3 rounded-xl border text-left transition-all ${
               isLclDisabled
                 ? 'border-slate-200 bg-slate-100/80 opacity-60 cursor-not-allowed text-slate-400'
-                : !isFCL
+                : isLCL
                 ? 'border-cyan-600 bg-cyan-50/70 font-bold text-cyan-950 cursor-pointer shadow-2xs'
                 : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 cursor-pointer'
             }`}
@@ -266,7 +277,7 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
                 <span className="text-[10px] bg-rose-100 text-rose-700 px-2 py-0.5 rounded-md font-bold border border-rose-200">
                   🚫 Không hỗ trợ
                 </span>
-              ) : !isFCL ? (
+              ) : isLCL ? (
                 <span className="text-[10px] bg-cyan-600 text-white px-2 py-0.5 rounded-md font-bold">
                   Đang chọn
                 </span>
@@ -437,6 +448,55 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
             </span>
           </div>
 
+          {/* Row: Total Weight & Volume for Ocean FCL */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Tổng Khối Lượng (kg) *
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={weightKg || (specs.grossWeightKgs ? specs.grossWeightKgs.toString() : '')}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (setWeightKg) setWeightKg(val);
+                    const num = parseFloat(val.replace(/\./g, '').replace(/,/g, '.'));
+                    updateSpec('grossWeightKgs', isNaN(num) ? undefined : num);
+                  }}
+                  placeholder="VD: 15.000"
+                  className="w-full h-10 pl-3.5 pr-10 text-xs bg-white border border-slate-200 rounded-xl focus:border-cyan-500 font-bold text-slate-900 shadow-2xs"
+                />
+                <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 pointer-events-none">
+                  kg
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Tổng Thể Tích (cbm) *
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={volumeCbm || (specs.cbmVolume ? specs.cbmVolume.toString() : '')}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (setVolumeCbm) setVolumeCbm(val);
+                    const num = parseFloat(val.replace(/,/g, '.'));
+                    updateSpec('cbmVolume', isNaN(num) ? undefined : num);
+                  }}
+                  placeholder="VD: 45"
+                  className="w-full h-10 pl-3.5 pr-12 text-xs bg-white border border-slate-200 rounded-xl focus:border-cyan-500 font-bold text-slate-900 shadow-2xs"
+                />
+                <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 pointer-events-none">
+                  cbm
+                </span>
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
@@ -516,7 +576,7 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
       )}
 
       {/* LCL CFS CONFIGURATION (Dimensions, Weight, CBM, Chargeable Weight & Stackable) */}
-      {!isFCL && (
+      {isLCL && (
         <div className="space-y-4 pt-1 animate-in fade-in duration-150">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <span className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
@@ -552,7 +612,7 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
                 <input
                   type="checkbox"
                   id="lclStackableCheck"
-                  checked={specs.lclStackable ?? true}
+                  checked={Boolean(specs.lclStackable)}
                   onChange={(e) => updateSpec('lclStackable', e.target.checked)}
                   className="rounded-sm text-cyan-600 focus:ring-cyan-500 w-4 h-4 cursor-pointer"
                 />

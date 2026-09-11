@@ -2164,8 +2164,8 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                 />
               </div>
 
-              {/* Row 3: Weight & Volume for Transport Services (Hidden for Warehousing and Trucking since Trucking FTL declares in Tab 4 and LTL declares in LTL specs) */}
-              {serviceType !== 'Warehousing' && serviceType !== 'Trucking' && (
+              {/* Row 3: Weight & Volume for Customs Clearance only (Moved to Tab 4 for Sea Freight, Rail Freight, Air, Trucking, Cross-Border) */}
+              {serviceType === 'Customs Clearance' && (
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
                     Tổng Khối Lượng (kg) *
@@ -2185,7 +2185,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                 </div>
               )}
 
-              {serviceType !== 'Warehousing' && serviceType !== 'Trucking' && (
+              {serviceType === 'Customs Clearance' && (
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
                     Tổng Thể Tích (cbm) *
@@ -2347,6 +2347,10 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                 destination={destination}
                 setDestination={setDestination}
                 cargoClassification={cargoClassification}
+                weightKg={weightKg}
+                setWeightKg={setWeightKg}
+                volumeCbm={volumeCbm}
+                setVolumeCbm={setVolumeCbm}
               />
             )}
 
@@ -2370,6 +2374,10 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                 destination={destination}
                 setDestination={setDestination}
                 cargoClassification={cargoClassification}
+                weightKg={weightKg}
+                setWeightKg={setWeightKg}
+                volumeCbm={volumeCbm}
+                setVolumeCbm={setVolumeCbm}
               />
             )}
 
@@ -2416,6 +2424,10 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                 setOrigin={setOrigin}
                 destination={destination}
                 setDestination={setDestination}
+                weightKg={weightKg}
+                setWeightKg={setWeightKg}
+                volumeCbm={volumeCbm}
+                setVolumeCbm={setVolumeCbm}
               />
             )}
 
@@ -2619,8 +2631,13 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                   type="date"
                   required
                   value={expiryDate}
+                  onClick={(e) => {
+                    try {
+                      e.currentTarget.showPicker?.();
+                    } catch (_) {}
+                  }}
                   onChange={(e) => setExpiryDate(e.target.value)}
-                  className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-amber-500 font-medium text-slate-800 shadow-2xs"
+                  className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-amber-500 font-medium text-slate-800 shadow-2xs cursor-pointer"
                 />
               </div>
 
@@ -2637,8 +2654,13 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                   type="date"
                   required
                   value={pickupDate}
+                  onClick={(e) => {
+                    try {
+                      e.currentTarget.showPicker?.();
+                    } catch (_) {}
+                  }}
                   onChange={(e) => setPickupDate(e.target.value)}
-                  className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-medium text-slate-800 shadow-2xs"
+                  className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-medium text-slate-800 shadow-2xs cursor-pointer"
                 />
               </div>
 
@@ -2655,8 +2677,13 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                   type="date"
                   required
                   value={deliveryDate}
+                  onClick={(e) => {
+                    try {
+                      e.currentTarget.showPicker?.();
+                    } catch (_) {}
+                  }}
                   onChange={(e) => setDeliveryDate(e.target.value)}
-                  className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-medium text-slate-800 shadow-2xs"
+                  className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-medium text-slate-800 shadow-2xs cursor-pointer"
                 />
               </div>
             </div>
