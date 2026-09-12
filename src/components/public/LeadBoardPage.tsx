@@ -67,6 +67,7 @@ import {
 } from 'lucide-react';
 import { SupplierLeadItem, ServiceType, CurrentView, UserPersona, PricingType, LeadStatus, QuotationItem, FlexCreditWallet } from '../../types';
 import { SupplierLeadCompareModal } from '../supplier/SupplierLeadCompareModal';
+import { InquirySummaryConfirmModal } from '../customer/InquirySummaryConfirmModal';
 import { LeadInquiryDetailCard } from './LeadInquiryDetailCard';
 
 interface LeadBoardPageProps {
@@ -127,6 +128,7 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [expandedLeadIds, setExpandedLeadIds] = useState<Record<string, boolean>>({});
   const [unlockedLeadIds, setUnlockedLeadIds] = useState<Record<string, boolean>>({});
+  const [selectedDetailLead, setSelectedDetailLead] = useState<SupplierLeadItem | null>(null);
   const [activeCompareModalLead, setActiveCompareModalLead] = useState<SupplierLeadItem | null>(null);
   const [leadToUnlockConfirm, setLeadToUnlockConfirm] = useState<SupplierLeadItem | null>(null);
   const [unlockToastMessage, setUnlockToastMessage] = useState<string | null>(null);
@@ -769,11 +771,10 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
     // 3. Hàng không (Air Freight)
     if (sType === 'Air Freight') {
       const isExpress = specs?.air?.airServiceType === 'Express / Courier' || 
-                        specs?.air?.serviceLevel?.toLowerCase().includes('priority') ||
                         textContext.includes('express') || 
                         textContext.includes('hỏa tốc') || 
                         textContext.includes('chuyển phát');
-      return isExpress ? 'Express' : 'Air Freight';
+      return isExpress ? 'Express' : 'Cargo';
     }
 
     // 4. Đường sắt (Rail Freight)
@@ -1202,9 +1203,12 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
                     <React.Fragment key={lead.id}>
                       <tr
                         id={`lead-row-${lead.code}`}
-                        onClick={() => toggleExpand(lead.id)}
+                        onClick={() => {
+                          setSelectedDetailLead(lead);
+                          if (onIncrementLeadViews) onIncrementLeadViews(lead.id);
+                        }}
                         className={`hover:bg-indigo-50/40 transition-colors cursor-pointer group ${
-                          isExpanded ? 'bg-indigo-50/30' : index % 2 === 1 ? 'bg-slate-50/40' : 'bg-white'
+                          index % 2 === 1 ? 'bg-slate-50/40' : 'bg-white'
                         }`}
                       >
                         {/* Cột 1: STT */}
@@ -1292,46 +1296,23 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
                           </div>
                         </td>
 
-                        {/* Cột 10: Thao Tác (Chỉ 1 nút Xem Chi Tiết / Đóng gọn gàng) */}
+                        {/* Cột 10: Thao Tác (Chỉ 1 nút Xem Chi Tiết mở Modal) */}
                         <td className="py-2.5 px-2 text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                           <button
-                            id={`toggle-lead-btn-${lead.code}`}
+                            id={`view-detail-lead-btn-${lead.code}`}
                             type="button"
-                            onClick={(e) => toggleExpand(lead.id, e)}
-                            className={`px-2.5 py-1 text-xs font-bold rounded-xl transition-all inline-flex items-center justify-center gap-1 cursor-pointer shadow-2xs ${
-                              isExpanded
-                                ? 'bg-indigo-600 text-white shadow-xs'
-                                : 'bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 hover:border-indigo-300'
-                            }`}
-                            title={isExpanded ? 'Thu gọn chi tiết lead' : 'Mở xem chi tiết hồ sơ'}
+                            onClick={() => {
+                              setSelectedDetailLead(lead);
+                              if (onIncrementLeadViews) onIncrementLeadViews(lead.id);
+                            }}
+                            className="px-2.5 py-1 text-xs font-bold rounded-xl transition-all inline-flex items-center justify-center gap-1 cursor-pointer shadow-2xs bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 hover:border-indigo-300"
+                            title="Mở xem tóm tắt yêu cầu báo giá"
                           >
-                            <span>{isExpanded ? 'Đóng' : 'Xem chi tiết'}</span>
-                            {isExpanded ? (
-                              <ChevronUp className="w-3.5 h-3.5" />
-                            ) : (
-                              <ChevronDown className="w-3.5 h-3.5" />
-                            )}
+                            <span>Xem chi tiết</span>
+                            <ChevronRight className="w-3.5 h-3.5" />
                           </button>
                         </td>
                       </tr>
-
-                      {/* Expandable Technical Specs Row */}
-                      {isExpanded && (
-                        <tr className="bg-indigo-50/40 border-b border-indigo-100">
-                          <td colSpan={10} className="p-3 sm:p-4">
-                            <LeadInquiryDetailCard
-                              lead={lead}
-                              isUnlocked={isUnlocked}
-                              maskCompanyName={maskCompanyName}
-                              maskContactPerson={maskContactPerson}
-                              onUnlockClick={() => handleUnlockLead(lead)}
-                              onOpenCreateQuotation={onOpenCreateQuotation}
-                              onToggleSaveLead={handleToggleSave}
-                              onCompareClick={handleOpenCompareModal}
-                            />
-                          </td>
-                        </tr>
-                      )}
                     </React.Fragment>
                   );
                 })
@@ -1632,6 +1613,28 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
           onUnlockWithCredit={(leadId, creditCost) => confirmUnlockWithCredit(leadId, creditCost)}
           onSubmitQuotation={onSubmitQuotation || (() => {})}
           onNavigate={onNavigate}
+        />
+      )}
+
+      {/* INQUIRY SUMMARY CONFIRM MODAL (TÓM TẮT YÊU CẦU BÁO GIÁ CHO SUPPLIER) */}
+      {selectedDetailLead && (
+        <InquirySummaryConfirmModal
+          isOpen={Boolean(selectedDetailLead)}
+          inquiry={selectedDetailLead.inquiry || null}
+          lead={selectedDetailLead}
+          isSupplierView={true}
+          isUnlocked={Boolean(unlockedLeadIds[selectedDetailLead.id] || selectedDetailLead.isUnlocked)}
+          onUnlock={() => {
+            confirmUnlockWithCredit(selectedDetailLead.id, 50);
+            setSelectedDetailLead((prev) => (prev ? { ...prev, isUnlocked: true } : null));
+          }}
+          isSaved={Boolean(selectedDetailLead.isSaved)}
+          onSaveLead={() => handleToggleSave(selectedDetailLead)}
+          onClose={() => setSelectedDetailLead(null)}
+          onConfirm={() => {}}
+          matchingSuppliersCount={selectedDetailLead.quotesCount || 0}
+          quotations={quotations}
+          onSubmitQuotation={onSubmitQuotation}
         />
       )}
     </div>

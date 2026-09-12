@@ -294,17 +294,22 @@ export interface CustomsInquirySpecs {
   committedVolume?: number;
   committedFrequency?: string;
   tradeRole?: 'Xuất khẩu (Export)' | 'Nhập khẩu (Import)';
+  declarationEntity?: 'Chủ hàng đứng tên trực tiếp (Token DN)' | 'Đại lý Hải quan đứng tên (Khai thuê Đại lý)' | string;
   cargoValue?: number | string;
   cargoValueCurrency?: string;
-  declarationType: 'Nhập khẩu kinh doanh (A11)' | 'Nhập gia công (E21)' | 'Nhập SXXK (E31)' | 'Xuất khẩu kinh doanh (B11)' | 'Xuất SXXK (E62)' | 'Tạm nhập tái xuất (G11)' | 'Phi mậu dịch (H11)';
+  declarationType?: string;
   customsSubDepartment: string; // Chi cục Hải quan Cát Lái, Cảng Hải Phòng, Nội Bài, Tân Sơn Nhất, v.v.
+  portOrBorderGate?: string; // Cảng biển / Sân bay / Cửa khẩu / ICD nhận hoặc xuất hàng thực tế
+  declarationCount?: number;
+  declarationFrequencyUnit?: string;
   hsCodePrimary: string;
   itemDescription: string;
   invoiceValueUSD?: number;
-  coFormRequested?: 'Form E (ASEAN-China)' | 'Form D (ASEAN)' | 'Form EUR.1 (EVFTA)' | 'Form AK (Korea)' | 'Form VJ (Japan)' | 'Không yêu cầu';
-  specializedInspectionType?: 'Kiểm dịch thực vật / động vật' | 'Vệ sinh An toàn Thực phẩm' | 'Kiểm tra Hiệu suất Năng lượng' | 'Giám định Chất lượng Hàng hóa' | 'Không có';
+  coFormRequested?: 'Form E (ASEAN-China)' | 'Form D (ASEAN)' | 'Form EUR.1 (EVFTA)' | 'Form AK (Korea)' | 'Form VJ (Japan)' | 'Không yêu cầu' | string;
+  specializedInspectionType?: 'Kiểm dịch thực vật / động vật' | 'Vệ sinh An toàn Thực phẩm' | 'Kiểm tra Hiệu suất Năng lượng' | 'Giám định Chất lượng Hàng hóa' | 'Không có' | string;
   redChannelInspectionSupport: boolean;
   selectedVAS?: string[];
+  selectedSurcharges?: string[];
 }
 
 export interface CrossBorderInquirySpecs {
@@ -327,6 +332,7 @@ export interface CrossBorderInquirySpecs {
   cargoMode: 'Xe liên vận chạy thẳng (Direct GMS)' | 'Sang tải / Đổi đầu kéo tại cửa khẩu (Transshipment)';
   customsScope?: 'Chỉ cước vận chuyển (Chủ hàng tự làm HQ)' | 'Thông quan Hải quan đầu VN' | 'Thông quan Trọn gói 2 đầu (VN + Nước bạn)';
   vehicleType?: string;
+  tonnageCategory?: string;
   vehicleCount?: number;
   shipmentCount?: number;
   frequencyUnit?: string;
@@ -344,6 +350,7 @@ export interface CrossBorderInquirySpecs {
   hsCode?: string;
   cargoValue?: number | string;
   cargoValueCurrency?: string;
+  stackable?: boolean;
   selectedVAS?: string[];
 }
 

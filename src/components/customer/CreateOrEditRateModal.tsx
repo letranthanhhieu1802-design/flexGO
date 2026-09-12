@@ -228,6 +228,8 @@ export const CreateOrEditRateModal: React.FC<CreateOrEditRateModalProps> = ({
       originCity: 'Bắc Ninh, Việt Nam',
       destinationCity: 'Bằng Tường (Pingxiang), Quảng Tây, Trung Quốc',
       cargoMode: 'Xe liên vận chạy thẳng (Direct GMS)',
+      vehicleType: 'Đầu Kéo Container Kín (Dry Box Container)',
+      tonnageCategory: 'Container 40ft High Cube (40HC) — [Tải 28 - 30 Tấn / 76 CBM]',
       vehicleCount: 2,
       customsAtBorderIncluded: true,
       transitPermitGMSNeeded: true,

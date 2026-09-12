@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { Globe, MapPin, Flag, ArrowLeftRight, Truck, Package, ShieldCheck, Clock, FileText, Anchor, Sparkles, Plus, Trash2, Box } from 'lucide-react';
+import React, { useMemo, useEffect } from 'react';
+import { Plus, Trash2 } from 'lucide-react';
 import { CrossBorderInquirySpecs } from '../../../types';
 import { VASItemDef } from './VASSection';
 
@@ -58,36 +58,63 @@ export const CROSS_BORDER_VAS_ITEMS: VASItemDef[] = [
   },
 ];
 
-const CROSS_BORDER_VEHICLES = [
+interface CrossBorderVehicleType {
+  id: string;
+  name: string;
+  desc: string;
+  tonnages: {
+    id: string;
+    label: string;
+  }[];
+}
+
+const CROSS_BORDER_VEHICLE_TYPES: CrossBorderVehicleType[] = [
   {
-    id: 'cont-40hc',
-    name: 'Đầu Kéo Container 40ft High Cube (40HC) — [Tiêu chuẩn 2.9m / 68 CBM]',
-    desc: 'Phổ biến nhất cho hàng tiêu dùng, điện tử, linh kiện, may mặc đóng cont kín',
+    id: 'cont-dry',
+    name: 'Đầu Kéo Container Kín (Dry Box Container)',
+    desc: 'Phổ biến cho hàng tiêu dùng, dệt may, điện tử, linh kiện đóng cont kín tiêu chuẩn',
+    tonnages: [
+      { id: 'cb-cont-40hc', label: 'Container 40ft High Cube (40HC) — [Tải 28 - 30 Tấn / 76 CBM]' },
+      { id: 'cb-cont-20gp', label: 'Container 20ft Tiêu Chuẩn (20GP) — [Tải 25 - 28 Tấn / 33 CBM]' },
+      { id: 'cb-cont-45hc', label: 'Container 45ft High Cube (45HC) — [Tải 28 - 30 Tấn / 86 CBM]' },
+    ],
   },
   {
-    id: 'cont-40rf',
-    name: 'Đầu Kéo Container Lạnh 40ft Reefer (40RF) — [Dải nhiệt kiểm soát / Genset]',
-    desc: 'Trái cây xuất khẩu (sầu riêng, thanh long), nông sản, thủy hải sản, thực phẩm đông lạnh',
+    id: 'cont-reefer',
+    name: 'Đầu Kéo Container Lạnh (Reefer Container)',
+    desc: 'Trái cây xuất khẩu (sầu riêng, thanh long), nông sản, thủy hải sản, có máy phát Genset',
+    tonnages: [
+      { id: 'cb-cont-40rf', label: 'Container 40ft Lạnh (40RF) — [Tải 26 - 28 Tấn / Máy phát Genset]' },
+      { id: 'cb-cont-20rf', label: 'Container 20ft Lạnh (20RF) — [Tải 22 - 24 Tấn / Máy phát Genset]' },
+    ],
   },
   {
-    id: 'cont-20gp',
-    name: 'Đầu Kéo Container 20ft (20GP / 20RF) — [Hàng nặng / Quặng / Hóa chất 28-30T]',
-    desc: 'Hàng có trọng lượng lớn, hóa chất, nguyên liệu công nghiệp nặng',
+    id: 'truck-box',
+    name: 'Xe Tải Thùng Kín Liên Vận GMS (Box Truck)',
+    desc: 'Chạy thẳng nội đô Campuchia / Lào, an ninh cao có niêm phong kẹp chì hải quan',
+    tonnages: [
+      { id: 'cb-truck-15t', label: 'Xe Tải 15.0 Tấn (3 Chân GMS) — [Dài 9.5m / 55 - 60 CBM]' },
+      { id: 'cb-truck-18t', label: 'Xe Tải 18.0 Tấn (4 Chân GMS) — [Dài 9.6m / 60 - 65 CBM]' },
+      { id: 'cb-truck-8t', label: 'Xe Tải 8.0 Tấn (2 Chân GMS) — [Dài 8.2m / 42 - 45 CBM]' },
+    ],
   },
   {
-    id: 'truck-15t-box',
-    name: 'Xe Tải Thùng Kín 15.0T (3 Chân liên vận GMS) — [Dài 9.5m / 55 - 60 CBM]',
-    desc: 'Chạy thẳng nội đô Campuchia / Lào, an ninh cao có niêm phong kẹp chì',
-  },
-  {
-    id: 'truck-15t-tarpaulin',
-    name: 'Xe Tải Mui Bạt 15.0T - 18.0T (3-4 Chân) — [Dễ cẩu nóc / Nông sản]',
-    desc: 'Bốc dỡ hàng máy móc từ trên nóc thùng hoặc hàng bao tải',
+    id: 'truck-tarpaulin',
+    name: 'Xe Tải Mui Bạt (Tarpaulin Truck)',
+    desc: 'Bốc dỡ hàng máy móc từ trên nóc thùng bằng cẩu hoặc bốc hàng bao tải 2 bên hông',
+    tonnages: [
+      { id: 'cb-tarp-15t', label: 'Xe Tải Mui Bạt 15.0 Tấn (3 Chân) — [Dài 9.5m / Mở nóc cẩu hàng]' },
+      { id: 'cb-tarp-18t', label: 'Xe Tải Mui Bạt 18.0 Tấn (4 Chân) — [Dài 9.6m / Mở bạt 2 bên hông]' },
+    ],
   },
   {
     id: 'flatbed-lowbed',
-    name: 'Đầu Kéo Sơ-mi Rơ-moóc Sàn / Lùn (Flatbed / Lowbed) — [Máy móc, Thiết bị quá khổ]',
-    desc: 'Hàng cơ giới, thép cuộn, cấu kiện công trình xây dựng nhà máy',
+    name: 'Sơ-mi Rơ-moóc Sàn / Sàn Lùn (Flatbed / Lowbed)',
+    desc: 'Hàng cơ giới, thép cuộn, cấu kiện công trình xây dựng, hàng siêu trường siêu trọng',
+    tonnages: [
+      { id: 'cb-flatbed-40ft', label: 'Moóc Sàn (Flatbed 40ft) — [Tải 30 - 32 Tấn / Dài 12.4m]' },
+      { id: 'cb-lowbed-heavy', label: 'Moóc Sàn Lùn (Lowbed) — [Tải 35 - 45 Tấn / Quá khổ quá tải]' },
+    ],
   },
 ];
 
@@ -98,6 +125,7 @@ interface CrossBorderInquiryFormProps {
   setOrigin: (val: string) => void;
   destination: string;
   setDestination: (val: string) => void;
+  cargoClassification?: 'General' | 'Reefer' | 'Hazmat';
   weightKg?: string;
   setWeightKg?: (val: string) => void;
   volumeCbm?: string;
@@ -111,11 +139,26 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
   setOrigin,
   destination,
   setDestination,
+  cargoClassification = 'General',
   weightKg,
   setWeightKg,
   volumeCbm,
   setVolumeCbm,
 }) => {
+  const isReefer = cargoClassification === 'Reefer';
+  const isHazmat = cargoClassification === 'Hazmat';
+  const isSpecialCargo = isReefer || isHazmat;
+
+  // Auto force FTL if Reefer or Hazmat
+  useEffect(() => {
+    if (isSpecialCargo && specs.loadType !== 'FTL (Nguyên chuyến / Nguyên cont)') {
+      onChange({
+        ...specs,
+        loadType: 'FTL (Nguyên chuyến / Nguyên cont)',
+      });
+    }
+  }, [isSpecialCargo, specs, onChange]);
+
   const updateSpec = <K extends keyof CrossBorderInquirySpecs>(key: K, value: CrossBorderInquirySpecs[K]) => {
     onChange({
       ...specs,
@@ -208,6 +251,18 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
     return [destination || ''];
   }, [specs.deliveryLocations, destination, isLTL]);
 
+  const selectedVehicleType = useMemo(() => {
+    if (!specs.vehicleType) return undefined;
+    return (
+      CROSS_BORDER_VEHICLE_TYPES.find((v) => v.name === specs.vehicleType) ||
+      CROSS_BORDER_VEHICLE_TYPES.find(
+        (v) =>
+          specs.vehicleType?.includes(v.name) ||
+          v.name.includes(specs.vehicleType || '')
+      )
+    );
+  }, [specs.vehicleType]);
+
   const handlePickupLocationChange = (index: number, val: string) => {
     const newLocations = [...pickupLocations];
     newLocations[index] = val;
@@ -287,34 +342,32 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
     <div className="space-y-5 animate-in fade-in duration-200">
       {/* 1. Load Mode: FTL vs LTL */}
       <div className="space-y-1.5">
-        <div className="flex items-center justify-between">
-          <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
-            <Truck className="w-3.5 h-3.5 text-orange-600" />
-            <span>Hình Thức Vận Chuyển (Load Mode) *</span>
-          </label>
-          <span className="text-[10px] font-bold text-orange-800 bg-orange-50 px-2 py-0.5 rounded-md border border-orange-200">
-            {isFTL ? '🚚 Vận chuyển nguyên xe / cont' : isLTL ? '📦 Ghép hàng lẻ phân phối' : 'Chưa chọn'}
-          </span>
-        </div>
+        <label className="block text-xs font-bold text-slate-800">
+          Hình Thức Vận Chuyển (Load Mode) *
+        </label>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {[
             {
               type: 'FTL (Nguyên chuyến / Nguyên cont)',
-              title: '🚚 FTL - Bao Nguyên Xe / Cont (Full Truckload)',
+              title: 'FTL - Bao Nguyên Xe / Cont (Full Truckload)',
               desc: 'Thuê trọn cont/xe, bốc dỡ linh hoạt, giao thẳng không sang xe hoặc sang tải cả xe. Hỗ trợ đa điểm.',
             },
             {
               type: 'LTL (Ghép hàng lẻ)',
-              title: '📦 LTL - Ghép Hàng Lẻ Xuyên Biên Giới (Less-Than-Truckload)',
+              title: 'LTL - Ghép Hàng Lẻ Xuyên Biên Giới (Less-Than-Truckload)',
               desc: 'Tính cước theo CBM/Kg quy đổi. Cố định 1 điểm lấy - 1 điểm giao qua kho gom phân phối.',
             },
           ].map((item) => {
             const isSelected = specs.loadType === item.type;
+            const isLtlItem = item.type === 'LTL (Ghép hàng lẻ)';
+            const isDisabled = isLtlItem && isSpecialCargo;
             return (
               <button
                 type="button"
                 key={item.type}
+                disabled={isDisabled}
                 onClick={() => {
+                  if (isDisabled) return;
                   updateSpec('loadType', item.type as any);
                   if (item.type === 'LTL (Ghép hàng lẻ)') {
                     onChange({
@@ -328,17 +381,19 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
                     });
                   }
                 }}
-                className={`p-3 rounded-xl border text-left cursor-pointer transition-all ${
-                  isSelected
-                    ? 'border-orange-600 bg-orange-50/80 font-bold text-orange-950 shadow-2xs'
-                    : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
+                className={`p-3 rounded-xl border text-left transition-all ${
+                  isDisabled
+                    ? 'border-slate-200 bg-slate-100/70 text-slate-400 opacity-40 cursor-not-allowed select-none'
+                    : isSelected
+                      ? 'border-orange-600 bg-orange-50/80 font-bold text-orange-950 shadow-2xs cursor-pointer'
+                      : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 cursor-pointer'
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold">{item.title}</span>
-                  {isSelected && <span className="w-2 h-2 rounded-full bg-orange-600 shrink-0"></span>}
+                  {isSelected && !isDisabled && <span className="w-2 h-2 rounded-full bg-orange-600 shrink-0"></span>}
                 </div>
-                <p className="text-[11px] text-slate-500 mt-1 font-normal leading-relaxed">
+                <p className={`text-[11px] mt-1 font-normal leading-relaxed ${isDisabled ? 'text-slate-400' : 'text-slate-500'}`}>
                   {item.desc}
                 </p>
               </button>
@@ -349,9 +404,8 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
 
       {/* 2. Trade Role & Incoterms 2020 */}
       <div className="space-y-1.5">
-        <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
-          <ArrowLeftRight className="w-3.5 h-3.5 text-orange-700" />
-          <span>Vai Trò Doanh Nghiệp & Điều Kiện Thương Mại (Incoterms 2020) *</span>
+        <label className="block text-xs font-bold text-slate-800">
+          Vai Trò Doanh Nghiệp & Điều Kiện Thương Mại (Incoterms 2020) *
         </label>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
@@ -360,8 +414,8 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
             </label>
             <div className="grid grid-cols-2 gap-2">
               {[
-                { role: 'Xuất khẩu (Export)', title: '🛫 Tuyến Xuất Khẩu' },
-                { role: 'Nhập khẩu (Import)', title: '🛬 Tuyến Nhập Khẩu' },
+                { role: 'Xuất khẩu (Export)', title: 'Tuyến Xuất Khẩu' },
+                { role: 'Nhập khẩu (Import)', title: 'Tuyến Nhập Khẩu' },
               ].map((item) => {
                 const isSelected = specs.tradeRole === item.role;
                 return (
@@ -406,12 +460,8 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
 
       {/* 3. Border Gate Selection */}
       <div className="space-y-1.5">
-        <label className="block text-xs font-bold text-slate-800 flex items-center justify-between">
-          <span className="flex items-center gap-1.5">
-            <Flag className="w-3.5 h-3.5 text-orange-600" />
-            <span>Cửa Khẩu Biên Giới Qua Lại (Border Checkpoint) *</span>
-          </span>
-          <span className="text-[10px] text-orange-700 font-normal">Cửa khẩu quốc tế làm thủ tục GMS</span>
+        <label className="block text-xs font-bold text-slate-800">
+          Cửa Khẩu Biên Giới Qua Lại (Border Checkpoint) *
         </label>
         <select
           value={specs.borderGate || ''}
@@ -419,48 +469,48 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
           className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-bold text-orange-950 shadow-2xs cursor-pointer"
         >
           <option value="">-- Chọn Cửa Khẩu Biên Giới --</option>
-          <optgroup label="🇰🇭 Tuyến Cửa Khẩu Campuchia (Cambodia Route)">
+          <optgroup label="Tuyến Cửa Khẩu Campuchia (Cambodia Route)">
             <option value="Mộc Bài / Xa Mát (Tây Ninh VN ↔ Bavet / Phnom Penh Campuchia)">
-              🇰🇭 Cửa khẩu Quốc tế Mộc Bài / Xa Mát (Tây Ninh VN ↔ Bavet / Phnom Penh Campuchia)
+              Cửa khẩu Quốc tế Mộc Bài / Xa Mát (Tây Ninh VN ↔ Bavet / Phnom Penh Campuchia)
             </option>
             <option value="Hoa Lư (Bình Phước VN ↔ Trapeang Sre Campuchia)">
-              🇰🇭 Cửa khẩu Hoa Lư (Bình Phước VN ↔ Trapeang Sre / Kratie Campuchia)
+              Cửa khẩu Hoa Lư (Bình Phước VN ↔ Trapeang Sre / Kratie Campuchia)
             </option>
             <option value="Bình Hiệp (Long An VN ↔ Prey Vo Campuchia)">
-              🇰🇭 Cửa khẩu Quốc tế Bình Hiệp (Long An VN ↔ Prey Vo / Svay Rieng)
+              Cửa khẩu Quốc tế Bình Hiệp (Long An VN ↔ Prey Vo / Svay Rieng)
             </option>
             <option value="Tịnh Biên / Vĩnh Xương (An Giang VN ↔ Phnom Den / Kaam Samnor)">
-              🇰🇭 Cửa khẩu Tịnh Biên / Vĩnh Xương (An Giang VN ↔ Phnom Den / Kandal)
+              Cửa khẩu Tịnh Biên / Vĩnh Xương (An Giang VN ↔ Phnom Den / Kandal)
             </option>
           </optgroup>
 
-          <optgroup label="🇨🇳 Tuyến Cửa Khẩu Trung Quốc (China Route)">
+          <optgroup label="Tuyến Cửa Khẩu Trung Quốc (China Route)">
             <option value="Hữu Nghị / Tân Thanh (Lạng Sơn VN ↔ Bằng Tường / Hữu Nghị Quan TQ)">
-              🇨🇳 Cửa khẩu Quốc tế Hữu Nghị / Tân Thanh (Lạng Sơn VN ↔ Bằng Tường / Pingxiang Quảng Tây)
+              Cửa khẩu Quốc tế Hữu Nghị / Tân Thanh (Lạng Sơn VN ↔ Bằng Tường / Pingxiang Quảng Tây)
             </option>
             <option value="Móng Cái / Cầu Bắc Luân II (Quảng Ninh VN ↔ Đông Hưng Quảng Tây TQ)">
-              🇨🇳 Cửa khẩu Quốc tế Móng Cái / Bắc Luân II (Quảng Ninh VN ↔ Đông Hưng / Dongxing TQ)
+              Cửa khẩu Quốc tế Móng Cái / Bắc Luân II (Quảng Ninh VN ↔ Đông Hưng / Dongxing TQ)
             </option>
             <option value="Kim Thành (Lào Cai VN ↔ Hà Khẩu Vân Nam TQ)">
-              🇨🇳 Cửa khẩu Quốc tế Kim Thành (Lào Cai VN ↔ Hà Khẩu / Hekou Vân Nam TQ)
+              Cửa khẩu Quốc tế Kim Thành (Lào Cai VN ↔ Hà Khẩu / Hekou Vân Nam TQ)
             </option>
             <option value="Trà Lĩnh (Cao Bằng VN ↔ Long Bang TQ)">
-              🇨🇳 Cửa khẩu Quốc tế Trà Lĩnh (Cao Bằng VN ↔ Long Bang Quảng Tây TQ)
+              Cửa khẩu Quốc tế Trà Lĩnh (Cao Bằng VN ↔ Long Bang Quảng Tây TQ)
             </option>
           </optgroup>
 
-          <optgroup label="🇱🇦 🇹🇭 Tuyến Cửa Khẩu Lào & Thái Lan (Laos & Thailand Route)">
+          <optgroup label="Tuyến Cửa Khẩu Lào & Thái Lan (Laos & Thailand Route)">
             <option value="Lao Bảo (Quảng Trị VN ↔ Savannakhet Lào ↔ Mukdahan Thái Lan)">
-              🇱🇦 🇹🇭 Cửa khẩu Quốc tế Lao Bảo (Quảng Trị VN ↔ Savannakhet Lào ↔ Mukdahan Thái Lan)
+              Cửa khẩu Quốc tế Lao Bảo (Quảng Trị VN ↔ Savannakhet Lào ↔ Mukdahan Thái Lan)
             </option>
             <option value="Cha Lo (Quảng Bình VN ↔ Na Phao Lào ↔ Nakhon Phanom Thái Lan)">
-              🇱🇦 🇹🇭 Cửa khẩu Quốc tế Cha Lo (Quảng Bình VN ↔ Na Phao Lào ↔ Nakhon Phanom Thái Lan)
+              Cửa khẩu Quốc tế Cha Lo (Quảng Bình VN ↔ Na Phao Lào ↔ Nakhon Phanom Thái Lan)
             </option>
             <option value="Cầu Treo (Hà Tĩnh VN ↔ Namphao Lào ↔ Bolikhamxay)">
-              🇱🇦 Cửa khẩu Quốc tế Cầu Treo (Hà Tĩnh VN ↔ Namphao Lào ↔ Viêng Chăn)
+              Cửa khẩu Quốc tế Cầu Treo (Hà Tĩnh VN ↔ Namphao Lào ↔ Viêng Chăn)
             </option>
             <option value="Bờ Y (Kon Tum VN ↔ Phouvong Lào ↔ Attapeu)">
-              🇱🇦 Cửa khẩu Quốc tế Bờ Y (Kon Tum VN ↔ Phouvong Nam Lào)
+              Cửa khẩu Quốc tế Bờ Y (Kon Tum VN ↔ Phouvong Nam Lào)
             </option>
           </optgroup>
         </select>
@@ -468,44 +518,33 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
 
       {/* 4. Origin & Destination Terms & Multi-stop Addresses */}
       <div className="space-y-1.5">
-        <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
-          <MapPin className="w-3.5 h-3.5 text-orange-600" />
-          <span>Địa Điểm Lấy & Giao Hàng Xuyên Biên Giới *</span>
+        <label className="block text-xs font-bold text-slate-800">
+          Địa Điểm Lấy & Giao Hàng Xuyên Biên Giới *
         </label>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {/* Origin / Pickup Points */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <label className="block text-[11px] font-semibold text-slate-700 flex items-center gap-1">
-                <span>Điểm Lấy Hàng (Pickup) *</span>
+              <label className="block text-[11px] font-semibold text-slate-700">
+                Điểm Lấy Hàng (Pickup) *
               </label>
-              <div className="flex items-center gap-1.5">
-                <select
-                  value={specs.originTerm || ''}
-                  onChange={(e) => updateSpec('originTerm', e.target.value as any)}
-                  className="text-[11px] h-6 px-2 py-0 bg-white border border-slate-300 rounded-md font-bold text-orange-950 cursor-pointer"
-                >
-                  <option value="">-- Điều kiện lấy --</option>
-                  <option value="Door (Lấy tận nơi)">🏠 Door (Lấy tận nơi)</option>
-                  <option value="Border (Giao tại bãi cửa khẩu)">🚩 Border (Tại bãi cửa khẩu)</option>
-                </select>
-                {isFTL && (
-                  <span className="text-[10px] text-slate-500 font-bold bg-slate-100 px-1.5 py-0.5 rounded">
-                    {pickupLocations.length} Điểm
-                  </span>
-                )}
-              </div>
+              <select
+                value={specs.originTerm || ''}
+                onChange={(e) => updateSpec('originTerm', e.target.value as any)}
+                className="text-[11px] h-6 px-2 py-0 bg-white border border-slate-300 rounded-md font-bold text-orange-950 cursor-pointer"
+              >
+                <option value="">-- Điều kiện lấy --</option>
+                <option value="Door (Lấy tận nơi)">Door (Lấy tận nơi)</option>
+                <option value="Border (Giao tại bãi cửa khẩu)">Border (Tại bãi cửa khẩu)</option>
+              </select>
             </div>
 
             <div className="space-y-2">
               {pickupLocations.map((loc, idx) => (
                 <div key={idx} className="space-y-1">
                   <div className="flex items-center justify-between text-[11px]">
-                    <span className="font-semibold text-slate-600 flex items-center gap-1">
-                      <span className="w-4 h-4 rounded-full bg-orange-100 text-orange-800 text-[10px] font-bold flex items-center justify-center">
-                        {idx + 1}
-                      </span>
-                      <span>{idx === 0 ? 'Điểm lấy 1 (Kho chính) *' : `Điểm lấy ${idx + 1} (Gom phụ)`}</span>
+                    <span className="font-semibold text-slate-600">
+                      {idx === 0 ? 'Điểm lấy 1 (Kho chính) *' : `Điểm lấy ${idx + 1} (Gom phụ)`}
                     </span>
                     {isFTL && idx > 0 && (
                       <button
@@ -545,36 +584,26 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
           {/* Destination / Delivery Points */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <label className="block text-[11px] font-semibold text-slate-700 flex items-center gap-1">
-                <span>Điểm Giao Hàng (Delivery) *</span>
+              <label className="block text-[11px] font-semibold text-slate-700">
+                Điểm Giao Hàng (Delivery) *
               </label>
-              <div className="flex items-center gap-1.5">
-                <select
-                  value={specs.destinationTerm || ''}
-                  onChange={(e) => updateSpec('destinationTerm', e.target.value as any)}
-                  className="text-[11px] h-6 px-2 py-0 bg-white border border-slate-300 rounded-md font-bold text-rose-950 cursor-pointer"
-                >
-                  <option value="">-- Điều kiện giao --</option>
-                  <option value="Door (Giao tận nơi)">🏠 Door (Giao tận nơi)</option>
-                  <option value="Border (Nhận tại bãi cửa khẩu)">🚩 Border (Tại bãi cửa khẩu)</option>
-                </select>
-                {isFTL && (
-                  <span className="text-[10px] text-slate-500 font-bold bg-slate-100 px-1.5 py-0.5 rounded">
-                    {deliveryLocations.length} Điểm
-                  </span>
-                )}
-              </div>
+              <select
+                value={specs.destinationTerm || ''}
+                onChange={(e) => updateSpec('destinationTerm', e.target.value as any)}
+                className="text-[11px] h-6 px-2 py-0 bg-white border border-slate-300 rounded-md font-bold text-rose-950 cursor-pointer"
+              >
+                <option value="">-- Điều kiện giao --</option>
+                <option value="Door (Giao tận nơi)">Door (Giao tận nơi)</option>
+                <option value="Border (Nhận tại bãi cửa khẩu)">Border (Tại bãi cửa khẩu)</option>
+              </select>
             </div>
 
             <div className="space-y-2">
               {deliveryLocations.map((loc, idx) => (
                 <div key={idx} className="space-y-1">
                   <div className="flex items-center justify-between text-[11px]">
-                    <span className="font-semibold text-slate-600 flex items-center gap-1">
-                      <span className="w-4 h-4 rounded-full bg-rose-100 text-rose-800 text-[10px] font-bold flex items-center justify-center">
-                        {idx + 1}
-                      </span>
-                      <span>{idx === 0 ? 'Điểm giao 1 (Kho đích) *' : `Điểm giao ${idx + 1} (Multi-drop)`}</span>
+                    <span className="font-semibold text-slate-600">
+                      {idx === 0 ? 'Điểm giao 1 (Kho đích) *' : `Điểm giao ${idx + 1} (Multi-drop)`}
                     </span>
                     {isFTL && idx > 0 && (
                       <button
@@ -628,8 +657,8 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
               onChange={(e) => updateSpec('cargoMode', e.target.value as any)}
               className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-bold text-orange-950 shadow-2xs cursor-pointer"
             >
-              <option value="Xe liên vận chạy thẳng (Direct GMS)">🚛 Xe liên vận chạy thẳng không sang tải (Direct GMS)</option>
-              <option value="Sang tải / Đổi đầu kéo tại cửa khẩu (Transshipment)">🔄 Sang tải / Đổi đầu kéo tại bãi cửa khẩu (Transshipment)</option>
+              <option value="Xe liên vận chạy thẳng (Direct GMS)">Xe liên vận chạy thẳng không sang tải (Direct GMS)</option>
+              <option value="Sang tải / Đổi đầu kéo tại cửa khẩu (Transshipment)">Sang tải / Đổi đầu kéo tại bãi cửa khẩu (Transshipment)</option>
             </select>
           </div>
 
@@ -642,9 +671,9 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
               onChange={(e) => updateSpec('customsScope', e.target.value as any)}
               className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-bold text-orange-950 shadow-2xs cursor-pointer"
             >
-              <option value="Thông quan Trọn gói 2 đầu (VN + Nước bạn)">📑 Trọn gói Hải quan 2 đầu (Hải quan VN + Nước bạn)</option>
-              <option value="Thông quan Hải quan đầu VN">📑 Chỉ thông quan Hải quan đầu Việt Nam</option>
-              <option value="Chỉ cước vận chuyển (Chủ hàng tự làm HQ)">🚚 Chỉ vận chuyển thuần túy (Chủ hàng tự mở tờ khai)</option>
+              <option value="Thông quan Trọn gói 2 đầu (VN + Nước bạn)">Trọn gói Hải quan 2 đầu (Hải quan VN + Nước bạn)</option>
+              <option value="Thông quan Hải quan đầu VN">Chỉ thông quan Hải quan đầu Việt Nam</option>
+              <option value="Chỉ cước vận chuyển (Chủ hàng tự làm HQ)">Chỉ vận chuyển thuần túy (Chủ hàng tự mở tờ khai)</option>
             </select>
           </div>
         </div>
@@ -652,15 +681,9 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
 
       {/* 6. Vehicle Type, Trip Volume & Frequency, SLA */}
       <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
-            <Truck className="w-3.5 h-3.5 text-orange-600" />
-            <span>Cấu Hình Phương Tiện & Sản Lượng Chuyến ({isFTL ? 'FTL' : 'LTL'}) *</span>
-          </label>
-          <span className="text-[10px] font-bold text-orange-800 bg-orange-50 px-2 py-0.5 rounded-md border border-orange-200">
-            GMS Fleet Specs
-          </span>
-        </div>
+        <label className="block text-xs font-bold text-slate-800">
+          Cấu Hình Phương Tiện & Sản Lượng Chuyến ({isFTL ? 'FTL' : 'LTL'}) *
+        </label>
 
         {isFTL ? (
           /* FTL Fleet & Trip Volume */
@@ -714,22 +737,57 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
               </div>
             </div>
 
-            <div>
-              <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                Loại Phương Tiện / Container Xuyên Biên Giới *
-              </label>
-              <select
-                value={specs.vehicleType || ''}
-                onChange={(e) => updateSpec('vehicleType', e.target.value)}
-                className="w-full h-10 px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-bold text-orange-950 shadow-2xs cursor-pointer"
-              >
-                <option value="">-- Chọn Loại Phương Tiện --</option>
-                {CROSS_BORDER_VEHICLES.map((v) => (
-                  <option key={v.id} value={v.name}>
-                    {v.name}
+            {/* Row: Vehicle Type & Tonnage Category (2 columns) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                  Loại Phương Tiện / Thùng Xe *
+                </label>
+                <select
+                  value={specs.vehicleType || ''}
+                  onChange={(e) => {
+                    const newType = e.target.value;
+                    onChange({
+                      ...specs,
+                      vehicleType: newType,
+                      tonnageCategory: '',
+                    });
+                  }}
+                  className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-bold text-orange-950 shadow-2xs cursor-pointer"
+                >
+                  <option value="">-- Chọn Loại Phương Tiện --</option>
+                  {CROSS_BORDER_VEHICLE_TYPES.map((v) => (
+                    <option key={v.id} value={v.name}>
+                      {v.name}
+                    </option>
+                  ))}
+                </select>
+                {selectedVehicleType && (
+                  <p className="text-[11px] text-slate-500 mt-1 italic line-clamp-1">
+                    {selectedVehicleType.desc}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                  Phân Khúc Tải Trọng & Kích Cỡ *
+                </label>
+                <select
+                  value={specs.tonnageCategory || ''}
+                  onChange={(e) => updateSpec('tonnageCategory', e.target.value)}
+                  className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-bold text-orange-950 shadow-2xs cursor-pointer"
+                >
+                  <option value="">
+                    {selectedVehicleType ? '-- Chọn Phân Khúc Tải Trọng --' : '-- Vui lòng chọn Loại Phương Tiện trước --'}
                   </option>
-                ))}
-              </select>
+                  {selectedVehicleType?.tonnages.map((t) => (
+                    <option key={t.id} value={t.label}>
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -772,9 +830,8 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
             {/* SLA Leadtime for FTL */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-[11px] font-semibold text-slate-600 mb-1 flex items-center gap-1">
-                  <Clock className="w-3.5 h-3.5 text-orange-600" />
-                  <span>Thời Gian Giao Hàng Yêu Cầu (Leadtime / Transit SLA) *</span>
+                <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                  Thời Gian Giao Hàng Yêu Cầu (Leadtime / Transit SLA) *
                 </label>
                 <select
                   value={specs.leadtimeSLA || ''}
@@ -782,17 +839,17 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
                   className="w-full h-10 px-3 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-bold text-orange-950 shadow-2xs cursor-pointer"
                 >
                   <option value="">-- Chọn Thời Gian Giao Hàng --</option>
-                  <option value="⚡ Hỏa Tốc / Express Xuyên Biên Giới (24h - 36h)">
-                    ⚡ Hỏa Tốc / Express Xuyên Biên Giới (24h - 36h) — Tuyến gần Campuchia / Bằng Tường
+                  <option value="Hỏa Tốc / Express Xuyên Biên Giới (24h - 36h)">
+                    Hỏa Tốc / Express Xuyên Biên Giới (24h - 36h) — Tuyến gần Campuchia / Bằng Tường
                   </option>
-                  <option value="🚚 Tiêu Chuẩn Tuyến Trung Quốc / Lào (3 - 5 Ngày)">
-                    🚚 Tiêu Chuẩn Tuyến Trung Quốc / Lào (3 - 5 Ngày) — Quảng Châu, Thâm Quyến, Viêng Chăn
+                  <option value="Tiêu Chuẩn Tuyến Trung Quốc / Lào (3 - 5 Ngày)">
+                    Tiêu Chuẩn Tuyến Trung Quốc / Lào (3 - 5 Ngày) — Quảng Châu, Thâm Quyến, Viêng Chăn
                   </option>
-                  <option value="🗺️ Tiêu Chuẩn Tuyến Xa Thái Lan / Nội địa TQ (5 - 7 Ngày)">
-                    🗺️ Tiêu Chuẩn Tuyến Xa Thái Lan / Nội địa TQ (5 - 7 Ngày) — Bangkok, Thượng Hải
+                  <option value="Tiêu Chuẩn Tuyến Xa Thái Lan / Nội địa TQ (5 - 7 Ngày)">
+                    Tiêu Chuẩn Tuyến Xa Thái Lan / Nội địa TQ (5 - 7 Ngày) — Bangkok, Thượng Hải
                   </option>
-                  <option value="✏️ Theo thỏa thuận lịch giao nhận riêng">
-                    ✏️ Theo thỏa thuận lịch giao nhận riêng
+                  <option value="Theo thỏa thuận lịch giao nhận riêng">
+                    Theo thỏa thuận lịch giao nhận riêng
                   </option>
                 </select>
               </div>
@@ -815,9 +872,8 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
           /* LTL Trip Volume & Dimensions */
           <div className="space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-                <Box className="w-4 h-4 text-orange-600" />
-                <span>Khai Báo Kích Thước & Trọng Lượng Ghép Hàng LTL</span>
+              <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                Khai Báo Kích Thước & Trọng Lượng Ghép Hàng LTL
               </span>
               <span className="text-[11px] text-slate-500 font-medium">
                 Tỷ lệ quy đổi tiêu chuẩn: 1 CBM = 250 kg
@@ -932,6 +988,33 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
                   <span>{specs.ltlChargeableWeightKg !== undefined && specs.ltlChargeableWeightKg !== null ? `${specs.ltlChargeableWeightKg.toLocaleString('vi-VN')} Kg` : '-- Kg'}</span>
                   <span className="text-[10px] text-orange-700 font-normal">(Max thực vs quy đổi)</span>
                 </div>
+              </div>
+            </div>
+
+            {/* Khả năng xếp chồng (Stackable) cho LTL */}
+            <div className="space-y-1.5">
+              <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                Khả Năng Xếp Chồng (Stackable) *
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { val: true, label: 'Có thể xếp chồng (Stackable)' },
+                  { val: false, label: 'Không được xếp chồng' },
+                ].map((item) => (
+                  <button
+                    type="button"
+                    key={String(item.val)}
+                    onClick={() => updateSpec('stackable', item.val)}
+                    className={`h-10 px-3 rounded-xl border text-left cursor-pointer transition-all text-xs flex items-center justify-between ${
+                      specs.stackable === item.val
+                        ? 'border-orange-600 bg-orange-50/80 font-bold text-orange-950 shadow-2xs'
+                        : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
+                    }`}
+                  >
+                    <span>{item.label}</span>
+                    {specs.stackable === item.val && <span className="w-1.5 h-1.5 rounded-full bg-orange-600"></span>}
+                  </button>
+                ))}
               </div>
             </div>
 

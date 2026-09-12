@@ -31,6 +31,7 @@ import {
 } from '../../types';
 import { LeadInquiryDetailCard } from '../public/LeadInquiryDetailCard';
 import { SupplierLeadCompareModal } from './SupplierLeadCompareModal';
+import { InquirySummaryConfirmModal } from '../customer/InquirySummaryConfirmModal';
 
 interface SupplierLeadsPageProps {
   leads: SupplierLeadItem[];
@@ -69,6 +70,7 @@ export const SupplierLeadsPage: React.FC<SupplierLeadsPageProps> = ({
   const [viewMode, setViewMode] = useState<'TABLE' | 'KANBAN'>('TABLE');
   const [expandedLeadIds, setExpandedLeadIds] = useState<Record<string, boolean>>({});
   const [unlockedLeadIds, setUnlockedLeadIds] = useState<Record<string, boolean>>({});
+  const [selectedDetailLead, setSelectedDetailLead] = useState<SupplierLeadItem | null>(null);
   const [activeCompareModalLead, setActiveCompareModalLead] = useState<SupplierLeadItem | null>(null);
   const [unlockToastMessage, setUnlockToastMessage] = useState<string | null>(null);
   const [sortField, setSortField] = useState<SortField>('createdDate');
@@ -259,11 +261,10 @@ export const SupplierLeadsPage: React.FC<SupplierLeadsPageProps> = ({
     // 3. Hàng không (Air Freight)
     if (sType === 'Air Freight') {
       const isExpress = specs?.air?.airServiceType === 'Express / Courier' || 
-                        specs?.air?.serviceLevel?.toLowerCase().includes('priority') ||
                         textContext.includes('express') || 
                         textContext.includes('hỏa tốc') || 
                         textContext.includes('chuyển phát');
-      return isExpress ? 'Express' : 'Air Freight';
+      return isExpress ? 'Express' : 'Cargo';
     }
 
     // 4. Đường sắt (Rail Freight)
@@ -906,11 +907,12 @@ export const SupplierLeadsPage: React.FC<SupplierLeadsPageProps> = ({
                       <React.Fragment key={lead.id}>
                         <tr
                           id={`supplier-lead-row-${lead.code}`}
-                          onClick={() => toggleExpandLead(lead.id)}
+                          onClick={() => {
+                            setSelectedDetailLead(lead);
+                            if (onIncrementLeadViews) onIncrementLeadViews(lead.id);
+                          }}
                           className={`transition-colors cursor-pointer select-none ${
-                            isExpanded
-                              ? 'bg-indigo-50/60 font-medium'
-                              : idx % 2 === 0
+                            idx % 2 === 0
                               ? 'bg-white hover:bg-slate-50/90'
                               : 'bg-slate-50/40 hover:bg-slate-100/70'
                           }`}
@@ -1014,42 +1016,18 @@ export const SupplierLeadsPage: React.FC<SupplierLeadsPageProps> = ({
                             <button
                               id={`toggle-supplier-lead-btn-${lead.code}`}
                               type="button"
-                              onClick={(e) => toggleExpandLead(lead.id, e)}
-                              className={`px-2.5 py-1 text-xs font-bold rounded-xl transition-all inline-flex items-center justify-center gap-1 cursor-pointer shadow-2xs ${
-                                isExpanded
-                                  ? 'bg-indigo-600 text-white shadow-xs'
-                                  : 'bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 hover:border-indigo-300'
-                              }`}
-                              title={isExpanded ? 'Thu gọn chi tiết lead' : 'Mở xem chi tiết hồ sơ & thao tác'}
+                              onClick={() => {
+                                setSelectedDetailLead(lead);
+                                if (onIncrementLeadViews) onIncrementLeadViews(lead.id);
+                              }}
+                              className="px-2.5 py-1 text-xs font-bold rounded-xl transition-all inline-flex items-center justify-center gap-1 cursor-pointer shadow-2xs bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 hover:border-indigo-300"
+                              title="Mở xem tóm tắt yêu cầu báo giá"
                             >
-                              <span>{isExpanded ? 'Đóng' : 'Xem chi tiết'}</span>
-                              {isExpanded ? (
-                                <ChevronUp className="w-3.5 h-3.5" />
-                              ) : (
-                                <ChevronDown className="w-3.5 h-3.5" />
-                              )}
+                              <span>Xem chi tiết</span>
+                              <ChevronRight className="w-3.5 h-3.5" />
                             </button>
                           </td>
                         </tr>
-
-                        {/* DÒNG CHI TIẾT EXPANDED (SUPPLIER VIEW: CÓ NÚT BÁO GIÁ, MỞ KHÓA / SO SÁNH ĐỐI THỦ, CHIA SẺ, LƯU) */}
-                        {isExpanded && (
-                          <tr className="bg-indigo-50/30 border-b border-indigo-100 animate-in fade-in duration-150">
-                            <td colSpan={11} className="p-3 sm:p-5">
-                              <LeadInquiryDetailCard
-                                lead={{ ...lead, isUnlocked }}
-                                isUnlocked={isUnlocked}
-                                isCustomerView={false}
-                                maskCompanyName={maskCompanyName}
-                                maskContactPerson={maskContactPerson}
-                                onUnlockClick={() => handleUnlockLead(lead)}
-                                onOpenCreateQuotation={() => onOpenCreateQuotation(lead)}
-                                onToggleSaveLead={(l, e) => onToggleSaveLead && onToggleSaveLead(l.id)}
-                                onCompareClick={() => handleOpenCompareModal(lead)}
-                              />
-                            </td>
-                          </tr>
-                        )}
                       </React.Fragment>
                     );
                   })
@@ -1073,6 +1051,28 @@ export const SupplierLeadsPage: React.FC<SupplierLeadsPageProps> = ({
             setActiveCompareModalLead(null);
             onOpenCreateQuotation(l);
           }}
+        />
+      )}
+
+      {/* INQUIRY SUMMARY CONFIRM MODAL (TÓM TẮT YÊU CẦU BÁO GIÁ CHO SUPPLIER) */}
+      {selectedDetailLead && (
+        <InquirySummaryConfirmModal
+          isOpen={Boolean(selectedDetailLead)}
+          inquiry={selectedDetailLead.inquiry || null}
+          lead={selectedDetailLead}
+          isSupplierView={true}
+          isUnlocked={Boolean(unlockedLeadIds[selectedDetailLead.id] || selectedDetailLead.isUnlocked)}
+          onUnlock={() => {
+            handleUnlockLead(selectedDetailLead);
+            setSelectedDetailLead((prev) => (prev ? { ...prev, isUnlocked: true } : null));
+          }}
+          isSaved={Boolean(selectedDetailLead.isSaved)}
+          onSaveLead={() => onToggleSaveLead && onToggleSaveLead(selectedDetailLead.id)}
+          onClose={() => setSelectedDetailLead(null)}
+          onConfirm={() => {}}
+          matchingSuppliersCount={selectedDetailLead.quotesCount || 0}
+          quotations={quotations}
+          onSubmitQuotation={onSubmitQuotation}
         />
       )}
     </div>

@@ -745,6 +745,73 @@ export const GENERAL_LOGISTICS_SURCHARGES: SurchargeItemDef[] = [
   },
 ];
 
+// Customs Clearance Surcharges LOV
+export const CUSTOMS_SURCHARGES: SurchargeItemDef[] = [
+  {
+    id: 'sc-customs-edi',
+    code: 'VNACCS / EDI',
+    name: 'Phí truyền dữ liệu tờ khai hải quan điện tử (VNACCS/VCIS)',
+    desc: 'Phí bản quyền đường truyền số hóa dữ liệu tờ khai vào hệ thống Tổng cục Hải quan.',
+    category: 'POL',
+    categoryLabel: 'Phí Khai Báo & Truyền Dữ Liệu',
+    isPopularDefault: true,
+  },
+  {
+    id: 'sc-customs-red-channel',
+    code: 'RED CHANNEL',
+    name: 'Phí kiểm hóa thực tế bãi kiểm (Luồng Đỏ - Red Channel)',
+    desc: 'Chi phí cử nhân sự hiện trường đăng ký kiểm hóa, cắt seal, bốc xếp kiểm đếm cùng công chức hải quan.',
+    category: 'POL',
+    categoryLabel: 'Phí Hiện Trường & Kiểm Hóa',
+    isPopularDefault: true,
+  },
+  {
+    id: 'sc-customs-devanning',
+    code: 'DEVANNING / LIFT',
+    name: 'Phí nâng hạ & rút ruột container phục vụ kiểm hóa',
+    desc: 'Phí cẩu gắp và bốc dỡ hàng mẫu ra khỏi container tại bãi kiểm hóa cảng/ICD.',
+    category: 'POL',
+    categoryLabel: 'Phí Hiện Trường & Kiểm Hóa',
+    isPopularDefault: false,
+  },
+  {
+    id: 'sc-customs-inspection',
+    code: 'SPECIALIZED PERMIT',
+    name: 'Phí thủ tục kiểm tra chuyên ngành (Kiểm dịch / VSATTP / Hợp quy CR)',
+    desc: 'Chi phí đăng ký hồ sơ, phối hợp cơ quan chuyên ngành lấy mẫu thử nghiệm tại cảng.',
+    category: 'POD',
+    categoryLabel: 'Kiểm Tra Chuyên Ngành & C/O',
+    isPopularDefault: true,
+  },
+  {
+    id: 'sc-customs-co',
+    code: 'C/O APPLICATION',
+    name: 'Phí thủ tục xin cấp Chứng nhận xuất xứ hàng hóa (C/O Fee)',
+    desc: 'Chi phí chuẩn bị bộ chứng từ, nộp hồ sơ điện tử và nhận phôi C/O gốc tại VCCI / Phòng QLXNK.',
+    category: 'POD',
+    categoryLabel: 'Kiểm Tra Chuyên Ngành & C/O',
+    isPopularDefault: false,
+  },
+  {
+    id: 'sc-customs-consultation',
+    code: 'VALUATION & HS',
+    name: 'Phí tư vấn tham vấn trị giá hải quan & giải trình mã HS Code',
+    desc: 'Chi phí đại diện chuẩn bị hồ sơ kỹ thuật, chứng minh mức giá giao dịch và áp mã HS chuẩn xác.',
+    category: 'POD',
+    categoryLabel: 'Tư Vấn & Pháp Lý Hải Quan',
+    isPopularDefault: false,
+  },
+  {
+    id: 'sc-customs-doc-delivery',
+    code: 'DOC HANDOVER',
+    name: 'Phí bàn giao bộ tờ khai thông quan gốc tận nơi & lưu trữ hồ sơ',
+    desc: 'Chi phí giao nhận chuyển phát bảo đảm bộ chứng từ gốc có xác nhận thông quan về trụ sở khách hàng.',
+    category: 'POD',
+    categoryLabel: 'Tư Vấn & Pháp Lý Hải Quan',
+    isPopularDefault: true,
+  },
+];
+
 interface SurchargesSectionProps {
   serviceType: ServiceType;
   warehouseType?: string;
@@ -782,6 +849,8 @@ export const SurchargesSection: React.FC<SurchargesSectionProps> = ({
         return AIR_SURCHARGES;
       case 'Rail Freight':
         return RAIL_SURCHARGES;
+      case 'Customs Clearance':
+        return CUSTOMS_SURCHARGES;
       case 'Warehousing': {
         if (warehouseType === 'Kho tự quản (Self-Storage)') {
           return SELF_STORAGE_SURCHARGES;

@@ -319,7 +319,6 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
         onChange({
           ...specs,
           billingUnitPreference: 'Order (Hoàn tất đơn hàng TMĐT)',
-          dailyOrderCount: specs.dailyOrderCount || 100,
           bufferPalletPositions: specs.bufferPalletPositions || 20,
         });
       }
@@ -364,29 +363,11 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
             {cargoClassification === 'General'
               ? 'Hàng Thường'
               : cargoClassification === 'Reefer'
-              ? 'Hàng Lạnh'
-              : 'Hàng Nguy Hiểm'}
+                ? 'Hàng Lạnh'
+                : 'Hàng Nguy Hiểm'}
           </span>
         </div>
 
-        {/* Compatibility notification alerts */}
-        {cargoClassification === 'General' && (
-          <div className="p-2.5 bg-blue-50/70 border border-blue-200 rounded-xl text-xs text-blue-900">
-            <span className="font-bold">Quy định phân nhóm hàng thường:</span> Kho Thường Grade A, Kho Ngoại Quan, Kho TMĐT Fulfillment và Kho Tự Quản được mở. Kho Lạnh và Kho Hàng Nguy Hiểm bị khóa.
-          </div>
-        )}
-
-        {cargoClassification === 'Reefer' && (
-          <div className="p-2.5 bg-cyan-50/70 border border-cyan-200 rounded-xl text-xs text-cyan-950 flex items-center gap-2">
-            <span className="font-bold">Quy định phân nhóm hàng lạnh:</span> Chỉ cho phép lưu kho tại <strong>Kho Lạnh / Mát</strong>, <strong>Kho Ngoại Quan</strong> (có phân khu lạnh) hoặc <strong>Kho Tự Quản</strong>.
-          </div>
-        )}
-
-        {cargoClassification === 'Hazmat' && (
-          <div className="p-2.5 bg-amber-50/70 border border-amber-200 rounded-xl text-xs text-amber-950 flex items-center gap-2">
-            <span className="font-bold">Quy định phân nhóm hàng nguy hiểm (DG):</span> Chỉ cho phép lưu kho tại <strong>Kho Hàng Nguy Hiểm (DG)</strong>, <strong>Kho Ngoại Quan</strong> (đạt chuẩn DG) hoặc <strong>Kho Tự Quản</strong>.
-          </div>
-        )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
           {[
@@ -434,24 +415,19 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
                   }
                 }}
                 title={disabled ? disabledReason : item.title}
-                className={`p-3 rounded-xl border transition-all text-left flex flex-col justify-between ${
-                  disabled
+                className={`p-3 rounded-xl border transition-all text-left flex flex-col justify-between ${disabled
                     ? 'border-slate-200 bg-slate-100/70 opacity-60 cursor-not-allowed text-slate-400'
                     : isSelected
-                    ? 'border-purple-600 bg-purple-50/70 font-bold text-purple-950 shadow-2xs cursor-pointer'
-                    : 'border-slate-200 bg-white hover:border-slate-300 text-slate-700 cursor-pointer'
-                }`}
+                      ? 'border-purple-600 bg-purple-50/70 font-bold text-purple-950 shadow-2xs cursor-pointer'
+                      : 'border-slate-200 bg-white hover:border-slate-300 text-slate-700 cursor-pointer'
+                  }`}
               >
                 <div>
                   <div className="flex items-center justify-between">
                     <span className={`text-xs font-bold ${disabled ? 'text-slate-400' : 'text-slate-900'}`}>
                       {item.title}
                     </span>
-                    {disabled ? (
-                      <span className="text-[10px] bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded font-bold border border-rose-200">
-                        Khóa
-                      </span>
-                    ) : isSelected ? (
+                    {isSelected ? (
                       <span className="w-2 h-2 rounded-full bg-purple-600"></span>
                     ) : null}
                   </div>
@@ -585,8 +561,8 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
               title: 'Theo Pallet (Vị trí)',
               sub: 'Tính theo lượng tồn thực',
               disabled: isEcommerceWarehouse || isSelfStorage,
-              disabledReason: isEcommerceWarehouse 
-                ? 'Kho TMĐT chỉ tính theo Đơn hàng' 
+              disabledReason: isEcommerceWarehouse
+                ? 'Kho TMĐT chỉ tính theo Đơn hàng'
                 : 'Kho tự quản bàn giao mặt sàn riêng biệt',
             },
             {
@@ -616,13 +592,12 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
                   }
                 }}
                 title={item.disabled ? item.disabledReason : item.title}
-                className={`p-2.5 rounded-xl border text-left transition-all ${
-                  item.disabled
+                className={`p-2.5 rounded-xl border text-left transition-all ${item.disabled
                     ? 'border-slate-200 bg-slate-100/70 opacity-50 cursor-not-allowed text-slate-400'
                     : isSelected
-                    ? 'border-purple-600 bg-purple-50/70 font-bold text-purple-950 shadow-2xs cursor-pointer'
-                    : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 cursor-pointer'
-                }`}
+                      ? 'border-purple-600 bg-purple-50/70 font-bold text-purple-950 shadow-2xs cursor-pointer'
+                      : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 cursor-pointer'
+                  }`}
               >
                 <div className="flex items-center justify-between">
                   <span className={`text-xs font-bold ${item.disabled ? 'text-slate-400' : ''}`}>{item.title}</span>
@@ -692,7 +667,7 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 animate-in fade-in duration-150">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Số Vị Trí Pallet Cần Thuê (Slots) *
+                Số Vị Trí Pallet Cần Thuê (Pallet) *
               </label>
               <input
                 type="text"
@@ -851,21 +826,7 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
       </div>
 
       {/* 4. Operations & Inventory Method: Hidden for Self-Storage */}
-      {isSelfStorage ? (
-        <div className="h-auto p-3.5 bg-white border border-slate-200 rounded-xl flex items-start gap-3 shadow-2xs animate-in fade-in duration-150">
-          <div className="p-2 rounded-lg bg-amber-500 text-white shrink-0">
-            <ShieldCheck className="w-4 h-4" />
-          </div>
-          <div className="text-xs text-slate-800 flex-1">
-            <span className="font-bold block text-xs text-slate-900">
-              Đặc Thù Vận Hành Mô Hình Kho Tự Quản (Self-Storage)
-            </span>
-            <p className="text-slate-500 mt-0.5 leading-relaxed text-[11px]">
-              Bàn giao khoang sàn riêng biệt, khách hàng giữ chìa khóa / thẻ từ riêng và chủ động ra vào 24/7. Không tính phí bốc xếp nâng hạ hay phí phần mềm WMS.
-            </p>
-          </div>
-        </div>
-      ) : (
+      {isSelfStorage ? null : (
         <div className="space-y-3.5 pt-1">
           <span className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 text-slate-800">
             <RefreshCw className="w-4 h-4 text-purple-600" />
@@ -970,7 +931,6 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
                         outboundQty: qty,
                         outboundUnit: unit,
                         outboundPeriod: period,
-                        dailyOrderCount: (isEcommerceWarehouse || unit === 'Đơn hàng (Orders)') ? qty : specs.dailyOrderCount,
                         dailyOutboundVolume: qty ? `${qty.toLocaleString('vi-VN')} ${unit} / ${period}` : '',
                       });
                     }}
@@ -989,7 +949,6 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
                       onChange({
                         ...specs,
                         outboundUnit: unit,
-                        dailyOrderCount: (isEcommerceWarehouse || unit === 'Đơn hàng (Orders)') ? qty : specs.dailyOrderCount,
                         dailyOutboundVolume: qty ? `${qty.toLocaleString('vi-VN')} ${unit} / ${period}` : '',
                       });
                     }}
