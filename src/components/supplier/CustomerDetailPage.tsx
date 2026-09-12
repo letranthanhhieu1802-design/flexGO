@@ -62,7 +62,7 @@ import {
   LeadStatus
 } from '../../types';
 import { mockCustomerTimeline, initialSupplierLeads } from '../../data/mockData';
-import { SupplierLeadCompareModal } from './SupplierLeadCompareModal';
+import { InquirySummaryConfirmModal } from '../customer/InquirySummaryConfirmModal';
 import { LeadInquiryDetailCard } from '../public/LeadInquiryDetailCard';
 
 interface CustomerDetailPageProps {
@@ -1597,34 +1597,31 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({
         </div>
       )}
 
-      {/* MODAL: BÓC TÁCH MA TRẬN ĐỐI THỦ & MỞ KHÓA INQUIRY VỚI GIÁ 25 FLEXCREDIT */}
+      {/* INQUIRY SUMMARY CONFIRM MODAL (TÓM TẮT YÊU CẦU BÁO GIÁ CHO SUPPLIER) */}
       {selectedLeadForCompare && (
-        <SupplierLeadCompareModal
-          isOpen={true}
+        <InquirySummaryConfirmModal
+          isOpen={Boolean(selectedLeadForCompare)}
+          inquiry={selectedLeadForCompare.inquiry || null}
           lead={selectedLeadForCompare}
-          currentUser={currentUser}
-          quotations={quotations}
-          wallet={wallet}
-          isUnlocked={selectedLeadForCompare.isUnlocked}
-          onClose={() => setSelectedLeadForCompare(null)}
-          onUnlockWithCredit={(leadId, cost) => {
-            // Guarantee 25 FlexCredit cost for Customer 360 Inquiries
-            const discountCost = cost === 50 ? 25 : cost;
-            const success = handleUnlockInquiryWithDiscount(leadId);
+          isSupplierView={true}
+          isUnlocked={Boolean(selectedLeadForCompare.isUnlocked)}
+          onUnlock={() => {
+            const success = handleUnlockInquiryWithDiscount(selectedLeadForCompare.id);
             if (success !== false) {
               setSelectedLeadForCompare((prev) => prev ? { ...prev, isUnlocked: true } : null);
             }
-            return success;
           }}
+          isSaved={Boolean(selectedLeadForCompare.isSaved)}
+          onClose={() => setSelectedLeadForCompare(null)}
+          onConfirm={() => {}}
+          matchingSuppliersCount={selectedLeadForCompare.quotesCount || 0}
+          quotations={quotations}
           onSubmitQuotation={(quote) => {
             if (onSubmitQuotation) {
-              onSubmitQuotation(quote);
+              onSubmitQuotation(quote as any);
             }
             setSelectedLeadForCompare(null);
           }}
-          onNavigate={onNavigate}
-          creditCostOverride={25}
-          discountBadge="Ưu đãi Khách hàng 360: 25 FlexCredit (Tiết kiệm 50%)"
         />
       )}
     </div>

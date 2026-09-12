@@ -3,8 +3,6 @@ import {
   Plus, 
   Search, 
   ChevronRight,
-  ChevronDown,
-  ChevronUp,
   Building2,
   X,
   ArrowUpDown,
@@ -18,8 +16,8 @@ import {
   ShieldCheck,
   Clock
 } from 'lucide-react';
-import { InquiryItem, InquiryStatus, ServiceType, CurrentView, SupplierLeadItem, QuotationItem, SupplierCompany } from '../../types';
-import { LeadInquiryDetailCard } from '../public/LeadInquiryDetailCard';
+import { InquiryItem, InquiryStatus, ServiceType, CurrentView, SupplierLeadItem, QuotationItem, SupplierCompany, UserProfile } from '../../types';
+import { InquirySummaryConfirmModal } from './InquirySummaryConfirmModal';
 
 interface InquiriesPageProps {
   inquiries: InquiryItem[];
@@ -28,6 +26,7 @@ interface InquiriesPageProps {
   suppliers?: SupplierCompany[];
   initialSupplierFilter?: string;
   initialSupplierName?: string;
+  currentUser?: UserProfile | null;
   onOpenCreateModal: () => void;
   onSelectInquiry: (inquiry: InquiryItem | string) => void;
   onNavigate: (view: CurrentView) => void;
@@ -43,6 +42,7 @@ export const InquiriesPage: React.FC<InquiriesPageProps> = ({
   suppliers = [],
   initialSupplierFilter = '',
   initialSupplierName = '',
+  currentUser,
   onOpenCreateModal,
   onSelectInquiry,
   onNavigate,
@@ -51,7 +51,7 @@ export const InquiriesPage: React.FC<InquiriesPageProps> = ({
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [serviceFilter, setServiceFilter] = useState<string>('ALL');
   const [supplierFilter, setSupplierFilter] = useState<string>(initialSupplierFilter || initialSupplierName || '');
-  const [expandedInquiryIds, setExpandedInquiryIds] = useState<Record<string, boolean>>({});
+  const [selectedDetailInquiry, setSelectedDetailInquiry] = useState<InquiryItem | null>(null);
   const [sortField, setSortField] = useState<SortField>('createdDate');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
@@ -60,14 +60,6 @@ export const InquiriesPage: React.FC<InquiriesPageProps> = ({
       setSupplierFilter(initialSupplierFilter || initialSupplierName);
     }
   }, [initialSupplierFilter, initialSupplierName]);
-
-  const toggleExpandInquiry = (inquiryId: string, e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    setExpandedInquiryIds((prev) => ({
-      ...prev,
-      [inquiryId]: !prev[inquiryId],
-    }));
-  };
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -130,81 +122,7 @@ export const InquiriesPage: React.FC<InquiriesPageProps> = ({
     return false;
   };
 
-  // Convert or merge InquiryItem into a SupplierLeadItem representation for LeadInquiryDetailCard
-  const convertInquiryToLead = (inq: InquiryItem): SupplierLeadItem => {
-    const matchedLead = leads.find(
-      (l) => l.code === inq.code || l.inquiryCode === inq.code || l.code === inq.leadCode
-    );
 
-    const isContract = inq.pricingType === 'CONTRACT';
-    const rawBudgetNum = parseInt(inq.targetBudget?.replace(/\D/g, '') || '50000000', 10);
-    const formattedVND = rawBudgetNum.toLocaleString('vi-VN') + ' ₫';
-    const displayTotal = isContract ? `${formattedVND} / tháng` : formattedVND;
-
-    if (matchedLead) {
-      return {
-        ...matchedLead,
-        code: inq.code,
-        customerCompany: inq.customerCompany || matchedLead.customerCompany,
-        contactName: inq.contactPerson || matchedLead.contactName,
-        serviceType: inq.serviceType || matchedLead.serviceType,
-        origin: inq.origin || matchedLead.origin,
-        destination: inq.destination || matchedLead.destination,
-        route: inq.title || matchedLead.route,
-        cargoDetails: inq.cargoType || matchedLead.cargoDetails,
-        volumeDisplay: inq.weightVolume || matchedLead.volumeDisplay,
-        unitPriceDisplay: matchedLead.unitPriceDisplay || (isContract ? `${Math.round(rawBudgetNum / 20).toLocaleString('vi-VN')} ₫ / chuyến` : formattedVND),
-        estimatedValueVND: matchedLead.estimatedValueVND || rawBudgetNum,
-        estimatedValueDisplay: matchedLead.estimatedValueDisplay || displayTotal,
-        createdDate: inq.createdDate || matchedLead.createdDate,
-        dueDate: inq.expiryDate || inq.pickupDate || matchedLead.dueDate,
-        status: (inq.status === 'Awarded' ? 'Won' : inq.status) as any,
-        quotesCount: inq.responsesCount ?? matchedLead.quotesCount,
-        viewsCount: inq.viewsCount ?? matchedLead.viewsCount,
-        isUnlocked: true,
-        inquiry: inq,
-      };
-    }
-
-    return {
-      id: `lead-from-${inq.id}`,
-      code: inq.code,
-      customerCompany: inq.customerCompany || 'ABC Manufacturing Co., Ltd.',
-      contactName: inq.contactPerson || 'Lê Trần Thanh Hiếu',
-      contactRole: 'Procurement Specialist',
-      contactPhone: '0908 123 456',
-      contactEmail: 'procurement@shipper-logistics.vn',
-      taxId: '0314892831',
-      serviceType: inq.serviceType,
-      origin: inq.origin,
-      destination: inq.destination,
-      route: inq.title || `${inq.origin.split('(')[0].trim()} → ${inq.destination.split('(')[0].trim()}`,
-      pricingType: inq.pricingType || 'SPOT',
-      contractTerm: inq.contractTerm || (isContract ? 'Hợp đồng 12 tháng' : 'Theo lô / Chuyến lẻ'),
-      volumeDisplay: inq.weightVolume || '15 Tấn (52 CBM)',
-      unitPriceVND: isContract ? Math.round(rawBudgetNum / 20) : rawBudgetNum,
-      unitPriceDisplay: isContract ? `${Math.round(rawBudgetNum / 20).toLocaleString('vi-VN')} ₫ / chuyến` : formattedVND,
-      estimatedValueVND: rawBudgetNum,
-      estimatedValueDisplay: displayTotal,
-      createdDate: inq.createdDate,
-      dueDate: inq.expiryDate || inq.pickupDate || 'Sep 10, 2026',
-      status: (inq.status === 'Awarded' ? 'Won' : inq.status) as any,
-      inquiryCode: inq.code,
-      cargoDetails: inq.cargoType || 'Linh kiện thiết bị công nghiệp',
-      urgency: 'Standard',
-      matchScore: 96,
-      quotesCount: inq.responsesCount,
-      viewsCount: inq.viewsCount || (inq.responsesCount * 6 + 18),
-      isUnlocked: true,
-      isSaved: false,
-      cargoClassification: inq.cargoClassification,
-      packaging: inq.packaging,
-      requestedSurcharges: inq.requestedSurcharges,
-      selectedVAS: inq.selectedVAS,
-      serviceSpecs: inq.serviceSpecs,
-      inquiry: inq,
-    };
-  };
 
   // Helper Badge Style cho Service Group (Phẳng, không icon)
   const getServiceBadgeStyle = (service: ServiceType) => {
@@ -746,8 +664,6 @@ export const InquiriesPage: React.FC<InquiriesPageProps> = ({
                 </tr>
               ) : (
                 sortedInquiries.map((inq, idx) => {
-                  const isExpanded = Boolean(expandedInquiryIds[inq.id]);
-                  const leadRepresentation = convertInquiryToLead(inq);
                   const isContract = inq.pricingType === 'CONTRACT';
                   const rawBudgetNum = parseInt(inq.targetBudget?.replace(/\D/g, '') || '0', 10);
                   const operationMode = getOperationModeDisplay(inq);
@@ -756,13 +672,9 @@ export const InquiriesPage: React.FC<InquiriesPageProps> = ({
                     <React.Fragment key={inq.id}>
                       <tr
                         id={`inquiry-row-${inq.code}`}
-                        onClick={() => toggleExpandInquiry(inq.id)}
-                        className={`transition-colors cursor-pointer select-none ${
-                          isExpanded
-                            ? 'bg-indigo-50/60 font-medium'
-                            : idx % 2 === 0
-                            ? 'bg-white hover:bg-slate-50/90'
-                            : 'bg-slate-50/40 hover:bg-slate-100/70'
+                        onClick={() => setSelectedDetailInquiry(inq)}
+                        className={`hover:bg-indigo-50/40 transition-colors cursor-pointer select-none group ${
+                          idx % 2 === 1 ? 'bg-slate-50/40' : 'bg-white'
                         }`}
                       >
                         {/* Cột 1: STT */}
@@ -857,44 +769,17 @@ export const InquiriesPage: React.FC<InquiriesPageProps> = ({
                         {/* Cột 11: Thao Tác (Chỉ 1 nút Xem Chi Tiết) */}
                         <td className="py-2.5 px-2 text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                           <button
-                            id={`toggle-inquiry-btn-${inq.code}`}
+                            id={`view-detail-inquiry-btn-${inq.code}`}
                             type="button"
-                            onClick={(e) => toggleExpandInquiry(inq.id, e)}
-                            className={`px-2.5 py-1 text-xs font-bold rounded-xl transition-all inline-flex items-center justify-center gap-1 cursor-pointer shadow-2xs ${
-                              isExpanded
-                                ? 'bg-indigo-600 text-white shadow-xs'
-                                : 'bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 hover:border-indigo-300'
-                            }`}
-                            title={isExpanded ? 'Thu gọn chi tiết inquiry' : 'Mở xem chi tiết hồ sơ'}
+                            onClick={() => setSelectedDetailInquiry(inq)}
+                            className="px-2.5 py-1 text-xs font-bold rounded-xl transition-all inline-flex items-center justify-center gap-1 cursor-pointer shadow-2xs bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 hover:border-indigo-300"
+                            title="Mở xem tóm tắt yêu cầu báo giá"
                           >
-                            <span>{isExpanded ? 'Đóng' : 'Xem chi tiết'}</span>
-                            {isExpanded ? (
-                              <ChevronUp className="w-3.5 h-3.5" />
-                            ) : (
-                              <ChevronDown className="w-3.5 h-3.5" />
-                            )}
+                            <span>Xem chi tiết</span>
+                            <ChevronRight className="w-3.5 h-3.5" />
                           </button>
                         </td>
                       </tr>
-
-                      {/* DÒNG CHI TIẾT EXPANDED (CUSTOMER VIEW: CÓ COMPARE MATRIX & CHIA SẺ BÊN TRONG) */}
-                      {isExpanded && (
-                        <tr className="bg-indigo-50/30 border-b border-indigo-100 animate-in fade-in duration-150">
-                          <td colSpan={11} className="p-3 sm:p-5">
-                            <LeadInquiryDetailCard
-                              lead={leadRepresentation}
-                              isCustomerView={true}
-                              onCompareClick={() => {
-                                onNavigate({
-                                  type: 'workspace',
-                                  view: 'customer-compare',
-                                  params: { inquiryCode: inq.code },
-                                });
-                              }}
-                            />
-                          </td>
-                        </tr>
-                      )}
                     </React.Fragment>
                   );
                 })
@@ -903,6 +788,22 @@ export const InquiriesPage: React.FC<InquiriesPageProps> = ({
           </table>
         </div>
       </div>
+
+      {/* POPUP TÓM TẮT YÊU CẦU BÁO GIÁ ĐA NĂNG (CUSTOMER VIEW) */}
+      {selectedDetailInquiry && (
+        <InquirySummaryConfirmModal
+          isOpen={Boolean(selectedDetailInquiry)}
+          inquiry={selectedDetailInquiry}
+          currentUser={currentUser}
+          isSupplierView={false}
+          isCustomerView={true}
+          isPublished={true}
+          quotations={quotations}
+          matchingSuppliersCount={selectedDetailInquiry.responsesCount || 0}
+          onClose={() => setSelectedDetailInquiry(null)}
+          onConfirm={() => {}}
+        />
+      )}
     </div>
   );
 };

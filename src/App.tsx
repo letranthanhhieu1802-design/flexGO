@@ -984,6 +984,7 @@ export function App() {
               leads={leads}
               quotations={quotations}
               suppliers={suppliers}
+              currentUser={currentUser}
               initialSupplierFilter={currentView.params?.supplierCode || currentView.params?.supplierId || ''}
               initialSupplierName={currentView.params?.supplierCode || currentView.params?.supplierName || ''}
               onSelectInquiry={(inq) => {
@@ -1277,6 +1278,7 @@ export function App() {
             <InquiriesPage
               inquiries={inquiries}
               leads={leads}
+              currentUser={currentUser}
               onSelectInquiry={(inq) => {
                 const code = typeof inq === 'string' ? inq : inq.code;
                 setCurrentView({

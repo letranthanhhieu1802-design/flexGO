@@ -1073,75 +1073,100 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
           {/* Scrollable Table Area: Vertical max-h-[640px], NO horizontal scrollbar */}
           <div 
             ref={tableScrollRef}
-            className="overflow-y-auto max-h-[640px] relative scroll-smooth focus:outline-none w-full"
+            className="overflow-y-auto overflow-x-hidden max-h-[640px] relative scroll-smooth focus:outline-none w-full"
             tabIndex={0}
           >
-            <table className="w-full text-left border-collapse table-auto" id="promotions-data-table">
+            <table className="w-full text-left border-collapse table-fixed" id="promotions-data-table">
+              <colgroup>
+                {/* 1. STT */}
+                <col className="w-[3%]" />
+                {/* 2. PIC / CÔNG TY */}
+                <col className="w-[18%]" />
+                {/* 3. HẠN GIÁ */}
+                <col className="w-[7%]" />
+                {/* 4. MÃ */}
+                <col className="w-[9%]" />
+                {/* 5. NHÓM DỊCH VỤ */}
+                <col className="w-[8%]" />
+                {/* 6. NHÓM HÀNG */}
+                <col className="w-[8%]" />
+                {/* 7. MÔ HÌNH */}
+                <col className="w-[11%]" />
+                {/* 8. MÔ TẢ (Giảm độ rộng nhỏ lại) */}
+                <col className="w-[12%]" />
+                {/* 9. ĐƠN GIÁ */}
+                <col className="w-[9%]" />
+                {/* 10. INQUIRIES / XEM */}
+                <col className="w-[7%]" />
+                {/* 11. THAO TÁC */}
+                <col className="w-[8%]" />
+              </colgroup>
+
               {/* Frozen Sticky Table Header - Standardized 11 Columns */}
               <thead className="sticky top-0 z-20 bg-slate-100 shadow-xs border-b border-slate-200">
                 <tr className="bg-slate-100 text-[10px] font-bold text-slate-600 uppercase tracking-wider select-none">
                   {/* 1. STT */}
-                  <th className="py-2.5 px-1.5 w-8 text-center sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
+                  <th className="py-2.5 px-1 text-center sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
                     STT
                   </th>
 
                   {/* 2. PIC (Tên PIC & Tên công ty) */}
                   <th 
-                    className="py-2.5 px-2 cursor-pointer hover:text-orange-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200 min-w-[140px]"
+                    className="py-2.5 px-2 cursor-pointer hover:text-orange-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200 overflow-hidden"
                     onClick={() => handleSort('pic')}
                   >
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1 truncate">
                       <span>PIC / CÔNG TY</span>
-                      <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                      <ArrowUpDown className="w-3 h-3 text-slate-400 shrink-0" />
                     </div>
                   </th>
                   
                   {/* 3. Hạn Giá */}
                   <th 
-                    className="py-2.5 px-2 cursor-pointer hover:text-orange-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
+                    className="py-2.5 px-1 text-center cursor-pointer hover:text-orange-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
                     onClick={() => handleSort('createdDate')}
                   >
-                    <div className="flex items-center gap-1">
-                      <span>Hạn Giá</span>
-                      <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                    <div className="flex items-center justify-center gap-1">
+                      <span>HẠN GIÁ</span>
+                      <ArrowUpDown className="w-3 h-3 text-slate-400 shrink-0" />
                     </div>
                   </th>
 
                   {/* 4. Mã */}
                   <th 
-                    className="py-2.5 px-2 cursor-pointer hover:text-orange-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
+                    className="py-2.5 px-1 text-center cursor-pointer hover:text-orange-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
                     onClick={() => handleSort('code')}
                   >
-                    <div className="flex items-center gap-1">
-                      <span>Mã</span>
-                      <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                    <div className="flex items-center justify-center gap-1">
+                      <span>MÃ</span>
+                      <ArrowUpDown className="w-3 h-3 text-slate-400 shrink-0" />
                     </div>
                   </th>
 
                   {/* 5. Nhóm Dịch Vụ */}
                   <th 
-                    className="py-2.5 px-2 cursor-pointer hover:text-orange-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
+                    className="py-2.5 px-1 text-center cursor-pointer hover:text-orange-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
                     onClick={() => handleSort('service')}
                   >
-                    <div className="flex items-center gap-1">
-                      <span>Nhóm Dịch Vụ</span>
-                      <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                    <div className="flex items-center justify-center gap-1">
+                      <span>NHÓM DỊCH VỤ</span>
+                      <ArrowUpDown className="w-3 h-3 text-slate-400 shrink-0" />
                     </div>
                   </th>
 
                   {/* 6. Nhóm Hàng */}
-                  <th className="py-2.5 px-1.5 text-center whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
-                    <span>Nhóm Hàng</span>
+                  <th className="py-2.5 px-1 text-center whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
+                    <span>NHÓM HÀNG</span>
                   </th>
 
                   {/* 7. Mô Hình */}
-                  <th className="py-2.5 px-1.5 text-center whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
-                    <span>Mô Hình</span>
+                  <th className="py-2.5 px-1 text-center whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
+                    <span>MÔ HÌNH</span>
                   </th>
 
                   {/* 8. Mô Tả */}
-                  <th className="py-2.5 px-2 whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
-                    <span>Mô Tả</span>
+                  <th className="py-2.5 px-2 whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200 overflow-hidden">
+                    <span>MÔ TẢ</span>
                   </th>
 
                   {/* 9. Đơn Giá */}
@@ -1150,25 +1175,25 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
                     onClick={() => handleSort('price')}
                   >
                     <div className="flex items-center justify-end gap-1">
-                      <span>Đơn Giá</span>
-                      <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                      <span>ĐƠN GIÁ</span>
+                      <ArrowUpDown className="w-3 h-3 text-slate-400 shrink-0" />
                     </div>
                   </th>
 
                   {/* 10. Số Inquiries / Xem */}
                   <th 
-                    className="py-2.5 px-1.5 text-center cursor-pointer hover:text-orange-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
+                    className="py-2.5 px-1 text-center cursor-pointer hover:text-orange-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
                     onClick={() => handleSort('views')}
                   >
                     <div className="flex items-center justify-center gap-1">
                       <span>INQUIRIES / XEM</span>
-                      <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                      <ArrowUpDown className="w-3 h-3 text-slate-400 shrink-0" />
                     </div>
                   </th>
 
                   {/* 11. Thao Tác */}
-                  <th className="py-2.5 px-2 text-center whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200 min-w-[170px]">
-                    <span>Thao Tác</span>
+                  <th className="py-2.5 px-1 text-center whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
+                    <span>THAO TÁC</span>
                   </th>
                 </tr>
               </thead>
@@ -1213,32 +1238,32 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
                         }`}
                       >
                         {/* 1. STT */}
-                        <td className="py-2.5 px-1.5 text-center font-mono text-slate-500 font-bold text-xs select-none w-8">
+                        <td className="py-2 px-1 text-center font-mono text-slate-500 font-bold text-xs select-none">
                           {row.stt}
                         </td>
 
-                        {/* 2. PIC (Tên PIC & Tên công ty - Không ava, badge, sđt) */}
-                        <td className="py-2.5 px-2 min-w-[140px] max-w-[180px]">
-                          <div className="space-y-0.5">
+                        {/* 2. PIC (Tên PIC & Tên công ty - Kích thước chữ công ty nhỏ lại) */}
+                        <td className="py-2 px-2 overflow-hidden">
+                          <div className="space-y-0.5 min-w-0">
                             <p className="font-bold text-slate-800 text-xs truncate" title={row.picName}>
                               {row.picName}
                             </p>
-                            <p className="text-[11px] text-slate-500 font-medium truncate" title={row.companyName}>
+                            <p className="text-[9.5px] text-slate-400 font-normal leading-tight truncate" title={row.companyName}>
                               {row.companyName}
                             </p>
                           </div>
                         </td>
 
                         {/* 3. Hạn Giá */}
-                        <td className="py-2.5 px-2 whitespace-nowrap">
+                        <td className="py-2 px-1 text-center whitespace-nowrap">
                           <span className="text-xs font-semibold text-slate-700">
                             {row.validUntilDisplay}
                           </span>
                         </td>
 
                         {/* 4. Mã */}
-                        <td className="py-2.5 px-2 whitespace-nowrap">
-                          <div className="flex items-center gap-1 font-mono font-bold text-slate-800 text-xs">
+                        <td className="py-2 px-1 text-center whitespace-nowrap">
+                          <div className="flex items-center justify-center gap-1 font-mono font-bold text-slate-800 text-xs">
                             <span className="text-orange-600 hover:underline">{row.code}</span>
                             <button
                               onClick={(e) => handleCopyCode(row.code, e)}
@@ -1255,7 +1280,7 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
                         </td>
 
                         {/* 5. Nhóm Dịch Vụ */}
-                        <td className="py-2.5 px-2 whitespace-nowrap">
+                        <td className="py-2 px-1 text-center whitespace-nowrap">
                           <span
                             className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-bold border ${row.serviceStyle.bg}`}
                           >
@@ -1264,9 +1289,9 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
                         </td>
 
                         {/* 6. Nhóm Hàng */}
-                        <td className="py-2.5 px-1.5 whitespace-nowrap text-center">
+                        <td className="py-2 px-1 whitespace-nowrap text-center">
                           <span
-                            className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-bold border ${
+                            className={`inline-block px-1.5 py-0.5 rounded-md text-[10px] font-bold border ${
                               row.cargoGroup === 'Hàng lạnh'
                                 ? 'bg-cyan-50 text-cyan-700 border-cyan-200'
                                 : row.cargoGroup === 'Hàng nguy hiểm'
@@ -1279,15 +1304,15 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
                         </td>
 
                         {/* 7. Mô Hình */}
-                        <td className="py-2.5 px-1.5 whitespace-nowrap text-center">
-                          <span className="text-xs font-bold text-slate-800">
+                        <td className="py-2 px-1 text-center overflow-hidden">
+                          <span className="text-[11.5px] font-bold text-slate-800 truncate block" title={row.serviceModel}>
                             {row.serviceModel}
                           </span>
                         </td>
 
                         {/* 8. Mô Tả (Dòng 1: Hành lang/Địa chỉ, Dòng 2: Subtext chi tiết) */}
-                        <td className="py-2.5 px-2 max-w-[280px]">
-                          <div className="space-y-0.5">
+                        <td className="py-2 px-2 overflow-hidden">
+                          <div className="space-y-0.5 min-w-0">
                             <p className="font-bold text-slate-900 text-xs group-hover:text-orange-600 transition-colors truncate" title={row.descriptionMain}>
                               {row.descriptionMain}
                             </p>
@@ -1298,19 +1323,19 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
                         </td>
 
                         {/* 9. Đơn Giá: Số tiền dòng trên (VNĐ), ĐVT dòng subtext dưới, không % giảm, không gạch ngang */}
-                        <td className="py-2.5 px-2 text-right whitespace-nowrap">
+                        <td className="py-2 px-2 text-right whitespace-nowrap">
                           <div className="space-y-0.5">
                             <span className="text-xs font-black text-slate-900 block tracking-tight">
                               {row.priceAmount}
                             </span>
-                            <span className="text-[10px] font-medium text-slate-500 block">
+                            <span className="text-[10px] font-medium text-slate-500 block truncate">
                               {row.priceUnit}
                             </span>
                           </div>
                         </td>
 
                         {/* 10. Thống Kê Số Inquiries / Xem */}
-                        <td className="py-2.5 px-1.5 text-center whitespace-nowrap">
+                        <td className="py-2 px-1 text-center whitespace-nowrap">
                           <div className="flex flex-col items-center gap-0.5">
                             <span className="px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/80">
                               {row.inquiries} inquiries
@@ -1321,10 +1346,10 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
                           </div>
                         </td>
 
-                        {/* 11. Thao Tác (Xem đầy đủ, Lưu, Xem hồ sơ) */}
-                        <td className="py-2.5 px-2 text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                          <div className="flex items-center justify-center gap-1.5">
-                            {/* Nút 1: Xem đầy đủ (Mở modal popup ma trận cước) */}
+                        {/* 11. Thao Tác (Xem đầy đủ ở trên, 2 nút Lưu & Xem chi tiết ở dưới thu nhỏ) */}
+                        <td className="py-1.5 px-1 text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex flex-col items-center justify-center gap-1 mx-auto w-full max-w-[84px]">
+                            {/* Nút 1: Xem đầy đủ (nằm ở trên) */}
                             <button
                               id={`btn-view-full-${row.code}`}
                               type="button"
@@ -1332,49 +1357,52 @@ export const HotPromotionPage: React.FC<HotPromotionPageProps> = ({
                                 handleIncrementPromotionViews(promo.id);
                                 setSelectedPromoForModal(promo);
                               }}
-                              className="px-2.5 py-1 text-xs font-bold rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-700 hover:text-orange-800 border border-orange-200 hover:border-orange-300 transition-colors inline-flex items-center gap-1 cursor-pointer shadow-2xs"
+                              className="w-full py-1 px-1.5 text-[10.5px] font-bold rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-700 hover:text-orange-800 border border-orange-200/90 transition-all inline-flex items-center justify-center gap-1 cursor-pointer shadow-2xs leading-tight active:scale-95"
                               title="Xem biểu giá ma trận cước đầy đủ"
                             >
-                              <Maximize2 className="w-3.5 h-3.5 text-orange-600" />
-                              <span>Xem đầy đủ</span>
+                              <Maximize2 className="w-3 h-3 text-orange-600 shrink-0" />
+                              <span className="whitespace-nowrap">Xem đầy đủ</span>
                             </button>
 
-                            {/* Nút 2: Lưu */}
-                            <button
-                              id={`btn-bookmark-promo-${row.code}`}
-                              type="button"
-                              onClick={(e) => toggleBookmark(promo.id, promo.title, e)}
-                              className={`p-1.5 text-xs font-bold rounded-lg border transition-colors inline-flex items-center justify-center cursor-pointer shadow-2xs ${
-                                isBookmarked
-                                  ? 'bg-amber-500 border-amber-500 text-white hover:bg-amber-600'
-                                  : 'bg-white border-slate-200 text-slate-600 hover:text-amber-600 hover:bg-amber-50 hover:border-amber-200'
-                              }`}
-                              title={isBookmarked ? 'Đã lưu (Bấm để bỏ lưu)' : 'Lưu biểu giá'}
-                            >
-                              {isBookmarked ? (
-                                <BookmarkCheck className="w-3.5 h-3.5" />
-                              ) : (
-                                <Bookmark className="w-3.5 h-3.5" />
-                              )}
-                            </button>
+                            {/* Hàng dưới: 2 nút Lưu & Xem chi tiết (kích thước nhỏ lại) */}
+                            <div className="flex items-center justify-center gap-1 w-full">
+                              {/* Nút 2: Lưu */}
+                              <button
+                                id={`btn-bookmark-promo-${row.code}`}
+                                type="button"
+                                onClick={(e) => toggleBookmark(promo.id, promo.title, e)}
+                                className={`flex-1 py-0.5 px-1 text-[10px] font-bold rounded-md border transition-all inline-flex items-center justify-center cursor-pointer shadow-2xs ${
+                                  isBookmarked
+                                    ? 'bg-amber-500 border-amber-500 text-white hover:bg-amber-600'
+                                    : 'bg-white border-slate-200 text-slate-500 hover:text-amber-600 hover:bg-amber-50 hover:border-amber-200'
+                                }`}
+                                title={isBookmarked ? 'Đã lưu (Bấm để bỏ lưu)' : 'Lưu biểu giá'}
+                              >
+                                {isBookmarked ? (
+                                  <BookmarkCheck className="w-3 h-3" />
+                                ) : (
+                                  <Bookmark className="w-3 h-3" />
+                                )}
+                              </button>
 
-                            {/* Nút 3: Xem hồ sơ */}
-                            <button
-                              id={`btn-view-profile-${row.code}`}
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onNavigate({
-                                  type: 'public',
-                                  tab: 'supplier-profile',
-                                  params: { specialistId: promo.specialistId, viewState: 'detail' }
-                                });
-                              }}
-                              className="p-1.5 text-xs font-bold rounded-lg bg-white hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 border border-slate-200 hover:border-indigo-200 transition-colors inline-flex items-center justify-center cursor-pointer shadow-2xs"
-                              title="Xem hồ sơ năng lực của PIC"
-                            >
-                              <ExternalLink className="w-3.5 h-3.5" />
-                            </button>
+                              {/* Nút 3: Xem chi tiết hồ sơ */}
+                              <button
+                                id={`btn-view-profile-${row.code}`}
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onNavigate({
+                                    type: 'public',
+                                    tab: 'supplier-profile',
+                                    params: { specialistId: promo.specialistId, viewState: 'detail' }
+                                  });
+                                }}
+                                className="flex-1 py-0.5 px-1 text-[10px] font-bold rounded-md bg-white hover:bg-indigo-50 text-slate-500 hover:text-indigo-600 border border-slate-200 hover:border-indigo-200 transition-all inline-flex items-center justify-center cursor-pointer shadow-2xs"
+                                title="Xem chi tiết hồ sơ năng lực của PIC"
+                              >
+                                <ExternalLink className="w-3 h-3" />
+                              </button>
+                            </div>
                           </div>
                         </td>
                       </tr>

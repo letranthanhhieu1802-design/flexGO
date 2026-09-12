@@ -60,7 +60,8 @@ import {
   BookmarkCheck,
   Lock,
   Unlock,
-  KeyRound
+  KeyRound,
+  Trophy
 } from 'lucide-react';
 import { InquiryItem, ServiceType, UserProfile, SupplierLeadItem, QuotationItem } from '../../types';
 
@@ -74,6 +75,7 @@ interface InquirySummaryConfirmModalProps {
   onConfirm?: () => void;
   // Supplier View props
   isSupplierView?: boolean;
+  isCustomerView?: boolean;
   lead?: SupplierLeadItem | null;
   isUnlocked?: boolean;
   onUnlock?: () => void;
@@ -91,7 +93,8 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
   isPublished: isPublishedProp,
   onClose,
   onConfirm = () => {},
-  isSupplierView = false,
+  isSupplierView: isSupplierViewProp = false,
+  isCustomerView,
   lead = null,
   isUnlocked: isUnlockedProp,
   onUnlock,
@@ -100,12 +103,14 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
   quotations = [],
   onSubmitQuotation,
 }) => {
+  const isSupplierView = isCustomerView !== undefined ? !isCustomerView : isSupplierViewProp;
   const [activeTab, setActiveTab] = useState<'profile_cargo' | 'tariff_sheet'>('profile_cargo');
   const [internalPublished, setInternalPublished] = useState<boolean>(false);
   const [copiedLink, setCopiedLink] = useState<boolean>(false);
   const [localUnlocked, setLocalUnlocked] = useState<boolean>(Boolean(isUnlockedProp));
   const [isQuoting, setIsQuoting] = useState<boolean>(false);
   const [localSaved, setLocalSaved] = useState<boolean>(Boolean(isSavedProp));
+  const [awardedSupplierName, setAwardedSupplierName] = useState<string | null>(null);
   const [quoteSubmittedToast, setQuoteSubmittedToast] = useState<string | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -353,7 +358,6 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
   };
 
   const competitorQuotes = useMemo(() => {
-    if (!isSupplierView) return [];
     const count = lead?.quotesCount ?? inquiry.responsesCount ?? 0;
     if (count === 0) return [];
 
@@ -387,7 +391,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
         formattedSurcharge: surchargeEach.toLocaleString('vi-VN') + cSuffix,
       };
     });
-  }, [isSupplierView, lead, inquiry]);
+  }, [lead, inquiry]);
 
   // Helper to remove any emojis/icons from stored data strings
   const cleanTextNoEmoji = (text?: string): string => {
@@ -944,22 +948,6 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                   </div>
                 </div>
 
-                {/* Banner cảnh báo khi chưa mở khóa */}
-                {isSupplierView && !effectiveUnlocked && (
-                  <div className="mt-2.5 p-2.5 rounded-xl bg-amber-50 border border-amber-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-                    <div className="flex items-center gap-2 text-amber-900">
-                      <Lock className="w-4 h-4 text-amber-600 shrink-0" />
-                      <span>Thông tin định danh khách hàng & Hotline đang được ẩn. Nhấn nút <strong>"Mở khóa (-50 Credits)"</strong> trên thanh tiêu đề để xem đầy đủ.</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleUnlock}
-                      className="px-3 py-1 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs shrink-0 cursor-pointer shadow-xs transition-all active:scale-95 text-center"
-                    >
-                      Mở khóa ngay
-                    </button>
-                  </div>
-                )}
               </div>
 
               {/* ========================================================================= */}
@@ -2415,6 +2403,30 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                                     <span className="truncate">{comp.supplierName}</span>
                                   </div>
                                   <span className="text-[9.5px] text-emerald-600 font-bold mt-0.5">{comp.tag}</span>
+                                  {!isSupplierView && (
+                                    <div className="mt-1">
+                                      {awardedSupplierName === comp.supplierName ? (
+                                        <span className="px-2.5 py-0.5 bg-emerald-600 text-white font-extrabold text-[10px] rounded-md shadow-xs inline-flex items-center gap-1">
+                                          <Check className="w-2.5 h-2.5" />
+                                          <span>Đã Trao Thầu</span>
+                                        </span>
+                                      ) : (
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            setAwardedSupplierName(comp.supplierName);
+                                            setQuoteSubmittedToast(`Đã trao thầu thành công cho ${comp.supplierName}! Hợp đồng điện tử đã được tạo.`);
+                                            setTimeout(() => setQuoteSubmittedToast(null), 4000);
+                                          }}
+                                          className="px-2.5 py-0.5 bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-[10px] rounded-md shadow-xs inline-flex items-center gap-1 cursor-pointer transition-all active:scale-95"
+                                          title="Trao thầu cho nhà cung cấp này"
+                                        >
+                                          <Trophy className="w-2.5 h-2.5" />
+                                          <span>Trao Thầu</span>
+                                        </button>
+                                      )}
+                                    </div>
+                                  )}
                                 </>
                               ) : (
                                 <>

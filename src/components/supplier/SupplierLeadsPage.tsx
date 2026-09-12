@@ -29,8 +29,6 @@ import {
   QuotationItem,
   FlexCreditWallet
 } from '../../types';
-import { LeadInquiryDetailCard } from '../public/LeadInquiryDetailCard';
-import { SupplierLeadCompareModal } from './SupplierLeadCompareModal';
 import { InquirySummaryConfirmModal } from '../customer/InquirySummaryConfirmModal';
 
 interface SupplierLeadsPageProps {
@@ -71,7 +69,6 @@ export const SupplierLeadsPage: React.FC<SupplierLeadsPageProps> = ({
   const [expandedLeadIds, setExpandedLeadIds] = useState<Record<string, boolean>>({});
   const [unlockedLeadIds, setUnlockedLeadIds] = useState<Record<string, boolean>>({});
   const [selectedDetailLead, setSelectedDetailLead] = useState<SupplierLeadItem | null>(null);
-  const [activeCompareModalLead, setActiveCompareModalLead] = useState<SupplierLeadItem | null>(null);
   const [unlockToastMessage, setUnlockToastMessage] = useState<string | null>(null);
   const [sortField, setSortField] = useState<SortField>('createdDate');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
@@ -132,7 +129,6 @@ export const SupplierLeadsPage: React.FC<SupplierLeadsPageProps> = ({
   const handleUnlockLead = (lead: SupplierLeadItem) => {
     const isAlreadyUnlocked = Boolean(unlockedLeadIds[lead.id] || lead.isUnlocked);
     if (isAlreadyUnlocked) {
-      setActiveCompareModalLead({ ...lead, isUnlocked: true });
       return;
     }
 
@@ -155,18 +151,11 @@ export const SupplierLeadsPage: React.FC<SupplierLeadsPageProps> = ({
     
     setUnlockedLeadIds((prev) => ({ ...prev, [lead.id]: true }));
     setExpandedLeadIds((prev) => ({ ...prev, [lead.id]: true }));
-    const updatedLead = { ...lead, isUnlocked: true };
-    setActiveCompareModalLead(updatedLead);
     
     setUnlockToastMessage(`Đã mở khóa thành công ${lead.customerCompany} (-${creditCost} Credits)! Hotline & Ma trận giá đã sẵn sàng.`);
     setTimeout(() => {
       setUnlockToastMessage(null);
     }, 4500);
-  };
-
-  const handleOpenCompareModal = (lead: SupplierLeadItem) => {
-    const isAlreadyUnlocked = Boolean(unlockedLeadIds[lead.id] || lead.isUnlocked);
-    setActiveCompareModalLead({ ...lead, isUnlocked: isAlreadyUnlocked });
   };
 
   // Click handler trên thẻ Kanban: Chuyển sang Table View và mở rộng chi tiết của Lead đó
@@ -1038,21 +1027,7 @@ export const SupplierLeadsPage: React.FC<SupplierLeadsPageProps> = ({
         </div>
       )}
 
-      {/* Supplier Lead Compare Modal (Ma Trận Đối Thủ) */}
-      {activeCompareModalLead && (
-        <SupplierLeadCompareModal
-          isOpen={Boolean(activeCompareModalLead)}
-          lead={activeCompareModalLead}
-          isUnlocked={Boolean(unlockedLeadIds[activeCompareModalLead.id] || activeCompareModalLead.isUnlocked)}
-          onClose={() => setActiveCompareModalLead(null)}
-          onUnlock={() => handleUnlockLead(activeCompareModalLead)}
-          onOpenCreateQuotation={() => {
-            const l = activeCompareModalLead;
-            setActiveCompareModalLead(null);
-            onOpenCreateQuotation(l);
-          }}
-        />
-      )}
+
 
       {/* INQUIRY SUMMARY CONFIRM MODAL (TÓM TẮT YÊU CẦU BÁO GIÁ CHO SUPPLIER) */}
       {selectedDetailLead && (

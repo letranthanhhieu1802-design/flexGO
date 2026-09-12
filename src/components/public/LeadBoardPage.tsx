@@ -66,7 +66,6 @@ import {
   Share2
 } from 'lucide-react';
 import { SupplierLeadItem, ServiceType, CurrentView, UserPersona, PricingType, LeadStatus, QuotationItem, FlexCreditWallet } from '../../types';
-import { SupplierLeadCompareModal } from '../supplier/SupplierLeadCompareModal';
 import { InquirySummaryConfirmModal } from '../customer/InquirySummaryConfirmModal';
 import { LeadInquiryDetailCard } from './LeadInquiryDetailCard';
 
@@ -129,7 +128,6 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
   const [expandedLeadIds, setExpandedLeadIds] = useState<Record<string, boolean>>({});
   const [unlockedLeadIds, setUnlockedLeadIds] = useState<Record<string, boolean>>({});
   const [selectedDetailLead, setSelectedDetailLead] = useState<SupplierLeadItem | null>(null);
-  const [activeCompareModalLead, setActiveCompareModalLead] = useState<SupplierLeadItem | null>(null);
   const [leadToUnlockConfirm, setLeadToUnlockConfirm] = useState<SupplierLeadItem | null>(null);
   const [unlockToastMessage, setUnlockToastMessage] = useState<string | null>(null);
   const [savedToastMessage, setSavedToastMessage] = useState<string | null>(null);
@@ -588,7 +586,7 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
     if (e) e.stopPropagation();
     const isAlreadyUnlocked = Boolean(unlockedLeadIds[lead.id] || lead.isUnlocked);
     if (isAlreadyUnlocked) {
-      setActiveCompareModalLead({ ...lead, isUnlocked: true });
+      setSelectedDetailLead({ ...lead, isUnlocked: true });
     } else {
       setLeadToUnlockConfirm(lead);
     }
@@ -597,7 +595,7 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
   const handleOpenCompareModal = (lead: SupplierLeadItem, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     const isAlreadyUnlocked = Boolean(unlockedLeadIds[lead.id] || lead.isUnlocked);
-    setActiveCompareModalLead({ ...lead, isUnlocked: isAlreadyUnlocked });
+    setSelectedDetailLead({ ...lead, isUnlocked: isAlreadyUnlocked });
   };
 
   const confirmUnlockWithCredit = (leadId: string, creditCost: number = 50) => {
@@ -626,8 +624,7 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
     setExpandedLeadIds((prev) => ({ ...prev, [leadId]: true }));
     setLeadToUnlockConfirm(null);
     if (targetLead) {
-      const updatedLead = { ...targetLead, isUnlocked: true };
-      setActiveCompareModalLead(updatedLead);
+      setSelectedDetailLead((prev) => (prev && prev.id === leadId ? { ...prev, isUnlocked: true } : prev));
     }
     
     setUnlockToastMessage(`Đã mở khóa thành công ${targetLead?.customerCompany || 'Lead'} (-${creditCost} Credits)! Hotline & Ma trận giá đã sẵn sàng.`);
@@ -1600,21 +1597,7 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
         </div>
       )}
 
-      {/* SUPPLIER LEAD COMPARE & QUOTE MODAL (WITH FLEXCREDIT UNLOCK) */}
-      {activeCompareModalLead && (
-        <SupplierLeadCompareModal
-          isOpen={true}
-          lead={activeCompareModalLead}
-          currentUser={currentUser}
-          quotations={quotations}
-          wallet={wallet}
-          isUnlocked={Boolean(unlockedLeadIds[activeCompareModalLead.id] || activeCompareModalLead.isUnlocked)}
-          onClose={() => setActiveCompareModalLead(null)}
-          onUnlockWithCredit={(leadId, creditCost) => confirmUnlockWithCredit(leadId, creditCost)}
-          onSubmitQuotation={onSubmitQuotation || (() => {})}
-          onNavigate={onNavigate}
-        />
-      )}
+
 
       {/* INQUIRY SUMMARY CONFIRM MODAL (TÓM TẮT YÊU CẦU BÁO GIÁ CHO SUPPLIER) */}
       {selectedDetailLead && (
