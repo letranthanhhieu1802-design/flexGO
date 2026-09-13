@@ -129,7 +129,7 @@ export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
         <div className="flex items-center justify-between">
           <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
             <ArrowLeftRight className="w-3.5 h-3.5 text-amber-600" />
-            <span>Mô Hình Thủ Tục Hải Quan *</span>
+            <span>Mô Hình Thủ Tục Hải Quan <span className="text-red-500">*</span></span>
           </label>
           <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-lg border border-amber-200">
             {specs.tradeRole === 'Xuất khẩu (Export)'
@@ -185,14 +185,14 @@ export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-semibold text-slate-700 mb-1">
-            Loại Hình Tờ Khai Hải Quan ({isImport ? 'Nhập khẩu' : 'Xuất khẩu'}) *
+            Loại Hình Tờ Khai Hải Quan ({isImport ? 'Nhập khẩu' : 'Xuất khẩu'}) <span className="text-red-500">*</span>
           </label>
           <select
             value={specs.declarationType || ''}
             onChange={(e) => updateSpec('declarationType', e.target.value)}
             className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-amber-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
           >
-            <option value="">-- Chọn Loại Hình Tờ Khai * --</option>
+            <option value="">-- Chọn Loại Hình Tờ Khai --</option>
             {currentDeclarationOptions.map((opt) => (
               <option key={opt.value} value={opt.value}>
                 {opt.label}
@@ -204,7 +204,7 @@ export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
         <div>
           <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
             <UserCheck className="w-3.5 h-3.5 text-amber-600" />
-            <span>Hình Thức Đứng Tên Tờ Khai *</span>
+            <span>Hình Thức Đứng Tên Tờ Khai <span className="text-red-500">*</span></span>
           </label>
           <select
             value={specs.declarationEntity || 'Chủ hàng đứng tên trực tiếp (Token DN)'}
@@ -226,7 +226,7 @@ export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
         <div>
           <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
             <Landmark className="w-3.5 h-3.5 text-amber-600" />
-            <span>Chi Cục Hải Quan Quản Lý / Mở Tờ Khai *</span>
+            <span>Chi Cục Hải Quan Quản Lý / Mở Tờ Khai <span className="text-red-500">*</span></span>
           </label>
           <input
             type="text"
@@ -244,7 +244,7 @@ export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
         <div>
           <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
             <Ship className="w-3.5 h-3.5 text-blue-600" />
-            <span>Cảng / Sân Bay / Cửa Khẩu / ICD Nhận Hoặc Xuất Hàng *</span>
+            <span>Cảng / Sân Bay / Cửa Khẩu / ICD Nhận Hoặc Xuất Hàng <span className="text-red-500">*</span></span>
           </label>
           <input
             type="text"
@@ -265,7 +265,7 @@ export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
         <div>
           <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
             <Hash className="w-3.5 h-3.5 text-amber-600" />
-            <span>Số Lượng Tờ Khai Dự Kiến *</span>
+            <span>Số Lượng Tờ Khai Dự Kiến <span className="text-red-500">*</span></span>
           </label>
           <input
             type="number"

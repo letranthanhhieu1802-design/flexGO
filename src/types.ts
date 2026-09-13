@@ -229,8 +229,8 @@ export interface AirInquirySpecs {
   isTemperatureSensitive: boolean;
   requiredTemperatureRange?: string;
   customsAtAirport: boolean;
-  hsCode?: string;
   stackable?: boolean;
+  isStackable?: boolean;
   shipmentCount?: number;
   frequencyUnit?: string;
   selectedVAS?: string[];

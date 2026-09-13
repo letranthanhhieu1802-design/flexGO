@@ -169,7 +169,7 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
         <div className="flex items-center justify-between">
           <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
             <ArrowLeftRight className="w-3.5 h-3.5 text-cyan-700" />
-            <span>Vai Trò Của Doanh Nghiệp Trong Lô Hàng (Trade Role) *</span>
+            <span>Vai Trò Của Doanh Nghiệp Trong Lô Hàng (Trade Role) <span className="text-red-500">*</span></span>
           </label>
           <span className="text-[10px] font-semibold text-cyan-800 bg-cyan-50 px-2 py-0.5 rounded-md border border-cyan-100">
             {specs.tradeRole === 'Nhập khẩu (Import)'
@@ -229,14 +229,14 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
       {/* Incoterms - Đưa lên phía trên Hình thức đóng hàng */}
       <div>
         <label className="block text-xs font-semibold text-slate-700 mb-1">
-          Điều Kiện Thương Mại (Incoterms 2020) *
+          Điều Kiện Thương Mại (Incoterms 2020) <span className="text-red-500">*</span>
         </label>
         <select
           value={specs.incoterm || ''}
           onChange={(e) => updateSpec('incoterm', e.target.value as any)}
           className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-cyan-500 font-semibold text-cyan-950 shadow-2xs cursor-pointer"
         >
-          <option value="">-- Chọn Điều Kiện Thương Mại (Incoterms 2020) * --</option>
+          <option value="">-- Chọn Điều Kiện Thương Mại (Incoterms 2020) --</option>
           <option value="FOB">FOB - Free on Board (Giao lên tàu cảng bốc)</option>
           <option value="CIF">CIF - Cost, Insurance and Freight (Giao cảng dỡ kèm BH)</option>
           <option value="CFR">CFR - Cost and Freight (Tiền hàng và cước biển)</option>
@@ -250,7 +250,7 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
       {/* Mode Selector: FCL vs LCL */}
       <div className="space-y-2">
         <label className="block text-xs font-bold text-slate-800">
-          Hình Thức Đóng Hàng Biển (FCL / LCL) *
+          Hình Thức Đóng Hàng Biển (FCL / LCL) <span className="text-red-500">*</span>
         </label>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <button
@@ -307,7 +307,7 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
           <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
             <span className="flex items-center gap-1.5">
               <ArrowLeftRight className="w-3.5 h-3.5 text-cyan-600" />
-              <span>Điều Kiện Nhận Hàng (Origin Term) *</span>
+              <span>Điều Kiện Nhận Hàng (Origin Term) <span className="text-red-500">*</span></span>
             </span>
             <span className="text-[10.5px] font-semibold text-cyan-700 bg-cyan-50 px-2 py-0.5 rounded border border-cyan-200">
               Điểm lấy
@@ -318,7 +318,7 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
             onChange={(e) => updateSpec('originServiceTerm', e.target.value as any)}
             className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-cyan-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
           >
-            <option value="">-- Chọn Điều Kiện Nhận Hàng * --</option>
+            <option value="">-- Chọn Điều Kiện Nhận Hàng --</option>
             <option value="Door">🚪 Door (Nhận tại kho người gửi / Shipper)</option>
             <option value="CY">⚓ CY (Nhận tại bãi container cảng bốc / CY)</option>
             <option value="CFS">📦 CFS (Nhận tại kho gom hàng lẻ / CFS)</option>
@@ -329,7 +329,7 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
           <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
             <span className="flex items-center gap-1.5">
               <ArrowLeftRight className="w-3.5 h-3.5 text-rose-600" />
-              <span>Điều Kiện Giao Hàng (Destination Term) *</span>
+              <span>Điều Kiện Giao Hàng (Destination Term) <span className="text-red-500">*</span></span>
             </span>
             <span className="text-[10.5px] font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
               Điểm giao
@@ -340,7 +340,7 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
             onChange={(e) => updateSpec('destinationServiceTerm', e.target.value as any)}
             className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-rose-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
           >
-            <option value="">-- Chọn Điều Kiện Giao Hàng * --</option>
+            <option value="">-- Chọn Điều Kiện Giao Hàng --</option>
             <option value="Door">🚪 Door (Giao tại kho người nhận / Consignee)</option>
             <option value="CY">⚓ CY (Giao tại bãi container cảng dỡ / CY)</option>
             <option value="CFS">📦 CFS (Giao tại kho dỡ hàng lẻ / CFS)</option>
@@ -386,12 +386,12 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
             {isFCL ? (
               <>
                 <Anchor className="w-3.5 h-3.5 text-cyan-600" />
-                <span>Cảng Bốc Hàng (Port of Loading - POL) *</span>
+                <span>Cảng Bốc Hàng (Port of Loading - POL) <span className="text-red-500">*</span></span>
               </>
             ) : (
               <>
                 <Package className="w-3.5 h-3.5 text-cyan-600" />
-                <span>Địa Chỉ Lấy Hàng Kho CFS (Origin CFS Warehouse) *</span>
+                <span>Địa Chỉ Lấy Hàng Kho CFS (Origin CFS Warehouse) <span className="text-red-500">*</span></span>
               </>
             )}
           </label>
@@ -414,12 +414,12 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
             {isFCL ? (
               <>
                 <Anchor className="w-3.5 h-3.5 text-rose-600" />
-                <span>Cảng Dỡ Hàng (Port of Discharge - POD) *</span>
+                <span>Cảng Dỡ Hàng (Port of Discharge - POD) <span className="text-red-500">*</span></span>
               </>
             ) : (
               <>
                 <Package className="w-3.5 h-3.5 text-rose-600" />
-                <span>Địa Chỉ Giao Hàng Kho CFS (Destination CFS Warehouse) *</span>
+                <span>Địa Chỉ Giao Hàng Kho CFS (Destination CFS Warehouse) <span className="text-red-500">*</span></span>
               </>
             )}
           </label>
@@ -452,7 +452,7 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Tổng Khối Lượng (kg) *
+                Tổng Khối Lượng (kg) <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <input
@@ -475,7 +475,7 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Tổng Thể Tích (cbm) *
+                Tổng Thể Tích (cbm) <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <input
@@ -500,14 +500,14 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Loại Vỏ Container *
+                Loại Vỏ Container <span className="text-red-500">*</span>
               </label>
               <select
                 value={specs.containerType || ''}
                 onChange={(e) => updateSpec('containerType', e.target.value as any)}
                 className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-cyan-500 font-semibold text-cyan-950 shadow-2xs cursor-pointer"
               >
-                <option value="">-- Chọn Loại Vỏ Container * --</option>
+                <option value="">-- Chọn Loại Vỏ Container --</option>
                 <option value="20ft General (20DC)">20ft General (20DC)</option>
                 <option value="40ft General (40DC)">40ft General (40DC)</option>
                 <option value="40ft High Cube (40HC)">40ft High Cube (40HC)</option>
@@ -539,7 +539,7 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Số Lượng Container Cần Thuê *
+                Số Lượng Container Cần Thuê <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -556,7 +556,7 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Đơn Vị (Tần Suất Vận Chuyển) *
+                Đơn Vị (Tần Suất Vận Chuyển) <span className="text-red-500">*</span>
               </label>
               <select
                 value={specs.containerCountUnit || ''}
@@ -592,7 +592,7 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Số Lượng Kiện / Pallet Cần Gom Ghép *
+                Số Lượng Kiện / Pallet Cần Gom Ghép <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -602,7 +602,7 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
                   const val = e.target.value.replace(/\D/g, '');
                   handleLclPiecesChange(val ? parseInt(val, 10) : undefined);
                 }}
-                placeholder="VD: 4"
+                placeholder="VD: 5"
                 className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-cyan-500 font-bold text-slate-900 shadow-2xs"
               />
             </div>
@@ -611,10 +611,9 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
               <label className="flex items-center gap-2 h-10 px-3.5 bg-white border border-slate-200 rounded-xl cursor-pointer">
                 <input
                   type="checkbox"
-                  id="lclStackableCheck"
                   checked={Boolean(specs.lclStackable)}
                   onChange={(e) => updateSpec('lclStackable', e.target.checked)}
-                  className="rounded-sm text-cyan-600 focus:ring-cyan-500 w-4 h-4 cursor-pointer"
+                  className="rounded text-cyan-600 focus:ring-cyan-500 cursor-pointer"
                 />
                 <span className="text-xs text-slate-800 font-semibold">
                   Hàng có thể chồng tầng (Stackable)
@@ -626,7 +625,7 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
           {/* Row 2: Dimension Inputs (L x W x H cm) */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-700">Kích Thước 1 Kiện (Dài x Rộng x Cao cm)</span>
+              <label className="text-xs font-semibold text-slate-700">Kích Thước 1 Kiện (Dài x Rộng x Cao cm)</label>
               <span className="text-[11px] text-slate-400">Tự động tính Tổng Thể Tích CBM</span>
             </div>
             <div className="grid grid-cols-3 gap-3">
@@ -668,7 +667,7 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
                     const val = e.target.value.replace(/\D/g, '');
                     handleLclDimChange('heightCm', val ? parseInt(val, 10) : undefined);
                   }}
-                  placeholder="VD: 150"
+                  placeholder="VD: 160"
                   className="w-full h-10 px-3 text-xs bg-white border border-slate-200 rounded-xl text-center font-bold text-slate-900 focus:border-cyan-500 shadow-2xs"
                 />
               </div>
@@ -679,7 +678,7 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Tổng Trọng Lượng Thực Tế (Gross Kg) *
+                Tổng Trọng Lượng Thực Tế (Gross Kg) <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -718,7 +717,7 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Số Lượng Chuyến Ghép *
+                Số Lượng Chuyến Ghép <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -735,7 +734,7 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Đơn Vị (Tần Suất Vận Chuyển) *
+                Đơn Vị (Tần Suất Vận Chuyển) <span className="text-red-500">*</span>
               </label>
               <select
                 value={specs.lclFrequencyUnit || ''}

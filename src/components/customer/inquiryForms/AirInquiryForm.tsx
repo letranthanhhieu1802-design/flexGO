@@ -179,7 +179,7 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
       {/* 1. TOP SERVICE TYPE SELECTOR: Air Cargo vs Express / Courier */}
       <div className="space-y-1.5">
         <label className="block text-xs font-bold text-slate-800">
-          Loại Hình Dịch Vụ Vận Tải Hàng Không *
+          Loại Hình Dịch Vụ Vận Tải Hàng Không <span className="text-red-500">*</span>
         </label>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <button
@@ -249,7 +249,7 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
         <div className="flex items-center justify-between">
           <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
             <ArrowLeftRight className="w-3.5 h-3.5 text-sky-700" />
-            <span>Vai Trò Của Doanh Nghiệp Trong Lô Hàng (Trade Role) *</span>
+            <span>Vai Trò Của Doanh Nghiệp Trong Lô Hàng (Trade Role) <span className="text-red-500">*</span></span>
           </label>
           <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border ${
             isExpress ? 'text-amber-900 bg-amber-50 border-amber-200' : 'text-sky-800 bg-sky-50 border-sky-200'
@@ -301,14 +301,14 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
       {/* 3. INCOTERMS 2020 */}
       <div>
         <label className="block text-xs font-semibold text-slate-700 mb-1">
-          Điều Kiện Thương Mại (Incoterms 2020) *
+          Điều Kiện Thương Mại (Incoterms 2020) <span className="text-red-500">*</span>
         </label>
         <select
           value={specs.incoterm || ''}
           onChange={(e) => updateSpec('incoterm', e.target.value as any)}
           className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-sky-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
         >
-          <option value="">-- Chọn Điều Kiện Thương Mại (Incoterms 2020) * --</option>
+          <option value="">-- Chọn Điều Kiện Thương Mại (Incoterms 2020) --</option>
           <option value="FCA">FCA - Free Carrier (Giao cho người chuyên chở tại sân bay đi)</option>
           <option value="CIP">CIP - Carriage and Insurance Paid to (Cước và bảo hiểm trả tới sân bay đến)</option>
           <option value="CPT">CPT - Carriage Paid to (Cước phí trả tới sân bay đến)</option>
@@ -329,7 +329,7 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
               <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
                 <span className="flex items-center gap-1.5">
                   <ArrowLeftRight className="w-3.5 h-3.5 text-sky-600" />
-                  <span>Điều Kiện Nhận Hàng (Origin Term) *</span>
+                  <span>Điều Kiện Nhận Hàng (Origin Term) <span className="text-red-500">*</span></span>
                 </span>
                 <span className="text-[10.5px] font-semibold text-sky-700 bg-sky-50 px-2 py-0.5 rounded border border-sky-200">
                   Điểm lấy
@@ -340,7 +340,7 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
                 onChange={(e) => updateSpec('originServiceTerm', e.target.value as any)}
                 className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-sky-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
               >
-                <option value="">-- Chọn Điều Kiện Nhận Hàng * --</option>
+                <option value="">-- Chọn Điều Kiện Nhận Hàng --</option>
                 <option value="Door">Door (Lấy tận kho người gửi / Shipper)</option>
                 <option value="Airport">Airport (Nhận tại ga hàng hóa sân bay đi / AOD)</option>
               </select>
@@ -350,7 +350,7 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
               <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
                 <span className="flex items-center gap-1.5">
                   <ArrowLeftRight className="w-3.5 h-3.5 text-indigo-600" />
-                  <span>Điều Kiện Giao Hàng (Destination Term) *</span>
+                  <span>Điều Kiện Giao Hàng (Destination Term) <span className="text-red-500">*</span></span>
                 </span>
                 <span className="text-[10.5px] font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200">
                   Điểm giao
@@ -361,7 +361,7 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
                 onChange={(e) => updateSpec('destinationServiceTerm', e.target.value as any)}
                 className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
               >
-                <option value="">-- Chọn Điều Kiện Giao Hàng * --</option>
+                <option value="">-- Chọn Điều Kiện Giao Hàng --</option>
                 <option value="Door">Door (Giao tận kho người nhận / Consignee)</option>
                 <option value="Airport">Airport (Giao tại ga hàng hóa sân bay đến / AOA)</option>
               </select>
@@ -404,7 +404,7 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
                 <Plane className="w-3.5 h-3.5 text-sky-600" />
-                <span>Sân Bay Đi (AOD - Airport of Departure) *</span>
+                <span>Sân Bay Đi (AOD - Airport of Departure) <span className="text-red-500">*</span></span>
               </label>
               <input
                 type="text"
@@ -422,7 +422,7 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
                 <Plane className="w-3.5 h-3.5 text-indigo-600" />
-                <span>Sân Bay Đến (AOA - Airport of Arrival) *</span>
+                <span>Sân Bay Đến (AOA - Airport of Arrival) <span className="text-red-500">*</span></span>
               </label>
               <input
                 type="text"
@@ -448,7 +448,7 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
           {/* Express Package Classification */}
           <div className="space-y-1.5">
             <label className="block text-xs font-bold text-slate-800">
-              Phân Loại Bưu Kiện Chuyển Phát (Express Package Type) *
+              Phân Loại Bưu Kiện Chuyển Phát (Express Package Type) <span className="text-red-500">*</span>
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               {[
@@ -502,7 +502,7 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
               <div className="space-y-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Địa Chỉ Lấy Hàng Tận Nơi (Pickup Address) *
+                    Địa Chỉ Lấy Hàng Tận Nơi (Pickup Address) <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -534,7 +534,7 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
               <div className="space-y-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Địa Chỉ Giao Hàng Tận Nơi (Delivery Address) *
+                    Địa Chỉ Giao Hàng Tận Nơi (Delivery Address) <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -550,7 +550,7 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
                 </div>
                 <div>
                   <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                    Mã Bưu Chính Đến (Destination Zip/Postal Code) *
+                    Mã Bưu Chính Đến (Destination Zip/Postal Code) <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -584,7 +584,7 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
-              {isExpress ? 'Số Lượng Hộp / Kiện Chuyển Phát *' : 'Số Lượng Kiện Hàng *'}
+              {isExpress ? <>Số Lượng Hộp / Kiện Chuyển Phát <span className="text-red-500">*</span></> : <>Số Lượng Kiện Hàng <span className="text-red-500">*</span></>}
             </label>
             <input
               type="text"
@@ -603,23 +603,24 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
             <label className="flex items-center gap-2 h-10 px-3.5 bg-white border border-slate-200 rounded-xl cursor-pointer">
               <input
                 type="checkbox"
-                id="airStackableCheck"
-                checked={Boolean(specs.stackable)}
-                onChange={(e) => updateSpec('stackable', e.target.checked)}
-                className="rounded-sm text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer"
+                checked={Boolean(specs.isStackable)}
+                onChange={(e) => updateSpec('isStackable', e.target.checked)}
+                className="rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
               />
               <span className="text-xs text-slate-800 font-semibold">
-                Hàng có thể chồng tầng (Stackable)
+                Kiện hàng có thể xếp chồng (Stackable)
               </span>
             </label>
           </div>
         </div>
 
-        {/* Hàng 2 (3 cột Dài x Rộng x Cao): Kích Thước 1 Kiện (cm) */}
+        {/* Hàng 2: Kích Thước Dài x Rộng x Cao cm */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-700">Kích Thước 1 Kiện (Dài x Rộng x Cao cm)</span>
-            <span className="text-[11px] text-slate-400">Tự động tính Tổng Thể Tích CBM</span>
+            <label className="text-xs font-semibold text-slate-700">
+              Kích Thước 1 Kiện Chuẩn (Dài x Rộng x Cao cm)
+            </label>
+            <span className="text-[11px] text-slate-400">Tự động tính thể tích & Trọng lượng quy đổi</span>
           </div>
           <div className="grid grid-cols-3 gap-3">
             <div>
@@ -627,12 +628,12 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
               <input
                 type="text"
                 inputMode="numeric"
-                value={currentL !== undefined && currentL > 0 ? currentL : ''}
+                value={currentL !== undefined && currentL !== null && currentL > 0 ? currentL : ''}
                 onChange={(e) => {
                   const val = e.target.value.replace(/\D/g, '');
                   handleDimChange('lengthCm', val ? parseInt(val, 10) : undefined);
                 }}
-                placeholder="VD: 50"
+                placeholder="VD: 60"
                 className="w-full h-10 px-3 text-xs bg-white border border-slate-200 rounded-xl text-center font-bold text-slate-900 focus:border-indigo-500 shadow-2xs"
               />
             </div>
@@ -641,7 +642,7 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
               <input
                 type="text"
                 inputMode="numeric"
-                value={currentW !== undefined && currentW > 0 ? currentW : ''}
+                value={currentW !== undefined && currentW !== null && currentW > 0 ? currentW : ''}
                 onChange={(e) => {
                   const val = e.target.value.replace(/\D/g, '');
                   handleDimChange('widthCm', val ? parseInt(val, 10) : undefined);
@@ -655,12 +656,12 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
               <input
                 type="text"
                 inputMode="numeric"
-                value={currentH !== undefined && currentH > 0 ? currentH : ''}
+                value={currentH !== undefined && currentH !== null && currentH > 0 ? currentH : ''}
                 onChange={(e) => {
                   const val = e.target.value.replace(/\D/g, '');
                   handleDimChange('heightCm', val ? parseInt(val, 10) : undefined);
                 }}
-                placeholder="VD: 30"
+                placeholder="VD: 35"
                 className="w-full h-10 px-3 text-xs bg-white border border-slate-200 rounded-xl text-center font-bold text-slate-900 focus:border-indigo-500 shadow-2xs"
               />
             </div>
@@ -671,7 +672,7 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Tổng Trọng Lượng Thực Tế (Gross Kg) *
+              Tổng Trọng Lượng Thực Tế (Gross Kg) <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -710,7 +711,7 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Số Lượng Chuyến Hàng Không *
+              Số Lượng Chuyến Hàng Không <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -727,7 +728,7 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Đơn Vị (Tần Suất Vận Chuyển) *
+              Đơn Vị (Tần Suất Vận Chuyển) <span className="text-red-500">*</span>
             </label>
             <select
               value={specs.frequencyUnit || ''}

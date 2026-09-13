@@ -182,7 +182,7 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
         <div className="flex items-center justify-between">
           <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
             <ArrowLeftRight className="w-3.5 h-3.5 text-blue-700" />
-            <span>Vai Trò Của Doanh Nghiệp Trong Lô Hàng (Trade Role) *</span>
+            <span>Vai Trò Của Doanh Nghiệp Trong Lô Hàng (Trade Role) <span className="text-red-500">*</span></span>
           </label>
           <span className="text-[10px] font-bold text-blue-800 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200">
             {specs.tradeRole === 'Liên vận xuất khẩu (Export Rail)'
@@ -242,7 +242,7 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
       {/* 2. Mode Selector: FCL vs LCL */}
       <div className="space-y-1.5">
         <label className="block text-xs font-bold text-slate-800">
-          Phương Thức Vận Chuyển Đường Sắt (Mode of Rail Transport) *
+          Phương Thức Vận Chuyển Đường Sắt (Mode of Rail Transport) <span className="text-red-500">*</span>
         </label>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <button
@@ -318,12 +318,12 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
       <div className="space-y-1.5">
         <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
           <ArrowLeftRight className="w-3.5 h-3.5 text-blue-600" />
-          <span>Điều Kiện Giao Nhận Đường Sắt (Movement Terms) *</span>
+          <span>Điều Kiện Giao Nhận Đường Sắt (Movement Terms) <span className="text-red-500">*</span></span>
         </label>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
             <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-              Điều Kiện Nhận Hàng (Origin Term) *
+              Điều Kiện Nhận Hàng (Origin Term) <span className="text-red-500">*</span>
             </label>
             <select
               value={specs.originServiceTerm || ''}
@@ -339,7 +339,7 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
 
           <div>
             <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-              Điều Kiện Giao Hàng (Destination Term) *
+              Điều Kiện Giao Hàng (Destination Term) <span className="text-red-500">*</span>
             </label>
             <select
               value={specs.destinationServiceTerm || ''}
@@ -359,12 +359,12 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
       <div className="space-y-1.5">
         <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
           <Train className="w-3.5 h-3.5 text-blue-600" />
-          <span>Ga Xếp Dỡ Đường Sắt (Rail Stations) *</span>
+          <span>Ga Xếp Dỡ Đường Sắt (Rail Stations) <span className="text-red-500">*</span></span>
         </label>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
             <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-              {isFCL ? 'Ga Xếp Hàng (Origin Rail Station / POL Ga) *' : 'Địa Chỉ Kho Ga Nhận Hàng (Origin CFS Rail Station) *'}
+              {isFCL ? <>Ga Xếp Hàng (Origin Rail Station / POL Ga) <span className="text-red-500">*</span></> : <>Địa Chỉ Kho Ga Nhận Hàng (Origin CFS Rail Station) <span className="text-red-500">*</span></>}
             </label>
             <input
               type="text"
@@ -381,7 +381,7 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
 
           <div>
             <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-              {isFCL ? 'Ga Dỡ Hàng (Destination Rail Station / POD Ga) *' : 'Địa Chỉ Kho Ga Trả Hàng (Destination CFS Rail Station) *'}
+              {isFCL ? <>Ga Dỡ Hàng (Destination Rail Station / POD Ga) <span className="text-red-500">*</span></> : <>Địa Chỉ Kho Ga Trả Hàng (Destination CFS Rail Station) <span className="text-red-500">*</span></>}
             </label>
             <input
               type="text"
@@ -439,7 +439,7 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
           <div className="flex items-center justify-between">
             <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
               <Layers className="w-3.5 h-3.5 text-blue-700" />
-              <span>Cấu Hình Container / Toa Xe & Số Lượng Chuyến FCL *</span>
+              <span>Cấu Hình Container / Toa Xe & Số Lượng Chuyến FCL <span className="text-red-500">*</span></span>
             </label>
             <span className="text-[10px] text-blue-800 font-bold bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200">
               FCL / Nguyên Toa Xe
@@ -450,7 +450,7 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                Tổng Khối Lượng (kg) *
+                Tổng Khối Lượng (kg) <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <input
@@ -473,7 +473,7 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
 
             <div>
               <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                Tổng Thể Tích (cbm) *
+                Tổng Thể Tích (cbm) <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <input
@@ -497,13 +497,13 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-[11px] font-semibold text-slate-600 mb-1">Loại Container / Toa Xe *</label>
+              <label className="block text-[11px] font-semibold text-slate-600 mb-1">Loại Container / Toa Xe <span className="text-red-500">*</span></label>
               <select
                 value={specs.containerType || ''}
                 onChange={(e) => updateSpec('containerType', e.target.value as any)}
                 className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-bold text-blue-950 shadow-2xs cursor-pointer"
               >
-                <option value="">-- Chọn Loại Container / Toa Xe * --</option>
+                <option value="">-- Chọn Loại Container / Toa Xe --</option>
                 <option value="Cont 40ft HC">Cont 40ft High Cube (40HC - Phổ biến nhất)</option>
                 <option value="Cont 20ft">Cont 20ft Thường (20DC)</option>
                 <option value="Cont Lạnh (Reefer Rail)">Container Lạnh 40RF (Có máy phát điện Genset)</option>
@@ -533,7 +533,7 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                1. Số Lượng Container / Toa Xe *
+                1. Số Lượng Container / Toa Xe <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -550,7 +550,7 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
 
             <div>
               <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                2. Đơn Vị (Tần Suất Vận Chuyển) *
+                2. Đơn Vị (Tần Suất Vận Chuyển) <span className="text-red-500">*</span>
               </label>
               <select
                 value={specs.containerCountUnit || ''}
@@ -593,7 +593,7 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
           <div className="flex flex-wrap items-center justify-between gap-2">
             <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
               <Box className="w-3.5 h-3.5 text-blue-700" />
-              <span>Khai Báo Kích Thước & Trọng Lượng Gom Hàng Lẻ Ga (CFS) *</span>
+              <span>Khai Báo Kích Thước & Trọng Lượng Gom Hàng Lẻ Ga (CFS) <span className="text-red-500">*</span></span>
             </label>
             <div className="flex items-center gap-2">
               <span className="text-[10px] text-blue-900 bg-blue-50 border border-blue-200 font-bold px-2 py-0.5 rounded-md">
@@ -606,7 +606,7 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
             <div>
               <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                Số Lượng Kiện / Pallet Cần Ghép *
+                Số Lượng Kiện / Pallet Cần Ghép <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -616,67 +616,77 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
                   const val = e.target.value.replace(/\D/g, '');
                   handleLclPiecesChange(val ? parseInt(val, 10) : undefined);
                 }}
-                placeholder="VD: 4"
+                placeholder="VD: 5"
                 className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-bold text-slate-900 shadow-2xs"
               />
             </div>
 
-            <div className="flex items-center gap-2 h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl">
-              <input
-                type="checkbox"
-                id="railLclStackableCheck"
-                checked={Boolean(specs.lclStackable)}
-                onChange={(e) => updateSpec('lclStackable', e.target.checked)}
-                className="rounded-sm text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer"
-              />
-              <label htmlFor="railLclStackableCheck" className="text-xs font-semibold text-slate-800 cursor-pointer select-none">
-                Hàng có thể chồng tầng (Stackable)
+            <div className="flex flex-col justify-end">
+              <label className="flex items-center gap-2 h-10 px-3.5 bg-white border border-slate-200 rounded-xl cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={Boolean(specs.lclStackable)}
+                  onChange={(e) => updateSpec('lclStackable', e.target.checked)}
+                  className="rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
+                />
+                <span className="text-xs text-slate-800 font-semibold">
+                  Kiện hàng có thể xếp chồng (Stackable)
+                </span>
               </label>
             </div>
           </div>
 
-          {/* Hàng 2: Kích thước 3 ô Dài x Rộng x Cao cm */}
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="block text-[11px] font-semibold text-slate-600">
-                Kích Thước 1 Kiện (Dài x Rộng x Cao cm)
+          {/* Hàng 2: Kích Thước Dài x Rộng x Cao cm */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-semibold text-slate-700">
+                Kích Thước 1 Kiện Chuẩn (Dài x Rộng x Cao cm)
               </label>
-              <span className="text-[10px] text-slate-400 font-medium">Tự động tính Tổng Thể Tích CBM</span>
+              <span className="text-[11px] text-slate-400">Tự động tính thể tích & Trọng lượng quy đổi</span>
             </div>
-            <div className="grid grid-cols-3 gap-2">
-              <input
-                type="text"
-                inputMode="numeric"
-                value={specs.lclDimensions?.lengthCm !== undefined && specs.lclDimensions.lengthCm !== null && specs.lclDimensions.lengthCm > 0 ? specs.lclDimensions.lengthCm : ''}
-                onChange={(e) => {
-                  const val = e.target.value.replace(/\D/g, '');
-                  handleLclDimChange('lengthCm', val ? parseInt(val, 10) : undefined);
-                }}
-                placeholder="Dài (L) cm"
-                className="w-full h-10 px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-xl text-center font-bold text-slate-800 shadow-2xs"
-              />
-              <input
-                type="text"
-                inputMode="numeric"
-                value={specs.lclDimensions?.widthCm !== undefined && specs.lclDimensions.widthCm !== null && specs.lclDimensions.widthCm > 0 ? specs.lclDimensions.widthCm : ''}
-                onChange={(e) => {
-                  const val = e.target.value.replace(/\D/g, '');
-                  handleLclDimChange('widthCm', val ? parseInt(val, 10) : undefined);
-                }}
-                placeholder="Rộng (W) cm"
-                className="w-full h-10 px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-xl text-center font-bold text-slate-800 shadow-2xs"
-              />
-              <input
-                type="text"
-                inputMode="numeric"
-                value={specs.lclDimensions?.heightCm !== undefined && specs.lclDimensions.heightCm !== null && specs.lclDimensions.heightCm > 0 ? specs.lclDimensions.heightCm : ''}
-                onChange={(e) => {
-                  const val = e.target.value.replace(/\D/g, '');
-                  handleLclDimChange('heightCm', val ? parseInt(val, 10) : undefined);
-                }}
-                placeholder="Cao (H) cm"
-                className="w-full h-10 px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-xl text-center font-bold text-slate-800 shadow-2xs"
-              />
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <span className="text-[10px] text-slate-500 block mb-1 font-medium">Dài (L) cm</span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={specs.lclDimensions?.lengthCm !== undefined && specs.lclDimensions.lengthCm !== null && specs.lclDimensions.lengthCm > 0 ? specs.lclDimensions.lengthCm : ''}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '');
+                    handleLclDimChange('lengthCm', val ? parseInt(val, 10) : undefined);
+                  }}
+                  placeholder="VD: 120"
+                  className="w-full h-10 px-3 text-xs bg-white border border-slate-200 rounded-xl text-center font-bold text-slate-900 focus:border-blue-500 shadow-2xs"
+                />
+              </div>
+              <div>
+                <span className="text-[10px] text-slate-500 block mb-1 font-medium">Rộng (W) cm</span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={specs.lclDimensions?.widthCm !== undefined && specs.lclDimensions.widthCm !== null && specs.lclDimensions.widthCm > 0 ? specs.lclDimensions.widthCm : ''}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '');
+                    handleLclDimChange('widthCm', val ? parseInt(val, 10) : undefined);
+                  }}
+                  placeholder="VD: 100"
+                  className="w-full h-10 px-3 text-xs bg-white border border-slate-200 rounded-xl text-center font-bold text-slate-900 focus:border-blue-500 shadow-2xs"
+                />
+              </div>
+              <div>
+                <span className="text-[10px] text-slate-500 block mb-1 font-medium">Cao (H) cm</span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={specs.lclDimensions?.heightCm !== undefined && specs.lclDimensions.heightCm !== null && specs.lclDimensions.heightCm > 0 ? specs.lclDimensions.heightCm : ''}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '');
+                    handleLclDimChange('heightCm', val ? parseInt(val, 10) : undefined);
+                  }}
+                  placeholder="VD: 160"
+                  className="w-full h-10 px-3 text-xs bg-white border border-slate-200 rounded-xl text-center font-bold text-slate-900 focus:border-blue-500 shadow-2xs"
+                />
+              </div>
             </div>
           </div>
 
@@ -684,7 +694,7 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                Tổng Trọng Lượng Thực (Gross Kg) *
+                Tổng Trọng Lượng Thực (Gross Kg) <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -723,7 +733,7 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                1. Số Lượng Chuyến Ghép *
+                1. Số Lượng Chuyến Ghép <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -740,7 +750,7 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
 
             <div>
               <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                2. Đơn Vị (Tần Suất Vận Chuyển) *
+                2. Đơn Vị (Tần Suất Vận Chuyển) <span className="text-red-500">*</span>
               </label>
               <select
                 value={specs.lclFrequencyUnit || ''}

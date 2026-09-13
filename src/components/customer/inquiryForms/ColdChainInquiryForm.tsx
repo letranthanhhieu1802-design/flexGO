@@ -102,12 +102,12 @@ export const ColdChainInquiryForm: React.FC<ColdChainInquiryFormProps> = ({
       <div className="space-y-1.5">
         <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
           <MapPin className="w-3.5 h-3.5 text-emerald-600" />
-          <span>Tuyến Đường & Địa Điểm Kho Lạnh (Cold Chain Corridor) *</span>
+          <span>Tuyến Đường & Địa Điểm Kho Lạnh (Cold Chain Corridor) <span className="text-red-500">*</span></span>
         </label>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
             <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-              Kho Lạnh Xuất Phát (Cold Storage Origin) *
+              Kho Lạnh Xuất Phát (Cold Storage Origin) <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -121,7 +121,7 @@ export const ColdChainInquiryForm: React.FC<ColdChainInquiryFormProps> = ({
 
           <div>
             <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-              Kho Lạnh Đích / Điểm Giao (Cold Storage Destination) *
+              Kho Lạnh Đích / Điểm Giao (Cold Storage Destination) <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -139,12 +139,12 @@ export const ColdChainInquiryForm: React.FC<ColdChainInquiryFormProps> = ({
       <div className="space-y-1.5">
         <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
           <ThermometerSnowflake className="w-3.5 h-3.5 text-emerald-600" />
-          <span>Yêu Cầu Nhiệt Độ & Cấu Hình Phương Tiện *</span>
+          <span>Yêu Cầu Nhiệt Độ & Cấu Hình Phương Tiện <span className="text-red-500">*</span></span>
         </label>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-              Dải Nhiệt Độ Yêu Cầu (Temperature Category) *
+              Dải Nhiệt Độ Yêu Cầu (Temperature Category) <span className="text-red-500">*</span>
             </label>
             <select
               value={specs.temperatureCategory || ''}
@@ -161,7 +161,7 @@ export const ColdChainInquiryForm: React.FC<ColdChainInquiryFormProps> = ({
 
           <div>
             <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-              Loại Xe / Container Lạnh *
+              Loại Xe / Container Lạnh <span className="text-red-500">*</span>
             </label>
             <select
               value={specs.vehicleOrContType || ''}

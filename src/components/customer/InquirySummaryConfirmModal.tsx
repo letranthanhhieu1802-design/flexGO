@@ -61,9 +61,11 @@ import {
   Lock,
   Unlock,
   KeyRound,
-  Trophy
+  Trophy,
+  Trash2
 } from 'lucide-react';
 import { InquiryItem, ServiceType, UserProfile, SupplierLeadItem, QuotationItem } from '../../types';
+import { getSurchargesForService } from './inquiryForms/SurchargesSection';
 
 interface InquirySummaryConfirmModalProps {
   isOpen: boolean;
@@ -146,10 +148,19 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
     }
   }, [isPublished]);
 
-  if (!isOpen || !inquiry) return null;
+  // Lock document body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isOpen]);
 
   // Lead Code and Inquiry Code are 1:1 identical (Mã lead và Mã Inquiry là 1)
-  const leadCode = inquiry.leadCode || inquiry.code;
+  const leadCode = inquiry?.leadCode || inquiry?.code || '';
 
   // Share URL pointing directly to the Lead Board filtered by this Lead Code
   const shareUrl = typeof window !== 'undefined'
@@ -236,7 +247,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
     }
   };
 
-  const specs = inquiry.serviceSpecs || {};
+  const specs = inquiry?.serviceSpecs || {};
   const trucking = specs.trucking;
   const ocean = specs.ocean;
   const air = specs.air;
@@ -248,47 +259,49 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
   const project = specs.project;
 
   // Active pick-up and drop-off points
-  const isTrucking = inquiry.serviceType === 'Trucking';
-  const isTruckingLtl = isTrucking && (trucking?.loadType?.includes('LTL') || inquiry.title?.toLowerCase().includes('ltl'));
-  const isLcl = inquiry.serviceType === 'Sea Freight (LCL)' || ocean?.mode?.includes('LCL') || inquiry.title?.toLowerCase().includes('lcl');
-  const isFcl = (inquiry.serviceType === 'Sea Freight (FCL)' || ocean?.mode?.includes('FCL')) && !isLcl;
+  const isTrucking = inquiry?.serviceType === 'Trucking';
+  const isTruckingLtl = isTrucking && (trucking?.loadType?.includes('LTL') || inquiry?.title?.toLowerCase().includes('ltl'));
+  const isColdChain = inquiry?.serviceType === 'Cold Chain' || inquiry?.title?.toLowerCase().includes('cold chain') || inquiry?.title?.toLowerCase().includes('lạnh');
+  const isProjectCargo = inquiry?.serviceType === 'Project Cargo' || inquiry?.title?.toLowerCase().includes('dự án') || inquiry?.title?.toLowerCase().includes('project');
+  const isLcl = inquiry?.serviceType === 'Sea Freight (LCL)' || ocean?.mode?.includes('LCL') || inquiry?.title?.toLowerCase().includes('lcl');
+  const isFcl = (inquiry?.serviceType === 'Sea Freight (FCL)' || ocean?.mode?.includes('FCL')) && !isLcl;
   const isOcean = isFcl || isLcl;
-  const isAir = inquiry.serviceType === 'Air Freight' || inquiry.title?.toLowerCase().includes('air freight');
-  const isAirExpress = isAir && (air?.airServiceType === 'Express / Courier' || inquiry.title?.toLowerCase().includes('courier') || inquiry.title?.toLowerCase().includes('express'));
+  const isAir = inquiry?.serviceType === 'Air Freight' || inquiry?.title?.toLowerCase().includes('air freight');
+  const isAirExpress = isAir && (air?.airServiceType === 'Express / Courier' || inquiry?.title?.toLowerCase().includes('courier') || inquiry?.title?.toLowerCase().includes('express'));
   const isAirCargo = isAir && !isAirExpress;
-  const isRail = inquiry.serviceType === 'Rail Freight' || inquiry.title?.toLowerCase().includes('rail');
-  const isRailLcl = isRail && (rail?.mode?.includes('LCL') || inquiry.title?.toLowerCase().includes('lcl'));
+  const isRail = inquiry?.serviceType === 'Rail Freight' || inquiry?.title?.toLowerCase().includes('rail');
+  const isRailLcl = isRail && (rail?.mode?.includes('LCL') || inquiry?.title?.toLowerCase().includes('lcl'));
   const isRailFcl = isRail && !isRailLcl;
-  const isWarehousing = inquiry.serviceType === 'Warehousing' || inquiry.title?.toLowerCase().includes('kho');
-  const isCrossBorder = inquiry.serviceType === 'Cross-border' || inquiry.title?.toLowerCase().includes('cross-border') || inquiry.title?.toLowerCase().includes('biên giới');
-  const isCrossBorderLtl = isCrossBorder && (crossBorder?.loadType?.includes('LTL') || inquiry.title?.toLowerCase().includes('ltl'));
+  const isWarehousing = inquiry?.serviceType === 'Warehousing' || inquiry?.title?.toLowerCase().includes('kho');
+  const isCrossBorder = inquiry?.serviceType === 'Cross-border' || inquiry?.title?.toLowerCase().includes('cross-border') || inquiry?.title?.toLowerCase().includes('biên giới');
+  const isCrossBorderLtl = isCrossBorder && (crossBorder?.loadType?.includes('LTL') || inquiry?.title?.toLowerCase().includes('ltl'));
   const isCrossBorderFtl = isCrossBorder && !isCrossBorderLtl;
-  const isCustoms = inquiry.serviceType === 'Customs Clearance' || inquiry.title?.toLowerCase().includes('hải quan') || inquiry.title?.toLowerCase().includes('customs');
-  const isCustomsExport = isCustoms && (customs?.tradeRole?.includes('Xuất') || inquiry.title?.toLowerCase().includes('xuất'));
+  const isCustoms = inquiry?.serviceType === 'Customs Clearance' || inquiry?.title?.toLowerCase().includes('hải quan') || inquiry?.title?.toLowerCase().includes('customs');
+  const isCustomsExport = isCustoms && (customs?.tradeRole?.includes('Xuất') || inquiry?.title?.toLowerCase().includes('xuất'));
   const isCustomsImport = isCustoms && !isCustomsExport;
 
   const pickupList: string[] = (isTrucking && trucking?.pickupLocations && trucking.pickupLocations.length > 0)
     ? trucking.pickupLocations.map(l => l.trim()).filter(Boolean)
     : (isCrossBorder && crossBorder?.pickupLocations && crossBorder.pickupLocations.length > 0)
       ? crossBorder.pickupLocations.map(l => l.trim()).filter(Boolean)
-      : [inquiry.origin].filter(Boolean);
+      : [inquiry?.origin || ''].filter(Boolean);
 
   const deliveryList: string[] = (isTrucking && trucking?.deliveryLocations && trucking.deliveryLocations.length > 0)
     ? trucking.deliveryLocations.map(l => l.trim()).filter(Boolean)
     : (isCrossBorder && crossBorder?.deliveryLocations && crossBorder.deliveryLocations.length > 0)
       ? crossBorder.deliveryLocations.map(l => l.trim()).filter(Boolean)
-      : [inquiry.destination].filter(Boolean);
+      : [inquiry?.destination || ''].filter(Boolean);
 
   const totalPickupCount = pickupList.length || 1;
   const totalDeliveryCount = deliveryList.length || 1;
   const isMultiPoint = totalPickupCount > 1 || totalDeliveryCount > 1;
 
   // Customer Profile Information
-  const customerCompanyName = lead?.customerCompany || inquiry.customerCompany || currentUser?.companyName || 'ABC Manufacturing Vietnam Co., Ltd.';
-  const customerContactName = lead?.contactName || inquiry.contactPerson || (currentUser ? `${currentUser.name} (${currentUser.roleTitle || 'Logistics & Supply Chain'})` : 'Lê Hoàng Hiếu (Logistics Lead)');
+  const customerCompanyName = lead?.customerCompany || inquiry?.customerCompany || currentUser?.companyName || 'ABC Manufacturing Vietnam Co., Ltd.';
+  const customerContactName = lead?.contactName || inquiry?.contactPerson || (currentUser ? `${currentUser.name} (${currentUser.roleTitle || 'Logistics & Supply Chain'})` : 'Lê Hoàng Hiếu (Logistics Lead)');
   const customerEmail = lead?.contactEmail || currentUser?.email || 'hieu.le@abcmfg.vn';
   const customerPhone = lead?.contactPhone || '+84 908 123 456';
-  const customerTaxId = lead?.taxId || inquiry.taxCode || '0314892831';
+  const customerTaxId = lead?.taxId || inquiry?.taxCode || '0314892831';
 
   // Masking helpers for TH1 & TH2 (Customer masked when !effectiveUnlocked)
   const maskCompanyName = (name: string) => {
@@ -326,20 +339,111 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
 
   // Quoting & Competitor Calculations for Tab 2
   const rawTargetBudget = useMemo(() => {
-    return parseInt(inquiry.targetBudget?.replace(/\D/g, '') || '50000000', 10);
+    return parseInt(inquiry?.targetBudget?.replace(/\D/g, '') || '50000000', 10);
   }, [inquiry]);
 
   const [myTotalQuoteInput, setMyTotalQuoteInput] = useState<string>(() => {
-    const raw = parseInt(inquiry.targetBudget?.replace(/\D/g, '') || '50000000', 10);
+    const raw = parseInt(inquiry?.targetBudget?.replace(/\D/g, '') || '50000000', 10);
     const calculated = Math.round((raw * 0.95) / 10000) * 10000;
-    return calculated.toLocaleString('vi-VN') + (inquiry.targetBudget?.includes('USD') ? ' USD' : ' ₫') + (inquiry.pricingType === 'CONTRACT' ? ' / tháng' : '');
+    return calculated.toLocaleString('vi-VN') + (inquiry?.targetBudget?.includes('USD') ? ' USD' : ' ₫') + (inquiry?.pricingType === 'CONTRACT' ? ' / tháng' : '');
   });
 
   const [myBaseFreightInput, setMyBaseFreightInput] = useState<string>(() => {
-    const raw = parseInt(inquiry.targetBudget?.replace(/\D/g, '') || '50000000', 10);
+    const raw = parseInt(inquiry?.targetBudget?.replace(/\D/g, '') || '50000000', 10);
     const calculated = Math.round((raw * 0.80) / 10000) * 10000;
-    return calculated.toLocaleString('vi-VN') + (inquiry.targetBudget?.includes('USD') ? ' USD' : ' ₫');
+    return calculated.toLocaleString('vi-VN') + (inquiry?.targetBudget?.includes('USD') ? ' USD' : ' ₫');
   });
+
+  // Quoted surcharges state for supplier quote
+  interface QuotedSurchargeItem {
+    id: string;
+    name: string;
+    unit: string;
+    price: string;
+    isFromCustomer?: boolean;
+  }
+
+  const [quotedSurcharges, setQuotedSurcharges] = useState<QuotedSurchargeItem[]>(() => {
+    const requested = inquiry?.requestedSurcharges || [];
+    return requested.map((r, idx) => ({
+      id: `req-${idx}-${r}`,
+      name: r,
+      unit: getSurchargeUnit(r),
+      price: '',
+      isFromCustomer: true,
+    }));
+  });
+
+  useEffect(() => {
+    if (inquiry) {
+      const requested = inquiry.requestedSurcharges || [];
+      if (requested.length > 0) {
+        setQuotedSurcharges(
+          requested.map((r, idx) => ({
+            id: `req-${idx}-${r}`,
+            name: r,
+            unit: getSurchargeUnit(r),
+            price: '',
+            isFromCustomer: true,
+          }))
+        );
+      } else {
+        setQuotedSurcharges([]);
+      }
+    }
+  }, [inquiry]);
+
+  const handleSurchargePriceChange = (id: string, priceStr: string) => {
+    setQuotedSurcharges(prev => prev.map(item => item.id === id ? { ...item, price: priceStr } : item));
+  };
+
+  const handleRemoveSurcharge = (id: string) => {
+    setQuotedSurcharges(prev => prev.filter(item => item.id !== id));
+  };
+
+  const handleAddSurchargeFromLOV = (lovId: string) => {
+    if (!inquiry) return;
+    const serviceLovList = getSurchargesForService(inquiry.serviceType, warehousing?.warehouseType);
+    const found = serviceLovList.find(s => s.id === lovId);
+    if (!found) return;
+    setQuotedSurcharges(prev => [
+      ...prev,
+      {
+        id: `lov-${Date.now()}-${found.id}`,
+        name: found.name,
+        unit: getSurchargeUnit(found.name),
+        price: '',
+        isFromCustomer: false,
+      }
+    ]);
+  };
+
+  const availableServiceLOV = useMemo(() => {
+    if (!inquiry) return [];
+    return getSurchargesForService(inquiry.serviceType, warehousing?.warehouseType);
+  }, [inquiry, warehousing?.warehouseType]);
+
+  const unaddedSurcharges = useMemo(() => {
+    return availableServiceLOV.filter(lov => !quotedSurcharges.some(qs => qs.name === lov.name || (lov.code && qs.name.includes(lov.code))));
+  }, [availableServiceLOV, quotedSurcharges]);
+
+  const currencySymbol = inquiry?.targetBudget?.includes('USD') || inquiry?.cargoValueCurrency === 'USD' ? '$' : 'đ';
+
+  useEffect(() => {
+    if (isQuoting && inquiry) {
+      const baseNum = parseFloat(myBaseFreightInput.replace(/\D/g, '')) || 0;
+      const surchargesTotal = quotedSurcharges.reduce((sum, item) => {
+        const val = parseFloat(item.price.replace(/\D/g, '')) || 0;
+        return sum + val;
+      }, 0);
+      if (baseNum > 0 || surchargesTotal > 0) {
+        const total = baseNum + surchargesTotal;
+        const cSuffix = inquiry.targetBudget?.includes('USD') ? ' USD' : ' ₫';
+        const uSuffix = inquiry.pricingType === 'CONTRACT' ? ' / tháng' : '';
+        setMyTotalQuoteInput(total.toLocaleString('vi-VN') + cSuffix + uSuffix);
+      }
+    }
+  }, [myBaseFreightInput, quotedSurcharges, isQuoting, inquiry?.targetBudget, inquiry?.pricingType]);
 
   const [hasSubmittedQuote, setHasSubmittedQuote] = useState<boolean>(false);
 
@@ -358,6 +462,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
   };
 
   const competitorQuotes = useMemo(() => {
+    if (!inquiry) return [];
     const count = lead?.quotesCount ?? inquiry.responsesCount ?? 0;
     if (count === 0) return [];
 
@@ -392,6 +497,9 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
       };
     });
   }, [lead, inquiry]);
+
+  // Early return ONLY after all Hooks have been declared (Rules of Hooks)
+  if (!isOpen || !inquiry) return null;
 
   // Helper to remove any emojis/icons from stored data strings
   const cleanTextNoEmoji = (text?: string): string => {
@@ -624,82 +732,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
     }
   };
 
-  const getCol3HeaderConfig = () => {
-    switch (inquiry.serviceType) {
-      case 'Sea Freight (FCL)':
-        return {
-          tag: 'Cont #1',
-          label: ocean?.containerType ? `${ocean.containerType} —— (${ocean.containerCount || 1} Cont)` : '40ft High Cube (40HC) —— (76 CBM)',
-        };
-      case 'Sea Freight (LCL)':
-        return {
-          tag: 'Lô Hàng LCL #1',
-          label: ocean?.cbmVolume ? `${ocean.cbmVolume} CBM / ${ocean.grossWeightKgs || 0} kg` : 'Hàng lẻ LCL (Gom kho CFS)',
-        };
-      case 'Trucking':
-        return {
-          tag: 'Cấu Hình Xe #1',
-          label: trucking?.truckType ? `${trucking.truckType} —— (${trucking.tonnageCategory || 'Tiêu chuẩn'})` : 'Xe Tải Thùng Kín (Dry Box Truck)',
-        };
-      case 'Cold Chain':
-        return {
-          tag: 'Cấu Hình Xe Lạnh #1',
-          label: coldChain?.vehicleOrContType ? `${coldChain.vehicleOrContType} —— (${coldChain.temperatureCategory?.split(':')[0] || 'Chilled'})` : 'Xe Tải Đông Lạnh (Thermo King)',
-        };
-      case 'Air Freight':
-        return {
-          tag: 'Lô Hàng Air #1',
-          label: air?.chargeableWeightKgs ? `${air.chargeableWeightKgs} kg CW —— (${air.serviceLevel?.split('(')[0] || 'Standard'})` : 'Standard Air Cargo',
-        };
-      case 'Rail Freight':
-        return {
-          tag: isRailFcl ? 'Toa / Cont #1' : 'Lô Hàng LCL Ga #1',
-          label: isRailFcl
-            ? (rail?.containerType ? `${rail.containerType} —— (${rail.containerCount || 1} Cont/Toa)` : 'Container 40HC Đường Sắt')
-            : (rail?.lclCbm ? `${rail.lclCbm} CBM / ${rail.lclGrossWeightKg || 0} kg (${rail.lclRevenueTon || 0} RT)` : 'Hàng Lẻ Ga Đường Sắt (CFS)'),
-        };
-      case 'Warehousing': {
-        const whScale = warehousing?.billingUnitPreference?.includes('Pallet')
-          ? `${warehousing.palletPositions ? warehousing.palletPositions.toLocaleString('vi-VN') : 0} Pallet`
-          : warehousing?.billingUnitPreference?.includes('CBM')
-            ? `${warehousing.cbmVolume ? warehousing.cbmVolume.toLocaleString('vi-VN') : 0} CBM`
-            : warehousing?.billingUnitPreference?.includes('Order')
-              ? `${warehousing.bufferStorageQty || warehousing.bufferPalletPositions || 0} ${cleanTextNoEmoji(warehousing.bufferStorageUnit) || 'Pallet'}`
-              : `${warehousing?.storageAreaSqm ? warehousing.storageAreaSqm.toLocaleString('vi-VN') : 0} m²`;
-        return {
-          tag: 'Mô Hình Kho #1',
-          label: `${cleanTextNoEmoji(warehousing?.warehouseType) || 'Kho Thường Grade A'} (${whScale})`,
-        };
-      }
-      case 'Customs Clearance': {
-        const hs = customs?.hsCodePrimary || inquiry.hsCode || 'Chưa chỉ định';
-        const decl = customs?.declarationType ? cleanTextNoEmoji(customs.declarationType) : (isCustomsExport ? 'Tờ khai Xuất khẩu B11' : 'Tờ khai Nhập khẩu A11');
-        return {
-          tag: 'Tờ Khai #1',
-          label: `${decl} —— (HS: ${hs})`,
-        };
-      }
-      case 'Cross-border':
-        return {
-          tag: isCrossBorderLtl ? 'Lô Hàng LTL #1' : 'Phương Án FTL #1',
-          label: isCrossBorderLtl
-            ? (crossBorder?.ltlCbm ? `${crossBorder.ltlCbm} CBM / ${crossBorder.ltlGrossWeightKg || 0} kg (${crossBorder.ltlChargeableWeightKg || 0} kg CW)` : 'Hàng Lẻ Xuyên Biên Giới (LTL)')
-            : (crossBorder?.vehicleType
-                ? `${cleanTextNoEmoji(crossBorder.vehicleType)}${crossBorder.tonnageCategory ? ` —— (${cleanTextNoEmoji(crossBorder.tonnageCategory.split('—')[0])})` : ` —— (${cleanTextNoEmoji(crossBorder.borderGate?.split('(')[0]) || 'Cửa khẩu Mộc Bài'})`}`
-                : 'Xe Liên Vận GMS Chạy Thẳng'),
-        };
-      case 'Project Cargo':
-        return {
-          tag: 'Gói Dự Án #1',
-          label: project?.projectType || 'Vận tải siêu trường siêu trọng',
-        };
-      default:
-        return {
-          tag: 'Cấu Hình #1',
-          label: getTariffMainUnit(),
-        };
-    }
-  };
+
 
   const routeDisplay = isWarehousing
     ? `Khu vực đặt kho: ${inquiry.origin || 'Chưa chỉ định'} ➔ Bán kính phân phối: ${inquiry.destination || 'Chưa chỉ định'}`
@@ -2026,6 +2059,135 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                         </span>
                       </div>
                     </div>
+                  ) : isColdChain ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2.5 gap-x-8 text-xs">
+                      {/* Hàng 1: Loại hình dịch vụ & Dải nhiệt độ bảo quản */}
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Loại hình dịch vụ:</span>
+                        <span className="font-normal text-slate-800">{getServiceNameVi(inquiry.serviceType)}</span>
+                      </div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Dải Nhiệt Độ Bảo Quản:</span>
+                        <span className="font-bold text-emerald-800">
+                          {cleanTextNoEmoji(coldChain?.temperatureCategory || inquiry.temperatureRequirement || 'Đông lạnh / Mát kiểm soát')}
+                        </span>
+                      </div>
+
+                      {/* Hàng 2: Loại xe / Container lạnh & Chạy máy phát Genset */}
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Loại Xe / Cont Lạnh:</span>
+                        <span className="font-normal text-slate-800">
+                          {cleanTextNoEmoji(coldChain?.vehicleOrContType || 'Xe tải lạnh chuyên dụng')}
+                        </span>
+                      </div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Máy Phát Điện Genset:</span>
+                        <span className="font-normal text-slate-800">
+                          {coldChain?.backupGensetIncluded ? 'Duy trì cấp điện Clip-on Genset liên tục' : 'Theo quy chuẩn xe lạnh'}
+                        </span>
+                      </div>
+
+                      {/* Hàng 3: Tiền làm lạnh & IoT GPS Data Logger */}
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Tiền Làm Lạnh (Pre-cooling):</span>
+                        <span className="font-normal text-slate-800">
+                          {coldChain?.preCoolingRequested ? 'Làm lạnh thùng trước 30-60 phút trước khi bốc hàng' : 'Không yêu cầu'}
+                        </span>
+                      </div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">IoT Data Logger & GPS:</span>
+                        <span className="font-normal text-slate-800">
+                          {coldChain?.realtimeGpsTempLogging ? 'Ghi & truyền biểu đồ nhiệt độ online 24/7' : 'Theo dõi định kỳ'}
+                        </span>
+                      </div>
+
+                      {/* Hàng 4: Kho Lạnh Xuất Phát & Kho Lạnh Đích */}
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Kho Lạnh Xuất Phát (Origin):</span>
+                        <span className="font-normal text-slate-800">
+                          {inquiry.origin || 'Chưa chỉ định'}
+                        </span>
+                      </div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Kho Lạnh Đích Đến (Destination):</span>
+                        <span className="font-normal text-slate-800">
+                          {inquiry.destination || 'Chưa chỉ định'}
+                        </span>
+                      </div>
+
+                      {/* Hàng 5: Tiêu chuẩn Dược phẩm GDP / HACCP */}
+                      {coldChain?.isPharmaCertifiedGDP && (
+                        <div className="flex items-baseline gap-2 md:col-span-2">
+                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Tiêu Chuẩn Chuỗi Lạnh:</span>
+                          <span className="font-normal text-emerald-800 font-bold">
+                            Đạt chứng nhận kiểm soát nhiệt độ nghiêm ngặt chuẩn GDP Dược Phẩm / HACCP
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  ) : isProjectCargo ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2.5 gap-x-8 text-xs">
+                      {/* Hàng 1: Loại hình dịch vụ & Mô hình dự án */}
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Loại hình dịch vụ:</span>
+                        <span className="font-normal text-slate-800">{getServiceNameVi(inquiry.serviceType)}</span>
+                      </div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Phân Loại Mô Hình Dự Án:</span>
+                        <span className="font-normal text-slate-800">
+                          {cleanTextNoEmoji(project?.projectCategory || 'Mạng lưới phân phối (Distribution)')}
+                        </span>
+                      </div>
+
+                      {/* Hàng 2: Kênh phân phối & Phạm vi địa lý */}
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Kênh Phân Phối Mục Tiêu:</span>
+                        <span className="font-normal text-slate-800">
+                          {cleanTextNoEmoji(project?.distributionChannel || 'Chuỗi Siêu thị / TTTM / Đại lý')}
+                        </span>
+                      </div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Phạm Vi Địa Lý Phân Phối:</span>
+                        <span className="font-normal text-slate-800">
+                          {cleanTextNoEmoji(project?.coverageScope || 'Toàn quốc (Bắc - Trung - Nam)')}
+                        </span>
+                      </div>
+
+                      {/* Hàng 3: Kho Tổng / Nhà máy xuất hàng & Điểm đến */}
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Kho Tổng Xuất Hàng Chính (Hubs):</span>
+                        <span className="font-normal text-slate-800">
+                          {project?.originWarehouses && project.originWarehouses.length > 0
+                            ? project.originWarehouses.join('; ')
+                            : (inquiry.origin || 'Chưa chỉ định')}
+                        </span>
+                      </div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Địa Bàn Phân Phối / Điểm Đến:</span>
+                        <span className="font-normal text-slate-800">
+                          {cleanTextNoEmoji(project?.destinationSite || inquiry.destination || 'Theo mạng lưới cửa hàng')}
+                        </span>
+                      </div>
+
+                      {/* Hàng 4: Cấu hình đội xe & Báo cáo KPI OTIF */}
+                      {project?.fleetRequirements && project.fleetRequirements.length > 0 && (
+                        <div className="flex items-baseline gap-2 md:col-span-2">
+                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Đội Xe Vận Tải Yêu Cầu:</span>
+                          <span className="font-normal text-slate-800">
+                            {project.fleetRequirements.join(', ')}
+                          </span>
+                        </div>
+                      )}
+
+                      {project?.keyKPIRequirements && project.keyKPIRequirements.length > 0 && (
+                        <div className="flex items-baseline gap-2 md:col-span-2">
+                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Cam Kết KPI Vận Hành:</span>
+                          <span className="font-normal text-slate-800">
+                            {project.keyKPIRequirements.join(', ')}
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   ) : (
                     <>
                       {/* Service & Model */}
@@ -2371,13 +2533,10 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                         <th className="py-3 px-3 text-center border-r border-slate-200">
                           CỘT 2: ĐVT
                         </th>
-                        <th className="py-2.5 px-3 text-center bg-indigo-50/60 border-r border-slate-200">
-                          <div className="flex flex-col items-center justify-center">
-                            <div className="inline-flex items-center gap-1.5 font-extrabold text-slate-800 bg-white border border-slate-300 px-2.5 py-1 rounded-lg text-xs shadow-2xs max-w-full truncate">
-                              <span className="truncate">{getCol3HeaderConfig().label}</span>
-                            </div>
-                            <span className="text-[10px] text-indigo-700 font-bold mt-0.5">Giá mục tiêu của KH</span>
-                          </div>
+                        <th className="py-3 px-3 text-center bg-indigo-50/60 border-r border-slate-200">
+                          <span className="text-[11px] font-extrabold text-indigo-900 uppercase tracking-wider">
+                            GIÁ MỤC TIÊU CỦA KH
+                          </span>
                         </th>
 
                         {/* CỘT BÁO GIÁ CỦA BẠN (KHI USER NHẤN BÁO GIÁ) */}
@@ -2567,77 +2726,207 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                         <td colSpan={3 + (isQuoting ? 1 : 0) + competitorQuotes.length} className="py-2 px-4 border-r border-slate-200">
                           <div className="flex items-center gap-2">
                             <span>{getServiceSection1Title()}</span>
-                            {inquiry.requestedSurcharges && inquiry.requestedSurcharges.length > 0 && (
-                              <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200 lowercase tracking-normal">
-                                {inquiry.requestedSurcharges.length} mục đã chỉ định
+                            {inquiry.quotationScope === 'ALL_IN' ? (
+                              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 tracking-normal">
+                                Yêu cầu Báo Giá Trọn Gói (All-in)
+                              </span>
+                            ) : inquiry.requestedSurcharges && inquiry.requestedSurcharges.length > 0 ? (
+                              <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200 tracking-normal">
+                                Báo Giá Bóc Tách ({inquiry.requestedSurcharges.length} mục đã chỉ định)
+                              </span>
+                            ) : (
+                              <span className="text-[10px] font-bold text-slate-600 bg-slate-200/80 px-2 py-0.5 rounded-md tracking-normal">
+                                Tùy chọn phụ phí
                               </span>
                             )}
                           </div>
                         </td>
                       </tr>
 
-                      {inquiry.requestedSurcharges && inquiry.requestedSurcharges.length > 0 ? (
-                        inquiry.requestedSurcharges.map((charge, idx) => (
-                          <tr key={idx} className="hover:bg-slate-50/80 transition-colors">
-                            <td className="py-2 px-4 border-r border-slate-200">
-                              <div className="font-medium text-slate-800">
-                                <span>{charge}</span>
-                              </div>
-                            </td>
-                            <td className="py-2 px-3 text-center border-r border-slate-200 font-semibold text-slate-600">
-                              {getSurchargeUnit(charge)}
-                            </td>
-                            <td className="py-2 px-4 text-center border-r border-slate-200">
-                              <div className="inline-flex items-center justify-center w-full min-h-[30px] bg-white border border-slate-200 rounded-lg px-3 py-1 shadow-2xs">
-                                <span className="font-mono font-bold text-slate-700 text-xs">Theo chuẩn</span>
-                              </div>
-                            </td>
+                      {isQuoting ? (
+                        <>
+                          {quotedSurcharges.length > 0 ? (
+                            quotedSurcharges.map((charge) => (
+                              <tr key={charge.id} className="hover:bg-slate-50/80 transition-colors">
+                                <td className="py-2 px-4 border-r border-slate-200">
+                                  <div className="flex items-center justify-between gap-1.5">
+                                    <div className="flex items-center gap-1.5 min-w-0">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleRemoveSurcharge(charge.id)}
+                                        className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors cursor-pointer shrink-0"
+                                        title={`Xóa phụ phí "${charge.name}"`}
+                                      >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                      </button>
+                                      <span className="text-slate-400 text-xs shrink-0">•</span>
+                                      <span className="text-xs font-semibold text-slate-800 truncate" title={charge.name}>
+                                        {charge.name}
+                                      </span>
+                                    </div>
+                                    <span className="text-[9.5px] font-semibold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200 shrink-0 select-none">
+                                      LOV
+                                    </span>
+                                  </div>
+                                </td>
+                                <td className="py-2 px-3 text-center border-r border-slate-200 font-medium text-slate-600 text-xs">
+                                  {charge.unit}
+                                </td>
+                                <td className="py-2 px-4 text-center border-r border-slate-200">
+                                  <div className="inline-flex items-center justify-center w-full min-h-[30px] bg-white border border-slate-200 rounded-lg px-3 py-1 shadow-2xs">
+                                    <span className="font-mono font-bold text-slate-700 text-xs">
+                                      {charge.isFromCustomer ? 'Theo chuẩn' : 'Bổ sung'}
+                                    </span>
+                                  </div>
+                                </td>
 
-                            {/* Cột Báo giá của bạn: Phụ phí */}
-                            {isQuoting && (
-                              <td className="py-2 px-3 text-center border-r border-slate-200 bg-indigo-50/30">
-                                <span className="text-[11px] font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200">
-                                  Đã tính trong all-in
-                                </span>
+                                {/* Cột Báo giá của bạn: Nhập giá phụ phí */}
+                                <td className="py-2 px-3 text-center border-r border-slate-200 bg-indigo-50/40">
+                                  <div className="relative flex items-center">
+                                    <input
+                                      type="text"
+                                      value={charge.price}
+                                      onChange={(e) => {
+                                        const val = e.target.value.replace(/[^\d.]/g, '');
+                                        const num = parseFloat(val.replace(/\./g, ''));
+                                        const formatted = isNaN(num) ? '' : num.toLocaleString('vi-VN');
+                                        handleSurchargePriceChange(charge.id, formatted || val);
+                                      }}
+                                      placeholder="0"
+                                      className="w-full py-1.5 pl-3 pr-7 text-right font-mono font-medium text-xs text-slate-900 bg-white border border-slate-200 rounded-lg hover:border-slate-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-2xs"
+                                    />
+                                    <span className="absolute right-2.5 text-[11px] font-semibold text-slate-400 pointer-events-none">
+                                      {currencySymbol}
+                                    </span>
+                                  </div>
+                                </td>
+
+                                {/* Các cột đối thủ: Phụ phí */}
+                                {competitorQuotes.map((comp) => (
+                                  <td key={comp.id} className="py-2 px-3 text-center border-r border-slate-200">
+                                    {effectiveUnlocked ? (
+                                      <span className="font-mono font-medium text-slate-700 text-xs">
+                                        {comp.formattedSurcharge}
+                                      </span>
+                                    ) : (
+                                      <span className="font-mono text-slate-300 tracking-widest text-xs select-none">••••••••</span>
+                                    )}
+                                  </td>
+                                ))}
+                              </tr>
+                            ))
+                          ) : (
+                            <tr className="hover:bg-slate-50/80 transition-colors">
+                              <td className="py-2.5 px-4 border-r border-slate-200 font-medium text-slate-600 text-xs italic">
+                                Khách hàng yêu cầu báo giá Trọn gói (All-in). Bạn có thể bấm chọn thêm phụ phí bên dưới để bóc tách minh bạch.
                               </td>
-                            )}
+                              <td className="py-2.5 px-3 text-center border-r border-slate-200 text-slate-400">—</td>
+                              <td className="py-2.5 px-4 text-center border-r border-slate-200">
+                                <div className="inline-flex items-center justify-center w-full min-h-[30px] bg-slate-50 border border-slate-200 rounded-lg px-3 py-1 text-slate-500 font-medium text-xs">
+                                  Đã bao gồm
+                                </div>
+                              </td>
+                              <td className="py-2.5 px-3 text-center border-r border-slate-200 bg-indigo-50/30 text-indigo-700 text-xs font-semibold">
+                                Đã tính trong all-in
+                              </td>
+                              {competitorQuotes.map((comp) => (
+                                <td key={comp.id} className="py-2.5 px-3 text-center border-r border-slate-200 text-xs text-slate-500">
+                                  {effectiveUnlocked ? 'Đã bao gồm' : '••••••••'}
+                                </td>
+                              ))}
+                            </tr>
+                          )}
 
-                            {/* Các cột đối thủ: Phụ phí */}
-                            {competitorQuotes.map((comp) => (
-                              <td key={comp.id} className="py-2 px-3 text-center border-r border-slate-200">
-                                {effectiveUnlocked ? (
-                                  <span className="font-mono font-medium text-slate-700 text-xs">
-                                    {comp.formattedSurcharge}
+                          {/* HÀNG HÀNH ĐỘNG DƯỚI CÙNG: CHỌN PHỤ PHÍ THÊM TỪ LOV */}
+                          {unaddedSurcharges.length > 0 && (
+                            <tr className="bg-indigo-50/20 hover:bg-indigo-50/40 transition-colors border-b border-slate-200">
+                              <td className="py-2 px-4 border-r border-slate-200">
+                                <div className="relative">
+                                  <select
+                                    value=""
+                                    onChange={(e) => {
+                                      if (e.target.value) {
+                                        handleAddSurchargeFromLOV(e.target.value);
+                                        e.target.value = '';
+                                      }
+                                    }}
+                                    className="w-full px-3 py-1.5 text-xs font-bold text-indigo-700 bg-white hover:border-indigo-400 border border-indigo-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer shadow-2xs"
+                                  >
+                                    <option value="" disabled>
+                                      + Chọn phụ phí thêm từ LOV ({unaddedSurcharges.length} mục)...
+                                    </option>
+                                    {unaddedSurcharges.map((item) => (
+                                      <option key={item.id} value={item.id}>
+                                        + {item.name} — [{getSurchargeUnit(item.name)}]
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+                              </td>
+                              <td className="py-2 px-3 text-center border-r border-slate-200 text-slate-400 text-[10px] font-medium italic select-none">
+                                Theo LOV
+                              </td>
+                              <td colSpan={1 + 1 + competitorQuotes.length} className="py-2 px-4 border-r border-slate-200 bg-slate-50/30"></td>
+                            </tr>
+                          )}
+                        </>
+                      ) : (
+                        /* CHẾ ĐỘ CUSTOMER VIEW: XEM DANH SÁCH PHỤ PHÍ ĐÃ YÊU CẦU */
+                        inquiry.requestedSurcharges && inquiry.requestedSurcharges.length > 0 ? (
+                          inquiry.requestedSurcharges.map((charge, idx) => (
+                            <tr key={idx} className="hover:bg-slate-50/80 transition-colors">
+                              <td className="py-2 px-4 border-r border-slate-200">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-slate-400">•</span>
+                                  <span className="font-semibold text-slate-800 text-xs">
+                                    {charge}
                                   </span>
-                                ) : (
-                                  <span className="font-mono text-slate-300 tracking-widest text-xs select-none">••••••••</span>
-                                )}
+                                  <span className="text-[9px] font-black px-1.5 py-0.2 bg-slate-100 text-slate-500 rounded shrink-0 border border-slate-200">
+                                    LOV
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="py-2 px-3 text-center border-r border-slate-200 font-semibold text-slate-600 text-xs">
+                                {getSurchargeUnit(charge)}
+                              </td>
+                              <td className="py-2 px-4 text-center border-r border-slate-200">
+                                <div className="inline-flex items-center justify-center w-full min-h-[30px] bg-white border border-slate-200 rounded-lg px-3 py-1 shadow-2xs">
+                                  <span className="font-mono font-bold text-slate-700 text-xs">Theo chuẩn</span>
+                                </div>
+                              </td>
+
+                              {/* Các cột đối thủ: Phụ phí */}
+                              {competitorQuotes.map((comp) => (
+                                <td key={comp.id} className="py-2 px-3 text-center border-r border-slate-200">
+                                  {effectiveUnlocked ? (
+                                    <span className="font-mono font-medium text-slate-700 text-xs">
+                                      {comp.formattedSurcharge}
+                                    </span>
+                                  ) : (
+                                    <span className="font-mono text-slate-300 tracking-widest text-xs select-none">••••••••</span>
+                                  )}
+                                </td>
+                              ))}
+                            </tr>
+                          ))
+                        ) : (
+                          <tr className="hover:bg-slate-50/80 transition-colors">
+                            <td className="py-2.5 px-4 border-r border-slate-200 font-medium text-slate-600 text-xs italic">
+                              Đã bao gồm trọn gói trong cước chính (Báo giá All-in).
+                            </td>
+                            <td className="py-2.5 px-3 text-center border-r border-slate-200 text-slate-400">—</td>
+                            <td className="py-2.5 px-4 text-center border-r border-slate-200">
+                              <div className="inline-flex items-center justify-center w-full min-h-[30px] bg-slate-50 border border-slate-200 rounded-lg px-3 py-1 text-slate-500 font-medium text-xs">
+                                Đã bao gồm
+                              </div>
+                            </td>
+                            {competitorQuotes.map((comp) => (
+                              <td key={comp.id} className="py-2.5 px-3 text-center border-r border-slate-200 text-xs text-slate-500">
+                                {effectiveUnlocked ? 'Đã bao gồm' : '••••••••'}
                               </td>
                             ))}
                           </tr>
-                        ))
-                      ) : (
-                        <tr className="hover:bg-slate-50/80 transition-colors">
-                          <td className="py-2.5 px-4 border-r border-slate-200 font-semibold text-slate-600 italic">
-                            Theo biểu phí phụ phí chuẩn ban hành của nhà vận tải / cảng biển.
-                          </td>
-                          <td className="py-2.5 px-3 text-center border-r border-slate-200 text-slate-400">—</td>
-                          <td className="py-2.5 px-4 text-center border-r border-slate-200">
-                            <div className="inline-flex items-center justify-center w-full min-h-[30px] bg-slate-50 border border-slate-200 rounded-lg px-3 py-1 text-slate-500 font-medium text-xs">
-                              Đã bao gồm
-                            </div>
-                          </td>
-                          {isQuoting && (
-                            <td className="py-2.5 px-3 text-center border-r border-slate-200 bg-indigo-50/30 text-indigo-700 text-xs font-semibold">
-                              Đã bao gồm
-                            </td>
-                          )}
-                          {competitorQuotes.map((comp) => (
-                            <td key={comp.id} className="py-2.5 px-3 text-center border-r border-slate-200 text-xs text-slate-500">
-                              {effectiveUnlocked ? 'Đã bao gồm' : '••••••••'}
-                            </td>
-                          ))}
-                        </tr>
+                        )
                       )}
 
                       {/* 2. DỊCH VỤ GIÁ TRỊ GIA TĂNG (VAS) */}

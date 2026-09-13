@@ -286,28 +286,31 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
       return;
     }
 
-    // 1. Fallback theo nhóm hàng hóa
+    // 1. Fallback theo nhóm hàng hóa & gán mặc định nếu chưa chọn
     if (cargoClassification === 'General') {
-      if (specs.warehouseType === 'Kho lạnh / Kho mát (Cold Storage)' || specs.warehouseType === 'Kho hàng nguy hiểm (DG Warehouse)') {
+      if (!specs.warehouseType || specs.warehouseType === 'Kho lạnh / Kho mát (Cold Storage)' || specs.warehouseType === 'Kho hàng nguy hiểm (DG Warehouse)') {
         onChange({
           ...specs,
           warehouseType: 'Kho thường (Grade A Dry)',
+          billingUnitPreference: specs.billingUnitPreference || 'm² (Diện tích sàn)',
         });
         return;
       }
     } else if (cargoClassification === 'Reefer') {
-      if (specs.warehouseType !== 'Kho lạnh / Kho mát (Cold Storage)' && specs.warehouseType !== 'Kho tự quản (Self-Storage)' && specs.warehouseType !== 'Kho ngoại quan (Bonded)') {
+      if (!specs.warehouseType || (specs.warehouseType !== 'Kho lạnh / Kho mát (Cold Storage)' && specs.warehouseType !== 'Kho tự quản (Self-Storage)' && specs.warehouseType !== 'Kho ngoại quan (Bonded)')) {
         onChange({
           ...specs,
           warehouseType: 'Kho lạnh / Kho mát (Cold Storage)',
+          billingUnitPreference: specs.billingUnitPreference || 'm² (Diện tích sàn)',
         });
         return;
       }
     } else if (cargoClassification === 'Hazmat') {
-      if (specs.warehouseType !== 'Kho hàng nguy hiểm (DG Warehouse)' && specs.warehouseType !== 'Kho ngoại quan (Bonded)' && specs.warehouseType !== 'Kho tự quản (Self-Storage)') {
+      if (!specs.warehouseType || (specs.warehouseType !== 'Kho hàng nguy hiểm (DG Warehouse)' && specs.warehouseType !== 'Kho ngoại quan (Bonded)' && specs.warehouseType !== 'Kho tự quản (Self-Storage)')) {
         onChange({
           ...specs,
           warehouseType: 'Kho hàng nguy hiểm (DG Warehouse)',
+          billingUnitPreference: specs.billingUnitPreference || 'm² (Diện tích sàn)',
         });
         return;
       }
@@ -357,7 +360,7 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
           <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
-            <span>Mô Hình & Loại Hình Kho Bãi Chuyên Biệt (Warehouse Category) *</span>
+            <span>Mô Hình & Loại Hình Kho Bãi Chuyên Biệt (Warehouse Category) <span className="text-red-500">*</span></span>
           </label>
           <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-purple-50 text-purple-800 border border-purple-200">
             {cargoClassification === 'General'
@@ -457,14 +460,14 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
           {/* Row 1: Bonded Flow Purpose */}
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Mục Đích / Luồng Hàng Gửi Kho Ngoại Quan *
+              Mục Đích / Luồng Hàng Gửi Kho Ngoại Quan <span className="text-red-500">*</span>
             </label>
             <select
               value={specs.bondedPurpose || ''}
               onChange={(e) => updateSpec('bondedPurpose', e.target.value)}
               className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
             >
-              <option value="">-- Chọn Mục Đích / Luồng Hàng Gửi Kho Ngoại Quan * --</option>
+              <option value="">-- Chọn Mục Đích / Luồng Hàng Gửi Kho Ngoại Quan --</option>
               <option value="Hàng nhập khẩu chờ hoàn tất thủ tục thông quan vào nội địa">
                 Hàng nhập khẩu chờ hoàn tất thủ tục thông quan vào nội địa (Giải tỏa dần)
               </option>
@@ -501,7 +504,7 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1">
                 <DollarSign className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                <span>Tổng Giá Trị Hàng Hóa Lưu Kho (Cargo Value) *</span>
+                <span>Tổng Giá Trị Hàng Hóa Lưu Kho (Cargo Value) <span className="text-red-500">*</span></span>
               </label>
               <div className="flex items-center gap-1.5">
                 <div className="flex-1">
@@ -541,7 +544,7 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
           <label className="block text-xs font-bold text-slate-800">
-            Đơn Vị Tính Phí Thuê Kho Ưa Chuộng (Billing Preference) *
+            Đơn Vị Tính Phí Thuê Kho Ưa Chuộng (Billing Preference) <span className="text-red-500">*</span>
           </label>
           <span className="text-[10px] font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
             {specs.billingUnitPreference || 'm² (Diện tích sàn)'}
@@ -628,7 +631,7 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in duration-150">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Diện Tích Sàn Cần Thuê (m²) *
+                Diện Tích Sàn Cần Thuê (m²) <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -645,7 +648,7 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Số Lượng Mã Hàng Quản Lý (SKUs) *
+                Số Lượng Mã Hàng Quản Lý (SKUs) <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -667,7 +670,7 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 animate-in fade-in duration-150">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Số Vị Trí Pallet Cần Thuê (Pallet) *
+                Số Vị Trí Pallet Cần Thuê (Pallet) <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -684,7 +687,7 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Số Lượng Mã Hàng (SKUs) *
+                Số Lượng Mã Hàng (SKUs) <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -719,7 +722,7 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in duration-150">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Tổng Thể Tích Lưu Trữ Dự Kiến (CBM m³) *
+                Tổng Thể Tích Lưu Trữ Dự Kiến (CBM m³) <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -736,7 +739,7 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Số Lượng Mã Hàng Quản Lý (SKUs) *
+                Số Lượng Mã Hàng Quản Lý (SKUs) <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -758,7 +761,7 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in duration-150">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Số Lượng Mã Hàng Quản Lý (SKUs) *
+                Số Lượng Mã Hàng Quản Lý (SKUs) <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -775,7 +778,7 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Dung Lượng Lưu Kho Đệm (Buffer Stock) *
+                Dung Lượng Lưu Kho Đệm (Buffer Stock) <span className="text-red-500">*</span>
               </label>
               <div className="flex items-center gap-1.5">
                 <div className="w-2/5">
@@ -1031,13 +1034,16 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
         <div>
           <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
             <MapPin className="w-3.5 h-3.5 text-purple-600" />
-            <span>Khu Vực / Tỉnh Thành Mong Muốn Đặt Kho *</span>
+            <span>Khu Vực / Tỉnh Thành Mong Muốn Đặt Kho <span className="text-red-500">*</span></span>
           </label>
           <input
             type="text"
             required
-            value={origin}
-            onChange={(e) => setOrigin(e.target.value)}
+            value={origin || specs.targetLocation || ''}
+            onChange={(e) => {
+              setOrigin(e.target.value);
+              updateSpec('targetLocation', e.target.value);
+            }}
             placeholder="VD: KCN Sóng Thần 1, Dĩ An, Bình Dương hoặc KCN Hiệp Phước, TP.HCM"
             className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 text-slate-900 shadow-2xs"
           />
@@ -1046,7 +1052,7 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
         <div>
           <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
             <MapPin className="w-3.5 h-3.5 text-rose-600" />
-            <span>Phạm Vi & Bán Kính Phân Phối Trọng Tâm *</span>
+            <span>Phạm Vi & Bán Kính Phân Phối Trọng Tâm <span className="text-red-500">*</span></span>
           </label>
           <input
             type="text"

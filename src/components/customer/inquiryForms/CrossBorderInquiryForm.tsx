@@ -343,7 +343,7 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
       {/* 1. Load Mode: FTL vs LTL */}
       <div className="space-y-1.5">
         <label className="block text-xs font-bold text-slate-800">
-          Hình Thức Vận Chuyển (Load Mode) *
+          Hình Thức Vận Chuyển (Load Mode) <span className="text-red-500">*</span>
         </label>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {[
@@ -405,12 +405,12 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
       {/* 2. Trade Role & Incoterms 2020 */}
       <div className="space-y-1.5">
         <label className="block text-xs font-bold text-slate-800">
-          Vai Trò Doanh Nghiệp & Điều Kiện Thương Mại (Incoterms 2020) *
+          Vai Trò Doanh Nghiệp & Điều Kiện Thương Mại (Incoterms 2020) <span className="text-red-500">*</span>
         </label>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
             <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-              Vai Trò Doanh Nghiệp (Trade Role) *
+              Vai Trò Doanh Nghiệp (Trade Role) <span className="text-red-500">*</span>
             </label>
             <div className="grid grid-cols-2 gap-2">
               {[
@@ -439,7 +439,7 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
 
           <div>
             <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-              Điều Kiện Thương Mại (Incoterms 2020) *
+              Điều Kiện Thương Mại (Incoterms 2020) <span className="text-red-500">*</span>
             </label>
             <select
               value={specs.incoterms || ''}
@@ -461,7 +461,7 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
       {/* 3. Border Gate Selection */}
       <div className="space-y-1.5">
         <label className="block text-xs font-bold text-slate-800">
-          Cửa Khẩu Biên Giới Qua Lại (Border Checkpoint) *
+          Cửa Khẩu Biên Giới Qua Lại (Border Checkpoint) <span className="text-red-500">*</span>
         </label>
         <select
           value={specs.borderGate || ''}
@@ -519,14 +519,14 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
       {/* 4. Origin & Destination Terms & Multi-stop Addresses */}
       <div className="space-y-1.5">
         <label className="block text-xs font-bold text-slate-800">
-          Địa Điểm Lấy & Giao Hàng Xuyên Biên Giới *
+          Địa Điểm Lấy & Giao Hàng Xuyên Biên Giới <span className="text-red-500">*</span>
         </label>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {/* Origin / Pickup Points */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <label className="block text-[11px] font-semibold text-slate-700">
-                Điểm Lấy Hàng (Pickup) *
+                Điểm Lấy Hàng (Pickup) <span className="text-red-500">*</span>
               </label>
               <select
                 value={specs.originTerm || ''}
@@ -544,7 +544,7 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
                 <div key={idx} className="space-y-1">
                   <div className="flex items-center justify-between text-[11px]">
                     <span className="font-semibold text-slate-600">
-                      {idx === 0 ? 'Điểm lấy 1 (Kho chính) *' : `Điểm lấy ${idx + 1} (Gom phụ)`}
+                      {idx === 0 ? <>Điểm lấy 1 (Kho chính) <span className="text-red-500">*</span></> : `Điểm lấy ${idx + 1} (Gom phụ)`}
                     </span>
                     {isFTL && idx > 0 && (
                       <button
@@ -585,7 +585,7 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <label className="block text-[11px] font-semibold text-slate-700">
-                Điểm Giao Hàng (Delivery) *
+                Điểm Giao Hàng (Delivery) <span className="text-red-500">*</span>
               </label>
               <select
                 value={specs.destinationTerm || ''}
@@ -603,7 +603,7 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
                 <div key={idx} className="space-y-1">
                   <div className="flex items-center justify-between text-[11px]">
                     <span className="font-semibold text-slate-600">
-                      {idx === 0 ? 'Điểm giao 1 (Kho đích) *' : `Điểm giao ${idx + 1} (Multi-drop)`}
+                      {idx === 0 ? <>Điểm giao 1 (Kho đích) <span className="text-red-500">*</span></> : `Điểm giao ${idx + 1} (Multi-drop)`}
                     </span>
                     {isFTL && idx > 0 && (
                       <button
@@ -645,44 +645,37 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
       {/* 5. Transit Mode & Customs Scope */}
       <div className="space-y-1.5">
         <label className="block text-xs font-bold text-slate-800">
-          Phương Thức Vượt Biên Giới & Hải Quan Cửa Khẩu *
+          Phương Thức Vượt Biên Giới <span className="text-red-500">*</span>
         </label>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div>
-            <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-              Phương Thức Vượt Biên Giới *
-            </label>
-            <select
-              value={specs.cargoMode || 'Xe liên vận chạy thẳng (Direct GMS)'}
-              onChange={(e) => updateSpec('cargoMode', e.target.value as any)}
-              className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-bold text-orange-950 shadow-2xs cursor-pointer"
-            >
-              <option value="Xe liên vận chạy thẳng (Direct GMS)">Xe liên vận chạy thẳng không sang tải (Direct GMS)</option>
-              <option value="Sang tải / Đổi đầu kéo tại cửa khẩu (Transshipment)">Sang tải / Đổi đầu kéo tại bãi cửa khẩu (Transshipment)</option>
-            </select>
-          </div>
+        <select
+          value={specs.cargoMode || 'Xe liên vận chạy thẳng (Direct GMS)'}
+          onChange={(e) => updateSpec('cargoMode', e.target.value as any)}
+          className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-bold text-orange-950 shadow-2xs cursor-pointer"
+        >
+          <option value="Xe liên vận chạy thẳng (Direct GMS)">Xe liên vận chạy thẳng không sang tải (Direct GMS)</option>
+          <option value="Sang tải / Đổi đầu kéo tại cửa khẩu (Transshipment)">Sang tải / Đổi đầu kéo tại bãi cửa khẩu (Transshipment)</option>
+        </select>
+      </div>
 
-          <div>
-            <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-              Phạm Vi Dịch Vụ Hải Quan Cửa Khẩu *
-            </label>
-            <select
-              value={specs.customsScope || 'Thông quan Trọn gói 2 đầu (VN + Nước bạn)'}
-              onChange={(e) => updateSpec('customsScope', e.target.value as any)}
-              className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-bold text-orange-950 shadow-2xs cursor-pointer"
-            >
-              <option value="Thông quan Trọn gói 2 đầu (VN + Nước bạn)">Trọn gói Hải quan 2 đầu (Hải quan VN + Nước bạn)</option>
-              <option value="Thông quan Hải quan đầu VN">Chỉ thông quan Hải quan đầu Việt Nam</option>
-              <option value="Chỉ cước vận chuyển (Chủ hàng tự làm HQ)">Chỉ vận chuyển thuần túy (Chủ hàng tự mở tờ khai)</option>
-            </select>
-          </div>
-        </div>
+      <div>
+        <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+          Phạm Vi Dịch Vụ Hải Quan Cửa Khẩu <span className="text-red-500">*</span>
+        </label>
+        <select
+          value={specs.customsScope || 'Thông quan Trọn gói 2 đầu (VN + Nước bạn)'}
+          onChange={(e) => updateSpec('customsScope', e.target.value as any)}
+          className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-bold text-orange-950 shadow-2xs cursor-pointer"
+        >
+          <option value="Thông quan Trọn gói 2 đầu (VN + Nước bạn)">Trọn gói Hải quan 2 đầu (Hải quan VN + Nước bạn)</option>
+          <option value="Thông quan Hải quan đầu VN">Chỉ thông quan Hải quan đầu Việt Nam</option>
+          <option value="Chỉ cước vận chuyển (Chủ hàng tự làm HQ)">Chỉ vận chuyển thuần túy (Chủ hàng tự mở tờ khai)</option>
+        </select>
       </div>
 
       {/* 6. Vehicle Type, Trip Volume & Frequency, SLA */}
       <div className="space-y-3">
         <label className="block text-xs font-bold text-slate-800">
-          Cấu Hình Phương Tiện & Sản Lượng Chuyến ({isFTL ? 'FTL' : 'LTL'}) *
+          Cấu Hình Phương Tiện & Sản Lượng Chuyến ({isFTL ? 'FTL' : 'LTL'}) <span className="text-red-500">*</span>
         </label>
 
         {isFTL ? (
@@ -692,7 +685,7 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                  Tổng Khối Lượng (kg) *
+                  Tổng Khối Lượng (kg) <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <input
@@ -715,7 +708,7 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
 
               <div>
                 <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                  Tổng Thể Tích (cbm) *
+                  Tổng Thể Tích (cbm) <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <input
@@ -741,7 +734,7 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                  Loại Phương Tiện / Thùng Xe *
+                  Loại Phương Tiện / Thùng Xe <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={specs.vehicleType || ''}
@@ -771,7 +764,7 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
 
               <div>
                 <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                  Phân Khúc Tải Trọng & Kích Cỡ *
+                  Phân Khúc Tải Trọng & Kích Cỡ <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={specs.tonnageCategory || ''}
@@ -793,7 +786,7 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                  Số Lượng Chuyến / Xe Cần Thuê *
+                  Số Lượng Chuyến / Xe Cần Thuê <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
@@ -811,7 +804,7 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
 
               <div>
                 <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                  Đơn Vị (Tần Suất Vận Chuyển) *
+                  Đơn Vị (Tần Suất Vận Chuyển) <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={specs.frequencyUnit || ''}
@@ -831,7 +824,7 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                  Thời Gian Giao Hàng Yêu Cầu (Leadtime / Transit SLA) *
+                  Thời Gian Giao Hàng Yêu Cầu (Leadtime / Transit SLA) <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={specs.leadtimeSLA || ''}
@@ -883,7 +876,7 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
             {/* Row 1: Pieces */}
             <div>
               <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                Số Lượng Kiện / Pallet Cần Ghép *
+                Số Lượng Kiện / Pallet Cần Ghép <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -956,7 +949,7 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                  Tổng Trọng Lượng Thực Tế (Gross Kg) *
+                  Tổng Trọng Lượng Thực Tế (Gross Kg) <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -994,7 +987,7 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
             {/* Khả năng xếp chồng (Stackable) cho LTL */}
             <div className="space-y-1.5">
               <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                Khả Năng Xếp Chồng (Stackable) *
+                Khả Năng Xếp Chồng (Stackable) <span className="text-red-500">*</span>
               </label>
               <div className="grid grid-cols-2 gap-2">
                 {[
@@ -1022,7 +1015,7 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                  Số Lượng Lô Hàng / Chuyến Ghép *
+                  Số Lượng Lô Hàng / Chuyến Ghép <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
@@ -1040,7 +1033,7 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
 
               <div>
                 <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                  Đơn Vị (Tần Suất Ghép Hàng) *
+                  Đơn Vị (Tần Suất Ghép Hàng) <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={specs.frequencyUnit || ''}

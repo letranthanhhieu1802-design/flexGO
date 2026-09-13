@@ -314,11 +314,17 @@ export const PricingTypeSection: React.FC<PricingTypeSectionProps> = ({
           <div className="space-y-3">
             <div>
               <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                {isWarehousing
-                  ? (!isContract ? 'Chọn Thời Gian Thuê Kho Tràn Mùa Vụ *' : 'Chọn Thời Hạn Ký Kết Hợp Đồng Kho Dài Hạn *')
-                  : isProject
-                  ? 'Thời Hạn Hợp Đồng Dự Án (Project Term) *'
-                  : '1. Thời Hạn Hợp Đồng Ký Kết (Contract Term) *'}
+                {isWarehousing ? (
+                  !isContract ? (
+                    <>Chọn Thời Gian Thuê Kho Tràn Mùa Vụ <span className="text-red-500">*</span></>
+                  ) : (
+                    <>Chọn Thời Hạn Ký Kết Hợp Đồng Kho Dài Hạn <span className="text-red-500">*</span></>
+                  )
+                ) : isProject ? (
+                  <>Thời Hạn Hợp Đồng Dự Án (Project Term) <span className="text-red-500">*</span></>
+                ) : (
+                  <>1. Thời Hạn Hợp Đồng Ký Kết (Contract Term) <span className="text-red-500">*</span></>
+                )}
               </label>
               {isProject ? (
                 <select
@@ -419,7 +425,7 @@ export const PricingTypeSection: React.FC<PricingTypeSectionProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-100">
                 <div>
                   <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                    2. Số Lượng Tờ Khai Ước Tính *
+                    2. Số Lượng Tờ Khai Ước Tính <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="number"
@@ -439,7 +445,7 @@ export const PricingTypeSection: React.FC<PricingTypeSectionProps> = ({
 
                 <div>
                   <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                    3. Đơn Vị Tần Suất Khai Báo (Committed Frequency) *
+                    3. Đơn Vị Tần Suất Khai Báo (Committed Frequency) <span className="text-red-500">*</span>
                   </label>
                   <select
                     value={committedFrequency || ''}

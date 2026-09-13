@@ -808,9 +808,214 @@ export const CUSTOMS_SURCHARGES: SurchargeItemDef[] = [
     desc: 'Chi phí giao nhận chuyển phát bảo đảm bộ chứng từ gốc có xác nhận thông quan về trụ sở khách hàng.',
     category: 'POD',
     categoryLabel: 'Tư Vấn & Pháp Lý Hải Quan',
+    isPopularDefault: false,
+  },
+];
+
+// Cold Chain Surcharges LOV
+export const COLD_CHAIN_SURCHARGES: SurchargeItemDef[] = [
+  {
+    id: 'sc-cold-genset',
+    code: 'GENSET & PLUG-IN',
+    name: 'Phí chạy máy phát điện lạnh liên tục & Cắm điện bãi (Genset / Plug-in)',
+    desc: 'Phí duy trì nhiệt độ bảo quản chuẩn trong suốt hành trình và thời gian chờ hạ bãi.',
+    category: 'INLAND',
+    categoryLabel: 'Bảo Quản & Nhiệt Độ',
+    isPopularDefault: true,
+  },
+  {
+    id: 'sc-cold-datalogger',
+    code: 'DATALOGGER & IOT',
+    name: 'Phí giám sát nhiệt độ cảm biến IoT thời gian thực & Xuất dữ liệu Datalogger',
+    desc: 'Cung cấp biểu đồ dải nhiệt độ chi tiết từng phút từ lúc đóng hàng đến khi giao nhận.',
+    category: 'INLAND',
+    categoryLabel: 'Bảo Quản & Nhiệt Độ',
+    isPopularDefault: true,
+  },
+  {
+    id: 'sc-cold-dry-ice',
+    code: 'DRY ICE / GEL PACKS',
+    name: 'Phí bổ sung đá khô / Gel lạnh bảo quản thứ cấp chuyên dụng',
+    desc: 'Duy trì độ lạnh sâu cho các mặt hàng vaccine, sinh phẩm, kem, hoặc hải sản tươi sống.',
+    category: 'INLAND',
+    categoryLabel: 'Vật Tư & Đóng Gói Lạnh',
+    isPopularDefault: false,
+  },
+  {
+    id: 'sc-cold-sanitization',
+    code: 'SANITIZATION',
+    name: 'Phí khử trùng, xịt ozone & Vệ sinh khoang lạnh chuẩn VSATTP / GDP',
+    desc: 'Khử mùi, diệt khuẩn thùng xe trước khi tiếp nhận lô hàng thực phẩm hoặc dược phẩm.',
+    category: 'INLAND',
+    categoryLabel: 'Vệ Sinh & Tiêu Chuẩn',
+    isPopularDefault: false,
+  },
+  {
+    id: 'sc-cold-detention',
+    code: 'COLD DETENTION',
+    name: 'Phí lưu ca xe bảo quản lạnh qua đêm (Cold Detention Fee)',
+    desc: 'Bồi dưỡng thời gian xe phải nổ máy lạnh chờ bốc dỡ quá số giờ quy định tại kho.',
+    category: 'INLAND',
+    categoryLabel: 'Phụ Phí Thời Gian',
+    isPopularDefault: false,
+  },
+  {
+    id: 'sc-cold-bot',
+    code: 'BOT TOLL',
+    name: 'Phí cầu đường & Trạm thu phí BOT toàn tuyến (Toll Fees)',
+    desc: 'Vé trạm thu phí tự động VETC/ePass trên hành trình vận tải lạnh.',
+    category: 'INLAND',
+    categoryLabel: 'Phụ Phí Hành Trình',
     isPopularDefault: true,
   },
 ];
+
+// Cross-Border Surcharges LOV
+export const CROSS_BORDER_SURCHARGES: SurchargeItemDef[] = [
+  {
+    id: 'sc-cb-transshipment',
+    code: 'BORDER TRANSSHIPMENT',
+    name: 'Phí sang tải / Đổi đầu kéo tại bãi chuyển tải cửa khẩu biên giới',
+    desc: 'Phí nhân công và xe nâng bốc chuyển hàng từ xe Việt Nam sang xe nước bạn hoặc đổi đầu kéo.',
+    category: 'POL',
+    categoryLabel: 'Chuyển Tải Cửa Khẩu',
+    isPopularDefault: true,
+  },
+  {
+    id: 'sc-cb-depot-storage',
+    code: 'BORDER DEPOT STORAGE',
+    name: 'Phí lưu bãi & Nâng hạ container tại bãi đệm cửa khẩu (Border Depot)',
+    desc: 'Chi phí lưu xe/cont tại bãi chờ mở tờ khai hải quan và thông quan biên giới.',
+    category: 'POL',
+    categoryLabel: 'Bến Bãi Cửa Khẩu',
+    isPopularDefault: true,
+  },
+  {
+    id: 'sc-cb-permit',
+    code: 'GMS PERMIT',
+    name: 'Phí giấy phép liên vận quốc tế GMS / Hiệp định CAM-LAO-VN',
+    desc: 'Thủ tục xin cấp phù hiệu và giấy phép vận tải đường bộ qua biên giới hợp pháp.',
+    category: 'POL',
+    categoryLabel: 'Giấy Phép & Thủ Tục',
+    isPopularDefault: true,
+  },
+  {
+    id: 'sc-cb-quarantine',
+    code: 'BORDER QUARANTINE',
+    name: 'Phí kiểm dịch thực vật / Động vật & Khử trùng tại trạm kiểm soát biên giới',
+    desc: 'Thực hiện lấy mẫu kiểm tra và cấp chứng thư kiểm dịch xuất nhập khẩu tại cửa khẩu.',
+    category: 'POD',
+    categoryLabel: 'Kiểm Dịch & Chuyên Ngành',
+    isPopularDefault: false,
+  },
+  {
+    id: 'sc-cb-pilot',
+    code: 'BORDER PILOT & RUNNER',
+    name: 'Phí hoa tiêu / Nhân sự giao nhận điều phối qua barie cửa khẩu 2 đầu',
+    desc: 'Hỗ trợ tài xế làm thủ tục xuất cảnh phương tiện và hướng dẫn xe vào bãi nhận hàng.',
+    category: 'POL',
+    categoryLabel: 'Điều Phối Hiện Trường',
+    isPopularDefault: false,
+  },
+  {
+    id: 'sc-cb-overtime',
+    code: 'OVERTIME CUSTOMS',
+    name: 'Phí làm thủ tục hải quan cửa khẩu ngoài giờ hành chính & Ngày nghỉ',
+    desc: 'Chi phí mở tờ khai và thông quan gấp buổi tối hoặc cuối tuần để giải phóng xe nhanh.',
+    category: 'POL',
+    categoryLabel: 'Dịch Vụ Ngoài Giờ',
+    isPopularDefault: false,
+  },
+];
+
+// Project Cargo Surcharges LOV
+export const PROJECT_CARGO_SURCHARGES: SurchargeItemDef[] = [
+  {
+    id: 'sc-proj-survey',
+    code: 'ROUTE SURVEY',
+    name: 'Phí khảo sát tuyến đường & Đánh giá kết cấu cầu đường (Route Survey)',
+    desc: 'Đo đạc tĩnh không cầu vượt, dây điện, bán kính cua và kiểm tra tải trọng cầu yếu.',
+    category: 'GENERAL',
+    categoryLabel: 'Khảo Sát & Kỹ Thuật',
+    isPopularDefault: true,
+  },
+  {
+    id: 'sc-proj-permit',
+    code: 'SPECIAL PERMIT',
+    name: 'Phí xin giấy phép lưu hành đặc biệt hàng siêu trường siêu trọng (Oversize)',
+    desc: 'Hồ sơ cấp phép của Cục Đường Bộ cho phương tiện chở hàng vượt quá khổ giới hạn.',
+    category: 'GENERAL',
+    categoryLabel: 'Pháp Lý & Cấp Phép',
+    isPopularDefault: true,
+  },
+  {
+    id: 'sc-proj-escort',
+    code: 'PILOT ESCORT',
+    name: 'Phí xe hộ tống dẫn đường & Điều tiết giao thông chuyên dụng (Pilot Cars)',
+    desc: 'Xe chuyên dùng có đèn tín hiệu cảnh báo đi trước và sau đoàn xe rơ-moóc chở hàng nặng.',
+    category: 'GENERAL',
+    categoryLabel: 'An Toàn Hành Trình',
+    isPopularDefault: true,
+  },
+  {
+    id: 'sc-proj-lashing',
+    code: 'LASHING & SECURING',
+    name: 'Phí chèn lót, chằng buộc & Giằng néo an toàn hàng dự án (Lashing & Securing)',
+    desc: 'Sử dụng cáp thép, xích chuyên dụng, gỗ chèn lót chịu lực và cấp chứng thư chằng buộc an toàn.',
+    category: 'GENERAL',
+    categoryLabel: 'Chằng Buộc & Gia Cố',
+    isPopularDefault: true,
+  },
+  {
+    id: 'sc-proj-crane',
+    code: 'HEAVY MOBILE CRANE',
+    name: 'Phí cẩu tự hành / Cẩu bánh lốp chuyên dụng bốc dỡ hàng siêu trọng',
+    desc: 'Huy động cẩu 50T - 250T nâng hạ kết cấu máy móc thiết bị đặt vào vị trí bệ móng.',
+    category: 'GENERAL',
+    categoryLabel: 'Nâng Hạ Hiện Trường',
+    isPopularDefault: false,
+  },
+  {
+    id: 'sc-proj-obstacle',
+    code: 'OBSTACLE REMOVAL',
+    name: 'Phí nâng hạ tạm thời chướng ngại vật (dây điện, cổng chào, biển báo giao thông)',
+    desc: 'Phối hợp đơn vị điện lực và quản lý đường bộ xử lý vật cản trên hành trình di chuyển.',
+    category: 'GENERAL',
+    categoryLabel: 'Hạ Tầng Hành Trình',
+    isPopularDefault: false,
+  },
+];
+
+export const getSurchargesForService = (serviceType: ServiceType, warehouseType?: string): SurchargeItemDef[] => {
+  switch (serviceType) {
+    case 'Sea Freight (FCL)':
+    case 'Sea Freight (LCL)':
+      return OCEAN_SURCHARGES;
+    case 'Trucking':
+      return TRUCKING_SURCHARGES;
+    case 'Cold Chain':
+      return COLD_CHAIN_SURCHARGES;
+    case 'Air Freight':
+      return AIR_SURCHARGES;
+    case 'Rail Freight':
+      return RAIL_SURCHARGES;
+    case 'Warehousing':
+      if (warehouseType?.includes('Lạnh') || warehouseType?.includes('Mát')) return COLD_WAREHOUSE_SURCHARGES;
+      if (warehouseType?.includes('Nguy Hiểm') || warehouseType?.includes('Hóa Chất')) return DG_WAREHOUSE_SURCHARGES;
+      if (warehouseType?.includes('Ngoại Quan')) return BONDED_WAREHOUSE_SURCHARGES;
+      if (warehouseType?.includes('Thương Mại Điện Tử') || warehouseType?.includes('Fulfillment')) return ECOMMERCE_WAREHOUSE_SURCHARGES;
+      if (warehouseType?.includes('Tự Quản')) return SELF_STORAGE_SURCHARGES;
+      return DRY_WAREHOUSE_SURCHARGES;
+    case 'Customs Clearance':
+      return CUSTOMS_SURCHARGES;
+    case 'Cross-border':
+      return CROSS_BORDER_SURCHARGES;
+    case 'Project Cargo':
+      return PROJECT_CARGO_SURCHARGES;
+    default:
+      return GENERAL_LOGISTICS_SURCHARGES;
+  }
+};
 
 interface SurchargesSectionProps {
   serviceType: ServiceType;
@@ -818,8 +1023,8 @@ interface SurchargesSectionProps {
   cargoClassification?: string;
   quotationScope?: QuotationScope | '';
   onChangeQuotationScope: (scope: QuotationScope) => void;
-  selectedSurcharges: string[];
-  onChangeSelectedSurcharges: (surcharges: string[]) => void;
+  selectedSurcharges?: string[];
+  onChangeSelectedSurcharges?: (surcharges: string[]) => void;
   surchargesNotes?: string;
   onChangeSurchargesNotes?: (notes: string) => void;
   themeColor?: 'blue' | 'cyan' | 'teal' | 'sky' | 'emerald' | 'purple' | 'amber' | 'orange' | 'indigo';
@@ -828,61 +1033,17 @@ interface SurchargesSectionProps {
 export const SurchargesSection: React.FC<SurchargesSectionProps> = ({
   serviceType,
   warehouseType,
-  cargoClassification,
-  quotationScope = 'ALL_IN',
+  quotationScope,
   onChangeQuotationScope,
   selectedSurcharges = [],
   onChangeSelectedSurcharges,
   surchargesNotes = '',
   onChangeSurchargesNotes,
-  themeColor = 'indigo',
 }) => {
-  // Determine relevant surcharges list based on serviceType
-  const getSurchargesList = (): SurchargeItemDef[] => {
-    switch (serviceType) {
-      case 'Sea Freight (FCL)':
-      case 'Sea Freight (LCL)':
-        return OCEAN_SURCHARGES;
-      case 'Trucking':
-        return TRUCKING_SURCHARGES;
-      case 'Air Freight':
-        return AIR_SURCHARGES;
-      case 'Rail Freight':
-        return RAIL_SURCHARGES;
-      case 'Customs Clearance':
-        return CUSTOMS_SURCHARGES;
-      case 'Warehousing': {
-        if (warehouseType === 'Kho tự quản (Self-Storage)') {
-          return SELF_STORAGE_SURCHARGES;
-        }
-        if (warehouseType === 'Kho TMĐT / Fulfillment') {
-          return ECOMMERCE_WAREHOUSE_SURCHARGES;
-        }
-        if (warehouseType === 'Kho lạnh / Kho mát (Cold Storage)' || cargoClassification === 'Reefer') {
-          return COLD_WAREHOUSE_SURCHARGES;
-        }
-        if (warehouseType === 'Kho hàng nguy hiểm (DG Warehouse)' || cargoClassification === 'Hazmat') {
-          return DG_WAREHOUSE_SURCHARGES;
-        }
-        if (warehouseType === 'Kho ngoại quan (Bonded)') {
-          return BONDED_WAREHOUSE_SURCHARGES;
-        }
-        return DRY_WAREHOUSE_SURCHARGES;
-      }
-      default:
-        return [
-          ...TRUCKING_SURCHARGES.slice(0, 3),
-          ...GENERAL_LOGISTICS_SURCHARGES,
-        ];
-    }
-  };
-
-  const surchargesList = getSurchargesList();
-
-  // Group surcharges by category
-  const categories = Array.from(new Set(surchargesList.map((item) => item.categoryLabel)));
+  const availableSurcharges = getSurchargesForService(serviceType, warehouseType);
 
   const handleToggleSurcharge = (name: string) => {
+    if (!onChangeSelectedSurcharges) return;
     if (selectedSurcharges.includes(name)) {
       onChangeSelectedSurcharges(selectedSurcharges.filter((s) => s !== name));
     } else {
@@ -890,135 +1051,206 @@ export const SurchargesSection: React.FC<SurchargesSectionProps> = ({
     }
   };
 
-  const handleSelectPopularDefaults = () => {
-    const populars = surchargesList.filter((item) => item.isPopularDefault).map((item) => item.name);
-    onChangeSelectedSurcharges(populars);
+  const handleSelectPopular = () => {
+    if (!onChangeSelectedSurcharges) return;
+    const popularNames = availableSurcharges.filter((s) => s.isPopularDefault).map((s) => s.name);
+    onChangeSelectedSurcharges(popularNames);
   };
 
   const handleSelectAll = () => {
-    const all = surchargesList.map((item) => item.name);
-    onChangeSelectedSurcharges(all);
+    if (!onChangeSelectedSurcharges) return;
+    onChangeSelectedSurcharges(availableSurcharges.map((s) => s.name));
   };
 
   const handleClearAll = () => {
+    if (!onChangeSelectedSurcharges) return;
     onChangeSelectedSurcharges([]);
   };
 
+  // Group surcharges by categoryLabel
+  const groupedSurcharges: { [key: string]: SurchargeItemDef[] } = {};
+  availableSurcharges.forEach((item) => {
+    const cat = item.categoryLabel || 'Phụ Phí Khác';
+    if (!groupedSurcharges[cat]) {
+      groupedSurcharges[cat] = [];
+    }
+    groupedSurcharges[cat].push(item);
+  });
+
   return (
     <div className="space-y-4 animate-in fade-in duration-200">
-      {/* Surcharges Checklist Box */}
-      <div className="p-4 bg-white rounded-2xl border border-slate-200/90 shadow-2xs space-y-3.5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-slate-100">
-          <div>
-            <span className="text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              <span>Danh Mục Phụ Phí Yêu Cầu Báo Giá ({selectedSurcharges.length}/{surchargesList.length})</span>
-            </span>
-            <span className="text-[11px] text-slate-500 block mt-0.5">
-              {serviceType === 'Warehousing'
-                ? 'Tích chọn các loại phụ phí mà bạn muốn đơn vị vận hành kho bãi phải bao gồm hoặc làm rõ trong bảng báo giá.'
-                : 'Tích chọn các loại phụ phí mà bạn muốn nhà vận tải phải bao gồm hoặc làm rõ trong bảng báo giá.'}
-            </span>
-          </div>
-
-          {/* Quick Action Presets */}
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <button
-              type="button"
-              onClick={handleSelectPopularDefaults}
-              className="px-2.5 py-1 text-[11px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 rounded-lg flex items-center gap-1 transition-colors cursor-pointer shadow-2xs"
-              title="Chọn nhanh các phụ phí bắt buộc phổ biến nhất"
-            >
-              <Zap className="w-3 h-3 text-amber-600" />
-              <span>Gói Chuẩn Phổ Biến</span>
-            </button>
-            <button
-              type="button"
-              onClick={handleSelectAll}
-              className="px-2.5 py-1 text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors cursor-pointer"
-            >
-              Chọn Tất Cả
-            </button>
-            <button
-              type="button"
-              onClick={handleClearAll}
-              className="px-2.5 py-1 text-[11px] font-semibold text-slate-400 hover:text-slate-700 rounded-lg transition-colors cursor-pointer flex items-center gap-1"
-            >
-              <RotateCcw className="w-3 h-3" />
-              <span>Xóa</span>
-            </button>
-          </div>
+      {/* Quotation Scope Selection Header */}
+      <div className="p-4 sm:p-5 bg-white rounded-2xl border border-slate-200/90 shadow-2xs space-y-3.5">
+        <div>
+          <span className="text-xs font-extrabold text-slate-900 uppercase tracking-wider">
+            Phạm Vi Báo Giá & Phụ Phí (Quotation Scope) <span className="text-red-500">*</span>
+          </span>
         </div>
 
-        {/* Grouped Category Surcharges */}
-        <div className="space-y-4">
-          {categories.map((categoryLabel) => {
-            const categoryItems = surchargesList.filter((item) => item.categoryLabel === categoryLabel);
-            return (
-              <div key={categoryLabel} className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-extrabold uppercase text-indigo-900 bg-indigo-50/80 px-2 py-0.5 rounded-md border border-indigo-100">
-                    {categoryLabel}
-                  </span>
-                  <span className="text-[10px] text-slate-400 font-medium">
-                    ({categoryItems.filter((i) => selectedSurcharges.includes(i.name)).length}/{categoryItems.length} đã chọn)
-                  </span>
-                </div>
+        {/* 2 Khối Nhỏ Gọn Lựa Chọn Phạm Vi Báo Giá */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {/* Khối 1: ALL_IN */}
+          <button
+            type="button"
+            onClick={() => onChangeQuotationScope('ALL_IN')}
+            className={`p-3 sm:p-3.5 rounded-xl border-2 transition-all cursor-pointer text-left flex items-center gap-3 select-none ${
+              quotationScope === 'ALL_IN'
+                ? 'bg-indigo-50/60 border-indigo-600 shadow-xs ring-1 ring-indigo-500/20'
+                : 'bg-slate-50/60 border-slate-200/90 hover:bg-slate-100/70 hover:border-slate-300'
+            }`}
+          >
+            <div
+              className={`w-9 h-9 rounded-lg flex items-center justify-center font-bold text-sm shrink-0 transition-colors ${
+                quotationScope === 'ALL_IN'
+                  ? 'bg-indigo-600 text-white shadow-xs'
+                  : 'bg-white border border-slate-200 text-slate-500'
+              }`}
+            >
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <div className="min-w-0">
+              <h4 className="text-xs sm:text-sm font-bold text-slate-900 leading-tight">
+                Báo Giá Trọn Gói (All-in Rate)
+              </h4>
+              <span className="text-[11px] text-slate-400 font-medium block mt-0.5">
+                Đơn giá tổng hợp duy nhất
+              </span>
+            </div>
+          </button>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-                  {categoryItems.map((item) => {
-                    const isChecked = selectedSurcharges.includes(item.name);
-                    return (
-                      <div
-                        key={item.id}
-                        onClick={() => handleToggleSurcharge(item.name)}
-                        className={`p-3 rounded-xl border transition-all cursor-pointer flex items-start gap-3 select-none ${
-                          isChecked
-                            ? 'bg-indigo-50/50 border-indigo-300 ring-1 ring-indigo-500/20 text-indigo-950'
-                            : 'bg-slate-50/60 border-slate-200 text-slate-700 hover:bg-slate-100/60 hover:border-slate-300'
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={isChecked}
-                          onChange={() => {}} // Handled by parent div
-                          className="mt-0.5 rounded-sm text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer shrink-0"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between gap-1.5">
-                            <span className="text-xs font-bold leading-snug">
-                              {item.name}
-                            </span>
-                            <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-700 shrink-0">
-                              {item.code}
-                            </span>
-                          </div>
-                          <p className="text-[10.5px] text-slate-500 mt-0.5 line-clamp-2 leading-relaxed">
-                            {item.desc}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+          {/* Khối 2: ITEMIZED */}
+          <button
+            type="button"
+            onClick={() => onChangeQuotationScope('ITEMIZED')}
+            className={`p-3 sm:p-3.5 rounded-xl border-2 transition-all cursor-pointer text-left flex items-center gap-3 select-none ${
+              quotationScope === 'ITEMIZED'
+                ? 'bg-indigo-50/60 border-indigo-600 shadow-xs ring-1 ring-indigo-500/20'
+                : 'bg-slate-50/60 border-slate-200/90 hover:bg-slate-100/70 hover:border-slate-300'
+            }`}
+          >
+            <div
+              className={`w-9 h-9 rounded-lg flex items-center justify-center font-bold text-sm shrink-0 transition-colors ${
+                quotationScope === 'ITEMIZED'
+                  ? 'bg-indigo-600 text-white shadow-xs'
+                  : 'bg-white border border-slate-200 text-slate-500'
+              }`}
+            >
+              <Receipt className="w-5 h-5" />
+            </div>
+            <div className="min-w-0">
+              <h4 className="text-xs sm:text-sm font-bold text-slate-900 leading-tight">
+                Báo Giá Bóc Tách (Itemized Breakdown)
+              </h4>
+              <span className="text-[11px] text-slate-400 font-medium block mt-0.5">
+                Tách bạch cước chính & phụ phí
+              </span>
+            </div>
+          </button>
+        </div>
+
+        {/* Dynamic Area based on Quotation Scope */}
+        {quotationScope === 'ALL_IN' ? (
+          /* ALL_IN BANNER */
+          <div className="p-4 rounded-xl bg-emerald-50/70 border border-emerald-200 flex items-start gap-3 text-xs text-emerald-900 animate-in fade-in duration-150">
+            <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <div className="font-bold text-emerald-950 text-xs">
+                Chế độ Báo Giá Trọn Gói (All-in Rate) đã được chọn
               </div>
-            );
-          })}
-        </div>
+              <p className="text-emerald-800 leading-relaxed text-[11.5px]">
+                Nhà cung cấp sẽ chịu trách nhiệm tính toán và bao trọn toàn bộ chi phí hành trình vào đơn giá cuối cùng. Khi gửi báo giá, nhà cung cấp sẽ tự kê khai danh sách phụ phí đi kèm tương ứng để bạn nắm rõ. Bạn không cần chọn từng phụ phí.
+              </p>
+            </div>
+          </div>
+        ) : quotationScope === 'ITEMIZED' ? (
+          /* ITEMIZED SURCHARGES SELECTION BLOCK */
+          <div className="space-y-3.5 pt-2 animate-in fade-in duration-150">
+            <div className="flex flex-wrap items-center justify-between gap-2 p-3 bg-indigo-50/60 border border-indigo-100 rounded-xl">
+              <div>
+                <span className="text-xs font-bold text-indigo-950">
+                  Danh Mục Phụ Phí Yêu Cầu Bóc Tách ({serviceType}) <span className="text-red-500">*</span>
+                </span>
+                <span className="text-[10.5px] text-indigo-700 block mt-0.5">
+                  Đã chọn <strong>{selectedSurcharges.length}</strong> / {availableSurcharges.length} phụ phí yêu cầu nhà cung cấp báo giá riêng
+                </span>
+              </div>
 
-        {/* Surcharges Notes */}
+              {/* Quick Action Buttons */}
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={handleSelectPopular}
+                  className="px-2.5 py-1 text-[11px] font-bold text-indigo-700 bg-white hover:bg-indigo-100 border border-indigo-200 rounded-lg shadow-2xs cursor-pointer transition-all active:scale-95"
+                >
+                  Chọn Phổ Biến
+                </button>
+              </div>
+            </div>
+
+            {/* Surcharge Groups */}
+            <div className="space-y-3">
+              {Object.entries(groupedSurcharges).map(([category, items]) => (
+                <div key={category} className="space-y-1.5">
+                  <div className="text-[11px] font-bold text-slate-600 uppercase tracking-wider px-1">
+                    • {category} ({items.length})
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {items.map((item) => {
+                      const isChecked = selectedSurcharges.includes(item.name);
+                      return (
+                        <div
+                          key={item.id}
+                          onClick={() => handleToggleSurcharge(item.name)}
+                          className={`p-2.5 rounded-xl border text-xs cursor-pointer transition-all flex items-start gap-2.5 ${
+                            isChecked
+                              ? 'border-indigo-600 bg-indigo-50/80 shadow-2xs'
+                              : 'border-slate-200 bg-white hover:border-slate-300'
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={() => {}} // Handled by container onClick
+                            className="mt-0.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-1.5">
+                              <span className={`font-bold leading-tight ${isChecked ? 'text-indigo-950' : 'text-slate-800'}`}>
+                                {item.name}
+                              </span>
+                              <span className="text-[9px] font-black px-1.5 py-0.2 bg-slate-100 text-slate-500 rounded shrink-0 border border-slate-200">
+                                LOV
+                              </span>
+                            </div>
+                            {item.desc && (
+                              <p className="text-[10.5px] text-slate-500 mt-0.5 leading-snug line-clamp-2">
+                                {item.desc}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {/* Surcharges Notes & Specific Requirements */}
         {onChangeSurchargesNotes && (
-          <div className="pt-2 border-t border-slate-100">
+          <div className="pt-3 border-t border-slate-100">
             <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1.5">
               <FileText className="w-3.5 h-3.5 text-indigo-600" />
-              <span>Ghi Chú Hoặc Yêu Cầu Phụ Phí Bổ Sung Khác (Nếu có):</span>
+              <span>Ghi Chú & Thỏa Thuận Phụ Phí Cụ Thể (Nếu có)</span>
             </label>
             <input
               type="text"
               value={surchargesNotes}
               onChange={(e) => onChangeSurchargesNotes(e.target.value)}
-              placeholder="VD: Yêu cầu cố định phụ phí THC trong 6 tháng, miễn phí 21 ngày Dem/Det cảng đích..."
-              className="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 font-medium text-slate-900"
+              placeholder="VD: Yêu cầu cố định phụ phí trong 6 tháng, miễn phí 21 ngày Dem/Det cảng đích, miễn phí lưu ca 24h..."
+              className="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 font-medium text-slate-900 transition-colors"
             />
           </div>
         )}

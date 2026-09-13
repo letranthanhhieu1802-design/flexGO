@@ -176,7 +176,7 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
         <div className="flex items-center justify-between">
           <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
             <Layers className="w-3.5 h-3.5 text-indigo-600" />
-            <span>Phân Loại Mô Hình Dự Án Logistics (Project Category) *</span>
+            <span>Phân Loại Mô Hình Dự Án Logistics (Project Category) <span className="text-red-500">*</span></span>
           </label>
           <span className="text-[10px] text-indigo-700 font-bold bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200">
             Hợp Đồng Dự Án / Đấu Thầu
@@ -278,12 +278,12 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
           <div className="space-y-1.5">
             <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
               <Store className="w-3.5 h-3.5 text-indigo-600" />
-              <span>Kênh Phân Phối & Phạm Vi Địa Lý *</span>
+              <span>Kênh Phân Phối & Phạm Vi Địa Lý <span className="text-red-500">*</span></span>
             </label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                  Kênh Phân Phối Mục Tiêu (Distribution Channel) *
+                  Kênh Phân Phối Mục Tiêu (Distribution Channel) <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={specs.distributionChannel || 'B2B / Siêu thị (Modern Trade)'}
@@ -299,7 +299,7 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
 
               <div>
                 <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                  Phạm Vi Địa Lý Phân Phối (Geographical Coverage) *
+                  Phạm Vi Địa Lý Phân Phối (Geographical Coverage) <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={specs.coverageScope || 'Toàn quốc (Bắc - Trung - Nam)'}
@@ -320,7 +320,7 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
             <div className="flex items-center justify-between">
               <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
                 <MapPin className="w-3.5 h-3.5 text-indigo-600" />
-                <span>Danh Sách Kho Tổng / Nhà Máy Xuất Hàng Chính (Origin Hubs) *</span>
+                <span>Danh Sách Kho Tổng / Nhà Máy Xuất Hàng Chính (Origin Hubs) <span className="text-red-500">*</span></span>
               </label>
               <span className="text-[10px] text-slate-500 font-bold bg-slate-100 px-1.5 py-0.5 rounded">
                 {originWarehouses.length} Kho Xuất
@@ -334,7 +334,7 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
                     <span className="w-4 h-4 rounded-full bg-indigo-100 text-indigo-800 text-[10px] font-bold flex items-center justify-center">
                       {idx + 1}
                     </span>
-                    <span>{idx === 0 ? 'Kho Tổng / Nhà máy chính 1 *' : `Kho Tổng / Nhà máy vệ tinh ${idx + 1}`}</span>
+                    <span>{idx === 0 ? <>Kho Tổng / Nhà máy chính 1 <span className="text-red-500">*</span></> : `Kho Tổng / Nhà máy vệ tinh ${idx + 1}`}</span>
                   </span>
                   {idx > 0 && (
                     <button
@@ -375,7 +375,7 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
             <div className="flex items-center justify-between">
               <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
                 <Truck className="w-3.5 h-3.5 text-indigo-600" />
-                <span>Cơ Cấu Đội Xe Vận Tải Yêu Cầu Cho Dự Án (Chọn các loại xe cần thiết) *</span>
+                <span>Cơ Cấu Đội Xe Vận Tải Yêu Cầu Cho Dự Án (Chọn các loại xe cần thiết) <span className="text-red-500">*</span></span>
               </label>
               <span className="text-[10px] text-slate-500 font-normal">
                 Theo nhóm: {cargoClassification === 'Reefer' ? 'Xe đông lạnh' : cargoClassification === 'Hazmat' ? 'Xe hóa chất DG' : 'Xe tải bách hóa'}
@@ -410,12 +410,12 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
           {/* Structured Volume & Frequency */}
           <div className="space-y-1.5">
             <label className="block text-xs font-bold text-slate-800">
-              Sản Lượng & Tần Suất Vận Chuyển Dự Án *
+              Sản Lượng & Tần Suất Vận Chuyển Dự Án <span className="text-red-500">*</span>
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                  Số Lượng Chuyến Cần Thuê *
+                  Số Lượng Chuyến Cần Thuê <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
@@ -434,7 +434,7 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
 
               <div>
                 <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                  Đơn Vị (Tần Suất Vận Chuyển) *
+                  Đơn Vị (Tần Suất Vận Chuyển) <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={specs.frequencyUnit || 'Tháng (Chuyến / Tháng)'}
@@ -466,7 +466,7 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
           <div className="space-y-1.5">
             <label className="block text-xs font-bold text-slate-800 flex items-center gap-1">
               <Split className="w-3.5 h-3.5 text-indigo-600" />
-              <span>Phạm Vi Luân Chuyển Mạng Lưới X-Dock (Cross-Dock Scope) *</span>
+              <span>Phạm Vi Luân Chuyển Mạng Lưới X-Dock (Cross-Dock Scope) <span className="text-red-500">*</span></span>
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               {[
@@ -511,12 +511,12 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
           {/* 2. Hub Location(s) & Temperature */}
           <div className="space-y-1.5">
             <label className="block text-xs font-bold text-slate-800">
-              Trạm Gom Hàng & Nhiệt Độ Sàn X-Dock *
+              Trạm Gom Hàng & Nhiệt Độ Sàn X-Dock <span className="text-red-500">*</span>
             </label>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div>
                 <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                  Trạm Gom Hàng Nguồn *
+                  Trạm Gom Hàng Nguồn <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -534,7 +534,7 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
               {specs.xDockScope === 'Liên Vùng Tuyến Trục (Inter-region Linehaul)' && (
                 <div>
                   <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                    Trạm Phân Phối Đích *
+                    Trạm Phân Phối Đích <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -552,7 +552,7 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
 
               <div className={specs.xDockScope === 'Liên Vùng Tuyến Trục (Inter-region Linehaul)' ? '' : 'md:col-span-2'}>
                 <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                  Nhiệt Độ Sàn Xử Lý Tại Trạm Cross-Dock *
+                  Nhiệt Độ Sàn Xử Lý Tại Trạm Cross-Dock <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={specs.xDockTemperature || 'Nhiệt độ thường (Ambient)'}
@@ -570,12 +570,12 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
           {/* 3. Inbound Volume & Pricing Metric Unit */}
           <div className="space-y-1.5">
             <label className="block text-xs font-bold text-slate-800">
-              Sản Lượng & Đơn Vị Tính Cước Inbound *
+              Sản Lượng & Đơn Vị Tính Cước Inbound <span className="text-red-500">*</span>
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                  Sản Lượng Gom Inbound Dự Kiến *
+                  Sản Lượng Gom Inbound Dự Kiến <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -591,7 +591,7 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
 
               <div>
                 <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                  Đơn Vị Tính Cước Kỳ Vọng *
+                  Đơn Vị Tính Cước Kỳ Vọng <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={specs.xDockPricingMetric || 'VND / kg'}
@@ -608,7 +608,7 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
 
               <div>
                 <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                  Tần Suất Gom Hàng Inbound *
+                  Tần Suất Gom Hàng Inbound <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={specs.xDockInboundFrequencyUnit || 'Ngày (Hàng ngày)'}
@@ -627,7 +627,7 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <label className="block text-xs font-bold text-slate-800">
-                Chuỗi Siêu Thị / Tổng Kho DC Đích Phân Phối Outbound *
+                Chuỗi Siêu Thị / Tổng Kho DC Đích Phân Phối Outbound <span className="text-red-500">*</span>
               </label>
               <span className="text-[11px] text-indigo-700 font-semibold">Chọn các kênh phân phối của bạn</span>
             </div>
@@ -668,7 +668,7 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
           {/* 5. Sorting & Value-Added Services at X-Dock */}
           <div className="space-y-1.5">
             <label className="block text-xs font-bold text-slate-800">
-              Yêu Cầu Thao Tác Chia Chọn & Nghiệp Vụ Siêu Thị Tại Sàn X-Dock (Chọn các khâu) *
+              Yêu Cầu Thao Tác Chia Chọn & Nghiệp Vụ Siêu Thị Tại Sàn X-Dock (Chọn các khâu) <span className="text-red-500">*</span>
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {[
@@ -706,12 +706,12 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
           {/* 6. Turnaround Time & Operating Hours */}
           <div className="space-y-1.5">
             <label className="block text-xs font-bold text-slate-800">
-              Thời Gian Giải Tỏa & Khung Giờ Hoạt Động *
+              Thời Gian Giải Tỏa & Khung Giờ Hoạt Động <span className="text-red-500">*</span>
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                  Thời Gian Giải Tỏa Khỏi Sàn (Max Turnaround Time) *
+                  Thời Gian Giải Tỏa Khỏi Sàn (Max Turnaround Time) <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={specs.outboundMaxTurnaroundTime || 'Trong vòng 4 - 8 Giờ'}
@@ -750,12 +750,12 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
           <div className="space-y-1.5">
             <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
               <Anchor className="w-3.5 h-3.5 text-sky-600" />
-              <span>Cảng Gốc & Cảng Cạn ICD Đích *</span>
+              <span>Cảng Gốc & Cảng Cạn ICD Đích <span className="text-red-500">*</span></span>
             </label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                  Cảng Biển / Cảng Gốc (Origin Seaport / Terminal) *
+                  Cảng Biển / Cảng Gốc (Origin Seaport / Terminal) <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -772,7 +772,7 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
 
               <div>
                 <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                  Cảng Cạn ICD / Depot Vệ Tinh Đích (Destination ICD / Depot) *
+                  Cảng Cạn ICD / Depot Vệ Tinh Đích (Destination ICD / Depot) <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -792,12 +792,12 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
           {/* 2. Shuttle Mode & Monthly Tender Volume */}
           <div className="space-y-1.5">
             <label className="block text-xs font-bold text-slate-800">
-              Hình Thức Luân Chuyển & Sản Lượng Container *
+              Hình Thức Luân Chuyển & Sản Lượng Container <span className="text-red-500">*</span>
             </label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                  Hình Thức Luân Chuyển Shuttling Cảng ↔ ICD *
+                  Hình Thức Luân Chuyển Shuttling Cảng ↔ ICD <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={specs.portIcdShuttleMode || 'Đầu kéo Sơ-mi Rơ-moóc chuyên tuyến (Dedicated Drayage)'}
@@ -812,7 +812,7 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
 
               <div>
                 <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                  Sản Lượng Container Cam Kết Trong Gói Thầu *
+                  Sản Lượng Container Cam Kết Trong Gói Thầu <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -828,7 +828,7 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
           {/* 3. Container Types */}
           <div className="space-y-1.5">
             <label className="block text-xs font-bold text-slate-800">
-              Quy Cách & Chủng Loại Container Cần Khai Thác (Chọn các loại) *
+              Quy Cách & Chủng Loại Container Cần Khai Thác (Chọn các loại) <span className="text-red-500">*</span>
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {[
@@ -864,7 +864,7 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
           {/* 4. Yard & Terminal Operations / Scope */}
           <div className="space-y-1.5">
             <label className="block text-xs font-bold text-slate-800">
-              Gói Nghiệp Vụ Bãi & Khai Thác Tại Cảng / ICD (Chọn các khâu thực hiện) *
+              Gói Nghiệp Vụ Bãi & Khai Thác Tại Cảng / ICD (Chọn các khâu thực hiện) <span className="text-red-500">*</span>
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {[
@@ -909,7 +909,7 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
           <div className="space-y-1.5">
             <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
               <Globe className="w-3.5 h-3.5 text-teal-600" />
-              <span>Mô Hình Kết Hợp Đa Phương Thức (Combination Model) *</span>
+              <span>Mô Hình Kết Hợp Đa Phương Thức (Combination Model) <span className="text-red-500">*</span></span>
             </label>
             <select
               value={specs.multimodalCombination || 'Đường Biển + Đường Bộ (Sea - Road Freight)'}
@@ -937,13 +937,13 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
           {/* 3 Legs: First-mile -> Main-haul -> Last-mile */}
           <div className="space-y-1.5">
             <label className="block text-xs font-bold text-slate-800">
-              Hành Trình 3 Chặng Đa Phương Thức *
+              Hành Trình 3 Chặng Đa Phương Thức <span className="text-red-500">*</span>
             </label>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div>
                 <label className="block text-[11px] font-semibold text-slate-600 mb-1 flex items-center gap-1">
                   <span className="w-4 h-4 rounded-full bg-teal-600 text-white text-[10px] flex items-center justify-center font-bold">1</span>
-                  <span>Chặng Đầu (First-Mile) *</span>
+                  <span>Chặng Đầu (First-Mile) <span className="text-red-500">*</span></span>
                 </label>
                 <input
                   type="text"
@@ -961,7 +961,7 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
               <div>
                 <label className="block text-[11px] font-semibold text-slate-600 mb-1 flex items-center gap-1">
                   <span className="w-4 h-4 rounded-full bg-teal-600 text-white text-[10px] flex items-center justify-center font-bold">2</span>
-                  <span>Chặng Chính (Main-Haul) *</span>
+                  <span>Chặng Chính (Main-Haul) <span className="text-red-500">*</span></span>
                 </label>
                 <input
                   type="text"
@@ -976,7 +976,7 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
               <div>
                 <label className="block text-[11px] font-semibold text-slate-600 mb-1 flex items-center gap-1">
                   <span className="w-4 h-4 rounded-full bg-teal-600 text-white text-[10px] flex items-center justify-center font-bold">3</span>
-                  <span>Chặng Cuối (Last-Mile) *</span>
+                  <span>Chặng Cuối (Last-Mile) <span className="text-red-500">*</span></span>
                 </label>
                 <input
                   type="text"
@@ -995,12 +995,12 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
 
           <div className="space-y-1.5">
             <label className="block text-xs font-bold text-slate-800">
-              Quy Cách & Sản Lượng Cam Kết *
+              Quy Cách & Sản Lượng Cam Kết <span className="text-red-500">*</span>
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                  Quy Cách Vỏ Container / Phương Tiện *
+                  Quy Cách Vỏ Container / Phương Tiện <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={specs.multimodalContainerType || 'Container 40ft High Cube (40HC)'}
@@ -1017,7 +1017,7 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
 
               <div>
                 <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                  Sản Lượng Cam Kết Hàng Tháng *
+                  Sản Lượng Cam Kết Hàng Tháng <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"

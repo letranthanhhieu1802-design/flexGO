@@ -489,6 +489,7 @@ interface TruckingInquiryFormProps {
   setWeightKg?: (val: string) => void;
   volumeCbm?: string;
   setVolumeCbm?: (val: string) => void;
+  showValidationHighlight?: boolean;
 }
 
 export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
@@ -503,6 +504,7 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
   setWeightKg,
   volumeCbm = '',
   setVolumeCbm,
+  showValidationHighlight = false,
 }) => {
   const isReefer = cargoClassification === 'Reefer';
   const isHazmat = cargoClassification === 'Hazmat';
@@ -792,7 +794,7 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
       <div className="space-y-2">
         <label className="block text-xs font-bold text-slate-800 flex items-center gap-1.5">
           <Layers className="w-3.5 h-3.5 text-indigo-600" />
-          <span>Hình Thức Vận Chuyển (Load Mode) *</span>
+          <span>Hình Thức Vận Chuyển (Load Mode) <span className="text-red-500">*</span></span>
         </label>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -902,7 +904,7 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
               <div key={idx} className="space-y-1">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-medium text-slate-600">
-                    {idx === 0 ? 'Địa chỉ kho xuất hàng chính *' : `Điểm lấy ${idx + 1} (Kho phụ / Gom thêm) *`}
+                    {idx === 0 ? <>Địa chỉ kho xuất hàng chính <span className="text-red-500">*</span></> : <>Điểm lấy {idx + 1} (Kho phụ / Gom thêm) <span className="text-red-500">*</span></>}
                   </span>
                   {isFTL && idx > 0 && (
                     <button
@@ -918,6 +920,7 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
                 <input
                   type="text"
                   required
+                  data-invalid={showValidationHighlight && !loc.trim() ? 'true' : undefined}
                   value={loc}
                   onChange={(e) => handlePickupLocationChange(idx, e.target.value)}
                   placeholder={
@@ -925,7 +928,11 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
                       ? 'VD: Kho Sotrans, KCN Tân Bình, Tây Thạnh, Tân Phú, TP.HCM'
                       : `VD: Kho phụ ${idx + 1}, KCN Sóng Thần 1, Dĩ An, Bình Dương`
                   }
-                  className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-medium text-slate-900 shadow-2xs"
+                  className={`w-full h-10 px-3.5 text-xs rounded-xl font-medium text-slate-900 shadow-2xs transition-all ${
+                    showValidationHighlight && !loc.trim()
+                      ? 'bg-rose-50/40 border-2 border-rose-400 ring-2 ring-rose-100 focus:border-rose-500'
+                      : 'bg-white border border-slate-200 focus:border-blue-500'
+                  }`}
                 />
               </div>
             ))}
@@ -986,7 +993,7 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
               <div key={idx} className="space-y-1">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-medium text-slate-600">
-                    {idx === 0 ? 'Địa chỉ kho đích chính *' : `Điểm giao ${idx + 1} (Đại lý / Cửa hàng phụ) *`}
+                    {idx === 0 ? <>Địa chỉ kho đích chính <span className="text-red-500">*</span></> : <>Điểm giao {idx + 1} (Đại lý / Cửa hàng phụ) <span className="text-red-500">*</span></>}
                   </span>
                   {isFTL && idx > 0 && (
                     <button
@@ -1002,6 +1009,7 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
                 <input
                   type="text"
                   required
+                  data-invalid={showValidationHighlight && !loc.trim() ? 'true' : undefined}
                   value={loc}
                   onChange={(e) => handleDeliveryLocationChange(idx, e.target.value)}
                   placeholder={
@@ -1009,7 +1017,11 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
                       ? 'VD: Tổng Kho ICD Thăng Long, Đông Anh, Hà Nội'
                       : `VD: Đại lý ${idx + 1}, Cửa hàng 128 Nguyễn Trãi, Thanh Xuân, Hà Nội`
                   }
-                  className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-rose-500 font-medium text-slate-900 shadow-2xs"
+                  className={`w-full h-10 px-3.5 text-xs rounded-xl font-medium text-slate-900 shadow-2xs transition-all ${
+                    showValidationHighlight && !loc.trim()
+                      ? 'bg-rose-50/40 border-2 border-rose-400 ring-2 ring-rose-100 focus:border-rose-500'
+                      : 'bg-white border border-slate-200 focus:border-rose-500'
+                  }`}
                 />
               </div>
             ))}
@@ -1050,7 +1062,7 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Tổng Khối Lượng (kg) *
+                Tổng Khối Lượng (kg) <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <input
@@ -1079,7 +1091,7 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Tổng Thể Tích (cbm) *
+                Tổng Thể Tích (cbm) <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <input
@@ -1108,9 +1120,10 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Loại Thùng Phương Tiện *
+                Loại Thùng Phương Tiện <span className="text-red-500">*</span>
               </label>
               <select
+                data-invalid={showValidationHighlight && !specs.truckType ? 'true' : undefined}
                 value={specs.truckType || ''}
                 onChange={(e) => {
                   const newType = e.target.value;
@@ -1120,7 +1133,11 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
                     tonnageCategory: '',
                   });
                 }}
-                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
+                className={`w-full h-10 px-3.5 text-xs rounded-xl font-semibold shadow-2xs cursor-pointer transition-all ${
+                  showValidationHighlight && !specs.truckType
+                    ? 'bg-rose-50/50 border-2 border-rose-400 ring-2 ring-rose-100 text-slate-900'
+                    : 'bg-white border border-slate-200 focus:border-indigo-500 text-slate-900'
+                }`}
               >
                 <option value="">-- Chọn Loại Thùng Phương Tiện --</option>
                 {currentTruckBodies.map((body) => (
@@ -1138,12 +1155,17 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Phân Khúc Tải Trọng & Thể Tích Khả Dụng *
+                Phân Khúc Tải Trọng & Thể Tích Khả Dụng <span className="text-red-500">*</span>
               </label>
               <select
+                data-invalid={showValidationHighlight && !isLTL && !specs.tonnageCategory ? 'true' : undefined}
                 value={specs.tonnageCategory || ''}
                 onChange={(e) => updateSpec('tonnageCategory', e.target.value)}
-                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-semibold text-indigo-900 shadow-2xs cursor-pointer"
+                className={`w-full h-10 px-3.5 text-xs rounded-xl font-semibold shadow-2xs cursor-pointer transition-all ${
+                  showValidationHighlight && !isLTL && !specs.tonnageCategory
+                    ? 'bg-rose-50/50 border-2 border-rose-400 ring-2 ring-rose-100 text-indigo-900'
+                    : 'bg-white border border-slate-200 focus:border-indigo-500 text-indigo-900'
+                }`}
               >
                 <option value="">
                   {selectedBody ? '-- Chọn Phân Khúc Tải Trọng --' : '-- Vui lòng chọn Loại Thùng Phương Tiện trước --'}
@@ -1174,7 +1196,7 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Thời Gian Giao Hàng Yêu Cầu (Leadtime SLA) *
+                Thời Gian Giao Hàng Yêu Cầu (Leadtime SLA) <span className="text-red-500">*</span>
               </label>
               <select
                 value={specs.requestedLeadtime || ''}
@@ -1221,7 +1243,7 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Số Lượng Chuyến Cần Thuê *
+                Số Lượng Chuyến Cần Thuê <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -1238,7 +1260,7 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Đơn Vị (Tần Suất Vận Chuyển) *
+                Đơn Vị (Tần Suất Vận Chuyển) <span className="text-red-500">*</span>
               </label>
               <select
                 value={specs.vehicleCountUnit || ''}
@@ -1275,7 +1297,7 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
           {/* LTL Vehicle Carrier Type */}
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-              Phương Tiện Ghép Tuyến *
+              Phương Tiện Ghép Tuyến <span className="text-red-500">*</span>
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {LTL_TRUCK_OPTIONS.map((opt) => (
@@ -1307,7 +1329,7 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Số Lượng Kiện / Pallet Cần Ghép *
+                Số Lượng Kiện / Pallet Cần Ghép <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -1396,7 +1418,7 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Tổng Trọng Lượng Thực Tế (Gross Kg) *
+                Tổng Trọng Lượng Thực Tế (Gross Kg) <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -1435,7 +1457,7 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Số Lượng Chuyến Ghép *
+                Số Lượng Chuyến Ghép <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -1452,7 +1474,7 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Đơn Vị (Tần Suất Vận Chuyển) *
+                Đơn Vị (Tần Suất Vận Chuyển) <span className="text-red-500">*</span>
               </label>
               <select
                 value={specs.ltlFrequencyUnit || ''}

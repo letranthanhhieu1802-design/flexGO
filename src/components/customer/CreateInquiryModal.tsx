@@ -220,7 +220,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
     { id: 2, label: 'Hình thức giá' },
     { id: 3, label: 'Thông tin sản phẩm' },
     { id: 4, label: 'Thông tin vận hành' },
-    { id: 5, label: 'Thêm phụ phí' },
+    { id: 5, label: 'Phạm vi & Phụ phí' },
     { id: 6, label: 'Thêm dịch vụ gia tăng' },
     { id: 7, label: 'Giá và thời hạn' },
   ];
@@ -264,8 +264,8 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
     truckType: '',
     tonnageCategory: '',
     loadType: '',
-    vehicleCount: undefined,
-    vehicleCountUnit: '',
+    vehicleCount: 1,
+    vehicleCountUnit: 'Chuyến / Ngày',
     pickupPointsCount: 1,
     pickupLocations: [''],
     deliveryPointsCount: 1,
@@ -323,19 +323,19 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
   const [oceanSpecs, setOceanSpecs] = useState<OceanInquirySpecs>({
     pricingType: 'SPOT',
     tradeRole: '',
-    mode: '',
+    mode: 'FCL (Full Container)',
     originServiceTerm: '',
     destinationServiceTerm: '',
-    containerType: '',
-    containerCount: undefined,
-    containerCountUnit: '',
+    containerType: '40ft High Cube (40HC)',
+    containerCount: 1,
+    containerCountUnit: 'Container / Chuyến',
     lclShipmentCount: undefined,
     lclFrequencyUnit: '',
     cbmVolume: undefined,
     grossWeightKgs: undefined,
     polPort: '',
     podPort: '',
-    incoterm: '',
+    incoterm: 'FOB',
     commodityCategory: '',
     freeDemDetDaysRequested: undefined,
     packageType: '',
@@ -354,7 +354,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
     expressSpeedLevel: '',
     originAirport: '',
     destinationAirport: '',
-    packageCount: undefined,
+    packageCount: 1,
     grossWeightKgs: undefined,
     volumetricWeightKgs: undefined,
     chargeableWeightKgs: undefined,
@@ -382,25 +382,25 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
   const [warehousingSpecs, setWarehousingSpecs] = useState<WarehousingInquirySpecs>({
     pricingType: 'SPOT',
     warehousingLeaseModel: undefined,
-    warehouseType: '',
-    billingUnitPreference: '',
+    warehouseType: 'Kho thường (Grade A Dry)',
+    billingUnitPreference: 'm² (Diện tích sàn)',
     storageAreaSqm: undefined,
     palletPositions: undefined,
     cbmVolume: undefined,
     skuCount: undefined,
     bufferStorageQty: undefined,
-    bufferStorageUnit: '',
+    bufferStorageUnit: 'Pallet (Vị trí)',
     bufferPalletPositions: undefined,
     rentalDurationMonths: undefined,
     inboundQty: undefined,
-    inboundUnit: '',
-    inboundPeriod: '',
+    inboundUnit: 'Pallet',
+    inboundPeriod: 'Tuần',
     dailyInboundVolume: undefined,
     outboundQty: undefined,
-    outboundUnit: '',
-    outboundPeriod: '',
+    outboundUnit: 'Pallet',
+    outboundPeriod: 'Ngày',
     dailyOutboundVolume: undefined,
-    inventoryMethod: undefined,
+    inventoryMethod: 'FIFO (Nhập trước xuất trước)',
     wmsIntegrationNeeded: false,
     selectedVAS: [],
   });
@@ -409,6 +409,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
     pricingType: 'SPOT',
     tradeRole: '',
     declarationType: '',
+    declarationCount: 1,
     customsSubDepartment: '',
     hsCodePrimary: '',
     itemDescription: '',
@@ -427,7 +428,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
     cargoMode: '',
     vehicleType: '',
     tonnageCategory: '',
-    vehicleCount: undefined,
+    vehicleCount: 1,
     customsAtBorderIncluded: false,
     transitPermitGMSNeeded: false,
     selectedVAS: [],
@@ -436,12 +437,12 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
   const [railSpecs, setRailSpecs] = useState<RailInquirySpecs>({
     pricingType: 'SPOT',
     tradeRole: '',
-    mode: '',
+    mode: 'FCL (Nguyên container ga - ga)',
     originServiceTerm: '',
     destinationServiceTerm: '',
     containerType: '',
-    containerCount: undefined,
-    containerCountUnit: '',
+    containerCount: 1,
+    containerCountUnit: 'Cont / Chuyến',
     originStation: '',
     destinationStation: '',
     incoterm: '',
@@ -486,7 +487,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
   // SECTION 6: VAS Selection State per Service - No pre-selected default
   const [selectedVASList, setSelectedVASList] = useState<string[]>([]);
 
-  // SECTION 7: Budget, Currency, Exchange Rate, Dates & Notes - No pre-filled dates
+  // SECTION 7: Budget, Currency, Exchange Rate, Dates & Notes - No pre-selected default dates
   const [currency, setCurrency] = useState<'VND' | 'USD' | 'EUR' | 'CNY' | 'JPY'>('VND');
   const [exchangeRate, setExchangeRate] = useState<number>(25450);
   const [targetBudget, setTargetBudget] = useState('');
@@ -541,6 +542,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
 
   // Validation and Summary Confirmation States
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [showValidationHighlight, setShowValidationHighlight] = useState<boolean>(false);
   const [showSummaryConfirmModal, setShowSummaryConfirmModal] = useState<boolean>(false);
   const [draftInquiry, setDraftInquiry] = useState<InquiryItem | null>(null);
   const [hasPublishedInquiry, setHasPublishedInquiry] = useState<boolean>(false);
@@ -558,6 +560,17 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
       if (initialBenchmarkRate.rateDisplay) setTargetBudget(`Ngân sách mục tiêu: ${initialBenchmarkRate.rateDisplay}`);
     }
   }, [initialBenchmarkRate, isOpen]);
+
+  // Lock document body scroll when modal is open to ensure stationary popup
+  useEffect(() => {
+    if (isOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -664,29 +677,28 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
         return true;
       }
 
-      // TAB 3: Cargo Classification (*), Industry/Commodity (*), Packaging (*), Weight OR Volume (*)
+      // TAB 3: Cargo Classification (*), Industry (*), Cargo Specific Name (*), Packaging (*)
       case 3: {
         if (!cargoClassification) return false;
-        // Reefer must have temperature requirement
-        if (cargoClassification === 'Reefer' && !temperatureRequirement.trim()) return false;
+        // Reefer must have temperature requirement (or chosen in Cold Chain specs)
+        if (cargoClassification === 'Reefer') {
+          const hasTemp = Boolean(temperatureRequirement.trim() || coldChainSpecs.temperatureCategory);
+          if (!hasTemp) return false;
+        }
         // Hazmat must have IMO class and UN number
         if (cargoClassification === 'Hazmat' && (!dgClassIMO || !unNumber.trim())) return false;
 
-        const hasCommodity = Boolean(industry.trim() || cargoType.trim());
+        const hasIndustry = Boolean(industry.trim());
+        const hasCargoType = Boolean(cargoType.trim());
         const hasPackaging = Boolean(packagePackaging && (packagePackaging !== 'Khác' || customPackaging.trim()));
-        const hasWeightOrVolume = Boolean(
-          (weightKg && parseFloat(weightKg.replace(/,/g, '')) > 0) ||
-          (volumeCbm && parseFloat(volumeCbm.replace(/,/g, '')) > 0)
-        );
 
-        if (serviceType === 'Warehousing') {
-          return Boolean(hasCommodity && hasPackaging);
-        }
-        if (serviceType === 'Customs Clearance') {
-          return Boolean(hasCommodity && (hasWeightOrVolume || hsCode.trim() || cargoValue.trim()));
+        // Mandatory common fields for all services in Tab 3
+        if (!hasIndustry || !hasCargoType || !hasPackaging) {
+          return false;
         }
 
-        return Boolean(hasCommodity && hasPackaging && hasWeightOrVolume);
+        // All common checks passed for Tab 3
+        return true;
       }
 
       // TAB 4: Route & Equipment Specs per Service (*)
@@ -715,51 +727,62 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
           }
         }
 
-        // 2. Sea Freight (FCL / LCL) Validation
+        // 2. Cold Chain (Vận Tải Lạnh) Validation
+        if (serviceType === 'Cold Chain') {
+          const hasOrigin = Boolean(origin.trim());
+          const hasDest = Boolean(destination.trim());
+          const hasTemp = Boolean(coldChainSpecs.temperatureCategory || temperatureRequirement.trim());
+          const hasVehicle = Boolean(coldChainSpecs.vehicleOrContType);
+          return Boolean(hasOrigin && hasDest && hasTemp && hasVehicle);
+        }
+
+        // 3. Sea Freight (FCL / LCL) Validation
         if (serviceType === 'Sea Freight (FCL)' || serviceType === 'Sea Freight (LCL)') {
           const hasPol = Boolean(oceanSpecs.polPort?.trim() || origin.trim());
           const hasPod = Boolean(oceanSpecs.podPort?.trim() || destination.trim());
-          const hasIncoterms = Boolean(oceanSpecs.incoterms);
+          const isDomestic = oceanSpecs.tradeRole === 'Nội địa (Domestic)';
+          const hasIncoterms = isDomestic || Boolean(oceanSpecs.incoterm || (oceanSpecs as any).incoterms);
           const isFCL = oceanSpecs.mode !== 'LCL (Hàng lẻ đóng ghép CFS)';
 
           if (isFCL) {
-            const hasCont = (oceanSpecs.containerCount || 0) >= 1;
+            const hasCont = (oceanSpecs.containerCount || 1) >= 1;
             return Boolean(hasPol && hasPod && hasIncoterms && hasCont);
           } else {
             return Boolean(hasPol && hasPod && hasIncoterms);
           }
         }
 
-        // 3. Air Freight Validation
+        // 4. Air Freight Validation
         if (serviceType === 'Air Freight') {
-          const hasAod = Boolean(airSpecs.originAirport?.trim() || origin.trim());
-          const hasAoa = Boolean(airSpecs.destinationAirport?.trim() || destination.trim());
+          const hasAod = Boolean(airSpecs.originAirport?.trim() || origin.trim() || airSpecs.pickupAddress?.trim());
+          const hasAoa = Boolean(airSpecs.destinationAirport?.trim() || destination.trim() || airSpecs.deliveryAddress?.trim());
           return Boolean(hasAod && hasAoa);
         }
 
-        // 4. Warehousing Validation
+        // 5. Warehousing Validation
         if (serviceType === 'Warehousing') {
           const hasLocation = Boolean(warehousingSpecs.targetLocation?.trim() || origin.trim());
-          const hasWhType = Boolean(warehousingSpecs.warehouseType);
+          const hasWhType = Boolean(warehousingSpecs.warehouseType || 'Kho thường (Grade A Dry)');
           const hasCapacity = Boolean(
             (warehousingSpecs.storageAreaSqm && warehousingSpecs.storageAreaSqm > 0) ||
             (warehousingSpecs.palletPositions && warehousingSpecs.palletPositions > 0) ||
             (warehousingSpecs.cbmVolume && warehousingSpecs.cbmVolume > 0) ||
             (warehousingSpecs.bufferStorageQty && warehousingSpecs.bufferStorageQty > 0) ||
-            (warehousingSpecs.bufferPalletPositions && warehousingSpecs.bufferPalletPositions > 0)
+            (warehousingSpecs.bufferPalletPositions && warehousingSpecs.bufferPalletPositions > 0) ||
+            (warehousingSpecs.skuCount && warehousingSpecs.skuCount > 0)
           );
           return Boolean(hasLocation && hasWhType && hasCapacity);
         }
 
-        // 5. Customs Clearance Validation
+        // 6. Customs Clearance Validation
         if (serviceType === 'Customs Clearance') {
           const hasSubDept = Boolean(customsSpecs.customsSubDepartment?.trim() || origin.trim());
           const hasDeclType = Boolean(customsSpecs.declarationType || (customsSpecs as any).customsDeclarationType);
-          const hasCount = (customsSpecs.declarationCount || 0) >= 1;
+          const hasCount = (customsSpecs.declarationCount || 1) >= 1;
           return Boolean(hasSubDept && hasDeclType && hasCount);
         }
 
-        // 6. Rail Freight Validation
+        // 7. Rail Freight Validation
         if (serviceType === 'Rail Freight') {
           const hasDeparture = Boolean(railSpecs.departureStation?.trim() || railSpecs.originStation?.trim() || origin.trim());
           const hasArrival = Boolean(railSpecs.arrivalStation?.trim() || railSpecs.destinationStation?.trim() || destination.trim());
@@ -767,45 +790,176 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
           return Boolean(hasDeparture && hasArrival && hasMode);
         }
 
-        // 7. Cross-Border Validation
+        // 8. Cross-Border Validation
         if (serviceType === 'Cross-border') {
           const hasGate = Boolean(crossBorderSpecs.borderGate?.trim());
-          const hasOrigin = Boolean(crossBorderSpecs.originCountryCity?.trim() || crossBorderSpecs.originProvince?.trim() || origin.trim());
-          const hasDest = Boolean(crossBorderSpecs.destinationCountryCity?.trim() || crossBorderSpecs.destinationProvince?.trim() || destination.trim());
+          const hasOrigin = Boolean(
+            crossBorderSpecs.originCountryCity?.trim() ||
+            crossBorderSpecs.originProvince?.trim() ||
+            (crossBorderSpecs.pickupLocations && crossBorderSpecs.pickupLocations.some(l => l && l.trim().length > 0)) ||
+            origin.trim()
+          );
+          const hasDest = Boolean(
+            crossBorderSpecs.destinationCountryCity?.trim() ||
+            crossBorderSpecs.destinationProvince?.trim() ||
+            (crossBorderSpecs.deliveryLocations && crossBorderSpecs.deliveryLocations.some(l => l && l.trim().length > 0)) ||
+            destination.trim()
+          );
           return Boolean(hasGate && hasOrigin && hasDest);
         }
 
-        // 8. Project Cargo Validation
+        // 9. Project Cargo Validation
         if (serviceType === 'Project Cargo') {
-          const hasName = Boolean(projectSpecs.projectName?.trim() || title.trim());
-          const hasOrigin = Boolean(projectSpecs.originHub?.trim() || origin.trim());
-          const hasDest = Boolean(projectSpecs.destinationSite?.trim() || destination.trim());
-          return Boolean(hasName && hasOrigin && hasDest);
+          const hasCategory = Boolean(projectSpecs.projectCategory || projectSpecs.projectName?.trim() || title.trim());
+          const hasOrigin = Boolean(projectSpecs.originHub?.trim() || origin.trim() || (projectSpecs.originWarehouses && projectSpecs.originWarehouses.some(w => w && w.trim())));
+          const hasDest = Boolean(projectSpecs.destinationSite?.trim() || destination.trim() || projectSpecs.coverageScope);
+          return Boolean(hasCategory && hasOrigin && hasDest);
         }
 
         return false;
       }
 
-      // TAB 5: Quotation Scope (*) - All-in or Itemized
+      // TAB 5: Quotation Scope (*) - All-in or Itemized (defaults to ALL_IN)
       case 5:
-        return Boolean(quotationScope);
+        return true;
 
       // TAB 6: VAS is optional
       case 6:
-        return Boolean(selectedVASList.length > 0);
+        return true;
 
-      // TAB 7: RFQ Expiry Date (*) and Pickup / Readiness Date (*)
+      // TAB 7: Giá và thời hạn - luôn hoàn thành để sẵn sàng xem tóm tắt
       case 7:
-        return Boolean(expiryDate && pickupDate);
+        return true;
 
       default:
         return false;
     }
   };
 
-  // Tạm thời mở khóa tất cả các tab theo yêu cầu người dùng để dễ dàng xem và điều chỉnh màn hình
-  const isTabUnlocked = (_tabId: number): boolean => {
+  // Cơ chế ràng buộc mở tab tuần tự: Tab N chỉ mở khi tất cả các tab trước (1 đến N-1) đã hoàn thành các trường bắt buộc (*)
+  const isTabUnlocked = (tabId: number): boolean => {
+    if (tabId === 1) return true;
+    for (let i = 1; i < tabId; i++) {
+      if (!isTabCompleted(i)) return false;
+    }
     return true;
+  };
+
+  // Helper lấy thông báo lỗi chi tiết khi chuyển tab chưa hoàn tất
+  const getTabValidationErrors = (tabId: number): string[] => {
+    const errors: string[] = [];
+    switch (tabId) {
+      case 1:
+        if (!serviceType) errors.push('Vui lòng chọn 1 nhóm dịch vụ logistics cần báo giá.');
+        break;
+      case 2:
+        if (!pricingType) errors.push('Vui lòng chọn hình thức định giá (Hàng giao ngay Spot hoặc Hợp đồng dài hạn Contract).');
+        if (pricingType === 'CONTRACT' && !contractTerm) errors.push('Vui lòng chọn thời hạn hợp đồng kỳ vọng.');
+        break;
+      case 3:
+        if (!cargoClassification) errors.push('Vui lòng chọn phân loại hàng hóa (Hàng thường, Hàng lạnh hoặc Hàng nguy hiểm).');
+        if (cargoClassification === 'Reefer' && !temperatureRequirement.trim() && !coldChainSpecs.temperatureCategory) {
+          errors.push('Vui lòng nhập hoặc chọn dải nhiệt độ bảo quản lạnh.');
+        }
+        if (cargoClassification === 'Hazmat') {
+          if (!dgClassIMO) errors.push('Vui lòng chọn phân nhóm IMO Class.');
+          if (!unNumber.trim()) errors.push('Vui lòng nhập mã số UN.');
+        }
+        if (!industry.trim()) errors.push('Vui lòng chọn Ngành Hàng (Industry).');
+        if (!cargoType.trim()) errors.push('Vui lòng nhập Tên / Chủng Loại Hàng Hóa Cụ Thể.');
+        if (!packagePackaging) {
+          errors.push('Vui lòng chọn Quy Cách Đóng Gói (Packaging).');
+        } else if (packagePackaging === 'Khác' && !customPackaging.trim()) {
+          errors.push('Vui lòng nhập quy cách đóng gói cụ thể.');
+        }
+        break;
+      case 4:
+        if (serviceType === 'Trucking') {
+          const hasPickup = Boolean((truckingSpecs.pickupLocations && truckingSpecs.pickupLocations.some(l => l && l.trim().length > 0)) || origin.trim());
+          const hasDelivery = Boolean((truckingSpecs.deliveryLocations && truckingSpecs.deliveryLocations.some(l => l && l.trim().length > 0)) || destination.trim());
+          if (!hasPickup) errors.push('Vui lòng nhập địa điểm lấy hàng (Origin).');
+          if (!hasDelivery) errors.push('Vui lòng nhập địa điểm giao hàng (Destination).');
+          if (!truckingSpecs.truckType) errors.push('Vui lòng chọn loại phương tiện xe tải.');
+          if (truckingSpecs.loadType !== 'LTL (Ghép hàng lẻ)') {
+            if (!truckingSpecs.tonnageCategory && !truckingSpecs.truckType) errors.push('Vui lòng chọn tải trọng xe.');
+            if ((truckingSpecs.vehicleCount || 1) < 1) errors.push('Vui lòng nhập số lượng xe cần điều động (tối thiểu 1 xe).');
+          }
+        } else if (serviceType === 'Cold Chain') {
+          if (!origin.trim()) errors.push('Vui lòng nhập kho lạnh xuất phát (Origin).');
+          if (!destination.trim()) errors.push('Vui lòng nhập kho lạnh đích / điểm giao (Destination).');
+          if (!coldChainSpecs.temperatureCategory && !temperatureRequirement.trim()) {
+            errors.push('Vui lòng chọn dải nhiệt độ bảo quản lạnh.');
+          }
+          if (!coldChainSpecs.vehicleOrContType) errors.push('Vui lòng chọn loại xe tải lạnh hoặc container lạnh.');
+        } else if (serviceType === 'Sea Freight (FCL)' || serviceType === 'Sea Freight (LCL)') {
+          if (!oceanSpecs.polPort?.trim() && !origin.trim()) errors.push('Vui lòng chọn cảng bốc (POL).');
+          if (!oceanSpecs.podPort?.trim() && !destination.trim()) errors.push('Vui lòng chọn cảng dỡ (POD).');
+          const isDomestic = oceanSpecs.tradeRole === 'Nội địa (Domestic)';
+          if (!isDomestic && !oceanSpecs.incoterm && !(oceanSpecs as any).incoterms) {
+            errors.push('Vui lòng chọn điều kiện giao hàng Incoterms.');
+          }
+          if (oceanSpecs.mode !== 'LCL (Hàng lẻ đóng ghép CFS)' && (oceanSpecs.containerCount || 1) < 1) {
+            errors.push('Vui lòng nhập số lượng container (tối thiểu 1 cont).');
+          }
+        } else if (serviceType === 'Air Freight') {
+          const isExp = airSpecs.airServiceType === 'Express / Courier';
+          if (!airSpecs.originAirport?.trim() && !origin.trim() && !airSpecs.pickupAddress?.trim()) {
+            errors.push(isExp ? 'Vui lòng nhập địa chỉ lấy hàng tận nơi.' : 'Vui lòng chọn sân bay đi (AOD).');
+          }
+          if (!airSpecs.destinationAirport?.trim() && !destination.trim() && !airSpecs.deliveryAddress?.trim()) {
+            errors.push(isExp ? 'Vui lòng nhập địa chỉ giao hàng tận nơi.' : 'Vui lòng chọn sân bay đến (AOA).');
+          }
+        } else if (serviceType === 'Warehousing') {
+          if (!warehousingSpecs.targetLocation?.trim() && !origin.trim()) errors.push('Vui lòng nhập vị trí kho bãi mục tiêu (Khu vực / Tỉnh thành muốn đặt kho).');
+          const hasCap = (warehousingSpecs.storageAreaSqm && warehousingSpecs.storageAreaSqm > 0) ||
+            (warehousingSpecs.palletPositions && warehousingSpecs.palletPositions > 0) ||
+            (warehousingSpecs.cbmVolume && warehousingSpecs.cbmVolume > 0) ||
+            (warehousingSpecs.bufferStorageQty && warehousingSpecs.bufferStorageQty > 0) ||
+            (warehousingSpecs.bufferPalletPositions && warehousingSpecs.bufferPalletPositions > 0) ||
+            (warehousingSpecs.skuCount && warehousingSpecs.skuCount > 0);
+          if (!hasCap) errors.push('Vui lòng nhập diện tích sàn (m²), thể tích (cbm) hoặc số vị trí pallet cần thuê.');
+        } else if (serviceType === 'Customs Clearance') {
+          if (!customsSpecs.customsSubDepartment?.trim() && !origin.trim()) errors.push('Vui lòng nhập Chi Cục Hải Quan mở tờ khai.');
+          if (!customsSpecs.declarationType && !(customsSpecs as any).customsDeclarationType) errors.push('Vui lòng chọn loại hình tờ khai hải quan.');
+          if ((customsSpecs.declarationCount || 1) < 1) errors.push('Vui lòng nhập số lượng bộ tờ khai cần thông quan (tối thiểu 1 bộ).');
+        } else if (serviceType === 'Rail Freight') {
+          if (!railSpecs.originStation?.trim() && !railSpecs.departureStation?.trim() && !origin.trim()) errors.push('Vui lòng chọn ga xuất phát.');
+          if (!railSpecs.destinationStation?.trim() && !railSpecs.arrivalStation?.trim() && !destination.trim()) errors.push('Vui lòng chọn ga đến.');
+          if (!railSpecs.mode) errors.push('Vui lòng chọn phương thức đường sắt.');
+        } else if (serviceType === 'Cross-border') {
+          if (!crossBorderSpecs.borderGate?.trim()) errors.push('Vui lòng chọn cửa khẩu thông quan.');
+          const hasOrigin = Boolean(
+            crossBorderSpecs.originProvince?.trim() ||
+            crossBorderSpecs.originCountryCity?.trim() ||
+            (crossBorderSpecs.pickupLocations && crossBorderSpecs.pickupLocations.some(l => l && l.trim().length > 0)) ||
+            origin.trim()
+          );
+          if (!hasOrigin) errors.push('Vui lòng nhập địa điểm xuất phát.');
+          const hasDest = Boolean(
+            crossBorderSpecs.destinationProvince?.trim() ||
+            crossBorderSpecs.destinationCountryCity?.trim() ||
+            (crossBorderSpecs.deliveryLocations && crossBorderSpecs.deliveryLocations.some(l => l && l.trim().length > 0)) ||
+            destination.trim()
+          );
+          if (!hasDest) errors.push('Vui lòng nhập địa điểm đích đến.');
+        } else if (serviceType === 'Project Cargo') {
+          if (!projectSpecs.projectCategory) errors.push('Vui lòng chọn phân loại mô hình dự án logistics.');
+          const hasOrigin = Boolean(origin.trim() || projectSpecs.originHub?.trim() || (projectSpecs.originWarehouses && projectSpecs.originWarehouses.some(w => w && w.trim())));
+          if (!hasOrigin) errors.push('Vui lòng nhập kho tổng / nhà máy xuất hàng dự án.');
+          const hasDest = Boolean(destination.trim() || projectSpecs.destinationSite?.trim() || projectSpecs.coverageScope);
+          if (!hasDest) errors.push('Vui lòng chọn phạm vi địa lý hoặc điểm đến của dự án.');
+        }
+        break;
+      case 5:
+        // Tự động mặc định là Trọn Gói (ALL_IN) nếu người dùng không chọn bóc tách
+        break;
+      case 7:
+        // Các mốc thời gian nếu người dùng không điền sẽ có giá trị mặc định thỏa thuận linh hoạt khi xem tóm tắt
+        break;
+      default:
+        break;
+    }
+    return errors;
   };
 
   // Helper to determine budget label, placeholder and contextual badge based on service & mode
@@ -826,6 +980,15 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
         badge: 'Nguyên chuyến (FTL)',
         hint: `Tải trọng xe: ${truckingSpecs.tonnageCategory || '15.0T'}`,
         defaultVal: '45.000.000 VND / chuyến',
+      };
+    }
+    if (serviceType === 'Cold Chain') {
+      return {
+        label: 'Đơn Giá Kỳ Vọng / Chuyến (Xe / Cont Lạnh)',
+        placeholder: 'VD: 28.000.000 VND / chuyến',
+        badge: 'VND / Chuyến Lạnh',
+        hint: `Nhiệt độ: ${coldChainSpecs.temperatureCategory || temperatureRequirement || '2°C - 8°C'}`,
+        defaultVal: '28.000.000 VND',
       };
     }
     if (serviceType === 'Sea Freight (FCL)') {
@@ -1047,143 +1210,65 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
     if (newService === 'Cold Chain') {
       setCargoClassification('Reefer');
     }
+    if (newService === 'Warehousing') {
+      setWarehousingSpecs((prev) => ({
+        ...prev,
+        warehouseType: prev.warehouseType || 'Kho thường (Grade A Dry)',
+        billingUnitPreference: prev.billingUnitPreference || 'm² (Diện tích sàn)',
+      }));
+      if (!packagePackaging) {
+        setPackagePackaging('Đóng Pallet gỗ / nhựa tiêu chuẩn');
+      }
+    }
   };
 
   const validateInquiryForm = (): string[] => {
     const errors: string[] = [];
-
-    // 1. Kiểm tra Nơi đi / Địa điểm xuất phát theo từng loại dịch vụ
-    if (serviceType === 'Customs Clearance') {
-      if (!origin.trim() && !customsSpecs.customsSubDepartment?.trim()) {
-        errors.push('Vui lòng nhập Chi Cục Hải Quan Mở Tờ Khai.');
-      }
-    } else if (serviceType === 'Warehousing') {
-      if (!origin.trim() && !warehousingSpecs.targetLocation?.trim()) {
-        errors.push('Vui lòng nhập Khu vực & Địa bàn kho bãi mục tiêu.');
-      }
-    } else if (serviceType === 'Project Cargo') {
-      if (!origin.trim() && !projectSpecs.coverageScope?.trim()) {
-        errors.push('Vui lòng nhập Phạm vi địa bàn hoặc Mạng lưới HUB dự án.');
-      }
-    } else if (serviceType === 'Air Freight') {
-      if (!origin.trim() && !airSpecs.originAirport?.trim()) {
-        errors.push('Vui lòng chọn Sân bay đi / Cất cánh (AOD).');
-      }
-    } else if (serviceType === 'Sea Freight (FCL)' || serviceType === 'Sea Freight (LCL)') {
-      if (!origin.trim() && !oceanSpecs.polPort?.trim()) {
-        errors.push('Vui lòng chọn Cảng bốc hàng (POL) hoặc Kho CFS xuất phát.');
-      }
-    } else if (serviceType === 'Rail Freight') {
-      if (!origin.trim() && !railSpecs.originStation?.trim()) {
-        errors.push('Vui lòng chọn Ga xuất phát / Ga đi.');
-      }
-    } else if (serviceType === 'Cross-border') {
-      if (!origin.trim() && !crossBorderSpecs.originProvince?.trim()) {
-        errors.push('Vui lòng chọn Tỉnh/Thành xuất phát.');
-      }
-    } else {
-      if (!origin.trim()) {
-        errors.push('Địa điểm lấy hàng / Nơi đi (Origin) là bắt buộc.');
-      }
+    for (let t = 1; t <= 7; t++) {
+      errors.push(...getTabValidationErrors(t));
     }
-
-    // 2. Kiểm tra Nơi đến / Điểm giao (Chỉ áp dụng cho các nhóm dịch vụ vận tải có tuyến đường)
-    const requiresDestination = [
-      'Trucking',
-      'Sea Freight (FCL)',
-      'Sea Freight (LCL)',
-      'Air Freight',
-      'Rail Freight',
-      'Cross-border',
-      'Cold Chain',
-    ].includes(serviceType);
-
-    if (requiresDestination && !destination.trim()) {
-      if (serviceType === 'Air Freight') {
-        errors.push('Vui lòng chọn Sân bay đến / Hạ cánh (AOA).');
-      } else if (serviceType === 'Sea Freight (FCL)' || serviceType === 'Sea Freight (LCL)') {
-        errors.push('Vui lòng chọn Cảng dỡ hàng (POD) hoặc Kho CFS đích.');
-      } else if (serviceType === 'Rail Freight') {
-        errors.push('Vui lòng chọn Ga đến / Ga đích.');
-      } else if (serviceType === 'Cross-border') {
-        errors.push('Vui lòng chọn Quốc gia & Địa điểm đích.');
-      } else {
-        errors.push('Địa điểm giao hàng / Nơi đến (Destination) là bắt buộc.');
-      }
-    }
-
-    // 3. Hạn chót nhận báo giá (RFQ Deadline)
-    if (!expiryDate) {
-      errors.push('Hạn chót nhận báo giá (RFQ Deadline) là bắt buộc.');
-    }
-
-    // 4. Ngày bắt đầu / Lấy hàng dự kiến
-    if (!pickupDate) {
-      if (serviceType === 'Customs Clearance') {
-        errors.push('Vui lòng chọn Ngày dự kiến mở tờ khai / làm thủ tục hải quan.');
-      } else if (serviceType === 'Warehousing') {
-        errors.push('Vui lòng chọn Ngày dự kiến bắt đầu thuê kho.');
-      } else if (serviceType === 'Project Cargo') {
-        errors.push('Vui lòng chọn Ngày dự kiến triển khai dự án.');
-      } else {
-        errors.push('Ngày lấy hàng dự kiến (Pickup Date) là bắt buộc.');
-      }
-    }
-
-    // 5. Kiểm tra Trọng lượng / Thể tích (Miễn trừ cho Kho Bãi, Dự Án, Thủ Tục Hải Quan, FCL đã có số cont, và Trucking LTL đã khai báo ở cấu hình)
-    const isWeightVolumeExempt = ['Warehousing', 'Project Cargo', 'Customs Clearance'].includes(serviceType);
-    const hasOceanFclContainer = (serviceType === 'Sea Freight (FCL)' || (serviceType === 'Sea Freight (LCL)' && oceanSpecs.mode?.includes('FCL'))) && (oceanSpecs.containerCount || 0) > 0;
-    const hasAirWeight = serviceType === 'Air Freight' && Boolean(airSpecs.grossWeightKgs || airSpecs.chargeableWeightKgs);
-    const isTruckingLtlConfigured = serviceType === 'Trucking' && truckingSpecs.loadType === 'LTL (Ghép hàng lẻ)' && Boolean(truckingSpecs.ltlGrossWeightKg || truckingSpecs.ltlCbm || truckingSpecs.ltlPieces);
-
-    if (!isWeightVolumeExempt && !hasOceanFclContainer && !hasAirWeight && !isTruckingLtlConfigured && !weightKg.trim() && !volumeCbm.trim()) {
-      errors.push('Vui lòng nhập Khối lượng (kg) hoặc Thể tích (cbm) của hàng hóa.');
-    }
-
-    // 6. Ràng buộc hàng lạnh / nguy hiểm
-    if (cargoClassification === 'Reefer' && !temperatureRequirement) {
-      errors.push('Vui lòng chọn dải nhiệt độ bảo quản cho hàng đông lạnh.');
-    }
-
-    if (cargoClassification === 'Hazmat' && !dgClassIMO) {
-      errors.push('Vui lòng chọn phân loại hàng nguy hiểm (DG IMO Class).');
-    }
-
-    if ((cargoClassification === 'Reefer' || cargoClassification === 'Hazmat')) {
-      if ((serviceType === 'Sea Freight (FCL)' || serviceType === 'Sea Freight (LCL)') && oceanSpecs.mode === 'LCL (Hàng lẻ đóng ghép CFS)') {
-        errors.push(`Hàng ${cargoClassification === 'Reefer' ? 'Lạnh' : 'Nguy Hiểm'} bắt buộc vận chuyển FCL nguyên container, không thể chọn LCL.`);
-      }
-      if (serviceType === 'Rail Freight' && railSpecs.mode === 'LCL (Hàng lẻ ghép toa)') {
-        errors.push(`Hàng ${cargoClassification === 'Reefer' ? 'Lạnh' : 'Nguy Hiểm'} bắt buộc vận chuyển FCL nguyên toa/container, không thể chọn LCL.`);
-      }
-    }
-
     return errors;
   };
 
   const handleSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
 
+    const finalExpiryDate = expiryDate.trim() || 'Trong 48 giờ';
+    const finalPickupDate = pickupDate.trim() || 'Linh hoạt theo thỏa thuận';
+    const finalDeliveryDate = deliveryDate.trim() || 'Theo cam kết SLA tuyến';
+
+    // Auto-fill default quotationScope to ALL_IN if customer didn't choose in Tab 5
+    const finalQuotationScope: QuotationScope = quotationScope || 'ALL_IN';
+    if (!quotationScope) {
+      setQuotationScope('ALL_IN');
+    }
+
     const errors = validateInquiryForm();
     if (errors.length > 0) {
       setValidationErrors(errors);
-      const formElement = document.getElementById('create-inquiry-form-body');
-      if (formElement) {
-        formElement.scrollTo({ top: 0, behavior: 'smooth' });
+      setShowValidationHighlight(true);
+      // Tự động chuyển đến tab đầu tiên có lỗi để người dùng thấy rõ và hoàn tất
+      for (let t = 1; t <= 7; t++) {
+        if (getTabValidationErrors(t).length > 0) {
+          setActiveTab(t);
+          break;
+        }
       }
+      setTimeout(() => {
+        const formElement = document.getElementById('create-inquiry-form-body');
+        const firstInvalidEl = formElement?.querySelector<HTMLElement>('[data-invalid="true"], input:invalid, select:invalid');
+        if (firstInvalidEl) {
+          firstInvalidEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          firstInvalidEl.focus();
+        } else if (formElement) {
+          formElement.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      }, 80);
       return;
     }
 
     setValidationErrors([]);
-    const finalTitle = title.trim() || (
-      serviceType === 'Customs Clearance'
-        ? `Thủ tục Hải quan - ${origin.trim() || customsSpecs.customsSubDepartment || 'Chi cục Hải quan'}`
-        : serviceType === 'Warehousing'
-          ? `Thuê kho bãi 3PL - ${origin.trim() || warehousingSpecs.targetLocation || 'Kho tiêu chuẩn'}`
-          : serviceType === 'Project Cargo'
-            ? `Dự án logistics - ${projectSpecs.projectName || origin.trim() || 'Chuỗi cung ứng'}`
-            : (origin && destination ? `${origin.split(',')[0]} → ${destination.split(',')[0]} (${serviceType})` : `Yêu cầu báo giá ${serviceType}`)
-    );
+    setShowValidationHighlight(false);
 
     const reqs: string[] = [];
     if (gpsRequired) reqs.push('GPS Live Telematics Tracking');
@@ -1235,6 +1320,41 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
       };
     }
 
+    const effectiveOrigin = (
+      origin.trim() ||
+      (serviceType === 'Trucking' ? cleanedTruckingSpecs.pickupLocations?.[0] : '') ||
+      (serviceType === 'Sea Freight (FCL)' || serviceType === 'Sea Freight (LCL)' ? oceanSpecs.polPort : '') ||
+      (serviceType === 'Air Freight' ? airSpecs.originAirport : '') ||
+      (serviceType === 'Warehousing' ? warehousingSpecs.targetLocation : '') ||
+      (serviceType === 'Customs Clearance' ? customsSpecs.customsSubDepartment : '') ||
+      (serviceType === 'Rail Freight' ? (railSpecs.departureStation || railSpecs.originStation) : '') ||
+      (serviceType === 'Cross-border' ? (crossBorderSpecs.originProvince || crossBorderSpecs.originCountryCity) : '') ||
+      (serviceType === 'Project Cargo' ? (projectSpecs.originHub || projectSpecs.originWarehouses?.[0]) : '') ||
+      'Điểm đi'
+    );
+
+    const effectiveDestination = (
+      destination.trim() ||
+      (serviceType === 'Trucking' ? cleanedTruckingSpecs.deliveryLocations?.[0] : '') ||
+      (serviceType === 'Sea Freight (FCL)' || serviceType === 'Sea Freight (LCL)' ? oceanSpecs.podPort : '') ||
+      (serviceType === 'Air Freight' ? airSpecs.destinationAirport : '') ||
+      (serviceType === 'Rail Freight' ? (railSpecs.arrivalStation || railSpecs.destinationStation) : '') ||
+      (serviceType === 'Cross-border' ? (crossBorderSpecs.destinationProvince || crossBorderSpecs.destinationCountryCity) : '') ||
+      (serviceType === 'Project Cargo' ? (projectSpecs.destinationSite || projectSpecs.coverageScope) : '') ||
+      (serviceType === 'Warehousing' ? 'Toàn quốc / Bán kính phân phối linh hoạt' : '') ||
+      'Điểm đến'
+    );
+
+    const finalTitle = title.trim() || (
+      serviceType === 'Customs Clearance'
+        ? `Thủ tục Hải quan - ${effectiveOrigin}`
+        : serviceType === 'Warehousing'
+          ? `Thuê kho bãi 3PL - ${effectiveOrigin}`
+          : serviceType === 'Project Cargo'
+            ? `Dự án logistics - ${projectSpecs.projectName || projectSpecs.projectCategory || effectiveOrigin}`
+            : `${effectiveOrigin.split(',')[0]} → ${effectiveDestination.split(',')[0]} (${serviceType})`
+    );
+
     // Assemble service specific specs
     const serviceSpecs: ServiceSpecificSpecs = {};
     if (serviceType === 'Trucking') {
@@ -1276,7 +1396,14 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
     } else if (serviceType === 'Rail Freight') {
       serviceSpecs.rail = { ...railSpecs, pricingType, contractTerm, committedFrequency, selectedVAS: selectedVASList };
     } else if (serviceType === 'Cold Chain') {
-      serviceSpecs.coldChain = { ...coldChainSpecs, pricingType, contractTerm, committedFrequency, selectedVAS: selectedVASList };
+      serviceSpecs.coldChain = {
+        ...coldChainSpecs,
+        temperatureCategory: coldChainSpecs.temperatureCategory || temperatureRequirement,
+        pricingType,
+        contractTerm,
+        committedFrequency,
+        selectedVAS: selectedVASList
+      };
     } else if (serviceType === 'Warehousing') {
       const leaseModel = pricingType === 'SPOT' ? 'OVERFLOW' : 'LONG_TERM';
       let durationMonths = 12;
@@ -1290,6 +1417,9 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
 
       serviceSpecs.warehousing = {
         ...warehousingSpecs,
+        warehouseType: warehousingSpecs.warehouseType || 'Kho thường (Grade A Dry)',
+        billingUnitPreference: warehousingSpecs.billingUnitPreference || 'm² (Diện tích sàn)',
+        targetLocation: warehousingSpecs.targetLocation || origin,
         warehousingLeaseModel: leaseModel,
         rentalDurationMonths: durationMonths,
         pricingType,
@@ -1322,7 +1452,15 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
         selectedVAS: selectedVASList
       };
     } else if (serviceType === 'Project Cargo') {
-      serviceSpecs.project = { ...projectSpecs, pricingType, contractTerm, committedFrequency, selectedVAS: selectedVASList };
+      serviceSpecs.project = {
+        ...projectSpecs,
+        originHub: projectSpecs.originHub || projectSpecs.originWarehouses?.[0] || origin,
+        destinationSite: projectSpecs.destinationSite || projectSpecs.coverageScope || destination,
+        pricingType,
+        contractTerm,
+        committedFrequency,
+        selectedVAS: selectedVASList
+      };
     }
 
     const finalPackaging = packagePackaging === 'Khác'
@@ -1358,7 +1496,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
       : `${budgetConfig.defaultVal}`;
 
     // Smart route string for multi-point or single point
-    let calculatedRoute = `${origin.split(',')[0]} → ${destination.split(',')[0]}`;
+    let calculatedRoute = `${effectiveOrigin.split(',')[0]} → ${effectiveDestination.split(',')[0]}`;
     if (serviceType === 'Trucking' && cleanedTruckingSpecs.pickupLocations && cleanedTruckingSpecs.deliveryLocations) {
       const pCount = cleanedTruckingSpecs.pickupLocations.length;
       const dCount = cleanedTruckingSpecs.deliveryLocations.length;
@@ -1383,7 +1521,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
       contractTerm: pricingType === 'CONTRACT' ? contractTerm : undefined,
       committedVolume: pricingType === 'CONTRACT' ? committedFrequency : undefined,
       selectedVAS: selectedVASList,
-      quotationScope,
+      quotationScope: finalQuotationScope,
       requestedSurcharges: requestedSurcharges.length > 0 ? requestedSurcharges : undefined,
       surchargesNotes: surchargesNotes.trim() ? surchargesNotes.trim() : undefined,
       cargoClassification,
@@ -1394,8 +1532,8 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
       packingGroup: cargoClassification === 'Hazmat' ? packingGroup : undefined,
       flashPoint: cargoClassification === 'Hazmat' && flashPoint.trim() ? flashPoint.trim() : undefined,
       msdsFileName: cargoClassification === 'Hazmat' ? (msdsFileName || 'MSDS_Safety_Data_Sheet.pdf') : undefined,
-      origin: origin || railSpecs.originStation || (cleanedTruckingSpecs.pickupLocations?.[0] ?? 'Điểm đi'),
-      destination: destination || railSpecs.destinationStation || (cleanedTruckingSpecs.deliveryLocations?.[0] ?? 'Điểm đến'),
+      origin: effectiveOrigin,
+      destination: effectiveDestination,
       route: calculatedRoute,
       originServiceTerm: activeOriginServiceTerm,
       destinationServiceTerm: activeDestinationServiceTerm,
@@ -1417,9 +1555,9 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
       targetBudget: formattedTargetBudget,
       currency,
       exchangeRate: currency === 'VND' ? 1 : exchangeRate,
-      pickupDate,
-      deliveryDate,
-      expiryDate,
+      pickupDate: finalPickupDate,
+      deliveryDate: finalDeliveryDate,
+      expiryDate: finalExpiryDate,
       description,
       specialRequirements: reqs,
       attachments: attachments.length > 0 ? attachments : undefined,
@@ -1471,11 +1609,16 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                   serviceType === 'Cross-border' ? 11 : 8;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-3 md:p-4 bg-slate-950/75 backdrop-blur-xs overflow-y-auto animate-in fade-in duration-200">
+    <>
       <div
-        id="create-inquiry-modal-card"
-        className="w-full max-w-[98vw] 2xl:max-w-[1680px] bg-white rounded-2xl md:rounded-3xl shadow-2xl border border-slate-200 overflow-hidden my-2 sm:my-3 flex flex-col h-[96vh] max-h-[96vh]"
+        className={`fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-slate-950/80 backdrop-blur-xs overflow-hidden animate-in fade-in duration-150 ${
+          showSummaryConfirmModal ? 'hidden' : ''
+        }`}
       >
+        <div
+          id="create-inquiry-modal-card"
+          className="w-full max-w-[98vw] 2xl:max-w-[1680px] bg-white rounded-2xl md:rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col h-[94vh] max-h-[94vh] my-auto"
+        >
         {/* Modal Header */}
         <div className="px-6 py-3 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex items-center justify-between shrink-0 border-b border-indigo-900/50">
           <h3 className="text-base font-bold text-white tracking-wide uppercase">
@@ -1494,26 +1637,53 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
         <div className="bg-slate-50 border-b border-slate-200 px-3 sm:px-4 lg:px-5 pt-2.5 pb-2 shrink-0">
           <div className="grid grid-cols-7 gap-1 sm:gap-1.5 w-full">
             {TABS.map((tab) => {
-              const isCompleted = isTabCompleted(tab.id);
+              const isUnlocked = isTabUnlocked(tab.id);
               const isActive = activeTab === tab.id;
+              // A tab can only be marked completed if it is unlocked AND user has progressed to or beyond it
+              const isCompleted = isUnlocked && isTabCompleted(tab.id) && (
+                tab.id <= 5
+                  ? true
+                  : tab.id === 6
+                    ? (selectedVASList.length > 0 || activeTab > 6)
+                    : (activeTab === 7 && Boolean(expiryDate && pickupDate))
+              );
 
               return (
                 <button
                   key={tab.id}
                   type="button"
-                  onClick={() => setActiveTab(tab.id)}
-                  className="group flex flex-col items-stretch text-center transition-all pb-0.5 cursor-pointer min-w-0"
-                  title={`Tab ${tab.id}: ${tab.label}`}
+                  disabled={!isUnlocked}
+                  onClick={() => {
+                    if (isUnlocked) {
+                      setValidationErrors([]);
+                      setActiveTab(tab.id);
+                    }
+                  }}
+                  className={`group flex flex-col items-stretch text-center transition-all pb-0.5 min-w-0 ${
+                    !isUnlocked ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'
+                  }`}
+                  title={
+                    !isUnlocked
+                      ? `Tab ${tab.id}: ${tab.label} (Cần điền đủ các trường * của tab trước)`
+                      : `Tab ${tab.id}: ${tab.label}`
+                  }
                 >
                   <div
-                    className={`w-full px-1 sm:px-2 py-1.5 text-[11px] xl:text-xs font-bold rounded-xl whitespace-nowrap transition-all flex items-center justify-center gap-1 sm:gap-1.5 ${isActive
-                        ? 'bg-indigo-600 text-white shadow-xs'
-                        : isCompleted
-                          ? 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100/80 border border-emerald-200/60'
-                          : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/70 border border-slate-200/60 bg-white'
-                      }`}
+                    className={`w-full px-1 sm:px-2 py-1.5 text-[11px] xl:text-xs font-bold rounded-xl whitespace-nowrap transition-all flex items-center justify-center gap-1 sm:gap-1.5 ${
+                      !isUnlocked
+                        ? 'bg-slate-100/70 text-slate-400 border border-slate-200/60'
+                        : isActive
+                          ? 'bg-indigo-600 text-white shadow-xs'
+                          : isCompleted
+                            ? 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100/80 border border-emerald-200/60'
+                            : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/70 border border-slate-200/60 bg-white'
+                    }`}
                   >
-                    {isCompleted ? (
+                    {!isUnlocked ? (
+                      <span className="w-4 h-4 rounded-full flex items-center justify-center shrink-0 text-[10px] font-bold bg-slate-200/70 text-slate-400">
+                        {tab.id}
+                      </span>
+                    ) : isCompleted ? (
                       <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center shrink-0 ${isActive ? 'bg-white/20 text-white' : 'bg-emerald-600 text-white'}`}>
                         <Check className="w-2.5 h-2.5 stroke-[3]" />
                       </span>
@@ -1528,12 +1698,15 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                   {/* Small Progress Status Bar below each Tab */}
                   <div className="w-full px-0.5 mt-1.5">
                     <div
-                      className={`h-[2.5px] rounded-full transition-all duration-300 ${isCompleted
-                          ? 'bg-emerald-500 shadow-xs'
+                      className={`h-[2.5px] rounded-full transition-all duration-300 ${
+                        !isUnlocked
+                          ? 'bg-transparent'
                           : isActive
                             ? 'bg-indigo-600'
-                            : 'bg-slate-200 group-hover:bg-slate-300'
-                        }`}
+                            : isCompleted
+                              ? 'bg-emerald-500 shadow-xs'
+                              : 'bg-slate-200 group-hover:bg-slate-300'
+                      }`}
                     />
                   </div>
                 </button>
@@ -1798,9 +1971,11 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                   <div className="flex items-center gap-1.5 text-xs font-bold text-cyan-950">
                     <ThermometerSnowflake className="w-4 h-4 text-cyan-700" />
                     <span>
-                      {serviceType === 'Warehousing'
-                        ? 'Yêu Cầu Kiểm Soát Nhiệt Độ, Độ Ẩm & Bảo Quản Kho Lạnh *'
-                        : 'Yêu Cầu Kiểm Soát Nhiệt Độ & Bảo Quản Lạnh *'}
+                      {serviceType === 'Warehousing' ? (
+                        <>Yêu Cầu Kiểm Soát Nhiệt Độ, Độ Ẩm & Bảo Quản Kho Lạnh <span className="text-red-500">*</span></>
+                      ) : (
+                        <>Yêu Cầu Kiểm Soát Nhiệt Độ & Bảo Quản Lạnh <span className="text-red-500">*</span></>
+                      )}
                     </span>
                   </div>
 
@@ -1819,7 +1994,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                       {/* Select LOV standard range */}
                       <div>
                         <label className="block text-xs font-semibold text-slate-700 mb-1">
-                          Dải Nhiệt Độ Chuẩn *
+                          Dải Nhiệt Độ Chuẩn <span className="text-red-500">*</span>
                         </label>
                         <select
                           value={
@@ -1836,7 +2011,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                           }}
                           className="w-full h-10 px-3.5 text-xs bg-white border border-cyan-300 rounded-xl font-bold text-cyan-950 focus:border-cyan-500 cursor-pointer shadow-2xs"
                         >
-                          <option value="">-- Chọn dải nhiệt độ chuẩn (Bắt buộc) * --</option>
+                          <option value="">-- Chọn dải nhiệt độ chuẩn --</option>
                           {REEFER_TEMPERATURE_RANGES_LOV.map((opt) => (
                             <option key={opt.id} value={opt.id}>
                               {opt.label}
@@ -1848,7 +2023,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                       {/* Refine / Custom manual input */}
                       <div>
                         <label className="block text-xs font-semibold text-slate-700 mb-1">
-                          Chi Tiết Dải Cài Đặt Thực Tế (°C) *
+                          Chi Tiết Dải Cài Đặt Thực Tế (°C) <span className="text-red-500">*</span>
                         </label>
                         <input
                           type="text"
@@ -1910,7 +2085,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                       {/* 2. Inbound Cargo Temperature State */}
                       <div>
                         <label className="block text-xs font-semibold text-slate-700 mb-1">
-                          Trạng Thái Nhiệt Độ Hàng Khi Đưa Vào Kho *
+                          Trạng Thái Nhiệt Độ Hàng Khi Đưa Vào Kho <span className="text-red-500">*</span>
                         </label>
                         <div className="grid grid-cols-2 gap-2">
                           <button
@@ -1969,21 +2144,21 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                 <div className="p-4 bg-amber-50/60 border border-amber-200 rounded-2xl space-y-3.5 animate-in fade-in duration-150">
                   <div className="flex items-center gap-1.5 text-xs font-bold text-amber-950">
                     <AlertTriangle className="w-4 h-4 text-amber-700" />
-                    <span>Khai Báo Thông Số Hàng Nguy Hiểm & Hóa Chất (IMO / GHS DG Class) *</span>
+                    <span>Khai Báo Thông Số Hàng Nguy Hiểm & Hóa Chất (IMO / GHS DG Class) <span className="text-red-500">*</span></span>
                   </div>
 
                   {/* Row 1: IMO Class & UN Number */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                       <label className="block text-xs font-semibold text-slate-700 mb-1">
-                        Nhóm Nguy Hiểm (IMO Class) *
+                        Nhóm Nguy Hiểm (IMO Class) <span className="text-red-500">*</span>
                       </label>
                       <select
                         value={dgClassIMO}
                         onChange={(e) => setDgClassIMO(e.target.value)}
                         className="w-full h-10 px-3.5 text-xs bg-white border border-amber-200 rounded-xl font-bold text-amber-950 focus:border-amber-500 shadow-2xs cursor-pointer"
                       >
-                        <option value="">-- Chọn nhóm IMO Class (Bắt buộc) * --</option>
+                        <option value="">-- Chọn nhóm IMO Class --</option>
                         <option value="Class 2.1 - Khí dễ cháy (Flammable Gas)">Class 2.1 - Khí dễ cháy</option>
                         <option value="Class 2.2 - Khí không cháy, không độc">Class 2.2 - Khí không độc hại</option>
                         <option value="Class 3 - Chất lỏng dễ cháy (Flammable Liquids)">Class 3 - Chất lỏng dễ cháy</option>
@@ -2000,7 +2175,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
 
                     <div>
                       <label className="block text-xs font-semibold text-slate-700 mb-1">
-                        Mã Số UN (UN Number) *
+                        Mã Số UN (UN Number) <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -2017,14 +2192,14 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1 border-t border-amber-200/60">
                     <div>
                       <label className="block text-xs font-semibold text-slate-700 mb-1">
-                        Nhóm Đóng Gói (Packing Group) *
+                        Nhóm Đóng Gói (Packing Group) <span className="text-red-500">*</span>
                       </label>
                       <select
                         value={packingGroup}
                         onChange={(e) => setPackingGroup(e.target.value)}
                         className="w-full h-10 px-3.5 text-xs bg-white border border-amber-200 rounded-xl font-bold text-amber-950 focus:border-amber-500 shadow-2xs cursor-pointer"
                       >
-                        <option value="">-- Chọn Nhóm Đóng Gói (Bắt buộc) * --</option>
+                        <option value="">-- Chọn nhóm đóng gói --</option>
                         <option value="PG I (Mức độ nguy hiểm cao)">PG I - Mức độ nguy hiểm cao</option>
                         <option value="PG II (Mức độ nguy hiểm trung bình)">PG II - Mức độ nguy hiểm trung bình</option>
                         <option value="PG III (Mức độ nguy hiểm thấp)">PG III - Mức độ nguy hiểm thấp</option>
@@ -2078,18 +2253,26 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
 
               {/* General Cargo Info & Packaging - Unified 2-Column Balanced Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Row 1: Industry & Specific Commodity */}
+                {/* Row 1: Industry & Cargo Type */}
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Ngành Hàng (Industry) *
+                    Ngành Hàng (Industry) <span className="text-red-500">*</span>
                   </label>
                   <select
                     required
+                    data-invalid={showValidationHighlight && !industry.trim() ? 'true' : undefined}
                     value={industry}
-                    onChange={(e) => setIndustry(e.target.value)}
-                    className="w-full h-10 px-3.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 font-semibold text-slate-800 transition-colors cursor-pointer"
+                    onChange={(e) => {
+                      setIndustry(e.target.value);
+                      if (showValidationHighlight) setValidationErrors([]);
+                    }}
+                    className={`w-full h-10 px-3.5 text-xs rounded-xl font-semibold transition-all cursor-pointer ${
+                      showValidationHighlight && !industry.trim()
+                        ? 'bg-rose-50/50 border-2 border-rose-400 ring-2 ring-rose-100 text-slate-800'
+                        : 'bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 text-slate-800'
+                    }`}
                   >
-                    <option value="">-- Chọn ngành hàng (Bắt buộc) * --</option>
+                    <option value="">-- Chọn ngành hàng --</option>
                     {LOGISTICS_INDUSTRY_LOV.map((item) => (
                       <option key={item.id} value={item.name}>
                         {item.name}
@@ -2100,23 +2283,33 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Tên / Chủng Loại Hàng Hóa Cụ Thể
+                    Tên / Chủng Loại Hàng Hóa Cụ Thể <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
+                    required
+                    data-invalid={showValidationHighlight && !cargoType.trim() ? 'true' : undefined}
                     value={cargoType}
-                    onChange={(e) => setCargoType(e.target.value)}
+                    onChange={(e) => {
+                      setCargoType(e.target.value);
+                      if (showValidationHighlight) setValidationErrors([]);
+                    }}
                     placeholder="VD: Bao bì, bo mạch, hạt nhựa, nông sản..."
-                    className="w-full h-10 px-3.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 font-medium text-slate-900 transition-colors"
+                    className={`w-full h-10 px-3.5 text-xs rounded-xl font-medium transition-all ${
+                      showValidationHighlight && !cargoType.trim()
+                        ? 'bg-rose-50/50 border-2 border-rose-400 ring-2 ring-rose-100 text-slate-900'
+                        : 'bg-slate-50 border border-slate-200 focus:bg-white focus:border-indigo-500 text-slate-900'
+                    }`}
                   />
                 </div>
 
                 {/* Row 2: Packaging & Storage Requirement */}
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Quy Cách Đóng Gói (Packaging) *
+                    Quy Cách Đóng Gói (Packaging) <span className="text-red-500">*</span>
                   </label>
                   <select
+                    data-invalid={showValidationHighlight && !packagePackaging ? 'true' : undefined}
                     value={packagePackaging}
                     onChange={(e) => {
                       setPackagePackaging(e.target.value);
@@ -2126,7 +2319,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                     }}
                     className="w-full h-10 px-3.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 font-semibold text-slate-800 transition-colors cursor-pointer"
                   >
-                    <option value="">-- Chọn quy cách đóng gói (Bắt buộc) * --</option>
+                    <option value="">-- Chọn quy cách đóng gói --</option>
                     <option value="Đóng Pallet gỗ / nhựa tiêu chuẩn">Đóng Pallet gỗ / nhựa tiêu chuẩn (Palletized)</option>
                     <option value="Thùng carton rời / Chưa lên pallet">Thùng carton rời / Chưa lên pallet (Loose Cartons)</option>
                     <option value="Kiện gỗ / Khung gỗ / Thùng gỗ kín">Kiện gỗ / Khung gỗ / Thùng gỗ kín (Wooden Crates)</option>
@@ -2169,7 +2362,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                 {serviceType === 'Customs Clearance' && (
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Tổng Khối Lượng (kg) *
+                      Tổng Khối Lượng (kg) <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <input
@@ -2189,7 +2382,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                 {serviceType === 'Customs Clearance' && (
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Tổng Thể Tích (cbm) *
+                      Tổng Thể Tích (cbm) <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <input
@@ -2336,6 +2529,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                   setWeightKg={setWeightKg}
                   volumeCbm={volumeCbm}
                   setVolumeCbm={setVolumeCbm}
+                  showValidationHighlight={showValidationHighlight}
                 />
               )}
 
@@ -2448,17 +2642,14 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
             </div>
           )}
 
-          {/* SECTION 5: Thêm Phụ Phí */}
+          {/* SECTION 5: Phạm Vi Báo Giá & Phụ Phí */}
           {activeTab === 5 && (
             <div>
               <div className="flex items-center justify-between mb-3">
                 <label className="block text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                   <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[11px] font-bold flex items-center justify-center">5</span>
-                  <span>Thêm Phụ Phí</span>
+                  <span>Phạm Vi Báo Giá & Phụ Phí</span>
                 </label>
-                <span className="text-[11px] font-semibold text-indigo-600">
-                  {requestedSurcharges.length} Phụ phí đã chọn
-                </span>
               </div>
 
               <SurchargesSection
@@ -2529,7 +2720,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                     {/* Currency Selection */}
                     <div className="sm:col-span-4">
                       <label className="block text-xs font-semibold text-slate-700 mb-1">
-                        Đơn Vị Tiền Tệ *
+                        Đơn Vị Tiền Tệ <span className="text-red-500">*</span>
                       </label>
                       <select
                         value={currency}
@@ -2571,7 +2762,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                     {/* Row 1, Col 1: Đơn Vị Tiền Tệ */}
                     <div>
                       <label className="block text-xs font-semibold text-slate-700 mb-1">
-                        Đơn Vị Tiền Tệ *
+                        Đơn Vị Tiền Tệ <span className="text-red-500">*</span>
                       </label>
                       <select
                         value={currency}
@@ -2610,7 +2801,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                     {/* Row 2, Col 1: Tỉ Giá Quy Đổi */}
                     <div>
                       <label className="block text-xs font-semibold text-slate-700 mb-1">
-                        Tỉ Giá Quy Đổi (1 {currency} / VND) *
+                        Tỉ Giá Quy Đổi (1 {currency} / VND) <span className="text-red-500">*</span>
                       </label>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400">
@@ -2655,11 +2846,12 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1">
                     <Clock className="w-3.5 h-3.5 text-amber-600" />
-                    <span>Hạn Chót Nhận Báo Giá *</span>
+                    <span>Hạn Chót Nhận Báo Giá <span className="text-red-500">*</span></span>
                   </label>
                   <input
                     type="date"
                     required
+                    data-invalid={showValidationHighlight && !expiryDate ? 'true' : undefined}
                     value={expiryDate}
                     onClick={(e) => {
                       try {
@@ -2667,7 +2859,11 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                       } catch (_) { }
                     }}
                     onChange={(e) => setExpiryDate(e.target.value)}
-                    className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-amber-500 font-medium text-slate-800 shadow-2xs cursor-pointer"
+                    className={`w-full h-10 px-3.5 text-xs rounded-xl font-medium shadow-2xs cursor-pointer transition-all ${
+                      showValidationHighlight && !expiryDate
+                        ? 'bg-rose-50/50 border-2 border-rose-400 ring-2 ring-rose-100 text-slate-800'
+                        : 'bg-white border border-slate-200 focus:border-amber-500 text-slate-800'
+                    }`}
                   />
                 </div>
 
@@ -2676,13 +2872,14 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                     <Calendar className="w-3.5 h-3.5 text-indigo-600" />
                     <span>
                       {serviceType === 'Project Cargo'
-                        ? 'Ngày Bắt Đầu Triển Khai *'
-                        : 'Ngày Lấy Hàng Dự Kiến *'}
+                        ? <>Ngày Bắt Đầu Triển Khai <span className="text-red-500">*</span></>
+                        : <>Ngày Lấy Hàng Dự Kiến <span className="text-red-500">*</span></>}
                     </span>
                   </label>
                   <input
                     type="date"
                     required
+                    data-invalid={showValidationHighlight && !pickupDate ? 'true' : undefined}
                     value={pickupDate}
                     onClick={(e) => {
                       try {
@@ -2690,7 +2887,11 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                       } catch (_) { }
                     }}
                     onChange={(e) => setPickupDate(e.target.value)}
-                    className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-medium text-slate-800 shadow-2xs cursor-pointer"
+                    className={`w-full h-10 px-3.5 text-xs rounded-xl font-medium shadow-2xs cursor-pointer transition-all ${
+                      showValidationHighlight && !pickupDate
+                        ? 'bg-rose-50/50 border-2 border-rose-400 ring-2 ring-rose-100 text-slate-800'
+                        : 'bg-white border border-slate-200 focus:border-indigo-500 text-slate-800'
+                    }`}
                   />
                 </div>
 
@@ -2699,13 +2900,14 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                     <Calendar className="w-3.5 h-3.5 text-rose-600" />
                     <span>
                       {serviceType === 'Project Cargo'
-                        ? 'Thời Hạn Dự Án / Hạn Chót Vận Hành *'
-                        : 'Hạn Chót Giao Hàng *'}
+                        ? <>Thời Hạn Dự Án / Hạn Chót Vận Hành <span className="text-red-500">*</span></>
+                        : <>Hạn Chót Giao Hàng <span className="text-red-500">*</span></>}
                     </span>
                   </label>
                   <input
                     type="date"
                     required
+                    data-invalid={showValidationHighlight && !deliveryDate ? 'true' : undefined}
                     value={deliveryDate}
                     onClick={(e) => {
                       try {
@@ -2713,7 +2915,11 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                       } catch (_) { }
                     }}
                     onChange={(e) => setDeliveryDate(e.target.value)}
-                    className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-medium text-slate-800 shadow-2xs cursor-pointer"
+                    className={`w-full h-10 px-3.5 text-xs rounded-xl font-medium shadow-2xs cursor-pointer transition-all ${
+                      showValidationHighlight && !deliveryDate
+                        ? 'bg-rose-50/50 border-2 border-rose-400 ring-2 ring-rose-100 text-slate-800'
+                        : 'bg-white border border-slate-200 focus:border-rose-500 text-slate-800'
+                    }`}
                   />
                 </div>
               </div>
@@ -2884,6 +3090,24 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
               <button
                 type="button"
                 onClick={() => {
+                  if (!isTabCompleted(activeTab)) {
+                    const tabErrors = getTabValidationErrors(activeTab);
+                    setValidationErrors(tabErrors);
+                    setShowValidationHighlight(true);
+                    setTimeout(() => {
+                      const formElement = document.getElementById('create-inquiry-form-body');
+                      const firstInvalidEl = formElement?.querySelector<HTMLElement>('[data-invalid="true"], input:invalid, select:invalid');
+                      if (firstInvalidEl) {
+                        firstInvalidEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        firstInvalidEl.focus();
+                      } else if (formElement) {
+                        formElement.scrollTo({ top: 0, behavior: 'smooth' });
+                      }
+                    }, 60);
+                    return;
+                  }
+                  setValidationErrors([]);
+                  setShowValidationHighlight(false);
                   setActiveTab((prev) => Math.min(prev + 1, 7));
                 }}
                 className="px-5 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white cursor-pointer shadow-md"
@@ -2895,26 +3119,29 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
               <button
                 type="button"
                 onClick={handleSubmit}
-                className="px-6 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white cursor-pointer shadow-md"
+                className="px-6 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white cursor-pointer shadow-md active:scale-95"
               >
-                <Send className="w-4 h-4" />
-                <span>Phát Hành Yêu Cầu Báo Giá (Send RFQ)</span>
+                <FileText className="w-4 h-4" />
+                <span>Xem Tóm Tắt Báo Giá (RFQ Summary)</span>
               </button>
             )}
           </div>
         </div>
+        </div>
       </div>
 
       {/* Summary Review & Confirmation Modal */}
-      <InquirySummaryConfirmModal
-        isOpen={showSummaryConfirmModal}
-        inquiry={draftInquiry}
-        currentUser={currentUser}
-        matchingSuppliersCount={matchingSuppliersCount}
-        isPublished={hasPublishedInquiry}
-        onClose={handleCloseSummaryModal}
-        onConfirm={handleConfirmFinalPublish}
-      />
-    </div>
+      {showSummaryConfirmModal && draftInquiry && (
+        <InquirySummaryConfirmModal
+          isOpen={showSummaryConfirmModal}
+          inquiry={draftInquiry}
+          currentUser={currentUser}
+          matchingSuppliersCount={matchingSuppliersCount}
+          isPublished={hasPublishedInquiry}
+          onClose={handleCloseSummaryModal}
+          onConfirm={handleConfirmFinalPublish}
+        />
+      )}
+    </>
   );
 };
