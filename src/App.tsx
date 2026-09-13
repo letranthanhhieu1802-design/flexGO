@@ -28,6 +28,9 @@ import {
   mockOpportunities, 
   mockNotifications,
   mockContracts,
+} from './data/mockData';
+import { getMonthlyFrequency } from './utils/pricingCalculator';
+import { 
   mockFlexCreditWallet,
   mockCreditPackages,
   mockCreditTransactions
@@ -48,7 +51,6 @@ import { CompanyDirectoryPage } from './components/public/CompanyDirectoryPage';
 
 // Customer Workspace Pages
 import { InquiriesPage } from './components/customer/InquiriesPage';
-import { InquiryDetailWorkspace } from './components/customer/InquiryDetailWorkspace';
 import { CustomerQuotationsPage } from './components/customer/CustomerQuotationsPage';
 import { CompareQuotesPage } from './components/customer/CompareQuotesPage';
 import { MySuppliersPage } from './components/customer/MySuppliersPage';
@@ -60,7 +62,6 @@ import { SupplierLeadsPage } from './components/supplier/SupplierLeadsPage';
 import { SupplierQuotationsPage } from './components/supplier/SupplierQuotationsPage';
 import { MiniCRMPage } from './components/supplier/MiniCRMPage';
 import { CustomerDetailPage } from './components/supplier/CustomerDetailPage';
-import { OpportunityKanbanPage } from './components/supplier/OpportunityKanbanPage';
 import { CreateQuotationModal } from './components/supplier/CreateQuotationModal';
 import { SupplierProfileEditPage } from './components/supplier/SupplierProfileEditPage';
 
@@ -179,76 +180,6 @@ export function App() {
     }
   }, []);
 
-  // Derive My Leads & Opportunity Pipeline based on the 4 mandatory sources:
-  // 1. Inquiries saved by supplier from Lead Board or Customer Inquiries (isSaved)
-  // 2. Inquiries where supplier submitted quotation (Quoted / Won / Lost / quotesCount > 0)
-  // 3. Inquiries unlocked using FlexCredit (isUnlocked)
-  // 4. Inquiries received via Direct RFQ on Supplier Profile (isDirectRfq)
-  const myLeadsOpportunities = useMemo<OpportunityItem[]>(() => {
-    const myLeadItems = leads.filter((lead) => {
-      const isSaved = Boolean(lead.isSaved);
-      const isQuoted = lead.status === 'Quoted' || lead.status === 'Won' || lead.status === 'Lost' || Boolean(lead.quotesCount && lead.quotesCount > 0) || lead.source === 'QUOTED';
-      const isUnlocked = Boolean(lead.isUnlocked) || lead.source === 'UNLOCKED';
-      const isDirectRfq = Boolean(lead.isDirectRfq) || lead.source === 'DIRECT_RFQ';
-      return isSaved || isQuoted || isUnlocked || isDirectRfq;
-    });
-
-    return myLeadItems.map((lead) => {
-      // Determine primary source for the pipeline opportunity
-      let source: SupplierLeadSourceType = 'SAVED';
-      if (lead.isDirectRfq || lead.source === 'DIRECT_RFQ') {
-        source = 'DIRECT_RFQ';
-      } else if (lead.status === 'Quoted' || lead.status === 'Won' || lead.status === 'Lost' || (lead.quotesCount && lead.quotesCount > 0) || lead.source === 'QUOTED') {
-        source = 'QUOTED';
-      } else if (lead.isUnlocked || lead.source === 'UNLOCKED') {
-        source = 'UNLOCKED';
-      } else if (lead.isSaved) {
-        source = 'SAVED';
-      }
-
-      // Check corresponding quotation if any
-      const relatedQuote = quotations.find((q) => q.inquiryCode === lead.inquiryCode || q.inquiryCode === lead.code);
-      const existingOpp = opportunities.find((o) => o.leadCode === lead.code || o.inquiryCode === lead.inquiryCode || o.code === `OPP-${lead.code.replace('FG-', '').replace('LG-', '')}`);
-
-      const stage: PipelineStage = lead.status;
-
-      let nextAction = 'Lập phương án & gửi báo giá';
-      if (stage === 'Quoted') {
-        nextAction = 'Theo dõi phản hồi & đàm phán cước';
-      } else if (stage === 'Won') {
-        nextAction = 'Đã trao thầu - Điều phối phương tiện vận tải';
-      } else if (stage === 'Lost') {
-        nextAction = 'Khảo sát nguyên nhân trượt thầu';
-      } else if (stage === 'Closed') {
-        nextAction = 'Đã hết hạn chào giá';
-      }
-
-      return {
-        id: existingOpp?.id || `opp-${lead.id}`,
-        code: existingOpp?.code || `OPP-${lead.code.replace('FG-', '').replace('LG-', '')}`,
-        leadCode: lead.code,
-        inquiryCode: lead.inquiryCode,
-        title: existingOpp?.title || `${lead.customerCompany} - ${lead.route}`,
-        customerCompany: lead.customerCompany,
-        contactPerson: lead.contactName,
-        serviceType: lead.serviceType,
-        route: lead.route,
-        estimatedValue: lead.estimatedValueVND,
-        estimatedValueDisplay: lead.estimatedValueDisplay,
-        currency: 'VND',
-        stage: stage,
-        owner: existingOpp?.owner || 'Minh Tran',
-        source: source,
-        expectedCloseDate: lead.dueDate || existingOpp?.expectedCloseDate || '2026-09-15',
-        probability: stage === 'Won' ? 100 : stage === 'Lost' || stage === 'Closed' ? 0 : stage === 'Quoted' ? 75 : 50,
-        notes: lead.sourceNotes || existingOpp?.notes || lead.cargoDetails || '',
-        nextAction: existingOpp?.nextAction || nextAction,
-        quotationCode: relatedQuote?.code || existingOpp?.quotationCode,
-        lastUpdated: existingOpp?.lastUpdated || 'Gần đây',
-      };
-    });
-  }, [leads, quotations, opportunities]);
-
   // Handlers
   const handlePersonaChange = (type: 'CUSTOMER' | 'SUPPLIER' | 'BOTH') => {
     const targetPersona = mockUserPersonas.find((p) => p.companyType === type);
@@ -294,9 +225,13 @@ export function App() {
       (finalInquiry.title || '').toLowerCase().includes('hợp đồng') ||
       (finalInquiry.targetBudget || '').toLowerCase().includes('tháng') ||
       (finalInquiry.targetBudget || '').toLowerCase().includes('năm') ||
+      finalInquiry.pricingType === 'CONTRACT' ||
       finalInquiry.serviceSpecs?.trucking?.pricingType === 'CONTRACT' ||
       finalInquiry.serviceSpecs?.ocean?.pricingType === 'CONTRACT';
-    const estVal = isContract ? budgetNum * 12 : budgetNum;
+
+    const monthlyFreq = getMonthlyFrequency(finalInquiry);
+    const estVal = isContract ? budgetNum * monthlyFreq : budgetNum;
+    const reqCurrency = finalInquiry.currency || 'VND';
 
     // Also create a lead on the board
     const newLead: SupplierLeadItem = {
@@ -315,9 +250,12 @@ export function App() {
       contractTerm: isContract ? 'Hợp đồng định kỳ 12 tháng' : 'Theo chuyến / Lô',
       volumeDisplay: finalInquiry.weightVolume || '1 Lô hàng FCL',
       unitPriceVND: budgetNum,
-      unitPriceDisplay: finalInquiry.targetBudget || `${budgetNum.toLocaleString('vi-VN')} ₫ / lô`,
+      unitPriceDisplay: finalInquiry.targetBudget || `${budgetNum.toLocaleString('vi-VN')} ${reqCurrency} / lô`,
       estimatedValueVND: estVal,
-      estimatedValueDisplay: finalInquiry.targetBudget || `${estVal.toLocaleString('vi-VN')} ₫`,
+      estimatedValueDisplay: isContract 
+        ? `${estVal.toLocaleString('vi-VN')} ${reqCurrency} / tháng`
+        : `${estVal.toLocaleString('vi-VN')} ${reqCurrency} / lô`,
+      currency: reqCurrency,
       createdDate: 'Hôm nay',
       dueDate: finalInquiry.deliveryDate || finalInquiry.expiryDate || '7 ngày tới',
       status: 'Open',
@@ -380,11 +318,10 @@ export function App() {
       })
     );
 
-    // Open detail workspace for the new inquiry
+    // Chuyển hướng về trang My Inquiries của Customer sau khi phát hành thành công
     setCurrentView({
       type: 'workspace',
-      view: 'customer-inquiry-detail',
-      params: { inquiryCode: finalInquiry.code },
+      view: 'customer-inquiries',
     });
   };
 
@@ -677,11 +614,7 @@ export function App() {
     setIsCreateInquiryOpen(true);
   };
 
-  const handleMovePipelineStage = (oppId: string, newStage: PipelineStage) => {
-    setOpportunities(
-      opportunities.map((o) => (o.id === oppId ? { ...o, stage: newStage } : o))
-    );
-  };
+
 
   const handleOpenQuotingForLead = (lead: SupplierLeadItem) => {
     setActiveQuotingLead(lead);
@@ -987,35 +920,11 @@ export function App() {
               currentUser={currentUser}
               initialSupplierFilter={currentView.params?.supplierCode || currentView.params?.supplierId || ''}
               initialSupplierName={currentView.params?.supplierCode || currentView.params?.supplierName || ''}
-              onSelectInquiry={(inq) => {
-                const code = typeof inq === 'string' ? inq : inq.code;
-                setCurrentView({
-                  type: 'workspace',
-                  view: 'customer-inquiry-detail',
-                  params: { inquiryCode: code },
-                });
-              }}
+              onSelectInquiry={() => {}}
               onOpenCreateModal={() => setIsCreateInquiryOpen(true)}
               onNavigate={setCurrentView}
             />
           );
-
-        case 'customer-inquiry-detail': {
-          const inqCode = currentView.params?.inquiryCode || 'FG-2608250001';
-          const inq = inquiries.find((i) => i.code === inqCode) || inquiries[0];
-          return (
-            <InquiryDetailWorkspace
-              inquiry={inq}
-              quotations={quotations}
-              suppliers={suppliers}
-              onBack={() =>
-                setCurrentView({ type: 'workspace', view: 'customer-inquiries' })
-              }
-              onNavigate={setCurrentView}
-              onAwardQuote={handleAwardQuote}
-            />
-          );
-        }
 
         case 'customer-quotations':
           return (
@@ -1164,25 +1073,6 @@ export function App() {
           );
         }
 
-        case 'supplier-pipeline':
-          return (
-            <OpportunityKanbanPage
-              opportunities={myLeadsOpportunities}
-              onSelectOpportunity={(opp) => {
-                const matchedCust = crmCustomers.find(
-                  (c) => c.companyName === opp.customerCompany
-                );
-                if (matchedCust) {
-                  setSelectedCustomerId(matchedCust.id);
-                  setCurrentView({ type: 'workspace', view: 'supplier-crm' });
-                }
-              }}
-              onOpenCreateQuotation={() => setIsCreateQuotationOpen(true)}
-              onNavigate={setCurrentView}
-              onMoveStage={handleMovePipelineStage}
-            />
-          );
-
         case 'supplier-contracts':
           return (
             <ContractsPage
@@ -1279,14 +1169,7 @@ export function App() {
               inquiries={inquiries}
               leads={leads}
               currentUser={currentUser}
-              onSelectInquiry={(inq) => {
-                const code = typeof inq === 'string' ? inq : inq.code;
-                setCurrentView({
-                  type: 'workspace',
-                  view: 'customer-inquiry-detail',
-                  params: { inquiryCode: code },
-                });
-              }}
+              onSelectInquiry={() => {}}
               onOpenCreateModal={() => setIsCreateInquiryOpen(true)}
               onNavigate={setCurrentView}
             />

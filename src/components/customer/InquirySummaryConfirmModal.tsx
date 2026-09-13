@@ -260,24 +260,24 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
 
   // Active pick-up and drop-off points
   const isTrucking = inquiry?.serviceType === 'Trucking';
-  const isTruckingLtl = isTrucking && (trucking?.loadType?.includes('LTL') || inquiry?.title?.toLowerCase().includes('ltl'));
-  const isColdChain = inquiry?.serviceType === 'Cold Chain' || inquiry?.title?.toLowerCase().includes('cold chain') || inquiry?.title?.toLowerCase().includes('lạnh');
-  const isProjectCargo = inquiry?.serviceType === 'Project Cargo' || inquiry?.title?.toLowerCase().includes('dự án') || inquiry?.title?.toLowerCase().includes('project');
-  const isLcl = inquiry?.serviceType === 'Sea Freight (LCL)' || ocean?.mode?.includes('LCL') || inquiry?.title?.toLowerCase().includes('lcl');
-  const isFcl = (inquiry?.serviceType === 'Sea Freight (FCL)' || ocean?.mode?.includes('FCL')) && !isLcl;
-  const isOcean = isFcl || isLcl;
-  const isAir = inquiry?.serviceType === 'Air Freight' || inquiry?.title?.toLowerCase().includes('air freight');
-  const isAirExpress = isAir && (air?.airServiceType === 'Express / Courier' || inquiry?.title?.toLowerCase().includes('courier') || inquiry?.title?.toLowerCase().includes('express'));
+  const isTruckingLtl = isTrucking && Boolean(trucking?.loadType?.includes('LTL'));
+  const isColdChain = inquiry?.serviceType === 'Cold Chain';
+  const isProjectCargo = inquiry?.serviceType === 'Project Cargo';
+  const isLcl = inquiry?.serviceType === 'Sea Freight (LCL)' || (inquiry?.serviceType === 'Sea Freight (FCL)' && Boolean(ocean?.mode?.includes('LCL')));
+  const isFcl = (inquiry?.serviceType === 'Sea Freight (FCL)' || Boolean(ocean?.mode?.includes('FCL'))) && !isLcl;
+  const isOcean = inquiry?.serviceType === 'Sea Freight (FCL)' || inquiry?.serviceType === 'Sea Freight (LCL)';
+  const isAir = inquiry?.serviceType === 'Air Freight';
+  const isAirExpress = isAir && air?.airServiceType === 'Express / Courier';
   const isAirCargo = isAir && !isAirExpress;
-  const isRail = inquiry?.serviceType === 'Rail Freight' || inquiry?.title?.toLowerCase().includes('rail');
-  const isRailLcl = isRail && (rail?.mode?.includes('LCL') || inquiry?.title?.toLowerCase().includes('lcl'));
+  const isRail = inquiry?.serviceType === 'Rail Freight';
+  const isRailLcl = isRail && Boolean(rail?.mode?.includes('LCL'));
   const isRailFcl = isRail && !isRailLcl;
-  const isWarehousing = inquiry?.serviceType === 'Warehousing' || inquiry?.title?.toLowerCase().includes('kho');
-  const isCrossBorder = inquiry?.serviceType === 'Cross-border' || inquiry?.title?.toLowerCase().includes('cross-border') || inquiry?.title?.toLowerCase().includes('biên giới');
-  const isCrossBorderLtl = isCrossBorder && (crossBorder?.loadType?.includes('LTL') || inquiry?.title?.toLowerCase().includes('ltl'));
+  const isWarehousing = inquiry?.serviceType === 'Warehousing';
+  const isCrossBorder = inquiry?.serviceType === 'Cross-border';
+  const isCrossBorderLtl = isCrossBorder && Boolean(crossBorder?.loadType?.includes('LTL'));
   const isCrossBorderFtl = isCrossBorder && !isCrossBorderLtl;
-  const isCustoms = inquiry?.serviceType === 'Customs Clearance' || inquiry?.title?.toLowerCase().includes('hải quan') || inquiry?.title?.toLowerCase().includes('customs');
-  const isCustomsExport = isCustoms && (customs?.tradeRole?.includes('Xuất') || inquiry?.title?.toLowerCase().includes('xuất'));
+  const isCustoms = inquiry?.serviceType === 'Customs Clearance';
+  const isCustomsExport = isCustoms && Boolean(customs?.tradeRole?.includes('Xuất'));
   const isCustomsImport = isCustoms && !isCustomsExport;
 
   const pickupList: string[] = (isTrucking && trucking?.pickupLocations && trucking.pickupLocations.length > 0)
@@ -389,9 +389,36 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
     return 'Hạng mục';
   };
 
+  // Customer's requested currency
+  const targetCurrency = useMemo<string>(() => {
+    if (inquiry?.currency) return inquiry.currency.toUpperCase();
+    const budgetStr = inquiry?.targetBudget || '';
+    if (budgetStr.includes('EUR') || budgetStr.includes('€')) return 'EUR';
+    if (budgetStr.includes('USD') || budgetStr.includes('$')) return 'USD';
+    if (budgetStr.includes('CNY') || budgetStr.includes('¥')) return 'CNY';
+    if (budgetStr.includes('JPY')) return 'JPY';
+    if (budgetStr.includes('VND') || budgetStr.includes('₫')) return 'VND';
+    return (inquiry?.cargoValueCurrency || 'VND').toUpperCase();
+  }, [inquiry?.currency, inquiry?.targetBudget, inquiry?.cargoValueCurrency]);
+
+  const targetCurrencySymbol = useMemo<string>(() => {
+    switch (targetCurrency) {
+      case 'EUR': return '€';
+      case 'USD': return '$';
+      case 'CNY': return '¥';
+      case 'JPY': return '¥';
+      case 'VND': return '₫';
+      default: return targetCurrency;
+    }
+  }, [targetCurrency]);
+
+  const targetCurrencySuffix = useMemo<string>(() => {
+    return targetCurrency === 'VND' ? ' ₫' : ` ${targetCurrency}`;
+  }, [targetCurrency]);
+
   // Tariff Unit calculation helper (ĐVT column with currency and specific mode/container)
   const getTariffMainUnit = (): string => {
-    const curr = inquiry?.currency || 'USD';
+    const curr = targetCurrency;
 
     switch (inquiry?.serviceType) {
       case 'Sea Freight (FCL)': {
@@ -463,17 +490,14 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
     return parseInt(inquiry?.targetBudget?.replace(/\D/g, '') || '50000000', 10);
   }, [inquiry]);
 
-  const [myTotalQuoteInput, setMyTotalQuoteInput] = useState<string>(() => {
-    const raw = parseInt(inquiry?.targetBudget?.replace(/\D/g, '') || '50000000', 10);
-    const calculated = Math.round((raw * 0.95) / 10000) * 10000;
-    return calculated.toLocaleString('vi-VN') + (inquiry?.targetBudget?.includes('USD') ? ' USD' : ' ₫') + (inquiry?.pricingType === 'CONTRACT' ? ' / tháng' : '');
-  });
+  // Supplier quote inputs (starts empty with 0 placeholder, no auto-price proposal)
+  const [myTotalQuoteInput, setMyTotalQuoteInput] = useState<string>('');
+  const [myBaseFreightInput, setMyBaseFreightInput] = useState<string>('');
 
-  const [myBaseFreightInput, setMyBaseFreightInput] = useState<string>(() => {
-    const raw = parseInt(inquiry?.targetBudget?.replace(/\D/g, '') || '50000000', 10);
-    const calculated = Math.round((raw * 0.80) / 10000) * 10000;
-    return calculated.toLocaleString('vi-VN') + (inquiry?.targetBudget?.includes('USD') ? ' USD' : ' ₫');
-  });
+  useEffect(() => {
+    setMyTotalQuoteInput('');
+    setMyBaseFreightInput('');
+  }, [inquiry?.code, inquiry?.id]);
 
   // Quoted surcharges state for supplier quote
   interface QuotedSurchargeItem {
@@ -495,6 +519,13 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
     }));
   });
 
+  const [quotedVasPrices, setQuotedVasPrices] = useState<Record<string, string>>(() => {
+    const vasList = inquiry?.selectedVAS || [];
+    const init: Record<string, string> = {};
+    vasList.forEach(v => { init[v] = ''; });
+    return init;
+  });
+
   useEffect(() => {
     if (inquiry) {
       const requested = inquiry.requestedSurcharges || [];
@@ -511,8 +542,17 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
       } else {
         setQuotedSurcharges([]);
       }
+
+      const vasList = inquiry.selectedVAS || [];
+      const initVas: Record<string, string> = {};
+      vasList.forEach(v => { initVas[v] = ''; });
+      setQuotedVasPrices(initVas);
     }
   }, [inquiry]);
+
+  const handleVasPriceChange = (vasName: string, priceStr: string) => {
+    setQuotedVasPrices(prev => ({ ...prev, [vasName]: priceStr }));
+  };
 
   const handleSurchargePriceChange = (id: string, priceStr: string) => {
     setQuotedSurcharges(prev => prev.map(item => item.id === id ? { ...item, price: priceStr } : item));
@@ -548,7 +588,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
     return availableServiceLOV.filter(lov => !quotedSurcharges.some(qs => qs.name === lov.name || (lov.code && qs.name.includes(lov.code))));
   }, [availableServiceLOV, quotedSurcharges]);
 
-  const currencySymbol = inquiry?.targetBudget?.includes('USD') || inquiry?.cargoValueCurrency === 'USD' ? '$' : 'đ';
+  const currencySymbol = targetCurrencySymbol;
 
   useEffect(() => {
     if (isQuoting && inquiry) {
@@ -557,14 +597,19 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
         const val = parseFloat(item.price.replace(/\D/g, '')) || 0;
         return sum + val;
       }, 0);
-      if (baseNum > 0 || surchargesTotal > 0) {
-        const total = baseNum + surchargesTotal;
-        const cSuffix = inquiry.targetBudget?.includes('USD') ? ' USD' : ' ₫';
+      const vasTotal = Object.values(quotedVasPrices).reduce((sum, priceStr) => {
+        const val = parseFloat(priceStr.replace(/\D/g, '')) || 0;
+        return sum + val;
+      }, 0);
+      if (baseNum > 0 || surchargesTotal > 0 || vasTotal > 0) {
+        const total = baseNum + surchargesTotal + vasTotal;
         const uSuffix = inquiry.pricingType === 'CONTRACT' ? ' / tháng' : '';
-        setMyTotalQuoteInput(total.toLocaleString('vi-VN') + cSuffix + uSuffix);
+        setMyTotalQuoteInput(total.toLocaleString('vi-VN') + targetCurrencySuffix + uSuffix);
+      } else {
+        setMyTotalQuoteInput('');
       }
     }
-  }, [myBaseFreightInput, quotedSurcharges, isQuoting, inquiry?.targetBudget, inquiry?.pricingType]);
+  }, [myBaseFreightInput, quotedSurcharges, quotedVasPrices, isQuoting, targetCurrencySuffix, inquiry?.pricingType]);
 
   const [hasSubmittedQuote, setHasSubmittedQuote] = useState<boolean>(false);
 
@@ -588,33 +633,47 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
     if (count === 0) return [];
 
     const rawBudget = parseInt(inquiry.targetBudget?.replace(/\D/g, '') || '50000000', 10);
-    const isUSDVal = inquiry.targetBudget?.includes('USD') || inquiry.cargoValueCurrency === 'USD';
     const isContractVal = inquiry.pricingType === 'CONTRACT';
-    const cSuffix = isUSDVal ? ' USD' : ' ₫';
+    const cSuffix = targetCurrencySuffix;
     const uSuffix = isContractVal ? ' / tháng' : '';
 
     const sampleSuppliers = [
-      { name: 'Á Châu Logistics (Top 1)', factor: 0.94, tag: 'Thấp hơn KH 6%' },
-      { name: 'VinaFast Express', factor: 0.98, tag: 'Thấp hơn KH 2%' },
-      { name: 'Hoàng Hà Logistics', factor: 1.05, tag: 'Cao hơn KH 5%' },
-      { name: 'Tân Cảng Overland', factor: 1.02, tag: 'Cao hơn KH 2%' },
+      { picName: 'Nguyễn Văn Tuấn', companyName: 'Á Châu Logistics (Top 1)', factor: 0.94 },
+      { picName: 'Trần Thị Mai Phương', companyName: 'VinaFast Express', factor: 0.98 },
+      { picName: 'Lê Hoàng Nam', companyName: 'Hoàng Hà Logistics', factor: 1.05 },
+      { picName: 'Phạm Đức Trọng', companyName: 'Tân Cảng Overland', factor: 1.02 },
     ];
 
     return sampleSuppliers.slice(0, Math.min(count, 4)).map((s, idx) => {
       const totalQuote = Math.round((rawBudget * s.factor) / 10000) * 10000;
       const baseFreight = Math.round(totalQuote * 0.85);
       const surchargeEach = Math.round((totalQuote - baseFreight) / Math.max(1, (inquiry.requestedSurcharges?.length || 1)));
+
+      const locale = inquiry.currency === 'USD' ? 'en-US' : 'vi-VN';
+
+      // Tính toán biểu giá VAS cụ thể do supplier khai báo (chỉ hiển thị số)
+      const vasPrices: Record<string, string> = {};
+      if (inquiry.selectedVAS && inquiry.selectedVAS.length > 0) {
+        inquiry.selectedVAS.forEach((vas, vIdx) => {
+          const baseVasAmount = ((vIdx + 1) * 350000 + 400000) * (s.factor || 1);
+          const roundedVas = Math.round(baseVasAmount / 10000) * 10000;
+          vasPrices[vas] = roundedVas.toLocaleString(locale);
+        });
+      }
+
       return {
         id: `comp-${idx + 1}`,
-        supplierName: s.name,
-        tag: s.tag,
+        picName: s.picName,
+        companyName: s.companyName,
+        supplierName: s.companyName,
         factor: s.factor,
         totalQuote,
         baseFreight,
         surchargeEach,
-        formattedTotal: totalQuote.toLocaleString('vi-VN') + cSuffix + uSuffix,
-        formattedBase: baseFreight.toLocaleString('vi-VN') + cSuffix,
-        formattedSurcharge: surchargeEach.toLocaleString('vi-VN') + cSuffix,
+        vasPrices,
+        formattedTotal: totalQuote.toLocaleString(locale),
+        formattedBase: baseFreight.toLocaleString(locale),
+        formattedSurcharge: surchargeEach.toLocaleString(locale),
       };
     });
   }, [lead, inquiry]);
@@ -738,10 +797,10 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
 
 
   const routeDisplay = isWarehousing
-    ? `Khu vực đặt kho: ${inquiry.origin || 'Chưa chỉ định'} ➔ Bán kính phân phối: ${inquiry.destination || 'Chưa chỉ định'}`
+    ? `Khu vực đặt kho: ${inquiry.origin} ➔ Bán kính phân phối: ${inquiry.destination}`
     : isCustoms
-      ? `Chi cục HQ: ${inquiry.origin || customs?.customsSubDepartment || 'Chưa chỉ định'} ➔ Cảng/Cửa khẩu: ${inquiry.destination || customs?.portOrBorderGate || 'Chưa chỉ định'}`
-      : `${inquiry.origin || 'Điểm đi'} ➔ ${inquiry.destination || 'Điểm đến'}`;
+      ? `Chi cục HQ: ${inquiry.origin || customs?.customsSubDepartment || ''} ➔ Cảng/Cửa khẩu: ${inquiry.destination || customs?.portOrBorderGate || ''}`
+      : `${inquiry.origin || ''} ➔ ${inquiry.destination || ''}`;
 
   return (
     <div className="fixed inset-0 z-60 flex items-center justify-center p-2.5 sm:p-4 bg-slate-950/80 backdrop-blur-sm overflow-hidden animate-in fade-in duration-150">
@@ -755,9 +814,11 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
             <h3 className="text-sm sm:text-base font-bold text-white tracking-wide uppercase">
               TÓM TẮT YÊU CẦU BÁO GIÁ
             </h3>
-            <span className="text-xs font-mono font-bold text-indigo-300 bg-indigo-950/90 px-2.5 py-0.5 rounded-lg border border-indigo-700/60 hidden sm:inline">
-              {leadCode}
-            </span>
+            {leadCode ? (
+              <span className="text-xs font-mono font-bold text-indigo-300 bg-indigo-950/90 px-2.5 py-0.5 rounded-lg border border-indigo-700/60 hidden sm:inline">
+                {leadCode}
+              </span>
+            ) : null}
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-2">
@@ -1012,21 +1073,19 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
 
                     <div className="flex items-baseline gap-2">
                       <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Ngành hàng:</span>
-                      <span className="font-normal text-slate-800">{inquiry.industry || 'Hàng tiêu dùng FMCG & Công nghiệp'}</span>
+                      <span className="font-normal text-slate-800">{inquiry.industry}</span>
                     </div>
 
                     <div className="flex items-baseline gap-2">
                       <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Tên mặt hàng cụ thể:</span>
                       <span className="font-normal text-slate-800">
-                        {inquiry.cargoType && inquiry.cargoType !== inquiry.industry
-                          ? inquiry.cargoType
-                          : (inquiry.industry ? `Theo ngành hàng ${inquiry.industry}` : 'Theo danh mục khai báo')}
+                        {inquiry.cargoType || inquiry.industry}
                       </span>
                     </div>
 
                     <div className="flex items-baseline gap-2">
                       <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Quy cách đóng gói:</span>
-                      <span className="font-normal text-slate-800">{inquiry.packaging || 'Đóng Pallet tiêu chuẩn'}</span>
+                      <span className="font-normal text-slate-800">{inquiry.packaging}</span>
                     </div>
 
                     {/* Khả năng xếp chồng: Hiển thị ở Mục 2 (Chỉ dành cho các dịch vụ vận tải hàng rời / ghép hàng) */}
@@ -1096,25 +1155,29 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                         <div className="flex items-baseline gap-2">
                           <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Dải nhiệt độ yêu cầu:</span>
                           <span className="font-bold text-cyan-900">
-                            {inquiry.temperatureRequirement || 'Tiêu chuẩn bảo quản lạnh (-18°C ~ -22°C)'}
+                            {inquiry.temperatureRequirement}
                           </span>
                         </div>
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Kiểm soát độ ẩm:</span>
-                          <span className="font-normal text-slate-800">
-                            {warehousing?.humidityRequirement === 'Tùy chỉnh riêng (% RH)'
-                              ? (warehousing.customHumidity || 'Độ ẩm tùy chỉnh')
-                              : (warehousing?.humidityRequirement || 'Tiêu chuẩn kho lạnh/mát')}
-                          </span>
-                        </div>
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Trạng thái nhiệt khi nhập kho:</span>
-                          <span className="font-normal text-slate-800">
-                            {warehousing?.inboundTemperatureState === 'NEED_COOLING'
-                              ? 'Cần cấp đông / làm lạnh tại kho'
-                              : 'Hàng đã đạt chuẩn nhiệt độ'}
-                          </span>
-                        </div>
+                        {warehousing?.humidityRequirement && (
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Kiểm soát độ ẩm:</span>
+                            <span className="font-normal text-slate-800">
+                              {warehousing.humidityRequirement === 'Tùy chỉnh riêng (% RH)'
+                                ? (warehousing.customHumidity || 'Độ ẩm tùy chỉnh')
+                                : warehousing.humidityRequirement}
+                            </span>
+                          </div>
+                        )}
+                        {warehousing?.inboundTemperatureState && (
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Trạng thái nhiệt khi nhập kho:</span>
+                            <span className="font-normal text-slate-800">
+                              {warehousing.inboundTemperatureState === 'NEED_COOLING'
+                                ? 'Cần cấp đông / làm lạnh tại kho'
+                                : 'Hàng đã đạt chuẩn nhiệt độ'}
+                            </span>
+                          </div>
+                        )}
                       </>
                     )}
 
@@ -1123,33 +1186,39 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                         <div className="flex items-baseline gap-2">
                           <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Nhóm nguy hiểm (IMO Class):</span>
                           <span className="font-bold text-amber-900">
-                            {inquiry.dgClassIMO || 'Theo phân lớp DG'}
+                            {inquiry.dgClassIMO}
                           </span>
                         </div>
                         <div className="flex items-baseline gap-2">
                           <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Mã số UN (UN Number):</span>
                           <span className="font-normal text-slate-800">
-                            {inquiry.unNumber || 'Chưa chỉ định'}
+                            {inquiry.unNumber}
                           </span>
                         </div>
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Nhóm đóng gói (PG):</span>
-                          <span className="font-normal text-slate-800">
-                            {inquiry.packingGroup || 'Theo tiêu chuẩn UN'}
-                          </span>
-                        </div>
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Điểm chớp cháy:</span>
-                          <span className="font-normal text-slate-800">
-                            {inquiry.flashPoint ? `${inquiry.flashPoint}°C` : 'Không áp dụng'}
-                          </span>
-                        </div>
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Phiếu an toàn MSDS:</span>
-                          <span className="font-normal text-slate-800">
-                            {inquiry.msdsFileName || 'Chưa đính kèm'}
-                          </span>
-                        </div>
+                        {inquiry.packingGroup && (
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Nhóm đóng gói (PG):</span>
+                            <span className="font-normal text-slate-800">
+                              {inquiry.packingGroup}
+                            </span>
+                          </div>
+                        )}
+                        {inquiry.flashPoint && (
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Điểm chớp cháy:</span>
+                            <span className="font-normal text-slate-800">
+                              {`${inquiry.flashPoint}°C`}
+                            </span>
+                          </div>
+                        )}
+                        {inquiry.msdsFileName && (
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Phiếu an toàn MSDS:</span>
+                            <span className="font-normal text-slate-800">
+                              📄 {inquiry.msdsFileName}
+                            </span>
+                          </div>
+                        )}
                       </>
                     )}
 
@@ -1161,13 +1230,12 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                     )}
 
                     {/* Dành riêng cho Kho Ngoại Quan: Mã HS Code & Trị Giá Hàng Gửi Kho đưa lên Mục 2 ngang hàng với Yêu cầu bảo quản */}
-                    {isWarehousing && (warehousing?.bondedHsCode || warehousing?.bondedEstimatedValue || (warehousing?.warehouseType?.includes('ngoại quan') || warehousing?.warehouseType?.includes('Bonded'))) && (
+                    {isWarehousing && (warehousing?.bondedHsCode || warehousing?.bondedEstimatedValue || inquiry.hsCode) && (
                       <div className={`flex items-baseline gap-2 ${!inquiry.preservationRequirement ? 'md:col-span-2' : ''}`}>
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Mã HS Code & Trị Giá Hàng Gửi Kho:</span>
                         <span className="font-normal text-slate-800">
                           {(warehousing?.bondedHsCode || inquiry.hsCode) ? `HS: ${warehousing?.bondedHsCode || inquiry.hsCode}` : ''}
                           {warehousing?.bondedEstimatedValue ? ` — ${typeof warehousing.bondedEstimatedValue === 'number' ? warehousing.bondedEstimatedValue.toLocaleString('vi-VN') : warehousing.bondedEstimatedValue} ${warehousing.bondedEstimatedValueCurrency || 'USD'}` : ''}
-                          {!warehousing?.bondedHsCode && !inquiry.hsCode && !warehousing?.bondedEstimatedValue ? 'Chưa khai báo' : ''}
                         </span>
                       </div>
                     )}
@@ -1227,7 +1295,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                             <span className="font-normal text-slate-800">
                               {crossBorder?.ltlGrossWeightKg
                                 ? `${crossBorder.ltlGrossWeightKg.toLocaleString('vi-VN')} kg`
-                                : (crossBorder?.grossWeightKgs ? `${crossBorder.grossWeightKgs.toLocaleString('vi-VN')} kg` : (inquiry.ftlWeightKg ? `${inquiry.ftlWeightKg} kg` : 'Chưa khai báo'))}
+                                : (crossBorder?.grossWeightKgs ? `${crossBorder.grossWeightKgs.toLocaleString('vi-VN')} kg` : (inquiry.ftlWeightKg ? `${inquiry.ftlWeightKg} kg` : 'Theo thỏa thuận'))}
                             </span>
                           </div>
                           <div className="flex items-baseline gap-2">
@@ -1235,7 +1303,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                             <span className="font-normal text-slate-800">
                               {crossBorder?.ltlCbm
                                 ? `${crossBorder.ltlCbm.toLocaleString('vi-VN')} CBM`
-                                : (crossBorder?.cbmVolume ? `${crossBorder.cbmVolume.toLocaleString('vi-VN')} CBM` : (inquiry.ftlVolumeCbm ? `${inquiry.ftlVolumeCbm} CBM` : 'Chưa khai báo'))}
+                                : (crossBorder?.cbmVolume ? `${crossBorder.cbmVolume.toLocaleString('vi-VN')} CBM` : (inquiry.ftlVolumeCbm ? `${inquiry.ftlVolumeCbm} CBM` : 'Theo thỏa thuận'))}
                             </span>
                           </div>
 
@@ -1300,7 +1368,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-8 text-xs bg-cyan-50/40 p-3 rounded-xl border border-cyan-100">
                         <div className="flex items-baseline gap-2">
                           <span className="text-cyan-800/70 font-medium min-w-[140px] shrink-0">Dải nhiệt độ yêu cầu:</span>
-                          <span className="font-normal text-slate-800">{inquiry.temperatureRequirement || coldChain?.temperatureCategory || '+2°C ~ +8°C'}</span>
+                          <span className="font-normal text-slate-800">{inquiry.temperatureRequirement || coldChain?.temperatureCategory}</span>
                         </div>
                         <div className="flex items-baseline gap-2">
                           <span className="text-cyan-800/70 font-medium min-w-[140px] shrink-0">Duy trì điện liên tục:</span>
@@ -1329,20 +1397,24 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-8 text-xs bg-rose-50/40 p-3 rounded-xl border border-rose-100">
                         <div className="flex items-baseline gap-2">
                           <span className="text-rose-800/70 font-medium min-w-[140px] shrink-0">Nhóm nguy hiểm (IMO Class):</span>
-                          <span className="font-normal text-slate-800">{inquiry.dgClassIMO || 'IMO Class 3 (Chất lỏng dễ cháy)'}</span>
+                          <span className="font-normal text-slate-800">{inquiry.dgClassIMO}</span>
                         </div>
                         <div className="flex items-baseline gap-2">
                           <span className="text-rose-800/70 font-medium min-w-[140px] shrink-0">Mã số UN:</span>
-                          <span className="font-normal text-slate-800">{inquiry.unNumber || 'UN 1263'}</span>
+                          <span className="font-normal text-slate-800">{inquiry.unNumber}</span>
                         </div>
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-rose-800/70 font-medium min-w-[140px] shrink-0">Nhóm đóng gói:</span>
-                          <span className="font-normal text-slate-800">{inquiry.packingGroup || 'Packing Group II'}</span>
-                        </div>
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-rose-800/70 font-medium min-w-[140px] shrink-0">Điểm chớp cháy:</span>
-                          <span className="font-normal text-slate-800">{inquiry.flashPoint ? `${inquiry.flashPoint}°C` : 'N/A'}</span>
-                        </div>
+                        {inquiry.packingGroup && (
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-rose-800/70 font-medium min-w-[140px] shrink-0">Nhóm đóng gói:</span>
+                            <span className="font-normal text-slate-800">{inquiry.packingGroup}</span>
+                          </div>
+                        )}
+                        {inquiry.flashPoint && (
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-rose-800/70 font-medium min-w-[140px] shrink-0">Điểm chớp cháy:</span>
+                            <span className="font-normal text-slate-800">{`${inquiry.flashPoint}°C`}</span>
+                          </div>
+                        )}
                         {inquiry.msdsFileName && (
                           <div className="flex items-baseline gap-2 md:col-span-2">
                             <span className="text-rose-800/70 font-medium min-w-[140px] shrink-0">Tài liệu MSDS:</span>
@@ -1390,13 +1462,13 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       <div className="flex items-baseline gap-2">
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Vai Trò Của Doanh Nghiệp Trong Lô Hàng (Trade Role):</span>
                         <span className="font-normal text-slate-800">
-                          {cleanTextNoEmoji(ocean?.tradeRole || inquiry.tradeRole || 'Xuất khẩu (Export)')}
+                          {cleanTextNoEmoji(ocean?.tradeRole || inquiry.tradeRole)}
                         </span>
                       </div>
                       <div className="flex items-baseline gap-2">
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Điều Kiện Thương Mại (Incoterms 2020):</span>
                         <span className="font-normal text-slate-800">
-                          {cleanTextNoEmoji(ocean?.incoterm || inquiry.incoterms || 'FOB')}
+                          {cleanTextNoEmoji(ocean?.incoterm || inquiry.incoterms)}
                         </span>
                       </div>
 
@@ -1406,24 +1478,26 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                           <div className="flex items-baseline gap-2">
                             <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Loại Vỏ Container:</span>
                             <span className="font-normal text-slate-800">
-                              {ocean?.containerType || '40ft High Cube (40HC)'}
+                              {ocean?.containerType}
                             </span>
                           </div>
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Thời Gian Miễn Phí Lưu Cont / Bãi (Free Dem/Det):</span>
-                            <span className="font-normal text-slate-800">
-                              {ocean?.freeDemDetDaysRequested ? `${ocean.freeDemDetDaysRequested} Ngày` : '14 Ngày'}
-                            </span>
-                          </div>
+                          {ocean?.freeDemDetDaysRequested && (
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Thời Gian Miễn Phí Lưu Cont / Bãi (Free Dem/Det):</span>
+                              <span className="font-normal text-slate-800">
+                                {`${ocean.freeDemDetDaysRequested} Ngày`}
+                              </span>
+                            </div>
+                          )}
                         </>
                       )}
 
                       {/* LCL Specific Fields: Số Lượng Kiện (Đưa lên trên Điều kiện nhận/giao hàng) */}
-                      {isLcl && (
+                      {isLcl && ocean?.lclPieces && (
                         <div className="flex items-baseline gap-2 md:col-span-2">
                           <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Số Lượng Kiện / Pallet Cần Gom Ghép:</span>
                           <span className="font-normal text-slate-800">
-                            {ocean?.lclPieces ? `${ocean.lclPieces} Kiện / Pallet` : 'Chưa chỉ định'}
+                            {`${ocean.lclPieces} Kiện / Pallet`}
                           </span>
                         </div>
                       )}
@@ -1431,13 +1505,13 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       <div className="flex items-baseline gap-2">
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Điều Kiện Nhận Hàng (Origin Term):</span>
                         <span className="font-normal text-slate-800">
-                          {cleanTextNoEmoji(ocean?.originServiceTerm || inquiry.originServiceTerm || 'CY')}
+                          {cleanTextNoEmoji(ocean?.originServiceTerm || inquiry.originServiceTerm)}
                         </span>
                       </div>
                       <div className="flex items-baseline gap-2">
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Điều Kiện Giao Hàng (Destination Term):</span>
                         <span className="font-normal text-slate-800">
-                          {cleanTextNoEmoji(ocean?.destinationServiceTerm || inquiry.destinationServiceTerm || 'CY')}
+                          {cleanTextNoEmoji(ocean?.destinationServiceTerm || inquiry.destinationServiceTerm)}
                         </span>
                       </div>
 
@@ -1446,7 +1520,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                           {isLcl ? 'Địa Chỉ Lấy Hàng Kho CFS (Origin CFS Warehouse):' : 'Cảng Bốc Hàng (Port of Loading - POL):'}
                         </span>
                         <span className="font-normal text-slate-800">
-                          {ocean?.polPort || inquiry.origin || 'Chưa chỉ định'}
+                          {ocean?.polPort || inquiry.origin}
                         </span>
                       </div>
                       <div className="flex items-baseline gap-2">
@@ -1454,29 +1528,25 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                           {isLcl ? 'Địa Chỉ Giao Hàng Kho CFS (Destination CFS Warehouse):' : 'Cảng Dỡ Hàng (Port of Discharge - POD):'}
                         </span>
                         <span className="font-normal text-slate-800">
-                          {ocean?.podPort || inquiry.destination || 'Chưa chỉ định'}
+                          {ocean?.podPort || inquiry.destination}
                         </span>
                       </div>
 
-                      {/* Địa Chỉ Kho Lấy Hàng & Giao Hàng cùng 1 hàng */}
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Địa Chỉ Kho Lấy Hàng (Shipper Warehouse / Pickup Address):</span>
-                        <span className="font-normal text-slate-800">
-                          {ocean?.pickupAddress || 'Chưa chỉ định'}
-                        </span>
-                      </div>
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Địa Chỉ Giao Hàng (Consignee Warehouse / Delivery Address):</span>
-                        <span className="font-normal text-slate-800">
-                          {ocean?.deliveryAddress || 'Chưa chỉ định'}
-                        </span>
-                      </div>
-
-                      {/* Hãng Tàu Chỉ Định cho FCL */}
-                      {isFcl && Boolean(ocean?.preferredCarrier) && (
+                      {/* Địa Chỉ Kho Lấy Hàng & Giao Hàng: chỉ hiển thị khi có khai báo */}
+                      {ocean?.pickupAddress && (
                         <div className="flex items-baseline gap-2">
-                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Hãng Tàu Chỉ Định:</span>
-                          <span className="font-normal text-slate-800">{ocean?.preferredCarrier}</span>
+                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Địa Chỉ Kho Lấy Hàng (Shipper Warehouse):</span>
+                          <span className="font-normal text-slate-800">
+                            {ocean.pickupAddress}
+                          </span>
+                        </div>
+                      )}
+                      {ocean?.deliveryAddress && (
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Địa Chỉ Giao Hàng (Consignee Warehouse):</span>
+                          <span className="font-normal text-slate-800">
+                            {ocean.deliveryAddress}
+                          </span>
                         </div>
                       )}
 
@@ -1499,13 +1569,13 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       <div className="flex items-baseline gap-2">
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Vai Trò Của Doanh Nghiệp Trong Lô Hàng (Trade Role):</span>
                         <span className="font-normal text-slate-800">
-                          {cleanTextNoEmoji(air?.tradeRole || inquiry.tradeRole || 'Xuất khẩu (Export)')}
+                          {cleanTextNoEmoji(air?.tradeRole || inquiry.tradeRole)}
                         </span>
                       </div>
                       <div className="flex items-baseline gap-2">
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Điều Kiện Thương Mại (Incoterms 2020):</span>
                         <span className="font-normal text-slate-800">
-                          {cleanTextNoEmoji(air?.incoterm || inquiry.incoterms || 'FCA')}
+                          {cleanTextNoEmoji(air?.incoterm || inquiry.incoterms)}
                         </span>
                       </div>
 
@@ -1515,13 +1585,13 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                           <div className="flex items-baseline gap-2">
                             <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Điều Kiện Nhận Hàng (Origin Term):</span>
                             <span className="font-normal text-slate-800">
-                              {cleanTextNoEmoji(air?.originServiceTerm || inquiry.originServiceTerm || 'Airport')}
+                              {cleanTextNoEmoji(air?.originServiceTerm || inquiry.originServiceTerm)}
                             </span>
                           </div>
                           <div className="flex items-baseline gap-2">
                             <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Điều Kiện Giao Hàng (Destination Term):</span>
                             <span className="font-normal text-slate-800">
-                              {cleanTextNoEmoji(air?.destinationServiceTerm || inquiry.destinationServiceTerm || 'Airport')}
+                              {cleanTextNoEmoji(air?.destinationServiceTerm || inquiry.destinationServiceTerm)}
                             </span>
                           </div>
 
@@ -1529,30 +1599,16 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                           <div className="flex items-baseline gap-2">
                             <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Sân Bay Đi (AOD - Airport of Departure):</span>
                             <span className="font-normal text-slate-800">
-                              {cleanTextNoEmoji(air?.originAirport || inquiry.origin || 'Chưa chỉ định')}
+                              {cleanTextNoEmoji(air?.originAirport || inquiry.origin)}
                             </span>
                           </div>
-                          <div className="flex items-baseline gap-2">
+                          {/* Hàng 4: Sân bay đến */}
+                          <div className="flex items-baseline gap-2 md:col-span-2">
                             <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Sân Bay Đến (AOA - Airport of Arrival):</span>
                             <span className="font-normal text-slate-800">
-                              {cleanTextNoEmoji(air?.destinationAirport || inquiry.destination || 'Chưa chỉ định')}
+                              {cleanTextNoEmoji(air?.destinationAirport || inquiry.destination)}
                             </span>
                           </div>
-
-                          {/* Hàng 5: Địa chỉ kho lấy hàng & Giao hàng cùng 1 hàng */}
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Địa Chỉ Kho Lấy Hàng (Shipper Warehouse / Pickup Address):</span>
-                            <span className="font-normal text-slate-800">
-                              {cleanTextNoEmoji(air?.pickupAddress || 'Chưa chỉ định')}
-                            </span>
-                          </div>
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Địa Chỉ Giao Hàng (Consignee Warehouse / Delivery Address):</span>
-                            <span className="font-normal text-slate-800">
-                              {cleanTextNoEmoji(air?.deliveryAddress || 'Chưa chỉ định')}
-                            </span>
-                          </div>
-
                         </>
                       ) : (
                         <>
@@ -1560,13 +1616,13 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                           <div className="flex items-baseline gap-2">
                             <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Phân Loại Bưu Kiện (Express Package Type):</span>
                             <span className="font-normal text-slate-800">
-                              {cleanTextNoEmoji(air?.expressPackageType || 'Parcel / Package (Bưu phẩm / Hàng mẫu đóng hộp)')}
+                              {cleanTextNoEmoji(air?.expressPackageType)}
                             </span>
                           </div>
                           <div className="flex items-baseline gap-2">
                             <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Cấp Độ Chuyển Phát (Speed Level):</span>
                             <span className="font-normal text-slate-800">
-                              {cleanTextNoEmoji(air?.expressSpeedLevel || 'Express Tiêu Chuẩn (2-3 ngày)')}
+                              {cleanTextNoEmoji(air?.expressSpeedLevel)}
                             </span>
                           </div>
 
@@ -1574,31 +1630,35 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                           <div className="flex items-baseline gap-2">
                             <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Địa Chỉ Lấy Hàng Tận Nơi (Pickup Address):</span>
                             <span className="font-normal text-slate-800">
-                              {cleanTextNoEmoji(air?.pickupAddress || inquiry.origin || 'Chưa chỉ định')}
+                              {cleanTextNoEmoji(air?.pickupAddress || inquiry.origin)}
                               {air?.originPostalCode ? ` (Mã Zip: ${air.originPostalCode})` : ''}
                             </span>
                           </div>
                           <div className="flex items-baseline gap-2">
                             <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Địa Chỉ Giao Hàng Tận Nơi (Delivery Address):</span>
                             <span className="font-normal text-slate-800">
-                              {cleanTextNoEmoji(air?.deliveryAddress || inquiry.destination || 'Chưa chỉ định')}
+                              {cleanTextNoEmoji(air?.deliveryAddress || inquiry.destination)}
                               {air?.destinationPostalCode ? ` (Mã Zip: ${air.destinationPostalCode})` : ''}
                             </span>
                           </div>
 
-                          {/* Yêu cầu ký nhận POD & Thủ tục hải quan */}
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Yêu Cầu Ký Nhận Tận Tay (POD):</span>
-                            <span className="font-normal text-slate-800">
-                              {air?.signatureRequired ? 'Yêu cầu ký nhận tận tay' : 'Không yêu cầu'}
-                            </span>
-                          </div>
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Hỗ Trợ Thủ Tục Hải Quan:</span>
-                            <span className="font-normal text-slate-800">
-                              {air?.expressCustomsSupport ? 'Có hỗ trợ thủ tục hải quan trọn gói' : 'Tự thông quan'}
-                            </span>
-                          </div>
+                          {/* Yêu cầu ký nhận POD & Hỗ trợ thủ tục hải quan */}
+                          {air?.signatureRequired && (
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Yêu Cầu Ký Nhận Tận Tay (POD):</span>
+                              <span className="font-normal text-slate-800">
+                                Yêu cầu ký nhận tận tay
+                              </span>
+                            </div>
+                          )}
+                          {air?.expressCustomsSupport && (
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Hỗ Trợ Thủ Tục Hải Quan:</span>
+                              <span className="font-normal text-slate-800">
+                                Có hỗ trợ thủ tục hải quan trọn gói
+                              </span>
+                            </div>
+                          )}
                         </>
                       )}
                     </div>
@@ -1620,13 +1680,13 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       <div className="flex items-baseline gap-2">
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Vai Trò Của Doanh Nghiệp Trong Lô Hàng (Trade Role):</span>
                         <span className="font-normal text-slate-800">
-                          {cleanTextNoEmoji(rail?.tradeRole || inquiry.tradeRole || 'Nội địa Bắc - Nam (Domestic Rail)')}
+                          {cleanTextNoEmoji(rail?.tradeRole || inquiry.tradeRole)}
                         </span>
                       </div>
                       <div className="flex items-baseline gap-2">
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Điều Kiện Thương Mại (Incoterms 2020):</span>
                         <span className="font-normal text-slate-800">
-                          {cleanTextNoEmoji(rail?.incoterm || inquiry.incoterms || 'DAP')}
+                          {cleanTextNoEmoji(rail?.incoterm || inquiry.incoterms)}
                         </span>
                       </div>
 
@@ -1636,24 +1696,26 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                           <div className="flex items-baseline gap-2">
                             <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Loại Container / Toa Xe:</span>
                             <span className="font-normal text-slate-800">
-                              {rail?.containerType || 'Cont 40ft High Cube (40HC)'}
+                              {rail?.containerType}
                             </span>
                           </div>
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Thời Gian Miễn Phí Lưu Bãi Ga (Free Dem/Det):</span>
-                            <span className="font-normal text-slate-800">
-                              {rail?.freeDemDetDaysRequested ? `${rail.freeDemDetDaysRequested} Ngày` : '7 Ngày'}
-                            </span>
-                          </div>
+                          {rail?.freeDemDetDaysRequested && (
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Thời Gian Miễn Phí Lưu Bãi Ga (Free Dem/Det):</span>
+                              <span className="font-normal text-slate-800">
+                                {`${rail.freeDemDetDaysRequested} Ngày`}
+                              </span>
+                            </div>
+                          )}
                         </>
                       )}
 
                       {/* Hàng 3: LCL Specific: Số Lượng Kiện Cần Ghép (Đưa lên trên Điều kiện nhận/giao hàng) */}
-                      {isRailLcl && (
+                      {isRailLcl && rail?.lclPieces && (
                         <div className="flex items-baseline gap-2 md:col-span-2">
                           <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Số Lượng Kiện / Pallet Cần Ghép:</span>
                           <span className="font-normal text-slate-800">
-                            {rail?.lclPieces ? `${rail.lclPieces} Kiện / Pallet` : 'Chưa chỉ định'}
+                            {`${rail.lclPieces} Kiện / Pallet`}
                           </span>
                         </div>
                       )}
@@ -1662,13 +1724,13 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       <div className="flex items-baseline gap-2">
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Điều Kiện Nhận Hàng (Origin Term):</span>
                         <span className="font-normal text-slate-800">
-                          {cleanTextNoEmoji(rail?.originServiceTerm || inquiry.originServiceTerm || 'CY')}
+                          {cleanTextNoEmoji(rail?.originServiceTerm || inquiry.originServiceTerm)}
                         </span>
                       </div>
                       <div className="flex items-baseline gap-2">
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Điều Kiện Giao Hàng (Destination Term):</span>
                         <span className="font-normal text-slate-800">
-                          {cleanTextNoEmoji(rail?.destinationServiceTerm || inquiry.destinationServiceTerm || 'CY')}
+                          {cleanTextNoEmoji(rail?.destinationServiceTerm || inquiry.destinationServiceTerm)}
                         </span>
                       </div>
 
@@ -1678,7 +1740,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                           {isRailLcl ? 'Địa Chỉ Kho Ga Nhận Hàng (Origin CFS Rail Station):' : 'Ga Xếp Hàng (Origin Rail Station / POL Ga):'}
                         </span>
                         <span className="font-normal text-slate-800">
-                          {cleanTextNoEmoji(rail?.originStation || inquiry.origin || 'Chưa chỉ định')}
+                          {cleanTextNoEmoji(rail?.originStation || inquiry.origin)}
                         </span>
                       </div>
                       <div className="flex items-baseline gap-2">
@@ -1686,23 +1748,27 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                           {isRailLcl ? 'Địa Chỉ Kho Ga Trả Hàng (Destination CFS Rail Station):' : 'Ga Dỡ Hàng (Destination Rail Station / POD Ga):'}
                         </span>
                         <span className="font-normal text-slate-800">
-                          {cleanTextNoEmoji(rail?.destinationStation || inquiry.destination || 'Chưa chỉ định')}
+                          {cleanTextNoEmoji(rail?.destinationStation || inquiry.destination)}
                         </span>
                       </div>
 
-                      {/* Hàng 6: Địa chỉ kho lấy hàng & Địa chỉ kho giao hàng cùng 1 hàng */}
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Địa Chỉ Kho Lấy Hàng (Shipper Warehouse / Pickup Address):</span>
-                        <span className="font-normal text-slate-800">
-                          {cleanTextNoEmoji(rail?.pickupAddress || 'Chưa chỉ định')}
-                        </span>
-                      </div>
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Địa Chỉ Giao Hàng (Consignee Warehouse / Delivery Address):</span>
-                        <span className="font-normal text-slate-800">
-                          {cleanTextNoEmoji(rail?.deliveryAddress || 'Chưa chỉ định')}
-                        </span>
-                      </div>
+                      {/* Hàng 6: Địa chỉ kho lấy hàng & Địa chỉ kho giao hàng (chỉ hiển thị khi có khai báo) */}
+                      {rail?.pickupAddress && (
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Địa Chỉ Kho Lấy Hàng (Shipper Warehouse):</span>
+                          <span className="font-normal text-slate-800">
+                            {cleanTextNoEmoji(rail.pickupAddress)}
+                          </span>
+                        </div>
+                      )}
+                      {rail?.deliveryAddress && (
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Địa Chỉ Giao Hàng (Consignee Warehouse):</span>
+                          <span className="font-normal text-slate-800">
+                            {cleanTextNoEmoji(rail.deliveryAddress)}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   ) : isWarehousing ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2.5 gap-x-8 text-xs">
@@ -1714,7 +1780,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       <div className="flex items-baseline gap-2">
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Mô Hình & Loại Hình Kho Bãi:</span>
                         <span className="font-normal text-slate-800">
-                          {cleanTextNoEmoji(warehousing?.warehouseType) || 'Kho thường (Grade A Dry)'}
+                          {cleanTextNoEmoji(warehousing?.warehouseType)}
                         </span>
                       </div>
 
@@ -1722,7 +1788,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       <div className="flex items-baseline gap-2">
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Đơn Vị Tính Phí Thuê Kho:</span>
                         <span className="font-normal text-slate-800">
-                          {cleanTextNoEmoji(warehousing?.billingUnitPreference) || 'm² (Diện tích sàn)'}
+                          {cleanTextNoEmoji(warehousing?.billingUnitPreference)}
                         </span>
                       </div>
                       <div className="flex items-baseline gap-2">
@@ -1737,12 +1803,12 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                         </span>
                         <span className="font-normal text-slate-800">
                           {warehousing?.billingUnitPreference?.includes('Pallet')
-                            ? (warehousing.palletPositions ? `${warehousing.palletPositions.toLocaleString('vi-VN')} Pallet` : 'Chưa khai báo')
+                            ? (warehousing.palletPositions ? `${warehousing.palletPositions.toLocaleString('vi-VN')} Pallet` : '')
                             : warehousing?.billingUnitPreference?.includes('CBM')
-                              ? (warehousing.cbmVolume ? `${warehousing.cbmVolume.toLocaleString('vi-VN')} CBM` : 'Chưa khai báo')
+                              ? (warehousing.cbmVolume ? `${warehousing.cbmVolume.toLocaleString('vi-VN')} CBM` : '')
                               : warehousing?.billingUnitPreference?.includes('Order') || warehousing?.warehouseType === 'Kho TMĐT / Fulfillment'
-                                ? `${warehousing.bufferStorageQty ? warehousing.bufferStorageQty.toLocaleString('vi-VN') : (warehousing.bufferPalletPositions || 20)} ${cleanTextNoEmoji(warehousing.bufferStorageUnit) || 'Pallet (Vị trí)'}`
-                                : (warehousing?.storageAreaSqm ? `${warehousing.storageAreaSqm.toLocaleString('vi-VN')} m²` : 'Chưa khai báo')}
+                                ? `${warehousing.bufferStorageQty ? warehousing.bufferStorageQty.toLocaleString('vi-VN') : (warehousing.bufferPalletPositions || '')} ${cleanTextNoEmoji(warehousing.bufferStorageUnit) || ''}`
+                                : (warehousing?.storageAreaSqm ? `${warehousing.storageAreaSqm.toLocaleString('vi-VN')} m²` : '')}
                         </span>
                       </div>
 
@@ -1818,13 +1884,15 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                             </span>
                           </div>
 
-                          {/* Hàng 5: Nguyên tắc quản lý tồn kho & Tích hợp phần mềm WMS API (DUY NHẤT 1 LẦN) */}
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Nguyên Tắc Quản Lý Hạn Dùng:</span>
-                            <span className="font-normal text-slate-800">
-                              {cleanTextNoEmoji(warehousing?.inventoryMethod) || 'FIFO (Nhập trước - Xuất trước)'}
-                            </span>
-                          </div>
+                          {/* Hàng 5: Nguyên tắc quản lý tồn kho & Tích hợp phần mềm WMS API */}
+                          {warehousing?.inventoryMethod && (
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Nguyên Tắc Quản Lý Hạn Dùng:</span>
+                              <span className="font-normal text-slate-800">
+                                {cleanTextNoEmoji(warehousing.inventoryMethod)}
+                              </span>
+                            </div>
+                          )}
                           <div className="flex items-baseline gap-2">
                             <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Tích Hợp Phần Mềm WMS / API / EDI:</span>
                             <span className="font-normal text-slate-800">
@@ -1838,13 +1906,13 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       <div className="flex items-baseline gap-2">
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Khu Vực / Tỉnh Thành Mong Muốn Đặt Kho:</span>
                         <span className="font-normal text-slate-800">
-                          {cleanTextNoEmoji(warehousing?.targetLocation || inquiry.origin) || 'Chưa chỉ định'}
+                          {cleanTextNoEmoji(warehousing?.targetLocation || inquiry.origin)}
                         </span>
                       </div>
                       <div className="flex items-baseline gap-2">
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Phạm Vi & Bán Kính Phân Phối Trọng Tâm:</span>
                         <span className="font-normal text-slate-800">
-                          {cleanTextNoEmoji(inquiry.destination) || 'Toàn quốc / Bán kính phân phối linh hoạt'}
+                          {cleanTextNoEmoji(inquiry.destination)}
                         </span>
                       </div>
                     </div>
@@ -1858,7 +1926,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       <div className="flex items-baseline gap-2">
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Hình Thức Vận Chuyển:</span>
                         <span className="font-normal text-slate-800">
-                          {cleanTextNoEmoji(crossBorder?.loadType) || 'FTL (Nguyên chuyến / Nguyên cont)'}
+                          {cleanTextNoEmoji(crossBorder?.loadType)}
                         </span>
                       </div>
 
@@ -1866,13 +1934,13 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       <div className="flex items-baseline gap-2">
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Vai Trò Doanh Nghiệp (Trade Role):</span>
                         <span className="font-normal text-slate-800">
-                          {cleanTextNoEmoji(crossBorder?.tradeRole || inquiry.tradeRole || 'Xuất khẩu (Export)')}
+                          {cleanTextNoEmoji(crossBorder?.tradeRole || inquiry.tradeRole)}
                         </span>
                       </div>
                       <div className="flex items-baseline gap-2">
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Điều Kiện Thương Mại (Incoterms 2020):</span>
                         <span className="font-normal text-slate-800">
-                          {cleanTextNoEmoji(crossBorder?.incoterms || inquiry.incoterms || 'DAP')}
+                          {cleanTextNoEmoji(crossBorder?.incoterms || inquiry.incoterms)}
                         </span>
                       </div>
 
@@ -1880,13 +1948,13 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       <div className="flex items-baseline gap-2">
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Cửa Khẩu Biên Giới (Border Checkpoint):</span>
                         <span className="font-normal text-slate-800">
-                          {cleanTextNoEmoji(crossBorder?.borderGate) || 'Cửa khẩu Quốc tế Mộc Bài / Xa Mát'}
+                          {cleanTextNoEmoji(crossBorder?.borderGate)}
                         </span>
                       </div>
                       <div className="flex items-baseline gap-2">
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Phương Thức Vượt Biên Giới:</span>
                         <span className="font-normal text-slate-800">
-                          {cleanTextNoEmoji(crossBorder?.cargoMode) || 'Xe liên vận chạy thẳng (Direct GMS)'}
+                          {cleanTextNoEmoji(crossBorder?.cargoMode)}
                         </span>
                       </div>
 
@@ -1894,13 +1962,13 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       <div className="flex items-baseline gap-2">
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Phạm Vi Thủ Tục Hải Quan:</span>
                         <span className="font-normal text-slate-800">
-                          {cleanTextNoEmoji(crossBorder?.customsScope) || 'Thông quan Trọn gói 2 đầu (VN + Nước bạn)'}
+                          {cleanTextNoEmoji(crossBorder?.customsScope)}
                         </span>
                       </div>
                       <div className="flex items-baseline gap-2">
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Điều Kiện Lấy & Giao Hàng:</span>
                         <span className="font-normal text-slate-800">
-                          Lấy: {cleanTextNoEmoji(crossBorder?.originTerm) || 'Door'} ➔ Giao: {cleanTextNoEmoji(crossBorder?.destinationTerm) || 'Door'}
+                          Lấy: {cleanTextNoEmoji(crossBorder?.originTerm)} ➔ Giao: {cleanTextNoEmoji(crossBorder?.destinationTerm)}
                         </span>
                       </div>
 
@@ -1919,7 +1987,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                               <div>
                                 <span className="text-slate-500 font-medium block text-[11px]">• Địa chỉ kho đi chính:</span>
                                 <span className="font-normal text-slate-800 block pl-3">
-                                  {inquiry.origin || 'Chưa chỉ định'}
+                                  {inquiry.origin}
                                 </span>
                               </div>
                               {crossBorder?.pickupLocations && crossBorder.pickupLocations.length > 1 && (
@@ -1946,7 +2014,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                               <div>
                                 <span className="text-slate-500 font-medium block text-[11px]">• Địa chỉ kho đích chính:</span>
                                 <span className="font-normal text-slate-800 block pl-3">
-                                  {inquiry.destination || 'Chưa chỉ định'}
+                                  {inquiry.destination}
                                 </span>
                               </div>
                               {crossBorder?.deliveryLocations && crossBorder.deliveryLocations.length > 1 && (
@@ -1972,29 +2040,33 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                           <div className="flex items-baseline gap-2">
                             <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Loại Phương Tiện / Thùng Xe:</span>
                             <span className="font-normal text-slate-800">
-                              {cleanTextNoEmoji(crossBorder?.vehicleType) || 'Đầu Kéo Container Kín (Dry Box Container)'}
+                              {cleanTextNoEmoji(crossBorder?.vehicleType)}
                             </span>
                           </div>
                           <div className="flex items-baseline gap-2">
                             <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Phân Khúc Tải Trọng:</span>
                             <span className="font-normal text-slate-800">
-                              {cleanTextNoEmoji(crossBorder?.tonnageCategory) || 'Container 40ft High Cube (40HC)'}
+                              {cleanTextNoEmoji(crossBorder?.tonnageCategory)}
                             </span>
                           </div>
 
                           {/* Hàng 7: SLA Leadtime & Ghi chú */}
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Thời Gian Vận Chuyển (SLA):</span>
-                            <span className="font-normal text-slate-800">
-                              {cleanTextNoEmoji(crossBorder?.leadtimeSLA) || 'Tiêu chuẩn tuyến'}
-                            </span>
-                          </div>
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Ghi Chú Tiến Độ / Lịch Trình:</span>
-                            <span className="font-normal text-slate-800">
-                              {cleanTextNoEmoji(crossBorder?.leadtimeNote) || 'Theo cam kết lịch trình của nhà xe'}
-                            </span>
-                          </div>
+                          {crossBorder?.leadtimeSLA && (
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Thời Gian Vận Chuyển (SLA):</span>
+                              <span className="font-normal text-slate-800">
+                                {cleanTextNoEmoji(crossBorder.leadtimeSLA)}
+                              </span>
+                            </div>
+                          )}
+                          {crossBorder?.leadtimeNote && (
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Ghi Chú Tiến Độ / Lịch Trình:</span>
+                              <span className="font-normal text-slate-800">
+                                {cleanTextNoEmoji(crossBorder.leadtimeNote)}
+                              </span>
+                            </div>
+                          )}
                         </>
                       )}
                     </div>
@@ -2016,13 +2088,13 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       <div className="flex items-baseline gap-2">
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Loại Hình Tờ Khai Hải Quan:</span>
                         <span className="font-normal text-slate-800">
-                          {cleanTextNoEmoji(customs?.declarationType) || (isCustomsExport ? 'B11 - Xuất khẩu kinh doanh' : 'A11 - Nhập khẩu kinh doanh')}
+                          {cleanTextNoEmoji(customs?.declarationType)}
                         </span>
                       </div>
                       <div className="flex items-baseline gap-2">
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Hình Thức Đứng Tên Tờ Khai:</span>
                         <span className="font-normal text-slate-800">
-                          {cleanTextNoEmoji(customs?.declarationEntity) || 'Chủ hàng đứng tên trực tiếp (Token DN)'}
+                          {cleanTextNoEmoji(customs?.declarationEntity)}
                         </span>
                       </div>
 
@@ -2030,45 +2102,53 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       <div className="flex items-baseline gap-2">
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Chi Cục Hải Quan Mở Tờ Khai:</span>
                         <span className="font-normal text-slate-800">
-                          {cleanTextNoEmoji(customs?.customsSubDepartment || inquiry.origin || 'Chưa chỉ định')}
+                          {cleanTextNoEmoji(customs?.customsSubDepartment || inquiry.origin)}
                         </span>
                       </div>
                       <div className="flex items-baseline gap-2">
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Cảng / Sân Bay / Cửa Khẩu / ICD:</span>
                         <span className="font-normal text-slate-800">
-                          {cleanTextNoEmoji(customs?.portOrBorderGate || inquiry.destination || 'Chưa chỉ định')}
+                          {cleanTextNoEmoji(customs?.portOrBorderGate || inquiry.destination)}
                         </span>
                       </div>
 
-                      {/* Hàng 4: Mã HS Code chính & Trị giá hóa đơn khai báo */}
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Mã HS Code Chính:</span>
-                        <span className="font-mono font-bold text-amber-950">
-                          {customs?.hsCodePrimary || inquiry.hsCode || 'Theo chứng từ thực tế'}
-                        </span>
-                      </div>
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Trị Giá Khai Báo (Invoice Value):</span>
-                        <span className="font-normal text-slate-800">
-                          {customs?.cargoValue || inquiry.cargoValue
-                            ? `${typeof (customs?.cargoValue || inquiry.cargoValue) === 'number' ? (customs?.cargoValue || inquiry.cargoValue).toLocaleString('vi-VN') : (customs?.cargoValue || inquiry.cargoValue)} ${customs?.cargoValueCurrency || inquiry.cargoValueCurrency || 'USD'}`
-                            : (customs?.invoiceValueUSD ? `${customs.invoiceValueUSD.toLocaleString('vi-VN')} USD` : 'Chưa khai báo')}
-                        </span>
-                      </div>
+                      {/* Hàng 4: Mã HS Code chính & Trị giá hóa đơn khai báo - chỉ hiển thị khi có dữ liệu */}
+                      {(customs?.hsCodePrimary || inquiry.hsCode) && (
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Mã HS Code Chính:</span>
+                          <span className="font-mono font-bold text-amber-950">
+                            {customs?.hsCodePrimary || inquiry.hsCode}
+                          </span>
+                        </div>
+                      )}
+                      {(customs?.cargoValue || inquiry.cargoValue || customs?.invoiceValueUSD) && (
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Trị Giá Khai Báo (Invoice Value):</span>
+                          <span className="font-normal text-slate-800">
+                            {customs?.cargoValue || inquiry.cargoValue
+                              ? `${typeof (customs?.cargoValue || inquiry.cargoValue) === 'number' ? (customs?.cargoValue || inquiry.cargoValue).toLocaleString('vi-VN') : (customs?.cargoValue || inquiry.cargoValue)} ${customs?.cargoValueCurrency || inquiry.cargoValueCurrency || 'USD'}`
+                              : `${customs?.invoiceValueUSD?.toLocaleString('vi-VN')} USD`}
+                          </span>
+                        </div>
+                      )}
 
-                      {/* Hàng 5: Chứng nhận xuất xứ (C/O) & Kiểm tra chuyên ngành */}
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Chứng Nhận Xuất Xứ (C/O):</span>
-                        <span className="font-normal text-slate-800">
-                          {cleanTextNoEmoji(customs?.coFormRequested) || 'Không yêu cầu C/O'}
-                        </span>
-                      </div>
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Thủ Tục Kiểm Tra Chuyên Ngành:</span>
-                        <span className="font-normal text-slate-800">
-                          {cleanTextNoEmoji(customs?.specializedInspectionType) || 'Không có kiểm tra chuyên ngành'}
-                        </span>
-                      </div>
+                      {/* Hàng 5: Chứng nhận xuất xứ (C/O) & Kiểm tra chuyên ngành - chỉ hiển thị nếu có */}
+                      {customs?.coFormRequested && (
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Chứng Nhận Xuất Xứ (C/O):</span>
+                          <span className="font-normal text-slate-800">
+                            {cleanTextNoEmoji(customs.coFormRequested)}
+                          </span>
+                        </div>
+                      )}
+                      {customs?.specializedInspectionType && (
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Thủ Tục Kiểm Tra Chuyên Ngành:</span>
+                          <span className="font-normal text-slate-800">
+                            {cleanTextNoEmoji(customs.specializedInspectionType)}
+                          </span>
+                        </div>
+                      )}
 
                       {/* Hàng 6: Hỗ trợ kiểm hóa luồng đỏ & Số lượng tờ khai cam kết */}
                       <div className="flex items-baseline gap-2">
@@ -2130,13 +2210,13 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       <div className="flex items-baseline gap-2">
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Kho Lạnh Xuất Phát (Origin):</span>
                         <span className="font-normal text-slate-800">
-                          {inquiry.origin || 'Chưa chỉ định'}
+                          {inquiry.origin}
                         </span>
                       </div>
                       <div className="flex items-baseline gap-2">
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Kho Lạnh Đích Đến (Destination):</span>
                         <span className="font-normal text-slate-800">
-                          {inquiry.destination || 'Chưa chỉ định'}
+                          {inquiry.destination}
                         </span>
                       </div>
 
@@ -2172,30 +2252,32 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
 
                       {project?.projectCategory === 'CROSS_DOCK' ? (
                         <>
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Phạm Vi Cross-Dock:</span>
-                            <span className="font-normal text-slate-800">
-                              {cleanTextNoEmoji(project?.xDockScope || 'Nội Vùng (Intra-region Distribution)')}
-                            </span>
-                          </div>
+                          {project?.xDockScope && (
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Phạm Vi Cross-Dock:</span>
+                              <span className="font-normal text-slate-800">
+                                {cleanTextNoEmoji(project.xDockScope)}
+                              </span>
+                            </div>
+                          )}
                           <div className="flex items-baseline gap-2">
                             <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Sản Lượng Thông Qua:</span>
                             <span className="font-normal text-slate-800">
                               {project?.xDockThroughputPalletsDay
                                 ? `${project.xDockThroughputPalletsDay.toLocaleString('vi-VN')} Pallet / Ngày`
-                                : (project?.xDockThroughputCbmDay ? `${project.xDockThroughputCbmDay.toLocaleString('vi-VN')} CBM / Ngày` : 'Theo biến động luồng hàng')}
+                                : (project?.xDockThroughputCbmDay ? `${project.xDockThroughputCbmDay.toLocaleString('vi-VN')} CBM / Ngày` : (project?.xDockInboundVolume || 'Theo thỏa thuận'))}
                             </span>
                           </div>
                           <div className="flex items-baseline gap-2">
                             <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Trạm Gom Nguồn (Cross-Dock Hub):</span>
                             <span className="font-normal text-slate-800">
-                              {cleanTextNoEmoji(project?.xDockHubLocation || inquiry.origin) || 'Chưa chỉ định'}
+                              {cleanTextNoEmoji(project?.xDockHubLocation || inquiry.origin)}
                             </span>
                           </div>
                           <div className="flex items-baseline gap-2">
                             <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Trạm Phân Phối Đích (Dest Hub):</span>
                             <span className="font-normal text-slate-800">
-                              {cleanTextNoEmoji(project?.xDockDestinationHub || inquiry.destination) || 'Chưa chỉ định'}
+                              {cleanTextNoEmoji(project?.xDockDestinationHub || inquiry.destination)}
                             </span>
                           </div>
                           {project?.xDockSortationServices && project.xDockSortationServices.length > 0 && (
@@ -2220,13 +2302,13 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                           <div className="flex items-baseline gap-2">
                             <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Cảng Biển Gốc (Origin Port):</span>
                             <span className="font-normal text-slate-800">
-                              {cleanTextNoEmoji(project?.portIcdOriginPort || inquiry.origin) || 'Chưa chỉ định'}
+                              {cleanTextNoEmoji(project?.portIcdOriginPort || inquiry.origin)}
                             </span>
                           </div>
                           <div className="flex items-baseline gap-2">
                             <span className="text-slate-400 font-medium min-w-[130px] shrink-0">ICD / Depot Đích (Destination):</span>
                             <span className="font-normal text-slate-800">
-                              {cleanTextNoEmoji(project?.portIcdDestinationIcd || inquiry.destination) || 'Chưa chỉ định'}
+                              {cleanTextNoEmoji(project?.portIcdDestinationIcd || inquiry.destination)}
                             </span>
                           </div>
                           <div className="flex items-baseline gap-2">
@@ -2234,15 +2316,17 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                             <span className="font-normal text-slate-800">
                               {project?.portIcdContVolumeMonth
                                 ? `${project.portIcdContVolumeMonth.toLocaleString('vi-VN')} Cont / Tháng`
-                                : 'Theo thông báo hãng tàu'}
+                                : (project?.portIcdMonthlyTeuOrVolume || 'Theo thỏa thuận')}
                             </span>
                           </div>
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Phương Thức Kéo Cont:</span>
-                            <span className="font-normal text-slate-800">
-                              {cleanTextNoEmoji(project?.portIcdHaulageType || 'Kéo khép kín 2 chiều')}
-                            </span>
-                          </div>
+                          {project?.portIcdHaulageType && (
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Phương Thức Kéo Cont:</span>
+                              <span className="font-normal text-slate-800">
+                                {cleanTextNoEmoji(project.portIcdHaulageType)}
+                              </span>
+                            </div>
+                          )}
                           {project?.portIcdContTypes && project.portIcdContTypes.length > 0 && (
                             <div className="flex items-baseline gap-2 md:col-span-2">
                               <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Loại Container Vận Chuyển:</span>
@@ -2254,28 +2338,32 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                         </>
                       ) : project?.projectCategory === 'MULTIMODAL' ? (
                         <>
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Mô Hình Đa Phương Thức:</span>
-                            <span className="font-normal text-slate-800">
-                              {cleanTextNoEmoji(project?.multimodalCombo || 'Đường bộ + Đường sắt / Đường biển')}
-                            </span>
-                          </div>
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Thời Gian Giao Hàng (SLA):</span>
-                            <span className="font-normal text-slate-800">
-                              {cleanTextNoEmoji(project?.multimodalTargetLeadtime || 'Tiêu chuẩn đa phương thức')}
-                            </span>
-                          </div>
+                          {project?.multimodalCombo && (
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Mô Hình Đa Phương Thức:</span>
+                              <span className="font-normal text-slate-800">
+                                {cleanTextNoEmoji(project.multimodalCombo)}
+                              </span>
+                            </div>
+                          )}
+                          {project?.multimodalTargetLeadtime && (
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Thời Gian Giao Hàng (SLA):</span>
+                              <span className="font-normal text-slate-800">
+                                {cleanTextNoEmoji(project.multimodalTargetLeadtime)}
+                              </span>
+                            </div>
+                          )}
                           <div className="flex items-baseline gap-2">
                             <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Chặng Đầu (First-mile Origin):</span>
                             <span className="font-normal text-slate-800">
-                              {cleanTextNoEmoji(project?.multimodalFirstMile || inquiry.origin) || 'Chưa chỉ định'}
+                              {cleanTextNoEmoji(project?.multimodalFirstMile || inquiry.origin)}
                             </span>
                           </div>
                           <div className="flex items-baseline gap-2">
                             <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Chặng Cuối (Last-mile Dest):</span>
                             <span className="font-normal text-slate-800">
-                              {cleanTextNoEmoji(project?.multimodalLastMile || inquiry.destination) || 'Chưa chỉ định'}
+                              {cleanTextNoEmoji(project?.multimodalLastMile || inquiry.destination)}
                             </span>
                           </div>
                           {project?.multimodalTransitHub && (
@@ -2290,18 +2378,22 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       ) : (
                         <>
                           {/* Hàng 2: Kênh phân phối & Phạm vi địa lý */}
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Kênh Phân Phối Mục Tiêu:</span>
-                            <span className="font-normal text-slate-800">
-                              {cleanTextNoEmoji(project?.distributionChannel || 'Chuỗi Siêu thị / TTTM / Đại lý')}
-                            </span>
-                          </div>
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Phạm Vi Địa Lý Phân Phối:</span>
-                            <span className="font-normal text-slate-800">
-                              {cleanTextNoEmoji(project?.coverageScope || 'Toàn quốc (Bắc - Trung - Nam)')}
-                            </span>
-                          </div>
+                          {project?.distributionChannel && (
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Kênh Phân Phối Mục Tiêu:</span>
+                              <span className="font-normal text-slate-800">
+                                {cleanTextNoEmoji(project.distributionChannel)}
+                              </span>
+                            </div>
+                          )}
+                          {project?.coverageScope && (
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Phạm Vi Địa Lý Phân Phối:</span>
+                              <span className="font-normal text-slate-800">
+                                {cleanTextNoEmoji(project.coverageScope)}
+                              </span>
+                            </div>
+                          )}
 
                           {/* Hàng 3: Kho Tổng / Nhà máy xuất hàng & Điểm đến */}
                           <div className="flex items-baseline gap-2">
@@ -2309,13 +2401,13 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                             <span className="font-normal text-slate-800">
                               {project?.originWarehouses && project.originWarehouses.length > 0
                                 ? project.originWarehouses.join('; ')
-                                : (inquiry.origin || 'Chưa chỉ định')}
+                                : inquiry.origin}
                             </span>
                           </div>
                           <div className="flex items-baseline gap-2">
                             <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Địa Bàn Phân Phối / Điểm Đến:</span>
                             <span className="font-normal text-slate-800">
-                              {cleanTextNoEmoji(project?.destinationSite || inquiry.destination || 'Theo mạng lưới cửa hàng')}
+                              {cleanTextNoEmoji(project?.destinationSite || inquiry.destination)}
                             </span>
                           </div>
 
@@ -2374,7 +2466,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                               <div>
                                 <span className="text-slate-500 font-medium block text-[11px]">• Địa chỉ kho đi chính:</span>
                                 <span className="font-normal text-slate-800 block pl-3">
-                                  {inquiry.origin || 'Chưa chỉ định'}
+                                  {inquiry.origin}
                                 </span>
                               </div>
                               {isTrucking && trucking?.pickupLocations && trucking.pickupLocations.length > 1 && (
@@ -2401,7 +2493,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                               <div>
                                 <span className="text-slate-500 font-medium block text-[11px]">• Địa chỉ kho đích chính:</span>
                                 <span className="font-normal text-slate-800 block pl-3">
-                                  {inquiry.destination || 'Chưa chỉ định'}
+                                  {inquiry.destination}
                                 </span>
                               </div>
                               {isTrucking && trucking?.deliveryLocations && trucking.deliveryLocations.length > 1 && (
@@ -2431,7 +2523,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2.5 gap-x-8 text-xs">
                             <div className="flex items-baseline gap-2">
                               <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Loại Thùng Phương Tiện:</span>
-                              <span className="font-normal text-slate-800">{trucking?.truckType || 'Theo thỏa thuận'}</span>
+                              <span className="font-normal text-slate-800">{cleanTextNoEmoji(trucking?.truckType)}</span>
                             </div>
 
                             {!isTruckingLtl && trucking?.tonnageCategory && (
@@ -2506,8 +2598,8 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Số lượng chuyến cần thuê:</span>
                         <span className="font-normal text-slate-800">
                           {trucking?.loadType === 'LTL (Ghép hàng lẻ)'
-                            ? (trucking.ltlShipmentCount ? `${trucking.ltlShipmentCount} ${trucking.ltlFrequencyUnit || 'Chuyến / Tháng'}` : 'Chưa chỉ định')
-                            : (trucking?.vehicleCount ? `${trucking.vehicleCount} ${trucking?.vehicleCountUnit || 'Chuyến / Tháng'}` : 'Chưa chỉ định')}
+                            ? `${trucking?.ltlShipmentCount || ''} ${trucking?.ltlFrequencyUnit || ''}`.trim()
+                            : `${trucking?.vehicleCount || ''} ${trucking?.vehicleCountUnit || ''}`.trim()}
                         </span>
                       </div>
                     )}
@@ -2519,8 +2611,8 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                         </span>
                         <span className="font-normal text-slate-800">
                           {isLcl
-                            ? (ocean?.lclShipmentCount ? `${ocean.lclShipmentCount} ${ocean.lclFrequencyUnit || 'Chuyến / Tháng'}` : '1 Chuyến (Một lần / Spot)')
-                            : (ocean?.containerCount ? `${ocean.containerCount} ${ocean.containerCountUnit || 'Container / Tháng'}` : '1 Container (Một lần / Spot)')}
+                            ? `${ocean?.lclShipmentCount || ''} ${ocean?.lclFrequencyUnit || ''}`.trim()
+                            : `${ocean?.containerCount || ''} ${ocean?.containerCountUnit || ''}`.trim()}
                         </span>
                       </div>
                     )}
@@ -2532,8 +2624,8 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                         </span>
                         <span className="font-normal text-slate-800">
                           {air?.shipmentCount
-                            ? `${air.shipmentCount} ${air.frequencyUnit || 'Chuyến / Tháng'}`
-                            : '1 Chuyến (Một lần / Spot)'}
+                            ? `${air.shipmentCount} ${air.frequencyUnit || ''}`.trim()
+                            : ''}
                         </span>
                       </div>
                     )}
@@ -2545,8 +2637,8 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                         </span>
                         <span className="font-normal text-slate-800">
                           {isRailLcl
-                            ? (rail?.lclShipmentCount ? `${rail.lclShipmentCount} ${cleanTextNoEmoji(rail.lclFrequencyUnit) || 'Chuyến / Tháng'}` : '1 Chuyến (Một lần / Spot)')
-                            : (rail?.containerCount ? `${rail.containerCount} ${cleanTextNoEmoji(rail.containerCountUnit) || 'Container / Tháng'}` : '1 Container (Một lần / Spot)')}
+                            ? `${rail?.lclShipmentCount || ''} ${cleanTextNoEmoji(rail?.lclFrequencyUnit) || ''}`.trim()
+                            : `${rail?.containerCount || ''} ${cleanTextNoEmoji(rail?.containerCountUnit) || ''}`.trim()}
                         </span>
                       </div>
                     )}
@@ -2558,8 +2650,8 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                         </span>
                         <span className="font-normal text-slate-800">
                           {isCrossBorderLtl
-                            ? (crossBorder?.shipmentCount ? `${crossBorder.shipmentCount} ${cleanTextNoEmoji(crossBorder.frequencyUnit) || 'Lô hàng / Tháng'}` : '1 Lô hàng (Một lần / Spot)')
-                            : (crossBorder?.vehicleCount ? `${crossBorder.vehicleCount} ${cleanTextNoEmoji(crossBorder.frequencyUnit) || 'Chuyến / Tháng'}` : '1 Chuyến (Một lần / Spot)')}
+                            ? `${crossBorder?.shipmentCount || ''} ${cleanTextNoEmoji(crossBorder?.frequencyUnit) || ''}`.trim()
+                            : `${crossBorder?.vehicleCount || ''} ${cleanTextNoEmoji(crossBorder?.frequencyUnit) || ''}`.trim()}
                         </span>
                       </div>
                     )}
@@ -2572,7 +2664,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                         <span className="font-normal text-slate-800">
                           {warehousing?.rentalDurationMonths
                             ? `${warehousing.rentalDurationMonths} Tháng`
-                            : (inquiry.contractTerm || (inquiry.pricingType === 'CONTRACT' ? '12 Tháng' : 'Theo mùa vụ (Spot)'))}
+                            : (inquiry.contractTerm || (inquiry.pricingType === 'CONTRACT' ? 'Hợp đồng dài hạn' : 'Lưu kho ngắn hạn (Spot)'))}
                         </span>
                       </div>
                     )}
@@ -2583,7 +2675,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                           Số Lượng Tờ Khai Yêu Cầu:
                         </span>
                         <span className="font-normal text-slate-800">
-                          {customs?.declarationCount ? `${customs.declarationCount} ${cleanTextNoEmoji(customs.declarationFrequencyUnit) || 'Tờ khai'}` : (customs?.committedVolume ? `${customs.committedVolume} Tờ khai / ${customs.committedFrequency || 'Tháng'}` : '1 Tờ khai (Một lần / Spot)')}
+                          {customs?.declarationCount ? `${customs.declarationCount} ${cleanTextNoEmoji(customs.declarationFrequencyUnit) || 'Tờ khai'}`.trim() : (customs?.committedVolume ? `${customs.committedVolume} Tờ khai / ${customs.committedFrequency || 'Tháng'}` : '')}
                         </span>
                       </div>
                     )}
@@ -2611,19 +2703,19 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-y-2 gap-x-6 text-xs bg-slate-50/70 p-3 rounded-xl border border-slate-100">
                       <div className="space-y-0.5">
                         <span className="text-slate-400 text-[11px] block">Hạn chót nhận báo giá:</span>
-                        <span className="font-normal text-slate-800 block text-xs">{inquiry.expiryDate || 'Chưa thiết lập'}</span>
+                        <span className="font-normal text-slate-800 block text-xs">{inquiry.expiryDate}</span>
                       </div>
                       <div className="space-y-0.5">
                         <span className="text-slate-400 text-[11px] block">
                           {isWarehousing ? 'Ngày bắt đầu thuê kho dự kiến:' : 'Ngày lấy hàng dự kiến:'}
                         </span>
-                        <span className="font-normal text-slate-800 block text-xs">{inquiry.pickupDate || (isWarehousing ? 'Theo thỏa thuận bàn giao' : 'Theo thông báo giao nhận')}</span>
+                        <span className="font-normal text-slate-800 block text-xs">{inquiry.pickupDate}</span>
                       </div>
                       <div className="space-y-0.5">
                         <span className="text-slate-400 text-[11px] block">
                           {isWarehousing ? 'Hạn chót nghiệm thu / Vận hành:' : 'Hạn chót giao hàng:'}
                         </span>
-                        <span className="font-normal text-slate-800 block text-xs">{inquiry.deliveryDate || (isWarehousing ? 'Theo hợp đồng thuê kho' : 'Theo cam kết SLA tuyến')}</span>
+                        <span className="font-normal text-slate-800 block text-xs">{inquiry.deliveryDate}</span>
                       </div>
                     </div>
                   </div>
@@ -2706,38 +2798,45 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
 
                         {/* CÁC CỘT CỦA SUPPLIER KHÁC (ĐỐI THỦ) */}
                         {competitorQuotes.map((comp, cIdx) => (
-                          <th key={comp.id} className="py-2.5 px-3 text-center bg-slate-50 border-r border-slate-200">
-                            <div className="flex flex-col items-center justify-center">
+                          <th key={comp.id} className="py-2.5 px-3 text-center bg-slate-50 border-r border-slate-200 align-top">
+                            <div className="flex flex-col items-center justify-center gap-1.5">
                               {effectiveUnlocked ? (
                                 <>
-                                  <div className="inline-flex items-center gap-1 font-extrabold text-slate-800 bg-white border border-slate-300 px-2 py-0.5 rounded-md text-[11px] max-w-full truncate">
-                                    <span className="truncate">{comp.supplierName}</span>
-                                  </div>
-                                  <span className="text-[9.5px] text-emerald-600 font-bold mt-0.5">{comp.tag}</span>
+                                  {/* 1. NÚT TRAO THẦU Ở TRÊN ĐẦU BẢNG */}
                                   {!isSupplierView && (
-                                    <div className="mt-1">
-                                      {awardedSupplierName === comp.supplierName ? (
-                                        <span className="px-2.5 py-0.5 bg-emerald-600 text-white font-extrabold text-[10px] rounded-md shadow-xs inline-flex items-center gap-1">
-                                          <Check className="w-2.5 h-2.5" />
+                                    <div className="w-full flex justify-center pb-1 border-b border-slate-200/80">
+                                      {awardedSupplierName === comp.companyName ? (
+                                        <span className="w-full py-1 px-2.5 bg-emerald-600 text-white font-black text-[11px] rounded-lg shadow-xs inline-flex items-center justify-center gap-1 select-none">
+                                          <Check className="w-3 h-3 stroke-[3]" />
                                           <span>Đã Trao Thầu</span>
                                         </span>
                                       ) : (
                                         <button
                                           type="button"
                                           onClick={() => {
-                                            setAwardedSupplierName(comp.supplierName);
-                                            setQuoteSubmittedToast(`Đã trao thầu thành công cho ${comp.supplierName}! Hợp đồng điện tử đã được tạo.`);
+                                            setAwardedSupplierName(comp.companyName);
+                                            setQuoteSubmittedToast(`Đã trao thầu thành công cho ${comp.companyName} (${comp.picName})! Hợp đồng điện tử đã được tạo.`);
                                             setTimeout(() => setQuoteSubmittedToast(null), 4000);
                                           }}
-                                          className="px-2.5 py-0.5 bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-[10px] rounded-md shadow-xs inline-flex items-center gap-1 cursor-pointer transition-all active:scale-95"
+                                          className="w-full py-1 px-2.5 bg-amber-500 hover:bg-amber-600 text-white font-black text-[11px] rounded-lg shadow-xs inline-flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-95 hover:shadow-md"
                                           title="Trao thầu cho nhà cung cấp này"
                                         >
-                                          <Trophy className="w-2.5 h-2.5" />
+                                          <Trophy className="w-3.5 h-3.5 text-white shrink-0" />
                                           <span>Trao Thầu</span>
                                         </button>
                                       )}
                                     </div>
                                   )}
+
+                                  {/* 2. TÊN PIC VÀ SUBTEXT TÊN CÔNG TY */}
+                                  <div className="flex flex-col items-center justify-center w-full px-1">
+                                    <span className="font-black text-slate-900 text-xs tracking-tight truncate w-full text-center" title={comp.picName}>
+                                      {comp.picName}
+                                    </span>
+                                    <span className="text-[10px] text-slate-500 font-medium truncate w-full text-center mt-0.5" title={comp.companyName}>
+                                      {comp.companyName}
+                                    </span>
+                                  </div>
                                 </>
                               ) : (
                                 <>
@@ -2783,9 +2882,17 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                               <input
                                 type="text"
                                 value={myTotalQuoteInput}
-                                onChange={(e) => setMyTotalQuoteInput(e.target.value)}
+                                onChange={(e) => {
+                                  const val = e.target.value.replace(/[^\d]/g, '');
+                                  if (!val) {
+                                    setMyTotalQuoteInput('');
+                                    return;
+                                  }
+                                  const num = parseInt(val, 10);
+                                  setMyTotalQuoteInput(num.toLocaleString('vi-VN') + targetCurrencySuffix);
+                                }}
                                 className="w-full text-center font-black text-indigo-900 bg-white border border-indigo-300 rounded-lg px-2 py-1 text-xs focus:ring-2 focus:ring-indigo-500 outline-none shadow-2xs"
-                                placeholder="Nhập tổng cước..."
+                                placeholder="0"
                               />
                               <button
                                 type="button"
@@ -2808,9 +2915,6 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                               <div className="flex flex-col items-center justify-center">
                                 <span className="text-sm font-black text-slate-900 tracking-tight">
                                   {comp.formattedTotal}
-                                </span>
-                                <span className="text-[9.5px] text-emerald-600 font-bold mt-0.5">
-                                  {comp.tag}
                                 </span>
                               </div>
                             ) : (
@@ -2852,9 +2956,17 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                             <input
                               type="text"
                               value={myBaseFreightInput}
-                              onChange={(e) => setMyBaseFreightInput(e.target.value)}
+                              onChange={(e) => {
+                                const val = e.target.value.replace(/[^\d]/g, '');
+                                if (!val) {
+                                  setMyBaseFreightInput('');
+                                  return;
+                                }
+                                const num = parseInt(val, 10);
+                                setMyBaseFreightInput(num.toLocaleString('vi-VN') + targetCurrencySuffix);
+                              }}
                               className="w-full text-center font-bold text-indigo-900 bg-white border border-indigo-200 rounded-lg px-2 py-1 text-xs focus:ring-1 focus:ring-indigo-400 outline-none shadow-2xs"
-                              placeholder="Cước chặng chính..."
+                              placeholder="0"
                             />
                           </td>
                         )}
@@ -3115,9 +3227,23 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                             {/* Cột Báo giá của bạn: VAS */}
                             {isQuoting && (
                               <td className="py-2 px-3 text-center border-r border-slate-200 bg-indigo-50/30">
-                                <span className="text-[11px] font-bold text-emerald-700 flex items-center justify-center gap-1">
-                                  <Check className="w-3 h-3" /> Cam kết cung cấp
-                                </span>
+                                <div className="relative">
+                                  <input
+                                    type="text"
+                                    value={quotedVasPrices[vas] || ''}
+                                    onChange={(e) => {
+                                      const val = e.target.value.replace(/[^\d.]/g, '');
+                                      const num = parseFloat(val.replace(/\./g, ''));
+                                      const formatted = isNaN(num) ? '' : num.toLocaleString('vi-VN');
+                                      handleVasPriceChange(vas, formatted || val);
+                                    }}
+                                    placeholder="0"
+                                    className="w-full py-1.5 pl-3 pr-7 text-right font-mono font-medium text-xs text-slate-900 bg-white border border-slate-200 rounded-lg hover:border-slate-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-2xs"
+                                  />
+                                  <span className="absolute right-2.5 text-[11px] font-semibold text-slate-400 pointer-events-none">
+                                    {currencySymbol}
+                                  </span>
+                                </div>
                               </td>
                             )}
 
@@ -3125,8 +3251,8 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                             {competitorQuotes.map((comp) => (
                               <td key={comp.id} className="py-2 px-3 text-center border-r border-slate-200">
                                 {effectiveUnlocked ? (
-                                  <span className="text-[11px] font-bold text-emerald-600 flex items-center justify-center gap-1">
-                                    <Check className="w-3 h-3" /> Đã gồm
+                                  <span className="font-mono font-medium text-slate-700 text-xs">
+                                    {comp.vasPrices[vas] || `0 ${currencySymbol}`}
                                   </span>
                                 ) : (
                                   <span className="font-mono text-slate-300 tracking-widest text-xs select-none">••••••••</span>

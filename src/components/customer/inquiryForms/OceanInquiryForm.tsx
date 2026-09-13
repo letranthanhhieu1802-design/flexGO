@@ -83,7 +83,7 @@ export const OceanInquiryForm: React.FC<OceanInquiryFormProps> = ({
       onChange({
         ...specs,
         mode: 'FCL (Full Container)',
-        containerType: cargoClassification === 'Reefer' ? (specs.containerType?.includes('Reefer') ? specs.containerType : '40ft Reefer (40RF)') : (specs.containerType || '40ft High Cube (40HC)'),
+        containerType: specs.containerType || '',
       });
     }
   }, [isLclDisabled, cargoClassification, specs, onChange]);

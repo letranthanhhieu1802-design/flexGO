@@ -44,7 +44,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
       title: 'HCMC → Hanoi Trucking Service (FG-2608250001)',
       category: 'Inquiry',
       icon: Truck,
-      target: { type: 'workspace', view: 'customer-inquiry-detail', contextId: 'inq-01' } as CurrentView,
+      target: { type: 'workspace', view: 'customer-inquiries', contextId: 'inq-01' } as CurrentView,
     },
     {
       title: 'Compare Quotes: HCMC → Hanoi (3 Quotes)',

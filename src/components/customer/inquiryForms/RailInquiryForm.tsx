@@ -96,7 +96,7 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
       onChange({
         ...specs,
         mode: 'FCL (Nguyên container ga - ga)',
-        containerType: cargoClassification === 'Reefer' ? 'Cont Lạnh (Reefer Rail)' : (specs.containerType || 'Cont 40ft HC'),
+        containerType: cargoClassification === 'Reefer' ? 'Cont Lạnh (Reefer Rail)' : (specs.containerType || ''),
       });
     }
   }, [isLclDisabled, cargoClassification, specs, onChange]);

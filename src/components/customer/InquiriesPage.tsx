@@ -14,10 +14,12 @@ import {
   Zap,
   TrendingUp,
   ShieldCheck,
-  Clock
+  Clock,
+  Maximize2
 } from 'lucide-react';
 import { InquiryItem, InquiryStatus, ServiceType, CurrentView, SupplierLeadItem, QuotationItem, SupplierCompany, UserProfile } from '../../types';
 import { InquirySummaryConfirmModal } from './InquirySummaryConfirmModal';
+import { getLeadOrInquiryPricing } from '../../utils/pricingCalculator';
 
 interface InquiriesPageProps {
   inquiries: InquiryItem[];
@@ -737,14 +739,19 @@ export const InquiriesPage: React.FC<InquiriesPageProps> = ({
 
                         {/* Cột 8: Tổng Giá Trị */}
                         <td className="py-2.5 px-2 text-right whitespace-nowrap">
-                          <div className="space-y-0.5">
-                            <span className="text-xs sm:text-[12.5px] font-black text-emerald-700 block tracking-tight">
-                              {rawBudgetNum ? rawBudgetNum.toLocaleString('vi-VN') : 'Thỏa thuận'}
-                            </span>
-                            <span className="text-[9.5px] font-semibold text-slate-500 block">
-                              {isContract ? 'VNĐ / tháng' : 'VNĐ / lô'}
-                            </span>
-                          </div>
+                          {(() => {
+                            const pricing = getLeadOrInquiryPricing(inq);
+                            return (
+                              <div className="space-y-0.5">
+                                <span className="text-xs sm:text-[12.5px] font-black text-emerald-700 block tracking-tight">
+                                  {pricing.totalAmount > 0 ? pricing.formattedAmount : 'Thỏa thuận'}
+                                </span>
+                                <span className="text-[9.5px] font-semibold text-slate-500 block">
+                                  {pricing.unitSuffix}
+                                </span>
+                              </div>
+                            );
+                          })()}
                         </td>
 
                         {/* Cột 9: Trạng Thái (Status) */}
@@ -772,11 +779,11 @@ export const InquiriesPage: React.FC<InquiriesPageProps> = ({
                             id={`view-detail-inquiry-btn-${inq.code}`}
                             type="button"
                             onClick={() => setSelectedDetailInquiry(inq)}
-                            className="px-2.5 py-1 text-xs font-bold rounded-xl transition-all inline-flex items-center justify-center gap-1 cursor-pointer shadow-2xs bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 hover:border-indigo-300"
-                            title="Mở xem tóm tắt yêu cầu báo giá"
+                            className="px-2.5 py-1 text-xs font-bold rounded-xl transition-all inline-flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs bg-orange-50 hover:bg-orange-100 text-orange-700 hover:text-orange-800 border border-orange-200/90 hover:border-orange-300 active:scale-95"
+                            title="Mở xem đầy đủ yêu cầu báo giá"
                           >
-                            <span>Xem chi tiết</span>
-                            <ChevronRight className="w-3.5 h-3.5" />
+                            <Maximize2 className="w-3.5 h-3.5 text-orange-600 shrink-0" />
+                            <span>Xem đầy đủ</span>
                           </button>
                         </td>
                       </tr>

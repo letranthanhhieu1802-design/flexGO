@@ -206,13 +206,6 @@ export const HomePage: React.FC<HomePageProps> = ({
                 <span>Launch Supplier Workspace</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
-              <button
-                id="launch-pipeline-btn"
-                onClick={() => onNavigate({ type: 'workspace', view: 'supplier-pipeline' })}
-                className="px-3 py-1.5 text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl transition-colors cursor-pointer"
-              >
-                Open Kanban Pipeline
-              </button>
             </div>
           </div>
         </div>

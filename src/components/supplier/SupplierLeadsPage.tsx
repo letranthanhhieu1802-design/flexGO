@@ -4,7 +4,6 @@ import {
   ChevronRight,
   ChevronDown,
   ChevronUp,
-  Bookmark,
   BookmarkCheck,
   CheckCircle2, 
   ArrowUpDown,
@@ -16,9 +15,9 @@ import {
   Send,
   Trophy,
   XCircle,
-  Globe,
   Star,
-  Plus
+  Plus,
+  Maximize2
 } from 'lucide-react';
 import { 
   SupplierLeadItem, 
@@ -30,6 +29,7 @@ import {
   FlexCreditWallet
 } from '../../types';
 import { InquirySummaryConfirmModal } from '../customer/InquirySummaryConfirmModal';
+import { getLeadOrInquiryPricing } from '../../utils/pricingCalculator';
 
 interface SupplierLeadsPageProps {
   leads: SupplierLeadItem[];
@@ -64,7 +64,6 @@ export const SupplierLeadsPage: React.FC<SupplierLeadsPageProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [serviceFilter, setServiceFilter] = useState<string>('ALL');
-  const [viewScope, setViewScope] = useState<'ALL' | 'SAVED'>('ALL');
   const [viewMode, setViewMode] = useState<'TABLE' | 'KANBAN'>('TABLE');
   const [expandedLeadIds, setExpandedLeadIds] = useState<Record<string, boolean>>({});
   const [unlockedLeadIds, setUnlockedLeadIds] = useState<Record<string, boolean>>({});
@@ -90,8 +89,6 @@ export const SupplierLeadsPage: React.FC<SupplierLeadsPageProps> = ({
       }
     }
   }, [leads]);
-
-  const savedCount = leads.filter((l) => l.isSaved).length;
 
   const toggleExpandLead = (leadId: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
@@ -341,8 +338,6 @@ export const SupplierLeadsPage: React.FC<SupplierLeadsPageProps> = ({
 
   // Filter leads
   const filteredLeads = leads.filter((l) => {
-    if (viewScope === 'SAVED' && !l.isSaved) return false;
-
     const matchesSearch =
       l.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
       l.customerCompany.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -422,32 +417,6 @@ export const SupplierLeadsPage: React.FC<SupplierLeadsPageProps> = ({
               Quản lý, phân loại các tuyến vận tải đã lưu từ sàn Lead Board. Mở khóa thông tin chủ hàng, theo dõi trạng thái chào giá và chốt đơn vận chuyển.
             </p>
           </div>
-
-          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-            {/* Toggle Đã Lưu */}
-            <button
-              id="toggle-saved-leads-hero-btn"
-              onClick={() => setViewScope(viewScope === 'SAVED' ? 'ALL' : 'SAVED')}
-              className={`inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer shadow-xs border ${
-                viewScope === 'SAVED'
-                  ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-amber-500/20'
-                  : 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border-amber-400/30'
-              }`}
-            >
-              <Bookmark className="w-3.5 h-3.5 fill-current" />
-              <span>Đã Lưu ({savedCount})</span>
-            </button>
-
-            {/* Sàn Lead Board */}
-            <button
-              id="go-to-public-leadboard-btn"
-              onClick={() => onNavigate({ type: 'public', tab: 'lead-board' })}
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold text-white bg-indigo-500 hover:bg-indigo-600 active:bg-indigo-700 rounded-xl shadow-lg shadow-indigo-600/30 transition-all cursor-pointer"
-            >
-              <Globe className="w-4 h-4" />
-              <span>+ Khám Phá Sàn Lead Board</span>
-            </button>
-          </div>
         </div>
 
         {/* 4 Interactive KPI Cards in LeadBoard Dark Style */}
@@ -455,11 +424,10 @@ export const SupplierLeadsPage: React.FC<SupplierLeadsPageProps> = ({
           {/* Card 1: Đang Mở - Open (Blue) */}
           <div 
             onClick={() => {
-              setStatusFilter(statusFilter === 'Open' && viewScope === 'ALL' ? 'ALL' : 'Open');
-              setViewScope('ALL');
+              setStatusFilter(statusFilter === 'Open' ? 'ALL' : 'Open');
             }}
             className={`backdrop-blur-md rounded-2xl p-4 border transition-all cursor-pointer group select-none ${
-              statusFilter === 'Open' && viewScope === 'ALL'
+              statusFilter === 'Open'
                 ? 'bg-slate-800/90 border-blue-400 ring-2 ring-blue-400/40 shadow-lg shadow-blue-950/40'
                 : 'bg-slate-800/60 border-white/10 hover:border-blue-500/40'
             }`}
@@ -480,11 +448,10 @@ export const SupplierLeadsPage: React.FC<SupplierLeadsPageProps> = ({
           {/* Card 2: Đã Báo Giá - Quoted (Purple) */}
           <div 
             onClick={() => {
-              setStatusFilter(statusFilter === 'Quoted' && viewScope === 'ALL' ? 'ALL' : 'Quoted');
-              setViewScope('ALL');
+              setStatusFilter(statusFilter === 'Quoted' ? 'ALL' : 'Quoted');
             }}
             className={`backdrop-blur-md rounded-2xl p-4 border transition-all cursor-pointer group select-none ${
-              statusFilter === 'Quoted' && viewScope === 'ALL'
+              statusFilter === 'Quoted'
                 ? 'bg-slate-800/90 border-purple-400 ring-2 ring-purple-400/40 shadow-lg shadow-purple-950/40'
                 : 'bg-slate-800/60 border-white/10 hover:border-purple-500/40'
             }`}
@@ -505,11 +472,10 @@ export const SupplierLeadsPage: React.FC<SupplierLeadsPageProps> = ({
           {/* Card 3: Thắng Thầu - Won (Emerald) */}
           <div 
             onClick={() => {
-              setStatusFilter(statusFilter === 'Won' && viewScope === 'ALL' ? 'ALL' : 'Won');
-              setViewScope('ALL');
+              setStatusFilter(statusFilter === 'Won' ? 'ALL' : 'Won');
             }}
             className={`backdrop-blur-md rounded-2xl p-4 border transition-all cursor-pointer group select-none ${
-              statusFilter === 'Won' && viewScope === 'ALL'
+              statusFilter === 'Won'
                 ? 'bg-slate-800/90 border-emerald-400 ring-2 ring-emerald-400/40 shadow-lg shadow-emerald-950/40'
                 : 'bg-slate-800/60 border-white/10 hover:border-emerald-500/40'
             }`}
@@ -530,11 +496,10 @@ export const SupplierLeadsPage: React.FC<SupplierLeadsPageProps> = ({
           {/* Card 4: Trượt Thầu - Lost (Rose) */}
           <div 
             onClick={() => {
-              setStatusFilter(statusFilter === 'Lost' && viewScope === 'ALL' ? 'ALL' : 'Lost');
-              setViewScope('ALL');
+              setStatusFilter(statusFilter === 'Lost' ? 'ALL' : 'Lost');
             }}
             className={`backdrop-blur-md rounded-2xl p-4 border transition-all cursor-pointer group select-none ${
-              statusFilter === 'Lost' && viewScope === 'ALL'
+              statusFilter === 'Lost'
                 ? 'bg-slate-800/90 border-rose-400 ring-2 ring-rose-400/40 shadow-lg shadow-rose-950/40'
                 : 'bg-slate-800/60 border-white/10 hover:border-rose-500/40'
             }`}
@@ -578,33 +543,6 @@ export const SupplierLeadsPage: React.FC<SupplierLeadsPageProps> = ({
         </div>
 
         <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
-          {/* Scope Toggle (Tất cả / Đã lưu) */}
-          <div className="inline-flex p-1 bg-slate-100 rounded-xl border border-slate-200 text-xs font-semibold">
-            <button
-              type="button"
-              onClick={() => setViewScope('ALL')}
-              className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
-                viewScope === 'ALL'
-                  ? 'bg-white text-indigo-700 shadow-2xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Tất cả Leads ({leads.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewScope('SAVED')}
-              className={`px-3 py-1 rounded-lg transition-all cursor-pointer flex items-center gap-1 ${
-                viewScope === 'SAVED'
-                  ? 'bg-amber-50 text-amber-800 shadow-2xs font-bold'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <Bookmark className="w-3.5 h-3.5 text-amber-500" />
-              <span>Đã lưu ({savedCount})</span>
-            </button>
-          </div>
-
           {/* Service Filter */}
           <select
             id="supplier-lead-service-select"
@@ -873,14 +811,10 @@ export const SupplierLeadsPage: React.FC<SupplierLeadsPageProps> = ({
                     <td colSpan={11} className="py-16 text-center text-slate-400">
                       <div className="max-w-md mx-auto space-y-2">
                         <p className="font-bold text-slate-700 text-sm">
-                          {viewScope === 'SAVED'
-                            ? 'Chưa có tuyến vận tải nào được lưu'
-                            : 'Không tìm thấy cơ hội vận tải nào phù hợp'}
+                          Không tìm thấy cơ hội vận tải nào phù hợp
                         </p>
                         <p className="text-xs text-slate-400">
-                          {viewScope === 'SAVED'
-                            ? 'Hãy mở thẻ chi tiết Lead và bấm nút Lưu để theo dõi các tuyến tiềm năng.'
-                            : 'Hãy thử thay đổi từ khóa tìm kiếm hoặc điều chỉnh lại bộ lọc.'}
+                          Hãy thử thay đổi từ khóa tìm kiếm hoặc điều chỉnh lại bộ lọc.
                         </p>
                       </div>
                     </td>
@@ -971,14 +905,19 @@ export const SupplierLeadsPage: React.FC<SupplierLeadsPageProps> = ({
 
                           {/* Cột 8: Tổng Giá Trị */}
                           <td className="py-2.5 px-2 text-right whitespace-nowrap">
-                            <div className="space-y-0.5">
-                              <span className="text-xs sm:text-[12.5px] font-black text-emerald-700 block tracking-tight">
-                                {(lead.estimatedValueVND || (lead.estimatedValueDisplay ? parseInt(lead.estimatedValueDisplay.replace(/\D/g, ''), 10) : 0) || 0).toLocaleString('vi-VN')}
-                              </span>
-                              <span className="text-[9.5px] font-semibold text-slate-500 block">
-                                {isContract ? 'VNĐ / tháng' : 'VNĐ / lô'}
-                              </span>
-                            </div>
+                            {(() => {
+                              const pricing = getLeadOrInquiryPricing(lead);
+                              return (
+                                <div className="space-y-0.5">
+                                  <span className="text-xs sm:text-[12.5px] font-black text-emerald-700 block tracking-tight">
+                                    {pricing.formattedAmount}
+                                  </span>
+                                  <span className="text-[9.5px] font-semibold text-slate-500 block">
+                                    {pricing.unitSuffix}
+                                  </span>
+                                </div>
+                              );
+                            })()}
                           </td>
 
                           {/* Cột 9: Trạng Thái (Status - Có Lost) */}
@@ -1009,11 +948,11 @@ export const SupplierLeadsPage: React.FC<SupplierLeadsPageProps> = ({
                                 setSelectedDetailLead(lead);
                                 if (onIncrementLeadViews) onIncrementLeadViews(lead.id);
                               }}
-                              className="px-2.5 py-1 text-xs font-bold rounded-xl transition-all inline-flex items-center justify-center gap-1 cursor-pointer shadow-2xs bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 hover:border-indigo-300"
-                              title="Mở xem tóm tắt yêu cầu báo giá"
+                              className="px-2.5 py-1 text-xs font-bold rounded-xl transition-all inline-flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs bg-orange-50 hover:bg-orange-100 text-orange-700 hover:text-orange-800 border border-orange-200/90 hover:border-orange-300 active:scale-95"
+                              title="Mở xem đầy đủ yêu cầu báo giá"
                             >
-                              <span>Xem chi tiết</span>
-                              <ChevronRight className="w-3.5 h-3.5" />
+                              <Maximize2 className="w-3.5 h-3.5 text-orange-600 shrink-0" />
+                              <span>Xem đầy đủ</span>
                             </button>
                           </td>
                         </tr>

@@ -324,7 +324,7 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
         onChange({
           ...specs,
           billingUnitPreference: 'Order (Hoàn tất đơn hàng TMĐT)',
-          bufferPalletPositions: specs.bufferPalletPositions || 20,
+          bufferPalletPositions: specs.bufferPalletPositions,
         });
       }
     } else if (specs.warehouseType === 'Kho tự quản (Self-Storage)') {
@@ -332,7 +332,7 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
         onChange({
           ...specs,
           billingUnitPreference: 'm² (Diện tích sàn)',
-          storageAreaSqm: specs.storageAreaSqm || 500,
+          storageAreaSqm: specs.storageAreaSqm,
         });
       }
     } else {
@@ -340,7 +340,7 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
         onChange({
           ...specs,
           billingUnitPreference: 'm² (Diện tích sàn)',
-          storageAreaSqm: specs.storageAreaSqm || 500,
+          storageAreaSqm: specs.storageAreaSqm,
         });
       }
     }

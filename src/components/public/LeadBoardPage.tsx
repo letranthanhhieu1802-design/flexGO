@@ -43,6 +43,7 @@ import {
   HelpCircle,
   RotateCcw,
   Zap,
+  Maximize2,
   Lock,
   Unlock,
   Phone,
@@ -68,6 +69,7 @@ import {
 import { SupplierLeadItem, ServiceType, CurrentView, UserPersona, PricingType, LeadStatus, QuotationItem, FlexCreditWallet } from '../../types';
 import { InquirySummaryConfirmModal } from '../customer/InquirySummaryConfirmModal';
 import { LeadInquiryDetailCard } from './LeadInquiryDetailCard';
+import { getLeadOrInquiryPricing } from '../../utils/pricingCalculator';
 
 interface LeadBoardPageProps {
   leads: SupplierLeadItem[];
@@ -1271,14 +1273,19 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
 
                         {/* Cột 8: Tổng Giá Trị */}
                         <td className="py-2.5 px-2 text-right whitespace-nowrap">
-                          <div className="space-y-0.5">
-                            <span className="text-xs sm:text-[12.5px] font-black text-emerald-700 block tracking-tight">
-                              {(lead.estimatedValueVND || (lead.estimatedValueDisplay ? parseInt(lead.estimatedValueDisplay.replace(/\D/g, ''), 10) : 0) || 0).toLocaleString('vi-VN')}
-                            </span>
-                            <span className="text-[9.5px] font-semibold text-slate-500 block">
-                              {isContract ? 'VNĐ / tháng' : 'VNĐ / lô'}
-                            </span>
-                          </div>
+                          {(() => {
+                            const pricing = getLeadOrInquiryPricing(lead);
+                            return (
+                              <div className="space-y-0.5">
+                                <span className="text-xs sm:text-[12.5px] font-black text-emerald-700 block tracking-tight">
+                                  {pricing.formattedAmount}
+                                </span>
+                                <span className="text-[9.5px] font-semibold text-slate-500 block">
+                                  {pricing.unitSuffix}
+                                </span>
+                              </div>
+                            );
+                          })()}
                         </td>
 
                         {/* Cột 9: Thống Kê Báo Giá & Lượt Xem */}
@@ -1302,11 +1309,11 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
                               setSelectedDetailLead(lead);
                               if (onIncrementLeadViews) onIncrementLeadViews(lead.id);
                             }}
-                            className="px-2.5 py-1 text-xs font-bold rounded-xl transition-all inline-flex items-center justify-center gap-1 cursor-pointer shadow-2xs bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 hover:border-indigo-300"
-                            title="Mở xem tóm tắt yêu cầu báo giá"
+                            className="px-2.5 py-1 text-xs font-bold rounded-xl transition-all inline-flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs bg-orange-50 hover:bg-orange-100 text-orange-700 hover:text-orange-800 border border-orange-200/90 hover:border-orange-300 active:scale-95"
+                            title="Mở xem đầy đủ yêu cầu báo giá"
                           >
-                            <span>Xem chi tiết</span>
-                            <ChevronRight className="w-3.5 h-3.5" />
+                            <Maximize2 className="w-3.5 h-3.5 text-orange-600 shrink-0" />
+                            <span>Xem đầy đủ</span>
                           </button>
                         </td>
                       </tr>

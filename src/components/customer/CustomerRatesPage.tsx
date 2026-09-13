@@ -653,8 +653,7 @@ export const CustomerRatesPage: React.FC<CustomerRatesPageProps> = ({
                                     e.stopPropagation();
                                     onNavigate({
                                       type: 'workspace',
-                                      view: 'customer-inquiry-detail',
-                                      params: { inquiryCode: rate.linkedInquiryCode },
+                                      view: 'customer-inquiries',
                                     });
                                   }}
                                   className="text-[10.5px] text-indigo-600 hover:underline flex items-center gap-0.5 font-mono block"

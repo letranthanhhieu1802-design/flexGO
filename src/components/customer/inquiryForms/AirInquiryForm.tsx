@@ -205,8 +205,8 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
               onChange({
                 ...specs,
                 airServiceType: 'Air Freight / Cargo',
-                originServiceTerm: specs.originServiceTerm || 'AIRPORT',
-                destinationServiceTerm: specs.destinationServiceTerm || 'AIRPORT',
+                originServiceTerm: specs.originServiceTerm || '',
+                destinationServiceTerm: specs.destinationServiceTerm || '',
               });
             }}
             className={`p-3 rounded-xl text-left cursor-pointer transition-all flex items-start gap-3 border ${
@@ -234,10 +234,8 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
               onChange({
                 ...specs,
                 airServiceType: 'Express / Courier',
-                originServiceTerm: 'DOOR',
-                destinationServiceTerm: 'DOOR',
-                expressPackageType: specs.expressPackageType || 'Parcel / Package (Bưu phẩm / Hàng mẫu đóng hộp)',
-                expressSpeedLevel: specs.expressSpeedLevel || 'Express Tiêu Chuẩn (2-3 ngày)',
+                originServiceTerm: 'Door',
+                destinationServiceTerm: 'Door',
               });
             }}
             className={`p-3 rounded-xl text-left cursor-pointer transition-all flex items-start gap-3 border ${

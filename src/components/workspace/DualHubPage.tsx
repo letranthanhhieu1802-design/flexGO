@@ -105,7 +105,7 @@ export const DualHubPage: React.FC<DualHubPageProps> = ({
               {inquiries.slice(0, 2).map((inq) => (
                 <div
                   key={inq.id}
-                  onClick={() => onNavigate({ type: 'workspace', view: 'customer-inquiry-detail', params: { inquiryCode: inq.code } })}
+                  onClick={() => onNavigate({ type: 'workspace', view: 'customer-inquiries' })}
                   className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 hover:border-indigo-200 transition-all cursor-pointer"
                 >
                   <div className="flex items-center justify-between text-xs">
@@ -187,12 +187,6 @@ export const DualHubPage: React.FC<DualHubPageProps> = ({
             >
               <span>Open My Leads</span>
               <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={() => onNavigate({ type: 'workspace', view: 'supplier-pipeline' })}
-              className="text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl transition-colors"
-            >
-              Sales Kanban
             </button>
           </div>
         </div>

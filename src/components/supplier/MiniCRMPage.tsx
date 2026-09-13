@@ -44,7 +44,6 @@ export const MiniCRMPage: React.FC<MiniCRMPageProps> = ({
   onNavigate,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [sourceFilter, setSourceFilter] = useState<string>('ALL');
 
   // Calculate Seen (A) and Unseen (B) inquiries for each customer
@@ -124,23 +123,9 @@ export const MiniCRMPage: React.FC<MiniCRMPageProps> = ({
       (c.sourceDetails?.leadCode && c.sourceDetails.leadCode.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (c.sourceDetails?.quoteCode && c.sourceDetails.quoteCode.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    const matchesStatus = statusFilter === 'ALL' || c.status === statusFilter;
     const matchesSource = sourceFilter === 'ALL' || c.source === sourceFilter;
-    return matchesSearch && matchesStatus && matchesSource;
+    return matchesSearch && matchesSource;
   });
-
-  const getStatusBadge = (status: CRMCustomer['status']) => {
-    switch (status) {
-      case 'VIP':
-        return 'bg-purple-100 text-purple-800 border-purple-200 font-bold';
-      case 'Active':
-        return 'bg-emerald-100 text-emerald-800 border-emerald-200 font-semibold';
-      case 'Prospect':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'Dormant':
-        return 'bg-slate-100 text-slate-500 border-slate-200';
-    }
-  };
 
   const renderSourceBadge = (customer: CRMCustomer) => {
     const source = customer.source || 'FLEXCREDIT_UNLOCKED';
@@ -195,26 +180,6 @@ export const MiniCRMPage: React.FC<MiniCRMPageProps> = ({
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
               Quản lý tập trung tài khoản khách hàng từ 3 nguồn: <strong>Mở khóa FlexCredit</strong>, <strong>Landing Page Doanh nghiệp</strong> và <strong>Trao thầu Báo giá (Won)</strong>.
             </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-            <button
-              id="goto-leadboard-btn"
-              onClick={() => onNavigate({ type: 'workspace', view: 'supplier-leads' })}
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold text-amber-200 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/30 rounded-xl transition-all cursor-pointer shadow-xs"
-            >
-              <Zap className="w-3.5 h-3.5 text-amber-400 fill-amber-400/30" />
-              <span>Sàn Lead Board</span>
-            </button>
-
-            <button
-              id="goto-sales-pipeline-btn"
-              onClick={() => onNavigate({ type: 'workspace', view: 'supplier-pipeline' })}
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold text-white bg-indigo-500 hover:bg-indigo-600 active:bg-indigo-700 rounded-xl shadow-lg shadow-indigo-600/30 transition-all cursor-pointer"
-            >
-              <TrendingUp className="w-4 h-4" />
-              <span>+ Sales Pipeline</span>
-            </button>
           </div>
         </div>
 
@@ -310,40 +275,6 @@ export const MiniCRMPage: React.FC<MiniCRMPageProps> = ({
         </div>
       </div>
 
-      {/* Source Quick Filter Tabs */}
-      <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-1">
-        {[
-          { id: 'ALL', label: 'Tất cả nguồn', count: totalCount, icon: Layers },
-          { id: 'FLEXCREDIT_UNLOCKED', label: '1. Mở khóa Lead Board (FlexCredit)', count: flexCreditCount, icon: Coins },
-          { id: 'DIRECT_PROFILE_REQUEST', label: '2. Landing Page / Profile Inbound (Free)', count: directProfileCount, icon: Globe },
-          { id: 'AWARDED_QUOTE', label: '3. Trao thầu Báo giá (Awarded)', count: awardedCount, icon: Trophy },
-        ].map((tab) => {
-          const Icon = tab.icon;
-          const isActive = sourceFilter === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setSourceFilter(tab.id)}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
-                isActive
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
-              }`}
-            >
-              <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-indigo-400' : 'text-slate-400'}`} />
-              <span>{tab.label}</span>
-              <span
-                className={`px-1.5 py-0.5 text-[10px] rounded-full font-black ${
-                  isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'
-                }`}
-              >
-                {tab.count}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-
       {/* Search & Filters Bar */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-3 p-3 bg-white rounded-2xl border border-slate-200 shadow-2xs mb-6">
         <div className="relative w-full md:w-96">
@@ -369,18 +300,6 @@ export const MiniCRMPage: React.FC<MiniCRMPageProps> = ({
             <option value="FLEXCREDIT_UNLOCKED">⚡ 1. Mở khóa Lead Board (FlexCredit)</option>
             <option value="DIRECT_PROFILE_REQUEST">🌐 2. Supplier Profile / Landing Page</option>
             <option value="AWARDED_QUOTE">🏆 3. Khách hàng Trao thầu (Awarded)</option>
-          </select>
-
-          <select
-            id="crm-status-filter"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 text-xs font-medium bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-hidden"
-          >
-            <option value="ALL">Tất cả hạng VIP/Active</option>
-            <option value="VIP">Hạng VIP</option>
-            <option value="Active">Hạng Active</option>
-            <option value="Prospect">Hạng Prospect</option>
           </select>
         </div>
       </div>

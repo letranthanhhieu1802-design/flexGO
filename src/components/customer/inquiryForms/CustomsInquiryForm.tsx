@@ -100,7 +100,8 @@ export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
     });
   };
 
-  const isImport = specs.tradeRole !== 'Xuất khẩu (Export)';
+  const isImport = specs.tradeRole === 'Nhập khẩu (Import)';
+  const isExport = specs.tradeRole === 'Xuất khẩu (Export)';
 
   // Options by trade role
   const importDeclarationTypes = [
@@ -122,7 +123,7 @@ export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
     { value: 'Phi mậu dịch (H21)', label: 'H21 - Hàng quà biếu, hàng mẫu phi mậu dịch' },
   ];
 
-  const currentDeclarationOptions = isImport ? importDeclarationTypes : exportDeclarationTypes;
+  const currentDeclarationOptions = isImport ? importDeclarationTypes : (isExport ? exportDeclarationTypes : []);
 
   return (
     <div className="space-y-5 animate-in fade-in duration-200">
@@ -133,11 +134,13 @@ export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
             <ArrowLeftRight className="w-3.5 h-3.5 text-amber-600" />
             <span>Mô Hình Thủ Tục Hải Quan <span className="text-red-500">*</span></span>
           </label>
-          <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-lg border border-amber-200">
-            {specs.tradeRole === 'Xuất khẩu (Export)'
-              ? '🛫 Đầu Xuất (Export Clearance)'
-              : '🛬 Đầu Nhập (Import Clearance)'}
-          </span>
+          {specs.tradeRole && (
+            <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-lg border border-amber-200">
+              {specs.tradeRole === 'Xuất khẩu (Export)'
+                ? '🛫 Đầu Xuất (Export Clearance)'
+                : '🛬 Đầu Nhập (Import Clearance)'}
+            </span>
+          )}
         </div>
         <div className="grid grid-cols-2 gap-2.5">
           {[
@@ -152,7 +155,7 @@ export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
               sub: 'Mở tờ khai B11, B13, E62, E52, H21...',
             },
           ].map((item) => {
-            const isSelected = (specs.tradeRole || 'Nhập khẩu (Import)') === item.role;
+            const isSelected = specs.tradeRole === item.role;
             return (
               <button
                 type="button"
@@ -187,20 +190,23 @@ export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-semibold text-slate-700 mb-1">
-            Loại Hình Tờ Khai Hải Quan ({isImport ? 'Nhập khẩu' : 'Xuất khẩu'}) <span className="text-red-500">*</span>
+            Loại Hình Tờ Khai Hải Quan <span className="text-red-500">*</span>
           </label>
           <select
             required
             data-invalid={showValidationHighlight && !specs.declarationType ? 'true' : undefined}
             value={specs.declarationType || ''}
             onChange={(e) => updateSpec('declarationType', e.target.value)}
+            disabled={!specs.tradeRole}
             className={`w-full h-10 px-3.5 text-xs bg-white border rounded-xl focus:border-amber-500 font-semibold shadow-2xs cursor-pointer ${
               showValidationHighlight && !specs.declarationType
                 ? 'border-rose-400 bg-rose-50/40 text-rose-900'
                 : 'border-slate-200 text-slate-900'
-            }`}
+            } ${!specs.tradeRole ? 'opacity-60 cursor-not-allowed' : ''}`}
           >
-            <option value="">-- Chọn Loại Hình Tờ Khai --</option>
+            <option value="">
+              {!specs.tradeRole ? '-- Vui lòng chọn mô hình thủ tục trước --' : '-- Chọn Loại Hình Tờ Khai --'}
+            </option>
             {currentDeclarationOptions.map((opt) => (
               <option key={opt.value} value={opt.value}>
                 {opt.label}
@@ -220,7 +226,7 @@ export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
           <select
             required
             data-invalid={showValidationHighlight && !specs.declarationEntity ? 'true' : undefined}
-            value={specs.declarationEntity || 'Chủ hàng đứng tên trực tiếp (Token DN)'}
+            value={specs.declarationEntity || ''}
             onChange={(e) => updateSpec('declarationEntity', e.target.value)}
             className={`w-full h-10 px-3.5 text-xs bg-white border rounded-xl focus:border-amber-500 font-semibold shadow-2xs cursor-pointer ${
               showValidationHighlight && !specs.declarationEntity
@@ -228,6 +234,7 @@ export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
                 : 'border-slate-200 text-slate-900'
             }`}
           >
+            <option value="">-- Chọn hình thức đứng tên tờ khai --</option>
             <option value="Chủ hàng đứng tên trực tiếp (Token DN)">
               Chủ hàng đứng tên trực tiếp (DN cấp chữ ký số / ký từ xa)
             </option>
@@ -235,6 +242,9 @@ export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
               Đại lý Hải quan đứng tên (Khai thuê & ký chữ ký số Đại lý)
             </option>
           </select>
+          {showValidationHighlight && !specs.declarationEntity && (
+            <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng chọn hình thức đứng tên tờ khai</p>
+          )}
         </div>
       </div>
 
@@ -305,8 +315,8 @@ export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
             min={1}
             required
             data-invalid={showValidationHighlight && (!specs.declarationCount || specs.declarationCount < 1) ? 'true' : undefined}
-            value={specs.declarationCount !== undefined && specs.declarationCount !== null ? specs.declarationCount : 1}
-            onChange={(e) => updateSpec('declarationCount', parseInt(e.target.value, 10) || 1)}
+            value={specs.declarationCount !== undefined && specs.declarationCount !== null && specs.declarationCount > 0 ? specs.declarationCount : ''}
+            onChange={(e) => updateSpec('declarationCount', e.target.value ? parseInt(e.target.value, 10) : undefined as any)}
             className={`w-full h-10 px-3.5 text-xs bg-white border rounded-xl focus:border-amber-500 font-bold shadow-2xs ${
               showValidationHighlight && (!specs.declarationCount || specs.declarationCount < 1)
                 ? 'border-rose-400 bg-rose-50/40 text-rose-900'
@@ -327,7 +337,7 @@ export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
           <select
             required
             data-invalid={showValidationHighlight && !specs.declarationFrequencyUnit ? 'true' : undefined}
-            value={specs.declarationFrequencyUnit || (pricingType === 'CONTRACT' ? 'Tờ khai / Tháng' : 'Tờ khai một lần (Spot)')}
+            value={specs.declarationFrequencyUnit || ''}
             onChange={(e) => updateSpec('declarationFrequencyUnit', e.target.value)}
             className={`w-full h-10 px-3.5 text-xs bg-white border rounded-xl focus:border-amber-500 font-semibold shadow-2xs cursor-pointer ${
               showValidationHighlight && !specs.declarationFrequencyUnit
@@ -335,6 +345,7 @@ export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
                 : 'border-slate-200 text-slate-900'
             }`}
           >
+            <option value="">-- Chọn Tần Suất Khai Báo --</option>
             <option value="Tờ khai một lần (Spot)">Tờ khai một lần (Giao dịch Spot)</option>
             <option value="Tờ khai / Tuần">Tờ khai / Tuần</option>
             <option value="Tờ khai / Tháng">Tờ khai / Tháng (Hợp đồng định kỳ)</option>
@@ -355,11 +366,11 @@ export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
             <span>Form C/O Ưu Đãi Yêu Cầu (Certificate of Origin)</span>
           </label>
           <select
-            value={specs.coFormRequested || 'Không yêu cầu'}
+            value={specs.coFormRequested || ''}
             onChange={(e) => updateSpec('coFormRequested', e.target.value)}
             className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-amber-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
           >
-            <option value="Không yêu cầu">Không yêu cầu C/O</option>
+            <option value="">-- Không yêu cầu C/O (để trống nếu không cần) --</option>
             <option value="Form E (ASEAN-China)">Form E (ASEAN - Trung Quốc: ACFTA)</option>
             <option value="Form D (ASEAN)">Form D (Nội khối ASEAN: ATIGA)</option>
             <option value="Form EUR.1 (EVFTA)">Form EUR.1 (Hiệp định EVFTA Châu Âu)</option>
@@ -376,11 +387,11 @@ export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
             <span>Thủ Tục Kiểm Tra Chuyên Ngành (Nếu có)</span>
           </label>
           <select
-            value={specs.specializedInspectionType || 'Không có'}
+            value={specs.specializedInspectionType || ''}
             onChange={(e) => updateSpec('specializedInspectionType', e.target.value)}
             className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-amber-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
           >
-            <option value="Không có">Không có kiểm tra chuyên ngành</option>
+            <option value="">-- Không có kiểm tra chuyên ngành (để trống nếu không cần) --</option>
             <option value="Kiểm dịch thực vật / động vật">🌿 Kiểm dịch Thực vật / Động vật (Phytosanitary/Veterinary)</option>
             <option value="Vệ sinh An toàn Thực phẩm">🥗 Kiểm tra Vệ sinh An toàn Thực phẩm (Food Safety)</option>
             <option value="Kiểm tra Hiệu suất Năng lượng">⚡ Kiểm tra Hiệu suất Năng lượng & Dán nhãn năng lượng</option>

@@ -689,10 +689,11 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
           Phương Thức Vượt Biên Giới <span className="text-red-500">*</span>
         </label>
         <select
-          value={specs.cargoMode || 'Xe liên vận chạy thẳng (Direct GMS)'}
+          value={specs.cargoMode || ''}
           onChange={(e) => updateSpec('cargoMode', e.target.value as any)}
           className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-bold text-orange-950 shadow-2xs cursor-pointer"
         >
+          <option value="">-- Chọn Phương Thức Vượt Biên Giới --</option>
           <option value="Xe liên vận chạy thẳng (Direct GMS)">Xe liên vận chạy thẳng không sang tải (Direct GMS)</option>
           <option value="Sang tải / Đổi đầu kéo tại cửa khẩu (Transshipment)">Sang tải / Đổi đầu kéo tại bãi cửa khẩu (Transshipment)</option>
         </select>
@@ -703,10 +704,11 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
           Phạm Vi Dịch Vụ Hải Quan Cửa Khẩu <span className="text-red-500">*</span>
         </label>
         <select
-          value={specs.customsScope || 'Thông quan Trọn gói 2 đầu (VN + Nước bạn)'}
+          value={specs.customsScope || ''}
           onChange={(e) => updateSpec('customsScope', e.target.value as any)}
           className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-bold text-orange-950 shadow-2xs cursor-pointer"
         >
+          <option value="">-- Chọn Phạm Vi Dịch Vụ Hải Quan Cửa Khẩu --</option>
           <option value="Thông quan Trọn gói 2 đầu (VN + Nước bạn)">Trọn gói Hải quan 2 đầu (Hải quan VN + Nước bạn)</option>
           <option value="Thông quan Hải quan đầu VN">Chỉ thông quan Hải quan đầu Việt Nam</option>
           <option value="Chỉ cước vận chuyển (Chủ hàng tự làm HQ)">Chỉ vận chuyển thuần túy (Chủ hàng tự mở tờ khai)</option>

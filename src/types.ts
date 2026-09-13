@@ -6,7 +6,6 @@ export type PublicTab = PublicNavTab;
 export type WorkspaceView =
   // Customer Views
   | 'customer-inquiries'
-  | 'customer-inquiry-detail'
   | 'customer-quotations'
   | 'customer-compare'
   | 'customer-suppliers'
@@ -18,7 +17,6 @@ export type WorkspaceView =
   | 'supplier-crm'
   | 'supplier-crm-customers'
   | 'supplier-crm-customer-detail'
-  | 'supplier-pipeline'
   | 'supplier-analytics'
   | 'supplier-contracts'
   | 'supplier-profile-edit'
@@ -752,6 +750,7 @@ export interface SupplierLeadItem {
   unitPriceDisplay: string; // Đơn giá dự kiến: e.g. '16,600,000 ₫ / chuyến', '70,000,000 ₫ / cont'
   estimatedValueVND: number; // Tổng giá trị dự kiến
   estimatedValueDisplay: string;
+  currency?: string; // Đơn vị tiền tệ theo khách hàng yêu cầu (VND, USD, etc.)
   createdDate: string;
   dueDate?: string; // Hạn chót nộp báo giá (Due Date)
   status: LeadStatus;

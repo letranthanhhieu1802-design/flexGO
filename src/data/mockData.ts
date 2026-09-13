@@ -1475,7 +1475,7 @@ export const mockNotifications: NotificationItem[] = [
     timeAgo: '10 mins ago',
     read: false,
     type: 'quote_received',
-    actionTarget: { type: 'workspace', view: 'customer-inquiry-detail', contextId: 'inq-01' },
+    actionTarget: { type: 'workspace', view: 'customer-inquiries', contextId: 'inq-01' },
   },
   {
     id: 'notif-02',

@@ -296,10 +296,11 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
                   Kênh Phân Phối Mục Tiêu (Distribution Channel) <span className="text-red-500">*</span>
                 </label>
                 <select
-                  value={specs.distributionChannel || 'B2B / Siêu thị (Modern Trade)'}
+                  value={specs.distributionChannel || ''}
                   onChange={(e) => updateSpec('distributionChannel', e.target.value as any)}
                   className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-bold text-slate-900 cursor-pointer shadow-2xs"
                 >
+                  <option value="">-- Chọn Kênh Phân Phối Mục Tiêu --</option>
                   <option value="B2B / Siêu thị (Modern Trade)">🏢 Chuỗi Siêu thị / TTTM (Modern Trade - MT)</option>
                   <option value="Đại lý truyền thống (General Trade)">🏪 Hệ thống Nhà phân phối & Đại lý cấp 1 (General Trade - GT)</option>
                   <option value="Chuỗi bán lẻ (Retail Chain)">🛍️ Chuỗi Cửa hàng Bán lẻ / Showroom / F&B (Retail Chain)</option>
@@ -312,10 +313,11 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
                   Phạm Vi Địa Lý Phân Phối (Geographical Coverage) <span className="text-red-500">*</span>
                 </label>
                 <select
-                  value={specs.coverageScope || 'Toàn quốc (Bắc - Trung - Nam)'}
+                  value={specs.coverageScope || ''}
                   onChange={(e) => updateSpec('coverageScope', e.target.value as any)}
                   className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-bold text-slate-900 cursor-pointer shadow-2xs"
                 >
+                  <option value="">-- Chọn Phạm Vi Địa Lý Phân Phối --</option>
                   <option value="Toàn quốc (Bắc - Trung - Nam)">🇻🇳 Mạng lưới Toàn Quốc (Bắc - Trung - Nam)</option>
                   <option value="Miền Nam & ĐBSCL">🌴 Khu vực Miền Nam & Đồng Bằng Sông Cửu Long</option>
                   <option value="Miền Bắc & Vệ tinh">🏙️ Khu vực Miền Bắc & Các tỉnh Vệ tinh</option>
@@ -450,7 +452,7 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
                   min={1}
                   required
                   data-invalid={showValidationHighlight && (!specs.tripCount || specs.tripCount < 1) ? 'true' : undefined}
-                  value={specs.tripCount ?? (specs.monthlyTripsOrVolume ? parseInt(specs.monthlyTripsOrVolume, 10) || 150 : 150)}
+                  value={specs.tripCount !== undefined && specs.tripCount !== null ? (specs.tripCount === 0 ? '' : specs.tripCount) : ''}
                   onChange={(e) => {
                     const val = e.target.value ? parseInt(e.target.value, 10) : undefined;
                     updateSpec('tripCount', val);
@@ -475,11 +477,11 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
                 <select
                   required
                   data-invalid={showValidationHighlight && !specs.frequencyUnit ? 'true' : undefined}
-                  value={specs.frequencyUnit || 'Tháng (Chuyến / Tháng)'}
+                  value={specs.frequencyUnit || ''}
                   onChange={(e) => {
                     updateSpec('frequencyUnit', e.target.value);
-                    const count = specs.tripCount ?? 150;
-                    updateSpec('monthlyTripsOrVolume', `${count} ${e.target.value}`);
+                    const count = specs.tripCount;
+                    updateSpec('monthlyTripsOrVolume', count ? `${count} ${e.target.value}` : '');
                   }}
                   className={`w-full h-10 px-3.5 py-2.5 text-xs bg-white border rounded-xl focus:border-indigo-500 font-bold cursor-pointer shadow-2xs ${
                     showValidationHighlight && !specs.frequencyUnit
@@ -487,6 +489,7 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
                       : 'border-slate-200 text-slate-900'
                   }`}
                 >
+                  <option value="">-- Chọn Đơn Vị Tần Suất --</option>
                   <option value="Tháng (Chuyến / Tháng)">📅 Tháng (Chuyến / Tháng)</option>
                   <option value="Tuần (Chuyến / Tuần)">📅 Tuần (Chuyến / Tuần)</option>
                   <option value="Ngày (Chuyến / Ngày)">📅 Ngày (Chuyến / Ngày)</option>
@@ -616,10 +619,11 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
                   Nhiệt Độ Sàn Xử Lý Tại Trạm Cross-Dock <span className="text-red-500">*</span>
                 </label>
                 <select
-                  value={specs.xDockTemperature || 'Nhiệt độ thường (Ambient)'}
+                  value={specs.xDockTemperature || ''}
                   onChange={(e) => updateSpec('xDockTemperature', e.target.value as any)}
                   className="w-full h-10 px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-bold text-slate-900 cursor-pointer shadow-2xs"
                 >
+                  <option value="">-- Chọn Nhiệt Độ Sàn --</option>
                   <option value="Nhiệt độ thường (Ambient)">📦 Nhiệt độ thường (Ambient - FMCG / Gia dụng)</option>
                   <option value="Kiểm soát mát (Chilled 15°C - 25°C)">❄️ Kiểm soát mát (Chilled 15°C - 25°C - Mỹ phẩm, Dược phẩm)</option>
                   <option value="Lạnh sâu (Cold 2°C - 8°C)">🧊 Sàn lạnh chuyên dụng (Cold 2°C - 8°C - Thực phẩm tươi)</option>
@@ -664,10 +668,11 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
                   Đơn Vị Tính Cước Kỳ Vọng <span className="text-red-500">*</span>
                 </label>
                 <select
-                  value={specs.xDockPricingMetric || 'VND / kg'}
+                  value={specs.xDockPricingMetric || ''}
                   onChange={(e) => updateSpec('xDockPricingMetric', e.target.value as any)}
                   className="w-full h-10 px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-bold text-slate-900 cursor-pointer shadow-2xs"
                 >
+                  <option value="">-- Chọn Đơn Vị Tính Cước --</option>
                   <option value="VND / kg">⚖️ VND / kg (Theo khối lượng hàng nặng)</option>
                   <option value="VND / CBM (m³)">📦 VND / CBM m³ (Theo thể tích cồng kềnh)</option>
                   <option value="VND / Pallet">🪵 VND / Pallet (Theo vị trí Pallet chuẩn)</option>
@@ -681,10 +686,11 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
                   Tần Suất Gom Hàng Inbound <span className="text-red-500">*</span>
                 </label>
                 <select
-                  value={specs.xDockInboundFrequencyUnit || 'Ngày (Hàng ngày)'}
+                  value={specs.xDockInboundFrequencyUnit || ''}
                   onChange={(e) => updateSpec('xDockInboundFrequencyUnit', e.target.value)}
                   className="w-full h-10 px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-bold text-slate-900 cursor-pointer shadow-2xs"
                 >
+                  <option value="">-- Chọn Tần Suất Gom Hàng --</option>
                   <option value="Ngày (Hàng ngày)">📅 Hàng ngày (Daily Inbound)</option>
                   <option value="Tuần (Hàng tuần)">📅 Hàng tuần (Weekly Inbound)</option>
                   <option value="Tháng (Hàng tháng)">📅 Hàng tháng (Monthly Inbound)</option>
@@ -804,10 +810,11 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
                   Thời Gian Giải Tỏa Khỏi Sàn (Max Turnaround Time) <span className="text-red-500">*</span>
                 </label>
                 <select
-                  value={specs.outboundMaxTurnaroundTime || 'Trong vòng 4 - 8 Giờ'}
+                  value={specs.outboundMaxTurnaroundTime || ''}
                   onChange={(e) => updateSpec('outboundMaxTurnaroundTime', e.target.value)}
                   className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-bold text-slate-900 cursor-pointer shadow-2xs"
                 >
+                  <option value="">-- Chọn Thời Gian Giải Tỏa Khỏi Sàn --</option>
                   <option value="Dưới 4 Giờ (Hỏa tốc liên tục)">⚡ Dưới 4 Giờ (Hỏa tốc liên tục / Không lưu sàn)</option>
                   <option value="Trong vòng 4 - 8 Giờ">⏱️ Trong vòng 4 - 8 Giờ (Tiêu chuẩn ca làm việc)</option>
                   <option value="Trong ngày (Same-day Delivery)">🚚 Trong ngày (Same-day Delivery - Giao trước 17:00)</option>
@@ -906,10 +913,11 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
                   Hình Thức Luân Chuyển Shuttling Cảng ↔ ICD <span className="text-red-500">*</span>
                 </label>
                 <select
-                  value={specs.portIcdShuttleMode || 'Đầu kéo Sơ-mi Rơ-moóc chuyên tuyến (Dedicated Drayage)'}
+                  value={specs.portIcdShuttleMode || ''}
                   onChange={(e) => updateSpec('portIcdShuttleMode', e.target.value as any)}
                   className="w-full h-10 px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-sky-500 font-bold text-slate-900 cursor-pointer shadow-2xs"
                 >
+                  <option value="">-- Chọn Hình Thức Luân Chuyển Shuttling --</option>
                   <option value="Đầu kéo Sơ-mi Rơ-moóc chuyên tuyến (Dedicated Drayage)">🚛 Đầu kéo Sơ-mi Rơ-moóc chuyên tuyến (Dedicated Drayage)</option>
                   <option value="Sà lan sông kết nối Cảng - ICD (Inland Barge)">🚢 Sà lan sông kết nối Cảng - ICD (Inland Barge 72 - 128 TEU)</option>
                   <option value="Kết hợp Sà Lan + Đầu kéo (Barge - Road Hybrid)">🔄 Kết hợp Sà Lan + Đầu kéo (Barge - Road Hybrid Shuttle)</option>
@@ -1047,10 +1055,11 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
               <span>Mô Hình Kết Hợp Đa Phương Thức (Combination Model) <span className="text-red-500">*</span></span>
             </label>
             <select
-              value={specs.multimodalCombination || 'Đường Biển + Đường Bộ (Sea - Road Freight)'}
+              value={specs.multimodalCombination || ''}
               onChange={(e) => updateSpec('multimodalCombination', e.target.value as any)}
               className="w-full h-10 px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-teal-500 font-bold text-teal-950 cursor-pointer shadow-2xs"
             >
+              <option value="">-- Chọn Mô Hình Kết Hợp Đa Phương Thức --</option>
               <option value="Đường Biển + Đường Bộ (Sea - Road Freight)">
                 🚢 + 🚚 Đường Biển + Đường Bộ (Sea - Road: Cảng biển ↔ Drayage ↔ Kho xưởng)
               </option>
@@ -1162,10 +1171,11 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
                   Quy Cách Vỏ Container / Phương Tiện <span className="text-red-500">*</span>
                 </label>
                 <select
-                  value={specs.multimodalContainerType || 'Container 40ft High Cube (40HC)'}
+                  value={specs.multimodalContainerType || ''}
                   onChange={(e) => updateSpec('multimodalContainerType', e.target.value)}
                   className="w-full h-10 px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-teal-500 font-bold text-slate-900 cursor-pointer shadow-2xs"
                 >
+                  <option value="">-- Chọn Quy Cách Vỏ Container / Phương Tiện --</option>
                   <option value="Container 40ft High Cube (40HC)">📦 Container 40ft High Cube (40HC)</option>
                   <option value="Container 20ft (20GP)">📦 Container 20ft Tiêu Chuẩn (20GP)</option>
                   <option value="Container Lạnh 40RF (Reefer)">❄️ Container Lạnh 40RF (Reefer)</option>

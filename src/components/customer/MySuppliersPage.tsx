@@ -122,7 +122,6 @@ export const MySuppliersPage: React.FC<MySuppliersPageProps> = ({
   // Filters
   const [searchTerm, setSearchTerm] = useState('');
   const [sourceFilter, setSourceFilter] = useState<string>('ALL');
-  const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
   const [serviceFilter, setServiceFilter] = useState<string>('ALL');
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
 
@@ -201,29 +200,11 @@ export const MySuppliersPage: React.FC<MySuppliersPageProps> = ({
         (s.sourceDetails?.rateCode && s.sourceDetails.rateCode.toLowerCase().includes(searchTerm.toLowerCase()));
 
       const matchesSource = sourceFilter === 'ALL' || s.source === sourceFilter;
-      const matchesCategory = categoryFilter === 'ALL' || s.category === categoryFilter;
       const matchesService = serviceFilter === 'ALL' || s.services.includes(serviceFilter as ServiceType);
 
-      return matchesSearch && matchesSource && matchesCategory && matchesService;
+      return matchesSearch && matchesSource && matchesService;
     });
-  }, [localSuppliers, searchTerm, sourceFilter, categoryFilter, serviceFilter]);
-
-  const getCategoryBadge = (category: SupplierCategory) => {
-    switch (category) {
-      case 'Preferred':
-        return 'bg-purple-100 text-purple-800 border-purple-200 font-bold';
-      case 'Active':
-        return 'bg-emerald-100 text-emerald-800 border-emerald-200 font-semibold';
-      case 'Potential':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'Current Supplier':
-        return 'bg-sky-100 text-sky-800 border-sky-200 font-bold';
-      case 'Inactive':
-        return 'bg-slate-100 text-slate-500 border-slate-200';
-      default:
-        return 'bg-slate-100 text-slate-700 border-slate-200';
-    }
-  };
+  }, [localSuppliers, searchTerm, sourceFilter, serviceFilter]);
 
   const renderSourceBadge = (supplier: SupplierCompany) => {
     const source = supplier.source || 'AWARDED_QUOTE';
@@ -269,11 +250,8 @@ export const MySuppliersPage: React.FC<MySuppliersPageProps> = ({
               <ChevronRight className="w-3.5 h-3.5 text-indigo-400" />
               <span className="text-indigo-400 font-bold">My Suppliers (CRM Mạng Lưới Nhà Cung Cấp)</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-indigo-500/30 border border-indigo-400/40 text-indigo-300 flex items-center justify-center shadow-xs shrink-0">
-                <Building2 className="w-5 h-5 text-indigo-200" />
-              </div>
-              <span>My Suppliers</span>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+              My Suppliers
             </h1>
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
               Quản lý tập trung mạng lưới nhà cung cấp từ 3 nguồn: <strong>Trao thầu Báo giá (Awarded)</strong>, <strong>Yêu cầu Profile Trực tiếp (Direct RFQ)</strong> và <strong>Current Supplier (Khai báo giá vận hành)</strong>.
@@ -288,24 +266,6 @@ export const MySuppliersPage: React.FC<MySuppliersPageProps> = ({
             >
               <Plus className="w-3.5 h-3.5 text-sky-300" />
               <span>+ Khai Báo Current Supplier</span>
-            </button>
-
-            <button
-              id="browse-public-suppliers-btn"
-              onClick={() => onNavigate({ type: 'public', tab: 'supplier-profile' })}
-              className="px-3.5 py-2.5 text-xs font-bold text-slate-200 bg-white/10 hover:bg-white/20 border border-white/15 rounded-xl transition-all shadow-xs cursor-pointer flex items-center gap-1.5"
-            >
-              <Globe className="w-3.5 h-3.5 text-slate-300" />
-              <span>Danh Bạ Nhà Xe Công Khai</span>
-            </button>
-
-            <button
-              id="create-rfq-for-suppliers-btn"
-              onClick={() => onOpenCreateInquiry()}
-              className="flex items-center space-x-2 px-5 py-2.5 text-xs font-bold text-white bg-indigo-500 hover:bg-indigo-600 active:bg-indigo-700 rounded-xl shadow-lg shadow-indigo-600/30 transition-all cursor-pointer"
-            >
-              <Plus className="w-4 h-4" />
-              <span>+ Create Supplier RFQ</span>
             </button>
           </div>
         </div>
@@ -402,56 +362,6 @@ export const MySuppliersPage: React.FC<MySuppliersPageProps> = ({
         </div>
       </div>
 
-      {/* Source Quick Filter Tabs */}
-      <div className="flex items-center space-x-1.5 overflow-x-auto w-full p-1 bg-slate-100/90 rounded-2xl mb-6">
-        <button
-          onClick={() => setSourceFilter('ALL')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
-            sourceFilter === 'ALL'
-              ? 'bg-white text-slate-900 shadow-xs'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
-          }`}
-        >
-          Tất Cả Nguồn ({totalCount})
-        </button>
-
-        <button
-          onClick={() => setSourceFilter('AWARDED_QUOTE')}
-          className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
-            sourceFilter === 'AWARDED_QUOTE'
-              ? 'bg-white text-indigo-700 shadow-xs ring-1 ring-indigo-200'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
-          }`}
-        >
-          <Trophy className="w-3.5 h-3.5 text-indigo-600" />
-          <span>Awarded ({awardedCount})</span>
-        </button>
-
-        <button
-          onClick={() => setSourceFilter('DIRECT_PROFILE_REQUEST')}
-          className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
-            sourceFilter === 'DIRECT_PROFILE_REQUEST'
-              ? 'bg-white text-emerald-700 shadow-xs ring-1 ring-emerald-200'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
-          }`}
-        >
-          <Globe className="w-3.5 h-3.5 text-emerald-600" />
-          <span>Direct RFQ ({directProfileCount})</span>
-        </button>
-
-        <button
-          onClick={() => setSourceFilter('CURRENT_SUPPLIER')}
-          className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
-            sourceFilter === 'CURRENT_SUPPLIER'
-              ? 'bg-white text-sky-700 shadow-xs ring-1 ring-sky-200'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
-          }`}
-        >
-          <FileText className="w-3.5 h-3.5 text-sky-600" />
-          <span>Current Supplier ({currentSupplierCount})</span>
-        </button>
-      </div>
-
       {/* Search & Filter Toolbar */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-3 mb-6 bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs">
         <div className="relative w-full md:w-96">
@@ -466,20 +376,6 @@ export const MySuppliersPage: React.FC<MySuppliersPageProps> = ({
         </div>
 
         <div className="flex items-center gap-2 w-full md:w-auto flex-wrap">
-          {/* Category Filter */}
-          <div className="relative">
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="appearance-none pl-3 pr-8 py-2 text-xs font-medium bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
-            >
-              <option value="ALL">Tất cả phân loại</option>
-              <option value="Preferred">Preferred (Đối tác chiến lược)</option>
-              <option value="Active">Active (Đang vận hành)</option>
-              <option value="Potential">Potential (Tiềm năng)</option>
-              <option value="Current Supplier">Current Supplier (Ngoại sàn)</option>
-            </select>
-          </div>
 
           {/* Service Filter */}
           <div className="relative">

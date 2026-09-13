@@ -265,7 +265,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
     tonnageCategory: '',
     loadType: '',
     vehicleCount: 1,
-    vehicleCountUnit: 'Chuyến / Ngày',
+    vehicleCountUnit: '',
     pickupPointsCount: 1,
     pickupLocations: [''],
     deliveryPointsCount: 1,
@@ -323,19 +323,19 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
   const [oceanSpecs, setOceanSpecs] = useState<OceanInquirySpecs>({
     pricingType: 'SPOT',
     tradeRole: '',
-    mode: 'FCL (Full Container)',
+    mode: '',
     originServiceTerm: '',
     destinationServiceTerm: '',
-    containerType: '40ft High Cube (40HC)',
+    containerType: '',
     containerCount: 1,
-    containerCountUnit: 'Container / Chuyến',
+    containerCountUnit: '',
     lclShipmentCount: undefined,
     lclFrequencyUnit: '',
     cbmVolume: undefined,
     grossWeightKgs: undefined,
     polPort: '',
     podPort: '',
-    incoterm: 'FOB',
+    incoterm: '',
     commodityCategory: '',
     freeDemDetDaysRequested: undefined,
     packageType: '',
@@ -382,36 +382,36 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
   const [warehousingSpecs, setWarehousingSpecs] = useState<WarehousingInquirySpecs>({
     pricingType: 'SPOT',
     warehousingLeaseModel: undefined,
-    warehouseType: 'Kho thường (Grade A Dry)',
-    billingUnitPreference: 'm² (Diện tích sàn)',
+    warehouseType: '',
+    billingUnitPreference: '',
     storageAreaSqm: undefined,
     palletPositions: undefined,
     cbmVolume: undefined,
     skuCount: undefined,
     bufferStorageQty: undefined,
-    bufferStorageUnit: 'Pallet (Vị trí)',
+    bufferStorageUnit: '',
     bufferPalletPositions: undefined,
     rentalDurationMonths: undefined,
     inboundQty: undefined,
-    inboundUnit: 'Pallet',
-    inboundPeriod: 'Tuần',
+    inboundUnit: '',
+    inboundPeriod: '',
     dailyInboundVolume: undefined,
     outboundQty: undefined,
-    outboundUnit: 'Pallet',
-    outboundPeriod: 'Ngày',
+    outboundUnit: '',
+    outboundPeriod: '',
     dailyOutboundVolume: undefined,
-    inventoryMethod: 'FIFO (Nhập trước xuất trước)',
+    inventoryMethod: '',
     wmsIntegrationNeeded: false,
     selectedVAS: [],
   });
 
   const [customsSpecs, setCustomsSpecs] = useState<CustomsInquirySpecs>({
     pricingType: 'SPOT',
-    tradeRole: 'Nhập khẩu (Import)',
+    tradeRole: '',
     declarationType: '',
-    declarationEntity: 'Chủ hàng đứng tên trực tiếp (Token DN)',
+    declarationEntity: '',
     declarationCount: 1,
-    declarationFrequencyUnit: 'Tờ khai một lần (Spot)',
+    declarationFrequencyUnit: '',
     customsSubDepartment: '',
     portOrBorderGate: '',
     hsCodePrimary: '',
@@ -440,12 +440,12 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
   const [railSpecs, setRailSpecs] = useState<RailInquirySpecs>({
     pricingType: 'SPOT',
     tradeRole: '',
-    mode: 'FCL (Nguyên container ga - ga)',
+    mode: '',
     originServiceTerm: '',
     destinationServiceTerm: '',
     containerType: '',
     containerCount: 1,
-    containerCountUnit: 'Cont / Chuyến',
+    containerCountUnit: '',
     originStation: '',
     destinationStation: '',
     incoterm: '',
@@ -1943,24 +1943,8 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
     } else if (newService === 'Sea Freight (LCL)') {
       setOceanSpecs(prev => ({ ...prev, mode: 'LCL (Hàng lẻ đóng ghép CFS)' }));
     }
-    if (newService === 'Air Freight') {
-      setAirSpecs(prev => ({
-        ...prev,
-        airServiceType: prev.airServiceType || 'Air Freight / Cargo',
-      }));
-    }
     if (newService === 'Cold Chain') {
       setCargoClassification('Reefer');
-    }
-    if (newService === 'Warehousing') {
-      setWarehousingSpecs((prev) => ({
-        ...prev,
-        warehouseType: prev.warehouseType || 'Kho thường (Grade A Dry)',
-        billingUnitPreference: prev.billingUnitPreference || 'm² (Diện tích sàn)',
-      }));
-      if (!packagePackaging) {
-        setPackagePackaging('Đóng Pallet gỗ / nhựa tiêu chuẩn');
-      }
     }
   };
 
@@ -1975,9 +1959,9 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
   const handleSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
 
-    const finalExpiryDate = expiryDate.trim() || 'Trong 48 giờ';
-    const finalPickupDate = pickupDate.trim() || 'Linh hoạt theo thỏa thuận';
-    const finalDeliveryDate = deliveryDate.trim() || 'Theo cam kết SLA tuyến';
+    const finalExpiryDate = expiryDate.trim();
+    const finalPickupDate = pickupDate.trim();
+    const finalDeliveryDate = deliveryDate.trim();
 
     // Auto-fill default quotationScope to ALL_IN if customer didn't choose in Tab 5
     const finalQuotationScope: QuotationScope = quotationScope || 'ALL_IN';
@@ -2124,7 +2108,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
         ...oceanSpecs,
         polPort: origin || oceanSpecs.polPort,
         podPort: destination || oceanSpecs.podPort,
-        tradeRole: oceanSpecs.tradeRole || 'Xuất khẩu (Export)',
+        tradeRole: oceanSpecs.tradeRole,
         hsCode: hsCode.trim() || oceanSpecs.hsCode,
         cargoValue: cargoValue.trim() || oceanSpecs.cargoValue,
         cargoValueCurrency: cargoValue.trim() ? cargoValueCurrency : oceanSpecs.cargoValueCurrency,
@@ -2136,7 +2120,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
     } else if (serviceType === 'Air Freight') {
       serviceSpecs.air = {
         ...airSpecs,
-        tradeRole: airSpecs.tradeRole || 'Xuất khẩu (Export)',
+        tradeRole: airSpecs.tradeRole,
         hsCode: hsCode.trim() || airSpecs.hsCode,
         cargoValue: cargoValue.trim() || airSpecs.cargoValue,
         cargoValueCurrency: cargoValue.trim() ? cargoValueCurrency : airSpecs.cargoValueCurrency,
@@ -2261,7 +2245,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
 
     const formattedTargetBudget = targetBudget.trim()
       ? (targetBudget.toLowerCase().includes(currency.toLowerCase()) ? targetBudget : `${targetBudget} ${currency}`)
-      : `${budgetConfig.defaultVal}`;
+      : undefined;
 
     // Smart route string for multi-point or single point
     let calculatedRoute = `${effectiveOrigin.split(',')[0]} → ${effectiveDestination.split(',')[0]}`;
@@ -2299,7 +2283,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
       unNumber: cargoClassification === 'Hazmat' ? unNumber : undefined,
       packingGroup: cargoClassification === 'Hazmat' ? packingGroup : undefined,
       flashPoint: cargoClassification === 'Hazmat' && flashPoint.trim() ? flashPoint.trim() : undefined,
-      msdsFileName: cargoClassification === 'Hazmat' ? (msdsFileName || 'MSDS_Safety_Data_Sheet.pdf') : undefined,
+      msdsFileName: cargoClassification === 'Hazmat' ? (msdsFileName || undefined) : undefined,
       origin: effectiveOrigin,
       destination: effectiveDestination,
       route: calculatedRoute,
