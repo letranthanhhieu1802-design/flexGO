@@ -919,7 +919,7 @@ export function App() {
               suppliers={suppliers}
               currentUser={currentUser}
               initialSupplierFilter={currentView.params?.supplierCode || currentView.params?.supplierId || ''}
-              initialSupplierName={currentView.params?.supplierCode || currentView.params?.supplierName || ''}
+              initialSupplierName={currentView.params?.supplierName || currentView.params?.supplierCode || ''}
               onSelectInquiry={() => {}}
               onOpenCreateModal={() => setIsCreateInquiryOpen(true)}
               onNavigate={setCurrentView}

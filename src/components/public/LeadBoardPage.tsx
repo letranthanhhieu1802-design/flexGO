@@ -94,7 +94,7 @@ interface ServiceTabItem {
   id: string;
   name: string;
   nameVi: string;
-  badge: string;
+  badge?: string;
   subtext: string;
   serviceType: ServiceType | 'ALL';
   icon: React.ComponentType<{ className?: string }>;
@@ -138,6 +138,13 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
   const [copiedLeadLinkId, setCopiedLeadLinkId] = useState<string | null>(null);
   const [tableDensity, setTableDensity] = useState<'compact' | 'comfortable'>('comfortable');
 
+  // Multi-tab quick filters
+  const [activeQuickTab, setActiveQuickTab] = useState<'ALL' | 'URGENT' | 'HIGH_VALUE' | 'VERIFIED'>('ALL');
+  const [isBulkSelectMode, setIsBulkSelectMode] = useState(false);
+  const [selectedLeadIds, setSelectedLeadIds] = useState<string[]>([]);
+  const [selectedOriginRegion, setSelectedOriginRegion] = useState<string>('ALL');
+  const [selectedDestRegion, setSelectedDestRegion] = useState<string>('ALL');
+
   // Read URL query params on mount or when initialSearchTerm changes (e.g. from shared RFQ link: ?tab=lead-board&leadCode=LG-xxxxx)
   useEffect(() => {
     let effectiveSearch = initialSearchTerm;
@@ -178,103 +185,103 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
     setTimeout(() => setCopiedLeadLinkId(null), 2500);
   };
 
-  // 8 Core Logistics Services Filter Navigator (2 hàng x 4 loại hình)
+  // 8 Core Logistics Services Filter Navigator (2 hàng x 4 loại hình) - Thiết kế đồng bộ Màn hình Báo giá
   const serviceTabs: ServiceTabItem[] = [
     {
       id: 'Trucking',
       name: 'Trucking',
       nameVi: 'Đường Bộ',
       badge: 'LTL / FTL',
-      subtext: 'Xe tải thùng kín, bạt, đông lạnh...',
+      subtext: 'FTL / LTL',
       serviceType: 'Trucking',
       icon: Truck,
       colorClass: 'text-blue-600',
-      bgLightClass: 'bg-blue-50',
-      activeClass: 'bg-blue-600 text-white shadow-sm ring-1 ring-blue-600',
+      bgLightClass: 'bg-blue-50 border-blue-100',
+      activeClass: 'border-blue-600 bg-blue-50/40 ring-2 ring-blue-500/25 shadow-md -translate-y-0.5',
     },
     {
       id: 'Sea Freight',
       name: 'Sea Freight',
       nameVi: 'Đường Biển',
       badge: 'FCL / LCL',
-      subtext: 'Cảng đi - Cảng đến quốc tế & nội địa',
+      subtext: 'FCL / LCL',
       serviceType: 'Sea Freight (FCL)',
       icon: Ship,
       colorClass: 'text-cyan-600',
-      bgLightClass: 'bg-cyan-50',
-      activeClass: 'bg-cyan-600 text-white shadow-sm ring-1 ring-cyan-600',
+      bgLightClass: 'bg-cyan-50 border-cyan-100',
+      activeClass: 'border-cyan-600 bg-cyan-50/40 ring-2 ring-cyan-500/25 shadow-md -translate-y-0.5',
     },
     {
       id: 'Air Freight',
       name: 'Air Freight',
       nameVi: 'Hàng Không',
       badge: 'Cargo / Express',
-      subtext: 'Chuyển phát nhanh & Air Cargo',
+      subtext: 'Cargo / Express',
       serviceType: 'Air Freight',
       icon: Plane,
       colorClass: 'text-sky-600',
-      bgLightClass: 'bg-sky-50',
-      activeClass: 'bg-sky-600 text-white shadow-sm ring-1 ring-sky-600',
+      bgLightClass: 'bg-sky-50 border-sky-100',
+      activeClass: 'border-sky-600 bg-sky-50/40 ring-2 ring-sky-500/25 shadow-md -translate-y-0.5',
     },
     {
       id: 'Rail Freight',
       name: 'Rail Freight',
       nameVi: 'Đường Sắt',
-      badge: 'FCL / LCL Ga',
-      subtext: 'Tuyến Bắc Nam & Ga liên vận',
+      badge: 'FCL / LCL',
+      subtext: 'FCL / LCL',
       serviceType: 'Rail Freight',
       icon: Train,
       colorClass: 'text-emerald-600',
-      bgLightClass: 'bg-emerald-50',
-      activeClass: 'bg-emerald-600 text-white shadow-sm ring-1 ring-emerald-600',
+      bgLightClass: 'bg-emerald-50 border-emerald-100',
+      activeClass: 'border-emerald-600 bg-emerald-50/40 ring-2 ring-emerald-500/25 shadow-md -translate-y-0.5',
     },
     {
       id: 'Warehousing',
       name: 'Warehousing',
       nameVi: 'Kho Bãi 3PL',
       badge: '6 Loại hình kho',
-      subtext: 'Kho thường, ngoại quan, lạnh...',
+      subtext: 'Kho thường / Kho lạnh / Kho nguy hiểm / Ngoại quan / TMĐT / Kho tự quản',
       serviceType: 'Warehousing',
       icon: Building2,
       colorClass: 'text-purple-600',
-      bgLightClass: 'bg-purple-50',
-      activeClass: 'bg-purple-600 text-white shadow-sm ring-1 ring-purple-600',
+      bgLightClass: 'bg-purple-50 border-purple-100',
+      activeClass: 'border-purple-600 bg-purple-50/40 ring-2 ring-purple-500/25 shadow-md -translate-y-0.5',
     },
     {
       id: 'Customs Clearance',
       name: 'Customs Clearance',
       nameVi: 'Thủ Tục Hải Quan',
-      badge: 'Khai báo & C/O',
-      subtext: 'Thông quan cảng, sân bay, cửa khẩu',
+      badge: 'Nhập / Xuất khẩu',
+      subtext: 'Nhập khẩu / Xuất khẩu',
       serviceType: 'Customs Clearance',
       icon: FileText,
       colorClass: 'text-amber-600',
-      bgLightClass: 'bg-amber-50',
-      activeClass: 'bg-amber-600 text-white shadow-sm ring-1 ring-amber-600',
+      bgLightClass: 'bg-amber-50 border-amber-100',
+      activeClass: 'border-amber-600 bg-amber-50/40 ring-2 ring-amber-500/25 shadow-md -translate-y-0.5',
     },
     {
       id: 'Cross-border',
       name: 'Cross-Border',
-      nameVi: 'Cross-Border',
-      badge: 'VN ↔ GMS / TQ',
-      subtext: 'Vận tải bộ xuyên biên giới',
+      nameVi: 'Xuyên biên giới',
+      badge: 'FTL / LTL',
+      subtext: 'FTL / LTL',
       serviceType: 'Cross-border',
       icon: Globe,
       colorClass: 'text-orange-600',
-      bgLightClass: 'bg-orange-50',
-      activeClass: 'bg-orange-600 text-white shadow-sm ring-1 ring-orange-600',
+      bgLightClass: 'bg-orange-50 border-orange-100',
+      activeClass: 'border-orange-600 bg-orange-50/40 ring-2 ring-orange-500/25 shadow-md -translate-y-0.5',
     },
     {
       id: 'Project Cargo',
       name: 'Project Cargo',
-      nameVi: 'Integrated / Dự Án',
-      badge: 'OOG / Đa PT',
-      subtext: 'Hàng siêu trường siêu trọng, dự án',
+      nameVi: 'Dự Án',
+      badge: 'Đa phương thức',
+      subtext: 'Phân phối / X-dock / Cảng / Đa phương thức',
       serviceType: 'Project Cargo',
       icon: Layers,
       colorClass: 'text-indigo-600',
-      bgLightClass: 'bg-indigo-50',
-      activeClass: 'bg-indigo-600 text-white shadow-sm ring-1 ring-indigo-600',
+      bgLightClass: 'bg-indigo-50 border-indigo-100',
+      activeClass: 'border-indigo-600 bg-indigo-50/40 ring-2 ring-indigo-500/25 shadow-md -translate-y-0.5',
     },
   ];
 
@@ -839,17 +846,6 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
               Từ các khách hàng uy tín và đáng tin cậy được flexGO xác nhận.
             </p>
           </div>
-
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
-            <button
-              id="public-post-inquiry-btn"
-              onClick={onOpenCreateInquiry}
-              className="px-5 py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-lg shadow-indigo-600/30"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Đăng Yêu Cầu Vận Chuyển Mới</span>
-            </button>
-          </div>
         </div>
 
         {/* Top Market Metric Bar: 4 Ấn Tượng Chính (Open Leads, Tổng Giá Trị, Tổng Lượt Xem, Tổng Báo Giá) */}
@@ -961,7 +957,7 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
           </span>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 w-full">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 md:gap-3 w-full">
           {serviceTabs.map((tab) => {
             const Icon = tab.icon;
             const isSelected = selectedService === tab.id;
@@ -971,57 +967,52 @@ export const LeadBoardPage: React.FC<LeadBoardPageProps> = ({
               <button
                 key={tab.id}
                 id={`leadboard-service-tab-${tab.id}`}
+                type="button"
                 onClick={() => setSelectedService(prev => prev === tab.id ? 'ALL' : tab.id)}
-                className={`group p-3 rounded-2xl text-xs font-bold transition-all flex flex-col justify-between cursor-pointer border text-left min-h-[96px] relative ${
+                className={`py-2.5 px-2.5 sm:py-3 sm:px-3 rounded-2xl border text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-between group relative min-h-[104px] sm:min-h-[108px] ${
                   isSelected
-                    ? tab.activeClass
-                    : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200 shadow-2xs hover:border-slate-300'
+                    ? `${tab.activeClass}`
+                    : 'border-slate-200/90 bg-white hover:border-indigo-200 hover:bg-slate-50/80 shadow-xs hover:shadow-md hover:-translate-y-0.5'
                 }`}
               >
-                {/* Top line: Icon + Badge + Lead Count */}
-                <div className="flex items-center justify-between gap-1 w-full mb-1.5">
-                  <div
-                    className={`p-1.5 rounded-xl transition-colors shrink-0 ${
-                      isSelected ? 'bg-white/20 text-white' : `${tab.bgLightClass} ${tab.colorClass}`
-                    }`}
-                  >
-                    <Icon className="w-4 h-4" />
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    {tab.badge && (
-                      <span
-                        className={`px-1.5 py-0.5 text-[9px] font-black rounded-md tracking-tight ${
-                          isSelected
-                            ? 'bg-white/20 text-white'
-                            : 'bg-slate-100 text-slate-600 border border-slate-200/80'
-                        }`}
-                      >
-                        {tab.badge}
-                      </span>
-                    )}
-                    <span
-                      className={`px-2 py-0.5 text-[10.5px] font-black rounded-full shrink-0 ${
-                        isSelected
-                          ? 'bg-white text-slate-900 shadow-2xs'
-                          : 'bg-slate-100 text-slate-700 group-hover:bg-slate-200'
-                      }`}
-                    >
-                      {count}
-                    </span>
-                  </div>
+                {/* Số đếm inquiries trên góc phải */}
+                <span
+                  className={`absolute top-2 right-2 sm:top-2.5 sm:right-2.5 min-w-[19px] h-[19px] px-1 flex items-center justify-center text-[10px] font-bold rounded-full transition-all shadow-2xs ${
+                    isSelected
+                      ? 'bg-slate-900 text-white ring-1 ring-white/50'
+                      : 'bg-slate-100 text-slate-700 group-hover:bg-indigo-100 group-hover:text-indigo-700'
+                  }`}
+                  title={`${count} yêu cầu chào giá`}
+                >
+                  {count}
+                </span>
+
+                {/* Centered Icon in Squircle */}
+                <div
+                  className={`w-8.5 h-8.5 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center border shadow-2xs transition-transform group-hover:scale-105 shrink-0 mx-auto mb-1.5 sm:mb-2 ${
+                    isSelected ? 'bg-white shadow-xs' : tab.bgLightClass
+                  } ${tab.colorClass}`}
+                >
+                  <Icon className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
                 </div>
 
-                {/* Middle & Bottom: Service Title & Subtext */}
-                <div className="min-w-0 mt-auto">
-                  <div className="leading-tight truncate text-xs font-black">{tab.nameVi}</div>
-                  <div
-                    className={`text-[10px] font-medium leading-tight mt-0.5 truncate ${
-                      isSelected ? 'text-white/80' : 'text-slate-400'
+                {/* Centered Title + Subtitle */}
+                <div className="w-full text-center">
+                  <h4
+                    className={`text-xs sm:text-[13px] font-bold leading-tight transition-colors ${
+                      isSelected ? 'text-slate-900 font-black' : 'text-slate-900 group-hover:text-indigo-600'
+                    }`}
+                  >
+                    {tab.nameVi}
+                  </h4>
+                  <p
+                    className={`text-[9.5px] sm:text-[10.5px] mt-1 leading-snug font-medium transition-colors line-clamp-2 ${
+                      isSelected ? 'text-slate-600 font-semibold' : 'text-slate-400 group-hover:text-slate-500'
                     }`}
                     title={tab.subtext}
                   >
                     {tab.subtext}
-                  </div>
+                  </p>
                 </div>
               </button>
             );

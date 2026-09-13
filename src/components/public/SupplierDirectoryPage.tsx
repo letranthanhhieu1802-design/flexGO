@@ -296,17 +296,6 @@ export const SupplierDirectoryPage: React.FC<SupplierDirectoryPageProps> = ({
               Tổng hợp các đối tác uy tín và đáng tin cậy được flexGO xác nhận.
             </p>
           </div>
-
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
-            <button
-              id="public-post-inquiry-btn"
-              onClick={onOpenCreateInquiry}
-              className="px-5 py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-lg shadow-indigo-600/30"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Đăng Yêu Cầu Vận Chuyển Mới</span>
-            </button>
-          </div>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 mt-6 pt-6 border-t border-white/10 relative z-10">

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Plus, 
   Search, 
   ChevronRight,
   Building2,
@@ -29,7 +28,7 @@ interface InquiriesPageProps {
   initialSupplierFilter?: string;
   initialSupplierName?: string;
   currentUser?: UserProfile | null;
-  onOpenCreateModal: () => void;
+  onOpenCreateModal?: () => void;
   onSelectInquiry: (inquiry: InquiryItem | string) => void;
   onNavigate: (view: CurrentView) => void;
 }
@@ -350,17 +349,6 @@ export const InquiriesPage: React.FC<InquiriesPageProps> = ({
               Quản lý hồ sơ yêu cầu chào giá, theo dõi phản hồi báo giá từ các nhà cung cấp và đối soát Ma trận để Trao thầu.
             </p>
           </div>
-
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
-            <button
-              id="create-inquiry-top-btn"
-              onClick={onOpenCreateModal}
-              className="px-5 py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-lg shadow-indigo-600/30"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Tạo Yêu Cầu Báo Giá Mới</span>
-            </button>
-          </div>
         </div>
 
         {/* 4 Interactive KPI Cards in LeadBoard Dark Style */}
@@ -660,7 +648,7 @@ export const InquiriesPage: React.FC<InquiriesPageProps> = ({
                   <td colSpan={11} className="py-16 text-center text-slate-400">
                     <div className="max-w-md mx-auto space-y-2">
                       <p className="font-bold text-slate-700 text-sm">Không tìm thấy yêu cầu báo giá nào phù hợp</p>
-                      <p className="text-xs text-slate-400">Hãy thử thay đổi từ khóa tìm kiếm hoặc bấm nút "Tạo Yêu Cầu Báo Giá Mới".</p>
+                      <p className="text-xs text-slate-400">Hãy thử thay đổi từ khóa tìm kiếm hoặc điều chỉnh lại bộ lọc.</p>
                     </div>
                   </td>
                 </tr>

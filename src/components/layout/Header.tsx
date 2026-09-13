@@ -150,16 +150,13 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               id="nav-lead-board-btn"
               onClick={() => onNavigate({ type: 'public', tab: 'lead-board' })}
-              className={`text-sm font-medium h-16 flex items-center transition-colors cursor-pointer gap-1.5 ${
+              className={`text-sm font-medium h-16 flex items-center transition-colors cursor-pointer ${
                 isPublicActive('lead-board')
                   ? 'text-indigo-600 border-b-2 border-indigo-600 font-semibold'
                   : 'text-slate-500 hover:text-indigo-600'
               }`}
             >
-              <span>Lead Board</span>
-              <span className="px-1.5 py-0.5 text-[10px] font-bold bg-orange-100 text-orange-600 rounded-full">
-                Live RFQs
-              </span>
+              Lead Board
             </button>
 
             <button
@@ -177,17 +174,13 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               id="nav-hot-promotion-btn"
               onClick={() => onNavigate({ type: 'public', tab: 'hot-promotion' })}
-              className={`text-sm font-medium h-16 flex items-center gap-1.5 transition-colors cursor-pointer ${
+              className={`text-sm font-medium h-16 flex items-center transition-colors cursor-pointer ${
                 isPublicActive('hot-promotion')
-                  ? 'text-orange-600 border-b-2 border-orange-600 font-semibold'
-                  : 'text-slate-500 hover:text-orange-600'
+                  ? 'text-indigo-600 border-b-2 border-indigo-600 font-semibold'
+                  : 'text-slate-500 hover:text-indigo-600'
               }`}
             >
-              <Flame className="w-4 h-4 text-orange-500" />
-              <span>Hot Promotion</span>
-              <span className="px-1.5 py-0.5 text-[10px] font-extrabold bg-rose-100 text-rose-600 rounded-full animate-pulse">
-                HOT
-              </span>
+              Hot Promotion
             </button>
 
             {/* Company Dropdown Navigation */}

@@ -76,30 +76,49 @@ export const MySuppliersPage: React.FC<MySuppliersPageProps> = ({
     return new Set(inquiries.map((i) => i.code));
   }, [inquiries]);
 
-  // Calculate the count of quotations submitted by this supplier specifically for this Customer's inquiries
-  const getSupplierQuoteCountForCustomer = (supplier: SupplierCompany): number => {
-    if (quotations && quotations.length > 0) {
-      const matchQuotes = quotations.filter((q) => {
-        const isSupplierMatch = 
-          q.supplierId === supplier.id ||
-          (q.supplierName && q.supplierName.trim().toLowerCase() === supplier.name.trim().toLowerCase());
-        const isInquiryMatch = 
-          customerInquiryCodes.has(q.inquiryCode) || 
-          inquiries.some((i) => i.id === q.inquiryId || i.code === q.inquiryCode);
-        return isSupplierMatch && isInquiryMatch;
+  // Calculate the count of inquiries involving this supplier (quotations, invited, or awarded source)
+  const getSupplierInquiriesCount = (supplier: SupplierCompany): number => {
+    const targetSupplierId = (supplier.id || '').toLowerCase();
+    const targetSupplierCode = (supplier.code || '').toLowerCase();
+    const targetSupplierName = (supplier.name || '').toLowerCase();
+
+    const matchedInquiries = inquiries.filter((inq) => {
+      // 1. Direct match in quotations by supplierId, supplier code, or supplier name
+      const hasQuote = quotations.some((q) => {
+        if (q.inquiryCode !== inq.code && q.inquiryId !== inq.id) return false;
+        const qSupplierId = (q.supplierId || '').toLowerCase();
+        if (qSupplierId === targetSupplierId || (targetSupplierCode && qSupplierId === targetSupplierCode)) {
+          return true;
+        }
+        if (q.supplierName && q.supplierName.trim().toLowerCase() === targetSupplierName) {
+          return true;
+        }
+        return false;
       });
-      if (matchQuotes.length > 0) {
-        return matchQuotes.length;
+      if (hasQuote) return true;
+
+      // 2. Direct match in invitedSuppliers array
+      if (inq.invitedSuppliers && inq.invitedSuppliers.length > 0) {
+        const isInvited = inq.invitedSuppliers.some((nameOrCode) => {
+          const lowerVal = nameOrCode.toLowerCase().trim();
+          return (
+            lowerVal === targetSupplierCode ||
+            lowerVal === targetSupplierId ||
+            lowerVal === targetSupplierName
+          );
+        });
+        if (isInvited) return true;
       }
-    }
-    // Realistic fallback counts based on customer relationships
-    if (supplier.source === 'AWARDED_QUOTE') {
-      return supplier.inquiriesHandledCount ?? 3;
-    } else if (supplier.source === 'DIRECT_PROFILE_REQUEST') {
-      return supplier.inquiriesHandledCount ?? 2;
-    } else {
-      return supplier.inquiriesHandledCount ?? 1;
-    }
+
+      // 3. Match in sourceDetails
+      if (supplier.sourceDetails?.inquiryCode && supplier.sourceDetails.inquiryCode === inq.code) {
+        return true;
+      }
+
+      return false;
+    });
+
+    return matchedInquiries.length;
   };
 
   // Navigate to My Inquiries filtered by this supplier code (Mã NCC / Supplier ID)
@@ -205,6 +224,103 @@ export const MySuppliersPage: React.FC<MySuppliersPageProps> = ({
       return matchesSearch && matchesSource && matchesService;
     });
   }, [localSuppliers, searchTerm, sourceFilter, serviceFilter]);
+
+  // Structured Declared Service Badge (matching Supplier Profile / Directory style)
+  interface DeclaredServiceBadge {
+    fullText: string;
+    badgeClass: string;
+  }
+
+  const mapServiceTypeToBadge = (srv: ServiceType): DeclaredServiceBadge => {
+    switch (srv) {
+      case 'Trucking':
+        return { fullText: 'Đường bộ / Hàng thường / FTL', badgeClass: 'bg-blue-50 text-blue-700 border-blue-200' };
+      case 'Sea Freight (FCL)':
+        return { fullText: 'Đường biển / Hàng thường / FCL', badgeClass: 'bg-cyan-50 text-cyan-700 border-cyan-200' };
+      case 'Sea Freight (LCL)':
+        return { fullText: 'Đường biển / Hàng thường / LCL', badgeClass: 'bg-cyan-50 text-cyan-700 border-cyan-200' };
+      case 'Air Freight':
+        return { fullText: 'Hàng không / Hàng thường / Cargo', badgeClass: 'bg-sky-50 text-sky-700 border-sky-200' };
+      case 'Warehousing':
+        return { fullText: 'Kho 3PL / Hàng thường / Kho thường', badgeClass: 'bg-purple-50 text-purple-700 border-purple-200' };
+      case 'Customs Clearance':
+        return { fullText: 'Thủ tục hải quan / Hàng thường / Khai báo & C/O', badgeClass: 'bg-amber-50 text-amber-800 border-amber-200' };
+      case 'Cold Chain':
+        return { fullText: 'Đường bộ / Hàng lạnh / FTL', badgeClass: 'bg-teal-50 text-teal-700 border-teal-200' };
+      case 'Cross-border':
+        return { fullText: 'Cross-Border / Hàng thường / FTL', badgeClass: 'bg-orange-50 text-orange-700 border-orange-200' };
+      case 'Rail Freight':
+        return { fullText: 'Đường sắt / Hàng thường / FCL', badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
+      case 'Project Cargo':
+        return { fullText: 'Integrated / Hàng dự án / Đa phương thức', badgeClass: 'bg-violet-50 text-violet-700 border-violet-200' };
+      default:
+        return { fullText: `${srv} / Hàng thường / Tiêu chuẩn`, badgeClass: 'bg-slate-50 text-slate-700 border-slate-200' };
+    }
+  };
+
+  const getSupplierDeclaredBadges = (supplier: SupplierCompany): DeclaredServiceBadge[] => {
+    const sName = (supplier.name || '').toLowerCase();
+    const cPerson = (supplier.contactPerson || '').toLowerCase();
+
+    // Direct mapping to official supplier profiles in mockSalesSpecialists
+    if (supplier.id === 'supp-01' || sName.includes('vinatrans') || cPerson.includes('minh tran') || cPerson.includes('trần văn minh')) {
+      return [
+        { fullText: 'Đường bộ / Hàng thường / FTL', badgeClass: 'bg-blue-50 text-blue-700 border-blue-200' },
+        { fullText: 'Đường biển / Hàng thường / FCL', badgeClass: 'bg-cyan-50 text-cyan-700 border-cyan-200' },
+        { fullText: 'Kho 3PL / Hàng thường / Kho thường', badgeClass: 'bg-purple-50 text-purple-700 border-purple-200' },
+        { fullText: 'Hàng không / Hàng thường / Cargo', badgeClass: 'bg-sky-50 text-sky-700 border-sky-200' },
+        { fullText: 'Thủ tục hải quan / Hàng thường / Khai báo & C/O', badgeClass: 'bg-amber-50 text-amber-800 border-amber-200' },
+      ];
+    }
+    if (supplier.id === 'supp-02' || sName.includes('saigon ocean') || cPerson.includes('hoàng nam') || cPerson.includes('quốc bảo')) {
+      return [
+        { fullText: 'Đường biển / Hàng thường / FCL', badgeClass: 'bg-cyan-50 text-cyan-700 border-cyan-200' },
+        { fullText: 'Đường biển / Hàng thường / LCL', badgeClass: 'bg-cyan-50 text-cyan-700 border-cyan-200' },
+        { fullText: 'Thủ tục hải quan / Hàng thường / Khai báo & C/O', badgeClass: 'bg-amber-50 text-amber-800 border-amber-200' },
+        { fullText: 'Đường bộ / Hàng thường / FTL', badgeClass: 'bg-blue-50 text-blue-700 border-blue-200' },
+      ];
+    }
+    if (supplier.id === 'supp-03' || sName.includes('global dual') || cPerson.includes('thanh vo') || cPerson.includes('hương giang')) {
+      return [
+        { fullText: 'Cross-Border / Hàng thường / FTL', badgeClass: 'bg-orange-50 text-orange-700 border-orange-200' },
+        { fullText: 'Đường bộ / Hàng lạnh / FTL', badgeClass: 'bg-teal-50 text-teal-700 border-teal-200' },
+        { fullText: 'Thủ tục hải quan / Hàng thường / Khai báo & C/O', badgeClass: 'bg-amber-50 text-amber-800 border-amber-200' },
+        { fullText: 'Đường bộ / Hàng thường / FTL', badgeClass: 'bg-blue-50 text-blue-700 border-blue-200' },
+      ];
+    }
+    if (supplier.id === 'supp-04' || sName.includes('mekong express') || cPerson.includes('mai linh') || cPerson.includes('văn tú')) {
+      return [
+        { fullText: 'Đường bộ / Hàng thường / FTL', badgeClass: 'bg-blue-50 text-blue-700 border-blue-200' },
+        { fullText: 'Cross-Border / Hàng thường / FTL', badgeClass: 'bg-orange-50 text-orange-700 border-orange-200' },
+        { fullText: 'Hàng không / Hàng thường / Express', badgeClass: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+        { fullText: 'Đường bộ / Hàng lạnh / FTL', badgeClass: 'bg-teal-50 text-teal-700 border-teal-200' },
+      ];
+    }
+    if (sName.includes('skybridge') || cPerson.includes('minh khang')) {
+      return [
+        { fullText: 'Hàng không / Hàng thường / Cargo', badgeClass: 'bg-sky-50 text-sky-700 border-sky-200' },
+        { fullText: 'Hàng không / Hàng thường / Express', badgeClass: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+        { fullText: 'Thủ tục hải quan / Hàng nguy hiểm / Khai báo & C/O', badgeClass: 'bg-rose-50 text-rose-700 border-rose-200' },
+      ];
+    }
+    if (sName.includes('vietlogix') || cPerson.includes('đỗ thị mai')) {
+      return [
+        { fullText: 'Kho 3PL / Hàng thường / Kho ngoại quan', badgeClass: 'bg-purple-50 text-purple-700 border-purple-200' },
+        { fullText: 'Kho 3PL / Hàng thường / Kho thường', badgeClass: 'bg-purple-50 text-purple-700 border-purple-200' },
+        { fullText: 'Đường sắt / Hàng thường / FCL', badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+      ];
+    }
+
+    // Dynamic fallback from supplier.services
+    if (supplier.services && supplier.services.length > 0) {
+      return supplier.services.map(mapServiceTypeToBadge);
+    }
+
+    return [
+      { fullText: 'Đường bộ / Hàng thường / FTL', badgeClass: 'bg-blue-50 text-blue-700 border-blue-200' },
+      { fullText: 'Đường biển / Hàng thường / FCL', badgeClass: 'bg-cyan-50 text-cyan-700 border-cyan-200' },
+    ];
+  };
 
   const renderSourceBadge = (supplier: SupplierCompany) => {
     const source = supplier.source || 'AWARDED_QUOTE';
@@ -515,12 +631,15 @@ export const MySuppliersPage: React.FC<MySuppliersPageProps> = ({
                       )}
                     </td>
 
-                    {/* Cột 5: Dịch Vụ Cung Cấp (Hiển thị đầy đủ tất cả các dịch vụ đã tick chọn) */}
-                    <td className="py-4 px-4 max-w-sm">
+                    {/* Cột 5: Dịch Vụ Cung Cấp (Hiển thị chuẩn Nhóm / Hàng / Mô hình theo phong cách Supplier Profile) */}
+                    <td className="py-3 px-3 max-w-sm">
                       <div className="flex flex-wrap gap-1">
-                        {supplier.services.map((srv) => (
-                          <span key={srv} className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200 whitespace-nowrap">
-                            {srv}
+                        {getSupplierDeclaredBadges(supplier).map((badge, bIdx) => (
+                          <span
+                            key={bIdx}
+                            className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9.5px] font-bold border tracking-tight leading-tight whitespace-nowrap ${badge.badgeClass}`}
+                          >
+                            {badge.fullText}
                           </span>
                         ))}
                       </div>
@@ -531,18 +650,30 @@ export const MySuppliersPage: React.FC<MySuppliersPageProps> = ({
                       {renderSourceBadge(supplier)}
                     </td>
 
-                    {/* Cột 7: Số Lượng Báo Giá (Tính theo số báo giá cho Inquiry của Customer này) */}
-                    <td className="py-4 px-4 text-center" onClick={(e) => e.stopPropagation()}>
-                      <button
-                        type="button"
-                        id={`supplier-quotes-btn-${supplier.id}`}
-                        onClick={(e) => handleViewSupplierInquiries(supplier, e)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100/90 hover:bg-indigo-50 text-slate-800 hover:text-indigo-700 font-bold text-xs border border-slate-200 hover:border-indigo-300 transition-all hover:scale-105 shadow-2xs cursor-pointer"
-                        title={`Bấm để xem các Inquiries của bạn mà ${supplier.name} đã gửi báo giá`}
-                      >
-                        <span>{getSupplierQuoteCountForCustomer(supplier)} báo giá</span>
-                      </button>
-                    </td>
+                    {/* Cột 7: Số Lượng Báo Giá (Bấm để xem Inquiries có NCC tham gia báo giá) */}
+                    {(() => {
+                      const count = getSupplierInquiriesCount(supplier);
+                      return (
+                        <td 
+                          className="py-4 px-4 text-center cursor-pointer hover:bg-indigo-50/60 transition-colors group/quote-cell"
+                          onClick={(e) => handleViewSupplierInquiries(supplier, e)}
+                          title={`Bấm để xem các Inquiries liên quan đến ${supplier.name}`}
+                        >
+                          <button
+                            type="button"
+                            id={`supplier-quotes-btn-${supplier.id}`}
+                            onClick={(e) => handleViewSupplierInquiries(supplier, e)}
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs border transition-all shadow-2xs cursor-pointer ${
+                              count > 0
+                                ? 'bg-slate-100/90 text-slate-800 border-slate-200 group-hover/quote-cell:bg-indigo-600 group-hover/quote-cell:text-white group-hover/quote-cell:border-indigo-600 group-hover/quote-cell:shadow-sm'
+                                : 'bg-slate-50 text-slate-400 border-slate-200/60 group-hover/quote-cell:bg-slate-100 group-hover/quote-cell:text-slate-600'
+                            }`}
+                          >
+                            <span>{count} báo giá</span>
+                          </button>
+                        </td>
+                      );
+                    })()}
 
                     {/* Cột 8: Thao Tác (360 View) */}
                     <td className="py-4 px-4 text-right" onClick={(e) => e.stopPropagation()}>
@@ -613,9 +744,12 @@ export const MySuppliersPage: React.FC<MySuppliersPageProps> = ({
                 {/* Services & Routes */}
                 <div className="my-3 space-y-2">
                   <div className="flex flex-wrap gap-1">
-                    {supplier.services.map((srv) => (
-                      <span key={srv} className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-                        {srv}
+                    {getSupplierDeclaredBadges(supplier).map((badge, bIdx) => (
+                      <span
+                        key={bIdx}
+                        className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9.5px] font-bold border tracking-tight leading-tight ${badge.badgeClass}`}
+                      >
+                        {badge.fullText}
                       </span>
                     ))}
                   </div>
