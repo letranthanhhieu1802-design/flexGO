@@ -265,6 +265,10 @@ export interface WarehousingInquirySpecs {
   palletSpecsDescription?: string;
   cbmVolume?: number;
   dailyOrderCount?: number;
+  monthlyOrdersCount?: number;
+  dailyOrdersCount?: number;
+  b2cSkusCount?: number;
+  targetLocation?: string;
   rentalDurationMonths: number;
   skuCount?: number;
   inboundQty?: number;

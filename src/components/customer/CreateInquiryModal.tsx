@@ -719,8 +719,8 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
           const isFTL = truckingSpecs.loadType !== 'LTL (Ghép hàng lẻ)';
 
           if (isFTL) {
-            const hasTonnage = Boolean(truckingSpecs.tonnageCategory);
-            const hasCount = (truckingSpecs.vehicleCount || 0) >= 1;
+            const hasTonnage = Boolean(truckingSpecs.tonnageCategory || truckingSpecs.truckType);
+            const hasCount = (truckingSpecs.vehicleCount || 1) >= 1;
             return Boolean(hasPickup && hasDelivery && hasTruckType && hasTonnage && hasCount);
           } else {
             return Boolean(hasPickup && hasDelivery && hasTruckType);
@@ -769,7 +769,12 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
             (warehousingSpecs.cbmVolume && warehousingSpecs.cbmVolume > 0) ||
             (warehousingSpecs.bufferStorageQty && warehousingSpecs.bufferStorageQty > 0) ||
             (warehousingSpecs.bufferPalletPositions && warehousingSpecs.bufferPalletPositions > 0) ||
-            (warehousingSpecs.skuCount && warehousingSpecs.skuCount > 0)
+            (warehousingSpecs.skuCount && warehousingSpecs.skuCount > 0) ||
+            (warehousingSpecs.monthlyOrdersCount && warehousingSpecs.monthlyOrdersCount > 0) ||
+            (warehousingSpecs.dailyOrdersCount && warehousingSpecs.dailyOrdersCount > 0) ||
+            (warehousingSpecs.b2cSkusCount && warehousingSpecs.b2cSkusCount > 0) ||
+            (warehousingSpecs.bondedEstimatedValue && warehousingSpecs.bondedEstimatedValue > 0) ||
+            warehousingSpecs.warehouseType === 'Kho tự quản (Self-Storage)'
           );
           return Boolean(hasLocation && hasWhType && hasCapacity);
         }
@@ -810,10 +815,46 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
 
         // 9. Project Cargo Validation
         if (serviceType === 'Project Cargo') {
+          const category = projectSpecs.projectCategory || 'DISTRIBUTION';
           const hasCategory = Boolean(projectSpecs.projectCategory || projectSpecs.projectName?.trim() || title.trim());
-          const hasOrigin = Boolean(projectSpecs.originHub?.trim() || origin.trim() || (projectSpecs.originWarehouses && projectSpecs.originWarehouses.some(w => w && w.trim())));
-          const hasDest = Boolean(projectSpecs.destinationSite?.trim() || destination.trim() || projectSpecs.coverageScope);
-          return Boolean(hasCategory && hasOrigin && hasDest);
+
+          if (category === 'DISTRIBUTION') {
+            const hasOrigin = Boolean(
+              origin.trim() ||
+              projectSpecs.originHub?.trim() ||
+              (projectSpecs.originWarehouses && projectSpecs.originWarehouses.some(w => w && w.trim()))
+            );
+            const hasDest = Boolean(
+              destination.trim() ||
+              projectSpecs.destinationSite?.trim() ||
+              projectSpecs.coverageScope ||
+              'Toàn quốc'
+            );
+            return Boolean(hasCategory && hasOrigin && hasDest);
+          } else if (category === 'CROSS_DOCK') {
+            const hasOrigin = Boolean(
+              projectSpecs.xDockHubLocation?.trim() ||
+              origin.trim() ||
+              projectSpecs.originHub?.trim()
+            );
+            const isInterRegion = projectSpecs.xDockScope === 'Liên Vùng Tuyến Trục (Inter-region Linehaul)';
+            const hasDest = isInterRegion
+              ? Boolean(projectSpecs.xDockDestinationHub?.trim() || destination.trim())
+              : true;
+            return Boolean(hasCategory && hasOrigin && hasDest);
+          } else if (category === 'PORT_ICD') {
+            const hasOrigin = Boolean(projectSpecs.portIcdOriginPort?.trim() || origin.trim());
+            const hasDest = Boolean(projectSpecs.portIcdDestinationIcd?.trim() || destination.trim());
+            return Boolean(hasCategory && hasOrigin && hasDest);
+          } else if (category === 'MULTIMODAL') {
+            const hasOrigin = Boolean(projectSpecs.multimodalFirstMile?.trim() || origin.trim());
+            const hasDest = Boolean(projectSpecs.multimodalLastMile?.trim() || destination.trim());
+            return Boolean(hasCategory && hasOrigin && hasDest);
+          } else {
+            const hasOrigin = Boolean(origin.trim() || projectSpecs.originHub?.trim());
+            const hasDest = Boolean(destination.trim() || projectSpecs.destinationSite?.trim() || projectSpecs.coverageScope);
+            return Boolean(hasCategory && hasOrigin && hasDest);
+          }
         }
 
         return false;
@@ -916,8 +957,13 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
             (warehousingSpecs.cbmVolume && warehousingSpecs.cbmVolume > 0) ||
             (warehousingSpecs.bufferStorageQty && warehousingSpecs.bufferStorageQty > 0) ||
             (warehousingSpecs.bufferPalletPositions && warehousingSpecs.bufferPalletPositions > 0) ||
-            (warehousingSpecs.skuCount && warehousingSpecs.skuCount > 0);
-          if (!hasCap) errors.push('Vui lòng nhập diện tích sàn (m²), thể tích (cbm) hoặc số vị trí pallet cần thuê.');
+            (warehousingSpecs.skuCount && warehousingSpecs.skuCount > 0) ||
+            (warehousingSpecs.monthlyOrdersCount && warehousingSpecs.monthlyOrdersCount > 0) ||
+            (warehousingSpecs.dailyOrdersCount && warehousingSpecs.dailyOrdersCount > 0) ||
+            (warehousingSpecs.b2cSkusCount && warehousingSpecs.b2cSkusCount > 0) ||
+            (warehousingSpecs.bondedEstimatedValue && warehousingSpecs.bondedEstimatedValue > 0) ||
+            warehousingSpecs.warehouseType === 'Kho tự quản (Self-Storage)';
+          if (!hasCap) errors.push('Vui lòng nhập diện tích sàn (m²), thể tích (cbm), số vị trí pallet hoặc sản lượng đơn fulfillment cần thuê.');
         } else if (serviceType === 'Customs Clearance') {
           if (!customsSpecs.customsSubDepartment?.trim() && !origin.trim()) errors.push('Vui lòng nhập Chi Cục Hải Quan mở tờ khai.');
           if (!customsSpecs.declarationType && !(customsSpecs as any).customsDeclarationType) errors.push('Vui lòng chọn loại hình tờ khai hải quan.');
@@ -944,10 +990,43 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
           if (!hasDest) errors.push('Vui lòng nhập địa điểm đích đến.');
         } else if (serviceType === 'Project Cargo') {
           if (!projectSpecs.projectCategory) errors.push('Vui lòng chọn phân loại mô hình dự án logistics.');
-          const hasOrigin = Boolean(origin.trim() || projectSpecs.originHub?.trim() || (projectSpecs.originWarehouses && projectSpecs.originWarehouses.some(w => w && w.trim())));
-          if (!hasOrigin) errors.push('Vui lòng nhập kho tổng / nhà máy xuất hàng dự án.');
-          const hasDest = Boolean(destination.trim() || projectSpecs.destinationSite?.trim() || projectSpecs.coverageScope);
-          if (!hasDest) errors.push('Vui lòng chọn phạm vi địa lý hoặc điểm đến của dự án.');
+          const category = projectSpecs.projectCategory || 'DISTRIBUTION';
+          if (category === 'DISTRIBUTION') {
+            const hasOrigin = Boolean(
+              origin.trim() ||
+              projectSpecs.originHub?.trim() ||
+              (projectSpecs.originWarehouses && projectSpecs.originWarehouses.some(w => w && w.trim()))
+            );
+            if (!hasOrigin) errors.push('Vui lòng nhập kho tổng / nhà máy xuất hàng dự án.');
+            const hasDest = Boolean(
+              destination.trim() ||
+              projectSpecs.destinationSite?.trim() ||
+              projectSpecs.coverageScope ||
+              'Toàn quốc'
+            );
+            if (!hasDest) errors.push('Vui lòng chọn phạm vi địa lý hoặc điểm đến của dự án.');
+          } else if (category === 'CROSS_DOCK') {
+            const hasOrigin = Boolean(
+              projectSpecs.xDockHubLocation?.trim() ||
+              origin.trim() ||
+              projectSpecs.originHub?.trim()
+            );
+            if (!hasOrigin) errors.push('Vui lòng nhập trạm gom hàng nguồn (Cross-Dock Hub).');
+            const isInterRegion = projectSpecs.xDockScope === 'Liên Vùng Tuyến Trục (Inter-region Linehaul)';
+            if (isInterRegion && !projectSpecs.xDockDestinationHub?.trim() && !destination.trim()) {
+              errors.push('Vui lòng nhập trạm phân phối đích (Destination Hub).');
+            }
+          } else if (category === 'PORT_ICD') {
+            const hasOrigin = Boolean(projectSpecs.portIcdOriginPort?.trim() || origin.trim());
+            if (!hasOrigin) errors.push('Vui lòng nhập cảng biển / cảng gốc (Origin Port).');
+            const hasDest = Boolean(projectSpecs.portIcdDestinationIcd?.trim() || destination.trim());
+            if (!hasDest) errors.push('Vui lòng nhập cảng cạn ICD / depot đích (Destination ICD).');
+          } else if (category === 'MULTIMODAL') {
+            const hasOrigin = Boolean(projectSpecs.multimodalFirstMile?.trim() || origin.trim());
+            if (!hasOrigin) errors.push('Vui lòng nhập chặng đầu (First-Mile).');
+            const hasDest = Boolean(projectSpecs.multimodalLastMile?.trim() || destination.trim());
+            if (!hasDest) errors.push('Vui lòng nhập chặng cuối (Last-Mile).');
+          }
         }
         break;
       case 5:
@@ -1329,7 +1408,12 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
       (serviceType === 'Customs Clearance' ? customsSpecs.customsSubDepartment : '') ||
       (serviceType === 'Rail Freight' ? (railSpecs.departureStation || railSpecs.originStation) : '') ||
       (serviceType === 'Cross-border' ? (crossBorderSpecs.originProvince || crossBorderSpecs.originCountryCity) : '') ||
-      (serviceType === 'Project Cargo' ? (projectSpecs.originHub || projectSpecs.originWarehouses?.[0]) : '') ||
+      (serviceType === 'Project Cargo' ? (
+        projectSpecs.projectCategory === 'CROSS_DOCK' ? (projectSpecs.xDockHubLocation || projectSpecs.originHub) :
+        projectSpecs.projectCategory === 'PORT_ICD' ? projectSpecs.portIcdOriginPort :
+        projectSpecs.projectCategory === 'MULTIMODAL' ? projectSpecs.multimodalFirstMile :
+        (projectSpecs.originHub || projectSpecs.originWarehouses?.[0])
+      ) : '') ||
       'Điểm đi'
     );
 
@@ -1340,7 +1424,12 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
       (serviceType === 'Air Freight' ? airSpecs.destinationAirport : '') ||
       (serviceType === 'Rail Freight' ? (railSpecs.arrivalStation || railSpecs.destinationStation) : '') ||
       (serviceType === 'Cross-border' ? (crossBorderSpecs.destinationProvince || crossBorderSpecs.destinationCountryCity) : '') ||
-      (serviceType === 'Project Cargo' ? (projectSpecs.destinationSite || projectSpecs.coverageScope) : '') ||
+      (serviceType === 'Project Cargo' ? (
+        projectSpecs.projectCategory === 'CROSS_DOCK' ? (projectSpecs.xDockDestinationHub || 'Các chuỗi siêu thị/điểm bán nội vùng') :
+        projectSpecs.projectCategory === 'PORT_ICD' ? projectSpecs.portIcdDestinationIcd :
+        projectSpecs.projectCategory === 'MULTIMODAL' ? projectSpecs.multimodalLastMile :
+        (projectSpecs.destinationSite || projectSpecs.coverageScope || 'Toàn quốc')
+      ) : '') ||
       (serviceType === 'Warehousing' ? 'Toàn quốc / Bán kính phân phối linh hoạt' : '') ||
       'Điểm đến'
     );
@@ -1454,8 +1543,18 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
     } else if (serviceType === 'Project Cargo') {
       serviceSpecs.project = {
         ...projectSpecs,
-        originHub: projectSpecs.originHub || projectSpecs.originWarehouses?.[0] || origin,
-        destinationSite: projectSpecs.destinationSite || projectSpecs.coverageScope || destination,
+        originHub: (
+          projectSpecs.projectCategory === 'CROSS_DOCK' ? (projectSpecs.xDockHubLocation || projectSpecs.originHub || origin) :
+          projectSpecs.projectCategory === 'PORT_ICD' ? (projectSpecs.portIcdOriginPort || origin) :
+          projectSpecs.projectCategory === 'MULTIMODAL' ? (projectSpecs.multimodalFirstMile || origin) :
+          (projectSpecs.originHub || projectSpecs.originWarehouses?.[0] || origin)
+        ),
+        destinationSite: (
+          projectSpecs.projectCategory === 'CROSS_DOCK' ? (projectSpecs.xDockDestinationHub || destination || 'Các chuỗi siêu thị/điểm bán nội vùng') :
+          projectSpecs.projectCategory === 'PORT_ICD' ? (projectSpecs.portIcdDestinationIcd || destination) :
+          projectSpecs.projectCategory === 'MULTIMODAL' ? (projectSpecs.multimodalLastMile || destination) :
+          (projectSpecs.destinationSite || projectSpecs.coverageScope || destination || 'Toàn quốc')
+        ),
         pricingType,
         contractTerm,
         committedFrequency,
@@ -1484,8 +1583,14 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
       }
     } else {
       const parts: string[] = [];
-      const effectiveWeight = weightKg.trim() || (serviceType === 'Cross-border' ? (crossBorderSpecs.ltlGrossWeightKg ? crossBorderSpecs.ltlGrossWeightKg.toLocaleString('vi-VN') : (crossBorderSpecs.grossWeightKgs ? crossBorderSpecs.grossWeightKgs.toLocaleString('vi-VN') : '')) : '');
-      const effectiveVolume = volumeCbm.trim() || (serviceType === 'Cross-border' ? (crossBorderSpecs.ltlCbm ? crossBorderSpecs.ltlCbm.toString() : (crossBorderSpecs.cbmVolume ? crossBorderSpecs.cbmVolume.toString() : '')) : '');
+      const effectiveWeight = weightKg.trim() ||
+        (serviceType === 'Trucking' && truckingSpecs.loadType === 'LTL (Ghép hàng lẻ)' && truckingSpecs.ltlGrossWeightKg
+          ? truckingSpecs.ltlGrossWeightKg.toLocaleString('vi-VN')
+          : (serviceType === 'Cross-border' ? (crossBorderSpecs.ltlGrossWeightKg ? crossBorderSpecs.ltlGrossWeightKg.toLocaleString('vi-VN') : (crossBorderSpecs.grossWeightKgs ? crossBorderSpecs.grossWeightKgs.toLocaleString('vi-VN') : '')) : ''));
+      const effectiveVolume = volumeCbm.trim() ||
+        (serviceType === 'Trucking' && truckingSpecs.loadType === 'LTL (Ghép hàng lẻ)' && truckingSpecs.ltlCbm
+          ? truckingSpecs.ltlCbm.toString()
+          : (serviceType === 'Cross-border' ? (crossBorderSpecs.ltlCbm ? crossBorderSpecs.ltlCbm.toString() : (crossBorderSpecs.cbmVolume ? crossBorderSpecs.cbmVolume.toString() : '')) : ''));
       if (effectiveWeight) parts.push(`${effectiveWeight} kg`);
       if (effectiveVolume) parts.push(`${effectiveVolume} CBM`);
       finalWeightVolume = parts.length > 0 ? parts.join(' / ') : 'Theo thỏa thuận';

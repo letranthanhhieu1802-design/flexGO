@@ -1728,7 +1728,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                             ? 'Số Vị Trí Pallet Cần Thuê:'
                             : warehousing?.billingUnitPreference?.includes('CBM')
                               ? 'Tổng Thể Tích Lưu Trữ:'
-                              : warehousing?.billingUnitPreference?.includes('Order')
+                              : warehousing?.billingUnitPreference?.includes('Order') || warehousing?.warehouseType === 'Kho TMĐT / Fulfillment'
                                 ? 'Dung Lượng Lưu Kho Đệm:'
                                 : 'Diện Tích Sàn Cần Thuê:'}
                         </span>
@@ -1737,11 +1737,33 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                             ? (warehousing.palletPositions ? `${warehousing.palletPositions.toLocaleString('vi-VN')} Pallet` : 'Chưa khai báo')
                             : warehousing?.billingUnitPreference?.includes('CBM')
                               ? (warehousing.cbmVolume ? `${warehousing.cbmVolume.toLocaleString('vi-VN')} CBM` : 'Chưa khai báo')
-                              : warehousing?.billingUnitPreference?.includes('Order')
+                              : warehousing?.billingUnitPreference?.includes('Order') || warehousing?.warehouseType === 'Kho TMĐT / Fulfillment'
                                 ? `${warehousing.bufferStorageQty ? warehousing.bufferStorageQty.toLocaleString('vi-VN') : (warehousing.bufferPalletPositions || 20)} ${cleanTextNoEmoji(warehousing.bufferStorageUnit) || 'Pallet (Vị trí)'}`
                                 : (warehousing?.storageAreaSqm ? `${warehousing.storageAreaSqm.toLocaleString('vi-VN')} m²` : 'Chưa khai báo')}
                         </span>
                       </div>
+
+                      {/* Hàng 2.5: Đối với Kho TMĐT / Fulfillment: Sản lượng đơn hàng & B2C SKUs */}
+                      {(warehousing?.warehouseType === 'Kho TMĐT / Fulfillment' || warehousing?.billingUnitPreference?.includes('Order')) && (
+                        <>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Sản Lượng Đơn TMĐT:</span>
+                            <span className="font-normal text-slate-800">
+                              {warehousing?.monthlyOrdersCount
+                                ? `${warehousing.monthlyOrdersCount.toLocaleString('vi-VN')} Đơn / Tháng`
+                                : (warehousing?.dailyOrdersCount ? `${warehousing.dailyOrdersCount.toLocaleString('vi-VN')} Đơn / Ngày` : 'Theo thực tế đơn phát sinh')}
+                            </span>
+                          </div>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Số Mã Hàng TMĐT (SKUs):</span>
+                            <span className="font-normal text-slate-800">
+                              {(warehousing?.b2cSkusCount || warehousing?.skuCount)
+                                ? `${(warehousing.b2cSkusCount || warehousing.skuCount)!.toLocaleString('vi-VN')} SKUs`
+                                : 'Theo thực tế nhập hàng'}
+                            </span>
+                          </div>
+                        </>
+                      )}
 
                       {/* Hàng 3: SKUs & Thông số phụ kỹ thuật (nếu có) */}
                       {((warehousing?.warehouseType?.includes('Bonded') || warehousing?.warehouseType?.includes('ngoại quan')) && warehousing?.bondedPurpose) || (warehousing?.billingUnitPreference?.includes('Pallet') && warehousing?.palletSpecsDescription) ? (
@@ -1768,14 +1790,14 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                             </div>
                           )}
                         </>
-                      ) : (
+                      ) : !(warehousing?.warehouseType === 'Kho TMĐT / Fulfillment' || warehousing?.billingUnitPreference?.includes('Order')) ? (
                         <div className="flex items-baseline gap-2 md:col-span-2">
                           <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Số Lượng Mã Hàng Quản Lý (SKUs):</span>
                           <span className="font-normal text-slate-800">
                             {warehousing?.skuCount ? `${warehousing.skuCount.toLocaleString('vi-VN')} SKUs` : 'Theo thực tế nhập hàng'}
                           </span>
                         </div>
-                      )}
+                      ) : null}
 
                       {/* Hàng 4: Lưu lượng Nhập - Xuất Inbound/Outbound hoặc Đặc thù kho tự quản */}
                       {warehousing?.warehouseType === 'Kho tự quản (Self-Storage)' ? null : (
@@ -1813,13 +1835,13 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       <div className="flex items-baseline gap-2">
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Khu Vực / Tỉnh Thành Mong Muốn Đặt Kho:</span>
                         <span className="font-normal text-slate-800">
-                          {cleanTextNoEmoji(inquiry.origin) || 'Chưa chỉ định'}
+                          {cleanTextNoEmoji(warehousing?.targetLocation || inquiry.origin) || 'Chưa chỉ định'}
                         </span>
                       </div>
                       <div className="flex items-baseline gap-2">
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Phạm Vi & Bán Kính Phân Phối Trọng Tâm:</span>
                         <span className="font-normal text-slate-800">
-                          {cleanTextNoEmoji(inquiry.destination) || 'Chưa chỉ định'}
+                          {cleanTextNoEmoji(inquiry.destination) || 'Toàn quốc / Bán kính phân phối linh hoạt'}
                         </span>
                       </div>
                     </div>
@@ -2135,57 +2157,184 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                       <div className="flex items-baseline gap-2">
                         <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Phân Loại Mô Hình Dự Án:</span>
                         <span className="font-normal text-slate-800">
-                          {cleanTextNoEmoji(project?.projectCategory || 'Mạng lưới phân phối (Distribution)')}
+                          {project?.projectCategory === 'CROSS_DOCK'
+                            ? 'Cross-Docking & Trung Chuyển Nhanh'
+                            : project?.projectCategory === 'PORT_ICD'
+                              ? 'Vận Tải Cảng Biển & ICD / Depot'
+                              : project?.projectCategory === 'MULTIMODAL'
+                                ? 'Vận Tải Đa Phương Thức (Multimodal)'
+                                : cleanTextNoEmoji(project?.projectCategory || 'Mạng Lưới Phân Phối (Distribution)')}
                         </span>
                       </div>
 
-                      {/* Hàng 2: Kênh phân phối & Phạm vi địa lý */}
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Kênh Phân Phối Mục Tiêu:</span>
-                        <span className="font-normal text-slate-800">
-                          {cleanTextNoEmoji(project?.distributionChannel || 'Chuỗi Siêu thị / TTTM / Đại lý')}
-                        </span>
-                      </div>
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Phạm Vi Địa Lý Phân Phối:</span>
-                        <span className="font-normal text-slate-800">
-                          {cleanTextNoEmoji(project?.coverageScope || 'Toàn quốc (Bắc - Trung - Nam)')}
-                        </span>
-                      </div>
+                      {project?.projectCategory === 'CROSS_DOCK' ? (
+                        <>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Phạm Vi Cross-Dock:</span>
+                            <span className="font-normal text-slate-800">
+                              {cleanTextNoEmoji(project?.xDockScope || 'Nội Vùng (Intra-region Distribution)')}
+                            </span>
+                          </div>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Sản Lượng Thông Qua:</span>
+                            <span className="font-normal text-slate-800">
+                              {project?.xDockThroughputPalletsDay
+                                ? `${project.xDockThroughputPalletsDay.toLocaleString('vi-VN')} Pallet / Ngày`
+                                : (project?.xDockThroughputCbmDay ? `${project.xDockThroughputCbmDay.toLocaleString('vi-VN')} CBM / Ngày` : 'Theo biến động luồng hàng')}
+                            </span>
+                          </div>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Trạm Gom Nguồn (Cross-Dock Hub):</span>
+                            <span className="font-normal text-slate-800">
+                              {cleanTextNoEmoji(project?.xDockHubLocation || inquiry.origin) || 'Chưa chỉ định'}
+                            </span>
+                          </div>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Trạm Phân Phối Đích (Dest Hub):</span>
+                            <span className="font-normal text-slate-800">
+                              {cleanTextNoEmoji(project?.xDockDestinationHub || inquiry.destination) || 'Chưa chỉ định'}
+                            </span>
+                          </div>
+                          {project?.xDockSortationServices && project.xDockSortationServices.length > 0 && (
+                            <div className="flex items-baseline gap-2 md:col-span-2">
+                              <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Dịch Vụ Phân Loại / Chia Chọn:</span>
+                              <span className="font-normal text-slate-800">
+                                {project.xDockSortationServices.join(', ')}
+                              </span>
+                            </div>
+                          )}
+                          {project?.xDockVehicleTypes && project.xDockVehicleTypes.length > 0 && (
+                            <div className="flex items-baseline gap-2 md:col-span-2">
+                              <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Cấu Hình Đội Xe Trung Chuyển:</span>
+                              <span className="font-normal text-slate-800">
+                                {project.xDockVehicleTypes.join(', ')}
+                              </span>
+                            </div>
+                          )}
+                        </>
+                      ) : project?.projectCategory === 'PORT_ICD' ? (
+                        <>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Cảng Biển Gốc (Origin Port):</span>
+                            <span className="font-normal text-slate-800">
+                              {cleanTextNoEmoji(project?.portIcdOriginPort || inquiry.origin) || 'Chưa chỉ định'}
+                            </span>
+                          </div>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">ICD / Depot Đích (Destination):</span>
+                            <span className="font-normal text-slate-800">
+                              {cleanTextNoEmoji(project?.portIcdDestinationIcd || inquiry.destination) || 'Chưa chỉ định'}
+                            </span>
+                          </div>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Sản Lượng Container:</span>
+                            <span className="font-normal text-slate-800">
+                              {project?.portIcdContVolumeMonth
+                                ? `${project.portIcdContVolumeMonth.toLocaleString('vi-VN')} Cont / Tháng`
+                                : 'Theo thông báo hãng tàu'}
+                            </span>
+                          </div>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Phương Thức Kéo Cont:</span>
+                            <span className="font-normal text-slate-800">
+                              {cleanTextNoEmoji(project?.portIcdHaulageType || 'Kéo khép kín 2 chiều')}
+                            </span>
+                          </div>
+                          {project?.portIcdContTypes && project.portIcdContTypes.length > 0 && (
+                            <div className="flex items-baseline gap-2 md:col-span-2">
+                              <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Loại Container Vận Chuyển:</span>
+                              <span className="font-normal text-slate-800">
+                                {project.portIcdContTypes.join(', ')}
+                              </span>
+                            </div>
+                          )}
+                        </>
+                      ) : project?.projectCategory === 'MULTIMODAL' ? (
+                        <>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Mô Hình Đa Phương Thức:</span>
+                            <span className="font-normal text-slate-800">
+                              {cleanTextNoEmoji(project?.multimodalCombo || 'Đường bộ + Đường sắt / Đường biển')}
+                            </span>
+                          </div>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Thời Gian Giao Hàng (SLA):</span>
+                            <span className="font-normal text-slate-800">
+                              {cleanTextNoEmoji(project?.multimodalTargetLeadtime || 'Tiêu chuẩn đa phương thức')}
+                            </span>
+                          </div>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Chặng Đầu (First-mile Origin):</span>
+                            <span className="font-normal text-slate-800">
+                              {cleanTextNoEmoji(project?.multimodalFirstMile || inquiry.origin) || 'Chưa chỉ định'}
+                            </span>
+                          </div>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Chặng Cuối (Last-mile Dest):</span>
+                            <span className="font-normal text-slate-800">
+                              {cleanTextNoEmoji(project?.multimodalLastMile || inquiry.destination) || 'Chưa chỉ định'}
+                            </span>
+                          </div>
+                          {project?.multimodalTransitHub && (
+                            <div className="flex items-baseline gap-2 md:col-span-2">
+                              <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Trạm Trung Chuyển (Transit Hub):</span>
+                              <span className="font-normal text-slate-800">
+                                {cleanTextNoEmoji(project.multimodalTransitHub)}
+                              </span>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          {/* Hàng 2: Kênh phân phối & Phạm vi địa lý */}
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Kênh Phân Phối Mục Tiêu:</span>
+                            <span className="font-normal text-slate-800">
+                              {cleanTextNoEmoji(project?.distributionChannel || 'Chuỗi Siêu thị / TTTM / Đại lý')}
+                            </span>
+                          </div>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Phạm Vi Địa Lý Phân Phối:</span>
+                            <span className="font-normal text-slate-800">
+                              {cleanTextNoEmoji(project?.coverageScope || 'Toàn quốc (Bắc - Trung - Nam)')}
+                            </span>
+                          </div>
 
-                      {/* Hàng 3: Kho Tổng / Nhà máy xuất hàng & Điểm đến */}
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Kho Tổng Xuất Hàng Chính (Hubs):</span>
-                        <span className="font-normal text-slate-800">
-                          {project?.originWarehouses && project.originWarehouses.length > 0
-                            ? project.originWarehouses.join('; ')
-                            : (inquiry.origin || 'Chưa chỉ định')}
-                        </span>
-                      </div>
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Địa Bàn Phân Phối / Điểm Đến:</span>
-                        <span className="font-normal text-slate-800">
-                          {cleanTextNoEmoji(project?.destinationSite || inquiry.destination || 'Theo mạng lưới cửa hàng')}
-                        </span>
-                      </div>
+                          {/* Hàng 3: Kho Tổng / Nhà máy xuất hàng & Điểm đến */}
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Kho Tổng Xuất Hàng Chính (Hubs):</span>
+                            <span className="font-normal text-slate-800">
+                              {project?.originWarehouses && project.originWarehouses.length > 0
+                                ? project.originWarehouses.join('; ')
+                                : (inquiry.origin || 'Chưa chỉ định')}
+                            </span>
+                          </div>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Địa Bàn Phân Phối / Điểm Đến:</span>
+                            <span className="font-normal text-slate-800">
+                              {cleanTextNoEmoji(project?.destinationSite || inquiry.destination || 'Theo mạng lưới cửa hàng')}
+                            </span>
+                          </div>
 
-                      {/* Hàng 4: Cấu hình đội xe & Báo cáo KPI OTIF */}
-                      {project?.fleetRequirements && project.fleetRequirements.length > 0 && (
-                        <div className="flex items-baseline gap-2 md:col-span-2">
-                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Đội Xe Vận Tải Yêu Cầu:</span>
-                          <span className="font-normal text-slate-800">
-                            {project.fleetRequirements.join(', ')}
-                          </span>
-                        </div>
-                      )}
+                          {/* Hàng 4: Cấu hình đội xe & Báo cáo KPI OTIF */}
+                          {project?.fleetRequirements && project.fleetRequirements.length > 0 && (
+                            <div className="flex items-baseline gap-2 md:col-span-2">
+                              <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Đội Xe Vận Tải Yêu Cầu:</span>
+                              <span className="font-normal text-slate-800">
+                                {project.fleetRequirements.join(', ')}
+                              </span>
+                            </div>
+                          )}
 
-                      {project?.keyKPIRequirements && project.keyKPIRequirements.length > 0 && (
-                        <div className="flex items-baseline gap-2 md:col-span-2">
-                          <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Cam Kết KPI Vận Hành:</span>
-                          <span className="font-normal text-slate-800">
-                            {project.keyKPIRequirements.join(', ')}
-                          </span>
-                        </div>
+                          {project?.keyKPIRequirements && project.keyKPIRequirements.length > 0 && (
+                            <div className="flex items-baseline gap-2 md:col-span-2">
+                              <span className="text-slate-400 font-medium min-w-[130px] shrink-0">Cam Kết KPI Vận Hành:</span>
+                              <span className="font-normal text-slate-800">
+                                {project.keyKPIRequirements.join(', ')}
+                              </span>
+                            </div>
+                          )}
+                        </>
                       )}
                     </div>
                   ) : (
