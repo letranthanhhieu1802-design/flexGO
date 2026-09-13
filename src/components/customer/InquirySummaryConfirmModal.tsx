@@ -337,6 +337,127 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
     return `${tax.slice(0, 4)}******`;
   };
 
+  // Helper to remove any emojis/icons from stored data strings
+  const cleanTextNoEmoji = (text?: string): string => {
+    if (!text) return '';
+    return text.replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}🚪⚓📦🚢🛫🛬🇻🇳]/gu, '').trim();
+  };
+
+  // Surcharge Unit calculation helper
+  const getSurchargeUnit = (surchargeName: string): string => {
+    if (!surchargeName) return 'Mục';
+    const s = surchargeName.toLowerCase();
+    if (s.includes('fsc') || s.includes('nhiên liệu') || s.includes('xăng dầu') || s.includes('ssc') || s.includes('an ninh') || s.includes('x-ray') || s.includes('soi chiếu') || s.includes('terminal')) {
+      return 'Kg';
+    }
+    if (s.includes('awb') || s.includes('b/l') || s.includes('vận đơn') || s.includes('tờ khai') || s.includes('hải quan') || s.includes('chứng từ') || s.includes('kiểm dịch') || s.includes('hun trùng') || s.includes('c/o') || s.includes('giấy phép')) {
+      return 'Set (Bộ)';
+    }
+    if (s.includes('thc') || s.includes('nâng hạ') || s.includes('seal') || s.includes('chì') || s.includes('vệ sinh cont') || s.includes('cắm điện')) {
+      return isOcean && isFcl ? (ocean?.containerType ? ocean.containerType.split(' ')[0] : 'Cont') : 'Chuyến';
+    }
+    if (s.includes('cbm') || s.includes('cfs') || s.includes('khối')) {
+      return 'CBM';
+    }
+    if (s.includes('kg') || s.includes('tấn') || s.includes('tải trọng')) {
+      return 'Kg';
+    }
+    if (s.includes('pallet')) {
+      return 'Pallet';
+    }
+    if (s.includes('bốc xếp') || s.includes('nhân công') || s.includes('bốc dỡ')) {
+      return isWarehousing ? 'Pallet / Tấn' : 'Chuyến / Tấn';
+    }
+    if (isWarehousing) {
+      if (s.includes('inbound') || s.includes('nhập kho') || s.includes('outbound') || s.includes('xuất kho')) return 'Pallet / Tấn';
+      if (s.includes('quản lý') || s.includes('wms')) return 'Tháng';
+      if (s.includes('đơn')) return 'Đơn hàng';
+      return 'Mục';
+    }
+    if (isAir) return 'Kg';
+    return isOcean ? 'Cont' : 'Chuyến';
+  };
+
+  const getVasUnit = (vasName: string): string => {
+    if (!vasName) return 'Hạng mục';
+    const v = vasName.toLowerCase();
+    if (v.includes('bảo hiểm')) return '% Trị giá hàng';
+    if (v.includes('hải quan') || v.includes('c/o') || v.includes('hun trùng') || v.includes('kiểm dịch')) return 'Bộ hồ sơ';
+    if (v.includes('gps') || v.includes('tracking') || v.includes('nhiệt độ')) return 'Kèm cước';
+    if (v.includes('đóng gói') || v.includes('pallet') || v.includes('dán tem') || v.includes('quấn màng')) return 'Pallet / Kiện';
+    if (v.includes('bốc xếp') || v.includes('nâng hạ') || v.includes('xe nâng')) return 'Tấn / Giờ';
+    return 'Hạng mục';
+  };
+
+  // Tariff Unit calculation helper (ĐVT column with currency and specific mode/container)
+  const getTariffMainUnit = (): string => {
+    const curr = inquiry?.currency || 'USD';
+
+    switch (inquiry?.serviceType) {
+      case 'Sea Freight (FCL)': {
+        let contShort = 'Cont 20ft';
+        if (ocean?.containerType) {
+          const ct = ocean.containerType;
+          if (ct.includes('40HC') || ct.includes('40ft High Cube')) contShort = 'Cont 40HC';
+          else if (ct.includes('40RF') || (ct.includes('40') && ct.includes('Reefer'))) contShort = 'Cont 40RF';
+          else if (ct.includes('20RF') || (ct.includes('20') && ct.includes('Reefer'))) contShort = 'Cont 20RF';
+          else if (ct.includes('40GP') || ct.includes('40ft General') || ct.includes('40DC')) contShort = 'Cont 40ft';
+          else if (ct.includes('45HC') || ct.includes('45ft')) contShort = 'Cont 45HC';
+          else if (ct.includes('20ft') || ct.includes('20GP') || ct.includes('20DC')) contShort = 'Cont 20ft';
+          else if (ct.includes('Open Top') || ct.includes('OT')) contShort = `Cont ${ct.split(' ')[0]} OT`;
+          else if (ct.includes('Flat Rack') || ct.includes('FR')) contShort = `Cont ${ct.split(' ')[0]} FR`;
+          else if (ct.includes('Tank') || ct.includes('TK')) contShort = `Cont ${ct.split(' ')[0]} Tank`;
+          else contShort = `Cont ${ct.split(' ')[0]}`;
+        }
+        return `${curr} / ${contShort}`;
+      }
+      case 'Sea Freight (LCL)':
+        return `${curr} / kg`;
+      case 'Air Freight':
+        return `${curr} / kg`;
+      case 'Trucking':
+        return trucking?.loadType?.includes('LTL')
+          ? `${curr} / kg`
+          : `${curr} / Chuyến`;
+      case 'Cold Chain':
+        return `${curr} / Chuyến`;
+      case 'Rail Freight':
+        return isRailLcl
+          ? `${curr} / Tấn (RT)`
+          : `${curr} / Cont`;
+      case 'Warehousing':
+        if (warehousing?.billingUnitPreference?.includes('Pallet')) return `${curr} / Pallet / tháng`;
+        if (warehousing?.billingUnitPreference?.includes('CBM')) return `${curr} / CBM / tháng`;
+        if (warehousing?.billingUnitPreference?.includes('Order')) return `${curr} / Đơn hàng`;
+        return `${curr} / m² / tháng`;
+      case 'Customs Clearance':
+        return `${curr} / Tờ khai`;
+      case 'Cross-border':
+        return isCrossBorderLtl ? `${curr} / kg` : `${curr} / Chuyến`;
+      case 'Project Cargo':
+        return `${curr} / Trọn gói`;
+      default: {
+        if (isFcl) {
+          let contShort = 'Cont 20ft';
+          if (ocean?.containerType) {
+            const ct = ocean.containerType;
+            if (ct.includes('40HC')) contShort = 'Cont 40HC';
+            else if (ct.includes('40RF')) contShort = 'Cont 40RF';
+            else if (ct.includes('20RF')) contShort = 'Cont 20RF';
+            else if (ct.includes('40')) contShort = 'Cont 40ft';
+            else if (ct.includes('20')) contShort = 'Cont 20ft';
+            else contShort = `Cont ${ct.split(' ')[0]}`;
+          }
+          return `${curr} / ${contShort}`;
+        }
+        if (isLcl) {
+          return `${curr} / kg`;
+        }
+        return `${curr} / Đơn vị`;
+      }
+    }
+  };
+
   // Quoting & Competitor Calculations for Tab 2
   const rawTargetBudget = useMemo(() => {
     return parseInt(inquiry?.targetBudget?.replace(/\D/g, '') || '50000000', 10);
@@ -500,124 +621,6 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
 
   // Early return ONLY after all Hooks have been declared (Rules of Hooks)
   if (!isOpen || !inquiry) return null;
-
-  // Helper to remove any emojis/icons from stored data strings
-  const cleanTextNoEmoji = (text?: string): string => {
-    if (!text) return '';
-    return text.replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}🚪⚓📦🚢🛫🛬🇻🇳]/gu, '').trim();
-  };
-
-  // Tariff Unit calculation helper (ĐVT column with currency and specific mode/container)
-  const getTariffMainUnit = (): string => {
-    const curr = inquiry.currency || 'USD';
-
-    switch (inquiry.serviceType) {
-      case 'Sea Freight (FCL)': {
-        let contShort = 'Cont 20ft';
-        if (ocean?.containerType) {
-          const ct = ocean.containerType;
-          if (ct.includes('40HC') || ct.includes('40ft High Cube')) contShort = 'Cont 40HC';
-          else if (ct.includes('40RF') || (ct.includes('40') && ct.includes('Reefer'))) contShort = 'Cont 40RF';
-          else if (ct.includes('20RF') || (ct.includes('20') && ct.includes('Reefer'))) contShort = 'Cont 20RF';
-          else if (ct.includes('40GP') || ct.includes('40ft General') || ct.includes('40DC')) contShort = 'Cont 40ft';
-          else if (ct.includes('45HC') || ct.includes('45ft')) contShort = 'Cont 45HC';
-          else if (ct.includes('20ft') || ct.includes('20GP') || ct.includes('20DC')) contShort = 'Cont 20ft';
-          else if (ct.includes('Open Top') || ct.includes('OT')) contShort = `Cont ${ct.split(' ')[0]} OT`;
-          else if (ct.includes('Flat Rack') || ct.includes('FR')) contShort = `Cont ${ct.split(' ')[0]} FR`;
-          else if (ct.includes('Tank') || ct.includes('TK')) contShort = `Cont ${ct.split(' ')[0]} Tank`;
-          else contShort = `Cont ${ct.split(' ')[0]}`;
-        }
-        return `${curr} / ${contShort}`;
-      }
-      case 'Sea Freight (LCL)':
-        return `${curr} / kg`;
-      case 'Air Freight':
-        return `${curr} / kg`;
-      case 'Trucking':
-        return trucking?.loadType?.includes('LTL')
-          ? `${curr} / kg`
-          : `${curr} / Chuyến`;
-      case 'Cold Chain':
-        return `${curr} / Chuyến`;
-      case 'Rail Freight':
-        return isRailLcl
-          ? `${curr} / Tấn (RT)`
-          : `${curr} / Cont`;
-      case 'Warehousing':
-        if (warehousing?.billingUnitPreference?.includes('Pallet')) return `${curr} / Pallet / tháng`;
-        if (warehousing?.billingUnitPreference?.includes('CBM')) return `${curr} / CBM / tháng`;
-        if (warehousing?.billingUnitPreference?.includes('Order')) return `${curr} / Đơn hàng`;
-        return `${curr} / m² / tháng`;
-      case 'Customs Clearance':
-        return `${curr} / Tờ khai`;
-      case 'Cross-border':
-        return isCrossBorderLtl ? `${curr} / kg` : `${curr} / Chuyến`;
-      case 'Project Cargo':
-        return `${curr} / Trọn gói`;
-      default: {
-        if (isFcl) {
-          let contShort = 'Cont 20ft';
-          if (ocean?.containerType) {
-            const ct = ocean.containerType;
-            if (ct.includes('40HC')) contShort = 'Cont 40HC';
-            else if (ct.includes('40RF')) contShort = 'Cont 40RF';
-            else if (ct.includes('20RF')) contShort = 'Cont 20RF';
-            else if (ct.includes('40')) contShort = 'Cont 40ft';
-            else if (ct.includes('20')) contShort = 'Cont 20ft';
-            else contShort = `Cont ${ct.split(' ')[0]}`;
-          }
-          return `${curr} / ${contShort}`;
-        }
-        if (isLcl) {
-          return `${curr} / kg`;
-        }
-        return `${curr} / Đơn vị`;
-      }
-    }
-  };
-
-  const getSurchargeUnit = (surchargeName: string): string => {
-    const s = surchargeName.toLowerCase();
-    if (s.includes('fsc') || s.includes('nhiên liệu') || s.includes('xăng dầu') || s.includes('ssc') || s.includes('an ninh') || s.includes('x-ray') || s.includes('soi chiếu') || s.includes('terminal')) {
-      return 'Kg';
-    }
-    if (s.includes('awb') || s.includes('b/l') || s.includes('vận đơn') || s.includes('tờ khai') || s.includes('hải quan') || s.includes('chứng từ') || s.includes('kiểm dịch') || s.includes('hun trùng') || s.includes('c/o') || s.includes('giấy phép')) {
-      return 'Set (Bộ)';
-    }
-    if (s.includes('thc') || s.includes('nâng hạ') || s.includes('seal') || s.includes('chì') || s.includes('vệ sinh cont') || s.includes('cắm điện')) {
-      return isOcean && isFcl ? (ocean?.containerType ? ocean.containerType.split(' ')[0] : 'Cont') : 'Chuyến';
-    }
-    if (s.includes('cbm') || s.includes('cfs') || s.includes('khối')) {
-      return 'CBM';
-    }
-    if (s.includes('kg') || s.includes('tấn') || s.includes('tải trọng')) {
-      return 'Kg';
-    }
-    if (s.includes('pallet')) {
-      return 'Pallet';
-    }
-    if (s.includes('bốc xếp') || s.includes('nhân công') || s.includes('bốc dỡ')) {
-      return isWarehousing ? 'Pallet / Tấn' : 'Chuyến / Tấn';
-    }
-    if (isWarehousing) {
-      if (s.includes('inbound') || s.includes('nhập kho') || s.includes('outbound') || s.includes('xuất kho')) return 'Pallet / Tấn';
-      if (s.includes('quản lý') || s.includes('wms')) return 'Tháng';
-      if (s.includes('đơn')) return 'Đơn hàng';
-      return 'Mục';
-    }
-    if (isAir) return 'Kg';
-    return isOcean ? 'Cont' : 'Chuyến';
-  };
-
-  const getVasUnit = (vasName: string): string => {
-    const v = vasName.toLowerCase();
-    if (v.includes('bảo hiểm')) return '% Trị giá hàng';
-    if (v.includes('hải quan') || v.includes('c/o') || v.includes('hun trùng') || v.includes('kiểm dịch')) return 'Bộ hồ sơ';
-    if (v.includes('gps') || v.includes('tracking') || v.includes('nhiệt độ')) return 'Kèm cước';
-    if (v.includes('đóng gói') || v.includes('pallet') || v.includes('dán tem') || v.includes('quấn màng')) return 'Pallet / Kiện';
-    if (v.includes('bốc xếp') || v.includes('nâng hạ') || v.includes('xe nâng')) return 'Tấn / Giờ';
-    return 'Hạng mục';
-  };
 
   // Dynamic Section Titles & Configuration per Service Type
   const getServiceMainFreightTitle = (): string => {

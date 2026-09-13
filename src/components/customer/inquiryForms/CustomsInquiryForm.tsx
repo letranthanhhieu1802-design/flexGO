@@ -80,6 +80,7 @@ interface CustomsInquiryFormProps {
   setDestination: (val: string) => void;
   cargoClassification?: string;
   pricingType?: PricingType;
+  showValidationHighlight?: boolean;
 }
 
 export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
@@ -90,6 +91,7 @@ export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
   destination,
   setDestination,
   pricingType,
+  showValidationHighlight = false,
 }) => {
   const updateSpec = <K extends keyof CustomsInquirySpecs>(key: K, value: CustomsInquirySpecs[K]) => {
     onChange({
@@ -188,9 +190,15 @@ export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
             Loại Hình Tờ Khai Hải Quan ({isImport ? 'Nhập khẩu' : 'Xuất khẩu'}) <span className="text-red-500">*</span>
           </label>
           <select
+            required
+            data-invalid={showValidationHighlight && !specs.declarationType ? 'true' : undefined}
             value={specs.declarationType || ''}
             onChange={(e) => updateSpec('declarationType', e.target.value)}
-            className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-amber-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
+            className={`w-full h-10 px-3.5 text-xs bg-white border rounded-xl focus:border-amber-500 font-semibold shadow-2xs cursor-pointer ${
+              showValidationHighlight && !specs.declarationType
+                ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                : 'border-slate-200 text-slate-900'
+            }`}
           >
             <option value="">-- Chọn Loại Hình Tờ Khai --</option>
             {currentDeclarationOptions.map((opt) => (
@@ -199,6 +207,9 @@ export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
               </option>
             ))}
           </select>
+          {showValidationHighlight && !specs.declarationType && (
+            <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng chọn loại hình tờ khai hải quan</p>
+          )}
         </div>
 
         <div>
@@ -207,9 +218,15 @@ export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
             <span>Hình Thức Đứng Tên Tờ Khai <span className="text-red-500">*</span></span>
           </label>
           <select
+            required
+            data-invalid={showValidationHighlight && !specs.declarationEntity ? 'true' : undefined}
             value={specs.declarationEntity || 'Chủ hàng đứng tên trực tiếp (Token DN)'}
             onChange={(e) => updateSpec('declarationEntity', e.target.value)}
-            className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-amber-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
+            className={`w-full h-10 px-3.5 text-xs bg-white border rounded-xl focus:border-amber-500 font-semibold shadow-2xs cursor-pointer ${
+              showValidationHighlight && !specs.declarationEntity
+                ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                : 'border-slate-200 text-slate-900'
+            }`}
           >
             <option value="Chủ hàng đứng tên trực tiếp (Token DN)">
               Chủ hàng đứng tên trực tiếp (DN cấp chữ ký số / ký từ xa)
@@ -231,14 +248,22 @@ export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
           <input
             type="text"
             required
+            data-invalid={showValidationHighlight && !origin?.trim() && !specs.customsSubDepartment?.trim() ? 'true' : undefined}
             value={origin}
             onChange={(e) => {
               setOrigin(e.target.value);
               updateSpec('customsSubDepartment', e.target.value);
             }}
             placeholder="VD: Chi cục HQ CK Cảng Sài Gòn KV1 (Cát Lái), Chi cục HQ Cảng Hải Phòng KV3..."
-            className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-amber-500 text-slate-900 shadow-2xs"
+            className={`w-full h-10 px-3.5 text-xs bg-white border rounded-xl focus:border-amber-500 shadow-2xs ${
+              showValidationHighlight && !origin?.trim() && !specs.customsSubDepartment?.trim()
+                ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                : 'border-slate-200 text-slate-900'
+            }`}
           />
+          {showValidationHighlight && !origin?.trim() && !specs.customsSubDepartment?.trim() && (
+            <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng nhập Chi Cục Hải Quan mở tờ khai</p>
+          )}
         </div>
 
         <div>
@@ -249,14 +274,22 @@ export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
           <input
             type="text"
             required
+            data-invalid={showValidationHighlight && !destination?.trim() && !specs.portOrBorderGate?.trim() ? 'true' : undefined}
             value={destination}
             onChange={(e) => {
               setDestination(e.target.value);
               updateSpec('portOrBorderGate', e.target.value);
             }}
             placeholder="VD: Cảng Cát Lái, Sân bay Tân Sơn Nhất, Cửa khẩu Mộc Bài, ICD Phước Long..."
-            className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-amber-500 text-slate-900 shadow-2xs"
+            className={`w-full h-10 px-3.5 text-xs bg-white border rounded-xl focus:border-amber-500 shadow-2xs ${
+              showValidationHighlight && !destination?.trim() && !specs.portOrBorderGate?.trim()
+                ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                : 'border-slate-200 text-slate-900'
+            }`}
           />
+          {showValidationHighlight && !destination?.trim() && !specs.portOrBorderGate?.trim() && (
+            <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng nhập Cảng / Sân bay / Cửa khẩu / ICD tiếp nhận hàng hóa</p>
+          )}
         </div>
       </div>
 
@@ -270,22 +303,37 @@ export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
           <input
             type="number"
             min={1}
-            value={specs.declarationCount || 1}
-            onChange={(e) => updateSpec('declarationCount', parseInt(e.target.value) || 1)}
-            className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-amber-500 font-bold text-slate-900 shadow-2xs"
+            required
+            data-invalid={showValidationHighlight && (!specs.declarationCount || specs.declarationCount < 1) ? 'true' : undefined}
+            value={specs.declarationCount !== undefined && specs.declarationCount !== null ? specs.declarationCount : 1}
+            onChange={(e) => updateSpec('declarationCount', parseInt(e.target.value, 10) || 1)}
+            className={`w-full h-10 px-3.5 text-xs bg-white border rounded-xl focus:border-amber-500 font-bold shadow-2xs ${
+              showValidationHighlight && (!specs.declarationCount || specs.declarationCount < 1)
+                ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                : 'border-slate-200 text-slate-900'
+            }`}
             placeholder="VD: 1 hoặc 10"
           />
+          {showValidationHighlight && (!specs.declarationCount || specs.declarationCount < 1) && (
+            <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng nhập số lượng tờ khai dự kiến (tối thiểu 1 tờ khai)</p>
+          )}
         </div>
 
         <div>
           <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
             <Calendar className="w-3.5 h-3.5 text-indigo-600" />
-            <span>Tần Suất Khai Báo Hải Quan</span>
+            <span>Tần Suất Khai Báo Hải Quan <span className="text-red-500">*</span></span>
           </label>
           <select
+            required
+            data-invalid={showValidationHighlight && !specs.declarationFrequencyUnit ? 'true' : undefined}
             value={specs.declarationFrequencyUnit || (pricingType === 'CONTRACT' ? 'Tờ khai / Tháng' : 'Tờ khai một lần (Spot)')}
             onChange={(e) => updateSpec('declarationFrequencyUnit', e.target.value)}
-            className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-amber-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
+            className={`w-full h-10 px-3.5 text-xs bg-white border rounded-xl focus:border-amber-500 font-semibold shadow-2xs cursor-pointer ${
+              showValidationHighlight && !specs.declarationFrequencyUnit
+                ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                : 'border-slate-200 text-slate-900'
+            }`}
           >
             <option value="Tờ khai một lần (Spot)">Tờ khai một lần (Giao dịch Spot)</option>
             <option value="Tờ khai / Tuần">Tờ khai / Tuần</option>
@@ -293,6 +341,9 @@ export const CustomsInquiryForm: React.FC<CustomsInquiryFormProps> = ({
             <option value="Tờ khai / Quý">Tờ khai / Quý</option>
             <option value="Tờ khai / Năm">Tờ khai / Năm</option>
           </select>
+          {showValidationHighlight && !specs.declarationFrequencyUnit && (
+            <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng chọn tần suất khai báo hải quan</p>
+          )}
         </div>
       </div>
 

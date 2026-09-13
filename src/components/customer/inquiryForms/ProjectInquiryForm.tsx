@@ -68,6 +68,7 @@ interface ProjectInquiryFormProps {
   destination: string;
   setDestination: (val: string) => void;
   cargoClassification?: 'General' | 'Reefer' | 'Hazmat';
+  showValidationHighlight?: boolean;
 }
 
 const GENERAL_FLEET_ITEMS = [
@@ -100,6 +101,7 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
   destination,
   setDestination,
   cargoClassification = 'General',
+  showValidationHighlight = false,
 }) => {
   const updateSpec = <K extends keyof ProjectInquirySpecs>(key: K, value: ProjectInquirySpecs[K]) => {
     onChange({
@@ -183,7 +185,12 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+        <div
+          data-invalid={showValidationHighlight && !projectCategory ? 'true' : undefined}
+          className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 p-1 rounded-xl ${
+            showValidationHighlight && !projectCategory ? 'border border-rose-400 bg-rose-50/20' : ''
+          }`}
+        >
           {/* Option 1: Distribution */}
           <div
             onClick={() => updateSpec('projectCategory', 'DISTRIBUTION')}
@@ -268,6 +275,9 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
             </p>
           </div>
         </div>
+        {showValidationHighlight && !projectCategory && (
+          <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng chọn phân loại mô hình dự án logistics</p>
+        )}
       </div>
 
       {/* ========================================================================= */}
@@ -350,11 +360,19 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
                 <input
                   type="text"
                   required={idx === 0}
+                  data-invalid={showValidationHighlight && idx === 0 && !loc.trim() ? 'true' : undefined}
                   value={loc}
                   onChange={(e) => handleOriginChange(idx, e.target.value)}
                   placeholder={idx === 0 ? "VD: Kho Tổng CDC Sóng Thần 1, Dĩ An, Bình Dương" : "VD: Nhà máy KCN Tiên Sơn, Bắc Ninh (Kho phía Bắc)"}
-                  className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-medium text-slate-900 shadow-2xs placeholder:text-slate-400"
+                  className={`w-full h-10 px-3.5 py-2 text-xs bg-white border rounded-xl focus:border-indigo-500 font-medium shadow-2xs placeholder:text-slate-400 ${
+                    showValidationHighlight && idx === 0 && !loc.trim()
+                      ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                      : 'border-slate-200 text-slate-900'
+                  }`}
                 />
+                {showValidationHighlight && idx === 0 && !loc.trim() && (
+                  <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng nhập kho tổng / nhà máy xuất hàng chính</p>
+                )}
               </div>
             ))}
 
@@ -381,7 +399,14 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
                 Theo nhóm: {cargoClassification === 'Reefer' ? 'Xe đông lạnh' : cargoClassification === 'Hazmat' ? 'Xe hóa chất DG' : 'Xe tải bách hóa'}
               </span>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div
+              data-invalid={showValidationHighlight && (!specs.fleetRequirements || specs.fleetRequirements.length === 0) ? 'true' : undefined}
+              className={`grid grid-cols-1 sm:grid-cols-2 gap-2 p-1 rounded-xl ${
+                showValidationHighlight && (!specs.fleetRequirements || specs.fleetRequirements.length === 0)
+                  ? 'border border-rose-400 bg-rose-50/20'
+                  : ''
+              }`}
+            >
               {activeFleetItems.map((fleet) => {
                 const isChecked = ((specs.fleetRequirements || []) as string[]).includes(fleet.label);
                 return (
@@ -405,6 +430,9 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
                 );
               })}
             </div>
+            {showValidationHighlight && (!specs.fleetRequirements || specs.fleetRequirements.length === 0) && (
+              <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng chọn ít nhất một loại phương tiện vận tải cho dự án</p>
+            )}
           </div>
 
           {/* Structured Volume & Frequency */}
@@ -421,6 +449,7 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
                   type="number"
                   min={1}
                   required
+                  data-invalid={showValidationHighlight && (!specs.tripCount || specs.tripCount < 1) ? 'true' : undefined}
                   value={specs.tripCount ?? (specs.monthlyTripsOrVolume ? parseInt(specs.monthlyTripsOrVolume, 10) || 150 : 150)}
                   onChange={(e) => {
                     const val = e.target.value ? parseInt(e.target.value, 10) : undefined;
@@ -428,8 +457,15 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
                     updateSpec('monthlyTripsOrVolume', val ? `${val} ${specs.frequencyUnit || 'Tháng (Chuyến / Tháng)'}` : '');
                   }}
                   placeholder="VD: 150"
-                  className="w-full h-10 px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-bold text-slate-900 shadow-2xs"
+                  className={`w-full h-10 px-3.5 py-2.5 text-xs bg-white border rounded-xl focus:border-indigo-500 font-bold shadow-2xs ${
+                    showValidationHighlight && (!specs.tripCount || specs.tripCount < 1)
+                      ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                      : 'border-slate-200 text-slate-900'
+                  }`}
                 />
+                {showValidationHighlight && (!specs.tripCount || specs.tripCount < 1) && (
+                  <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng nhập số lượng chuyến cần thuê (tối thiểu 1 chuyến)</p>
+                )}
               </div>
 
               <div>
@@ -437,13 +473,19 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
                   Đơn Vị (Tần Suất Vận Chuyển) <span className="text-red-500">*</span>
                 </label>
                 <select
+                  required
+                  data-invalid={showValidationHighlight && !specs.frequencyUnit ? 'true' : undefined}
                   value={specs.frequencyUnit || 'Tháng (Chuyến / Tháng)'}
                   onChange={(e) => {
                     updateSpec('frequencyUnit', e.target.value);
                     const count = specs.tripCount ?? 150;
                     updateSpec('monthlyTripsOrVolume', `${count} ${e.target.value}`);
                   }}
-                  className="w-full h-10 px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-bold text-slate-900 cursor-pointer shadow-2xs"
+                  className={`w-full h-10 px-3.5 py-2.5 text-xs bg-white border rounded-xl focus:border-indigo-500 font-bold cursor-pointer shadow-2xs ${
+                    showValidationHighlight && !specs.frequencyUnit
+                      ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                      : 'border-slate-200 text-slate-900'
+                  }`}
                 >
                   <option value="Tháng (Chuyến / Tháng)">📅 Tháng (Chuyến / Tháng)</option>
                   <option value="Tuần (Chuyến / Tuần)">📅 Tuần (Chuyến / Tuần)</option>
@@ -451,6 +493,9 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
                   <option value="Quý (Chuyến / Quý)">📅 Quý (Chuyến / Quý)</option>
                   <option value="Năm (Chuyến / Năm)">📅 Năm (Chuyến / Năm)</option>
                 </select>
+                {showValidationHighlight && !specs.frequencyUnit && (
+                  <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng chọn đơn vị tần suất vận chuyển</p>
+                )}
               </div>
             </div>
           </div>
@@ -521,14 +566,22 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
                 <input
                   type="text"
                   required
+                  data-invalid={showValidationHighlight && !(specs.xDockHubLocation || origin)?.trim() ? 'true' : undefined}
                   value={specs.xDockHubLocation || origin || ''}
                   onChange={(e) => {
                     updateSpec('xDockHubLocation', e.target.value);
                     setOrigin(e.target.value);
                   }}
                   placeholder="VD: Điểm gom Bình Dương / TP.HCM / Bắc Ninh..."
-                  className="w-full h-10 px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-bold text-slate-900 shadow-2xs placeholder:text-slate-400"
+                  className={`w-full h-10 px-3.5 py-2.5 text-xs bg-white border rounded-xl focus:border-indigo-500 font-bold shadow-2xs placeholder:text-slate-400 ${
+                    showValidationHighlight && !(specs.xDockHubLocation || origin)?.trim()
+                      ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                      : 'border-slate-200 text-slate-900'
+                  }`}
                 />
+                {showValidationHighlight && !(specs.xDockHubLocation || origin)?.trim() && (
+                  <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng nhập trạm gom hàng nguồn</p>
+                )}
               </div>
 
               {specs.xDockScope === 'Liên Vùng Tuyến Trục (Inter-region Linehaul)' && (
@@ -539,14 +592,22 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
                   <input
                     type="text"
                     required
+                    data-invalid={showValidationHighlight && !(specs.xDockDestinationHub || destination)?.trim() ? 'true' : undefined}
                     value={specs.xDockDestinationHub || destination || ''}
                     onChange={(e) => {
                       updateSpec('xDockDestinationHub', e.target.value);
                       setDestination(e.target.value);
                     }}
                     placeholder="VD: Hub Đà Nẵng / Hub Hà Nội / Hải Phòng..."
-                    className="w-full h-10 px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-bold text-slate-900 shadow-2xs placeholder:text-slate-400"
+                    className={`w-full h-10 px-3.5 py-2.5 text-xs bg-white border rounded-xl focus:border-indigo-500 font-bold shadow-2xs placeholder:text-slate-400 ${
+                      showValidationHighlight && !(specs.xDockDestinationHub || destination)?.trim()
+                        ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                        : 'border-slate-200 text-slate-900'
+                    }`}
                   />
+                  {showValidationHighlight && !(specs.xDockDestinationHub || destination)?.trim() && (
+                    <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng nhập trạm phân phối đích</p>
+                  )}
                 </div>
               )}
 
@@ -579,14 +640,23 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
                 </label>
                 <input
                   type="text"
+                  required
+                  data-invalid={showValidationHighlight && !(specs.xDockInboundVolume || specs.inboundDailyVolume)?.trim() ? 'true' : undefined}
                   value={specs.xDockInboundVolume || specs.inboundDailyVolume || ''}
                   onChange={(e) => {
                     updateSpec('xDockInboundVolume', e.target.value);
                     updateSpec('inboundDailyVolume', e.target.value);
                   }}
                   placeholder="VD: 5.000, 120, 80..."
-                  className="w-full h-10 px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-bold text-slate-900 shadow-2xs placeholder:text-slate-400"
+                  className={`w-full h-10 px-3.5 py-2.5 text-xs bg-white border rounded-xl focus:border-indigo-500 font-bold shadow-2xs placeholder:text-slate-400 ${
+                    showValidationHighlight && !(specs.xDockInboundVolume || specs.inboundDailyVolume)?.trim()
+                      ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                      : 'border-slate-200 text-slate-900'
+                  }`}
                 />
+                {showValidationHighlight && !(specs.xDockInboundVolume || specs.inboundDailyVolume)?.trim() && (
+                  <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng nhập sản lượng gom Inbound dự kiến</p>
+                )}
               </div>
 
               <div>
@@ -631,7 +701,14 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
               </label>
               <span className="text-[11px] text-indigo-700 font-semibold">Chọn các kênh phân phối của bạn</span>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            <div
+              data-invalid={showValidationHighlight && (!specs.targetRetailChains || specs.targetRetailChains.length === 0) ? 'true' : undefined}
+              className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 p-1 rounded-xl ${
+                showValidationHighlight && (!specs.targetRetailChains || specs.targetRetailChains.length === 0)
+                  ? 'border border-rose-400 bg-rose-50/20'
+                  : ''
+              }`}
+            >
               {[
                 { id: 'chain-go', label: '🔴 GO! / Big C (Central Retail)' },
                 { id: 'chain-winmart', label: '🔴 WinMart / WinMart+ (Masan Group)' },
@@ -663,6 +740,9 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
                 );
               })}
             </div>
+            {showValidationHighlight && (!specs.targetRetailChains || specs.targetRetailChains.length === 0) && (
+              <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng chọn ít nhất một chuỗi siêu thị / điểm giao hàng</p>
+            )}
           </div>
 
           {/* 5. Sorting & Value-Added Services at X-Dock */}
@@ -670,7 +750,14 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
             <label className="block text-xs font-bold text-slate-800">
               Yêu Cầu Thao Tác Chia Chọn & Nghiệp Vụ Siêu Thị Tại Sàn X-Dock (Chọn các khâu) <span className="text-red-500">*</span>
             </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div
+              data-invalid={showValidationHighlight && (!specs.sortingRequirements || specs.sortingRequirements.length === 0) ? 'true' : undefined}
+              className={`grid grid-cols-1 sm:grid-cols-2 gap-2 p-1 rounded-xl ${
+                showValidationHighlight && (!specs.sortingRequirements || specs.sortingRequirements.length === 0)
+                  ? 'border border-rose-400 bg-rose-50/20'
+                  : ''
+              }`}
+            >
               {[
                 { id: 'sort-store', label: '🏷️ Phân loại chi tiết theo Mã Siêu Thị / Cửa Hàng (Store Code)' },
                 { id: 'sort-barcode', label: '📲 Quét mã vạch Barcode / QR Code từng kiện hàng' },
@@ -701,6 +788,9 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
                 );
               })}
             </div>
+            {showValidationHighlight && (!specs.sortingRequirements || specs.sortingRequirements.length === 0) && (
+              <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng chọn ít nhất một khâu thao tác chia chọn tại sàn</p>
+            )}
           </div>
 
           {/* 6. Turnaround Time & Operating Hours */}
@@ -760,14 +850,22 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
                 <input
                   type="text"
                   required
+                  data-invalid={showValidationHighlight && !(specs.portIcdOriginPort || origin)?.trim() ? 'true' : undefined}
                   value={specs.portIcdOriginPort || origin || ''}
                   onChange={(e) => {
                     updateSpec('portIcdOriginPort', e.target.value);
                     setOrigin(e.target.value);
                   }}
                   placeholder="VD: Cảng Quốc Tế Cái Mép (CMIT / TCIT) / Cát Lái / Lạch Huyện..."
-                  className="w-full h-10 px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-sky-500 font-bold text-slate-900 shadow-2xs placeholder:text-slate-400"
+                  className={`w-full h-10 px-3.5 py-2.5 text-xs bg-white border rounded-xl focus:border-sky-500 font-bold shadow-2xs placeholder:text-slate-400 ${
+                    showValidationHighlight && !(specs.portIcdOriginPort || origin)?.trim()
+                      ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                      : 'border-slate-200 text-slate-900'
+                  }`}
                 />
+                {showValidationHighlight && !(specs.portIcdOriginPort || origin)?.trim() && (
+                  <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng nhập cảng biển / cảng gốc</p>
+                )}
               </div>
 
               <div>
@@ -777,14 +875,22 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
                 <input
                   type="text"
                   required
+                  data-invalid={showValidationHighlight && !(specs.portIcdDestinationIcd || destination)?.trim() ? 'true' : undefined}
                   value={specs.portIcdDestinationIcd || destination || ''}
                   onChange={(e) => {
                     updateSpec('portIcdDestinationIcd', e.target.value);
                     setDestination(e.target.value);
                   }}
                   placeholder="VD: ICD Sóng Thần / Tân Cảng Long Bình / ICD Tiên Sơn..."
-                  className="w-full h-10 px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-sky-500 font-bold text-slate-900 shadow-2xs placeholder:text-slate-400"
+                  className={`w-full h-10 px-3.5 py-2.5 text-xs bg-white border rounded-xl focus:border-sky-500 font-bold shadow-2xs placeholder:text-slate-400 ${
+                    showValidationHighlight && !(specs.portIcdDestinationIcd || destination)?.trim()
+                      ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                      : 'border-slate-200 text-slate-900'
+                  }`}
                 />
+                {showValidationHighlight && !(specs.portIcdDestinationIcd || destination)?.trim() && (
+                  <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng nhập cảng cạn ICD / depot đích</p>
+                )}
               </div>
             </div>
           </div>
@@ -816,11 +922,20 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
                 </label>
                 <input
                   type="text"
+                  required
+                  data-invalid={showValidationHighlight && !specs.portIcdMonthlyTeuOrVolume?.trim() ? 'true' : undefined}
                   value={specs.portIcdMonthlyTeuOrVolume || ''}
                   onChange={(e) => updateSpec('portIcdMonthlyTeuOrVolume', e.target.value)}
                   placeholder="VD: 500 - 1.000 TEU / Tháng (hoặc 30 - 50 Cont / Ngày)"
-                  className="w-full h-10 px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-sky-500 font-bold text-slate-900 shadow-2xs placeholder:text-slate-400"
+                  className={`w-full h-10 px-3.5 py-2.5 text-xs bg-white border rounded-xl focus:border-sky-500 font-bold shadow-2xs placeholder:text-slate-400 ${
+                    showValidationHighlight && !specs.portIcdMonthlyTeuOrVolume?.trim()
+                      ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                      : 'border-slate-200 text-slate-900'
+                  }`}
                 />
+                {showValidationHighlight && !specs.portIcdMonthlyTeuOrVolume?.trim() && (
+                  <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng nhập sản lượng container cam kết</p>
+                )}
               </div>
             </div>
           </div>
@@ -830,7 +945,14 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
             <label className="block text-xs font-bold text-slate-800">
               Quy Cách & Chủng Loại Container Cần Khai Thác (Chọn các loại) <span className="text-red-500">*</span>
             </label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div
+              data-invalid={showValidationHighlight && (!specs.portIcdContainerTypes || specs.portIcdContainerTypes.length === 0) ? 'true' : undefined}
+              className={`grid grid-cols-2 sm:grid-cols-4 gap-2 p-1 rounded-xl ${
+                showValidationHighlight && (!specs.portIcdContainerTypes || specs.portIcdContainerTypes.length === 0)
+                  ? 'border border-rose-400 bg-rose-50/20'
+                  : ''
+              }`}
+            >
               {[
                 { id: 'cont-20gp', label: '📦 Container 20ft GP (Thường)' },
                 { id: 'cont-40hc', label: '📦 Container 40ft GP / 40HC' },
@@ -859,6 +981,9 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
                 );
               })}
             </div>
+            {showValidationHighlight && (!specs.portIcdContainerTypes || specs.portIcdContainerTypes.length === 0) && (
+              <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng chọn ít nhất một chủng loại container</p>
+            )}
           </div>
 
           {/* 4. Yard & Terminal Operations / Scope */}
@@ -866,7 +991,14 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
             <label className="block text-xs font-bold text-slate-800">
               Gói Nghiệp Vụ Bãi & Khai Thác Tại Cảng / ICD (Chọn các khâu thực hiện) <span className="text-red-500">*</span>
             </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div
+              data-invalid={showValidationHighlight && (!specs.portIcdOperations || specs.portIcdOperations.length === 0) ? 'true' : undefined}
+              className={`grid grid-cols-1 sm:grid-cols-2 gap-2 p-1 rounded-xl ${
+                showValidationHighlight && (!specs.portIcdOperations || specs.portIcdOperations.length === 0)
+                  ? 'border border-rose-400 bg-rose-50/20'
+                  : ''
+              }`}
+            >
               {[
                 { id: 'op-lolo', label: '🏗️ Nâng hạ Container tại Cảng & ICD (LoLo Lift On / Off)' },
                 { id: 'op-stuffing', label: '📦 Đóng hàng (Stuffing) / Rút ruột (Unstuffing) tại bãi ICD' },
@@ -897,6 +1029,9 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
                 );
               })}
             </div>
+            {showValidationHighlight && (!specs.portIcdOperations || specs.portIcdOperations.length === 0) && (
+              <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng chọn ít nhất một gói nghiệp vụ bãi & khai thác</p>
+            )}
           </div>
         </div>
       )}
@@ -948,14 +1083,22 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
                 <input
                   type="text"
                   required
+                  data-invalid={showValidationHighlight && !(specs.multimodalFirstMile || origin)?.trim() ? 'true' : undefined}
                   value={specs.multimodalFirstMile || origin || ''}
                   onChange={(e) => {
                     updateSpec('multimodalFirstMile', e.target.value);
                     setOrigin(e.target.value);
                   }}
                   placeholder="VD: Kho xưởng A ➔ Cảng Cát Lái"
-                  className="w-full h-10 px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-teal-500 font-medium text-slate-900 shadow-2xs placeholder:text-slate-400"
+                  className={`w-full h-10 px-3 py-2 text-xs bg-white border rounded-xl focus:border-teal-500 font-medium shadow-2xs placeholder:text-slate-400 ${
+                    showValidationHighlight && !(specs.multimodalFirstMile || origin)?.trim()
+                      ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                      : 'border-slate-200 text-slate-900'
+                  }`}
                 />
+                {showValidationHighlight && !(specs.multimodalFirstMile || origin)?.trim() && (
+                  <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng nhập chặng đầu</p>
+                )}
               </div>
 
               <div>
@@ -966,11 +1109,19 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
                 <input
                   type="text"
                   required
+                  data-invalid={showValidationHighlight && !specs.multimodalMainHaul?.trim() ? 'true' : undefined}
                   value={specs.multimodalMainHaul || ''}
                   onChange={(e) => updateSpec('multimodalMainHaul', e.target.value)}
                   placeholder="VD: Tàu Biển Cát Lái ↔ Hải Phòng"
-                  className="w-full h-10 px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-teal-500 font-medium text-slate-900 shadow-2xs placeholder:text-slate-400"
+                  className={`w-full h-10 px-3 py-2 text-xs bg-white border rounded-xl focus:border-teal-500 font-medium shadow-2xs placeholder:text-slate-400 ${
+                    showValidationHighlight && !specs.multimodalMainHaul?.trim()
+                      ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                      : 'border-slate-200 text-slate-900'
+                  }`}
                 />
+                {showValidationHighlight && !specs.multimodalMainHaul?.trim() && (
+                  <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng nhập chặng chính</p>
+                )}
               </div>
 
               <div>
@@ -981,14 +1132,22 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
                 <input
                   type="text"
                   required
+                  data-invalid={showValidationHighlight && !(specs.multimodalLastMile || destination)?.trim() ? 'true' : undefined}
                   value={specs.multimodalLastMile || destination || ''}
                   onChange={(e) => {
                     updateSpec('multimodalLastMile', e.target.value);
                     setDestination(e.target.value);
                   }}
                   placeholder="VD: Cảng Hải Phòng ➔ KCN VSIP"
-                  className="w-full h-10 px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-teal-500 font-medium text-slate-900 shadow-2xs placeholder:text-slate-400"
+                  className={`w-full h-10 px-3 py-2 text-xs bg-white border rounded-xl focus:border-teal-500 font-medium shadow-2xs placeholder:text-slate-400 ${
+                    showValidationHighlight && !(specs.multimodalLastMile || destination)?.trim()
+                      ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                      : 'border-slate-200 text-slate-900'
+                  }`}
                 />
+                {showValidationHighlight && !(specs.multimodalLastMile || destination)?.trim() && (
+                  <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng nhập chặng cuối</p>
+                )}
               </div>
             </div>
           </div>
@@ -1021,11 +1180,20 @@ export const ProjectInquiryForm: React.FC<ProjectInquiryFormProps> = ({
                 </label>
                 <input
                   type="text"
+                  required
+                  data-invalid={showValidationHighlight && !specs.multimodalMonthlyTeuOrVolume?.trim() ? 'true' : undefined}
                   value={specs.multimodalMonthlyTeuOrVolume || ''}
                   onChange={(e) => updateSpec('multimodalMonthlyTeuOrVolume', e.target.value)}
                   placeholder="VD: 30 - 50 TEU / Tháng (hoặc 800 Tấn / Tháng)"
-                  className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-teal-500 font-bold text-slate-900 shadow-2xs placeholder:text-slate-400"
+                  className={`w-full h-10 px-3.5 py-2 text-xs bg-white border rounded-xl focus:border-teal-500 font-bold shadow-2xs placeholder:text-slate-400 ${
+                    showValidationHighlight && !specs.multimodalMonthlyTeuOrVolume?.trim()
+                      ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                      : 'border-slate-200 text-slate-900'
+                  }`}
                 />
+                {showValidationHighlight && !specs.multimodalMonthlyTeuOrVolume?.trim() && (
+                  <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng nhập sản lượng cam kết hàng tháng</p>
+                )}
               </div>
             </div>
           </div>

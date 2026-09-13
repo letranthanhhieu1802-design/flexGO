@@ -71,6 +71,7 @@ interface RailInquiryFormProps {
   setWeightKg?: (val: string) => void;
   volumeCbm?: string;
   setVolumeCbm?: (val: string) => void;
+  showValidationHighlight?: boolean;
 }
 
 export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
@@ -85,6 +86,7 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
   setWeightKg,
   volumeCbm,
   setVolumeCbm,
+  showValidationHighlight = false,
 }) => {
   const isLclDisabled = cargoClassification === 'Reefer' || cargoClassification === 'Hazmat';
 
@@ -194,7 +196,12 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
               : 'Chưa chọn'}
           </span>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+        <div 
+          data-invalid={showValidationHighlight && !specs.tradeRole ? 'true' : undefined}
+          className={`grid grid-cols-1 sm:grid-cols-3 gap-2.5 p-1 rounded-2xl transition-colors ${
+            showValidationHighlight && !specs.tradeRole ? 'border border-rose-300 bg-rose-50/30' : ''
+          }`}
+        >
           {[
             {
               role: 'Nội địa Bắc - Nam (Domestic Rail)',
@@ -221,6 +228,8 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
                 className={`p-3 rounded-xl border text-left cursor-pointer transition-all ${
                   isSelected
                     ? 'border-blue-600 bg-blue-50/80 font-bold text-blue-950 shadow-2xs'
+                    : showValidationHighlight && !specs.tradeRole
+                    ? 'border-rose-300 bg-white text-slate-700 hover:border-rose-400'
                     : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
                 }`}
               >
@@ -237,6 +246,9 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
             );
           })}
         </div>
+        {showValidationHighlight && !specs.tradeRole && (
+          <p className="text-[11px] text-rose-600 font-medium mt-1">Vui lòng chọn vai trò của doanh nghiệp trong lô hàng đường sắt.</p>
+        )}
       </div>
 
       {/* 2. Mode Selector: FCL vs LCL */}
@@ -326,15 +338,23 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
               Điều Kiện Nhận Hàng (Origin Term) <span className="text-red-500">*</span>
             </label>
             <select
+              data-invalid={showValidationHighlight && !specs.originServiceTerm ? 'true' : undefined}
               value={specs.originServiceTerm || ''}
               onChange={(e) => updateSpec('originServiceTerm', e.target.value as any)}
-              className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-bold text-slate-900 shadow-2xs cursor-pointer"
+              className={`w-full h-10 px-3.5 py-2 text-xs bg-white border rounded-xl focus:border-blue-500 font-bold text-slate-900 shadow-2xs cursor-pointer ${
+                showValidationHighlight && !specs.originServiceTerm
+                  ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                  : 'border-slate-200'
+              }`}
             >
               <option value="">-- Chọn Điều Kiện Nhận Hàng * --</option>
               <option value="Door">Door (Lấy tận kho người gửi / Shipper)</option>
               <option value="CY">CY (Nhận tại bãi container ga xuất phát)</option>
               <option value="CFS">CFS (Nhận tại kho hàng lẻ ga xuất phát)</option>
             </select>
+            {showValidationHighlight && !specs.originServiceTerm && (
+              <p className="text-[11px] text-rose-600 font-medium mt-1">Vui lòng chọn điều kiện nhận hàng (Origin Term).</p>
+            )}
           </div>
 
           <div>
@@ -342,15 +362,23 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
               Điều Kiện Giao Hàng (Destination Term) <span className="text-red-500">*</span>
             </label>
             <select
+              data-invalid={showValidationHighlight && !specs.destinationServiceTerm ? 'true' : undefined}
               value={specs.destinationServiceTerm || ''}
               onChange={(e) => updateSpec('destinationServiceTerm', e.target.value as any)}
-              className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-bold text-slate-900 shadow-2xs cursor-pointer"
+              className={`w-full h-10 px-3.5 py-2 text-xs bg-white border rounded-xl focus:border-blue-500 font-bold text-slate-900 shadow-2xs cursor-pointer ${
+                showValidationHighlight && !specs.destinationServiceTerm
+                  ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                  : 'border-slate-200'
+              }`}
             >
               <option value="">-- Chọn Điều Kiện Giao Hàng * --</option>
               <option value="Door">Door (Giao tận kho người nhận / Consignee)</option>
               <option value="CY">CY (Giao tại bãi container ga đích đến)</option>
               <option value="CFS">CFS (Giao tại kho hàng lẻ ga đích đến)</option>
             </select>
+            {showValidationHighlight && !specs.destinationServiceTerm && (
+              <p className="text-[11px] text-rose-600 font-medium mt-1">Vui lòng chọn điều kiện giao hàng (Destination Term).</p>
+            )}
           </div>
         </div>
       </div>
@@ -367,6 +395,7 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
               {isFCL ? <>Ga Xếp Hàng (Origin Rail Station / POL Ga) <span className="text-red-500">*</span></> : <>Địa Chỉ Kho Ga Nhận Hàng (Origin CFS Rail Station) <span className="text-red-500">*</span></>}
             </label>
             <input
+              data-invalid={showValidationHighlight && !origin.trim() && !specs.originStation?.trim() ? 'true' : undefined}
               type="text"
               required
               value={origin}
@@ -375,8 +404,15 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
                 updateSpec('originStation', e.target.value);
               }}
               placeholder="VD: Ga Yên Viên / Ga Giáp Bát (Hà Nội) hoặc Ga Đồng Đăng"
-              className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-medium text-slate-900 shadow-2xs placeholder:text-slate-400"
+              className={`w-full h-10 px-3.5 py-2 text-xs bg-white border rounded-xl focus:border-blue-500 font-medium text-slate-900 shadow-2xs placeholder:text-slate-400 ${
+                showValidationHighlight && !origin.trim() && !specs.originStation?.trim()
+                  ? 'border-rose-400 bg-rose-50/40 text-rose-900 placeholder:text-rose-400'
+                  : 'border-slate-200'
+              }`}
             />
+            {showValidationHighlight && !origin.trim() && !specs.originStation?.trim() && (
+              <p className="text-[11px] text-rose-600 font-medium mt-1">Vui lòng nhập ga xếp hàng (Origin Rail Station / POL Ga).</p>
+            )}
           </div>
 
           <div>
@@ -384,6 +420,7 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
               {isFCL ? <>Ga Dỡ Hàng (Destination Rail Station / POD Ga) <span className="text-red-500">*</span></> : <>Địa Chỉ Kho Ga Trả Hàng (Destination CFS Rail Station) <span className="text-red-500">*</span></>}
             </label>
             <input
+              data-invalid={showValidationHighlight && !destination.trim() && !specs.destinationStation?.trim() ? 'true' : undefined}
               type="text"
               required
               value={destination}
@@ -392,8 +429,15 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
                 updateSpec('destinationStation', e.target.value);
               }}
               placeholder="VD: Ga Sóng Thần (Bình Dương) / Ga Trảng Bom (Đồng Nai)"
-              className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-medium text-slate-900 shadow-2xs placeholder:text-slate-400"
+              className={`w-full h-10 px-3.5 py-2 text-xs bg-white border rounded-xl focus:border-blue-500 font-medium text-slate-900 shadow-2xs placeholder:text-slate-400 ${
+                showValidationHighlight && !destination.trim() && !specs.destinationStation?.trim()
+                  ? 'border-rose-400 bg-rose-50/40 text-rose-900 placeholder:text-rose-400'
+                  : 'border-slate-200'
+              }`}
             />
+            {showValidationHighlight && !destination.trim() && !specs.destinationStation?.trim() && (
+              <p className="text-[11px] text-rose-600 font-medium mt-1">Vui lòng nhập ga dỡ hàng (Destination Rail Station / POD Ga).</p>
+            )}
           </div>
         </div>
       </div>
@@ -407,28 +451,44 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
             <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-              Địa Chỉ Kho Lấy Hàng (Shipper Warehouse / Pickup Address)
+              Địa Chỉ Kho Lấy Hàng (Shipper Warehouse / Pickup Address) {specs.originServiceTerm === 'Door' && <span className="text-red-500">*</span>}
             </label>
             <input
+              data-invalid={specs.originServiceTerm === 'Door' && showValidationHighlight && !specs.pickupAddress?.trim() ? 'true' : undefined}
               type="text"
               value={specs.pickupAddress || ''}
               onChange={(e) => updateSpec('pickupAddress', e.target.value)}
               placeholder="VD: Nhà máy KCN Quang Minh, Mê Linh, Hà Nội..."
-              className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-medium text-slate-800 shadow-2xs placeholder:text-slate-400"
+              className={`w-full h-10 px-3.5 py-2 text-xs bg-white border rounded-xl focus:border-blue-500 font-medium text-slate-800 shadow-2xs placeholder:text-slate-400 ${
+                specs.originServiceTerm === 'Door' && showValidationHighlight && !specs.pickupAddress?.trim()
+                  ? 'border-rose-400 bg-rose-50/40 text-rose-900 placeholder:text-rose-400'
+                  : 'border-slate-200'
+              }`}
             />
+            {specs.originServiceTerm === 'Door' && showValidationHighlight && !specs.pickupAddress?.trim() && (
+              <p className="text-[11px] text-rose-600 font-medium mt-1">Với hình thức Door, vui lòng nhập địa chỉ kho lấy hàng (Shipper Warehouse).</p>
+            )}
           </div>
 
           <div>
             <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-              Địa Chỉ Giao Hàng (Consignee Warehouse / Delivery Address)
+              Địa Chỉ Giao Hàng (Consignee Warehouse / Delivery Address) {specs.destinationServiceTerm === 'Door' && <span className="text-red-500">*</span>}
             </label>
             <input
+              data-invalid={specs.destinationServiceTerm === 'Door' && showValidationHighlight && !specs.deliveryAddress?.trim() ? 'true' : undefined}
               type="text"
               value={specs.deliveryAddress || ''}
               onChange={(e) => updateSpec('deliveryAddress', e.target.value)}
               placeholder="VD: Kho KCN VSIP 1, Thuận An, Bình Dương..."
-              className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-medium text-slate-800 shadow-2xs placeholder:text-slate-400"
+              className={`w-full h-10 px-3.5 py-2 text-xs bg-white border rounded-xl focus:border-blue-500 font-medium text-slate-800 shadow-2xs placeholder:text-slate-400 ${
+                specs.destinationServiceTerm === 'Door' && showValidationHighlight && !specs.deliveryAddress?.trim()
+                  ? 'border-rose-400 bg-rose-50/40 text-rose-900 placeholder:text-rose-400'
+                  : 'border-slate-200'
+              }`}
             />
+            {specs.destinationServiceTerm === 'Door' && showValidationHighlight && !specs.deliveryAddress?.trim() && (
+              <p className="text-[11px] text-rose-600 font-medium mt-1">Với hình thức Door, vui lòng nhập địa chỉ kho giao hàng (Consignee Warehouse).</p>
+            )}
           </div>
         </div>
       </div>
@@ -454,6 +514,7 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
               </label>
               <div className="relative">
                 <input
+                  data-invalid={showValidationHighlight && (!specs.grossWeightKgs || specs.grossWeightKgs <= 0) && (!weightKg || !weightKg.trim()) ? 'true' : undefined}
                   type="text"
                   value={weightKg || (specs.grossWeightKgs ? specs.grossWeightKgs.toString() : '')}
                   onChange={(e) => {
@@ -463,12 +524,19 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
                     updateSpec('grossWeightKgs', isNaN(num) ? undefined : num);
                   }}
                   placeholder="VD: 15.000"
-                  className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-bold text-slate-900 shadow-2xs"
+                  className={`w-full h-10 px-3.5 py-2 text-xs bg-white border rounded-xl focus:border-blue-500 font-bold text-slate-900 shadow-2xs ${
+                    showValidationHighlight && (!specs.grossWeightKgs || specs.grossWeightKgs <= 0) && (!weightKg || !weightKg.trim())
+                      ? 'border-rose-400 bg-rose-50/40 text-rose-900 placeholder:text-rose-400'
+                      : 'border-slate-200'
+                  }`}
                 />
                 <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 pointer-events-none">
                   kg
                 </span>
               </div>
+              {showValidationHighlight && (!specs.grossWeightKgs || specs.grossWeightKgs <= 0) && (!weightKg || !weightKg.trim()) && (
+                <p className="text-[11px] text-rose-600 font-medium mt-1">Vui lòng nhập tổng khối lượng hàng FCL (kg).</p>
+              )}
             </div>
 
             <div>
@@ -477,6 +545,7 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
               </label>
               <div className="relative">
                 <input
+                  data-invalid={showValidationHighlight && (!specs.cbmVolume || specs.cbmVolume <= 0) && (!volumeCbm || !volumeCbm.trim()) ? 'true' : undefined}
                   type="text"
                   value={volumeCbm || (specs.cbmVolume ? specs.cbmVolume.toString() : '')}
                   onChange={(e) => {
@@ -486,12 +555,19 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
                     updateSpec('cbmVolume', isNaN(num) ? undefined : num);
                   }}
                   placeholder="VD: 45"
-                  className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-bold text-slate-900 shadow-2xs"
+                  className={`w-full h-10 px-3.5 py-2 text-xs bg-white border rounded-xl focus:border-blue-500 font-bold text-slate-900 shadow-2xs ${
+                    showValidationHighlight && (!specs.cbmVolume || specs.cbmVolume <= 0) && (!volumeCbm || !volumeCbm.trim())
+                      ? 'border-rose-400 bg-rose-50/40 text-rose-900 placeholder:text-rose-400'
+                      : 'border-slate-200'
+                  }`}
                 />
                 <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 pointer-events-none">
                   cbm
                 </span>
               </div>
+              {showValidationHighlight && (!specs.cbmVolume || specs.cbmVolume <= 0) && (!volumeCbm || !volumeCbm.trim()) && (
+                <p className="text-[11px] text-rose-600 font-medium mt-1">Vui lòng nhập tổng thể tích hàng FCL (cbm).</p>
+              )}
             </div>
           </div>
 
@@ -499,9 +575,14 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
             <div>
               <label className="block text-[11px] font-semibold text-slate-600 mb-1">Loại Container / Toa Xe <span className="text-red-500">*</span></label>
               <select
+                data-invalid={showValidationHighlight && !specs.containerType ? 'true' : undefined}
                 value={specs.containerType || ''}
                 onChange={(e) => updateSpec('containerType', e.target.value as any)}
-                className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-bold text-blue-950 shadow-2xs cursor-pointer"
+                className={`w-full h-10 px-3.5 py-2 text-xs bg-white border rounded-xl focus:border-blue-500 font-bold text-blue-950 shadow-2xs cursor-pointer ${
+                  showValidationHighlight && !specs.containerType
+                    ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                    : 'border-slate-200'
+                }`}
               >
                 <option value="">-- Chọn Loại Container / Toa Xe --</option>
                 <option value="Cont 40ft HC">Cont 40ft High Cube (40HC - Phổ biến nhất)</option>
@@ -509,16 +590,26 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
                 <option value="Cont Lạnh (Reefer Rail)">Container Lạnh 40RF (Có máy phát điện Genset)</option>
                 <option value="Toa xe thùng kín / bạt">Toa xe thùng kín / Toa bạt chuyên dụng (Covered Wagon)</option>
               </select>
+              {showValidationHighlight && !specs.containerType && (
+                <p className="text-[11px] text-rose-600 font-medium mt-1">Vui lòng chọn loại container hoặc toa xe.</p>
+              )}
             </div>
 
             <div>
-              <label className="block text-[11px] font-semibold text-slate-600 mb-1">Điều Khoản Thương Mại (Incoterms)</label>
+              <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                Điều Khoản Thương Mại (Incoterms) {specs.tradeRole && specs.tradeRole !== 'Nội địa Bắc - Nam (Domestic Rail)' && <span className="text-red-500">*</span>}
+              </label>
               <select
+                data-invalid={showValidationHighlight && specs.tradeRole && specs.tradeRole !== 'Nội địa Bắc - Nam (Domestic Rail)' && !specs.incoterm ? 'true' : undefined}
                 value={specs.incoterm || ''}
                 onChange={(e) => updateSpec('incoterm', e.target.value)}
-                className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-medium text-slate-800 shadow-2xs cursor-pointer"
+                className={`w-full h-10 px-3.5 py-2 text-xs bg-white border rounded-xl focus:border-blue-500 font-medium text-slate-800 shadow-2xs cursor-pointer ${
+                  showValidationHighlight && specs.tradeRole && specs.tradeRole !== 'Nội địa Bắc - Nam (Domestic Rail)' && !specs.incoterm
+                    ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                    : 'border-slate-200'
+                }`}
               >
-                <option value="">-- Chọn Incoterms (Tùy chọn) --</option>
+                <option value="">-- {specs.tradeRole && specs.tradeRole !== 'Nội địa Bắc - Nam (Domestic Rail)' ? 'Chọn Incoterms *' : 'Chọn Incoterms (Tùy chọn)'} --</option>
                 <option value="DAP">DAP (Delivered at Place - Giao tại ga đích)</option>
                 <option value="FCA">FCA (Free Carrier - Giao cho bên vận chuyển ga đi)</option>
                 <option value="CPT">CPT (Carriage Paid To - Cước trả tới ga đến)</option>
@@ -526,6 +617,9 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
                 <option value="DDP">DDP (Delivered Duty Paid - Giao trọn gói gồm thuế)</option>
                 <option value="EXW">EXW (Ex Works - Nhận tại xưởng)</option>
               </select>
+              {showValidationHighlight && specs.tradeRole && specs.tradeRole !== 'Nội địa Bắc - Nam (Domestic Rail)' && !specs.incoterm && (
+                <p className="text-[11px] text-rose-600 font-medium mt-1">Vui lòng chọn Incoterms cho lô hàng liên vận quốc tế.</p>
+              )}
             </div>
           </div>
 
@@ -536,6 +630,7 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
                 1. Số Lượng Container / Toa Xe <span className="text-red-500">*</span>
               </label>
               <input
+                data-invalid={showValidationHighlight && (!specs.containerCount || specs.containerCount < 1) ? 'true' : undefined}
                 type="text"
                 inputMode="numeric"
                 value={specs.containerCount !== undefined && specs.containerCount !== null ? specs.containerCount : ''}
@@ -544,8 +639,15 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
                   updateSpec('containerCount', raw === '' ? undefined : parseInt(raw, 10));
                 }}
                 placeholder="VD: 1, 5, 10, 30..."
-                className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-bold text-slate-900 shadow-2xs"
+                className={`w-full h-10 px-3.5 py-2 text-xs bg-white border rounded-xl focus:border-blue-500 font-bold text-slate-900 shadow-2xs ${
+                  showValidationHighlight && (!specs.containerCount || specs.containerCount < 1)
+                    ? 'border-rose-400 bg-rose-50/40 text-rose-900 placeholder:text-rose-400'
+                    : 'border-slate-200'
+                }`}
               />
+              {showValidationHighlight && (!specs.containerCount || specs.containerCount < 1) && (
+                <p className="text-[11px] text-rose-600 font-medium mt-1">Vui lòng nhập số lượng container / toa xe (tối thiểu 1).</p>
+              )}
             </div>
 
             <div>
@@ -553,9 +655,14 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
                 2. Đơn Vị (Tần Suất Vận Chuyển) <span className="text-red-500">*</span>
               </label>
               <select
+                data-invalid={showValidationHighlight && !specs.containerCountUnit ? 'true' : undefined}
                 value={specs.containerCountUnit || ''}
                 onChange={(e) => updateSpec('containerCountUnit', e.target.value)}
-                className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-bold text-slate-900 shadow-2xs cursor-pointer"
+                className={`w-full h-10 px-3.5 py-2 text-xs bg-white border rounded-xl focus:border-blue-500 font-bold text-slate-900 shadow-2xs cursor-pointer ${
+                  showValidationHighlight && !specs.containerCountUnit
+                    ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                    : 'border-slate-200'
+                }`}
               >
                 <option value="">-- Chọn Đơn Vị Tần Suất --</option>
                 <option value="Container / Ngày">Ngày (Container / Ngày)</option>
@@ -564,6 +671,9 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
                 <option value="Container / Năm">Năm (Container / Năm)</option>
                 <option value="Container (Một lần)">Container (Một lần / Spot)</option>
               </select>
+              {showValidationHighlight && !specs.containerCountUnit && (
+                <p className="text-[11px] text-rose-600 font-medium mt-1">Vui lòng chọn đơn vị tần suất vận chuyển.</p>
+              )}
             </div>
 
             <div>
@@ -609,6 +719,7 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
                 Số Lượng Kiện / Pallet Cần Ghép <span className="text-red-500">*</span>
               </label>
               <input
+                data-invalid={showValidationHighlight && (!specs.lclPieces || specs.lclPieces < 1) ? 'true' : undefined}
                 type="text"
                 inputMode="numeric"
                 value={specs.lclPieces !== undefined && specs.lclPieces !== null ? specs.lclPieces : ''}
@@ -617,8 +728,15 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
                   handleLclPiecesChange(val ? parseInt(val, 10) : undefined);
                 }}
                 placeholder="VD: 5"
-                className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-bold text-slate-900 shadow-2xs"
+                className={`w-full h-10 px-3.5 py-2 text-xs bg-white border rounded-xl focus:border-blue-500 font-bold text-slate-900 shadow-2xs ${
+                  showValidationHighlight && (!specs.lclPieces || specs.lclPieces < 1)
+                    ? 'border-rose-400 bg-rose-50/40 text-rose-900 placeholder:text-rose-400'
+                    : 'border-slate-200'
+                }`}
               />
+              {showValidationHighlight && (!specs.lclPieces || specs.lclPieces < 1) && (
+                <p className="text-[11px] text-rose-600 font-medium mt-1">Vui lòng nhập số lượng kiện cần gom ghép (tối thiểu 1).</p>
+              )}
             </div>
 
             <div className="flex flex-col justify-end">
@@ -697,6 +815,7 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
                 Tổng Trọng Lượng Thực (Gross Kg) <span className="text-red-500">*</span>
               </label>
               <input
+                data-invalid={showValidationHighlight && (!specs.lclGrossWeightKg || specs.lclGrossWeightKg <= 0) && (!specs.grossWeightKgs || specs.grossWeightKgs <= 0) && (!weightKg || !weightKg.trim()) ? 'true' : undefined}
                 type="text"
                 inputMode="numeric"
                 value={specs.lclGrossWeightKg !== undefined && specs.lclGrossWeightKg !== null && specs.lclGrossWeightKg > 0 ? specs.lclGrossWeightKg : ''}
@@ -705,8 +824,15 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
                   handleLclGrossWeightChange(val ? parseInt(val, 10) : undefined);
                 }}
                 placeholder="VD: 1000"
-                className="w-full h-10 px-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-bold text-slate-900 shadow-2xs"
+                className={`w-full h-10 px-3 py-2 text-xs bg-white border rounded-xl focus:border-blue-500 font-bold text-slate-900 shadow-2xs ${
+                  showValidationHighlight && (!specs.lclGrossWeightKg || specs.lclGrossWeightKg <= 0) && (!specs.grossWeightKgs || specs.grossWeightKgs <= 0) && (!weightKg || !weightKg.trim())
+                    ? 'border-rose-400 bg-rose-50/40 text-rose-900 placeholder:text-rose-400'
+                    : 'border-slate-200'
+                }`}
               />
+              {showValidationHighlight && (!specs.lclGrossWeightKg || specs.lclGrossWeightKg <= 0) && (!specs.grossWeightKgs || specs.grossWeightKgs <= 0) && (!weightKg || !weightKg.trim()) && (
+                <p className="text-[11px] text-rose-600 font-medium mt-1">Vui lòng nhập tổng trọng lượng thực (Gross Kg).</p>
+              )}
             </div>
 
             <div>
@@ -736,6 +862,7 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
                 1. Số Lượng Chuyến Ghép <span className="text-red-500">*</span>
               </label>
               <input
+                data-invalid={showValidationHighlight && (!specs.lclShipmentCount || specs.lclShipmentCount < 1) ? 'true' : undefined}
                 type="text"
                 inputMode="numeric"
                 value={specs.lclShipmentCount !== undefined && specs.lclShipmentCount !== null ? specs.lclShipmentCount : ''}
@@ -744,8 +871,15 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
                   updateSpec('lclShipmentCount', raw === '' ? undefined : parseInt(raw, 10));
                 }}
                 placeholder="VD: 1, 2, 5, 10..."
-                className="w-full h-10 px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-bold text-slate-900 shadow-2xs"
+                className={`w-full h-10 px-3.5 py-2.5 text-xs bg-white border rounded-xl focus:border-blue-500 font-bold text-slate-900 shadow-2xs ${
+                  showValidationHighlight && (!specs.lclShipmentCount || specs.lclShipmentCount < 1)
+                    ? 'border-rose-400 bg-rose-50/40 text-rose-900 placeholder:text-rose-400'
+                    : 'border-slate-200'
+                }`}
               />
+              {showValidationHighlight && (!specs.lclShipmentCount || specs.lclShipmentCount < 1) && (
+                <p className="text-[11px] text-rose-600 font-medium mt-1">Vui lòng nhập số lượng chuyến ghép (tối thiểu 1 chuyến).</p>
+              )}
             </div>
 
             <div>
@@ -753,9 +887,14 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
                 2. Đơn Vị (Tần Suất Vận Chuyển) <span className="text-red-500">*</span>
               </label>
               <select
+                data-invalid={showValidationHighlight && !specs.lclFrequencyUnit ? 'true' : undefined}
                 value={specs.lclFrequencyUnit || ''}
                 onChange={(e) => updateSpec('lclFrequencyUnit', e.target.value)}
-                className="w-full h-10 px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-blue-500 font-bold text-slate-900 shadow-2xs cursor-pointer"
+                className={`w-full h-10 px-3.5 py-2.5 text-xs bg-white border rounded-xl focus:border-blue-500 font-bold text-slate-900 shadow-2xs cursor-pointer ${
+                  showValidationHighlight && !specs.lclFrequencyUnit
+                    ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                    : 'border-slate-200'
+                }`}
               >
                 <option value="">-- Chọn Đơn Vị Tần Suất --</option>
                 <option value="Chuyến / Ngày">Ngày (Chuyến / Ngày)</option>
@@ -764,6 +903,9 @@ export const RailInquiryForm: React.FC<RailInquiryFormProps> = ({
                 <option value="Chuyến / Năm">Năm (Chuyến / Năm)</option>
                 <option value="Chuyến (Một lần)">Chuyến (Một lần / Spot)</option>
               </select>
+              {showValidationHighlight && !specs.lclFrequencyUnit && (
+                <p className="text-[11px] text-rose-600 font-medium mt-1">Vui lòng chọn đơn vị tần suất vận chuyển.</p>
+              )}
             </div>
           </div>
         </div>

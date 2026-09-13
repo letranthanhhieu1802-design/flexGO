@@ -130,6 +130,7 @@ interface CrossBorderInquiryFormProps {
   setWeightKg?: (val: string) => void;
   volumeCbm?: string;
   setVolumeCbm?: (val: string) => void;
+  showValidationHighlight?: boolean;
 }
 
 export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
@@ -144,6 +145,7 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
   setWeightKg,
   volumeCbm,
   setVolumeCbm,
+  showValidationHighlight = false,
 }) => {
   const isReefer = cargoClassification === 'Reefer';
   const isHazmat = cargoClassification === 'Hazmat';
@@ -412,7 +414,7 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
             <label className="block text-[11px] font-semibold text-slate-600 mb-1">
               Vai Trò Doanh Nghiệp (Trade Role) <span className="text-red-500">*</span>
             </label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2" data-invalid={showValidationHighlight && !specs.tradeRole ? 'true' : undefined}>
               {[
                 { role: 'Xuất khẩu (Export)', title: 'Tuyến Xuất Khẩu' },
                 { role: 'Nhập khẩu (Import)', title: 'Tuyến Nhập Khẩu' },
@@ -426,7 +428,9 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
                     className={`h-10 px-3 rounded-xl border text-left cursor-pointer transition-all text-xs flex items-center justify-between ${
                       isSelected
                         ? 'border-orange-600 bg-orange-50/80 font-bold text-orange-950 shadow-2xs'
-                        : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
+                        : showValidationHighlight && !specs.tradeRole
+                          ? 'border-rose-300 bg-rose-50/30 text-rose-800 hover:border-rose-400'
+                          : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
                     }`}
                   >
                     <span>{item.title}</span>
@@ -435,6 +439,9 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
                 );
               })}
             </div>
+            {showValidationHighlight && !specs.tradeRole && (
+              <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng chọn vai trò doanh nghiệp (Xuất khẩu / Nhập khẩu)</p>
+            )}
           </div>
 
           <div>
@@ -442,9 +449,15 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
               Điều Kiện Thương Mại (Incoterms 2020) <span className="text-red-500">*</span>
             </label>
             <select
+              required
+              data-invalid={showValidationHighlight && !specs.incoterms ? 'true' : undefined}
               value={specs.incoterms || ''}
               onChange={(e) => updateSpec('incoterms', e.target.value)}
-              className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-bold text-orange-950 shadow-2xs cursor-pointer"
+              className={`w-full h-10 px-3.5 py-2 text-xs bg-white border rounded-xl focus:border-orange-500 font-bold shadow-2xs cursor-pointer ${
+                showValidationHighlight && !specs.incoterms
+                  ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                  : 'border-slate-200 text-orange-950'
+              }`}
             >
               <option value="">-- Chọn Điều Kiện Thương Mại --</option>
               <option value="DAP - Delivered at Place (Giao tại nơi đến)">DAP - Giao tại nơi đến (Nhà máy người mua)</option>
@@ -454,6 +467,9 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
               <option value="EXW - Ex Works (Giao tại xưởng người bán)">EXW - Giao tại xưởng người bán</option>
               <option value="CIF / CIP - Carriage and Insurance Paid">CIP / CIF - Cước phí và bảo hiểm trả tới đích</option>
             </select>
+            {showValidationHighlight && !specs.incoterms && (
+              <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng chọn điều kiện thương mại Incoterms 2020</p>
+            )}
           </div>
         </div>
       </div>
@@ -464,9 +480,15 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
           Cửa Khẩu Biên Giới Qua Lại (Border Checkpoint) <span className="text-red-500">*</span>
         </label>
         <select
+          required
+          data-invalid={showValidationHighlight && !specs.borderGate ? 'true' : undefined}
           value={specs.borderGate || ''}
           onChange={(e) => updateSpec('borderGate', e.target.value)}
-          className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-bold text-orange-950 shadow-2xs cursor-pointer"
+          className={`w-full h-10 px-3.5 py-2 text-xs bg-white border rounded-xl focus:border-orange-500 font-bold shadow-2xs cursor-pointer ${
+            showValidationHighlight && !specs.borderGate
+              ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+              : 'border-slate-200 text-orange-950'
+          }`}
         >
           <option value="">-- Chọn Cửa Khẩu Biên Giới --</option>
           <optgroup label="Tuyến Cửa Khẩu Campuchia (Cambodia Route)">
@@ -514,6 +536,9 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
             </option>
           </optgroup>
         </select>
+        {showValidationHighlight && !specs.borderGate && (
+          <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng chọn cửa khẩu thông quan biên giới</p>
+        )}
       </div>
 
       {/* 4. Origin & Destination Terms & Multi-stop Addresses */}
@@ -560,11 +585,19 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
                   <input
                     type="text"
                     required={idx === 0}
+                    data-invalid={idx === 0 && showValidationHighlight && !loc?.trim() && !origin?.trim() ? 'true' : undefined}
                     value={loc}
                     onChange={(e) => handlePickupLocationChange(idx, e.target.value)}
                     placeholder={idx === 0 ? "VD: Kho VSIP 1, TP. Thuận An, Bình Dương, Việt Nam" : "VD: KCN Amata, TP. Biên Hòa, Đồng Nai (Điểm gom thêm)"}
-                    className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-medium text-slate-900 shadow-2xs placeholder:text-slate-400"
+                    className={`w-full h-10 px-3.5 py-2 text-xs bg-white border rounded-xl focus:border-orange-500 font-medium shadow-2xs placeholder:text-slate-400 ${
+                      idx === 0 && showValidationHighlight && !loc?.trim() && !origin?.trim()
+                        ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                        : 'border-slate-200 text-slate-900'
+                    }`}
                   />
+                  {idx === 0 && showValidationHighlight && !loc?.trim() && !origin?.trim() && (
+                    <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng nhập địa chỉ kho lấy hàng chính (Điểm lấy 1)</p>
+                  )}
                 </div>
               ))}
             </div>
@@ -619,11 +652,19 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
                   <input
                     type="text"
                     required={idx === 0}
+                    data-invalid={idx === 0 && showValidationHighlight && !loc?.trim() && !destination?.trim() ? 'true' : undefined}
                     value={loc}
                     onChange={(e) => handleDeliveryLocationChange(idx, e.target.value)}
                     placeholder={idx === 0 ? "VD: Phnom Penh SEZ, Phnom Penh, Campuchia" : "VD: Kho Chroy Changvar, Phnom Penh (Giao bổ sung)"}
-                    className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-medium text-slate-900 shadow-2xs placeholder:text-slate-400"
+                    className={`w-full h-10 px-3.5 py-2 text-xs bg-white border rounded-xl focus:border-orange-500 font-medium shadow-2xs placeholder:text-slate-400 ${
+                      idx === 0 && showValidationHighlight && !loc?.trim() && !destination?.trim()
+                        ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                        : 'border-slate-200 text-slate-900'
+                    }`}
                   />
+                  {idx === 0 && showValidationHighlight && !loc?.trim() && !destination?.trim() && (
+                    <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng nhập địa chỉ kho giao hàng chính (Điểm giao 1)</p>
+                  )}
                 </div>
               ))}
             </div>
@@ -690,6 +731,8 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
                 <div className="relative">
                   <input
                     type="text"
+                    required
+                    data-invalid={showValidationHighlight && !(weightKg?.trim() || (specs.grossWeightKgs && specs.grossWeightKgs > 0)) ? 'true' : undefined}
                     value={weightKg || (specs.grossWeightKgs ? specs.grossWeightKgs.toString() : '')}
                     onChange={(e) => {
                       const val = e.target.value;
@@ -698,12 +741,19 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
                       updateSpec('grossWeightKgs', isNaN(num) ? undefined : num);
                     }}
                     placeholder="VD: 15.000"
-                    className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-bold text-slate-900 shadow-2xs"
+                    className={`w-full h-10 px-3.5 py-2 text-xs bg-white border rounded-xl focus:border-orange-500 font-bold shadow-2xs ${
+                      showValidationHighlight && !(weightKg?.trim() || (specs.grossWeightKgs && specs.grossWeightKgs > 0))
+                        ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                        : 'border-slate-200 text-slate-900'
+                    }`}
                   />
                   <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 pointer-events-none">
                     kg
                   </span>
                 </div>
+                {showValidationHighlight && !(weightKg?.trim() || (specs.grossWeightKgs && specs.grossWeightKgs > 0)) && (
+                  <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng nhập tổng khối lượng hàng hóa FTL (kg)</p>
+                )}
               </div>
 
               <div>
@@ -713,6 +763,8 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
                 <div className="relative">
                   <input
                     type="text"
+                    required
+                    data-invalid={showValidationHighlight && !(volumeCbm?.trim() || (specs.cbmVolume && specs.cbmVolume > 0)) ? 'true' : undefined}
                     value={volumeCbm || (specs.cbmVolume ? specs.cbmVolume.toString() : '')}
                     onChange={(e) => {
                       const val = e.target.value;
@@ -721,12 +773,19 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
                       updateSpec('cbmVolume', isNaN(num) ? undefined : num);
                     }}
                     placeholder="VD: 45"
-                    className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-bold text-slate-900 shadow-2xs"
+                    className={`w-full h-10 px-3.5 py-2 text-xs bg-white border rounded-xl focus:border-orange-500 font-bold shadow-2xs ${
+                      showValidationHighlight && !(volumeCbm?.trim() || (specs.cbmVolume && specs.cbmVolume > 0))
+                        ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                        : 'border-slate-200 text-slate-900'
+                    }`}
                   />
                   <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 pointer-events-none">
                     cbm
                   </span>
                 </div>
+                {showValidationHighlight && !(volumeCbm?.trim() || (specs.cbmVolume && specs.cbmVolume > 0)) && (
+                  <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng nhập tổng thể tích hàng hóa FTL (cbm)</p>
+                )}
               </div>
             </div>
 
@@ -737,6 +796,8 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
                   Loại Phương Tiện / Thùng Xe <span className="text-red-500">*</span>
                 </label>
                 <select
+                  required
+                  data-invalid={showValidationHighlight && !specs.vehicleType ? 'true' : undefined}
                   value={specs.vehicleType || ''}
                   onChange={(e) => {
                     const newType = e.target.value;
@@ -746,7 +807,11 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
                       tonnageCategory: '',
                     });
                   }}
-                  className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-bold text-orange-950 shadow-2xs cursor-pointer"
+                  className={`w-full h-10 px-3.5 py-2 text-xs bg-white border rounded-xl focus:border-orange-500 font-bold shadow-2xs cursor-pointer ${
+                    showValidationHighlight && !specs.vehicleType
+                      ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                      : 'border-slate-200 text-orange-950'
+                  }`}
                 >
                   <option value="">-- Chọn Loại Phương Tiện --</option>
                   {CROSS_BORDER_VEHICLE_TYPES.map((v) => (
@@ -755,10 +820,13 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
                     </option>
                   ))}
                 </select>
-                {selectedVehicleType && (
+                {selectedVehicleType && !showValidationHighlight && (
                   <p className="text-[11px] text-slate-500 mt-1 italic line-clamp-1">
                     {selectedVehicleType.desc}
                   </p>
+                )}
+                {showValidationHighlight && !specs.vehicleType && (
+                  <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng chọn loại phương tiện / thùng xe xuyên biên giới</p>
                 )}
               </div>
 
@@ -767,9 +835,15 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
                   Phân Khúc Tải Trọng & Kích Cỡ <span className="text-red-500">*</span>
                 </label>
                 <select
+                  required
+                  data-invalid={showValidationHighlight && !specs.tonnageCategory ? 'true' : undefined}
                   value={specs.tonnageCategory || ''}
                   onChange={(e) => updateSpec('tonnageCategory', e.target.value)}
-                  className="w-full h-10 px-3.5 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-bold text-orange-950 shadow-2xs cursor-pointer"
+                  className={`w-full h-10 px-3.5 py-2 text-xs bg-white border rounded-xl focus:border-orange-500 font-bold shadow-2xs cursor-pointer ${
+                    showValidationHighlight && !specs.tonnageCategory
+                      ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                      : 'border-slate-200 text-orange-950'
+                  }`}
                 >
                   <option value="">
                     {selectedVehicleType ? '-- Chọn Phân Khúc Tải Trọng --' : '-- Vui lòng chọn Loại Phương Tiện trước --'}
@@ -780,6 +854,9 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
                     </option>
                   ))}
                 </select>
+                {showValidationHighlight && !specs.tonnageCategory && (
+                  <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng chọn phân khúc tải trọng & kích cỡ xe</p>
+                )}
               </div>
             </div>
 
@@ -792,14 +869,22 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
                   type="number"
                   min={1}
                   required
+                  data-invalid={showValidationHighlight && (!specs.vehicleCount || specs.vehicleCount < 1) ? 'true' : undefined}
                   value={specs.vehicleCount !== undefined && specs.vehicleCount !== null ? (specs.vehicleCount === 0 ? '' : specs.vehicleCount) : ''}
                   onChange={(e) => {
                     const val = e.target.value ? parseInt(e.target.value, 10) : undefined;
                     updateSpec('vehicleCount', val);
                   }}
                   placeholder="VD: 1, 2, 5..."
-                  className="w-full h-10 px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-bold text-slate-900 shadow-2xs"
+                  className={`w-full h-10 px-3.5 py-2.5 text-xs bg-white border rounded-xl focus:border-orange-500 font-bold shadow-2xs ${
+                    showValidationHighlight && (!specs.vehicleCount || specs.vehicleCount < 1)
+                      ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                      : 'border-slate-200 text-slate-900'
+                  }`}
                 />
+                {showValidationHighlight && (!specs.vehicleCount || specs.vehicleCount < 1) && (
+                  <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng nhập số lượng chuyến / xe cần thuê (tối thiểu 1 xe)</p>
+                )}
               </div>
 
               <div>
@@ -807,9 +892,15 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
                   Đơn Vị (Tần Suất Vận Chuyển) <span className="text-red-500">*</span>
                 </label>
                 <select
+                  required
+                  data-invalid={showValidationHighlight && !specs.frequencyUnit ? 'true' : undefined}
                   value={specs.frequencyUnit || ''}
                   onChange={(e) => updateSpec('frequencyUnit', e.target.value)}
-                  className="w-full h-10 px-3 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-bold text-orange-950 shadow-2xs cursor-pointer"
+                  className={`w-full h-10 px-3 py-2.5 text-xs bg-white border rounded-xl focus:border-orange-500 font-bold shadow-2xs cursor-pointer ${
+                    showValidationHighlight && !specs.frequencyUnit
+                      ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                      : 'border-slate-200 text-orange-950'
+                  }`}
                 >
                   <option value="">-- Chọn Đơn Vị Tần Suất --</option>
                   <option value="Chuyến (Một lần duy nhất)">Chuyến (Một lần duy nhất)</option>
@@ -817,6 +908,9 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
                   <option value="Chuyến / Tháng">Chuyến / Tháng</option>
                   <option value="Chuyến / Ngày">Chuyến / Ngày (Tần suất cao)</option>
                 </select>
+                {showValidationHighlight && !specs.frequencyUnit && (
+                  <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng chọn đơn vị tần suất vận chuyển</p>
+                )}
               </div>
             </div>
 
@@ -827,9 +921,15 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
                   Thời Gian Giao Hàng Yêu Cầu (Leadtime / Transit SLA) <span className="text-red-500">*</span>
                 </label>
                 <select
+                  required
+                  data-invalid={showValidationHighlight && !specs.leadtimeSLA ? 'true' : undefined}
                   value={specs.leadtimeSLA || ''}
                   onChange={(e) => updateSpec('leadtimeSLA', e.target.value)}
-                  className="w-full h-10 px-3 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-bold text-orange-950 shadow-2xs cursor-pointer"
+                  className={`w-full h-10 px-3 py-2.5 text-xs bg-white border rounded-xl focus:border-orange-500 font-bold shadow-2xs cursor-pointer ${
+                    showValidationHighlight && !specs.leadtimeSLA
+                      ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                      : 'border-slate-200 text-orange-950'
+                  }`}
                 >
                   <option value="">-- Chọn Thời Gian Giao Hàng --</option>
                   <option value="Hỏa Tốc / Express Xuyên Biên Giới (24h - 36h)">
@@ -845,6 +945,9 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
                     Theo thỏa thuận lịch giao nhận riêng
                   </option>
                 </select>
+                {showValidationHighlight && !specs.leadtimeSLA && (
+                  <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng chọn thời gian giao hàng yêu cầu (SLA)</p>
+                )}
               </div>
 
               <div>
@@ -881,14 +984,23 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
               <input
                 type="text"
                 inputMode="numeric"
+                required
+                data-invalid={showValidationHighlight && (!specs.ltlPieces || specs.ltlPieces < 1) ? 'true' : undefined}
                 value={specs.ltlPieces !== undefined && specs.ltlPieces !== null ? specs.ltlPieces : ''}
                 onChange={(e) => {
                   const val = e.target.value.replace(/\D/g, '');
                   handleLtlPiecesChange(val ? parseInt(val, 10) : undefined);
                 }}
                 placeholder="VD: 4"
-                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-bold text-slate-900 shadow-2xs"
+                className={`w-full h-10 px-3.5 text-xs bg-white border rounded-xl focus:border-orange-500 font-bold shadow-2xs ${
+                  showValidationHighlight && (!specs.ltlPieces || specs.ltlPieces < 1)
+                    ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                    : 'border-slate-200 text-slate-900'
+                }`}
               />
+              {showValidationHighlight && (!specs.ltlPieces || specs.ltlPieces < 1) && (
+                <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng nhập số lượng kiện / pallet cần ghép (tối thiểu 1 kiện)</p>
+              )}
             </div>
 
             {/* Row 2: Dimension Inputs (L x W x H cm) */}
@@ -954,14 +1066,23 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
                 <input
                   type="text"
                   inputMode="numeric"
+                  required
+                  data-invalid={showValidationHighlight && (!specs.ltlGrossWeightKg || specs.ltlGrossWeightKg <= 0) ? 'true' : undefined}
                   value={specs.ltlGrossWeightKg !== undefined && specs.ltlGrossWeightKg !== null && specs.ltlGrossWeightKg > 0 ? specs.ltlGrossWeightKg : ''}
                   onChange={(e) => {
                     const val = e.target.value.replace(/\D/g, '');
                     handleLtlWeightChange(val ? parseFloat(val) : undefined);
                   }}
                   placeholder="VD: 1200"
-                  className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-bold text-slate-900 shadow-2xs"
+                  className={`w-full h-10 px-3.5 text-xs bg-white border rounded-xl focus:border-orange-500 font-bold shadow-2xs ${
+                    showValidationHighlight && (!specs.ltlGrossWeightKg || specs.ltlGrossWeightKg <= 0)
+                      ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                      : 'border-slate-200 text-slate-900'
+                  }`}
                 />
+                {showValidationHighlight && (!specs.ltlGrossWeightKg || specs.ltlGrossWeightKg <= 0) && (
+                  <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng nhập tổng trọng lượng thực tế (Gross Kg)</p>
+                )}
               </div>
 
               <div>
@@ -1021,14 +1142,22 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
                   type="number"
                   min={1}
                   required
+                  data-invalid={showValidationHighlight && (!specs.shipmentCount || specs.shipmentCount < 1) ? 'true' : undefined}
                   value={specs.shipmentCount !== undefined && specs.shipmentCount !== null ? (specs.shipmentCount === 0 ? '' : specs.shipmentCount) : ''}
                   onChange={(e) => {
                     const val = e.target.value ? parseInt(e.target.value, 10) : undefined;
                     updateSpec('shipmentCount', val);
                   }}
                   placeholder="VD: 1, 2, 3..."
-                  className="w-full h-10 px-3.5 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-bold text-slate-900 shadow-2xs"
+                  className={`w-full h-10 px-3.5 py-2.5 text-xs bg-white border rounded-xl focus:border-orange-500 font-bold shadow-2xs ${
+                    showValidationHighlight && (!specs.shipmentCount || specs.shipmentCount < 1)
+                      ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                      : 'border-slate-200 text-slate-900'
+                  }`}
                 />
+                {showValidationHighlight && (!specs.shipmentCount || specs.shipmentCount < 1) && (
+                  <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng nhập số lượng lô hàng / chuyến ghép (tối thiểu 1 lô)</p>
+                )}
               </div>
 
               <div>
@@ -1036,15 +1165,24 @@ export const CrossBorderInquiryForm: React.FC<CrossBorderInquiryFormProps> = ({
                   Đơn Vị (Tần Suất Ghép Hàng) <span className="text-red-500">*</span>
                 </label>
                 <select
+                  required
+                  data-invalid={showValidationHighlight && !specs.frequencyUnit ? 'true' : undefined}
                   value={specs.frequencyUnit || ''}
                   onChange={(e) => updateSpec('frequencyUnit', e.target.value)}
-                  className="w-full h-10 px-3 py-2.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-orange-500 font-bold text-orange-950 shadow-2xs cursor-pointer"
+                  className={`w-full h-10 px-3 py-2.5 text-xs bg-white border rounded-xl focus:border-orange-500 font-bold shadow-2xs cursor-pointer ${
+                    showValidationHighlight && !specs.frequencyUnit
+                      ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                      : 'border-slate-200 text-orange-950'
+                  }`}
                 >
                   <option value="">-- Chọn Đơn Vị Tần Suất --</option>
                   <option value="Lô hàng (Một lần duy nhất)">Lô hàng (Một lần duy nhất)</option>
                   <option value="Lô hàng / Tuần">Lô hàng / Tuần</option>
                   <option value="Lô hàng / Tháng">Lô hàng / Tháng</option>
                 </select>
+                {showValidationHighlight && !specs.frequencyUnit && (
+                  <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng chọn đơn vị tần suất ghép hàng</p>
+                )}
               </div>
             </div>
           </div>

@@ -1068,6 +1068,7 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
                 <input
                   type="text"
                   inputMode="numeric"
+                  data-invalid={showValidationHighlight && !weightKg?.trim() ? 'true' : undefined}
                   value={weightKg || ''}
                   onChange={(e) => {
                     const raw = e.target.value.replace(/[^0-9]/g, '');
@@ -1081,7 +1082,11 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
                     }
                   }}
                   placeholder="VD: 15.000"
-                  className="w-full h-10 pl-3.5 pr-10 text-xs bg-white border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 font-bold text-slate-900 transition-colors shadow-2xs"
+                  className={`w-full h-10 pl-3.5 pr-10 text-xs rounded-xl font-bold text-slate-900 transition-colors shadow-2xs ${
+                    showValidationHighlight && !weightKg?.trim()
+                      ? 'bg-rose-50/50 border-2 border-rose-400 ring-2 ring-rose-100 focus:border-rose-500'
+                      : 'bg-white border border-slate-200 focus:border-indigo-500'
+                  }`}
                 />
                 <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 pointer-events-none">
                   kg
@@ -1097,6 +1102,7 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
                 <input
                   type="text"
                   inputMode="numeric"
+                  data-invalid={showValidationHighlight && !volumeCbm?.trim() ? 'true' : undefined}
                   value={volumeCbm || ''}
                   onChange={(e) => {
                     const raw = e.target.value.replace(/[^0-9.]/g, '');
@@ -1107,7 +1113,11 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
                     setVolumeCbm?.(raw);
                   }}
                   placeholder="VD: 50"
-                  className="w-full h-10 pl-3.5 pr-12 text-xs bg-white border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-500 font-bold text-slate-900 transition-colors shadow-2xs"
+                  className={`w-full h-10 pl-3.5 pr-12 text-xs rounded-xl font-bold text-slate-900 transition-colors shadow-2xs ${
+                    showValidationHighlight && !volumeCbm?.trim()
+                      ? 'bg-rose-50/50 border-2 border-rose-400 ring-2 ring-rose-100 focus:border-rose-500'
+                      : 'bg-white border border-slate-200 focus:border-indigo-500'
+                  }`}
                 />
                 <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 pointer-events-none">
                   cbm
@@ -1199,9 +1209,14 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
                 Thời Gian Giao Hàng Yêu Cầu (Leadtime SLA) <span className="text-red-500">*</span>
               </label>
               <select
+                data-invalid={showValidationHighlight && !specs.requestedLeadtime ? 'true' : undefined}
                 value={specs.requestedLeadtime || ''}
                 onChange={(e) => updateSpec('requestedLeadtime', e.target.value)}
-                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
+                className={`w-full h-10 px-3.5 text-xs rounded-xl font-semibold shadow-2xs cursor-pointer transition-all ${
+                  showValidationHighlight && !specs.requestedLeadtime
+                    ? 'bg-rose-50/50 border-2 border-rose-400 ring-2 ring-rose-100 text-slate-900'
+                    : 'bg-white border border-slate-200 focus:border-indigo-500 text-slate-900'
+                }`}
               >
                 <option value="">-- Chọn Thời Gian Giao Hàng Yêu Cầu --</option>
                 <option value="Tiêu chuẩn Bắc Nam (60 - 72 giờ)">
@@ -1248,13 +1263,18 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
               <input
                 type="text"
                 inputMode="numeric"
+                data-invalid={showValidationHighlight && (!specs.vehicleCount || specs.vehicleCount < 1) ? 'true' : undefined}
                 value={specs.vehicleCount !== undefined && specs.vehicleCount !== null ? (specs.vehicleCount === 0 ? '' : specs.vehicleCount) : ''}
                 onChange={(e) => {
                   const raw = e.target.value.replace(/\D/g, '');
                   updateSpec('vehicleCount', raw === '' ? undefined : parseInt(raw, 10));
                 }}
                 placeholder="VD: 1"
-                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-bold text-slate-900 shadow-2xs"
+                className={`w-full h-10 px-3.5 text-xs rounded-xl font-bold text-slate-900 shadow-2xs transition-all ${
+                  showValidationHighlight && (!specs.vehicleCount || specs.vehicleCount < 1)
+                    ? 'bg-rose-50/50 border-2 border-rose-400 ring-2 ring-rose-100 focus:border-rose-500'
+                    : 'bg-white border border-slate-200 focus:border-indigo-500'
+                }`}
               />
             </div>
 
@@ -1263,9 +1283,14 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
                 Đơn Vị (Tần Suất Vận Chuyển) <span className="text-red-500">*</span>
               </label>
               <select
+                data-invalid={showValidationHighlight && !specs.vehicleCountUnit ? 'true' : undefined}
                 value={specs.vehicleCountUnit || ''}
                 onChange={(e) => updateSpec('vehicleCountUnit', e.target.value)}
-                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
+                className={`w-full h-10 px-3.5 text-xs rounded-xl font-semibold shadow-2xs cursor-pointer transition-all ${
+                  showValidationHighlight && !specs.vehicleCountUnit
+                    ? 'bg-rose-50/50 border-2 border-rose-400 ring-2 ring-rose-100 text-slate-900'
+                    : 'bg-white border border-slate-200 focus:border-indigo-500 text-slate-900'
+                }`}
               >
                 <option value="">-- Chọn Đơn Vị Tần Suất --</option>
                 <option value="Chuyến / Ngày">Chuyến / Ngày</option>
@@ -1299,7 +1324,12 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
             <label className="block text-xs font-semibold text-slate-700 mb-1.5">
               Phương Tiện Ghép Tuyến <span className="text-red-500">*</span>
             </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div 
+              data-invalid={showValidationHighlight && !specs.truckType ? 'true' : undefined}
+              className={`grid grid-cols-1 sm:grid-cols-2 gap-3 p-1 rounded-xl transition-all ${
+                showValidationHighlight && !specs.truckType ? 'ring-2 ring-rose-400 bg-rose-50/30' : ''
+              }`}
+            >
               {LTL_TRUCK_OPTIONS.map((opt) => (
                 <label
                   key={opt.id}
@@ -1334,13 +1364,18 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
               <input
                 type="text"
                 inputMode="numeric"
+                data-invalid={showValidationHighlight && (!specs.ltlPieces || specs.ltlPieces < 1) ? 'true' : undefined}
                 value={specs.ltlPieces !== undefined && specs.ltlPieces !== null ? specs.ltlPieces : ''}
                 onChange={(e) => {
                   const val = e.target.value.replace(/\D/g, '');
                   handleLtlPiecesChange(val ? parseInt(val, 10) : undefined);
                 }}
                 placeholder="VD: 4"
-                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-emerald-500 font-bold text-slate-900 shadow-2xs"
+                className={`w-full h-10 px-3.5 text-xs rounded-xl font-bold text-slate-900 shadow-2xs transition-all ${
+                  showValidationHighlight && (!specs.ltlPieces || specs.ltlPieces < 1)
+                    ? 'bg-rose-50/50 border-2 border-rose-400 ring-2 ring-rose-100 focus:border-rose-500'
+                    : 'bg-white border border-slate-200 focus:border-emerald-500'
+                }`}
               />
             </div>
 
@@ -1423,13 +1458,18 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
               <input
                 type="text"
                 inputMode="numeric"
+                data-invalid={showValidationHighlight && (!specs.ltlGrossWeightKg || specs.ltlGrossWeightKg <= 0) ? 'true' : undefined}
                 value={specs.ltlGrossWeightKg !== undefined && specs.ltlGrossWeightKg !== null && specs.ltlGrossWeightKg > 0 ? specs.ltlGrossWeightKg : ''}
                 onChange={(e) => {
                   const val = e.target.value.replace(/\D/g, '');
                   handleLtlWeightChange(val ? parseFloat(val) : undefined);
                 }}
                 placeholder="VD: 1200"
-                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-emerald-500 font-bold text-slate-900 shadow-2xs"
+                className={`w-full h-10 px-3.5 text-xs rounded-xl font-bold text-slate-900 shadow-2xs transition-all ${
+                  showValidationHighlight && (!specs.ltlGrossWeightKg || specs.ltlGrossWeightKg <= 0)
+                    ? 'bg-rose-50/50 border-2 border-rose-400 ring-2 ring-rose-100 focus:border-rose-500'
+                    : 'bg-white border border-slate-200 focus:border-emerald-500'
+                }`}
               />
             </div>
 
@@ -1462,13 +1502,18 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
               <input
                 type="text"
                 inputMode="numeric"
+                data-invalid={showValidationHighlight && (!specs.ltlShipmentCount || specs.ltlShipmentCount < 1) ? 'true' : undefined}
                 value={specs.ltlShipmentCount !== undefined && specs.ltlShipmentCount !== null ? specs.ltlShipmentCount : ''}
                 onChange={(e) => {
                   const raw = e.target.value.replace(/\D/g, '');
                   updateSpec('ltlShipmentCount', raw === '' ? undefined : parseInt(raw, 10));
                 }}
                 placeholder="VD: 1"
-                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-emerald-500 font-bold text-slate-900 shadow-2xs"
+                className={`w-full h-10 px-3.5 text-xs rounded-xl font-bold text-slate-900 shadow-2xs transition-all ${
+                  showValidationHighlight && (!specs.ltlShipmentCount || specs.ltlShipmentCount < 1)
+                    ? 'bg-rose-50/50 border-2 border-rose-400 ring-2 ring-rose-100 focus:border-rose-500'
+                    : 'bg-white border border-slate-200 focus:border-emerald-500'
+                }`}
               />
             </div>
 
@@ -1477,9 +1522,14 @@ export const TruckingInquiryForm: React.FC<TruckingInquiryFormProps> = ({
                 Đơn Vị (Tần Suất Vận Chuyển) <span className="text-red-500">*</span>
               </label>
               <select
+                data-invalid={showValidationHighlight && !specs.ltlFrequencyUnit ? 'true' : undefined}
                 value={specs.ltlFrequencyUnit || ''}
                 onChange={(e) => updateSpec('ltlFrequencyUnit', e.target.value)}
-                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-emerald-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
+                className={`w-full h-10 px-3.5 text-xs rounded-xl font-semibold shadow-2xs cursor-pointer transition-all ${
+                  showValidationHighlight && !specs.ltlFrequencyUnit
+                    ? 'bg-rose-50/50 border-2 border-rose-400 ring-2 ring-rose-100 text-slate-900'
+                    : 'bg-white border border-slate-200 focus:border-emerald-500 text-slate-900'
+                }`}
               >
                 <option value="">-- Chọn Đơn Vị Tần Suất --</option>
                 <option value="Chuyến / Ngày">Chuyến / Ngày</option>

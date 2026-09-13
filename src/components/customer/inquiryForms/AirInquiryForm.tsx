@@ -91,6 +91,11 @@ interface AirInquiryFormProps {
   setOrigin: (val: string) => void;
   destination: string;
   setDestination: (val: string) => void;
+  weightKg?: string;
+  setWeightKg?: (val: string) => void;
+  volumeCbm?: string;
+  setVolumeCbm?: (val: string) => void;
+  showValidationHighlight?: boolean;
 }
 
 export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
@@ -100,6 +105,11 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
   setOrigin,
   destination,
   setDestination,
+  weightKg,
+  setWeightKg,
+  volumeCbm,
+  setVolumeCbm,
+  showValidationHighlight = false,
 }) => {
   const isExpress = specs.airServiceType === 'Express / Courier';
   const isCargo = !isExpress;
@@ -125,6 +135,9 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
   };
 
   const handleGrossWeightChange = (gw?: number) => {
+    if (setWeightKg) {
+      setWeightKg(gw !== undefined && gw !== null ? gw.toString() : '');
+    }
     calculateAirMetrics(specs.airDimensions, specs.packageCount, gw);
   };
 
@@ -157,6 +170,10 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
     }
 
     const dimsStr = (l > 0 && w > 0 && h > 0) ? `${l} x ${w} x ${h} cm` : (specs.dimensionsCm || '');
+
+    if (setVolumeCbm && cbm !== undefined) {
+      setVolumeCbm(cbm.toString());
+    }
 
     onChange({
       ...specs,
@@ -263,7 +280,12 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
               : 'Chưa chọn'}
           </span>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+        <div
+          data-invalid={showValidationHighlight && !specs.tradeRole ? 'true' : undefined}
+          className={`grid grid-cols-2 sm:grid-cols-3 gap-2.5 p-1 rounded-xl transition-all ${
+            showValidationHighlight && !specs.tradeRole ? 'ring-2 ring-rose-400 bg-rose-50/30' : ''
+          }`}
+        >
           {[
             { role: 'Xuất khẩu (Export)', title: 'Xuất Khẩu (Export)', sub: 'Gửi hàng từ VN đi quốc tế' },
             { role: 'Nhập khẩu (Import)', title: 'Nhập Khẩu (Import)', sub: 'Nhận hàng từ quốc tế về VN' },
@@ -278,9 +300,9 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
                 className={`p-2.5 rounded-xl border text-left cursor-pointer transition-all ${
                   isSelected
                     ? isExpress
-                      ? 'border-amber-500 bg-amber-50/70 font-bold text-amber-950 shadow-2xs'
-                      : 'border-sky-600 bg-sky-50/70 font-bold text-sky-950 shadow-2xs'
-                    : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
+                    ? 'border-amber-500 bg-amber-50/70 font-bold text-amber-950 shadow-2xs'
+                    : 'border-sky-600 bg-sky-50/70 font-bold text-sky-950 shadow-2xs'
+                  : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -296,6 +318,9 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
             );
           })}
         </div>
+        {showValidationHighlight && !specs.tradeRole && (
+          <p className="text-[11px] text-rose-600 font-medium mt-1">Vui lòng chọn vai trò của doanh nghiệp trong lô hàng hàng không.</p>
+        )}
       </div>
 
       {/* 3. INCOTERMS 2020 */}
@@ -304,9 +329,14 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
           Điều Kiện Thương Mại (Incoterms 2020) <span className="text-red-500">*</span>
         </label>
         <select
+          data-invalid={showValidationHighlight && !specs.incoterm ? 'true' : undefined}
           value={specs.incoterm || ''}
           onChange={(e) => updateSpec('incoterm', e.target.value as any)}
-          className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-sky-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
+          className={`w-full h-10 px-3.5 text-xs bg-white border rounded-xl focus:border-sky-500 font-semibold text-slate-900 shadow-2xs cursor-pointer ${
+            showValidationHighlight && !specs.incoterm
+              ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+              : 'border-slate-200'
+          }`}
         >
           <option value="">-- Chọn Điều Kiện Thương Mại (Incoterms 2020) --</option>
           <option value="FCA">FCA - Free Carrier (Giao cho người chuyên chở tại sân bay đi)</option>
@@ -316,6 +346,9 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
           <option value="DDP">DDP - Delivered Duty Paid (Giao tận nơi đã nộp thuế)</option>
           <option value="EXW">EXW - Ex Works (Giao tại xưởng người bán)</option>
         </select>
+        {showValidationHighlight && !specs.incoterm && (
+          <p className="text-[11px] text-rose-600 font-medium mt-1">Vui lòng chọn điều kiện giao hàng Incoterms 2020.</p>
+        )}
       </div>
 
       {/* ========================================================================= */}
@@ -336,14 +369,22 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
                 </span>
               </label>
               <select
+                data-invalid={showValidationHighlight && !specs.originServiceTerm ? 'true' : undefined}
                 value={specs.originServiceTerm || ''}
                 onChange={(e) => updateSpec('originServiceTerm', e.target.value as any)}
-                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-sky-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
+                className={`w-full h-10 px-3.5 text-xs bg-white border rounded-xl focus:border-sky-500 font-semibold text-slate-900 shadow-2xs cursor-pointer ${
+                  showValidationHighlight && !specs.originServiceTerm
+                    ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                    : 'border-slate-200'
+                }`}
               >
                 <option value="">-- Chọn Điều Kiện Nhận Hàng --</option>
                 <option value="Door">Door (Lấy tận kho người gửi / Shipper)</option>
                 <option value="Airport">Airport (Nhận tại ga hàng hóa sân bay đi / AOD)</option>
               </select>
+              {showValidationHighlight && !specs.originServiceTerm && (
+                <p className="text-[11px] text-rose-600 font-medium mt-1">Vui lòng chọn điều kiện nhận hàng (Door hoặc Airport).</p>
+              )}
             </div>
 
             <div>
@@ -357,14 +398,22 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
                 </span>
               </label>
               <select
+                data-invalid={showValidationHighlight && !specs.destinationServiceTerm ? 'true' : undefined}
                 value={specs.destinationServiceTerm || ''}
                 onChange={(e) => updateSpec('destinationServiceTerm', e.target.value as any)}
-                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
+                className={`w-full h-10 px-3.5 text-xs bg-white border rounded-xl focus:border-indigo-500 font-semibold text-slate-900 shadow-2xs cursor-pointer ${
+                  showValidationHighlight && !specs.destinationServiceTerm
+                    ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                    : 'border-slate-200'
+                }`}
               >
                 <option value="">-- Chọn Điều Kiện Giao Hàng --</option>
                 <option value="Door">Door (Giao tận kho người nhận / Consignee)</option>
                 <option value="Airport">Airport (Giao tại ga hàng hóa sân bay đến / AOA)</option>
               </select>
+              {showValidationHighlight && !specs.destinationServiceTerm && (
+                <p className="text-[11px] text-rose-600 font-medium mt-1">Vui lòng chọn điều kiện giao hàng (Door hoặc Airport).</p>
+              )}
             </div>
           </div>
 
@@ -373,29 +422,51 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
                 <MapPin className="w-3.5 h-3.5 text-sky-600" />
-                <span>Địa Chỉ Kho Lấy Hàng (Shipper Warehouse / Pickup Address)</span>
+                <span>
+                  Địa Chỉ Kho Lấy Hàng (Shipper Warehouse)
+                  {specs.originServiceTerm === 'Door' && <span className="text-red-500"> *</span>}
+                </span>
               </label>
               <input
+                data-invalid={showValidationHighlight && specs.originServiceTerm === 'Door' && (!specs.pickupAddress || !specs.pickupAddress.trim()) ? 'true' : undefined}
                 type="text"
                 value={specs.pickupAddress || ''}
                 onChange={(e) => updateSpec('pickupAddress', e.target.value)}
                 placeholder="VD: Kho KCN Tân Bình, Tây Thạnh, Tân Phú, TP.HCM..."
-                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-sky-500 text-slate-900 shadow-2xs"
+                className={`w-full h-10 px-3.5 text-xs bg-white border rounded-xl focus:border-sky-500 text-slate-900 shadow-2xs ${
+                  showValidationHighlight && specs.originServiceTerm === 'Door' && (!specs.pickupAddress || !specs.pickupAddress.trim())
+                    ? 'border-rose-400 bg-rose-50/40 text-rose-900 placeholder:text-rose-400'
+                    : 'border-slate-200'
+                }`}
               />
+              {showValidationHighlight && specs.originServiceTerm === 'Door' && (!specs.pickupAddress || !specs.pickupAddress.trim()) && (
+                <p className="text-[11px] text-rose-600 font-medium mt-1">Với hình thức Door, vui lòng nhập địa chỉ kho lấy hàng.</p>
+              )}
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
                 <MapPin className="w-3.5 h-3.5 text-indigo-600" />
-                <span>Địa Chỉ Giao Hàng (Consignee Warehouse / Delivery Address)</span>
+                <span>
+                  Địa Chỉ Giao Hàng (Consignee Warehouse)
+                  {specs.destinationServiceTerm === 'Door' && <span className="text-red-500"> *</span>}
+                </span>
               </label>
               <input
+                data-invalid={showValidationHighlight && specs.destinationServiceTerm === 'Door' && (!specs.deliveryAddress || !specs.deliveryAddress.trim()) ? 'true' : undefined}
                 type="text"
                 value={specs.deliveryAddress || ''}
                 onChange={(e) => updateSpec('deliveryAddress', e.target.value)}
                 placeholder="VD: 12-4 Haneda Airport Blvd, Ota City, Tokyo, Japan..."
-                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 text-slate-900 shadow-2xs"
+                className={`w-full h-10 px-3.5 text-xs bg-white border rounded-xl focus:border-indigo-500 text-slate-900 shadow-2xs ${
+                  showValidationHighlight && specs.destinationServiceTerm === 'Door' && (!specs.deliveryAddress || !specs.deliveryAddress.trim())
+                    ? 'border-rose-400 bg-rose-50/40 text-rose-900 placeholder:text-rose-400'
+                    : 'border-slate-200'
+                }`}
               />
+              {showValidationHighlight && specs.destinationServiceTerm === 'Door' && (!specs.deliveryAddress || !specs.deliveryAddress.trim()) && (
+                <p className="text-[11px] text-rose-600 font-medium mt-1">Với hình thức Door, vui lòng nhập địa chỉ kho giao hàng.</p>
+              )}
             </div>
           </div>
 
@@ -407,6 +478,7 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
                 <span>Sân Bay Đi (AOD - Airport of Departure) <span className="text-red-500">*</span></span>
               </label>
               <input
+                data-invalid={showValidationHighlight && (!origin || !origin.trim()) && (!specs.originAirport || !specs.originAirport.trim()) ? 'true' : undefined}
                 type="text"
                 required
                 value={origin}
@@ -415,8 +487,15 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
                   updateSpec('originAirport', e.target.value);
                 }}
                 placeholder="VD: SGN (Sân bay Tân Sơn Nhất, TP.HCM) hoặc HAN (Nội Bài)"
-                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-sky-500 text-slate-900 shadow-2xs"
+                className={`w-full h-10 px-3.5 text-xs bg-white border rounded-xl focus:border-sky-500 text-slate-900 shadow-2xs ${
+                  showValidationHighlight && (!origin || !origin.trim()) && (!specs.originAirport || !specs.originAirport.trim())
+                    ? 'border-rose-400 bg-rose-50/40 text-rose-900 placeholder:text-rose-400'
+                    : 'border-slate-200'
+                }`}
               />
+              {showValidationHighlight && (!origin || !origin.trim()) && (!specs.originAirport || !specs.originAirport.trim()) && (
+                <p className="text-[11px] text-rose-600 font-medium mt-1">Vui lòng nhập sân bay xuất phát (AOD).</p>
+              )}
             </div>
 
             <div>
@@ -425,6 +504,7 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
                 <span>Sân Bay Đến (AOA - Airport of Arrival) <span className="text-red-500">*</span></span>
               </label>
               <input
+                data-invalid={showValidationHighlight && (!destination || !destination.trim()) && (!specs.destinationAirport || !specs.destinationAirport.trim()) ? 'true' : undefined}
                 type="text"
                 required
                 value={destination}
@@ -433,8 +513,15 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
                   updateSpec('destinationAirport', e.target.value);
                 }}
                 placeholder="VD: NRT (Tokyo Narita) hoặc FRA (Frankfurt), LAX (Los Angeles)"
-                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 text-slate-900 shadow-2xs"
+                className={`w-full h-10 px-3.5 text-xs bg-white border rounded-xl focus:border-indigo-500 text-slate-900 shadow-2xs ${
+                  showValidationHighlight && (!destination || !destination.trim()) && (!specs.destinationAirport || !specs.destinationAirport.trim())
+                    ? 'border-rose-400 bg-rose-50/40 text-rose-900 placeholder:text-rose-400'
+                    : 'border-slate-200'
+                }`}
               />
+              {showValidationHighlight && (!destination || !destination.trim()) && (!specs.destinationAirport || !specs.destinationAirport.trim()) && (
+                <p className="text-[11px] text-rose-600 font-medium mt-1">Vui lòng nhập sân bay đến (AOA).</p>
+              )}
             </div>
           </div>
         </div>
@@ -450,7 +537,12 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
             <label className="block text-xs font-bold text-slate-800">
               Phân Loại Bưu Kiện Chuyển Phát (Express Package Type) <span className="text-red-500">*</span>
             </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div
+              data-invalid={showValidationHighlight && !specs.expressPackageType ? 'true' : undefined}
+              className={`grid grid-cols-1 sm:grid-cols-2 gap-2.5 p-1 rounded-xl transition-all ${
+                showValidationHighlight && !specs.expressPackageType ? 'ring-2 ring-rose-400 bg-rose-50/30' : ''
+              }`}
+            >
               {[
                 {
                   id: 'Document / Letter (Tài liệu / Thư tín)',
@@ -488,6 +580,9 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
                 );
               })}
             </div>
+            {showValidationHighlight && !specs.expressPackageType && (
+              <p className="text-[11px] text-rose-600 font-medium mt-1">Vui lòng chọn loại bưu kiện chuyển phát nhanh.</p>
+            )}
           </div>
 
           {/* Door-to-Door Pickup & Delivery with Postal Code */}
@@ -505,6 +600,7 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
                     Địa Chỉ Lấy Hàng Tận Nơi (Pickup Address) <span className="text-red-500">*</span>
                   </label>
                   <input
+                    data-invalid={showValidationHighlight && (!origin || !origin.trim()) && (!specs.pickupAddress || !specs.pickupAddress.trim()) ? 'true' : undefined}
                     type="text"
                     required
                     value={origin || specs.pickupAddress || ''}
@@ -513,8 +609,15 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
                       updateSpec('pickupAddress', e.target.value);
                     }}
                     placeholder="VD: Số 45 Lê Duẩn, P. Bến Nghé, Quận 1, TP.HCM..."
-                    className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-amber-500 text-slate-900 shadow-2xs"
+                    className={`w-full h-10 px-3.5 text-xs bg-white border rounded-xl focus:border-amber-500 text-slate-900 shadow-2xs ${
+                      showValidationHighlight && (!origin || !origin.trim()) && (!specs.pickupAddress || !specs.pickupAddress.trim())
+                        ? 'border-rose-400 bg-rose-50/40 text-rose-900 placeholder:text-rose-400'
+                        : 'border-slate-200'
+                    }`}
                   />
+                  {showValidationHighlight && (!origin || !origin.trim()) && (!specs.pickupAddress || !specs.pickupAddress.trim()) && (
+                    <p className="text-[11px] text-rose-600 font-medium mt-1">Vui lòng nhập địa chỉ lấy hàng tận nơi.</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-[11px] font-semibold text-slate-600 mb-1">
@@ -537,6 +640,7 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
                     Địa Chỉ Giao Hàng Tận Nơi (Delivery Address) <span className="text-red-500">*</span>
                   </label>
                   <input
+                    data-invalid={showValidationHighlight && (!destination || !destination.trim()) && (!specs.deliveryAddress || !specs.deliveryAddress.trim()) ? 'true' : undefined}
                     type="text"
                     required
                     value={destination || specs.deliveryAddress || ''}
@@ -545,20 +649,35 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
                       updateSpec('deliveryAddress', e.target.value);
                     }}
                     placeholder="VD: 100-0001 Chiyoda-ku, Tokyo, Japan (hoặc bang/thành phố đích)..."
-                    className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-amber-500 text-slate-900 shadow-2xs"
+                    className={`w-full h-10 px-3.5 text-xs bg-white border rounded-xl focus:border-amber-500 text-slate-900 shadow-2xs ${
+                      showValidationHighlight && (!destination || !destination.trim()) && (!specs.deliveryAddress || !specs.deliveryAddress.trim())
+                        ? 'border-rose-400 bg-rose-50/40 text-rose-900 placeholder:text-rose-400'
+                        : 'border-slate-200'
+                    }`}
                   />
+                  {showValidationHighlight && (!destination || !destination.trim()) && (!specs.deliveryAddress || !specs.deliveryAddress.trim()) && (
+                    <p className="text-[11px] text-rose-600 font-medium mt-1">Vui lòng nhập địa chỉ giao hàng tận nơi.</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-[11px] font-semibold text-slate-600 mb-1">
                     Mã Bưu Chính Đến (Destination Zip/Postal Code) <span className="text-red-500">*</span>
                   </label>
                   <input
+                    data-invalid={showValidationHighlight && (!specs.destinationPostalCode || !specs.destinationPostalCode.trim()) ? 'true' : undefined}
                     type="text"
                     value={specs.destinationPostalCode || ''}
                     onChange={(e) => updateSpec('destinationPostalCode', e.target.value)}
                     placeholder="VD: 90001 (US), 100-0001 (JP), 04510 (KR)..."
-                    className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-amber-500 font-mono shadow-2xs"
+                    className={`w-full h-10 px-3.5 text-xs bg-white border rounded-xl focus:border-amber-500 font-mono shadow-2xs ${
+                      showValidationHighlight && (!specs.destinationPostalCode || !specs.destinationPostalCode.trim())
+                        ? 'border-rose-400 bg-rose-50/40 text-rose-900 placeholder:text-rose-400'
+                        : 'border-slate-200'
+                    }`}
                   />
+                  {showValidationHighlight && (!specs.destinationPostalCode || !specs.destinationPostalCode.trim()) && (
+                    <p className="text-[11px] text-rose-600 font-medium mt-1">Vui lòng nhập mã bưu chính nơi đến (Zip code).</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -587,6 +706,7 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
               {isExpress ? <>Số Lượng Hộp / Kiện Chuyển Phát <span className="text-red-500">*</span></> : <>Số Lượng Kiện Hàng <span className="text-red-500">*</span></>}
             </label>
             <input
+              data-invalid={showValidationHighlight && (!specs.packageCount || specs.packageCount < 1) ? 'true' : undefined}
               type="text"
               inputMode="numeric"
               value={specs.packageCount !== undefined && specs.packageCount !== null && specs.packageCount > 0 ? specs.packageCount : ''}
@@ -595,8 +715,15 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
                 handlePackageCountChange(val ? parseInt(val, 10) : undefined);
               }}
               placeholder={isExpress ? 'VD: 2' : 'VD: 10'}
-              className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-bold text-slate-900 shadow-2xs"
+              className={`w-full h-10 px-3.5 text-xs bg-white border rounded-xl focus:border-indigo-500 font-bold text-slate-900 shadow-2xs ${
+                showValidationHighlight && (!specs.packageCount || specs.packageCount < 1)
+                  ? 'border-rose-400 bg-rose-50/40 text-rose-900 placeholder:text-rose-400'
+                  : 'border-slate-200'
+              }`}
             />
+            {showValidationHighlight && (!specs.packageCount || specs.packageCount < 1) && (
+              <p className="text-[11px] text-rose-600 font-medium mt-1">Vui lòng nhập số lượng kiện (tối thiểu 1 kiện).</p>
+            )}
           </div>
 
           <div className="flex flex-col justify-end">
@@ -675,6 +802,7 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
               Tổng Trọng Lượng Thực Tế (Gross Kg) <span className="text-red-500">*</span>
             </label>
             <input
+              data-invalid={showValidationHighlight && (!specs.grossWeightKgs || specs.grossWeightKgs <= 0) && (!weightKg || !weightKg.trim()) ? 'true' : undefined}
               type="text"
               inputMode="numeric"
               value={specs.grossWeightKgs !== undefined && specs.grossWeightKgs !== null && specs.grossWeightKgs > 0 ? specs.grossWeightKgs : ''}
@@ -683,8 +811,15 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
                 handleGrossWeightChange(val ? parseFloat(val) : undefined);
               }}
               placeholder="VD: 25"
-              className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-bold text-slate-900 shadow-2xs"
+              className={`w-full h-10 px-3.5 text-xs bg-white border rounded-xl focus:border-indigo-500 font-bold text-slate-900 shadow-2xs ${
+                showValidationHighlight && (!specs.grossWeightKgs || specs.grossWeightKgs <= 0) && (!weightKg || !weightKg.trim())
+                  ? 'border-rose-400 bg-rose-50/40 text-rose-900 placeholder:text-rose-400'
+                  : 'border-slate-200'
+              }`}
             />
+            {showValidationHighlight && (!specs.grossWeightKgs || specs.grossWeightKgs <= 0) && (!weightKg || !weightKg.trim()) && (
+              <p className="text-[11px] text-rose-600 font-medium mt-1">Vui lòng nhập tổng trọng lượng thực tế (Gross Kg).</p>
+            )}
           </div>
 
           <div>
@@ -714,6 +849,7 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
               Số Lượng Chuyến Hàng Không <span className="text-red-500">*</span>
             </label>
             <input
+              data-invalid={showValidationHighlight && (!specs.shipmentCount || specs.shipmentCount < 1) ? 'true' : undefined}
               type="text"
               inputMode="numeric"
               value={specs.shipmentCount !== undefined && specs.shipmentCount !== null ? specs.shipmentCount : ''}
@@ -722,8 +858,15 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
                 updateSpec('shipmentCount', raw === '' ? undefined : parseInt(raw, 10));
               }}
               placeholder="VD: 1"
-              className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-bold text-slate-900 shadow-2xs"
+              className={`w-full h-10 px-3.5 text-xs bg-white border rounded-xl focus:border-indigo-500 font-bold text-slate-900 shadow-2xs ${
+                showValidationHighlight && (!specs.shipmentCount || specs.shipmentCount < 1)
+                  ? 'border-rose-400 bg-rose-50/40 text-rose-900 placeholder:text-rose-400'
+                  : 'border-slate-200'
+              }`}
             />
+            {showValidationHighlight && (!specs.shipmentCount || specs.shipmentCount < 1) && (
+              <p className="text-[11px] text-rose-600 font-medium mt-1">Vui lòng nhập số lượng chuyến (tối thiểu 1 chuyến).</p>
+            )}
           </div>
 
           <div>
@@ -731,9 +874,14 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
               Đơn Vị (Tần Suất Vận Chuyển) <span className="text-red-500">*</span>
             </label>
             <select
+              data-invalid={showValidationHighlight && !specs.frequencyUnit ? 'true' : undefined}
               value={specs.frequencyUnit || ''}
               onChange={(e) => updateSpec('frequencyUnit', e.target.value)}
-              className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
+              className={`w-full h-10 px-3.5 text-xs bg-white border rounded-xl focus:border-indigo-500 font-semibold text-slate-900 shadow-2xs cursor-pointer ${
+                showValidationHighlight && !specs.frequencyUnit
+                  ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                  : 'border-slate-200'
+              }`}
             >
               <option value="">-- Chọn Đơn Vị Tần Suất --</option>
               <option value="Chuyến / Ngày">Chuyến / Ngày</option>
@@ -742,6 +890,9 @@ export const AirInquiryForm: React.FC<AirInquiryFormProps> = ({
               <option value="Chuyến / Năm">Chuyến / Năm</option>
               <option value="Chuyến (Một lần)">Chuyến (Một lần / Spot)</option>
             </select>
+            {showValidationHighlight && !specs.frequencyUnit && (
+              <p className="text-[11px] text-rose-600 font-medium mt-1">Vui lòng chọn đơn vị tần suất vận chuyển.</p>
+            )}
           </div>
         </div>
 

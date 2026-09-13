@@ -407,10 +407,13 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
 
   const [customsSpecs, setCustomsSpecs] = useState<CustomsInquirySpecs>({
     pricingType: 'SPOT',
-    tradeRole: '',
+    tradeRole: 'Nhập khẩu (Import)',
     declarationType: '',
+    declarationEntity: 'Chủ hàng đứng tên trực tiếp (Token DN)',
     declarationCount: 1,
+    declarationFrequencyUnit: 'Tờ khai một lần (Spot)',
     customsSubDepartment: '',
+    portOrBorderGate: '',
     hsCodePrimary: '',
     itemDescription: '',
     invoiceValueUSD: undefined,
@@ -685,8 +688,8 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
           const hasTemp = Boolean(temperatureRequirement.trim() || coldChainSpecs.temperatureCategory);
           if (!hasTemp) return false;
         }
-        // Hazmat must have IMO class and UN number
-        if (cargoClassification === 'Hazmat' && (!dgClassIMO || !unNumber.trim())) return false;
+        // Hazmat must have IMO class, UN number and packingGroup
+        if (cargoClassification === 'Hazmat' && (!dgClassIMO || !unNumber.trim() || !packingGroup)) return false;
 
         const hasIndustry = Boolean(industry.trim());
         const hasCargoType = Boolean(cargoType.trim());
@@ -705,25 +708,59 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
       case 4: {
         if (!serviceType) return false;
 
-        // 1. Trucking Validation
+        // 1. Trucking Validation (áp dụng chuẩn hóa cho FTL và LTL, mọi nhóm hàng)
         if (serviceType === 'Trucking') {
-          const hasPickup = Boolean(
-            (truckingSpecs.pickupLocations && truckingSpecs.pickupLocations.some(l => l && l.trim().length > 0)) ||
-            origin.trim()
-          );
-          const hasDelivery = Boolean(
-            (truckingSpecs.deliveryLocations && truckingSpecs.deliveryLocations.some(l => l && l.trim().length > 0)) ||
-            destination.trim()
-          );
-          const hasTruckType = Boolean(truckingSpecs.truckType);
           const isFTL = truckingSpecs.loadType !== 'LTL (Ghép hàng lẻ)';
-
           if (isFTL) {
-            const hasTonnage = Boolean(truckingSpecs.tonnageCategory || truckingSpecs.truckType);
-            const hasCount = (truckingSpecs.vehicleCount || 1) >= 1;
-            return Boolean(hasPickup && hasDelivery && hasTruckType && hasTonnage && hasCount);
+            const pickups = truckingSpecs.pickupLocations && truckingSpecs.pickupLocations.length > 0
+              ? truckingSpecs.pickupLocations
+              : (origin.trim() ? [origin.trim()] : []);
+            const deliveries = truckingSpecs.deliveryLocations && truckingSpecs.deliveryLocations.length > 0
+              ? truckingSpecs.deliveryLocations
+              : (destination.trim() ? [destination.trim()] : []);
+
+            const allPickupsValid = pickups.length > 0 && pickups.every((l) => Boolean(l && l.trim()));
+            const allDeliveriesValid = deliveries.length > 0 && deliveries.every((l) => Boolean(l && l.trim()));
+            const hasWeight = Boolean(weightKg && weightKg.trim());
+            const hasVolume = Boolean(volumeCbm && volumeCbm.trim());
+            const hasTruckType = Boolean(truckingSpecs.truckType);
+            const hasTonnage = Boolean(truckingSpecs.tonnageCategory);
+            const hasLeadtime = Boolean(truckingSpecs.requestedLeadtime);
+            const hasCount = Boolean(truckingSpecs.vehicleCount && truckingSpecs.vehicleCount >= 1);
+            const hasUnit = Boolean(truckingSpecs.vehicleCountUnit);
+
+            return Boolean(
+              allPickupsValid &&
+              allDeliveriesValid &&
+              hasWeight &&
+              hasVolume &&
+              hasTruckType &&
+              hasTonnage &&
+              hasLeadtime &&
+              hasCount &&
+              hasUnit
+            );
           } else {
-            return Boolean(hasPickup && hasDelivery && hasTruckType);
+            // LTL (Ghép hàng lẻ)
+            const pickup = (truckingSpecs.pickupLocations && truckingSpecs.pickupLocations[0]) || origin.trim();
+            const delivery = (truckingSpecs.deliveryLocations && truckingSpecs.deliveryLocations[0]) || destination.trim();
+            const hasPickup = Boolean(pickup && pickup.trim());
+            const hasDelivery = Boolean(delivery && delivery.trim());
+            const hasTruckType = Boolean(truckingSpecs.truckType);
+            const hasPieces = Boolean(truckingSpecs.ltlPieces && truckingSpecs.ltlPieces >= 1);
+            const hasWeight = Boolean(truckingSpecs.ltlGrossWeightKg && truckingSpecs.ltlGrossWeightKg > 0);
+            const hasShipmentCount = Boolean(truckingSpecs.ltlShipmentCount && truckingSpecs.ltlShipmentCount >= 1);
+            const hasFrequency = Boolean(truckingSpecs.ltlFrequencyUnit);
+
+            return Boolean(
+              hasPickup &&
+              hasDelivery &&
+              hasTruckType &&
+              hasPieces &&
+              hasWeight &&
+              hasShipmentCount &&
+              hasFrequency
+            );
           }
         }
 
@@ -738,79 +775,324 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
 
         // 3. Sea Freight (FCL / LCL) Validation
         if (serviceType === 'Sea Freight (FCL)' || serviceType === 'Sea Freight (LCL)') {
+          const hasTradeRole = Boolean(oceanSpecs.tradeRole);
+          const hasIncoterms = Boolean(oceanSpecs.incoterm || (oceanSpecs as any).incoterms);
+          const hasOriginTerm = Boolean(oceanSpecs.originServiceTerm);
+          const hasDestTerm = Boolean(oceanSpecs.destinationServiceTerm);
+          const hasPickupAddress = oceanSpecs.originServiceTerm !== 'Door' || Boolean(oceanSpecs.pickupAddress?.trim());
+          const hasDeliveryAddress = oceanSpecs.destinationServiceTerm !== 'Door' || Boolean(oceanSpecs.deliveryAddress?.trim());
           const hasPol = Boolean(oceanSpecs.polPort?.trim() || origin.trim());
           const hasPod = Boolean(oceanSpecs.podPort?.trim() || destination.trim());
-          const isDomestic = oceanSpecs.tradeRole === 'Nội địa (Domestic)';
-          const hasIncoterms = isDomestic || Boolean(oceanSpecs.incoterm || (oceanSpecs as any).incoterms);
-          const isFCL = oceanSpecs.mode !== 'LCL (Hàng lẻ đóng ghép CFS)';
+          const isFCL = oceanSpecs.mode !== 'LCL (Hàng lẻ đóng ghép CFS)' && serviceType !== 'Sea Freight (LCL)';
 
           if (isFCL) {
-            const hasCont = (oceanSpecs.containerCount || 1) >= 1;
-            return Boolean(hasPol && hasPod && hasIncoterms && hasCont);
+            const hasWeight = Boolean(weightKg?.trim() || (oceanSpecs.grossWeightKgs && oceanSpecs.grossWeightKgs > 0));
+            const hasVolume = Boolean(volumeCbm?.trim() || (oceanSpecs.cbmVolume && oceanSpecs.cbmVolume > 0));
+            const hasContType = Boolean(oceanSpecs.containerType);
+            const hasContCount = Boolean(oceanSpecs.containerCount && oceanSpecs.containerCount >= 1);
+            const hasCountUnit = Boolean(oceanSpecs.containerCountUnit);
+
+            return Boolean(
+              hasTradeRole &&
+              hasIncoterms &&
+              hasOriginTerm &&
+              hasDestTerm &&
+              hasPickupAddress &&
+              hasDeliveryAddress &&
+              hasPol &&
+              hasPod &&
+              hasWeight &&
+              hasVolume &&
+              hasContType &&
+              hasContCount &&
+              hasCountUnit
+            );
           } else {
-            return Boolean(hasPol && hasPod && hasIncoterms);
+            // LCL
+            const hasPieces = Boolean(oceanSpecs.lclPieces && oceanSpecs.lclPieces >= 1);
+            const hasWeight = Boolean(
+              (oceanSpecs.lclGrossWeightKg && oceanSpecs.lclGrossWeightKg > 0) ||
+              (weightKg && weightKg.trim())
+            );
+            const hasShipmentCount = Boolean(oceanSpecs.lclShipmentCount && oceanSpecs.lclShipmentCount >= 1);
+            const hasFrequencyUnit = Boolean(oceanSpecs.lclFrequencyUnit);
+
+            return Boolean(
+              hasTradeRole &&
+              hasIncoterms &&
+              hasOriginTerm &&
+              hasDestTerm &&
+              hasPickupAddress &&
+              hasDeliveryAddress &&
+              hasPol &&
+              hasPod &&
+              hasPieces &&
+              hasWeight &&
+              hasShipmentCount &&
+              hasFrequencyUnit
+            );
           }
         }
 
         // 4. Air Freight Validation
         if (serviceType === 'Air Freight') {
-          const hasAod = Boolean(airSpecs.originAirport?.trim() || origin.trim() || airSpecs.pickupAddress?.trim());
-          const hasAoa = Boolean(airSpecs.destinationAirport?.trim() || destination.trim() || airSpecs.deliveryAddress?.trim());
-          return Boolean(hasAod && hasAoa);
+          const isExp = airSpecs.airServiceType === 'Express / Courier';
+          const hasTradeRole = Boolean(airSpecs.tradeRole);
+          const hasIncoterm = Boolean(airSpecs.incoterm || (airSpecs as any).incoterms);
+          const hasPackageCount = Boolean(airSpecs.packageCount && airSpecs.packageCount >= 1);
+          const hasGrossWeight = Boolean(
+            (airSpecs.grossWeightKgs && airSpecs.grossWeightKgs > 0) ||
+            (weightKg && weightKg.trim())
+          );
+          const hasShipmentCount = Boolean(airSpecs.shipmentCount && airSpecs.shipmentCount >= 1);
+          const hasFrequencyUnit = Boolean(airSpecs.frequencyUnit);
+
+          if (!isExp) {
+            // Air Freight / Cargo
+            const hasOriginTerm = Boolean(airSpecs.originServiceTerm);
+            const hasDestTerm = Boolean(airSpecs.destinationServiceTerm);
+            const hasPickupAddress = airSpecs.originServiceTerm !== 'Door' || Boolean(airSpecs.pickupAddress?.trim());
+            const hasDeliveryAddress = airSpecs.destinationServiceTerm !== 'Door' || Boolean(airSpecs.deliveryAddress?.trim());
+            const hasOriginAirport = Boolean(airSpecs.originAirport?.trim() || origin.trim());
+            const hasDestAirport = Boolean(airSpecs.destinationAirport?.trim() || destination.trim());
+
+            return Boolean(
+              hasTradeRole &&
+              hasIncoterm &&
+              hasOriginTerm &&
+              hasDestTerm &&
+              hasPickupAddress &&
+              hasDeliveryAddress &&
+              hasOriginAirport &&
+              hasDestAirport &&
+              hasPackageCount &&
+              hasGrossWeight &&
+              hasShipmentCount &&
+              hasFrequencyUnit
+            );
+          } else {
+            // Express / Courier
+            const hasPackageType = Boolean(airSpecs.expressPackageType);
+            const hasPickupAddress = Boolean(airSpecs.pickupAddress?.trim() || origin.trim());
+            const hasDeliveryAddress = Boolean(airSpecs.deliveryAddress?.trim() || destination.trim());
+            const hasPostalCode = Boolean(airSpecs.destinationPostalCode?.trim());
+
+            return Boolean(
+              hasTradeRole &&
+              hasIncoterm &&
+              hasPackageType &&
+              hasPickupAddress &&
+              hasDeliveryAddress &&
+              hasPostalCode &&
+              hasPackageCount &&
+              hasGrossWeight &&
+              hasShipmentCount &&
+              hasFrequencyUnit
+            );
+          }
         }
 
         // 5. Warehousing Validation
         if (serviceType === 'Warehousing') {
           const hasLocation = Boolean(warehousingSpecs.targetLocation?.trim() || origin.trim());
-          const hasWhType = Boolean(warehousingSpecs.warehouseType || 'Kho thường (Grade A Dry)');
-          const hasCapacity = Boolean(
-            (warehousingSpecs.storageAreaSqm && warehousingSpecs.storageAreaSqm > 0) ||
-            (warehousingSpecs.palletPositions && warehousingSpecs.palletPositions > 0) ||
-            (warehousingSpecs.cbmVolume && warehousingSpecs.cbmVolume > 0) ||
-            (warehousingSpecs.bufferStorageQty && warehousingSpecs.bufferStorageQty > 0) ||
-            (warehousingSpecs.bufferPalletPositions && warehousingSpecs.bufferPalletPositions > 0) ||
-            (warehousingSpecs.skuCount && warehousingSpecs.skuCount > 0) ||
-            (warehousingSpecs.monthlyOrdersCount && warehousingSpecs.monthlyOrdersCount > 0) ||
-            (warehousingSpecs.dailyOrdersCount && warehousingSpecs.dailyOrdersCount > 0) ||
-            (warehousingSpecs.b2cSkusCount && warehousingSpecs.b2cSkusCount > 0) ||
-            (warehousingSpecs.bondedEstimatedValue && warehousingSpecs.bondedEstimatedValue > 0) ||
-            warehousingSpecs.warehouseType === 'Kho tự quản (Self-Storage)'
+          const hasDistributionRadius = Boolean(destination.trim());
+          const whType = warehousingSpecs.warehouseType || 'Kho thường (Grade A Dry)';
+          const billingUnit = warehousingSpecs.billingUnitPreference || 'm² (Diện tích sàn)';
+
+          // Ràng buộc riêng cho Kho Ngoại Quan
+          const isBonded = whType === 'Kho ngoại quan (Bonded)' || whType === 'Kho ngoại quan (Bonded Warehouse)';
+          const hasBondedPurpose = !isBonded || Boolean(warehousingSpecs.bondedPurpose?.trim());
+          const hasBondedValue = !isBonded || Boolean(warehousingSpecs.bondedEstimatedValue && Number(warehousingSpecs.bondedEstimatedValue) > 0);
+
+          // Ràng buộc về Quy mô & Dung lượng lưu trữ
+          let hasStorageSpecs = false;
+          if (billingUnit === 'm² (Diện tích sàn)') {
+            hasStorageSpecs = Boolean(
+              warehousingSpecs.storageAreaSqm && warehousingSpecs.storageAreaSqm > 0 &&
+              warehousingSpecs.skuCount && warehousingSpecs.skuCount > 0
+            );
+          } else if (billingUnit === 'Pallet (Vị trí Pallet/tháng)') {
+            hasStorageSpecs = Boolean(
+              warehousingSpecs.palletPositions && warehousingSpecs.palletPositions > 0 &&
+              warehousingSpecs.skuCount && warehousingSpecs.skuCount > 0
+            );
+          } else if (billingUnit === 'CBM (Thể tích thực m³)') {
+            hasStorageSpecs = Boolean(
+              warehousingSpecs.cbmVolume && warehousingSpecs.cbmVolume > 0 &&
+              warehousingSpecs.skuCount && warehousingSpecs.skuCount > 0
+            );
+          } else if (billingUnit === 'Order (Hoàn tất đơn hàng TMĐT)' || whType === 'Kho TMĐT / Fulfillment') {
+            hasStorageSpecs = Boolean(
+              warehousingSpecs.skuCount && warehousingSpecs.skuCount > 0 &&
+              ((warehousingSpecs.bufferStorageQty && warehousingSpecs.bufferStorageQty > 0) ||
+               (warehousingSpecs.bufferPalletPositions && warehousingSpecs.bufferPalletPositions > 0))
+            );
+          } else {
+            hasStorageSpecs = Boolean(
+              (warehousingSpecs.storageAreaSqm && warehousingSpecs.storageAreaSqm > 0) ||
+              (warehousingSpecs.palletPositions && warehousingSpecs.palletPositions > 0) ||
+              (warehousingSpecs.cbmVolume && warehousingSpecs.cbmVolume > 0) ||
+              (warehousingSpecs.bufferStorageQty && warehousingSpecs.bufferStorageQty > 0) ||
+              (warehousingSpecs.bufferPalletPositions && warehousingSpecs.bufferPalletPositions > 0)
+            );
+          }
+
+          return Boolean(
+            hasLocation &&
+            hasDistributionRadius &&
+            hasBondedPurpose &&
+            hasBondedValue &&
+            hasStorageSpecs
           );
-          return Boolean(hasLocation && hasWhType && hasCapacity);
         }
 
         // 6. Customs Clearance Validation
         if (serviceType === 'Customs Clearance') {
+          const hasTradeRole = Boolean(customsSpecs.tradeRole);
+          const hasDeclType = Boolean(customsSpecs.declarationType?.trim() || (customsSpecs as any).customsDeclarationType?.trim());
+          const hasDeclEntity = Boolean(customsSpecs.declarationEntity?.trim());
           const hasSubDept = Boolean(customsSpecs.customsSubDepartment?.trim() || origin.trim());
-          const hasDeclType = Boolean(customsSpecs.declarationType || (customsSpecs as any).customsDeclarationType);
-          const hasCount = (customsSpecs.declarationCount || 1) >= 1;
-          return Boolean(hasSubDept && hasDeclType && hasCount);
+          const hasPortGate = Boolean(customsSpecs.portOrBorderGate?.trim() || destination.trim());
+          const hasCount = Boolean(customsSpecs.declarationCount && customsSpecs.declarationCount >= 1);
+          const hasFrequency = Boolean(customsSpecs.declarationFrequencyUnit?.trim());
+
+          return Boolean(
+            hasTradeRole &&
+            hasDeclType &&
+            hasDeclEntity &&
+            hasSubDept &&
+            hasPortGate &&
+            hasCount &&
+            hasFrequency
+          );
         }
 
         // 7. Rail Freight Validation
         if (serviceType === 'Rail Freight') {
-          const hasDeparture = Boolean(railSpecs.departureStation?.trim() || railSpecs.originStation?.trim() || origin.trim());
-          const hasArrival = Boolean(railSpecs.arrivalStation?.trim() || railSpecs.destinationStation?.trim() || destination.trim());
-          const hasMode = Boolean(railSpecs.mode);
-          return Boolean(hasDeparture && hasArrival && hasMode);
+          const isFCL = railSpecs.mode !== 'LCL (Hàng lẻ đóng ghép kho ga)';
+          const hasTradeRole = Boolean(railSpecs.tradeRole);
+          const hasOriginTerm = Boolean(railSpecs.originServiceTerm);
+          const hasDestTerm = Boolean(railSpecs.destinationServiceTerm);
+          const hasPickupAddress = railSpecs.originServiceTerm !== 'Door' || Boolean(railSpecs.pickupAddress?.trim());
+          const hasDeliveryAddress = railSpecs.destinationServiceTerm !== 'Door' || Boolean(railSpecs.deliveryAddress?.trim());
+          const hasDeparture = Boolean(railSpecs.originStation?.trim() || railSpecs.departureStation?.trim() || origin.trim());
+          const hasArrival = Boolean(railSpecs.destinationStation?.trim() || railSpecs.arrivalStation?.trim() || destination.trim());
+          const hasIncoterm = railSpecs.tradeRole === 'Nội địa Bắc - Nam (Domestic Rail)' || Boolean(railSpecs.incoterm);
+
+          if (isFCL) {
+            const hasWeight = Boolean(weightKg?.trim() || (railSpecs.grossWeightKgs && railSpecs.grossWeightKgs > 0));
+            const hasVolume = Boolean(volumeCbm?.trim() || (railSpecs.cbmVolume && railSpecs.cbmVolume > 0));
+            const hasContainerType = Boolean(railSpecs.containerType);
+            const hasContainerCount = Boolean(railSpecs.containerCount && railSpecs.containerCount >= 1);
+            const hasContainerCountUnit = Boolean(railSpecs.containerCountUnit);
+
+            return Boolean(
+              hasTradeRole &&
+              hasOriginTerm &&
+              hasDestTerm &&
+              hasPickupAddress &&
+              hasDeliveryAddress &&
+              hasDeparture &&
+              hasArrival &&
+              hasIncoterm &&
+              hasWeight &&
+              hasVolume &&
+              hasContainerType &&
+              hasContainerCount &&
+              hasContainerCountUnit
+            );
+          } else {
+            // LCL
+            const hasLclPieces = Boolean(railSpecs.lclPieces && railSpecs.lclPieces >= 1);
+            const hasLclWeight = Boolean(
+              (railSpecs.lclGrossWeightKg && railSpecs.lclGrossWeightKg > 0) ||
+              (railSpecs.grossWeightKgs && railSpecs.grossWeightKgs > 0) ||
+              (weightKg && weightKg.trim())
+            );
+            const hasLclShipmentCount = Boolean(railSpecs.lclShipmentCount && railSpecs.lclShipmentCount >= 1);
+            const hasLclFrequencyUnit = Boolean(railSpecs.lclFrequencyUnit);
+
+            return Boolean(
+              hasTradeRole &&
+              hasOriginTerm &&
+              hasDestTerm &&
+              hasPickupAddress &&
+              hasDeliveryAddress &&
+              hasDeparture &&
+              hasArrival &&
+              hasIncoterm &&
+              hasLclPieces &&
+              hasLclWeight &&
+              hasLclShipmentCount &&
+              hasLclFrequencyUnit
+            );
+          }
         }
 
         // 8. Cross-Border Validation
         if (serviceType === 'Cross-border') {
+          const isFTL = crossBorderSpecs.loadType !== 'LTL (Ghép hàng lẻ)';
+          const hasTradeRole = Boolean(crossBorderSpecs.tradeRole);
+          const hasIncoterm = Boolean(crossBorderSpecs.incoterms);
           const hasGate = Boolean(crossBorderSpecs.borderGate?.trim());
           const hasOrigin = Boolean(
             crossBorderSpecs.originCountryCity?.trim() ||
             crossBorderSpecs.originProvince?.trim() ||
-            (crossBorderSpecs.pickupLocations && crossBorderSpecs.pickupLocations.some(l => l && l.trim().length > 0)) ||
+            (crossBorderSpecs.pickupLocations && crossBorderSpecs.pickupLocations[0]?.trim()) ||
             origin.trim()
           );
           const hasDest = Boolean(
             crossBorderSpecs.destinationCountryCity?.trim() ||
             crossBorderSpecs.destinationProvince?.trim() ||
-            (crossBorderSpecs.deliveryLocations && crossBorderSpecs.deliveryLocations.some(l => l && l.trim().length > 0)) ||
+            (crossBorderSpecs.deliveryLocations && crossBorderSpecs.deliveryLocations[0]?.trim()) ||
             destination.trim()
           );
-          return Boolean(hasGate && hasOrigin && hasDest);
+
+          if (isFTL) {
+            const hasWeight = Boolean(weightKg?.trim() || (crossBorderSpecs.grossWeightKgs && crossBorderSpecs.grossWeightKgs > 0));
+            const hasVolume = Boolean(volumeCbm?.trim() || (crossBorderSpecs.cbmVolume && crossBorderSpecs.cbmVolume > 0));
+            const hasVehicleType = Boolean(crossBorderSpecs.vehicleType);
+            const hasTonnage = Boolean(crossBorderSpecs.tonnageCategory);
+            const hasVehicleCount = Boolean(crossBorderSpecs.vehicleCount && crossBorderSpecs.vehicleCount >= 1);
+            const hasFrequency = Boolean(crossBorderSpecs.frequencyUnit);
+            const hasLeadtimeSLA = Boolean(crossBorderSpecs.leadtimeSLA);
+
+            return Boolean(
+              hasTradeRole &&
+              hasIncoterm &&
+              hasGate &&
+              hasOrigin &&
+              hasDest &&
+              hasWeight &&
+              hasVolume &&
+              hasVehicleType &&
+              hasTonnage &&
+              hasVehicleCount &&
+              hasFrequency &&
+              hasLeadtimeSLA
+            );
+          } else {
+            // LTL
+            const hasPieces = Boolean(crossBorderSpecs.ltlPieces && crossBorderSpecs.ltlPieces >= 1);
+            const hasWeight = Boolean(
+              (crossBorderSpecs.ltlGrossWeightKg && crossBorderSpecs.ltlGrossWeightKg > 0) ||
+              (weightKg && weightKg.trim())
+            );
+            const hasShipmentCount = Boolean(crossBorderSpecs.shipmentCount && crossBorderSpecs.shipmentCount >= 1);
+            const hasFrequency = Boolean(crossBorderSpecs.frequencyUnit);
+
+            return Boolean(
+              hasTradeRole &&
+              hasIncoterm &&
+              hasGate &&
+              hasOrigin &&
+              hasDest &&
+              hasPieces &&
+              hasWeight &&
+              hasShipmentCount &&
+              hasFrequency
+            );
+          }
         }
 
         // 9. Project Cargo Validation
@@ -824,13 +1106,10 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
               projectSpecs.originHub?.trim() ||
               (projectSpecs.originWarehouses && projectSpecs.originWarehouses.some(w => w && w.trim()))
             );
-            const hasDest = Boolean(
-              destination.trim() ||
-              projectSpecs.destinationSite?.trim() ||
-              projectSpecs.coverageScope ||
-              'Toàn quốc'
-            );
-            return Boolean(hasCategory && hasOrigin && hasDest);
+            const hasFleet = Boolean(projectSpecs.fleetRequirements && projectSpecs.fleetRequirements.length > 0);
+            const hasTrips = Boolean((projectSpecs.tripCount && projectSpecs.tripCount >= 1) || projectSpecs.monthlyTripsOrVolume?.trim());
+            const hasFreq = Boolean(projectSpecs.frequencyUnit?.trim());
+            return Boolean(hasCategory && hasOrigin && hasFleet && hasTrips && hasFreq);
           } else if (category === 'CROSS_DOCK') {
             const hasOrigin = Boolean(
               projectSpecs.xDockHubLocation?.trim() ||
@@ -841,15 +1120,23 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
             const hasDest = isInterRegion
               ? Boolean(projectSpecs.xDockDestinationHub?.trim() || destination.trim())
               : true;
-            return Boolean(hasCategory && hasOrigin && hasDest);
+            const hasInbound = Boolean(projectSpecs.xDockInboundVolume?.trim() || projectSpecs.inboundDailyVolume?.trim());
+            const hasChains = Boolean(projectSpecs.targetRetailChains && projectSpecs.targetRetailChains.length > 0);
+            const hasSorting = Boolean(projectSpecs.sortingRequirements && projectSpecs.sortingRequirements.length > 0);
+            return Boolean(hasCategory && hasOrigin && hasDest && hasInbound && hasChains && hasSorting);
           } else if (category === 'PORT_ICD') {
             const hasOrigin = Boolean(projectSpecs.portIcdOriginPort?.trim() || origin.trim());
             const hasDest = Boolean(projectSpecs.portIcdDestinationIcd?.trim() || destination.trim());
-            return Boolean(hasCategory && hasOrigin && hasDest);
+            const hasTeu = Boolean(projectSpecs.portIcdMonthlyTeuOrVolume?.trim());
+            const hasContTypes = Boolean(projectSpecs.portIcdContainerTypes && projectSpecs.portIcdContainerTypes.length > 0);
+            const hasOperations = Boolean(projectSpecs.portIcdOperations && projectSpecs.portIcdOperations.length > 0);
+            return Boolean(hasCategory && hasOrigin && hasDest && hasTeu && hasContTypes && hasOperations);
           } else if (category === 'MULTIMODAL') {
-            const hasOrigin = Boolean(projectSpecs.multimodalFirstMile?.trim() || origin.trim());
-            const hasDest = Boolean(projectSpecs.multimodalLastMile?.trim() || destination.trim());
-            return Boolean(hasCategory && hasOrigin && hasDest);
+            const hasFirst = Boolean(projectSpecs.multimodalFirstMile?.trim() || origin.trim());
+            const hasMain = Boolean(projectSpecs.multimodalMainHaul?.trim());
+            const hasLast = Boolean(projectSpecs.multimodalLastMile?.trim() || destination.trim());
+            const hasVolume = Boolean(projectSpecs.multimodalMonthlyTeuOrVolume?.trim());
+            return Boolean(hasCategory && hasFirst && hasMain && hasLast && hasVolume);
           } else {
             const hasOrigin = Boolean(origin.trim() || projectSpecs.originHub?.trim());
             const hasDest = Boolean(destination.trim() || projectSpecs.destinationSite?.trim() || projectSpecs.coverageScope);
@@ -868,9 +1155,17 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
       case 6:
         return true;
 
-      // TAB 7: Giá và thời hạn - luôn hoàn thành để sẵn sàng xem tóm tắt
-      case 7:
-        return true;
+      // TAB 7: Giá và thời hạn (*)
+      case 7: {
+        const hasCurrency = Boolean(currency);
+        const hasRate = currency === 'VND' || (exchangeRate && exchangeRate > 0);
+        const hasExpiry = Boolean(expiryDate && expiryDate.trim());
+        const hasPickup = Boolean(pickupDate && pickupDate.trim());
+        const hasDelivery = Boolean(deliveryDate && deliveryDate.trim());
+        const areDatesLogical = !pickupDate || !deliveryDate || deliveryDate >= pickupDate;
+
+        return Boolean(hasCurrency && hasRate && hasExpiry && hasPickup && hasDelivery && areDatesLogical);
+      }
 
       default:
         return false;
@@ -885,6 +1180,9 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
     }
     return true;
   };
+
+  // Kiểm tra toàn bộ 7 tab đã hoàn thành đủ các trường bắt buộc (*)
+  const isAllTabsCompleted = [1, 2, 3, 4, 5, 6, 7].every((tabId) => isTabCompleted(tabId));
 
   // Helper lấy thông báo lỗi chi tiết khi chuyển tab chưa hoàn tất
   const getTabValidationErrors = (tabId: number): string[] => {
@@ -905,6 +1203,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
         if (cargoClassification === 'Hazmat') {
           if (!dgClassIMO) errors.push('Vui lòng chọn phân nhóm IMO Class.');
           if (!unNumber.trim()) errors.push('Vui lòng nhập mã số UN.');
+          if (!packingGroup) errors.push('Vui lòng chọn nhóm đóng gói (Packing Group).');
         }
         if (!industry.trim()) errors.push('Vui lòng chọn Ngành Hàng (Industry).');
         if (!cargoType.trim()) errors.push('Vui lòng nhập Tên / Chủng Loại Hàng Hóa Cụ Thể.');
@@ -916,14 +1215,67 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
         break;
       case 4:
         if (serviceType === 'Trucking') {
-          const hasPickup = Boolean((truckingSpecs.pickupLocations && truckingSpecs.pickupLocations.some(l => l && l.trim().length > 0)) || origin.trim());
-          const hasDelivery = Boolean((truckingSpecs.deliveryLocations && truckingSpecs.deliveryLocations.some(l => l && l.trim().length > 0)) || destination.trim());
-          if (!hasPickup) errors.push('Vui lòng nhập địa điểm lấy hàng (Origin).');
-          if (!hasDelivery) errors.push('Vui lòng nhập địa điểm giao hàng (Destination).');
-          if (!truckingSpecs.truckType) errors.push('Vui lòng chọn loại phương tiện xe tải.');
-          if (truckingSpecs.loadType !== 'LTL (Ghép hàng lẻ)') {
-            if (!truckingSpecs.tonnageCategory && !truckingSpecs.truckType) errors.push('Vui lòng chọn tải trọng xe.');
-            if ((truckingSpecs.vehicleCount || 1) < 1) errors.push('Vui lòng nhập số lượng xe cần điều động (tối thiểu 1 xe).');
+          const isFTL = truckingSpecs.loadType !== 'LTL (Ghép hàng lẻ)';
+          if (isFTL) {
+            const pickups = truckingSpecs.pickupLocations && truckingSpecs.pickupLocations.length > 0
+              ? truckingSpecs.pickupLocations
+              : (origin.trim() ? [origin.trim()] : []);
+            const deliveries = truckingSpecs.deliveryLocations && truckingSpecs.deliveryLocations.length > 0
+              ? truckingSpecs.deliveryLocations
+              : (destination.trim() ? [destination.trim()] : []);
+
+            if (pickups.length === 0 || pickups.some((l) => !l || !l.trim())) {
+              errors.push('Vui lòng nhập đầy đủ địa chỉ cho tất cả các điểm lấy hàng (Pickup).');
+            }
+            if (deliveries.length === 0 || deliveries.some((l) => !l || !l.trim())) {
+              errors.push('Vui lòng nhập đầy đủ địa chỉ cho tất cả các điểm giao hàng (Delivery).');
+            }
+            if (!weightKg || !weightKg.trim()) {
+              errors.push('Vui lòng nhập tổng khối lượng hàng hóa FTL (kg).');
+            }
+            if (!volumeCbm || !volumeCbm.trim()) {
+              errors.push('Vui lòng nhập tổng thể tích hàng hóa FTL (cbm).');
+            }
+            if (!truckingSpecs.truckType) {
+              errors.push('Vui lòng chọn loại thùng phương tiện xe tải.');
+            }
+            if (!truckingSpecs.tonnageCategory) {
+              errors.push('Vui lòng chọn phân khúc tải trọng & thể tích khả dụng.');
+            }
+            if (!truckingSpecs.requestedLeadtime) {
+              errors.push('Vui lòng chọn thời gian giao hàng yêu cầu (Leadtime SLA).');
+            }
+            if (!truckingSpecs.vehicleCount || truckingSpecs.vehicleCount < 1) {
+              errors.push('Vui lòng nhập số lượng chuyến cần thuê (tối thiểu 1 chuyến).');
+            }
+            if (!truckingSpecs.vehicleCountUnit) {
+              errors.push('Vui lòng chọn đơn vị tần suất vận chuyển.');
+            }
+          } else {
+            // LTL
+            const pickup = (truckingSpecs.pickupLocations && truckingSpecs.pickupLocations[0]) || origin.trim();
+            const delivery = (truckingSpecs.deliveryLocations && truckingSpecs.deliveryLocations[0]) || destination.trim();
+            if (!pickup || !pickup.trim()) {
+              errors.push('Vui lòng nhập địa chỉ lấy hàng / kho gom ghép LTL.');
+            }
+            if (!delivery || !delivery.trim()) {
+              errors.push('Vui lòng nhập địa chỉ giao hàng / kho trả hàng ghép LTL.');
+            }
+            if (!truckingSpecs.truckType) {
+              errors.push('Vui lòng chọn phương tiện ghép tuyến LTL.');
+            }
+            if (!truckingSpecs.ltlPieces || truckingSpecs.ltlPieces < 1) {
+              errors.push('Vui lòng nhập số lượng kiện / pallet cần ghép LTL.');
+            }
+            if (!truckingSpecs.ltlGrossWeightKg || truckingSpecs.ltlGrossWeightKg <= 0) {
+              errors.push('Vui lòng nhập tổng trọng lượng thực tế (Gross Kg) cho hàng ghép LTL.');
+            }
+            if (!truckingSpecs.ltlShipmentCount || truckingSpecs.ltlShipmentCount < 1) {
+              errors.push('Vui lòng nhập số lượng chuyến ghép cần vận chuyển.');
+            }
+            if (!truckingSpecs.ltlFrequencyUnit) {
+              errors.push('Vui lòng chọn đơn vị tần suất vận chuyển hàng ghép LTL.');
+            }
           }
         } else if (serviceType === 'Cold Chain') {
           if (!origin.trim()) errors.push('Vui lòng nhập kho lạnh xuất phát (Origin).');
@@ -933,61 +1285,320 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
           }
           if (!coldChainSpecs.vehicleOrContType) errors.push('Vui lòng chọn loại xe tải lạnh hoặc container lạnh.');
         } else if (serviceType === 'Sea Freight (FCL)' || serviceType === 'Sea Freight (LCL)') {
-          if (!oceanSpecs.polPort?.trim() && !origin.trim()) errors.push('Vui lòng chọn cảng bốc (POL).');
-          if (!oceanSpecs.podPort?.trim() && !destination.trim()) errors.push('Vui lòng chọn cảng dỡ (POD).');
-          const isDomestic = oceanSpecs.tradeRole === 'Nội địa (Domestic)';
-          if (!isDomestic && !oceanSpecs.incoterm && !(oceanSpecs as any).incoterms) {
-            errors.push('Vui lòng chọn điều kiện giao hàng Incoterms.');
+          const isFCL = oceanSpecs.mode !== 'LCL (Hàng lẻ đóng ghép CFS)' && serviceType !== 'Sea Freight (LCL)';
+
+          if (!oceanSpecs.tradeRole) {
+            errors.push('Vui lòng chọn vai trò của doanh nghiệp trong lô hàng (Xuất khẩu, Nhập khẩu hoặc Nội địa).');
           }
-          if (oceanSpecs.mode !== 'LCL (Hàng lẻ đóng ghép CFS)' && (oceanSpecs.containerCount || 1) < 1) {
-            errors.push('Vui lòng nhập số lượng container (tối thiểu 1 cont).');
+          if (!oceanSpecs.incoterm && !(oceanSpecs as any).incoterms) {
+            errors.push('Vui lòng chọn điều kiện giao hàng Incoterms 2020.');
+          }
+          if (!oceanSpecs.originServiceTerm) {
+            errors.push('Vui lòng chọn điều kiện nhận hàng (Origin Term: Door, CY hoặc CFS).');
+          }
+          if (!oceanSpecs.destinationServiceTerm) {
+            errors.push('Vui lòng chọn điều kiện giao hàng (Destination Term: Door, CY hoặc CFS).');
+          }
+          if (oceanSpecs.originServiceTerm === 'Door' && !oceanSpecs.pickupAddress?.trim()) {
+            errors.push('Với hình thức Door, vui lòng nhập địa chỉ kho lấy hàng (Shipper Warehouse).');
+          }
+          if (oceanSpecs.destinationServiceTerm === 'Door' && !oceanSpecs.deliveryAddress?.trim()) {
+            errors.push('Với hình thức Door, vui lòng nhập địa chỉ kho giao hàng (Consignee Warehouse).');
+          }
+          if (!oceanSpecs.polPort?.trim() && !origin.trim()) {
+            errors.push(isFCL ? 'Vui lòng nhập cảng bốc hàng (Port of Loading - POL).' : 'Vui lòng nhập kho gom hàng lẻ CFS đi.');
+          }
+          if (!oceanSpecs.podPort?.trim() && !destination.trim()) {
+            errors.push(isFCL ? 'Vui lòng nhập cảng dỡ hàng (Port of Discharge - POD).' : 'Vui lòng nhập kho dỡ hàng lẻ CFS đến.');
+          }
+
+          if (isFCL) {
+            if (!weightKg?.trim() && (!oceanSpecs.grossWeightKgs || oceanSpecs.grossWeightKgs <= 0)) {
+              errors.push('Vui lòng nhập tổng khối lượng hàng hóa FCL (kg).');
+            }
+            if (!volumeCbm?.trim() && (!oceanSpecs.cbmVolume || oceanSpecs.cbmVolume <= 0)) {
+              errors.push('Vui lòng nhập tổng thể tích hàng hóa FCL (cbm).');
+            }
+            if (!oceanSpecs.containerType) {
+              errors.push('Vui lòng chọn loại vỏ container.');
+            }
+            if (!oceanSpecs.containerCount || oceanSpecs.containerCount < 1) {
+              errors.push('Vui lòng nhập số lượng container cần thuê (tối thiểu 1 cont).');
+            }
+            if (!oceanSpecs.containerCountUnit) {
+              errors.push('Vui lòng chọn đơn vị tần suất vận chuyển container.');
+            }
+          } else {
+            // LCL
+            if (!oceanSpecs.lclPieces || oceanSpecs.lclPieces < 1) {
+              errors.push('Vui lòng nhập số lượng kiện / pallet cần gom ghép LCL (tối thiểu 1 kiện).');
+            }
+            if ((!oceanSpecs.lclGrossWeightKg || oceanSpecs.lclGrossWeightKg <= 0) && (!weightKg || !weightKg.trim())) {
+              errors.push('Vui lòng nhập tổng trọng lượng thực tế (Gross Kg) cho hàng gom ghép LCL.');
+            }
+            if (!oceanSpecs.lclShipmentCount || oceanSpecs.lclShipmentCount < 1) {
+              errors.push('Vui lòng nhập số lượng chuyến ghép cần vận chuyển (tối thiểu 1 chuyến).');
+            }
+            if (!oceanSpecs.lclFrequencyUnit) {
+              errors.push('Vui lòng chọn đơn vị tần suất vận chuyển hàng gom ghép LCL.');
+            }
           }
         } else if (serviceType === 'Air Freight') {
           const isExp = airSpecs.airServiceType === 'Express / Courier';
-          if (!airSpecs.originAirport?.trim() && !origin.trim() && !airSpecs.pickupAddress?.trim()) {
-            errors.push(isExp ? 'Vui lòng nhập địa chỉ lấy hàng tận nơi.' : 'Vui lòng chọn sân bay đi (AOD).');
+
+          if (!airSpecs.tradeRole) {
+            errors.push('Vui lòng chọn vai trò của doanh nghiệp trong lô hàng hàng không (Xuất khẩu, Nhập khẩu hoặc Nội địa).');
           }
-          if (!airSpecs.destinationAirport?.trim() && !destination.trim() && !airSpecs.deliveryAddress?.trim()) {
-            errors.push(isExp ? 'Vui lòng nhập địa chỉ giao hàng tận nơi.' : 'Vui lòng chọn sân bay đến (AOA).');
+          if (!airSpecs.incoterm && !(airSpecs as any).incoterms) {
+            errors.push('Vui lòng chọn điều kiện giao hàng Incoterms 2020.');
+          }
+
+          if (!isExp) {
+            // Air Freight / Cargo
+            if (!airSpecs.originServiceTerm) {
+              errors.push('Vui lòng chọn điều kiện nhận hàng (Origin Term: Door hoặc Airport).');
+            }
+            if (!airSpecs.destinationServiceTerm) {
+              errors.push('Vui lòng chọn điều kiện giao hàng (Destination Term: Door hoặc Airport).');
+            }
+            if (airSpecs.originServiceTerm === 'Door' && !airSpecs.pickupAddress?.trim()) {
+              errors.push('Với hình thức Door, vui lòng nhập địa chỉ kho lấy hàng (Shipper Warehouse).');
+            }
+            if (airSpecs.destinationServiceTerm === 'Door' && !airSpecs.deliveryAddress?.trim()) {
+              errors.push('Với hình thức Door, vui lòng nhập địa chỉ kho giao hàng (Consignee Warehouse).');
+            }
+            if (!airSpecs.originAirport?.trim() && !origin.trim()) {
+              errors.push('Vui lòng chọn hoặc nhập sân bay xuất phát (AOD).');
+            }
+            if (!airSpecs.destinationAirport?.trim() && !destination.trim()) {
+              errors.push('Vui lòng chọn hoặc nhập sân bay đến (AOA).');
+            }
+          } else {
+            // Express / Courier
+            if (!airSpecs.expressPackageType) {
+              errors.push('Vui lòng chọn phân loại bưu kiện chuyển phát nhanh (Document hoặc Parcel).');
+            }
+            if (!airSpecs.pickupAddress?.trim() && !origin.trim()) {
+              errors.push('Vui lòng nhập địa chỉ lấy hàng tận nơi (Pickup Address).');
+            }
+            if (!airSpecs.deliveryAddress?.trim() && !destination.trim()) {
+              errors.push('Vui lòng nhập địa chỉ giao hàng tận nơi (Delivery Address).');
+            }
+            if (!airSpecs.destinationPostalCode?.trim()) {
+              errors.push('Vui lòng nhập mã bưu chính nơi đến (Destination Zip/Postal Code).');
+            }
+          }
+
+          if (!airSpecs.packageCount || airSpecs.packageCount < 1) {
+            errors.push('Vui lòng nhập số lượng kiện hàng không (tối thiểu 1 kiện).');
+          }
+          if ((!airSpecs.grossWeightKgs || airSpecs.grossWeightKgs <= 0) && (!weightKg || !weightKg.trim())) {
+            errors.push('Vui lòng nhập tổng trọng lượng thực tế (Gross Kg).');
+          }
+          if (!airSpecs.shipmentCount || airSpecs.shipmentCount < 1) {
+            errors.push('Vui lòng nhập số lượng chuyến hàng không cần vận chuyển (tối thiểu 1 chuyến).');
+          }
+          if (!airSpecs.frequencyUnit) {
+            errors.push('Vui lòng chọn đơn vị tần suất vận chuyển hàng không.');
           }
         } else if (serviceType === 'Warehousing') {
-          if (!warehousingSpecs.targetLocation?.trim() && !origin.trim()) errors.push('Vui lòng nhập vị trí kho bãi mục tiêu (Khu vực / Tỉnh thành muốn đặt kho).');
-          const hasCap = (warehousingSpecs.storageAreaSqm && warehousingSpecs.storageAreaSqm > 0) ||
-            (warehousingSpecs.palletPositions && warehousingSpecs.palletPositions > 0) ||
-            (warehousingSpecs.cbmVolume && warehousingSpecs.cbmVolume > 0) ||
-            (warehousingSpecs.bufferStorageQty && warehousingSpecs.bufferStorageQty > 0) ||
-            (warehousingSpecs.bufferPalletPositions && warehousingSpecs.bufferPalletPositions > 0) ||
-            (warehousingSpecs.skuCount && warehousingSpecs.skuCount > 0) ||
-            (warehousingSpecs.monthlyOrdersCount && warehousingSpecs.monthlyOrdersCount > 0) ||
-            (warehousingSpecs.dailyOrdersCount && warehousingSpecs.dailyOrdersCount > 0) ||
-            (warehousingSpecs.b2cSkusCount && warehousingSpecs.b2cSkusCount > 0) ||
-            (warehousingSpecs.bondedEstimatedValue && warehousingSpecs.bondedEstimatedValue > 0) ||
-            warehousingSpecs.warehouseType === 'Kho tự quản (Self-Storage)';
-          if (!hasCap) errors.push('Vui lòng nhập diện tích sàn (m²), thể tích (cbm), số vị trí pallet hoặc sản lượng đơn fulfillment cần thuê.');
+          const whType = warehousingSpecs.warehouseType || 'Kho thường (Grade A Dry)';
+          const billingUnit = warehousingSpecs.billingUnitPreference || 'm² (Diện tích sàn)';
+          const isBonded = whType === 'Kho ngoại quan (Bonded)' || whType === 'Kho ngoại quan (Bonded Warehouse)';
+
+          if (isBonded) {
+            if (!warehousingSpecs.bondedPurpose?.trim()) {
+              errors.push('Vui lòng chọn mục đích / luồng hàng gửi kho ngoại quan.');
+            }
+            if (!warehousingSpecs.bondedEstimatedValue || Number(warehousingSpecs.bondedEstimatedValue) <= 0) {
+              errors.push('Vui lòng nhập tổng giá trị hàng hóa lưu kho ngoại quan.');
+            }
+          }
+
+          if (billingUnit === 'm² (Diện tích sàn)') {
+            if (!warehousingSpecs.storageAreaSqm || Number(warehousingSpecs.storageAreaSqm) <= 0) {
+              errors.push('Vui lòng nhập diện tích sàn cần thuê (m²).');
+            }
+            if (!warehousingSpecs.skuCount || Number(warehousingSpecs.skuCount) <= 0) {
+              errors.push('Vui lòng nhập số lượng mã hàng quản lý (SKU).');
+            }
+          } else if (billingUnit === 'Pallet (Vị trí Pallet/tháng)') {
+            if (!warehousingSpecs.palletPositions || Number(warehousingSpecs.palletPositions) <= 0) {
+              errors.push('Vui lòng nhập số vị trí pallet cần thuê.');
+            }
+            if (!warehousingSpecs.skuCount || Number(warehousingSpecs.skuCount) <= 0) {
+              errors.push('Vui lòng nhập số lượng mã hàng quản lý (SKU).');
+            }
+          } else if (billingUnit === 'CBM (Thể tích thực m³)') {
+            if (!warehousingSpecs.cbmVolume || Number(warehousingSpecs.cbmVolume) <= 0) {
+              errors.push('Vui lòng nhập tổng thể tích lưu trữ dự kiến (CBM m³).');
+            }
+            if (!warehousingSpecs.skuCount || Number(warehousingSpecs.skuCount) <= 0) {
+              errors.push('Vui lòng nhập số lượng mã hàng quản lý (SKU).');
+            }
+          } else if (billingUnit === 'Order (Hoàn tất đơn hàng TMĐT)' || whType === 'Kho TMĐT / Fulfillment') {
+            if (!warehousingSpecs.skuCount || Number(warehousingSpecs.skuCount) <= 0) {
+              errors.push('Vui lòng nhập số lượng mã hàng quản lý (SKU).');
+            }
+            if (!warehousingSpecs.bufferStorageQty && !warehousingSpecs.bufferPalletPositions) {
+              errors.push('Vui lòng nhập dung lượng lưu kho đệm (Buffer Stock).');
+            }
+          }
+
+          if (!warehousingSpecs.targetLocation?.trim() && !origin.trim()) {
+            errors.push('Vui lòng nhập khu vực / tỉnh thành mong muốn đặt kho.');
+          }
+          if (!destination.trim()) {
+            errors.push('Vui lòng nhập phạm vi & bán kính phân phối trọng tâm.');
+          }
         } else if (serviceType === 'Customs Clearance') {
-          if (!customsSpecs.customsSubDepartment?.trim() && !origin.trim()) errors.push('Vui lòng nhập Chi Cục Hải Quan mở tờ khai.');
-          if (!customsSpecs.declarationType && !(customsSpecs as any).customsDeclarationType) errors.push('Vui lòng chọn loại hình tờ khai hải quan.');
-          if ((customsSpecs.declarationCount || 1) < 1) errors.push('Vui lòng nhập số lượng bộ tờ khai cần thông quan (tối thiểu 1 bộ).');
+          if (!customsSpecs.tradeRole) {
+            errors.push('Vui lòng chọn mô hình thủ tục hải quan (Nhập khẩu / Xuất khẩu).');
+          }
+          if (!customsSpecs.declarationType && !(customsSpecs as any).customsDeclarationType) {
+            errors.push('Vui lòng chọn loại hình tờ khai hải quan.');
+          }
+          if (!customsSpecs.declarationEntity) {
+            errors.push('Vui lòng chọn hình thức đứng tên tờ khai.');
+          }
+          if (!customsSpecs.customsSubDepartment?.trim() && !origin.trim()) {
+            errors.push('Vui lòng nhập Chi Cục Hải Quan mở tờ khai.');
+          }
+          if (!customsSpecs.portOrBorderGate?.trim() && !destination.trim()) {
+            errors.push('Vui lòng nhập Cảng / Sân bay / Cửa khẩu / ICD tiếp nhận hàng hóa.');
+          }
+          if (!customsSpecs.declarationCount || customsSpecs.declarationCount < 1) {
+            errors.push('Vui lòng nhập số lượng tờ khai dự kiến (tối thiểu 1 tờ khai).');
+          }
+          if (!customsSpecs.declarationFrequencyUnit) {
+            errors.push('Vui lòng chọn tần suất khai báo hải quan.');
+          }
         } else if (serviceType === 'Rail Freight') {
-          if (!railSpecs.originStation?.trim() && !railSpecs.departureStation?.trim() && !origin.trim()) errors.push('Vui lòng chọn ga xuất phát.');
-          if (!railSpecs.destinationStation?.trim() && !railSpecs.arrivalStation?.trim() && !destination.trim()) errors.push('Vui lòng chọn ga đến.');
-          if (!railSpecs.mode) errors.push('Vui lòng chọn phương thức đường sắt.');
+          const isFCL = railSpecs.mode !== 'LCL (Hàng lẻ đóng ghép kho ga)';
+
+          if (!railSpecs.tradeRole) {
+            errors.push('Vui lòng chọn vai trò của doanh nghiệp trong lô hàng đường sắt (Nội địa Bắc - Nam, Xuất khẩu hoặc Nhập khẩu).');
+          }
+          if (railSpecs.tradeRole && railSpecs.tradeRole !== 'Nội địa Bắc - Nam (Domestic Rail)' && !railSpecs.incoterm) {
+            errors.push('Vui lòng chọn điều kiện thương mại Incoterms cho lô hàng liên vận quốc tế.');
+          }
+          if (!railSpecs.originServiceTerm) {
+            errors.push('Vui lòng chọn điều kiện nhận hàng (Origin Term: Door, CY hoặc CFS).');
+          }
+          if (!railSpecs.destinationServiceTerm) {
+            errors.push('Vui lòng chọn điều kiện giao hàng (Destination Term: Door, CY hoặc CFS).');
+          }
+          if (railSpecs.originServiceTerm === 'Door' && !railSpecs.pickupAddress?.trim()) {
+            errors.push('Với hình thức Door, vui lòng nhập địa chỉ kho lấy hàng (Shipper Warehouse).');
+          }
+          if (railSpecs.destinationServiceTerm === 'Door' && !railSpecs.deliveryAddress?.trim()) {
+            errors.push('Với hình thức Door, vui lòng nhập địa chỉ kho giao hàng (Consignee Warehouse).');
+          }
+          if (!railSpecs.originStation?.trim() && !railSpecs.departureStation?.trim() && !origin.trim()) {
+            errors.push(isFCL ? 'Vui lòng nhập ga xếp hàng (Origin Rail Station / POL Ga).' : 'Vui lòng nhập địa chỉ kho ga nhận hàng (Origin CFS Rail Station).');
+          }
+          if (!railSpecs.destinationStation?.trim() && !railSpecs.arrivalStation?.trim() && !destination.trim()) {
+            errors.push(isFCL ? 'Vui lòng nhập ga dỡ hàng (Destination Rail Station / POD Ga).' : 'Vui lòng nhập địa chỉ kho ga trả hàng (Destination CFS Rail Station).');
+          }
+
+          if (isFCL) {
+            if (!weightKg?.trim() && (!railSpecs.grossWeightKgs || railSpecs.grossWeightKgs <= 0)) {
+              errors.push('Vui lòng nhập tổng khối lượng hàng hóa FCL (kg).');
+            }
+            if (!volumeCbm?.trim() && (!railSpecs.cbmVolume || railSpecs.cbmVolume <= 0)) {
+              errors.push('Vui lòng nhập tổng thể tích hàng hóa FCL (cbm).');
+            }
+            if (!railSpecs.containerType) {
+              errors.push('Vui lòng chọn loại container hoặc toa xe.');
+            }
+            if (!railSpecs.containerCount || railSpecs.containerCount < 1) {
+              errors.push('Vui lòng nhập số lượng container / toa xe cần thuê (tối thiểu 1 cont).');
+            }
+            if (!railSpecs.containerCountUnit) {
+              errors.push('Vui lòng chọn đơn vị tần suất vận chuyển container / toa xe.');
+            }
+          } else {
+            // LCL
+            if (!railSpecs.lclPieces || railSpecs.lclPieces < 1) {
+              errors.push('Vui lòng nhập số lượng kiện / pallet cần gom ghép LCL ga (tối thiểu 1 kiện).');
+            }
+            if ((!railSpecs.lclGrossWeightKg || railSpecs.lclGrossWeightKg <= 0) && (!railSpecs.grossWeightKgs || railSpecs.grossWeightKgs <= 0) && (!weightKg || !weightKg.trim())) {
+              errors.push('Vui lòng nhập tổng trọng lượng thực tế (Gross Kg) cho hàng gom ghép LCL.');
+            }
+            if (!railSpecs.lclShipmentCount || railSpecs.lclShipmentCount < 1) {
+              errors.push('Vui lòng nhập số lượng chuyến ghép cần vận chuyển (tối thiểu 1 chuyến).');
+            }
+            if (!railSpecs.lclFrequencyUnit) {
+              errors.push('Vui lòng chọn đơn vị tần suất vận chuyển hàng gom ghép LCL.');
+            }
+          }
         } else if (serviceType === 'Cross-border') {
-          if (!crossBorderSpecs.borderGate?.trim()) errors.push('Vui lòng chọn cửa khẩu thông quan.');
+          if (!crossBorderSpecs.tradeRole) {
+            errors.push('Vui lòng chọn vai trò doanh nghiệp (Xuất khẩu / Nhập khẩu).');
+          }
+          if (!crossBorderSpecs.incoterms) {
+            errors.push('Vui lòng chọn điều kiện thương mại Incoterms 2020.');
+          }
+          if (!crossBorderSpecs.borderGate?.trim()) {
+            errors.push('Vui lòng chọn cửa khẩu thông quan biên giới.');
+          }
           const hasOrigin = Boolean(
             crossBorderSpecs.originProvince?.trim() ||
             crossBorderSpecs.originCountryCity?.trim() ||
-            (crossBorderSpecs.pickupLocations && crossBorderSpecs.pickupLocations.some(l => l && l.trim().length > 0)) ||
+            (crossBorderSpecs.pickupLocations && crossBorderSpecs.pickupLocations[0]?.trim()) ||
             origin.trim()
           );
-          if (!hasOrigin) errors.push('Vui lòng nhập địa điểm xuất phát.');
+          if (!hasOrigin) {
+            errors.push('Vui lòng nhập địa chỉ kho lấy hàng chính (Điểm lấy 1).');
+          }
           const hasDest = Boolean(
             crossBorderSpecs.destinationProvince?.trim() ||
             crossBorderSpecs.destinationCountryCity?.trim() ||
-            (crossBorderSpecs.deliveryLocations && crossBorderSpecs.deliveryLocations.some(l => l && l.trim().length > 0)) ||
+            (crossBorderSpecs.deliveryLocations && crossBorderSpecs.deliveryLocations[0]?.trim()) ||
             destination.trim()
           );
-          if (!hasDest) errors.push('Vui lòng nhập địa điểm đích đến.');
+          if (!hasDest) {
+            errors.push('Vui lòng nhập địa chỉ kho giao hàng chính (Điểm giao 1).');
+          }
+
+          const isFTL = crossBorderSpecs.loadType !== 'LTL (Ghép hàng lẻ)';
+          if (isFTL) {
+            if (!weightKg?.trim() && (!crossBorderSpecs.grossWeightKgs || crossBorderSpecs.grossWeightKgs <= 0)) {
+              errors.push('Vui lòng nhập tổng khối lượng hàng hóa FTL (kg).');
+            }
+            if (!volumeCbm?.trim() && (!crossBorderSpecs.cbmVolume || crossBorderSpecs.cbmVolume <= 0)) {
+              errors.push('Vui lòng nhập tổng thể tích hàng hóa FTL (cbm).');
+            }
+            if (!crossBorderSpecs.vehicleType) {
+              errors.push('Vui lòng chọn loại phương tiện / thùng xe xuyên biên giới.');
+            }
+            if (!crossBorderSpecs.tonnageCategory) {
+              errors.push('Vui lòng chọn phân khúc tải trọng & kích cỡ xe.');
+            }
+            if (!crossBorderSpecs.vehicleCount || crossBorderSpecs.vehicleCount < 1) {
+              errors.push('Vui lòng nhập số lượng chuyến / xe cần thuê (tối thiểu 1 xe).');
+            }
+            if (!crossBorderSpecs.frequencyUnit) {
+              errors.push('Vui lòng chọn đơn vị tần suất vận chuyển.');
+            }
+            if (!crossBorderSpecs.leadtimeSLA) {
+              errors.push('Vui lòng chọn thời gian giao hàng yêu cầu (SLA).');
+            }
+          } else {
+            // LTL
+            if (!crossBorderSpecs.ltlPieces || crossBorderSpecs.ltlPieces < 1) {
+              errors.push('Vui lòng nhập số lượng kiện / pallet cần ghép (tối thiểu 1 kiện).');
+            }
+            if ((!crossBorderSpecs.ltlGrossWeightKg || crossBorderSpecs.ltlGrossWeightKg <= 0) && (!weightKg || !weightKg.trim())) {
+              errors.push('Vui lòng nhập tổng trọng lượng thực tế (Gross Kg) cho hàng ghép LTL.');
+            }
+            if (!crossBorderSpecs.shipmentCount || crossBorderSpecs.shipmentCount < 1) {
+              errors.push('Vui lòng nhập số lượng lô hàng / chuyến ghép (tối thiểu 1 lô).');
+            }
+            if (!crossBorderSpecs.frequencyUnit) {
+              errors.push('Vui lòng chọn đơn vị tần suất ghép hàng.');
+            }
+          }
         } else if (serviceType === 'Project Cargo') {
           if (!projectSpecs.projectCategory) errors.push('Vui lòng chọn phân loại mô hình dự án logistics.');
           const category = projectSpecs.projectCategory || 'DISTRIBUTION';
@@ -998,13 +1609,15 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
               (projectSpecs.originWarehouses && projectSpecs.originWarehouses.some(w => w && w.trim()))
             );
             if (!hasOrigin) errors.push('Vui lòng nhập kho tổng / nhà máy xuất hàng dự án.');
-            const hasDest = Boolean(
-              destination.trim() ||
-              projectSpecs.destinationSite?.trim() ||
-              projectSpecs.coverageScope ||
-              'Toàn quốc'
-            );
-            if (!hasDest) errors.push('Vui lòng chọn phạm vi địa lý hoặc điểm đến của dự án.');
+            if (!projectSpecs.fleetRequirements || projectSpecs.fleetRequirements.length === 0) {
+              errors.push('Vui lòng chọn ít nhất một loại đội xe phục vụ dự án.');
+            }
+            if (!projectSpecs.tripCount && !projectSpecs.monthlyTripsOrVolume?.trim()) {
+              errors.push('Vui lòng nhập số chuyến cam kết theo chu kỳ.');
+            }
+            if (!projectSpecs.frequencyUnit?.trim()) {
+              errors.push('Vui lòng chọn đơn vị chu kỳ chuyến.');
+            }
           } else if (category === 'CROSS_DOCK') {
             const hasOrigin = Boolean(
               projectSpecs.xDockHubLocation?.trim() ||
@@ -1016,16 +1629,40 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
             if (isInterRegion && !projectSpecs.xDockDestinationHub?.trim() && !destination.trim()) {
               errors.push('Vui lòng nhập trạm phân phối đích (Destination Hub).');
             }
+            if (!projectSpecs.xDockInboundVolume?.trim() && !projectSpecs.inboundDailyVolume?.trim()) {
+              errors.push('Vui lòng nhập sản lượng gom hàng Inbound cập sàn.');
+            }
+            if (!projectSpecs.targetRetailChains || projectSpecs.targetRetailChains.length === 0) {
+              errors.push('Vui lòng chọn ít nhất một hệ thống siêu thị / chuỗi đích.');
+            }
+            if (!projectSpecs.sortingRequirements || projectSpecs.sortingRequirements.length === 0) {
+              errors.push('Vui lòng chọn ít nhất một khâu thao tác chia chọn tại sàn.');
+            }
           } else if (category === 'PORT_ICD') {
             const hasOrigin = Boolean(projectSpecs.portIcdOriginPort?.trim() || origin.trim());
             if (!hasOrigin) errors.push('Vui lòng nhập cảng biển / cảng gốc (Origin Port).');
             const hasDest = Boolean(projectSpecs.portIcdDestinationIcd?.trim() || destination.trim());
             if (!hasDest) errors.push('Vui lòng nhập cảng cạn ICD / depot đích (Destination ICD).');
+            if (!projectSpecs.portIcdMonthlyTeuOrVolume?.trim()) {
+              errors.push('Vui lòng nhập sản lượng container cam kết trong gói thầu.');
+            }
+            if (!projectSpecs.portIcdContainerTypes || projectSpecs.portIcdContainerTypes.length === 0) {
+              errors.push('Vui lòng chọn ít nhất một chủng loại container cần khai thác.');
+            }
+            if (!projectSpecs.portIcdOperations || projectSpecs.portIcdOperations.length === 0) {
+              errors.push('Vui lòng chọn ít nhất một gói nghiệp vụ bãi & khai thác tại Cảng / ICD.');
+            }
           } else if (category === 'MULTIMODAL') {
             const hasOrigin = Boolean(projectSpecs.multimodalFirstMile?.trim() || origin.trim());
             if (!hasOrigin) errors.push('Vui lòng nhập chặng đầu (First-Mile).');
+            if (!projectSpecs.multimodalMainHaul?.trim()) {
+              errors.push('Vui lòng nhập chặng chính (Main-Haul).');
+            }
             const hasDest = Boolean(projectSpecs.multimodalLastMile?.trim() || destination.trim());
             if (!hasDest) errors.push('Vui lòng nhập chặng cuối (Last-Mile).');
+            if (!projectSpecs.multimodalMonthlyTeuOrVolume?.trim()) {
+              errors.push('Vui lòng nhập sản lượng cam kết hàng tháng.');
+            }
           }
         }
         break;
@@ -1033,7 +1670,22 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
         // Tự động mặc định là Trọn Gói (ALL_IN) nếu người dùng không chọn bóc tách
         break;
       case 7:
-        // Các mốc thời gian nếu người dùng không điền sẽ có giá trị mặc định thỏa thuận linh hoạt khi xem tóm tắt
+        if (!currency) errors.push('Vui lòng chọn đơn vị tiền tệ.');
+        if (currency !== 'VND' && (!exchangeRate || exchangeRate <= 0)) {
+          errors.push('Vui lòng nhập tỉ giá quy đổi ngoại tệ sang VND.');
+        }
+        if (!expiryDate || !expiryDate.trim()) {
+          errors.push('Vui lòng chọn hạn chót nhận báo giá.');
+        }
+        if (!pickupDate || !pickupDate.trim()) {
+          errors.push('Vui lòng chọn ngày lấy hàng dự kiến.');
+        }
+        if (!deliveryDate || !deliveryDate.trim()) {
+          errors.push('Vui lòng chọn hạn chót giao hàng.');
+        }
+        if (pickupDate && deliveryDate && deliveryDate < pickupDate) {
+          errors.push('Hạn chót giao hàng không thể trước ngày lấy hàng.');
+        }
         break;
       default:
         break;
@@ -1286,6 +1938,17 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
   // Handle service type change & update appropriate defaults
   const handleSelectService = (newService: ServiceType) => {
     setServiceType(newService);
+    if (newService === 'Sea Freight (FCL)') {
+      setOceanSpecs(prev => ({ ...prev, mode: 'FCL (Full Container)' }));
+    } else if (newService === 'Sea Freight (LCL)') {
+      setOceanSpecs(prev => ({ ...prev, mode: 'LCL (Hàng lẻ đóng ghép CFS)' }));
+    }
+    if (newService === 'Air Freight') {
+      setAirSpecs(prev => ({
+        ...prev,
+        airServiceType: prev.airServiceType || 'Air Freight / Cargo',
+      }));
+    }
     if (newService === 'Cold Chain') {
       setCargoClassification('Reefer');
     }
@@ -1744,14 +2407,8 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
             {TABS.map((tab) => {
               const isUnlocked = isTabUnlocked(tab.id);
               const isActive = activeTab === tab.id;
-              // A tab can only be marked completed if it is unlocked AND user has progressed to or beyond it
-              const isCompleted = isUnlocked && isTabCompleted(tab.id) && (
-                tab.id <= 5
-                  ? true
-                  : tab.id === 6
-                    ? (selectedVASList.length > 0 || activeTab > 6)
-                    : (activeTab === 7 && Boolean(expiryDate && pickupDate))
-              );
+              // Tab được đánh dấu hoàn thành (tick xanh) khi mở khóa và điền đủ tất cả các trường bắt buộc (*)
+              const isCompleted = isUnlocked && isTabCompleted(tab.id);
 
               return (
                 <button
@@ -2651,6 +3308,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                   setWeightKg={setWeightKg}
                   volumeCbm={volumeCbm}
                   setVolumeCbm={setVolumeCbm}
+                  showValidationHighlight={showValidationHighlight}
                 />
               )}
 
@@ -2662,6 +3320,11 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                   setOrigin={setOrigin}
                   destination={destination}
                   setDestination={setDestination}
+                  weightKg={weightKg}
+                  setWeightKg={setWeightKg}
+                  volumeCbm={volumeCbm}
+                  setVolumeCbm={setVolumeCbm}
+                  showValidationHighlight={showValidationHighlight}
                 />
               )}
 
@@ -2678,6 +3341,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                   setWeightKg={setWeightKg}
                   volumeCbm={volumeCbm}
                   setVolumeCbm={setVolumeCbm}
+                  showValidationHighlight={showValidationHighlight}
                 />
               )}
 
@@ -2702,6 +3366,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                   setDestination={setDestination}
                   cargoClassification={cargoClassification}
                   pricingType={pricingType}
+                  showValidationHighlight={showValidationHighlight}
                 />
               )}
 
@@ -2714,6 +3379,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                   destination={destination}
                   setDestination={setDestination}
                   pricingType={pricingType}
+                  showValidationHighlight={showValidationHighlight}
                 />
               )}
 
@@ -2730,6 +3396,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                   setWeightKg={setWeightKg}
                   volumeCbm={volumeCbm}
                   setVolumeCbm={setVolumeCbm}
+                  showValidationHighlight={showValidationHighlight}
                 />
               )}
 
@@ -2742,6 +3409,7 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
                   destination={destination}
                   setDestination={setDestination}
                   cargoClassification={cargoClassification}
+                  showValidationHighlight={showValidationHighlight}
                 />
               )}
             </div>
@@ -3223,10 +3891,45 @@ export const CreateInquiryModal: React.FC<CreateInquiryModalProps> = ({
             ) : (
               <button
                 type="button"
-                onClick={handleSubmit}
-                className="px-6 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white cursor-pointer shadow-md active:scale-95"
+                id="btn-view-summary-modal"
+                onClick={() => {
+                  if (!isAllTabsCompleted) {
+                    const errors = validateInquiryForm();
+                    setValidationErrors(errors);
+                    setShowValidationHighlight(true);
+                    for (let t = 1; t <= 7; t++) {
+                      if (!isTabCompleted(t)) {
+                        setActiveTab(t);
+                        break;
+                      }
+                    }
+                    setTimeout(() => {
+                      const formElement = document.getElementById('create-inquiry-form-body');
+                      const firstInvalidEl = formElement?.querySelector<HTMLElement>('[data-invalid="true"], input:invalid, select:invalid');
+                      if (firstInvalidEl) {
+                        firstInvalidEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        firstInvalidEl.focus();
+                      } else if (formElement) {
+                        formElement.scrollTo({ top: 0, behavior: 'smooth' });
+                      }
+                    }, 80);
+                    return;
+                  }
+                  handleSubmit();
+                }}
+                disabled={!isAllTabsCompleted}
+                className={`px-6 py-2.5 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center space-x-2 ${
+                  isAllTabsCompleted
+                    ? 'bg-gradient-to-r from-indigo-600 via-indigo-700 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white cursor-pointer shadow-lg shadow-indigo-500/30 ring-2 ring-indigo-400 active:scale-95 animate-pulse-once'
+                    : 'bg-slate-200 text-slate-400 border border-slate-300 shadow-none cursor-not-allowed opacity-70'
+                }`}
+                title={
+                  isAllTabsCompleted
+                    ? 'Xem Tóm Tắt Báo Giá (RFQ Summary)'
+                    : 'Vui lòng hoàn thành đầy đủ tất cả các trường dữ liệu bắt buộc (*) từ bước 1 đến bước 7 để mở form tóm tắt'
+                }
               >
-                <FileText className="w-4 h-4" />
+                <FileText className={`w-4 h-4 ${isAllTabsCompleted ? 'text-white' : 'text-slate-400'}`} />
                 <span>Xem Tóm Tắt Báo Giá (RFQ Summary)</span>
               </button>
             )}

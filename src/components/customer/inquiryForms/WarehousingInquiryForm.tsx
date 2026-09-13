@@ -219,6 +219,7 @@ interface WarehousingInquiryFormProps {
   setDestination: (val: string) => void;
   cargoClassification?: 'General' | 'Reefer' | 'Hazmat';
   pricingType?: 'SPOT' | 'CONTRACT';
+  showValidationHighlight?: boolean;
 }
 
 export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
@@ -230,6 +231,7 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
   setDestination,
   cargoClassification = 'General',
   pricingType = 'SPOT',
+  showValidationHighlight = false,
 }) => {
   // Chỉ coi là thuê dài hạn khi pricingType là CONTRACT VÀ mô hình là LONG_TERM
   const effectivePricingType = pricingType || specs.pricingType || 'SPOT';
@@ -463,9 +465,14 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
               Mục Đích / Luồng Hàng Gửi Kho Ngoại Quan <span className="text-red-500">*</span>
             </label>
             <select
+              data-invalid={showValidationHighlight && !specs.bondedPurpose ? 'true' : undefined}
               value={specs.bondedPurpose || ''}
               onChange={(e) => updateSpec('bondedPurpose', e.target.value)}
-              className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-semibold text-slate-900 shadow-2xs cursor-pointer"
+              className={`w-full h-10 px-3.5 text-xs bg-white border rounded-xl focus:border-indigo-500 font-semibold shadow-2xs cursor-pointer ${
+                showValidationHighlight && !specs.bondedPurpose
+                  ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                  : 'border-slate-200 text-slate-900'
+              }`}
             >
               <option value="">-- Chọn Mục Đích / Luồng Hàng Gửi Kho Ngoại Quan --</option>
               <option value="Hàng nhập khẩu chờ hoàn tất thủ tục thông quan vào nội địa">
@@ -481,6 +488,9 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
                 Cung ứng nguyên liệu cho DN chế xuất EPE / SXXK (VMI - JIT Delivery)
               </option>
             </select>
+            {showValidationHighlight && !specs.bondedPurpose && (
+              <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng chọn mục đích gửi kho ngoại quan</p>
+            )}
           </div>
 
           {/* Row 2: HS Code & Cargo Value with Currency selector */}
@@ -511,6 +521,7 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
                   <input
                     type="text"
                     required
+                    data-invalid={showValidationHighlight && (!specs.bondedEstimatedValue || Number(specs.bondedEstimatedValue) <= 0) ? 'true' : undefined}
                     value={specs.bondedEstimatedValue !== undefined ? (typeof specs.bondedEstimatedValue === 'number' ? specs.bondedEstimatedValue.toLocaleString('vi-VN') : specs.bondedEstimatedValue) : ''}
                     onChange={(e) => {
                       const clean = e.target.value.replace(/\./g, '').replace(/,/g, '').replace(/\D/g, '');
@@ -518,7 +529,11 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
                       updateSpec('bondedEstimatedValue', num);
                     }}
                     placeholder="VD: 250.000 hoặc 5.000.000.000"
-                    className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-indigo-500 font-bold text-slate-900 shadow-2xs"
+                    className={`w-full h-10 px-3.5 text-xs bg-white border rounded-xl focus:border-indigo-500 font-bold shadow-2xs ${
+                      showValidationHighlight && (!specs.bondedEstimatedValue || Number(specs.bondedEstimatedValue) <= 0)
+                        ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                        : 'border-slate-200 text-slate-900'
+                    }`}
                   />
                 </div>
                 <div className="w-24 shrink-0">
@@ -535,6 +550,9 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
                   </select>
                 </div>
               </div>
+              {showValidationHighlight && (!specs.bondedEstimatedValue || Number(specs.bondedEstimatedValue) <= 0) && (
+                <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng nhập giá trị hàng hóa lưu kho ngoại quan</p>
+              )}
             </div>
           </div>
         </div>
@@ -636,14 +654,22 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
               <input
                 type="text"
                 required
+                data-invalid={showValidationHighlight && (!specs.storageAreaSqm || Number(specs.storageAreaSqm) <= 0) ? 'true' : undefined}
                 value={specs.storageAreaSqm ? specs.storageAreaSqm.toLocaleString('vi-VN') : ''}
                 onChange={(e) => {
                   const val = e.target.value.replace(/\D/g, '');
                   updateSpec('storageAreaSqm', val ? parseInt(val, 10) : undefined);
                 }}
                 placeholder="VD: 500"
-                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-bold text-slate-900 shadow-2xs"
+                className={`w-full h-10 px-3.5 text-xs bg-white border rounded-xl focus:border-purple-500 font-bold shadow-2xs ${
+                  showValidationHighlight && (!specs.storageAreaSqm || Number(specs.storageAreaSqm) <= 0)
+                    ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                    : 'border-slate-200 text-slate-900'
+                }`}
               />
+              {showValidationHighlight && (!specs.storageAreaSqm || Number(specs.storageAreaSqm) <= 0) && (
+                <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng nhập diện tích sàn cần thuê (m²)</p>
+              )}
             </div>
 
             <div>
@@ -653,14 +679,22 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
               <input
                 type="text"
                 required
+                data-invalid={showValidationHighlight && (!specs.skuCount || Number(specs.skuCount) <= 0) ? 'true' : undefined}
                 value={specs.skuCount ? specs.skuCount.toLocaleString('vi-VN') : ''}
                 onChange={(e) => {
                   const val = e.target.value.replace(/\D/g, '');
                   updateSpec('skuCount', val ? parseInt(val, 10) : undefined);
                 }}
                 placeholder="VD: 150"
-                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-bold text-slate-900 shadow-2xs"
+                className={`w-full h-10 px-3.5 text-xs bg-white border rounded-xl focus:border-purple-500 font-bold shadow-2xs ${
+                  showValidationHighlight && (!specs.skuCount || Number(specs.skuCount) <= 0)
+                    ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                    : 'border-slate-200 text-slate-900'
+                }`}
               />
+              {showValidationHighlight && (!specs.skuCount || Number(specs.skuCount) <= 0) && (
+                <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng nhập số lượng mã hàng quản lý (SKU)</p>
+              )}
             </div>
           </div>
         )}
@@ -675,14 +709,22 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
               <input
                 type="text"
                 required
+                data-invalid={showValidationHighlight && (!specs.palletPositions || Number(specs.palletPositions) <= 0) ? 'true' : undefined}
                 value={specs.palletPositions ? specs.palletPositions.toLocaleString('vi-VN') : ''}
                 onChange={(e) => {
                   const val = e.target.value.replace(/\D/g, '');
                   updateSpec('palletPositions', val ? parseInt(val, 10) : undefined);
                 }}
                 placeholder="VD: 350"
-                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-bold text-slate-900 shadow-2xs"
+                className={`w-full h-10 px-3.5 text-xs bg-white border rounded-xl focus:border-purple-500 font-bold shadow-2xs ${
+                  showValidationHighlight && (!specs.palletPositions || Number(specs.palletPositions) <= 0)
+                    ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                    : 'border-slate-200 text-slate-900'
+                }`}
               />
+              {showValidationHighlight && (!specs.palletPositions || Number(specs.palletPositions) <= 0) && (
+                <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng nhập số vị trí pallet cần thuê</p>
+              )}
             </div>
 
             <div>
@@ -692,14 +734,22 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
               <input
                 type="text"
                 required
+                data-invalid={showValidationHighlight && (!specs.skuCount || Number(specs.skuCount) <= 0) ? 'true' : undefined}
                 value={specs.skuCount ? specs.skuCount.toLocaleString('vi-VN') : ''}
                 onChange={(e) => {
                   const val = e.target.value.replace(/\D/g, '');
                   updateSpec('skuCount', val ? parseInt(val, 10) : undefined);
                 }}
                 placeholder="VD: 150"
-                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-bold text-slate-900 shadow-2xs"
+                className={`w-full h-10 px-3.5 text-xs bg-white border rounded-xl focus:border-purple-500 font-bold shadow-2xs ${
+                  showValidationHighlight && (!specs.skuCount || Number(specs.skuCount) <= 0)
+                    ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                    : 'border-slate-200 text-slate-900'
+                }`}
               />
+              {showValidationHighlight && (!specs.skuCount || Number(specs.skuCount) <= 0) && (
+                <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng nhập số lượng mã hàng quản lý (SKU)</p>
+              )}
             </div>
 
             <div>
@@ -727,14 +777,22 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
               <input
                 type="text"
                 required
+                data-invalid={showValidationHighlight && (!specs.cbmVolume || Number(specs.cbmVolume) <= 0) ? 'true' : undefined}
                 value={specs.cbmVolume ? specs.cbmVolume.toLocaleString('vi-VN') : ''}
                 onChange={(e) => {
                   const val = e.target.value.replace(/\D/g, '');
                   updateSpec('cbmVolume', val ? parseInt(val, 10) : undefined);
                 }}
                 placeholder="VD: 800"
-                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-bold text-slate-900 shadow-2xs"
+                className={`w-full h-10 px-3.5 text-xs bg-white border rounded-xl focus:border-purple-500 font-bold shadow-2xs ${
+                  showValidationHighlight && (!specs.cbmVolume || Number(specs.cbmVolume) <= 0)
+                    ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                    : 'border-slate-200 text-slate-900'
+                }`}
               />
+              {showValidationHighlight && (!specs.cbmVolume || Number(specs.cbmVolume) <= 0) && (
+                <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng nhập tổng thể tích lưu trữ dự kiến (CBM)</p>
+              )}
             </div>
 
             <div>
@@ -744,14 +802,22 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
               <input
                 type="text"
                 required
+                data-invalid={showValidationHighlight && (!specs.skuCount || Number(specs.skuCount) <= 0) ? 'true' : undefined}
                 value={specs.skuCount ? specs.skuCount.toLocaleString('vi-VN') : ''}
                 onChange={(e) => {
                   const val = e.target.value.replace(/\D/g, '');
                   updateSpec('skuCount', val ? parseInt(val, 10) : undefined);
                 }}
                 placeholder="VD: 150"
-                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-bold text-slate-900 shadow-2xs"
+                className={`w-full h-10 px-3.5 text-xs bg-white border rounded-xl focus:border-purple-500 font-bold shadow-2xs ${
+                  showValidationHighlight && (!specs.skuCount || Number(specs.skuCount) <= 0)
+                    ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                    : 'border-slate-200 text-slate-900'
+                }`}
               />
+              {showValidationHighlight && (!specs.skuCount || Number(specs.skuCount) <= 0) && (
+                <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng nhập số lượng mã hàng quản lý (SKU)</p>
+              )}
             </div>
           </div>
         )}
@@ -766,14 +832,22 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
               <input
                 type="text"
                 required
+                data-invalid={showValidationHighlight && (!specs.skuCount || Number(specs.skuCount) <= 0) ? 'true' : undefined}
                 value={specs.skuCount ? specs.skuCount.toLocaleString('vi-VN') : ''}
                 onChange={(e) => {
                   const val = e.target.value.replace(/\D/g, '');
                   updateSpec('skuCount', val ? parseInt(val, 10) : undefined);
                 }}
                 placeholder="VD: 150"
-                className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-bold text-slate-900 shadow-2xs"
+                className={`w-full h-10 px-3.5 text-xs bg-white border rounded-xl focus:border-purple-500 font-bold shadow-2xs ${
+                  showValidationHighlight && (!specs.skuCount || Number(specs.skuCount) <= 0)
+                    ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                    : 'border-slate-200 text-slate-900'
+                }`}
               />
+              {showValidationHighlight && (!specs.skuCount || Number(specs.skuCount) <= 0) && (
+                <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng nhập số lượng mã hàng quản lý (SKU)</p>
+              )}
             </div>
 
             <div>
@@ -785,6 +859,7 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
                   <input
                     type="text"
                     required
+                    data-invalid={showValidationHighlight && (!specs.bufferStorageQty && !specs.bufferPalletPositions) ? 'true' : undefined}
                     value={specs.bufferStorageQty !== undefined ? specs.bufferStorageQty.toLocaleString('vi-VN') : (specs.bufferPalletPositions ? specs.bufferPalletPositions.toLocaleString('vi-VN') : '')}
                     onChange={(e) => {
                       const val = e.target.value.replace(/\D/g, '');
@@ -798,7 +873,11 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
                       });
                     }}
                     placeholder="VD: 20"
-                    className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 font-bold text-slate-900 shadow-2xs"
+                    className={`w-full h-10 px-3.5 text-xs bg-white border rounded-xl focus:border-purple-500 font-bold shadow-2xs ${
+                      showValidationHighlight && (!specs.bufferStorageQty && !specs.bufferPalletPositions)
+                        ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                        : 'border-slate-200 text-slate-900'
+                    }`}
                   />
                 </div>
 
@@ -823,6 +902,9 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
                   </select>
                 </div>
               </div>
+              {showValidationHighlight && (!specs.bufferStorageQty && !specs.bufferPalletPositions) && (
+                <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng nhập dung lượng lưu kho đệm</p>
+              )}
             </div>
           </div>
         )}
@@ -1039,14 +1121,22 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
           <input
             type="text"
             required
+            data-invalid={showValidationHighlight && !(origin || specs.targetLocation)?.trim() ? 'true' : undefined}
             value={origin || specs.targetLocation || ''}
             onChange={(e) => {
               setOrigin(e.target.value);
               updateSpec('targetLocation', e.target.value);
             }}
             placeholder="VD: KCN Sóng Thần 1, Dĩ An, Bình Dương hoặc KCN Hiệp Phước, TP.HCM"
-            className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 text-slate-900 shadow-2xs"
+            className={`w-full h-10 px-3.5 text-xs bg-white border rounded-xl focus:border-purple-500 shadow-2xs ${
+              showValidationHighlight && !(origin || specs.targetLocation)?.trim()
+                ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                : 'border-slate-200 text-slate-900'
+            }`}
           />
+          {showValidationHighlight && !(origin || specs.targetLocation)?.trim() && (
+            <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng nhập khu vực / tỉnh thành mong muốn đặt kho</p>
+          )}
         </div>
 
         <div>
@@ -1057,11 +1147,19 @@ export const WarehousingInquiryForm: React.FC<WarehousingInquiryFormProps> = ({
           <input
             type="text"
             required
+            data-invalid={showValidationHighlight && !destination?.trim() ? 'true' : undefined}
             value={destination}
             onChange={(e) => setDestination(e.target.value)}
             placeholder="VD: Toàn bộ khu vực TP.HCM, Bình Dương, Đồng Nai & Miền Tây"
-            className="w-full h-10 px-3.5 text-xs bg-white border border-slate-200 rounded-xl focus:border-purple-500 text-slate-900 shadow-2xs"
+            className={`w-full h-10 px-3.5 text-xs bg-white border rounded-xl focus:border-purple-500 shadow-2xs ${
+              showValidationHighlight && !destination?.trim()
+                ? 'border-rose-400 bg-rose-50/40 text-rose-900'
+                : 'border-slate-200 text-slate-900'
+            }`}
           />
+          {showValidationHighlight && !destination?.trim() && (
+            <p className="text-[11px] text-rose-600 mt-1 font-medium">Vui lòng nhập phạm vi & bán kính phân phối trọng tâm</p>
+          )}
         </div>
       </div>
     </div>
