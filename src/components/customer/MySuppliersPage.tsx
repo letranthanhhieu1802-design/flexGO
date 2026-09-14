@@ -322,6 +322,25 @@ export const MySuppliersPage: React.FC<MySuppliersPageProps> = ({
     ];
   };
 
+  const getCategoryBadge = (category?: string) => {
+    switch (category) {
+      case 'FLEET_OWNER':
+        return 'bg-blue-50 text-blue-700 border-blue-200';
+      case 'FORWARDER':
+        return 'bg-purple-50 text-purple-700 border-purple-200';
+      case 'SHIPPING_LINE':
+        return 'bg-cyan-50 text-cyan-700 border-cyan-200';
+      case 'AIRLINE':
+        return 'bg-sky-50 text-sky-700 border-sky-200';
+      case 'WAREHOUSE_OPERATOR':
+        return 'bg-amber-50 text-amber-700 border-amber-200';
+      case 'CUSTOMS_BROKER':
+        return 'bg-rose-50 text-rose-700 border-rose-200';
+      default:
+        return 'bg-slate-50 text-slate-700 border-slate-200';
+    }
+  };
+
   const renderSourceBadge = (supplier: SupplierCompany) => {
     const source = supplier.source || 'AWARDED_QUOTE';
     switch (source) {
@@ -549,7 +568,6 @@ export const MySuppliersPage: React.FC<MySuppliersPageProps> = ({
               onClick={() => {
                 setSearchTerm('');
                 setSourceFilter('ALL');
-                setCategoryFilter('ALL');
                 setServiceFilter('ALL');
               }}
               className="px-4 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer"

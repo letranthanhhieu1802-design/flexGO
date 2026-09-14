@@ -116,6 +116,42 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
   const [quoteSubmittedToast, setQuoteSubmittedToast] = useState<string | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  // Fallback / Normalized inquiry from lead if inquiry prop is omitted or partially null
+  const effectiveInquiry: InquiryItem | null = useMemo(() => {
+    if (inquiry) return inquiry;
+    if (lead?.inquiry) return lead.inquiry;
+    if (lead) {
+      return {
+        id: lead.id,
+        code: lead.inquiryCode || lead.code,
+        leadCode: lead.inquiryCode || lead.code,
+        title: `${lead.serviceType}: ${lead.route}`,
+        customerCompany: lead.customerCompany,
+        contactPerson: lead.contactName,
+        contactPhone: lead.contactPhone,
+        contactEmail: lead.contactEmail,
+        serviceType: lead.serviceType,
+        origin: lead.origin,
+        destination: lead.destination,
+        route: lead.route,
+        cargoType: lead.cargoDetails || 'Hàng hóa tiêu chuẩn',
+        weightVolume: lead.volumeDisplay || '1 lô hàng',
+        targetBudget: lead.unitPriceDisplay || `${(lead.unitPriceVND || 45000000).toLocaleString('vi-VN')} ₫`,
+        pricingType: lead.pricingType || 'SPOT',
+        status: lead.status || 'Open',
+        createdDate: lead.createdDate || 'Hôm nay',
+        expiryDate: lead.dueDate || '2026-09-30',
+        responsesCount: lead.quotesCount || 0,
+        viewsCount: lead.viewsCount || 0,
+        currency: 'VND',
+        serviceSpecs: lead.serviceSpecs,
+        selectedVAS: lead.selectedVAS,
+        requestedSurcharges: lead.requestedSurcharges,
+      };
+    }
+    return null;
+  }, [inquiry, lead]);
+
   const isPublished = isPublishedProp !== undefined ? isPublishedProp : internalPublished;
 
   useEffect(() => {
@@ -160,7 +196,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
   }, [isOpen]);
 
   // Lead Code and Inquiry Code are 1:1 identical (Mã lead và Mã Inquiry là 1)
-  const leadCode = inquiry?.leadCode || inquiry?.code || '';
+  const leadCode = effectiveInquiry?.leadCode || effectiveInquiry?.code || lead?.inquiryCode || lead?.code || '';
 
   // Share URL pointing directly to the Lead Board filtered by this Lead Code
   const shareUrl = typeof window !== 'undefined'
@@ -247,7 +283,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
     }
   };
 
-  const specs = inquiry?.serviceSpecs || {};
+  const specs = effectiveInquiry?.serviceSpecs || lead?.serviceSpecs || {};
   const trucking = specs.trucking;
   const ocean = specs.ocean;
   const air = specs.air;
@@ -259,24 +295,25 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
   const project = specs.project;
 
   // Active pick-up and drop-off points
-  const isTrucking = inquiry?.serviceType === 'Trucking';
+  const currentServiceType = effectiveInquiry?.serviceType || lead?.serviceType || 'Trucking';
+  const isTrucking = currentServiceType === 'Trucking';
   const isTruckingLtl = isTrucking && Boolean(trucking?.loadType?.includes('LTL'));
-  const isColdChain = inquiry?.serviceType === 'Cold Chain';
-  const isProjectCargo = inquiry?.serviceType === 'Project Cargo';
-  const isLcl = inquiry?.serviceType === 'Sea Freight (LCL)' || (inquiry?.serviceType === 'Sea Freight (FCL)' && Boolean(ocean?.mode?.includes('LCL')));
-  const isFcl = (inquiry?.serviceType === 'Sea Freight (FCL)' || Boolean(ocean?.mode?.includes('FCL'))) && !isLcl;
-  const isOcean = inquiry?.serviceType === 'Sea Freight (FCL)' || inquiry?.serviceType === 'Sea Freight (LCL)';
-  const isAir = inquiry?.serviceType === 'Air Freight';
+  const isColdChain = currentServiceType === 'Cold Chain';
+  const isProjectCargo = currentServiceType === 'Project Cargo';
+  const isLcl = currentServiceType === 'Sea Freight (LCL)' || (currentServiceType === 'Sea Freight (FCL)' && Boolean(ocean?.mode?.includes('LCL')));
+  const isFcl = (currentServiceType === 'Sea Freight (FCL)' || Boolean(ocean?.mode?.includes('FCL'))) && !isLcl;
+  const isOcean = currentServiceType === 'Sea Freight (FCL)' || currentServiceType === 'Sea Freight (LCL)';
+  const isAir = currentServiceType === 'Air Freight';
   const isAirExpress = isAir && air?.airServiceType === 'Express / Courier';
   const isAirCargo = isAir && !isAirExpress;
-  const isRail = inquiry?.serviceType === 'Rail Freight';
+  const isRail = currentServiceType === 'Rail Freight';
   const isRailLcl = isRail && Boolean(rail?.mode?.includes('LCL'));
   const isRailFcl = isRail && !isRailLcl;
-  const isWarehousing = inquiry?.serviceType === 'Warehousing';
-  const isCrossBorder = inquiry?.serviceType === 'Cross-border';
+  const isWarehousing = currentServiceType === 'Warehousing';
+  const isCrossBorder = currentServiceType === 'Cross-border';
   const isCrossBorderLtl = isCrossBorder && Boolean(crossBorder?.loadType?.includes('LTL'));
   const isCrossBorderFtl = isCrossBorder && !isCrossBorderLtl;
-  const isCustoms = inquiry?.serviceType === 'Customs Clearance';
+  const isCustoms = currentServiceType === 'Customs Clearance';
   const isCustomsExport = isCustoms && Boolean(customs?.tradeRole?.includes('Xuất'));
   const isCustomsImport = isCustoms && !isCustomsExport;
 
@@ -284,20 +321,20 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
     ? trucking.pickupLocations.map(l => l.trim()).filter(Boolean)
     : (isCrossBorder && crossBorder?.pickupLocations && crossBorder.pickupLocations.length > 0)
       ? crossBorder.pickupLocations.map(l => l.trim()).filter(Boolean)
-      : [inquiry?.origin || ''].filter(Boolean);
+      : [effectiveInquiry?.origin || lead?.origin || ''].filter(Boolean);
 
   const deliveryList: string[] = (isTrucking && trucking?.deliveryLocations && trucking.deliveryLocations.length > 0)
     ? trucking.deliveryLocations.map(l => l.trim()).filter(Boolean)
     : (isCrossBorder && crossBorder?.deliveryLocations && crossBorder.deliveryLocations.length > 0)
       ? crossBorder.deliveryLocations.map(l => l.trim()).filter(Boolean)
-      : [inquiry?.destination || ''].filter(Boolean);
+      : [effectiveInquiry?.destination || lead?.destination || ''].filter(Boolean);
 
   const totalPickupCount = pickupList.length || 1;
   const totalDeliveryCount = deliveryList.length || 1;
   const isMultiPoint = totalPickupCount > 1 || totalDeliveryCount > 1;
 
   // Customer Profile Information
-  const customerCompanyName = lead?.customerCompany || inquiry?.customerCompany || currentUser?.companyName || 'ABC Manufacturing Vietnam Co., Ltd.';
+  const customerCompanyName = lead?.customerCompany || effectiveInquiry?.customerCompany || currentUser?.companyName || 'ABC Manufacturing Vietnam Co., Ltd.';
   const customerContactName = lead?.contactName || inquiry?.contactPerson || (currentUser ? `${currentUser.name} (${currentUser.roleTitle || 'Logistics & Supply Chain'})` : 'Lê Hoàng Hiếu (Logistics Lead)');
   const customerEmail = lead?.contactEmail || currentUser?.email || 'hieu.le@abcmfg.vn';
   const customerPhone = lead?.contactPhone || '+84 908 123 456';
@@ -597,8 +634,9 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
         const val = parseFloat(item.price.replace(/\D/g, '')) || 0;
         return sum + val;
       }, 0);
-      const vasTotal = Object.values(quotedVasPrices).reduce((sum, priceStr) => {
-        const val = parseFloat(priceStr.replace(/\D/g, '')) || 0;
+      const vasTotal: number = (Object.values(quotedVasPrices) as (string | number)[]).reduce<number>((sum, priceStr) => {
+        const str = String(priceStr || '');
+        const val = parseFloat(str.replace(/\D/g, '')) || 0;
         return sum + val;
       }, 0);
       if (baseNum > 0 || surchargesTotal > 0 || vasTotal > 0) {
@@ -676,14 +714,17 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
         formattedSurcharge: surchargeEach.toLocaleString(locale),
       };
     });
-  }, [lead, inquiry]);
+  }, [lead, effectiveInquiry]);
 
   // Early return ONLY after all Hooks have been declared (Rules of Hooks)
-  if (!isOpen || !inquiry) return null;
+  if (!isOpen || (!inquiry && !effectiveInquiry)) return null;
+
+  // Safe inquiry reference for all subsequent renders
+  const activeInquiry: InquiryItem = (inquiry || effectiveInquiry)!;
 
   // Dynamic Section Titles & Configuration per Service Type
   const getServiceMainFreightTitle = (): string => {
-    switch (inquiry.serviceType) {
+    switch (activeInquiry.serviceType) {
       case 'Sea Freight (FCL)':
         return 'Cước Biển Cơ Bản (Ocean Freight - OF) *';
       case 'Sea Freight (LCL)':
@@ -710,7 +751,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
   };
 
   const getServiceSection1Title = (): string => {
-    switch (inquiry.serviceType) {
+    switch (activeInquiry.serviceType) {
       case 'Sea Freight (FCL)':
         return '1. PHỤ PHÍ HÃNG TÀU & CẢNG BIỂN (SURCHARGES)';
       case 'Sea Freight (LCL)':
@@ -737,14 +778,14 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
   };
 
   const getServiceSection2Title = (): string => {
-    if (inquiry.serviceType === 'Warehousing') {
+    if (activeInquiry.serviceType === 'Warehousing') {
       return '2. DỊCH VỤ GIÁ TRỊ GIA TĂNG (VAS) TẠI KHO';
     }
     return '2. DỊCH VỤ GIÁ TRỊ GIA TĂNG (VAS) & TIỆN ÍCH KÈM THEO';
   };
 
   const getServiceSection3Title = (): string => {
-    switch (inquiry.serviceType) {
+    switch (activeInquiry.serviceType) {
       case 'Sea Freight (FCL)':
         return '3. CAM KẾT LỊCH TÀU & ĐIỀU KHOẢN VẬN CHUYỂN (SLA & TERMS)';
       case 'Sea Freight (LCL)':
@@ -771,7 +812,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
   };
 
   const getServiceSection3Icon = () => {
-    switch (inquiry.serviceType) {
+    switch (activeInquiry.serviceType) {
       case 'Sea Freight (FCL)':
       case 'Sea Freight (LCL)':
         return <Anchor className="w-3.5 h-3.5 text-sky-600" />;
@@ -797,10 +838,10 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
 
 
   const routeDisplay = isWarehousing
-    ? `Khu vực đặt kho: ${inquiry.origin} ➔ Bán kính phân phối: ${inquiry.destination}`
+    ? `Khu vực đặt kho: ${activeInquiry.origin} ➔ Bán kính phân phối: ${activeInquiry.destination}`
     : isCustoms
-      ? `Chi cục HQ: ${inquiry.origin || customs?.customsSubDepartment || ''} ➔ Cảng/Cửa khẩu: ${inquiry.destination || customs?.portOrBorderGate || ''}`
-      : `${inquiry.origin || ''} ➔ ${inquiry.destination || ''}`;
+      ? `Chi cục HQ: ${activeInquiry.origin || customs?.customsSubDepartment || ''} ➔ Cảng/Cửa khẩu: ${activeInquiry.destination || customs?.portOrBorderGate || ''}`
+      : `${activeInquiry.origin || ''} ➔ ${activeInquiry.destination || ''}`;
 
   return (
     <div className="fixed inset-0 z-60 flex items-center justify-center p-2.5 sm:p-4 bg-slate-950/80 backdrop-blur-sm overflow-hidden animate-in fade-in duration-150">

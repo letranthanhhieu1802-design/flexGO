@@ -47,7 +47,9 @@ import {
   Layers,
   Eye,
   Bookmark,
-  BookmarkCheck
+  BookmarkCheck,
+  ArrowUpDown,
+  Maximize2
 } from 'lucide-react';
 import { 
   CRMCustomer, 
@@ -64,6 +66,7 @@ import {
 import { mockCustomerTimeline, initialSupplierLeads } from '../../data/mockData';
 import { InquirySummaryConfirmModal } from '../customer/InquirySummaryConfirmModal';
 import { LeadInquiryDetailCard } from '../public/LeadInquiryDetailCard';
+import { getLeadOrInquiryPricing } from '../../utils/pricingCalculator';
 
 interface CustomerDetailPageProps {
   customer: CRMCustomer;
@@ -118,9 +121,20 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({
   const [inquirySearch, setInquirySearch] = useState('');
   const [serviceFilter, setServiceFilter] = useState<string>('ALL');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [sortField, setSortField] = useState<string>('createdDate');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [selectedLeadForCompare, setSelectedLeadForCompare] = useState<SupplierLeadItem | null>(null);
   const [expandedLeadIds, setExpandedLeadIds] = useState<Set<string>>(new Set());
   const [localExtraViews, setLocalExtraViews] = useState<Record<string, number>>({});
+
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('desc');
+    }
+  };
 
   const toggleExpandLead = (leadId: string) => {
     const isExpanding = !expandedLeadIds.has(leadId);
@@ -290,6 +304,10 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({
           viewsCount: (existingLead?.viewsCount ?? inq.viewsCount ?? 15) + (localExtraViews[inq.code || ''] || localExtraViews[existingLead?.id || ''] || 0),
           isUnlocked: Boolean(existingLead?.isUnlocked || customer.source === 'FLEXCREDIT_UNLOCKED' || inq.code === 'FG-2608250001'),
           isSaved: true,
+          inquiry: inq,
+          serviceSpecs: inq.serviceSpecs || existingLead?.serviceSpecs,
+          selectedVAS: inq.selectedVAS || existingLead?.selectedVAS,
+          requestedSurcharges: inq.requestedSurcharges || existingLead?.requestedSurcharges,
         };
 
         const key = inq.code || leadItem.id;
@@ -306,8 +324,11 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({
           const quotesCount = quotesForThisLead.length || lead.quotesCount;
           const myQuote = quotesForThisLead.find((q) => q.supplierId === currentUser.id);
 
+          const matchedInq = inquiries.find((i) => i.code === lead.inquiryCode || i.code === lead.code) || lead.inquiry;
+
           matchedMap.set(key, {
             ...lead,
+            inquiry: matchedInq || lead.inquiry,
             quotesCount: quotesCount,
             viewsCount: (lead.viewsCount || 15) + (localExtraViews[lead.code] || localExtraViews[lead.id] || 0),
             status: myQuote ? 'Quoted' : lead.status,
@@ -323,6 +344,51 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({
     if (result.length === 0) {
       const fallbackId = `lead-cust-${customer.id}-01`;
       const fallbackCode = `FG-2608${String(10 + Math.abs(customer.companyName.length % 20)).padStart(2, '0')}0001`;
+      const prefMode: ServiceType = (customer.preferredModes?.[0]?.includes('Sea') ? 'Sea Freight (FCL)' : customer.preferredModes?.[0]?.includes('Air') ? 'Air Freight' : customer.preferredModes?.[0]?.includes('Lạnh') ? 'Cold Chain' : 'Trucking') as ServiceType;
+      
+      const fallbackInquiry: InquiryItem = {
+        id: `inq-cust-${customer.id}-01`,
+        code: fallbackCode,
+        leadCode: fallbackCode,
+        title: `Vận chuyển định kỳ hợp đồng: ${customer.location || 'TP. Hồ Chí Minh'} → ${customer.operatingMarkets?.[0] || 'Hà Nội'}`,
+        customerCompany: customer.companyName,
+        contactPerson: customer.contactPerson,
+        contactPhone: customer.contactPhone,
+        contactEmail: customer.contactEmail,
+        serviceType: prefMode,
+        origin: customer.location || 'TP. Hồ Chí Minh',
+        destination: customer.operatingMarkets?.[0] || 'Hà Nội (KCN Thăng Long)',
+        route: customer.keyRoutes?.[0] || `${customer.location || 'TP. Hồ Chí Minh'} → Hà Nội`,
+        cargoType: customer.primaryCargo || 'Hàng công nghiệp tiêu chuẩn',
+        weightVolume: customer.monthlyVolumeEst || '25 Chuyến / Tháng',
+        targetBudget: customer.estimatedValueDisplay || '450,000,000 ₫',
+        pricingType: 'CONTRACT',
+        status: 'Open',
+        createdDate: 'Hôm nay',
+        expiryDate: '2026-09-25',
+        pickupDate: '2026-09-28',
+        deliveryDate: '2026-09-30',
+        description: `Vận chuyển định kỳ tuyến ${customer.location || 'TP. Hồ Chí Minh'} đi ${customer.operatingMarkets?.[0] || 'Hà Nội'}`,
+        responsesCount: 3,
+        viewsCount: 142,
+        currency: 'VND',
+        requestedSurcharges: ['Phí cầu đường cao tốc', 'Phí bến bãi lưu đêm'],
+        selectedVAS: ['Bảo hiểm hàng hóa toàn diện', 'Hệ thống định vị GPS & Báo cáo lộ trình'],
+        serviceSpecs: {
+          trucking: {
+            loadType: 'FTL (Nguyên chuyến)',
+            truckType: 'Xe tải thùng kín tiêu chuẩn',
+            tonnageCategory: '15 Tấn',
+            pricingType: 'CONTRACT',
+            contractTerm: '12 Tháng (Cam kết sản lượng)',
+            committedFrequency: '25 Chuyến / Tháng',
+            multiDropPoints: 0,
+            pickupLocations: [customer.location || 'TP. Hồ Chí Minh'],
+            deliveryLocations: [customer.operatingMarkets?.[0] || 'Hà Nội (KCN Thăng Long)'],
+          }
+        }
+      };
+
       const fallbackLead: SupplierLeadItem = {
         id: fallbackId,
         code: fallbackCode,
@@ -332,7 +398,7 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({
         contactRole: customer.contactRole,
         contactPhone: customer.contactPhone,
         contactEmail: customer.contactEmail,
-        serviceType: (customer.preferredModes?.[0]?.includes('Sea') ? 'Sea Freight (FCL)' : customer.preferredModes?.[0]?.includes('Air') ? 'Air Freight' : customer.preferredModes?.[0]?.includes('Lạnh') ? 'Cold Chain' : 'Trucking') as any,
+        serviceType: prefMode,
         origin: customer.location || 'TP. Hồ Chí Minh',
         destination: customer.operatingMarkets?.[0] || 'Hà Nội (KCN Thăng Long)',
         route: customer.keyRoutes?.[0] || `${customer.location} → Hà Nội`,
@@ -353,6 +419,7 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({
         viewsCount: 142 + (localExtraViews[fallbackId] || localExtraViews[fallbackCode] || 0),
         isUnlocked: customer.source === 'FLEXCREDIT_UNLOCKED',
         isSaved: true,
+        inquiry: fallbackInquiry,
       };
       result = [fallbackLead];
     }
@@ -367,9 +434,9 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({
     });
   }, [inquiries, leads, quotations, customer, currentUser.id, localExtraViews]);
 
-  // Filtered customer leads for leaderboard table
+  // Filtered customer leads for leaderboard table with dynamic sorting like My Leads
   const filteredCustomerLeads = useMemo(() => {
-    return customerLeads.filter((lead) => {
+    const filtered = customerLeads.filter((lead) => {
       const matchSearch =
         inquirySearch === '' ||
         lead.code.toLowerCase().includes(inquirySearch.toLowerCase()) ||
@@ -382,7 +449,24 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({
 
       return matchSearch && matchService && matchStatus;
     });
-  }, [customerLeads, inquirySearch, serviceFilter, statusFilter]);
+
+    return [...filtered].sort((a, b) => {
+      let aVal: any = a[sortField as keyof SupplierLeadItem] || '';
+      let bVal: any = b[sortField as keyof SupplierLeadItem] || '';
+
+      if (sortField === 'estimatedValueVND') {
+        aVal = a.estimatedValueVND || (a.estimatedValueDisplay ? parseInt(a.estimatedValueDisplay.replace(/\D/g, ''), 10) : 0);
+        bVal = b.estimatedValueVND || (b.estimatedValueDisplay ? parseInt(b.estimatedValueDisplay.replace(/\D/g, ''), 10) : 0);
+      } else if (sortField === 'quotesCount') {
+        aVal = a.quotesCount || 0;
+        bVal = b.quotesCount || 0;
+      }
+
+      if (aVal < bVal) return sortOrder === 'asc' ? -1 : 1;
+      if (aVal > bVal) return sortOrder === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [customerLeads, inquirySearch, serviceFilter, statusFilter, sortField, sortOrder]);
 
   const handleUnlockInquiryWithDiscount = (leadId: string) => {
     if (onUnlockLead) {
@@ -720,9 +804,9 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 animate-in fade-in duration-200">
+    <div className="w-full max-w-[1720px] mx-auto px-2 sm:px-4 lg:px-6 py-4 sm:py-5 animate-in fade-in duration-200 space-y-5">
       {/* Top Navigation Bar / Breadcrumbs */}
-      <div className="flex items-center justify-between pb-3 border-b border-slate-200 mb-6">
+      <div className="flex items-center justify-between pb-3 border-b border-slate-200">
         <div className="flex items-center space-x-2 text-xs font-semibold text-slate-500">
           <button
             onClick={onBack}
@@ -739,7 +823,7 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({
       </div>
 
       {/* 2 Primary Tabs (Pure text, no icons) */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-4 border-b border-slate-200 text-xs mb-6">
+      <div className="flex items-center gap-2 overflow-x-auto pb-3 border-b border-slate-200 text-xs">
         <button
           type="button"
           onClick={() => setActiveTab('overview')}
@@ -773,9 +857,9 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({
       </div>
 
       {/* 2-Column Executive Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* LEFT COLUMN: Dark Navy Executive Profile Card (lg:col-span-4) */}
-        <div className="lg:col-span-4">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        {/* LEFT COLUMN: Dark Navy Executive Profile Card (lg:col-span-4 xl:col-span-3) */}
+        <div className="lg:col-span-4 xl:col-span-3">
           <div className="bg-gradient-to-b from-[#1b3168] via-[#162753] to-[#0f1b38] rounded-3xl p-6 sm:p-7 text-white shadow-md border border-slate-800/40 space-y-6 sticky top-6">
             {/* Header: Avatar, Tên người phụ trách, Chức vụ, Tên công ty */}
             <div className="text-center pt-2">
@@ -904,9 +988,9 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({
         </div>
 
         {/* =====================================================================
-            RIGHT COLUMN: Tab Content (lg:col-span-8)
+            RIGHT COLUMN: Tab Content (lg:col-span-8 xl:col-span-9)
         ===================================================================== */}
-        <div className="lg:col-span-8 space-y-6">
+        <div className="lg:col-span-8 xl:col-span-9 space-y-5">
 
       {/* ========================================================================= */}
       {/* TAB 1: TỔNG QUAN (Để trang trắng sạch sẽ theo yêu cầu của user) */}
@@ -972,291 +1056,292 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({
 
                 <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto">
                   <select
+                    id="customer-inquiries-service-select"
                     value={serviceFilter}
                     onChange={(e) => setServiceFilter(e.target.value)}
                     className="px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-700 focus:outline-hidden cursor-pointer"
                   >
-                    <option value="ALL">Tất cả dịch vụ</option>
-                    <option value="Trucking">Trucking</option>
-                    <option value="Sea Freight (FCL)">Sea Freight (FCL)</option>
-                    <option value="Sea Freight (LCL)">Sea Freight (LCL)</option>
-                    <option value="Air Freight">Air Freight</option>
-                    <option value="Cold Chain">Cold Chain</option>
-                    <option value="Warehousing">Warehousing</option>
+                    <option value="ALL">Tất cả Nhóm Dịch Vụ</option>
+                    <option value="Trucking">Đường bộ</option>
+                    <option value="Sea Freight (FCL)">Đường biển (FCL)</option>
+                    <option value="Sea Freight (LCL)">Đường biển (LCL)</option>
+                    <option value="Air Freight">Hàng không</option>
+                    <option value="Rail Freight">Đường sắt</option>
+                    <option value="Cold Chain">Chuỗi lạnh</option>
+                    <option value="Warehousing">Kho bãi 3PL</option>
+                    <option value="Customs Clearance">Hải quan</option>
+                    <option value="Cross-border">Xuyên biên giới</option>
+                    <option value="Project Cargo">Logistics Dự án</option>
                   </select>
 
                   <select
+                    id="customer-inquiries-status-select"
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
                     className="px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-700 focus:outline-hidden cursor-pointer"
                   >
-                    <option value="ALL">Tất cả trạng thái</option>
-                    <option value="Open">Đang mở nhận giá (Open)</option>
-                    <option value="Quoted">Đã báo giá (Quoted)</option>
-                    <option value="Won">Đã trúng thầu (Won)</option>
+                    <option value="ALL">Tất cả Trạng thái</option>
+                    <option value="Open">Open</option>
+                    <option value="Quoted">Quoted</option>
+                    <option value="Won">Won</option>
+                    <option value="Lost">Lost</option>
+                    <option value="Closed">Closed</option>
                   </select>
                 </div>
               </div>
 
-              {/* INQUIRIES LEADERBOARD TABLE */}
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-slate-100/90 border-b border-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider">
-                    <th className="py-2.5 px-2 text-center w-10">STT</th>
-                    <th className="py-2.5 px-3 whitespace-nowrap">Ngày Đăng / Hạn</th>
-                    <th className="py-2.5 px-3 whitespace-nowrap">Mã ID</th>
-                    <th className="py-2.5 px-3 whitespace-nowrap">Nhóm Dịch Vụ</th>
-                    <th className="py-2.5 px-2 whitespace-nowrap">Nhóm Hàng</th>
-                    <th className="py-2.5 px-2 whitespace-nowrap">Mô Hình</th>
-                    <th className="py-2.5 px-2 whitespace-nowrap">Loại Hợp Đồng</th>
-                    <th className="py-2.5 px-3 text-right whitespace-nowrap">Tổng Giá Trị</th>
-                    <th className="py-2.5 px-2 text-center whitespace-nowrap">Trạng Thái</th>
-                    <th className="py-2.5 px-2 text-center whitespace-nowrap">Báo Giá / Xem</th>
-                    <th className="py-2.5 px-3 text-center whitespace-nowrap">Thao Tác</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 text-xs">
-                  {filteredCustomerLeads.length === 0 ? (
-                    <tr>
-                      <td colSpan={11} className="py-12 text-center text-slate-400">
-                        <Coins className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                        <p className="font-bold text-slate-600 text-sm">Không tìm thấy inquiry nào khớp với bộ lọc</p>
-                        <p className="text-xs text-slate-400 mt-1">Thử đổi từ khóa tìm kiếm hoặc bấm "Báo Giá Mới" để chào giá trực tiếp.</p>
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredCustomerLeads.map((lead, idx) => {
-                      const isExpanded = expandedLeadIds.has(lead.id);
-                      const isContract = lead.pricingType === 'CONTRACT';
-                      const operationMode = getOperationModeDisplay(lead);
-                      const isLeadViewed = Boolean(
-                        viewedInquiryCodes && (
-                          viewedInquiryCodes.includes(lead.code) ||
-                          (lead.inquiryCode && viewedInquiryCodes.includes(lead.inquiryCode)) ||
-                          viewedInquiryCodes.includes(lead.id)
-                        )
-                      );
+              {/* INQUIRIES DATA TABLE (CHUẨN 11 CỘT NHƯ TRANG MY LEADS CỦA SUPPLIER) */}
+              <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                <div className="overflow-x-auto max-h-[700px]">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-slate-100 text-[11px] font-bold text-slate-700 uppercase tracking-wider select-none">
+                        {/* 1. STT */}
+                        <th className="py-2.5 px-1.5 text-center w-10 sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
+                          STT
+                        </th>
 
-                      return (
-                        <React.Fragment key={lead.id}>
-                          <tr 
-                            className={`transition-colors group cursor-pointer select-none ${
-                              isExpanded 
-                                ? 'bg-indigo-50/60 font-medium' 
-                                : idx % 2 === 0
-                                ? 'bg-white hover:bg-slate-50/90'
-                                : 'bg-slate-50/40 hover:bg-slate-100/70'
-                            }`}
-                            onClick={() => toggleExpandLead(lead.id)}
-                          >
-                            {/* Cột 1: STT */}
-                            <td className="py-3 px-2 text-center text-slate-400 font-mono text-xs">
-                              {idx + 1}
-                            </td>
+                        {/* 2. Ngày Đăng / Hạn Nộp */}
+                        <th 
+                          className="py-2.5 px-2 cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
+                          onClick={() => handleSort('createdDate')}
+                        >
+                          <div className="flex items-center gap-1">
+                            <span>Ngày Đăng / Hạn</span>
+                            <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                          </div>
+                        </th>
 
-                            {/* Cột 2: Ngày Đăng & Hạn Nộp */}
-                            <td className="py-3 px-3 whitespace-nowrap">
-                              <div className="space-y-0.5">
-                                <span className="text-slate-700 font-semibold block text-xs">
-                                  {lead.createdDate || 'Aug 31, 2026'}
-                                </span>
-                                <span className="inline-block px-1.5 py-0.2 rounded text-[9px] font-bold bg-rose-50 text-rose-600 border border-rose-200">
-                                  Hạn: {lead.dueDate || '7 ngày'}
-                                </span>
-                              </div>
-                            </td>
+                        {/* 3. Mã ID */}
+                        <th 
+                          className="py-2.5 px-2 cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
+                          onClick={() => handleSort('code')}
+                        >
+                          <div className="flex items-center gap-1">
+                            <span>Mã ID</span>
+                            <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                          </div>
+                        </th>
 
-                            {/* Cột 3: Mã ID */}
-                            <td className="py-3 px-3 whitespace-nowrap">
-                              <div className="flex items-center gap-1.5">
-                                <span className="font-mono font-bold text-indigo-700 text-xs">
-                                  {lead.code}
-                                </span>
-                                {lead.isSaved && (
-                                  <BookmarkCheck className="w-3 h-3 text-amber-500 fill-amber-500 shrink-0" title="Đã lưu" />
-                                )}
-                              </div>
-                            </td>
+                        {/* 4. Nhóm Dịch Vụ */}
+                        <th className="py-2.5 px-2 whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
+                          <span>Nhóm Dịch Vụ</span>
+                        </th>
 
-                            {/* Cột 4: Nhóm Dịch Vụ */}
-                            <td className="py-3 px-3 whitespace-nowrap">
-                              <span className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-bold border ${getServiceBadgeStyle(lead.serviceType)}`}>
-                                {lead.serviceType}
-                              </span>
-                            </td>
+                        {/* 5. Nhóm Hàng */}
+                        <th className="py-2.5 px-1.5 whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
+                          <span>Nhóm Hàng</span>
+                        </th>
 
-                            {/* Cột 5: Nhóm Hàng */}
-                            <td className="py-3 px-2 whitespace-nowrap">
-                              <span className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-bold border ${getCargoBadgeStyle(lead.cargoClassification)}`}>
-                                {getCargoLabel(lead.cargoClassification)}
-                              </span>
-                            </td>
+                        {/* 6. Mô Hình */}
+                        <th className="py-2.5 px-1.5 whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
+                          <span>Mô Hình</span>
+                        </th>
 
-                            {/* Cột 6: Mô Hình */}
-                            <td className="py-3 px-2 whitespace-nowrap">
-                              <span className="text-slate-800 font-semibold text-xs">
-                                {operationMode}
-                              </span>
-                            </td>
+                        {/* 7. Loại Hợp Đồng */}
+                        <th 
+                          className="py-2.5 px-1.5 cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
+                          onClick={() => handleSort('pricingType')}
+                        >
+                          <span>Loại Hợp Đồng</span>
+                        </th>
 
-                            {/* Cột 7: Loại Hợp Đồng */}
-                            <td className="py-3 px-2 whitespace-nowrap">
-                              {isContract ? (
-                                <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
-                                  Hợp đồng
-                                </span>
-                              ) : (
-                                <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold bg-cyan-50 text-cyan-700 border border-cyan-200">
-                                  Theo lô
-                                </span>
-                              )}
-                            </td>
+                        {/* 8. Tổng Giá Trị */}
+                        <th 
+                          className="py-2.5 px-2 text-right cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
+                          onClick={() => handleSort('estimatedValueVND')}
+                        >
+                          <div className="flex items-center justify-end gap-1">
+                            <span>Tổng Giá Trị</span>
+                            <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                          </div>
+                        </th>
 
-                            {/* Cột 8: Tổng Giá Trị */}
-                            <td className="py-3 px-3 text-right whitespace-nowrap">
-                              <div className="space-y-0.5">
-                                <span className="text-xs sm:text-[12.5px] font-black text-emerald-700 block tracking-tight">
-                                  {(lead.estimatedValueVND || (lead.estimatedValueDisplay ? parseInt(lead.estimatedValueDisplay.replace(/\D/g, ''), 10) : 0) || 0).toLocaleString('vi-VN')}
-                                </span>
-                                <span className="text-[9.5px] font-semibold text-slate-500 block">
-                                  {isContract ? 'VNĐ / tháng' : 'VNĐ / lô'}
-                                </span>
-                              </div>
-                            </td>
+                        {/* 9. Trạng Thái */}
+                        <th 
+                          className="py-2.5 px-1.5 text-center cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
+                          onClick={() => handleSort('status')}
+                        >
+                          <div className="flex items-center justify-center gap-1">
+                            <span>Trạng Thái</span>
+                            <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                          </div>
+                        </th>
 
-                            {/* Cột 9: Trạng Thái */}
-                            <td className="py-3 px-2 text-center whitespace-nowrap">
-                              <span className={`inline-block px-2.5 py-0.5 rounded-md text-[10px] font-bold border ${getStatusBadgeStyle(lead.status)}`}>
-                                {getStatusDisplay(lead.status)}
-                              </span>
-                            </td>
+                        {/* 10. Báo Giá / Xem */}
+                        <th 
+                          className="py-2.5 px-1.5 text-center cursor-pointer hover:text-indigo-600 transition-colors whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200"
+                          onClick={() => handleSort('quotesCount')}
+                        >
+                          <div className="flex items-center justify-center gap-1">
+                            <span>Báo Giá / Xem</span>
+                            <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                          </div>
+                        </th>
 
-                            {/* Cột 10: Thống Kê Báo Giá & Lượt Xem */}
-                            <td className="py-3 px-2 text-center whitespace-nowrap">
-                              <div className="flex flex-col items-center gap-0.5">
-                                <span className="px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/80">
-                                  {lead.quotesCount || 0} báo giá
-                                </span>
-                                <span className="text-[9px] text-slate-400 font-medium">
-                                  {lead.viewsCount || 45} xem
-                                </span>
-                              </div>
-                            </td>
+                        {/* 11. Thao Tác (Xem đầy đủ modal) */}
+                        <th className="py-2.5 px-2 text-center whitespace-nowrap sticky top-0 z-20 bg-slate-100 border-b border-slate-200">
+                          <span>Thao Tác</span>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 text-xs">
+                      {filteredCustomerLeads.length === 0 ? (
+                        <tr>
+                          <td colSpan={11} className="py-16 text-center text-slate-400">
+                            <div className="max-w-md mx-auto space-y-2">
+                              <Coins className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                              <p className="font-bold text-slate-700 text-sm">
+                                Không tìm thấy yêu cầu báo giá nào của {customer.companyShortName || customer.companyName} phù hợp
+                              </p>
+                              <p className="text-xs text-slate-400">
+                                Hãy thử thay đổi từ khóa tìm kiếm hoặc điều chỉnh lại bộ lọc dịch vụ, trạng thái.
+                              </p>
+                            </div>
+                          </td>
+                        </tr>
+                      ) : (
+                        filteredCustomerLeads.map((lead, idx) => {
+                          const isContract = lead.pricingType === 'CONTRACT';
+                          const operationMode = getOperationModeDisplay(lead);
 
-                            {/* Cột 11: Thao Tác - Nút Xem chi tiết + Subtext Chưa xem nếu chưa mở xem */}
-                            <td className="py-3 px-3 text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                              <div className="flex flex-col items-center">
-                                <button
-                                  type="button"
-                                  onClick={() => toggleExpandLead(lead.id)}
-                                  className={`px-2.5 py-1 text-xs font-bold rounded-xl transition-all inline-flex items-center justify-center gap-1 cursor-pointer shadow-2xs ${
-                                    isExpanded
-                                      ? 'bg-indigo-600 text-white shadow-xs'
-                                      : 'bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 hover:border-indigo-300'
-                                  }`}
-                                  title={isExpanded ? 'Thu gọn chi tiết lead' : 'Mở xem chi tiết hồ sơ & thao tác'}
-                                >
-                                  <span>{isExpanded ? 'Đóng' : 'Xem chi tiết'}</span>
-                                  {isExpanded ? (
-                                    <ChevronUp className="w-3.5 h-3.5" />
-                                  ) : (
-                                    <ChevronDown className="w-3.5 h-3.5" />
-                                  )}
-                                </button>
+                          return (
+                            <React.Fragment key={lead.id}>
+                              <tr 
+                                id={`customer-lead-row-${lead.code}`}
+                                onClick={() => {
+                                  setSelectedLeadForCompare(lead);
+                                  if (onIncrementLeadViews) onIncrementLeadViews(lead.id);
+                                }}
+                                className={`transition-colors cursor-pointer select-none ${
+                                  idx % 2 === 0
+                                    ? 'bg-white hover:bg-slate-50/90'
+                                    : 'bg-slate-50/40 hover:bg-slate-100/70'
+                                }`}
+                              >
+                                {/* Cột 1: STT */}
+                                <td className="py-2.5 px-1.5 text-center text-slate-400 font-mono text-[10.5px]">
+                                  {idx + 1}
+                                </td>
 
-                                {/* Subtext Chưa xem: chỉ hiển thị khi chưa mở xem */}
-                                {!isLeadViewed && (
-                                  <span className="text-[10px] font-bold text-amber-600 block mt-0.5 animate-pulse">
-                                    Chưa xem
-                                  </span>
-                                )}
-                              </div>
-                            </td>
-                          </tr>
-
-                          {/* EXPANDED TECHNICAL SPECS & DETAIL CARD (GIỐNG LEAD BOARD) */}
-                          {isExpanded && (
-                            <tr className="bg-indigo-50/40 border-b border-indigo-100 animate-in fade-in duration-150">
-                              <td colSpan={11} className="p-3 sm:p-5">
-                                <div className="space-y-3">
-                                  {/* Quick Action Top Bar inside expanded card */}
-                                  <div className="flex flex-wrap items-center justify-between bg-white px-4 py-3 rounded-2xl border border-indigo-100 shadow-2xs gap-3">
-                                    <div className="flex items-center gap-2 text-xs">
-                                      <span className="font-black text-indigo-950 flex items-center gap-1.5">
-                                        <FileText className="w-4 h-4 text-indigo-600" />
-                                        <span>Chi Tiết Yêu Cầu Kỹ Thuật: {lead.code}</span>
-                                      </span>
-                                      <span className="text-slate-300">•</span>
-                                      <span className="text-slate-700 font-semibold">{lead.serviceType}</span>
-                                      <span className="text-slate-300">•</span>
-                                      <span className="text-slate-500">{lead.route}</span>
-                                    </div>
-
-                                    <div className="flex items-center gap-2">
-                                      {lead.isUnlocked ? (
-                                        <button
-                                          type="button"
-                                          onClick={() => setSelectedLeadForCompare(lead)}
-                                          className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer"
-                                        >
-                                          <BarChart3 className="w-3.5 h-3.5" />
-                                          <span>So Sánh Ma Trận Giá Đối Thủ</span>
-                                        </button>
-                                      ) : (
-                                        <button
-                                          type="button"
-                                          onClick={() => setSelectedLeadForCompare(lead)}
-                                          className="px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl text-xs font-black transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer"
-                                        >
-                                          <Coins className="w-3.5 h-3.5" />
-                                          <span>Mở Khóa Ma Trận Giá Đối Thủ (25 FC)</span>
-                                        </button>
-                                      )}
-
-                                      <button
-                                        type="button"
-                                        onClick={() => {
-                                          if (onOpenCreateQuotation) {
-                                            onOpenCreateQuotation(lead);
-                                          } else {
-                                            setSelectedLeadForCompare(lead);
-                                          }
-                                        }}
-                                        className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer"
-                                      >
-                                        <Send className="w-3.5 h-3.5" />
-                                        <span>Gửi Báo Giá Cho Khách Hàng</span>
-                                      </button>
-                                    </div>
+                                {/* Cột 2: Ngày Đăng & Hạn Nộp */}
+                                <td className="py-2.5 px-2 whitespace-nowrap">
+                                  <div className="space-y-0.5">
+                                    <span className="text-slate-700 font-semibold block text-[10.5px]">
+                                      {lead.createdDate || 'Aug 31, 2026'}
+                                    </span>
+                                    <span className="inline-block px-1.5 py-0.2 rounded text-[9px] font-bold bg-rose-50 text-rose-600 border border-rose-200">
+                                      Hạn: {lead.dueDate || '7 ngày'}
+                                    </span>
                                   </div>
+                                </td>
 
-                                  {/* LeadInquiryDetailCard with verified/unlocked customer identity */}
-                                  <LeadInquiryDetailCard
-                                    lead={lead}
-                                    isUnlocked={true}
-                                    maskCompanyName={(n) => n}
-                                    maskContactPerson={(n) => n}
-                                    onUnlockClick={() => setSelectedLeadForCompare(lead)}
-                                    onCompareClick={() => setSelectedLeadForCompare(lead)}
-                                    onOpenCreateQuotation={() => {
-                                      if (onOpenCreateQuotation) onOpenCreateQuotation(lead);
-                                      else setSelectedLeadForCompare(lead);
+                                {/* Cột 3: Mã ID */}
+                                <td className="py-2.5 px-2 whitespace-nowrap">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="font-mono font-bold text-indigo-700 text-xs">
+                                      {lead.code}
+                                    </span>
+                                    {lead.isSaved && (
+                                      <BookmarkCheck className="w-3 h-3 text-amber-500 fill-amber-500 shrink-0" title="Đã lưu" />
+                                    )}
+                                  </div>
+                                </td>
+
+                                {/* Cột 4: Nhóm Dịch Vụ */}
+                                <td className="py-2.5 px-2 whitespace-nowrap">
+                                  <span className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-bold border ${getServiceBadgeStyle(lead.serviceType)}`}>
+                                    {lead.serviceType}
+                                  </span>
+                                </td>
+
+                                {/* Cột 5: Nhóm Hàng */}
+                                <td className="py-2.5 px-1.5 whitespace-nowrap">
+                                  <span className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-bold border ${getCargoBadgeStyle(lead.cargoClassification)}`}>
+                                    {getCargoLabel(lead.cargoClassification)}
+                                  </span>
+                                </td>
+
+                                {/* Cột 6: Mô Hình */}
+                                <td className="py-2.5 px-1.5 whitespace-nowrap">
+                                  <span className="text-slate-800 font-semibold text-xs">
+                                    {operationMode}
+                                  </span>
+                                </td>
+
+                                {/* Cột 7: Loại Hợp Đồng */}
+                                <td className="py-2.5 px-1.5 whitespace-nowrap">
+                                  {isContract ? (
+                                    <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                                      Hợp đồng
+                                    </span>
+                                  ) : (
+                                    <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold bg-cyan-50 text-cyan-700 border border-cyan-200">
+                                      Theo lô
+                                    </span>
+                                  )}
+                                </td>
+
+                                {/* Cột 8: Tổng Giá Trị */}
+                                <td className="py-2.5 px-2 text-right whitespace-nowrap">
+                                  {(() => {
+                                    const pricing = getLeadOrInquiryPricing(lead);
+                                    return (
+                                      <div className="space-y-0.5">
+                                        <span className="text-xs sm:text-[12.5px] font-black text-emerald-700 block tracking-tight">
+                                          {pricing.formattedAmount}
+                                        </span>
+                                        <span className="text-[9.5px] font-semibold text-slate-500 block">
+                                          {pricing.unitSuffix}
+                                        </span>
+                                      </div>
+                                    );
+                                  })()}
+                                </td>
+
+                                {/* Cột 9: Trạng Thái */}
+                                <td className="py-2.5 px-1.5 text-center whitespace-nowrap">
+                                  <span className={`inline-block px-2.5 py-0.5 rounded-md text-[10px] font-bold border ${getStatusBadgeStyle(lead.status)}`}>
+                                    {getStatusDisplay(lead.status)}
+                                  </span>
+                                </td>
+
+                                {/* Cột 10: Thống Kê Báo Giá & Lượt Xem */}
+                                <td className="py-2.5 px-1.5 text-center whitespace-nowrap">
+                                  <div className="flex flex-col items-center gap-0.5">
+                                    <span className="px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/80">
+                                      {lead.quotesCount || 0} báo giá
+                                    </span>
+                                    <span className="text-[9px] text-slate-400 font-medium">
+                                      {lead.viewsCount || 0} xem
+                                    </span>
+                                  </div>
+                                </td>
+
+                                {/* Cột 11: Thao Tác (Xem đầy đủ modal) */}
+                                <td className="py-2.5 px-2 text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                                  <button
+                                    id={`toggle-customer-lead-btn-${lead.code}`}
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedLeadForCompare(lead);
+                                      if (onIncrementLeadViews) onIncrementLeadViews(lead.id);
                                     }}
-                                    isCustomerView={false}
-                                  />
-                                </div>
-                              </td>
-                            </tr>
-                          )}
-                        </React.Fragment>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
+                                    className="px-2.5 py-1 text-xs font-bold rounded-xl transition-all inline-flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs bg-orange-50 hover:bg-orange-100 text-orange-700 hover:text-orange-800 border border-orange-200/90 hover:border-orange-300 active:scale-95"
+                                    title="Mở xem đầy đủ yêu cầu báo giá"
+                                  >
+                                    <Maximize2 className="w-3.5 h-3.5 text-orange-600 shrink-0" />
+                                    <span>Xem đầy đủ</span>
+                                  </button>
+                                </td>
+                              </tr>
+                            </React.Fragment>
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
 
             <div className="bg-slate-50 px-6 py-3 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
               <span>Hiển thị <strong>{filteredCustomerLeads.length}</strong> inquiries của <strong>{customer.companyName}</strong></span>
@@ -1277,6 +1362,7 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({
           isOpen={Boolean(selectedLeadForCompare)}
           inquiry={selectedLeadForCompare.inquiry || null}
           lead={selectedLeadForCompare}
+          currentUser={currentUser}
           isSupplierView={true}
           isUnlocked={Boolean(selectedLeadForCompare.isUnlocked)}
           onUnlock={() => {
@@ -1286,6 +1372,12 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({
             }
           }}
           isSaved={Boolean(selectedLeadForCompare.isSaved)}
+          onSaveLead={() => {
+            if (onToggleSaveLead) {
+              onToggleSaveLead(selectedLeadForCompare.id);
+            }
+            setSelectedLeadForCompare((prev) => prev ? { ...prev, isSaved: !prev.isSaved } : null);
+          }}
           onClose={() => setSelectedLeadForCompare(null)}
           onConfirm={() => {}}
           matchingSuppliersCount={selectedLeadForCompare.quotesCount || 0}

@@ -11,18 +11,21 @@ export function getMonthlyMultiplier(frequencyUnit?: string): number {
 }
 
 export function getMonthlyFrequency(inquiry?: InquiryItem | null, lead?: SupplierLeadItem | null): number {
-  const specs = inquiry?.serviceSpecs || lead?.serviceSpecs;
+  const specs: any = inquiry?.serviceSpecs || lead?.serviceSpecs;
   if (!specs) return 1;
 
   // 1. Trucking
-  if (specs.trucking?.tripCount) {
-    return Math.max(1, Math.round((specs.trucking.tripCount || 1) * getMonthlyMultiplier(specs.trucking.frequencyUnit)));
+  if (specs.trucking?.tripCount || specs.trucking?.ltlShipmentCount) {
+    const trips = specs.trucking.tripCount || specs.trucking.ltlShipmentCount || 1;
+    const unit = specs.trucking.frequencyUnit || specs.trucking.ltlFrequencyUnit;
+    return Math.max(1, Math.round(trips * getMonthlyMultiplier(unit)));
   }
 
   // 2. Ocean
-  if (specs.ocean?.containerCount || specs.ocean?.shipmentCount) {
-    const count = specs.ocean.containerCount || specs.ocean.shipmentCount || 1;
-    return Math.max(1, Math.round(count * getMonthlyMultiplier(specs.ocean.frequencyUnit)));
+  if (specs.ocean?.containerCount || specs.ocean?.shipmentCount || specs.ocean?.lclShipmentCount) {
+    const count = specs.ocean.containerCount || specs.ocean.shipmentCount || specs.ocean.lclShipmentCount || 1;
+    const unit = specs.ocean.frequencyUnit || specs.ocean.lclFrequencyUnit;
+    return Math.max(1, Math.round(count * getMonthlyMultiplier(unit)));
   }
 
   // 3. Air
@@ -32,9 +35,10 @@ export function getMonthlyFrequency(inquiry?: InquiryItem | null, lead?: Supplie
   }
 
   // 4. Rail
-  if (specs.rail?.shipmentCount || specs.rail?.containerCount) {
-    const count = specs.rail.containerCount || specs.rail.shipmentCount || 1;
-    return Math.max(1, Math.round(count * getMonthlyMultiplier(specs.rail.frequencyUnit)));
+  if (specs.rail?.shipmentCount || specs.rail?.containerCount || specs.rail?.lclShipmentCount) {
+    const count = specs.rail.containerCount || specs.rail.shipmentCount || specs.rail.lclShipmentCount || 1;
+    const unit = specs.rail.frequencyUnit || specs.rail.lclFrequencyUnit;
+    return Math.max(1, Math.round(count * getMonthlyMultiplier(unit)));
   }
 
   // 5. Customs
@@ -69,9 +73,14 @@ export function getLeadOrInquiryPricing(item: SupplierLeadItem | InquiryItem): {
 } {
   const isLead = 'pricingType' in item;
   const pricingType = isLead ? (item as SupplierLeadItem).pricingType : ((item as InquiryItem).pricingType || 'SPOT');
+  const titleText = ('title' in item && typeof (item as any).title === 'string') 
+    ? (item as any).title 
+    : ('cargoDetails' in item && typeof (item as any).cargoDetails === 'string') 
+    ? (item as any).cargoDetails 
+    : '';
   const isContract = pricingType === 'CONTRACT' || 
-    (item.title || '').toLowerCase().includes('contract') || 
-    (item.title || '').toLowerCase().includes('hợp đồng');
+    titleText.toLowerCase().includes('contract') || 
+    titleText.toLowerCase().includes('hợp đồng');
 
   // Customer requested currency
   const currency = item.currency || (item as SupplierLeadItem).inquiry?.currency || 'VND';

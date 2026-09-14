@@ -482,6 +482,8 @@ export interface InquiryItem {
   title: string;
   customerCompany: string;
   contactPerson: string;
+  contactPhone?: string;
+  contactEmail?: string;
   serviceType: ServiceType;
   pricingType?: PricingType;
   contractTerm?: string;
