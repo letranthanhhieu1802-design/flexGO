@@ -1324,8 +1324,35 @@ export const CustomerDetailPage: React.FC<CustomerDetailPageProps> = ({
                                     id={`toggle-customer-lead-btn-${lead.code}`}
                                     type="button"
                                     onClick={() => {
-                                      setSelectedLeadForCompare(lead);
-                                      if (onIncrementLeadViews) onIncrementLeadViews(lead.id);
+                                      // Trigger increment views locally & globally
+                                      const idKey = lead.id;
+                                      const codeKey = lead.code || lead.inquiryCode || '';
+                                      
+                                      setLocalExtraViews((prev) => ({
+                                        ...prev,
+                                        [idKey]: (prev[idKey] || 0) + 1,
+                                        ...(codeKey ? { [codeKey]: (prev[codeKey] || 0) + 1 } : {}),
+                                      }));
+
+                                      if (onIncrementLeadViews) {
+                                        onIncrementLeadViews(lead.id);
+                                        if (lead.code && lead.code !== lead.id) onIncrementLeadViews(lead.code);
+                                        if (lead.inquiryCode && lead.inquiryCode !== lead.id) onIncrementLeadViews(lead.inquiryCode);
+                                      }
+                                      if (onMarkInquiryAsViewed) {
+                                        onMarkInquiryAsViewed(lead.code || lead.inquiryCode || lead.id);
+                                      }
+
+                                      // Update lead views in selected modal
+                                      const updatedLead: SupplierLeadItem = {
+                                        ...lead,
+                                        viewsCount: (lead.viewsCount || 0) + 1,
+                                        inquiry: lead.inquiry ? {
+                                          ...lead.inquiry,
+                                          viewsCount: (lead.inquiry.viewsCount || 0) + 1,
+                                        } : undefined,
+                                      };
+                                      setSelectedLeadForCompare(updatedLead);
                                     }}
                                     className="px-2.5 py-1 text-xs font-bold rounded-xl transition-all inline-flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs bg-orange-50 hover:bg-orange-100 text-orange-700 hover:text-orange-800 border border-orange-200/90 hover:border-orange-300 active:scale-95"
                                     title="Mở xem đầy đủ yêu cầu báo giá"

@@ -62,7 +62,8 @@ import {
   Unlock,
   KeyRound,
   Trophy,
-  Trash2
+  Trash2,
+  Eye
 } from 'lucide-react';
 import { InquiryItem, ServiceType, UserProfile, SupplierLeadItem, QuotationItem } from '../../types';
 import { getSurchargesForService } from './inquiryForms/SurchargesSection';
@@ -860,6 +861,12 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                 {leadCode}
               </span>
             ) : null}
+            {activeInquiry?.viewsCount !== undefined && activeInquiry.viewsCount > 0 && (
+              <span className="text-[11px] font-semibold text-slate-300 bg-white/10 px-2.5 py-0.5 rounded-lg border border-white/15 inline-flex items-center gap-1.5" title="Tổng số lượt xem yêu cầu báo giá này">
+                <Eye className="w-3.5 h-3.5 text-slate-300" />
+                <span>{activeInquiry.viewsCount} lượt xem</span>
+              </span>
+            )}
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-2">
