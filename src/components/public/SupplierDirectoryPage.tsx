@@ -137,6 +137,14 @@ interface SupplierDirectoryPageProps {
   initialSpecialistId?: string;
   initialViewState?: 'directory' | 'detail';
   fromView?: string;
+  supplierId?: string;
+  initialTab?: 'profile' | 'company' | 'services' | 'performance' | 'contract';
+  hasFlexGoAccount?: boolean;
+  supplierName?: string;
+  supplierTaxId?: string;
+  contactPerson?: string;
+  contactPhone?: string;
+  contactEmail?: string;
   onOpenCreateInquiry: () => void;
   onNavigate: (view: CurrentView) => void;
 }
@@ -148,6 +156,14 @@ export const SupplierDirectoryPage: React.FC<SupplierDirectoryPageProps> = ({
   initialSpecialistId,
   initialViewState,
   fromView,
+  supplierId,
+  initialTab,
+  hasFlexGoAccount,
+  supplierName,
+  supplierTaxId,
+  contactPerson,
+  contactPhone,
+  contactEmail,
   onOpenCreateInquiry,
   onNavigate,
 }) => {
@@ -266,6 +282,15 @@ export const SupplierDirectoryPage: React.FC<SupplierDirectoryPageProps> = ({
     return (
       <SupplierProfileDetailPage
         specialistId={selectedSpecialistId}
+        fromView={fromView}
+        supplierId={supplierId}
+        initialTab={initialTab}
+        hasFlexGoAccount={hasFlexGoAccount}
+        supplierName={supplierName}
+        supplierTaxId={supplierTaxId}
+        contactPerson={contactPerson}
+        contactPhone={contactPhone}
+        contactEmail={contactEmail}
         onBackToDirectory={() => {
           if (fromView === 'customer-suppliers') {
             onNavigate({ type: 'workspace', view: 'customer-suppliers' });

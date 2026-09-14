@@ -162,15 +162,28 @@ export const MySuppliersPage: React.FC<MySuppliersPageProps> = ({
     setCopiedKey(key);
     setTimeout(() => setCopiedKey(null), 2000);
   };
-
   const handleAddCurrentSupplier = (newSupplier: SupplierCompany) => {
-    setLocalSuppliers((prev) => [newSupplier, ...prev]);
+    setLocalSuppliers((prev) => {
+      const existsIndex = prev.findIndex((s) => s.id === newSupplier.id || (s.taxId && s.taxId === newSupplier.taxId));
+      if (existsIndex >= 0) {
+        const updated = [...prev];
+        updated[existsIndex] = {
+          ...updated[existsIndex],
+          source: 'CURRENT_SUPPLIER',
+          sourceDetails: newSupplier.sourceDetails || updated[existsIndex].sourceDetails,
+        };
+        return updated;
+      }
+      return [newSupplier, ...prev];
+    });
     if (externalAddSupplier) {
       externalAddSupplier(newSupplier);
     }
+    setIsAddSupplierModalOpen(false);
+    handleOpenSupplier360(newSupplier, undefined, 'contract');
   };
 
-  const handleOpenSupplier360 = (supplier: SupplierCompany, e?: React.MouseEvent) => {
+  const handleOpenSupplier360 = (supplier: SupplierCompany, e?: React.MouseEvent, overrideTab?: 'profile' | 'contract') => {
     if (e) {
       e.stopPropagation();
     }
@@ -197,6 +210,13 @@ export const MySuppliersPage: React.FC<MySuppliersPageProps> = ({
         viewState: 'detail',
         supplierId: supplier.id,
         from: 'customer-suppliers',
+        hasFlexGoAccount: supplier.hasFlexGoAccount !== false,
+        initialTab: overrideTab || (supplier.hasFlexGoAccount === false ? 'contract' : 'contract'),
+        supplierName: supplier.name,
+        supplierTaxId: supplier.taxId,
+        contactPerson: supplier.contactPerson,
+        contactPhone: supplier.contactPhone,
+        contactEmail: supplier.contactEmail,
       },
     });
   };
@@ -827,6 +847,7 @@ export const MySuppliersPage: React.FC<MySuppliersPageProps> = ({
         isOpen={isAddSupplierModalOpen}
         onClose={() => setIsAddSupplierModalOpen(false)}
         onAddSupplier={handleAddCurrentSupplier}
+        existingSuppliers={initialSuppliers && initialSuppliers.length > 0 ? initialSuppliers : localSuppliers}
       />
     </div>
   );

@@ -461,10 +461,10 @@ export const SupplierProfileEditPage: React.FC<SupplierProfileEditPageProps> = (
       {/* Editor Navigation Tabs (4 Core Studio Tabs) */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-200 text-xs scrollbar-thin">
         {[
-          { id: 'profile', label: '1. Hồ Sơ Chuyên Viên (My Profile)', icon: User, count: null },
-          { id: 'company', label: '2. Pháp Nhân & Doanh Nghiệp (My Company)', icon: Building2, count: null },
-          { id: 'services', label: '3. Danh Mục Dịch Vụ & Bảng Cước', icon: Truck, count: profile.services.length },
-          { id: 'performance', label: '4. Chỉ Số Hiệu Suất & Đánh Giá (Reviews)', icon: TrendingUp, count: 142 },
+          { id: 'profile', label: '1. PIC profile', icon: User },
+          { id: 'company', label: '2. Company', icon: Building2 },
+          { id: 'services', label: '3. Services', icon: Truck },
+          { id: 'performance', label: '4. PIC performance', icon: TrendingUp },
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeEditorTab === tab.id;
@@ -481,13 +481,6 @@ export const SupplierProfileEditPage: React.FC<SupplierProfileEditPageProps> = (
             >
               <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-indigo-600'}`} />
               <span>{tab.label}</span>
-              {tab.count !== null && (
-                <span className={`px-1.5 py-0.2 rounded-md text-[10px] font-black ${
-                  isActive ? 'bg-indigo-800 text-indigo-100' : 'bg-slate-200 text-slate-700'
-                }`}>
-                  {tab.count}
-                </span>
-              )}
             </button>
           );
         })}

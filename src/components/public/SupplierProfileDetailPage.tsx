@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   ArrowLeft, 
   User, 
@@ -17,7 +17,10 @@ import {
   Zap, 
   ExternalLink,
   MessageSquare,
-  Receipt
+  Receipt,
+  FileText,
+  FileCheck,
+  Lock,
 } from 'lucide-react';
 import { CurrentView, SalesSpecialistProfile } from '../../types';
 import { mockSalesSpecialists } from '../../data/mockSalesSpecialists';
@@ -37,6 +40,7 @@ import { TabCompanyView } from '../supplier/studio/TabCompanyView';
 import { TabPerformanceReviews } from '../supplier/studio/TabPerformanceReviews';
 import { SupplierDeclaredServicesView } from './supplier-profile/SupplierDeclaredServicesView';
 import { SupplierProfilePricingTab } from './supplier-profile/SupplierProfilePricingTab';
+import { SupplierServiceCapabilityModal } from '../supplier/SupplierServiceCapabilityModal';
 
 interface SupplierProfileDetailPageProps {
   specialistId: string;
@@ -48,6 +52,15 @@ interface SupplierProfileDetailPageProps {
   onSelectSpecialist: (id: string) => void;
   onOpenCreateInquiry: () => void;
   onNavigate: (view: CurrentView) => void;
+  fromView?: string;
+  supplierId?: string;
+  initialTab?: 'profile' | 'company' | 'services' | 'performance' | 'contract';
+  hasFlexGoAccount?: boolean;
+  supplierName?: string;
+  supplierTaxId?: string;
+  contactPerson?: string;
+  contactPhone?: string;
+  contactEmail?: string;
 }
 
 export const SupplierProfileDetailPage: React.FC<SupplierProfileDetailPageProps> = ({
@@ -60,13 +73,40 @@ export const SupplierProfileDetailPage: React.FC<SupplierProfileDetailPageProps>
   onSelectSpecialist,
   onOpenCreateInquiry,
   onNavigate,
+  fromView,
+  supplierId,
+  initialTab,
+  hasFlexGoAccount,
+  supplierName,
+  supplierTaxId,
+  contactPerson,
+  contactPhone,
+  contactEmail,
 }) => {
-  // 4 Primary Profile Tabs declared by Saleman:
+  const isOfflineSupplier = hasFlexGoAccount === false;
+  const effectiveOfflineName = supplierName || companyProfile?.companyName || 'Nhà Cung Cấp Mới';
+  const effectiveOfflineTaxId = supplierTaxId;
+  const effectiveOfflineContact = contactPerson || salemanProfile?.vietnameseName;
+  const effectiveOfflinePhone = contactPhone || salemanProfile?.phone;
+  const effectiveOfflineEmail = contactEmail || salemanProfile?.email;
+
+  // 5 Profile Tabs:
   // 1. 'profile' (1. Hồ Sơ Chuyên Viên)
   // 2. 'company' (2. Pháp Nhân & Doanh Nghiệp)
   // 3. 'services' (3. Danh Mục Dịch Vụ & Bảng Cước)
   // 4. 'performance' (4. Chỉ Số Hiệu Suất & Đánh Giá)
-  const [activeMainTab, setActiveMainTab] = useState<'profile' | 'company' | 'services' | 'performance'>('profile');
+  // 5. 'contract' (5. Hợp Đồng & Biểu Giá Riêng - Private Customer Tariff)
+  const [activeMainTab, setActiveMainTab] = useState<'profile' | 'company' | 'services' | 'performance' | 'contract'>(
+    isOfflineSupplier ? 'contract' : (initialTab || 'profile')
+  );
+
+  useEffect(() => {
+    if (isOfflineSupplier) {
+      setActiveMainTab('contract');
+    } else if (initialTab) {
+      setActiveMainTab(initialTab);
+    }
+  }, [initialTab, isOfflineSupplier, specialistId, supplierId]);
 
   // Modals & Interactive RFQ
   const [isDirectRFQModalOpen, setIsDirectRFQModalOpen] = useState<boolean>(false);
@@ -138,6 +178,146 @@ export const SupplierProfileDetailPage: React.FC<SupplierProfileDetailPageProps>
     setIsDirectRFQModalOpen(true);
   };
 
+  // Effective Key for Private Contract between this Customer and this Supplier
+  const effectiveSupplierKey = supplierId || specialistId || 'default';
+  const effectiveContractStorageKey = `customer_private_contract_${effectiveSupplierKey}`;
+
+  const [customerContractServices, setCustomerContractServices] = useState<any[]>(() => {
+    try {
+      const saved = localStorage.getItem(effectiveContractStorageKey);
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    } catch (e) {}
+    // Default initial contract services tailored for contract context
+    return [
+      {
+        id: 'srv-trk-gen-ftl',
+        modelCode: 'FTL',
+        title: 'Đường bộ - Hàng thường - FTL',
+        description: 'Đội xe hợp đồng phân bổ ưu tiên 20 xe tải 5T - 15T',
+        highlight: 'Cam kết giao hàng đúng hẹn 99.8%, bồi thường 100% rủi ro mất mát',
+        freeSurcharges: ['Phí cầu đường BOT toàn tuyến', 'Định vị GPS hành trình 24/7'],
+        paidSurcharges: [
+          { id: 'psc-1', name: 'Phí bốc xếp 2 đầu bến bãi', priceText: '400,000 ₫ / Điểm', isChecked: true },
+          { id: 'psc-2', name: 'Phí lưu đêm xe quá 12h', priceText: '600,000 ₫ / Đêm', isChecked: false },
+        ],
+        routes: [
+          {
+            id: 'r-ctr-1',
+            routeCode: 'CTR-FTL-001',
+            route: 'TP.HCM ⇄ Bình Dương / Đồng Nai',
+            origin: 'KCN Tân Bình (TP.HCM)',
+            destination: 'KCN VSIP 1 (Bình Dương)',
+            vehicleType: 'Xe tải thùng kín 8.0T',
+            pricingUnit: 'Chuyến',
+            price: 2600000,
+            currency: 'VND',
+            sla: '3 - 5 giờ',
+            pricingStyle: 'All-in',
+            validUntil: '2026-12-31',
+            promotionPercent: 0,
+          },
+          {
+            id: 'r-ctr-2',
+            routeCode: 'CTR-FTL-002',
+            route: 'TP.HCM ⇄ Hà Nội',
+            origin: 'Kho Hub Bình Tân (TP.HCM)',
+            destination: 'KCN Thăng Long (Hà Nội)',
+            vehicleType: 'Xe tải thùng kín 15.0T',
+            pricingUnit: 'Chuyến',
+            price: 27500000,
+            currency: 'VND',
+            sla: '48 - 52 giờ',
+            pricingStyle: 'All-in',
+            validUntil: '2026-12-31',
+            promotionPercent: 5,
+          },
+        ],
+      },
+      {
+        id: 'srv-rail-gen-fcl',
+        modelCode: 'FCL',
+        title: 'Đường sắt - Hàng thường - FCL',
+        description: 'Cam kết 5 - 10 container đường sắt Bắc Nam/tuần',
+        highlight: 'Tiết kiệm 30% chi phí so với đường bộ, đúng giờ 99%',
+        freeSurcharges: ['Phí nâng hạ cont tại bãi ga', 'Theo dõi seal chì điện tử'],
+        paidSurcharges: [
+          { id: 'prail-1', name: 'Phí kéo container First-mile / Last-mile', priceText: '1,800,000 ₫ / Chuyến', isChecked: true },
+        ],
+        routes: [
+          {
+            id: 'r-rail-ctr-1',
+            routeCode: 'CTR-RAIL-001',
+            route: 'Ga Sóng Thần (Bình Dương) ⇄ Ga Giáp Bát / Yên Viên (Hà Nội)',
+            origin: 'Ga Sóng Thần (Bình Dương)',
+            destination: 'Ga Giáp Bát (Hà Nội)',
+            vehicleType: 'Container 40ft High Cube (40HC)',
+            pricingUnit: 'Cont',
+            price: 18500000,
+            currency: 'VND',
+            sla: '55 - 65 giờ',
+            pricingStyle: 'Ga - Ga',
+            validUntil: '2026-12-31',
+            promotionPercent: 0,
+          },
+        ],
+      },
+    ];
+  });
+
+  const handleSaveCustomerContractServices = (declaredList: any[]) => {
+    setCustomerContractServices(declaredList);
+    try {
+      localStorage.setItem(effectiveContractStorageKey, JSON.stringify(declaredList));
+      const existingRates = JSON.parse(localStorage.getItem('customer_custom_rates_list') || '[]');
+      const newRateItems: any[] = [];
+      declaredList.forEach((srv) => {
+        (srv.routes || []).forEach((rt: any) => {
+          newRateItems.push({
+            id: `rate-ctr-${rt.id || Math.random().toString(36).substr(2, 6)}`,
+            code: rt.routeCode || `CTR-${Math.floor(1000 + Math.random() * 9000)}`,
+            serviceType: srv.serviceType || 'Trucking',
+            title: `[Hợp đồng] ${rt.route || `${rt.origin} → ${rt.destination}`}`,
+            origin: rt.origin,
+            destination: rt.destination,
+            routeDisplay: rt.route || `${rt.origin} → ${rt.destination}`,
+            cargoType: srv.suitableFor || srv.cargoGroup || 'Hàng tiêu chuẩn hợp đồng',
+            equipmentOrVehicleType: rt.vehicleType || 'Xe / Cont hợp đồng',
+            loadType: srv.modelCode || 'FTL',
+            baseRateAmount: rt.price || 0,
+            baseRateCurrency: rt.currency || 'VND',
+            pricingUnit: `${rt.currency || 'VND'} / ${rt.pricingUnit || 'Chuyến'}`,
+            rateDisplay: `${(rt.price || 0).toLocaleString('vi-VN')} ${rt.currency || 'VND'} / ${rt.pricingUnit || 'Chuyến'}`,
+            allInclusive: rt.pricingStyle === 'All-in',
+            vatPercent: 8,
+            supplierId: effectiveSupplierKey,
+            supplierName: effectiveCompanyProfile.companyName || activeSpecialist.companyName,
+            supplierContact: effectiveSalemanProfile.vietnameseName || activeSpecialist.vietnameseName,
+            supplierPhone: effectiveSalemanProfile.phone || activeSpecialist.contactPhone,
+            supplierEmail: effectiveSalemanProfile.email || activeSpecialist.contactEmail,
+            contractCode: `HD-2026/${effectiveSupplierKey.toUpperCase()}`,
+            sourceType: 'PRIVATE_CONTRACT',
+            paymentTerms: 'Net 30 ngày',
+            transitTime: rt.sla || 'Theo SLA cam kết',
+            validFrom: '2026-01-01',
+            validTo: rt.validUntil || '2026-12-31',
+            status: 'Active',
+            createdDate: new Date().toISOString().split('T')[0],
+          });
+        });
+      });
+      localStorage.setItem('customer_custom_rates_list', JSON.stringify([...newRateItems, ...existingRates.filter((r: any) => r.supplierId !== effectiveSupplierKey)]));
+    } catch (e) {}
+
+    setCopiedToast(`Đã lưu thành công biểu giá hợp đồng riêng với ${effectiveCompanyProfile.companyName || activeSpecialist.companyName}!`);
+    setTimeout(() => setCopiedToast(null), 4000);
+  };
+
+  const contractRoutesCount = useMemo(() => {
+    return customerContractServices.reduce((acc, s) => acc + (s.routes?.length || 0), 0);
+  }, [customerContractServices]);
+
   return (
     <div id="supplier-profile-detail-page" className="w-full max-w-[1720px] mx-auto px-2 sm:px-4 lg:px-6 py-6 min-h-screen pb-24 text-slate-800 space-y-5 animate-in fade-in duration-200">
       
@@ -162,102 +342,195 @@ export const SupplierProfileDetailPage: React.FC<SupplierProfileDetailPageProps>
               <span>Quay Lại</span>
             </button>
 
-            <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-400">
-              <span>/</span>
-              <span className="text-slate-600 font-medium">{activeSpecialist.companyName}</span>
-              <span>/</span>
-              <span className="font-bold text-slate-900">{activeSpecialist.vietnameseName}</span>
-            </div>
+            {isOfflineSupplier ? (
+              <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-400">
+                <span>/</span>
+                <span className="text-slate-600 font-medium">Nhà Cung Cấp Của Tôi</span>
+                <span>/</span>
+                <span className="font-bold text-slate-900">{effectiveOfflineName}</span>
+                <span>/</span>
+                <span className="text-amber-700 font-semibold">Hợp Đồng & Biểu Giá Riêng</span>
+              </div>
+            ) : (
+              <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-400">
+                <span>/</span>
+                <span className="text-slate-600 font-medium">{activeSpecialist.companyName}</span>
+                <span>/</span>
+                <span className="font-bold text-slate-900">{activeSpecialist.vietnameseName}</span>
+              </div>
+            )}
           </div>
 
           {/* Quick Customer Action Buttons */}
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedRateItemForRFQ(null);
-                setIsDirectRFQModalOpen(true);
-              }}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs transition-colors cursor-pointer"
-            >
-              <Zap className="h-3.5 w-3.5" />
-              <span>Gửi RFQ Nhanh</span>
-            </button>
+            {!isOfflineSupplier ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedRateItemForRFQ(null);
+                    setIsDirectRFQModalOpen(true);
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs transition-colors cursor-pointer"
+                >
+                  <Zap className="h-3.5 w-3.5" />
+                  <span>Gửi RFQ Nhanh</span>
+                </button>
 
-            <button
-              type="button"
-              onClick={() => setIsConsultModalOpen(true)}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 transition-colors cursor-pointer"
-            >
-              <PhoneCall className="h-3.5 w-3.5 text-emerald-600" />
-              <span className="hidden md:inline">Đặt Hẹn Tư Vấn</span>
-            </button>
+                <button
+                  type="button"
+                  onClick={() => setIsConsultModalOpen(true)}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 transition-colors cursor-pointer"
+                >
+                  <PhoneCall className="h-3.5 w-3.5 text-emerald-600" />
+                  <span className="hidden md:inline">Đặt Hẹn Tư Vấn</span>
+                </button>
 
-            <button
-              onClick={() => handleCopy(window.location.href, 'Link hồ sơ')}
-              className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
-              title="Chia sẻ hồ sơ này"
-            >
-              <Share2 className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Chia sẻ</span>
-            </button>
+                <button
+                  onClick={() => handleCopy(window.location.href, 'Link hồ sơ')}
+                  className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
+                  title="Chia sẻ hồ sơ này"
+                >
+                  <Share2 className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Chia sẻ</span>
+                </button>
+              </>
+            ) : (
+              <div className="flex items-center gap-2">
+                {effectiveOfflinePhone && (
+                  <a
+                    href={`tel:${effectiveOfflinePhone.replace(/\s+/g, '')}`}
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50/90 hover:bg-emerald-100 px-3 py-1.5 text-xs font-bold text-emerald-800 transition-colors"
+                  >
+                    <PhoneCall className="h-3.5 w-3.5 text-emerald-600" />
+                    <span>Gọi {effectiveOfflinePhone}</span>
+                  </a>
+                )}
+                {effectiveOfflineEmail && (
+                  <a
+                    href={`mailto:${effectiveOfflineEmail}`}
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50/90 hover:bg-blue-100 px-3 py-1.5 text-xs font-bold text-blue-800 transition-colors"
+                  >
+                    <Mail className="h-3.5 w-3.5 text-blue-600" />
+                    <span className="hidden sm:inline">Gửi Email</span>
+                  </a>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       {/* Main Container */}
       <div className="space-y-6">
+
+        {/* Offline Supplier Header Banner (Chỉ hiện khi nhà cung cấp chưa có tài khoản flexGO) */}
+        {isOfflineSupplier && (
+          <div className="rounded-2xl border border-amber-200/90 bg-linear-to-r from-amber-50/90 via-white to-orange-50/40 p-5 shadow-2xs">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-black text-lg shadow-xs shrink-0">
+                  {effectiveOfflineName.slice(0, 2).toUpperCase()}
+                </div>
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h1 className="text-base sm:text-lg font-black text-slate-900">
+                      {effectiveOfflineName}
+                    </h1>
+                    <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 flex items-center gap-1">
+                      <Building2 className="w-3 h-3 text-amber-700" />
+                      Đối Tác Ngoại Sàn (Chưa có tài khoản flexGO)
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 mt-1.5 text-xs text-slate-600">
+                    {effectiveOfflineTaxId && (
+                      <span className="flex items-center gap-1.5">
+                        <span className="text-slate-400">MST:</span>
+                        <strong className="font-mono text-slate-900 bg-amber-100/60 px-1.5 py-0.2 rounded border border-amber-200">{effectiveOfflineTaxId}</strong>
+                      </span>
+                    )}
+                    {effectiveOfflineContact && (
+                      <span className="flex items-center gap-1.5">
+                        <User className="w-3.5 h-3.5 text-slate-400" />
+                        <span>Người phụ trách: <strong className="text-slate-900">{effectiveOfflineContact}</strong></span>
+                      </span>
+                    )}
+                    {effectiveOfflinePhone && (
+                      <span className="flex items-center gap-1.5">
+                        <PhoneCall className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>SĐT/Zalo: <strong className="text-slate-900">{effectiveOfflinePhone}</strong></span>
+                      </span>
+                    )}
+                    {effectiveOfflineEmail && (
+                      <span className="flex items-center gap-1.5">
+                        <Mail className="w-3.5 h-3.5 text-blue-600" />
+                        <span>Email: <strong className="text-slate-900">{effectiveOfflineEmail}</strong></span>
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-xs font-medium text-slate-500 bg-white border border-amber-200 px-3 py-1.5 rounded-xl shadow-2xs">
+                  Biểu giá hợp đồng nội bộ do bạn quản lý
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
         
         {/* =========================================================================
-            4 PRIMARY PUBLIC TABS (MATCHING 4 STUDIO DECLARATION TABS)
-            1. Hồ Sơ Chuyên Viên (Sales Specialist Profile)
-            2. Pháp Nhân & Doanh Nghiệp (Company Landing Page)
-            3. Danh Mục Dịch Vụ & Bảng Cước (Services & Benchmark Tariffs)
-            4. Chỉ Số Hiệu Suất & Đánh Giá (Platform KPIs & Reviews)
+            5 PRIMARY TABS (CHỈ HIỂN THỊ KHI SUPPLIER ĐÃ CÓ TRÊN FLEXGO)
            ========================================================================= */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-200 text-xs scrollbar-thin">
-          {[
-            { id: 'profile', label: '1. Hồ Sơ Chuyên Viên (My Profile)', icon: User, count: null },
-            { id: 'company', label: '2. Pháp Nhân & Doanh Nghiệp (My Company)', icon: Building2, count: null },
-            { id: 'services', label: '3. Danh Mục Dịch Vụ & Bảng Cước', icon: Truck, count: activeSpecialist.services?.length || 6 },
-            { id: 'performance', label: '4. Chỉ Số Hiệu Suất & Đánh Giá (Reviews)', icon: TrendingUp, count: 142 },
-          ].map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeMainTab === tab.id;
+        {!isOfflineSupplier && (
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-200 text-xs scrollbar-thin">
+            {[
+              { id: 'profile', label: '1. PIC profile', icon: User },
+              { id: 'company', label: '2. Company', icon: Building2 },
+              { id: 'services', label: '3. Services', icon: Truck },
+              { id: 'performance', label: '4. PIC performance', icon: TrendingUp },
+              ...(fromView === 'customer-suppliers' || activeMainTab === 'contract' ? [
+                { 
+                  id: 'contract', 
+                  label: '5. Contract', 
+                  icon: FileCheck, 
+                  isPrivate: true,
+                }
+              ] : []),
+            ].map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeMainTab === tab.id;
 
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveMainTab(tab.id as typeof activeMainTab)}
-                id={`tab-${tab.id}`}
-                aria-selected={isActive}
-                className={`px-4 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
-                  isActive
-                    ? 'bg-indigo-600 text-white shadow-sm ring-2 ring-indigo-600/30'
-                    : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200'
-                }`}
-              >
-                <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-indigo-600'}`} />
-                <span>{tab.label}</span>
-                {tab.count !== null && (
-                  <span className={`px-1.5 py-0.2 rounded-md text-[10px] font-black ${
-                    isActive ? 'bg-indigo-800 text-indigo-100' : 'bg-slate-200 text-slate-700'
-                  }`}>
-                    {tab.count}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveMainTab(tab.id as typeof activeMainTab)}
+                  id={`tab-${tab.id}`}
+                  aria-selected={isActive}
+                  className={`px-4 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+                    isActive
+                      ? 'bg-indigo-600 text-white shadow-sm ring-2 ring-indigo-600/30'
+                      : tab.isPrivate
+                      ? 'bg-indigo-50/70 text-indigo-900 hover:bg-indigo-100/80 border border-indigo-200'
+                      : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200'
+                  }`}
+                >
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-white' : tab.isPrivate ? 'text-indigo-600' : 'text-slate-600'}`} />
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         {/* =========================================================================
-            RENDER 4 TABS IN PUBLIC VIEW MODE (READ-ONLY)
+            RENDER TABS IN PUBLIC / CUSTOMER VIEW MODE
            ========================================================================= */}
         <div className="pt-2">
           {/* TAB 1: Saleman Personal Profile (TopCV Style Template) */}
-          {activeMainTab === 'profile' && (
+          {!isOfflineSupplier && activeMainTab === 'profile' && (
             <TabProfileTemplateRenderer
               profile={effectiveSalemanProfile}
               onChangeProfile={() => {}}
@@ -267,7 +540,7 @@ export const SupplierProfileDetailPage: React.FC<SupplierProfileDetailPageProps>
           )}
 
           {/* TAB 2: Company Landing Page (Corporate Template) */}
-          {activeMainTab === 'company' && (
+          {!isOfflineSupplier && activeMainTab === 'company' && (
             <TabCompanyView
               company={effectiveCompanyProfile}
               onChangeCompany={() => {}}
@@ -277,7 +550,7 @@ export const SupplierProfileDetailPage: React.FC<SupplierProfileDetailPageProps>
           )}
 
           {/* TAB 3: Services & Benchmark Rates (Cây Danh Mục Năng Lực & Biểu Phí Đã Khai Báo) */}
-          {activeMainTab === 'services' && (
+          {!isOfflineSupplier && activeMainTab === 'services' && (
             <SupplierDeclaredServicesView
               services={activeSpecialist.services}
               companyName={effectiveCompanyProfile.companyName || activeSpecialist.companyName}
@@ -289,10 +562,57 @@ export const SupplierProfileDetailPage: React.FC<SupplierProfileDetailPageProps>
           )}
 
           {/* TAB 4: Platform Performance Metrics & Reviews */}
-          {activeMainTab === 'performance' && (
+          {!isOfflineSupplier && activeMainTab === 'performance' && (
             <TabPerformanceReviews
               config={effectiveStudioConfig}
             />
+          )}
+
+          {/* TAB 5: Hợp Đồng & Biểu Giá Riêng (Hiển thị khi activeMainTab === 'contract' hoặc là Offline Supplier) */}
+          {(isOfflineSupplier || activeMainTab === 'contract') && (
+            <div className="space-y-4 animate-in fade-in duration-150">
+              <div className="rounded-2xl border border-indigo-100 bg-linear-to-r from-indigo-50/90 via-white to-blue-50/60 p-4 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-xs shrink-0">
+                    <FileText className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm font-black text-slate-900">
+                        Hợp Đồng & Biểu Giá Riêng: {effectiveOfflineName || effectiveCompanyProfile.companyName || activeSpecialist.companyName}
+                      </h3>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                        <Lock className="w-2.5 h-2.5" />
+                        Bảo Mật Nội Bộ
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Cam kết năng lực, điều khoản công nợ và biểu giá tuyến dưới đây là thỏa thuận riêng của bạn với nhà cung cấp này, được lưu trữ độc lập và tự động áp dụng khi tạo đơn/booking.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => handleDownloadRateSheet('contractTemplate')}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-bold text-slate-700 transition-colors cursor-pointer shadow-2xs"
+                  >
+                    <Receipt className="w-3.5 h-3.5 text-indigo-600" />
+                    <span>Tải Hợp Đồng Mẫu</span>
+                  </button>
+                </div>
+              </div>
+
+              <SupplierServiceCapabilityModal
+                isInline={true}
+                isCustomerContractMode={true}
+                customTitle={`Khai Báo & Quản Lý Biểu Giá Hợp Đồng Riêng`}
+                saveButtonText="Lưu Biểu Giá Hợp Đồng"
+                existingServices={customerContractServices}
+                onSave={handleSaveCustomerContractServices}
+                supplierName={effectiveOfflineName || effectiveCompanyProfile.companyName || activeSpecialist.companyName}
+              />
+            </div>
           )}
         </div>
 

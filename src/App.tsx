@@ -832,7 +832,29 @@ export function App() {
   };
 
   const handleSaveSupplier = (newSupplier: SupplierCompany) => {
-    setSuppliers((prev) => [newSupplier, ...prev]);
+    setSuppliers((prev) => {
+      const existsIndex = prev.findIndex((s) => s.id === newSupplier.id || (s.taxId && s.taxId === newSupplier.taxId));
+      if (existsIndex >= 0) {
+        const updated = [...prev];
+        updated[existsIndex] = {
+          ...updated[existsIndex],
+          source: 'CURRENT_SUPPLIER',
+          sourceDetails: newSupplier.sourceDetails || updated[existsIndex].sourceDetails,
+        };
+        return updated;
+      }
+      return [newSupplier, ...prev];
+    });
+
+    const newNotif: NotificationItem = {
+      id: `notif-${Date.now()}`,
+      title: 'Đã lưu Current Supplier',
+      message: `Nhà cung cấp "${newSupplier.name}" (MST: ${newSupplier.taxId || 'Chưa cập nhật'}) đã được ghi nhận vào danh sách nhà cung cấp của bạn.`,
+      timestamp: 'Vừa xong',
+      read: false,
+      type: 'deal',
+    };
+    setNotifications((prev) => [newNotif, ...prev]);
   };
 
   // Render Page Content based on currentView
@@ -875,6 +897,14 @@ export function App() {
                 (currentView.params?.specialistId ? 'detail' : 'directory')
               }
               fromView={currentView.params?.from}
+              supplierId={currentView.params?.supplierId}
+              initialTab={currentView.params?.initialTab}
+              hasFlexGoAccount={currentView.params?.hasFlexGoAccount}
+              supplierName={currentView.params?.supplierName}
+              supplierTaxId={currentView.params?.supplierTaxId}
+              contactPerson={currentView.params?.contactPerson}
+              contactPhone={currentView.params?.contactPhone}
+              contactEmail={currentView.params?.contactEmail}
               onOpenCreateInquiry={() => setIsCreateInquiryOpen(true)}
               onNavigate={setCurrentView}
             />

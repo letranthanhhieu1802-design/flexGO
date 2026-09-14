@@ -5194,12 +5194,16 @@ const getServiceTreeDisplayName = (name: string): string => {
   return name.replace(/\s*\([^)]*\)\s*$/, '').trim();
 };
 
-interface SupplierServiceCapabilityModalProps {
+export interface SupplierServiceCapabilityModalProps {
   isOpen?: boolean;
   onClose?: () => void;
   onSave: (declaredServices: any[]) => void;
   existingServices?: any[];
   isInline?: boolean;
+  customTitle?: string;
+  saveButtonText?: string;
+  isCustomerContractMode?: boolean;
+  supplierName?: string;
 }
 
 export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityModalProps> = ({
@@ -5208,6 +5212,10 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
   onSave,
   existingServices = [],
   isInline = false,
+  customTitle,
+  saveButtonText,
+  isCustomerContractMode = false,
+  supplierName,
 }) => {
   // Tree expansion state
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({
@@ -6009,6 +6017,39 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
         });
       });
     });
+    if (existingServices && existingServices.length > 0) {
+      existingServices.forEach((srv) => {
+        const matched = CAPABILITY_SERVICE_TREE.flatMap((c) =>
+          c.cargoGroups.flatMap((g) => g.models)
+        ).find((m) =>
+          (srv.modelCode && m.code === srv.modelCode) ||
+          m.id === srv.id ||
+          `srv-${m.id}` === srv.id ||
+          m.name.includes(srv.title) ||
+          srv.title?.includes(m.name)
+        );
+        if (matched && initial[matched.id]) {
+          if (srv.routes && srv.routes.length > 0) {
+            initial[matched.id].routes = JSON.parse(JSON.stringify(srv.routes));
+          }
+          if (srv.description) {
+            initial[matched.id].operationCapacity = srv.description;
+          }
+          if (srv.highlight) {
+            initial[matched.id].serviceCommitment = srv.highlight;
+          }
+          if (srv.freeSurcharges) {
+            initial[matched.id].freeSurcharges = [...srv.freeSurcharges];
+          }
+          if (srv.paidSurcharges) {
+            initial[matched.id].paidSurcharges = JSON.parse(JSON.stringify(srv.paidSurcharges));
+          }
+          if (srv.vasList) {
+            initial[matched.id].selectedVas = [...srv.vasList];
+          }
+        }
+      });
+    }
     return initial;
   });
 
@@ -6973,7 +7014,16 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
           <div>
             <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
               {isInline && <Truck className="w-5 h-5 text-indigo-600" />}
-              <span>{isInline ? "Khai Báo Danh Mục Dịch Vụ & Năng Lực Cung Ứng" : "Khai Báo Danh Mục Dịch Vụ Supplier"}</span>
+              <span>
+                {customTitle 
+                  ? customTitle 
+                  : (isInline ? "Khai Báo Danh Mục Dịch Vụ & Năng Lực Cung Ứng" : "Khai Báo Danh Mục Dịch Vụ Supplier")}
+              </span>
+              {isCustomerContractMode && (
+                <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+                  Biểu Giá Hợp Đồng Riêng
+                </span>
+              )}
             </h2>
           </div>
 
@@ -6984,7 +7034,7 @@ export const SupplierServiceCapabilityModal: React.FC<SupplierServiceCapabilityM
               className="inline-flex items-center gap-1.5 px-5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 active:scale-98 rounded-xl transition-all shadow-sm cursor-pointer"
             >
               <Save className="w-3.5 h-3.5" />
-              <span>Lưu Dữ Liệu</span>
+              <span>{saveButtonText || "Lưu Dữ Liệu"}</span>
             </button>
 
             {!isInline && onClose && (
