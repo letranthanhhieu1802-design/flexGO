@@ -24,9 +24,7 @@ export type WorkspaceView =
   | 'flexcredit-wallet'
   | 'flexcredit-add'
   | 'flexcredit-transactions'
-  // Settings Views
   | 'settings-profile'
-  | 'settings-company'
   // Dual Hub View
   | 'dual-hub'
   // Legacy alias Settings

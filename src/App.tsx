@@ -75,7 +75,6 @@ import { TransactionHistoryPage } from './components/flexcredit/TransactionHisto
 
 // Settings Pages
 import { MyProfilePage } from './components/settings/MyProfilePage';
-import { CompanyProfileSettingsPage } from './components/settings/CompanyProfileSettingsPage';
 
 // Dual Hub Workspace
 import { DualHubPage } from './components/workspace/DualHubPage';
@@ -1167,14 +1166,6 @@ export function App() {
               onUpdateProfile={(updated) => {
                 setCurrentUser((prev) => ({ ...prev, ...updated }));
               }}
-            />
-          );
-
-        case 'settings-company':
-          return (
-            <CompanyProfileSettingsPage
-              currentUser={currentUser}
-              onNavigate={setCurrentView}
             />
           );
 

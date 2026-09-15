@@ -26,27 +26,26 @@ import { CurrentView, SalesSpecialistProfile } from '../../types';
 import { mockSalesSpecialists } from '../../data/mockSalesSpecialists';
 import { 
   SalemanPersonalProfile, 
-  CompanyInfoProfile, 
   StudioTemplateConfig, 
   THEME_COLOR_OPTIONS 
 } from '../supplier/studio/studioTypes';
 import { 
   initialSalemanProfile, 
-  initialCompanyProfile, 
   initialStudioConfig 
 } from '../supplier/studio/mockStudioData';
 import { TabProfileTemplateRenderer } from '../supplier/studio/TabProfileTemplateRenderer';
-import { TabCompanyView } from '../supplier/studio/TabCompanyView';
 import { TabPerformanceReviews } from '../supplier/studio/TabPerformanceReviews';
 import { SupplierDeclaredServicesView } from './supplier-profile/SupplierDeclaredServicesView';
 import { SupplierProfilePricingTab } from './supplier-profile/SupplierProfilePricingTab';
 import { SupplierServiceCapabilityModal } from '../supplier/SupplierServiceCapabilityModal';
+import { PublicCompanyIdentityBanner } from '../supplier/studio/CompanyIdentityBanner';
+import type { CompanyIdentityBannerData } from '../supplier/studio/CompanyIdentityBanner';
 
 interface SupplierProfileDetailPageProps {
   specialistId: string;
   overrideProfile?: SalesSpecialistProfile;
   salemanProfile?: SalemanPersonalProfile;
-  companyProfile?: CompanyInfoProfile;
+  companyIdentityBanner?: CompanyIdentityBannerData;
   studioConfig?: StudioTemplateConfig;
   onBackToDirectory: () => void;
   onSelectSpecialist: (id: string) => void;
@@ -54,7 +53,7 @@ interface SupplierProfileDetailPageProps {
   onNavigate: (view: CurrentView) => void;
   fromView?: string;
   supplierId?: string;
-  initialTab?: 'profile' | 'company' | 'services' | 'performance' | 'contract';
+  initialTab?: 'profile' | 'services' | 'performance' | 'contract';
   hasFlexGoAccount?: boolean;
   supplierName?: string;
   supplierTaxId?: string;
@@ -67,7 +66,7 @@ export const SupplierProfileDetailPage: React.FC<SupplierProfileDetailPageProps>
   specialistId,
   overrideProfile,
   salemanProfile,
-  companyProfile,
+  companyIdentityBanner,
   studioConfig,
   onBackToDirectory,
   onSelectSpecialist,
@@ -84,19 +83,18 @@ export const SupplierProfileDetailPage: React.FC<SupplierProfileDetailPageProps>
   contactEmail,
 }) => {
   const isOfflineSupplier = hasFlexGoAccount === false;
-  const effectiveOfflineName = supplierName || companyProfile?.companyName || 'Nhà Cung Cấp Mới';
+  const effectiveOfflineName = supplierName || companyIdentityBanner?.companyName || 'Nhà Cung Cấp Mới';
   const effectiveOfflineTaxId = supplierTaxId;
   const effectiveOfflineContact = contactPerson || salemanProfile?.vietnameseName;
   const effectiveOfflinePhone = contactPhone || salemanProfile?.phone;
   const effectiveOfflineEmail = contactEmail || salemanProfile?.email;
 
-  // 5 Profile Tabs:
+  // 4 Profile Tabs:
   // 1. 'profile' (1. Hồ Sơ Chuyên Viên)
-  // 2. 'company' (2. Pháp Nhân & Doanh Nghiệp)
-  // 3. 'services' (3. Danh Mục Dịch Vụ & Bảng Cước)
-  // 4. 'performance' (4. Chỉ Số Hiệu Suất & Đánh Giá)
-  // 5. 'contract' (5. Hợp Đồng & Biểu Giá Riêng - Private Customer Tariff)
-  const [activeMainTab, setActiveMainTab] = useState<'profile' | 'company' | 'services' | 'performance' | 'contract'>(
+  // 2. 'services' (2. Danh Mục Dịch Vụ & Bảng Cước)
+  // 3. 'performance' (3. Chỉ Số Hiệu Suất & Đánh Giá)
+  // 4. 'contract' (4. Hợp Đồng & Biểu Giá Riêng - Private Customer Tariff)
+  const [activeMainTab, setActiveMainTab] = useState<'profile' | 'services' | 'performance' | 'contract'>(
     isOfflineSupplier ? 'contract' : (initialTab || 'profile')
   );
 
@@ -135,13 +133,7 @@ export const SupplierProfileDetailPage: React.FC<SupplierProfileDetailPageProps>
     };
   }, [salemanProfile, activeSpecialist]);
 
-  const effectiveCompanyProfile = useMemo(() => {
-    if (companyProfile) return companyProfile;
-    return {
-      ...initialCompanyProfile,
-      companyName: activeSpecialist.companyName || initialCompanyProfile.companyName,
-    };
-  }, [companyProfile, activeSpecialist]);
+  const effectiveCompanyName = companyIdentityBanner?.companyName || activeSpecialist.companyName;
 
   const effectiveStudioConfig = studioConfig || initialStudioConfig;
   const activeTheme = THEME_COLOR_OPTIONS[effectiveStudioConfig.themeColor];
@@ -292,7 +284,7 @@ export const SupplierProfileDetailPage: React.FC<SupplierProfileDetailPageProps>
             allInclusive: rt.pricingStyle === 'All-in',
             vatPercent: 8,
             supplierId: effectiveSupplierKey,
-            supplierName: effectiveCompanyProfile.companyName || activeSpecialist.companyName,
+            supplierName: effectiveCompanyName,
             supplierContact: effectiveSalemanProfile.vietnameseName || activeSpecialist.vietnameseName,
             supplierPhone: effectiveSalemanProfile.phone || activeSpecialist.contactPhone,
             supplierEmail: effectiveSalemanProfile.email || activeSpecialist.contactEmail,
@@ -310,7 +302,7 @@ export const SupplierProfileDetailPage: React.FC<SupplierProfileDetailPageProps>
       localStorage.setItem('customer_custom_rates_list', JSON.stringify([...newRateItems, ...existingRates.filter((r: any) => r.supplierId !== effectiveSupplierKey)]));
     } catch (e) {}
 
-    setCopiedToast(`Đã lưu thành công biểu giá hợp đồng riêng với ${effectiveCompanyProfile.companyName || activeSpecialist.companyName}!`);
+    setCopiedToast(`Đã lưu thành công biểu giá hợp đồng riêng với ${effectiveCompanyName}!`);
     setTimeout(() => setCopiedToast(null), 4000);
   };
 
@@ -423,6 +415,9 @@ export const SupplierProfileDetailPage: React.FC<SupplierProfileDetailPageProps>
 
       {/* Main Container */}
       <div className="space-y-6">
+        {companyIdentityBanner && !isOfflineSupplier && (
+          <PublicCompanyIdentityBanner data={companyIdentityBanner} />
+        )}
 
         {/* Offline Supplier Header Banner (Chỉ hiện khi nhà cung cấp chưa có tài khoản flexGO) */}
         {isOfflineSupplier && (
@@ -480,20 +475,17 @@ export const SupplierProfileDetailPage: React.FC<SupplierProfileDetailPageProps>
           </div>
         )}
         
-        {/* =========================================================================
-            5 PRIMARY TABS (CHỈ HIỂN THỊ KHI SUPPLIER ĐÃ CÓ TRÊN FLEXGO)
-           ========================================================================= */}
+        {/* Primary public profile tabs */}
         {!isOfflineSupplier && (
           <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-200 text-xs scrollbar-thin">
             {[
               { id: 'profile', label: '1. PIC profile', icon: User },
-              { id: 'company', label: '2. Company', icon: Building2 },
-              { id: 'services', label: '3. Services', icon: Truck },
-              { id: 'performance', label: '4. PIC performance', icon: TrendingUp },
+              { id: 'services', label: '2. Services', icon: Truck },
+              { id: 'performance', label: '3. PIC performance', icon: TrendingUp },
               ...(fromView === 'customer-suppliers' || activeMainTab === 'contract' ? [
                 { 
                   id: 'contract', 
-                  label: '5. Contract', 
+                  label: '4. Contract',
                   icon: FileCheck, 
                   isPrivate: true,
                 }
@@ -539,21 +531,11 @@ export const SupplierProfileDetailPage: React.FC<SupplierProfileDetailPageProps>
             />
           )}
 
-          {/* TAB 2: Company Landing Page (Corporate Template) */}
-          {!isOfflineSupplier && activeMainTab === 'company' && (
-            <TabCompanyView
-              company={effectiveCompanyProfile}
-              onChangeCompany={() => {}}
-              config={effectiveStudioConfig}
-              isReadOnly={true}
-            />
-          )}
-
-          {/* TAB 3: Services & Benchmark Rates (Cây Danh Mục Năng Lực & Biểu Phí Đã Khai Báo) */}
+          {/* TAB 2: Services & Benchmark Rates (Cây Danh Mục Năng Lực & Biểu Phí Đã Khai Báo) */}
           {!isOfflineSupplier && activeMainTab === 'services' && (
             <SupplierDeclaredServicesView
               services={activeSpecialist.services}
-              companyName={effectiveCompanyProfile.companyName || activeSpecialist.companyName}
+              companyName={effectiveCompanyName}
               specialistName={effectiveSalemanProfile.vietnameseName || activeSpecialist.vietnameseName}
               onOpenRFQForRate={handleOpenRFQForRate}
               onOpenConsult={() => setIsConsultModalOpen(true)}
@@ -561,14 +543,14 @@ export const SupplierProfileDetailPage: React.FC<SupplierProfileDetailPageProps>
             />
           )}
 
-          {/* TAB 4: Platform Performance Metrics & Reviews */}
+          {/* TAB 3: Platform Performance Metrics & Reviews */}
           {!isOfflineSupplier && activeMainTab === 'performance' && (
             <TabPerformanceReviews
               config={effectiveStudioConfig}
             />
           )}
 
-          {/* TAB 5: Hợp Đồng & Biểu Giá Riêng (Hiển thị khi activeMainTab === 'contract' hoặc là Offline Supplier) */}
+          {/* TAB 4: Hợp Đồng & Biểu Giá Riêng (Hiển thị khi activeMainTab === 'contract' hoặc là Offline Supplier) */}
           {(isOfflineSupplier || activeMainTab === 'contract') && (
             <div className="space-y-4 animate-in fade-in duration-150">
               <div className="rounded-2xl border border-indigo-100 bg-linear-to-r from-indigo-50/90 via-white to-blue-50/60 p-4 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -579,7 +561,7 @@ export const SupplierProfileDetailPage: React.FC<SupplierProfileDetailPageProps>
                   <div>
                     <div className="flex items-center gap-2">
                       <h3 className="text-sm font-black text-slate-900">
-                        Hợp Đồng & Biểu Giá Riêng: {effectiveOfflineName || effectiveCompanyProfile.companyName || activeSpecialist.companyName}
+                        Hợp Đồng & Biểu Giá Riêng: {effectiveOfflineName || effectiveCompanyName}
                       </h3>
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
                         <Lock className="w-2.5 h-2.5" />
@@ -610,7 +592,7 @@ export const SupplierProfileDetailPage: React.FC<SupplierProfileDetailPageProps>
                 saveButtonText="Lưu Biểu Giá Hợp Đồng"
                 existingServices={customerContractServices}
                 onSave={handleSaveCustomerContractServices}
-                supplierName={effectiveOfflineName || effectiveCompanyProfile.companyName || activeSpecialist.companyName}
+                supplierName={effectiveOfflineName || effectiveCompanyName}
               />
             </div>
           )}

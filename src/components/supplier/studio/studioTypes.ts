@@ -12,18 +12,6 @@ export type TemplateId =
   | 'modular-matrix'
   | 'speed-hunter';
 
-export type CompanyTemplateId = 
-  | 'corporate-flagship' 
-  | 'corporate-heritage'
-  | 'executive-pillar'
-  | 'modern-bento' 
-  | 'supply-chain-tech'
-  | 'staggered-cards'
-  | 'glassmorphism-luxury'
-  | 'clean-directory'
-  | 'industrial-impact'
-  | 'commercial-spotlight';
-
 export type ThemeColorId = 'navy' | 'emerald' | 'crimson' | 'amber' | 'slate';
 
 export interface ThemeColorOption {
@@ -281,7 +269,6 @@ export interface CompanyInfoProfile {
 
 export interface StudioTemplateConfig {
   activeTemplateId: TemplateId;
-  activeCompanyTemplateId?: CompanyTemplateId;
   themeColor: ThemeColorId;
   fontFamily: 'Inter' | 'Roboto' | 'Montserrat';
   visibleSections: {
@@ -296,19 +283,6 @@ export interface StudioTemplateConfig {
       awards?: boolean;
       skills?: boolean;
       hobbies?: boolean;
-    };
-    myCompany: {
-      about?: boolean;
-      visionMission?: boolean;
-      highlights: boolean;
-      branches: boolean;
-      affiliations: boolean;
-      ecosystem: boolean;
-      partners: boolean;
-      caseStudies: boolean;
-      compliance?: boolean;
-      infrastructure?: boolean;
-      clients?: boolean;
     };
   };
 }

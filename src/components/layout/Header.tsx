@@ -466,7 +466,7 @@ export const Header: React.FC<HeaderProps> = ({
                 className="absolute right-0 w-84 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 mt-2 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150"
               >
                 {/* Header User Identity */}
-                <div className="p-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+                <div className="p-4 bg-slate-50 border-b border-slate-100 flex items-center">
                   <div className="flex items-center gap-3 overflow-hidden">
                     <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-sm font-black shrink-0">
                       {initials}
@@ -476,9 +476,6 @@ export const Header: React.FC<HeaderProps> = ({
                       <div className="text-[11px] text-slate-500 truncate">{currentUser.companyName}</div>
                     </div>
                   </div>
-                  <span className="px-2 py-0.5 bg-indigo-100 text-indigo-700 font-bold text-[10px] uppercase rounded shrink-0">
-                    {currentUser.companyType}
-                  </span>
                 </div>
 
                 {/* Dropdown Scrollable Sections */}
@@ -486,9 +483,8 @@ export const Header: React.FC<HeaderProps> = ({
                   
                   {/* 1. CUSTOMER SECTION */}
                   <div className="p-2 space-y-1">
-                    <div className="px-2 py-1 text-[10px] font-black text-indigo-600 uppercase tracking-widest flex items-center justify-between">
+                    <div className="px-2 py-1 text-[10px] font-black text-indigo-600 uppercase tracking-widest">
                       <span>CUSTOMER</span>
-                      <span className="text-[9px] bg-indigo-50 px-1.5 py-0.2 rounded font-normal text-indigo-500">Shipper Hub</span>
                     </div>
 
                     <button
@@ -501,9 +497,6 @@ export const Header: React.FC<HeaderProps> = ({
                         <Inbox className="w-4 h-4 text-indigo-500" />
                         <span>My Inquiries</span>
                       </div>
-                      <span className="text-[10px] font-bold bg-orange-100 text-orange-600 px-1.5 rounded">
-                        {currentUser.badgeCount.customerInquiries}
-                      </span>
                     </button>
 
                     <button
@@ -517,9 +510,6 @@ export const Header: React.FC<HeaderProps> = ({
                         <FileSpreadsheet className="w-4 h-4 text-indigo-500" />
                         <span>My Rates (Biểu Giá Dịch Vụ)</span>
                       </div>
-                      <span className="text-[10px] font-bold bg-indigo-100 text-indigo-700 px-1.5 rounded">
-                        Rate Card
-                      </span>
                     </button>
 
                     <button
@@ -532,17 +522,13 @@ export const Header: React.FC<HeaderProps> = ({
                         <Building2 className="w-4 h-4 text-indigo-500" />
                         <span>My Suppliers</span>
                       </div>
-                      <span className="text-[10px] text-slate-400">
-                        {currentUser.badgeCount.customerSuppliers}
-                      </span>
                     </button>
                   </div>
 
                   {/* 2. SUPPLIER SECTION */}
                   <div className="p-2 space-y-1">
-                    <div className="px-2 py-1 text-[10px] font-black text-amber-600 uppercase tracking-widest flex items-center justify-between">
+                    <div className="px-2 py-1 text-[10px] font-black text-amber-600 uppercase tracking-widest">
                       <span>SUPPLIER</span>
-                      <span className="text-[9px] bg-amber-50 px-1.5 py-0.2 rounded font-normal text-amber-600">Carrier Hub</span>
                     </div>
 
                     <button
@@ -555,9 +541,6 @@ export const Header: React.FC<HeaderProps> = ({
                         <Flame className="w-4 h-4 text-amber-500" />
                         <span>My Leads</span>
                       </div>
-                      <span className="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-1.5 rounded">
-                        08 Live
-                      </span>
                     </button>
 
                     <button
@@ -570,9 +553,6 @@ export const Header: React.FC<HeaderProps> = ({
                         <Users className="w-4 h-4 text-amber-500" />
                         <span>My Customers</span>
                       </div>
-                      <span className="text-[10px] text-slate-400">
-                        35
-                      </span>
                     </button>
 
                     <button
@@ -585,17 +565,13 @@ export const Header: React.FC<HeaderProps> = ({
                         <Sparkles className="w-4 h-4 text-indigo-600" />
                         <span>Showcase & Rate Cards</span>
                       </div>
-                      <span className="text-[10px] font-bold bg-indigo-100 text-indigo-700 px-1.5 rounded">
-                        Public Detail
-                      </span>
                     </button>
                   </div>
 
                   {/* 3. FLEXCREDIT SECTION */}
                   <div className="p-2 space-y-1">
-                    <div className="px-2 py-1 text-[10px] font-black text-emerald-600 uppercase tracking-widest flex items-center justify-between">
+                    <div className="px-2 py-1 text-[10px] font-black text-emerald-600 uppercase tracking-widest">
                       <span>FLEXCREDIT</span>
-                      <span className="text-[9px] bg-emerald-50 px-1.5 py-0.2 rounded font-mono font-bold text-emerald-600">4,250 Cr</span>
                     </div>
 
                     <button
@@ -608,9 +584,6 @@ export const Header: React.FC<HeaderProps> = ({
                         <Coins className="w-4 h-4 text-amber-500" />
                         <span>My Wallet</span>
                       </div>
-                      <span className="text-[10px] font-bold text-amber-600">
-                        Gold Tier
-                      </span>
                     </button>
 
                     <button
@@ -623,9 +596,6 @@ export const Header: React.FC<HeaderProps> = ({
                         <PlusCircle className="w-4 h-4 text-emerald-600" />
                         <span>Add Credit</span>
                       </div>
-                      <span className="text-[10px] font-bold text-emerald-600 bg-emerald-100 px-1.5 rounded">
-                        Top-up
-                      </span>
                     </button>
 
                     <button
@@ -638,9 +608,6 @@ export const Header: React.FC<HeaderProps> = ({
                         <History className="w-4 h-4 text-slate-500" />
                         <span>Transaction History</span>
                       </div>
-                      <span className="text-[10px] text-slate-400">
-                        Ledger
-                      </span>
                     </button>
                   </div>
 
@@ -660,20 +627,6 @@ export const Header: React.FC<HeaderProps> = ({
                         <User className="w-4 h-4 text-slate-500" />
                         <span>My Profile</span>
                       </div>
-                      <span className="text-[10px] text-slate-400">Security</span>
-                    </button>
-
-                    <button
-                      onClick={() => navigateAndClose('settings-company')}
-                      className={`w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors text-left ${
-                        isWorkspaceActive('settings-company') ? 'bg-slate-100 text-slate-900 font-bold' : 'text-slate-700'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <Building2 className="w-4 h-4 text-slate-500" />
-                        <span>Company Profile</span>
-                      </div>
-                      <span className="text-[10px] font-bold text-emerald-600">Verified</span>
                     </button>
 
                     <button

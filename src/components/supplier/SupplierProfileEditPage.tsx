@@ -62,26 +62,33 @@ import { SupplierProfileDetailPage } from '../public/SupplierProfileDetailPage';
 import { SupplierServiceCapabilityModal } from './SupplierServiceCapabilityModal';
 import { 
   StudioTemplateConfig, 
-  SalemanPersonalProfile, 
-  CompanyInfoProfile 
+  SalemanPersonalProfile
 } from './studio/studioTypes';
 import { 
   initialSalemanProfile, 
-  initialCompanyProfile, 
   initialStudioConfig 
 } from './studio/mockStudioData';
 import { StudioToolbar } from './studio/StudioToolbar';
 import { TemplateSelectorModal } from './studio/TemplateSelectorModal';
 import { TabProfileTemplateRenderer } from './studio/TabProfileTemplateRenderer';
-import { TabCompanyView } from './studio/TabCompanyView';
 import { TabPerformanceReviews } from './studio/TabPerformanceReviews';
+import { CompanyIdentityBanner, CompanyIdentityBannerData } from './studio/CompanyIdentityBanner';
 
 interface SupplierProfileEditPageProps {
   currentSpecialistId?: string;
   onNavigate: (view: CurrentView) => void;
   onSaveSuccess?: (updatedProfile: SalesSpecialistProfile) => void;
-  initialTab?: 'profile' | 'company' | 'services' | 'performance';
+  initialTab?: 'profile' | 'services' | 'performance';
 }
+
+const createInitialCompanyIdentityBanner = (): CompanyIdentityBannerData => ({
+  companyName: 'Công Ty Cổ Phần Logistics VinaTrans Quốc Tế',
+  taxId: '0301456789',
+  logoUrl: '',
+  yearEstablished: '2008',
+  websiteUrl: 'https://vinatrans-global.vn',
+  address: 'Số 12 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh',
+});
 
 export const SupplierProfileEditPage: React.FC<SupplierProfileEditPageProps> = ({
   currentSpecialistId = 'sales-minh-tran',
@@ -92,9 +99,9 @@ export const SupplierProfileEditPage: React.FC<SupplierProfileEditPageProps> = (
   // Mode: 'edit' (Editor UI) vs 'preview' (Live Customer View)
   const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit');
   
-  // Active Tab inside Studio (4 core tabs)
+  // Active Tab inside Studio
   const [activeEditorTab, setActiveEditorTab] = useState<
-    'profile' | 'company' | 'services' | 'performance'
+    'profile' | 'services' | 'performance'
   >(initialTab);
 
   // Studio Template Configuration State
@@ -103,8 +110,10 @@ export const SupplierProfileEditPage: React.FC<SupplierProfileEditPageProps> = (
   // Saleman Personal Profile State (TopCV Style)
   const [salemanProfile, setSalemanProfile] = useState<SalemanPersonalProfile>(initialSalemanProfile);
 
-  // Company Information State
-  const [companyProfile, setCompanyProfile] = useState<CompanyInfoProfile>(initialCompanyProfile);
+  // Company identity is managed directly at the top of the PIC profile.
+  const [companyIdentityBanner, setCompanyIdentityBanner] = useState<CompanyIdentityBannerData>(
+    createInitialCompanyIdentityBanner
+  );
 
   // Template Selector Modal Visibility
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState<boolean>(false);
@@ -153,10 +162,8 @@ export const SupplierProfileEditPage: React.FC<SupplierProfileEditPageProps> = (
       email: salemanProfile.email,
       specialties: salemanProfile.specialties,
       languages: salemanProfile.languages,
-      companyName: companyProfile.companyName,
-      companyNameEn: companyProfile.companyNameEn,
-      companyBio: companyProfile.companyBio,
-      taxId: companyProfile.taxId,
+      companyName: companyIdentityBanner.companyName || profile.companyName,
+      taxId: companyIdentityBanner.taxId || profile.taxId,
       avatarUrl: salemanProfile.avatarUrl || profile.avatarUrl,
       avatarInitial: salemanProfile.avatarInitial || profile.avatarInitial,
     };
@@ -185,6 +192,7 @@ export const SupplierProfileEditPage: React.FC<SupplierProfileEditPageProps> = (
     if (window.confirm('Bạn có chắc muốn hoàn tác mọi thay đổi chưa lưu?')) {
       const found = mockSalesSpecialists.find((s) => s.id === currentSpecialistId) || mockSalesSpecialists[0];
       setProfile(JSON.parse(JSON.stringify(found)));
+      setCompanyIdentityBanner(createInitialCompanyIdentityBanner());
       setSaveToast('Đã khôi phục dữ liệu gốc.');
       setTimeout(() => setSaveToast(null), 3000);
     }
@@ -404,7 +412,7 @@ export const SupplierProfileEditPage: React.FC<SupplierProfileEditPageProps> = (
           specialistId={profile.id}
           overrideProfile={profile}
           salemanProfile={salemanProfile}
-          companyProfile={companyProfile}
+          companyIdentityBanner={companyIdentityBanner}
           studioConfig={studioConfig}
           onBackToDirectory={() => setViewMode('edit')}
           onSelectSpecialist={() => {}}
@@ -455,16 +463,14 @@ export const SupplierProfileEditPage: React.FC<SupplierProfileEditPageProps> = (
         onPreview={() => setViewMode('preview')}
         onSave={() => handleSaveProfile()}
         onReset={handleReset}
-        activeEditorTab={activeEditorTab}
       />
 
-      {/* Editor Navigation Tabs (4 Core Studio Tabs) */}
+      {/* Editor Navigation Tabs */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-200 text-xs scrollbar-thin">
         {[
           { id: 'profile', label: '1. PIC profile', icon: User },
-          { id: 'company', label: '2. Company', icon: Building2 },
-          { id: 'services', label: '3. Services', icon: Truck },
-          { id: 'performance', label: '4. PIC performance', icon: TrendingUp },
+          { id: 'services', label: '2. Services', icon: Truck },
+          { id: 'performance', label: '3. PIC performance', icon: TrendingUp },
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeEditorTab === tab.id;
@@ -490,28 +496,22 @@ export const SupplierProfileEditPage: React.FC<SupplierProfileEditPageProps> = (
           TAB 1: SALEMAN PERSONAL PROFILE (TOPCV STUDIO TEMPLATE ENGINE)
       ========================================================================= */}
       {activeEditorTab === 'profile' && (
-        <TabProfileTemplateRenderer
-          profile={salemanProfile}
-          onChangeProfile={setSalemanProfile}
-          config={studioConfig}
-          isReadOnly={false}
-        />
+        <div className="space-y-6">
+          <CompanyIdentityBanner
+            data={companyIdentityBanner}
+            onChange={setCompanyIdentityBanner}
+          />
+          <TabProfileTemplateRenderer
+            profile={salemanProfile}
+            onChangeProfile={setSalemanProfile}
+            config={studioConfig}
+            isReadOnly={false}
+          />
+        </div>
       )}
 
       {/* =========================================================================
-          TAB 2: COMPANY INFORMATION & CREDENTIALS
-      ========================================================================= */}
-      {activeEditorTab === 'company' && (
-        <TabCompanyView
-          company={companyProfile}
-          onChangeCompany={setCompanyProfile}
-          config={studioConfig}
-          isReadOnly={false}
-        />
-      )}
-
-      {/* =========================================================================
-          TAB 3: SERVICES & PRICING (INLINE FULL CAPABILITY TREE)
+          TAB 2: SERVICES & PRICING (INLINE FULL CAPABILITY TREE)
       ========================================================================= */}
       {activeEditorTab === 'services' && (
         <div className="space-y-6">
@@ -524,24 +524,19 @@ export const SupplierProfileEditPage: React.FC<SupplierProfileEditPageProps> = (
       )}
 
       {/* =========================================================================
-          TAB 4: PERFORMANCE METRICS & CLIENT TESTIMONIALS
+          TAB 3: PERFORMANCE METRICS & CLIENT TESTIMONIALS
       ========================================================================= */}
       {activeEditorTab === 'performance' && (
         <TabPerformanceReviews config={studioConfig} />
       )}
 
-      {/* TopCV Style Template Selector Modal */}
+      {/* PIC Profile Template Selector */}
       <TemplateSelectorModal
         isOpen={isTemplateModalOpen}
         onClose={() => setIsTemplateModalOpen(false)}
-        activeTab={activeEditorTab === 'company' ? 'company' : 'profile'}
         selectedTemplateId={studioConfig.activeTemplateId}
         onSelectTemplate={(tplId) => {
           setStudioConfig((prev) => ({ ...prev, activeTemplateId: tplId }));
-        }}
-        selectedCompanyTemplateId={studioConfig.activeCompanyTemplateId || 'corporate-flagship'}
-        onSelectCompanyTemplate={(cTplId) => {
-          setStudioConfig((prev) => ({ ...prev, activeCompanyTemplateId: cTplId }));
         }}
         selectedThemeColor={studioConfig.themeColor}
         onSelectThemeColor={(cId) => {

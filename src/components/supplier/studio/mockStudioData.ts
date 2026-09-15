@@ -315,7 +315,6 @@ export const initialCompanyProfile: CompanyInfoProfile = {
 
 export const initialStudioConfig: StudioTemplateConfig = {
   activeTemplateId: 'executive-elite',
-  activeCompanyTemplateId: 'corporate-flagship',
   themeColor: 'navy',
   fontFamily: 'Inter',
   visibleSections: {
@@ -330,19 +329,6 @@ export const initialStudioConfig: StudioTemplateConfig = {
       awards: true,
       skills: true,
       hobbies: true,
-    },
-    myCompany: {
-      about: true,
-      visionMission: true,
-      highlights: true,
-      branches: true,
-      affiliations: true,
-      ecosystem: true,
-      partners: true,
-      caseStudies: true,
-      compliance: true,
-      infrastructure: true,
-      clients: true,
     },
   },
 };

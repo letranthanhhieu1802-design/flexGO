@@ -138,7 +138,7 @@ interface SupplierDirectoryPageProps {
   initialViewState?: 'directory' | 'detail';
   fromView?: string;
   supplierId?: string;
-  initialTab?: 'profile' | 'company' | 'services' | 'performance' | 'contract';
+  initialTab?: 'profile' | 'services' | 'performance' | 'contract';
   hasFlexGoAccount?: boolean;
   supplierName?: string;
   supplierTaxId?: string;
