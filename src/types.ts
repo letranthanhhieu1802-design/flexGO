@@ -530,6 +530,7 @@ export interface InquiryItem {
   createdDate: string;
   expiryDate?: string;
   status: InquiryStatus;
+  awardedSupplierName?: string;
   responsesCount: number;
   viewsCount?: number;
   description: string;

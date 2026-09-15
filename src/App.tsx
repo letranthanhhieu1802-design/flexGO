@@ -996,6 +996,7 @@ export function App() {
               rates={customerRates}
               suppliers={suppliers}
               inquiries={inquiries}
+              quotations={quotations}
               onSaveRate={handleSaveCustomerRate}
               onDeleteRate={handleDeleteCustomerRate}
               onNavigate={setCurrentView}

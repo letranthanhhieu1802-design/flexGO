@@ -65,7 +65,7 @@ import {
   Trash2,
   Eye
 } from 'lucide-react';
-import { InquiryItem, ServiceType, UserProfile, SupplierLeadItem, QuotationItem } from '../../types';
+import { InquiryItem, ServiceType, UserProfile, SupplierLeadItem, QuotationItem, CustomerRateItem } from '../../types';
 import { getSurchargesForService } from './inquiryForms/SurchargesSection';
 
 interface InquirySummaryConfirmModalProps {
@@ -86,6 +86,11 @@ interface InquirySummaryConfirmModalProps {
   onSaveLead?: () => void;
   quotations?: QuotationItem[];
   onSubmitQuotation?: (quote: Partial<QuotationItem>) => void;
+  // Awarded RFQ specific props
+  onlyAwardedSupplier?: boolean;
+  awardedSupplierName?: string;
+  awardedRateData?: CustomerRateItem | null;
+  defaultTab?: 'profile_cargo' | 'tariff_sheet';
 }
 
 export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProps> = ({
@@ -105,15 +110,19 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
   onSaveLead,
   quotations = [],
   onSubmitQuotation,
+  onlyAwardedSupplier = false,
+  awardedSupplierName: awardedSupplierNameProp,
+  awardedRateData = null,
+  defaultTab = 'profile_cargo',
 }) => {
   const isSupplierView = isCustomerView !== undefined ? !isCustomerView : isSupplierViewProp;
-  const [activeTab, setActiveTab] = useState<'profile_cargo' | 'tariff_sheet'>('profile_cargo');
+  const [activeTab, setActiveTab] = useState<'profile_cargo' | 'tariff_sheet'>(defaultTab || 'profile_cargo');
   const [internalPublished, setInternalPublished] = useState<boolean>(false);
   const [copiedLink, setCopiedLink] = useState<boolean>(false);
   const [localUnlocked, setLocalUnlocked] = useState<boolean>(Boolean(isUnlockedProp));
   const [isQuoting, setIsQuoting] = useState<boolean>(false);
   const [localSaved, setLocalSaved] = useState<boolean>(Boolean(isSavedProp));
-  const [awardedSupplierName, setAwardedSupplierName] = useState<string | null>(null);
+  const [awardedSupplierName, setAwardedSupplierName] = useState<string | null>(awardedSupplierNameProp || inquiry?.awardedSupplierName || null);
   const [quoteSubmittedToast, setQuoteSubmittedToast] = useState<string | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -167,7 +176,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
   useEffect(() => {
     if (isOpen) {
       setCopiedLink(false);
-      setActiveTab('profile_cargo');
+      setActiveTab(defaultTab || 'profile_cargo');
       setIsQuoting(false);
       setQuoteSubmittedToast(null);
       setLocalUnlocked(Boolean(isUnlockedProp));
@@ -175,8 +184,13 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
       if (isPublishedProp === undefined) {
         setInternalPublished(false);
       }
+      if (awardedSupplierNameProp) {
+        setAwardedSupplierName(awardedSupplierNameProp);
+      } else if (inquiry?.awardedSupplierName) {
+        setAwardedSupplierName(inquiry.awardedSupplierName);
+      }
     }
-  }, [isOpen, isPublishedProp, isUnlockedProp, isSavedProp]);
+  }, [isOpen, isPublishedProp, isUnlockedProp, isSavedProp, defaultTab, awardedSupplierNameProp, inquiry]);
 
   // Scroll to top when published so the user clearly sees the generated Lead Code and Share Banner
   useEffect(() => {
@@ -667,12 +681,74 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
   };
 
   const competitorQuotes = useMemo(() => {
-    if (!inquiry) return [];
-    const count = lead?.quotesCount ?? inquiry.responsesCount ?? 0;
+    const activeInq = inquiry || effectiveInquiry;
+    if (!activeInq) return [];
+
+    // NẾU LÀ VIEW GIÁ TỪ TRAO THẦU: CHỈ HIỂN THỊ DUY NHẤT 1 CỘT CỦA SUPPLIER TRÚNG THẦU
+    if (onlyAwardedSupplier) {
+      const winnerName = awardedSupplierNameProp || awardedRateData?.supplierName || activeInq.awardedSupplierName || 'Á Châu Logistics (Top 1)';
+      const winnerPic = awardedRateData?.supplierContact || 'Nguyễn Văn Tuấn';
+
+      const rawBudget = parseInt(activeInq.targetBudget?.replace(/\D/g, '') || '65000000', 10);
+      const locale = activeInq.currency === 'USD' ? 'en-US' : 'vi-VN';
+
+      let totalQuote = 0;
+      let baseFreight = 0;
+      const surchargeMap: Record<string, string> = {};
+
+      if (awardedRateData && awardedRateData.baseRateAmount > 0) {
+        baseFreight = awardedRateData.baseRateAmount;
+        let nonIncludedSurchargesTotal = 0;
+        if (awardedRateData.surcharges && awardedRateData.surcharges.length > 0) {
+          awardedRateData.surcharges.forEach((sc) => {
+            if (sc.includedInBaseRate) {
+              surchargeMap[sc.name] = 'Đã bao gồm';
+            } else {
+              nonIncludedSurchargesTotal += sc.amount || 0;
+              surchargeMap[sc.name] = (sc.amount || 0).toLocaleString(locale);
+            }
+          });
+        }
+        totalQuote = awardedRateData.allInclusive ? baseFreight : (baseFreight + nonIncludedSurchargesTotal);
+      } else {
+        totalQuote = Math.round((rawBudget * 0.94) / 10000) * 10000;
+        baseFreight = Math.round(totalQuote * 0.85);
+      }
+
+      const surchargeEach = Math.round((totalQuote - baseFreight) / Math.max(1, (activeInq.requestedSurcharges?.length || 1)));
+
+      const vasPrices: Record<string, string> = {};
+      if (activeInq.selectedVAS && activeInq.selectedVAS.length > 0) {
+        activeInq.selectedVAS.forEach((vas, vIdx) => {
+          const baseVasAmount = ((vIdx + 1) * 350000 + 400000) * 0.94;
+          const roundedVas = Math.round(baseVasAmount / 10000) * 10000;
+          vasPrices[vas] = roundedVas.toLocaleString(locale);
+        });
+      }
+
+      return [{
+        id: 'comp-awarded-winner',
+        picName: winnerPic,
+        companyName: winnerName,
+        supplierName: winnerName,
+        factor: 0.94,
+        totalQuote,
+        baseFreight,
+        surchargeEach,
+        surchargeMap,
+        vasPrices,
+        formattedTotal: totalQuote.toLocaleString(locale),
+        formattedBase: baseFreight.toLocaleString(locale),
+        formattedSurcharge: surchargeEach.toLocaleString(locale),
+        isAwarded: true,
+      }];
+    }
+
+    const count = lead?.quotesCount ?? activeInq.responsesCount ?? 0;
     if (count === 0) return [];
 
-    const rawBudget = parseInt(inquiry.targetBudget?.replace(/\D/g, '') || '50000000', 10);
-    const isContractVal = inquiry.pricingType === 'CONTRACT';
+    const rawBudget = parseInt(activeInq.targetBudget?.replace(/\D/g, '') || '50000000', 10);
+    const isContractVal = activeInq.pricingType === 'CONTRACT';
     const cSuffix = targetCurrencySuffix;
     const uSuffix = isContractVal ? ' / tháng' : '';
 
@@ -686,14 +762,14 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
     return sampleSuppliers.slice(0, Math.min(count, 4)).map((s, idx) => {
       const totalQuote = Math.round((rawBudget * s.factor) / 10000) * 10000;
       const baseFreight = Math.round(totalQuote * 0.85);
-      const surchargeEach = Math.round((totalQuote - baseFreight) / Math.max(1, (inquiry.requestedSurcharges?.length || 1)));
+      const surchargeEach = Math.round((totalQuote - baseFreight) / Math.max(1, (activeInq.requestedSurcharges?.length || 1)));
 
-      const locale = inquiry.currency === 'USD' ? 'en-US' : 'vi-VN';
+      const locale = activeInq.currency === 'USD' ? 'en-US' : 'vi-VN';
 
       // Tính toán biểu giá VAS cụ thể do supplier khai báo (chỉ hiển thị số)
       const vasPrices: Record<string, string> = {};
-      if (inquiry.selectedVAS && inquiry.selectedVAS.length > 0) {
-        inquiry.selectedVAS.forEach((vas, vIdx) => {
+      if (activeInq.selectedVAS && activeInq.selectedVAS.length > 0) {
+        activeInq.selectedVAS.forEach((vas, vIdx) => {
           const baseVasAmount = ((vIdx + 1) * 350000 + 400000) * (s.factor || 1);
           const roundedVas = Math.round(baseVasAmount / 10000) * 10000;
           vasPrices[vas] = roundedVas.toLocaleString(locale);
@@ -713,9 +789,10 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
         formattedTotal: totalQuote.toLocaleString(locale),
         formattedBase: baseFreight.toLocaleString(locale),
         formattedSurcharge: surchargeEach.toLocaleString(locale),
+        isAwarded: false,
       };
     });
-  }, [lead, effectiveInquiry]);
+  }, [inquiry, effectiveInquiry, lead, onlyAwardedSupplier, awardedSupplierNameProp, awardedRateData, targetCurrencySuffix]);
 
   // Early return ONLY after all Hooks have been declared (Rules of Hooks)
   if (!isOpen || (!inquiry && !effectiveInquiry)) return null;
@@ -2804,17 +2881,17 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
               {/* TARIFF SHEET TABLE (GRID TABLE THEO FORM NHÀ CUNG CẤP VỚI CỘT BORDER RÕ RÀNG) */}
               <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden w-fit max-w-full">
                 <div className="overflow-x-auto custom-matrix-scroll">
-                  <table className="border-collapse text-xs text-left border-spacing-0 table-fixed" style={{ width: 'max-content' }}>
+                  <table className="border-collapse text-xs text-left border-spacing-0 table-fixed" style={{ width: onlyAwardedSupplier ? '100%' : 'max-content' }}>
                     {/* CỐ ĐỊNH KÍCH THƯỚC CỘT CHUẨN FORM BIỂU GIÁ NHÀ CUNG CẤP */}
                     <colgroup>
-                      <col style={{ width: '300px', minWidth: '300px', maxWidth: '300px' }} />
+                      <col style={{ width: onlyAwardedSupplier ? '380px' : '300px', minWidth: onlyAwardedSupplier ? '380px' : '300px' }} />
                       <col style={{ width: '100px', minWidth: '100px', maxWidth: '100px' }} />
-                      <col style={{ width: '260px', minWidth: '260px', maxWidth: '260px' }} />
+                      <col style={{ width: onlyAwardedSupplier ? '240px' : '260px', minWidth: onlyAwardedSupplier ? '240px' : '260px' }} />
                       {isQuoting && (
                         <col style={{ width: '280px', minWidth: '280px', maxWidth: '280px' }} />
                       )}
                       {competitorQuotes.map((c) => (
-                        <col key={c.id} style={{ width: '220px', minWidth: '220px', maxWidth: '220px' }} />
+                        <col key={c.id} style={{ width: onlyAwardedSupplier ? '280px' : '220px', minWidth: onlyAwardedSupplier ? '280px' : '220px' }} />
                       ))}
                     </colgroup>
                     <thead>
@@ -2844,18 +2921,18 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                           </th>
                         )}
 
-                        {/* CÁC CỘT CỦA SUPPLIER KHÁC (ĐỐI THỦ) */}
+                        {/* CÁC CỘT CỦA SUPPLIER (KHI onlyAwardedSupplier: CHỈ 1 CỘT DUY NHẤT CỦA SUPPLIER TRÚNG THẦU) */}
                         {competitorQuotes.map((comp, cIdx) => (
-                          <th key={comp.id} className="py-2.5 px-3 text-center bg-slate-50 border-r border-slate-200 align-top">
+                          <th key={comp.id} className={`py-2.5 px-3 text-center border-r border-slate-200 align-top ${onlyAwardedSupplier ? 'bg-emerald-50/40' : 'bg-slate-50'}`}>
                             <div className="flex flex-col items-center justify-center gap-1.5">
                               {effectiveUnlocked ? (
                                 <>
                                   {/* 1. NÚT TRAO THẦU Ở TRÊN ĐẦU BẢNG */}
                                   {!isSupplierView && (
                                     <div className="w-full flex justify-center pb-1 border-b border-slate-200/80">
-                                      {awardedSupplierName === comp.companyName ? (
-                                        <span className="w-full py-1 px-2.5 bg-emerald-600 text-white font-black text-[11px] rounded-lg shadow-xs inline-flex items-center justify-center gap-1 select-none">
-                                          <Check className="w-3 h-3 stroke-[3]" />
+                                      {(awardedSupplierName === comp.companyName || onlyAwardedSupplier || comp.isAwarded) ? (
+                                        <span className="w-full py-1.5 px-2.5 bg-emerald-600 text-white font-black text-[11px] rounded-lg shadow-xs inline-flex items-center justify-center gap-1 select-none">
+                                          <Check className="w-3.5 h-3.5 stroke-[3]" />
                                           <span>Đã Trao Thầu</span>
                                         </span>
                                       ) : (
@@ -2881,9 +2958,14 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                                     <span className="font-black text-slate-900 text-xs tracking-tight truncate w-full text-center" title={comp.picName}>
                                       {comp.picName}
                                     </span>
-                                    <span className="text-[10px] text-slate-500 font-medium truncate w-full text-center mt-0.5" title={comp.companyName}>
+                                    <span className="text-[10.5px] text-slate-600 font-bold truncate w-full text-center mt-0.5" title={comp.companyName}>
                                       {comp.companyName}
                                     </span>
+                                    {onlyAwardedSupplier && (
+                                      <span className="text-[9.5px] text-emerald-700 font-bold mt-0.5 bg-emerald-100/90 px-2 py-0.5 rounded-md border border-emerald-200">
+                                        Nhà thầu chiến thắng
+                                      </span>
+                                    )}
                                   </div>
                                 </>
                               ) : (
@@ -2916,8 +2998,8 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                         <td className="py-3 px-4 text-center border-r border-slate-200">
                           <div className="flex flex-col items-center justify-center">
                             <span className="text-base font-black text-slate-900 tracking-tight">
-                              {inquiry.targetBudget
-                                ? (inquiry.targetBudget.toString().replace(/₫|VND|USD|\$/g, '').trim())
+                              {activeInquiry.targetBudget
+                                ? (activeInquiry.targetBudget.toString().replace(/₫|VND|USD|\$/g, '').trim())
                                 : '—'}
                             </span>
                           </div>
@@ -2993,7 +3075,7 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                         <td className="py-3 px-4 text-center border-r border-slate-200">
                           <div className="inline-flex items-center justify-center w-full min-h-[30px] bg-white border border-slate-200 rounded-lg px-3 py-1 shadow-2xs">
                             <span className="font-mono font-bold text-slate-700 text-xs">
-                              {inquiry.targetBudget ? 'Bao gồm' : '—'}
+                              {activeInquiry.targetBudget ? 'Bao gồm' : '—'}
                             </span>
                           </div>
                         </td>
@@ -3038,13 +3120,13 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                         <td colSpan={3 + (isQuoting ? 1 : 0) + competitorQuotes.length} className="py-2 px-4 border-r border-slate-200">
                           <div className="flex items-center gap-2">
                             <span>{getServiceSection1Title()}</span>
-                            {inquiry.quotationScope === 'ALL_IN' ? (
+                            {activeInquiry.quotationScope === 'ALL_IN' ? (
                               <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 tracking-normal">
                                 Yêu cầu Báo Giá Trọn Gói (All-in)
                               </span>
-                            ) : inquiry.requestedSurcharges && inquiry.requestedSurcharges.length > 0 ? (
+                            ) : activeInquiry.requestedSurcharges && activeInquiry.requestedSurcharges.length > 0 ? (
                               <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200 tracking-normal">
-                                Báo Giá Bóc Tách ({inquiry.requestedSurcharges.length} mục đã chỉ định)
+                                Báo Giá Bóc Tách ({activeInquiry.requestedSurcharges.length} mục đã chỉ định)
                               </span>
                             ) : (
                               <span className="text-[10px] font-bold text-slate-600 bg-slate-200/80 px-2 py-0.5 rounded-md tracking-normal">
@@ -3114,17 +3196,22 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                                 </td>
 
                                 {/* Các cột đối thủ: Phụ phí */}
-                                {competitorQuotes.map((comp) => (
-                                  <td key={comp.id} className="py-2 px-3 text-center border-r border-slate-200">
-                                    {effectiveUnlocked ? (
-                                      <span className="font-mono font-medium text-slate-700 text-xs">
-                                        {comp.formattedSurcharge}
-                                      </span>
-                                    ) : (
-                                      <span className="font-mono text-slate-300 tracking-widest text-xs select-none">••••••••</span>
-                                    )}
-                                  </td>
-                                ))}
+                                {competitorQuotes.map((comp) => {
+                                  const surchargeVal = comp.surchargeMap && comp.surchargeMap[charge.name]
+                                    ? comp.surchargeMap[charge.name]
+                                    : comp.formattedSurcharge;
+                                  return (
+                                    <td key={comp.id} className="py-2 px-3 text-center border-r border-slate-200">
+                                      {effectiveUnlocked ? (
+                                        <span className="font-mono font-medium text-slate-700 text-xs">
+                                          {surchargeVal}
+                                        </span>
+                                      ) : (
+                                        <span className="font-mono text-slate-300 tracking-widest text-xs select-none">••••••••</span>
+                                      )}
+                                    </td>
+                                  );
+                                })}
                               </tr>
                             ))
                           ) : (
@@ -3184,8 +3271,8 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                         </>
                       ) : (
                         /* CHẾ ĐỘ CUSTOMER VIEW: XEM DANH SÁCH PHỤ PHÍ ĐÃ YÊU CẦU */
-                        inquiry.requestedSurcharges && inquiry.requestedSurcharges.length > 0 ? (
-                          inquiry.requestedSurcharges.map((charge, idx) => (
+                        activeInquiry.requestedSurcharges && activeInquiry.requestedSurcharges.length > 0 ? (
+                          activeInquiry.requestedSurcharges.map((charge, idx) => (
                             <tr key={idx} className="hover:bg-slate-50/80 transition-colors">
                               <td className="py-2 px-4 border-r border-slate-200">
                                 <div className="flex items-center gap-1.5">
@@ -3208,17 +3295,22 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                               </td>
 
                               {/* Các cột đối thủ: Phụ phí */}
-                              {competitorQuotes.map((comp) => (
-                                <td key={comp.id} className="py-2 px-3 text-center border-r border-slate-200">
-                                  {effectiveUnlocked ? (
-                                    <span className="font-mono font-medium text-slate-700 text-xs">
-                                      {comp.formattedSurcharge}
-                                    </span>
-                                  ) : (
-                                    <span className="font-mono text-slate-300 tracking-widest text-xs select-none">••••••••</span>
-                                  )}
-                                </td>
-                              ))}
+                              {competitorQuotes.map((comp) => {
+                                const surchargeVal = comp.surchargeMap && comp.surchargeMap[charge]
+                                  ? comp.surchargeMap[charge]
+                                  : comp.formattedSurcharge;
+                                return (
+                                  <td key={comp.id} className="py-2 px-3 text-center border-r border-slate-200">
+                                    {effectiveUnlocked ? (
+                                      <span className="font-mono font-medium text-slate-700 text-xs">
+                                        {surchargeVal}
+                                      </span>
+                                    ) : (
+                                      <span className="font-mono text-slate-300 tracking-widest text-xs select-none">••••••••</span>
+                                    )}
+                                  </td>
+                                );
+                              })}
                             </tr>
                           ))
                         ) : (
@@ -3246,17 +3338,17 @@ export const InquirySummaryConfirmModal: React.FC<InquirySummaryConfirmModalProp
                         <td colSpan={3 + (isQuoting ? 1 : 0) + competitorQuotes.length} className="py-2 px-4 border-r border-slate-200">
                           <div className="flex items-center gap-2">
                             <span>{getServiceSection2Title()}</span>
-                            {inquiry.selectedVAS && inquiry.selectedVAS.length > 0 && (
+                            {activeInquiry.selectedVAS && activeInquiry.selectedVAS.length > 0 && (
                               <span className="text-[10px] font-bold text-purple-700 bg-purple-100/70 px-2 py-0.5 rounded-md border border-purple-200 lowercase tracking-normal">
-                                {inquiry.selectedVAS.length} dịch vụ
+                                {activeInquiry.selectedVAS.length} dịch vụ
                               </span>
                             )}
                           </div>
                         </td>
                       </tr>
 
-                      {inquiry.selectedVAS && inquiry.selectedVAS.length > 0 ? (
-                        inquiry.selectedVAS.map((vas, idx) => (
+                      {activeInquiry.selectedVAS && activeInquiry.selectedVAS.length > 0 ? (
+                        activeInquiry.selectedVAS.map((vas, idx) => (
                           <tr key={idx} className="hover:bg-slate-50/80 transition-colors">
                             <td className="py-2 px-4 border-r border-slate-200">
                               <div className="font-medium text-slate-800">

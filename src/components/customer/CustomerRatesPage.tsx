@@ -18,7 +18,6 @@ import {
   Layers,
   Eye,
   FileSpreadsheet,
-  Download,
   Filter,
   CheckCircle2,
   AlertTriangle,
@@ -34,7 +33,8 @@ import {
   Package,
   MapPin,
   FileCheck,
-  RefreshCw
+  RefreshCw,
+  Maximize2
 } from 'lucide-react';
 import { 
   CustomerRateItem, 
@@ -43,14 +43,19 @@ import {
   RateSourceType,
   CurrentView,
   SupplierCompany,
-  InquiryItem
+  InquiryItem,
+  QuotationItem,
+  HotPromotionItem
 } from '../../types';
 import { CreateOrEditRateModal } from './CreateOrEditRateModal';
+import { InquirySummaryConfirmModal } from './InquirySummaryConfirmModal';
+import { HotPromotionFullCostMatrixModal } from '../public/HotPromotionFullCostMatrixModal';
 
 interface CustomerRatesPageProps {
   rates: CustomerRateItem[];
   suppliers?: SupplierCompany[];
   inquiries?: InquiryItem[];
+  quotations?: QuotationItem[];
   onSaveRate: (rate: CustomerRateItem) => void;
   onDeleteRate: (rateId: string) => void;
   onNavigate: (view: CurrentView) => void;
@@ -61,6 +66,7 @@ export const CustomerRatesPage: React.FC<CustomerRatesPageProps> = ({
   rates,
   suppliers = [],
   inquiries = [],
+  quotations = [],
   onSaveRate,
   onDeleteRate,
   onNavigate,
@@ -75,6 +81,14 @@ export const CustomerRatesPage: React.FC<CustomerRatesPageProps> = ({
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRate, setEditingRate] = useState<CustomerRateItem | null>(null);
+
+  // Awarded RFQ 2-Tab Modal State
+  const [selectedAwardedRate, setSelectedAwardedRate] = useState<CustomerRateItem | null>(null);
+  const [isAwardedModalOpen, setIsAwardedModalOpen] = useState(false);
+
+  // Hot Promotion Full Cost Matrix Modal State (for internal contract rates)
+  const [selectedPromoForModal, setSelectedPromoForModal] = useState<HotPromotionItem | null>(null);
+  const [isMatrixModalOpen, setIsMatrixModalOpen] = useState(false);
 
   const toggleExpandRate = (rateId: string) => {
     setExpandedRateIds((prev) => ({
@@ -92,6 +106,137 @@ export const CustomerRatesPage: React.FC<CustomerRatesPageProps> = ({
     setEditingRate(rate);
     setIsModalOpen(true);
   };
+
+  const handleOpenAwardedModal = (rate: CustomerRateItem) => {
+    setSelectedAwardedRate(rate);
+    setIsAwardedModalOpen(true);
+  };
+
+  const mapRateToPromotionItem = (rate: CustomerRateItem): HotPromotionItem => {
+    let promoCat: any = 'Trucking';
+    const st = (rate.serviceType || '').toLowerCase();
+    if (st.includes('sea') || st.includes('biển') || st.includes('ocean')) promoCat = 'Sea Freight';
+    else if (st.includes('air') || st.includes('không')) promoCat = 'Air Freight';
+    else if (st.includes('cold') || st.includes('lạnh')) promoCat = 'Cold Chain';
+    else if (st.includes('ware') || st.includes('kho')) promoCat = 'Warehousing';
+    else if (st.includes('custom') || st.includes('quan')) promoCat = 'Customs';
+    else if (st.includes('cross') || st.includes('biên')) promoCat = 'Cross-border';
+    else if (st.includes('rail') || st.includes('sắt')) promoCat = 'Rail Freight';
+    else if (st.includes('project') || st.includes('án')) promoCat = 'Project Cargo';
+
+    return {
+      id: rate.id,
+      code: rate.code,
+      title: rate.title,
+      badgeType: 'HOT_ROUTE',
+      badgeLabel: 'HĐ Nội Bộ',
+      discountPercent: 0,
+      originalPriceVND: rate.baseRateAmount || 0,
+      originalPriceDisplay: rate.rateDisplay,
+      promotionalPriceVND: rate.baseRateAmount || 0,
+      promotionalPriceDisplay: rate.rateDisplay,
+      pricingUnit: String(rate.pricingUnit || 'VND / Chuyến'),
+      serviceType: rate.serviceType,
+      category: promoCat,
+      origin: rate.origin,
+      destination: rate.destination,
+      routeDisplay: rate.routeDisplay || `${rate.origin} → ${rate.destination}`,
+      transitTime: rate.transitTime || 'Thỏa thuận',
+      vehicleOrUnit: rate.equipmentOrVehicleType || 'Tiêu chuẩn',
+      cargoSuitability: rate.cargoType,
+      availableCapacity: rate.loadType || 'Sẵn sàng',
+      specialistId: 'spec-internal',
+      specialistName: rate.supplierContact || rate.supplierName,
+      specialistVietnameseName: rate.supplierContact || rate.supplierName,
+      specialistTitle: 'Đại diện Hợp đồng nội bộ',
+      specialistAvatarInitial: (rate.supplierName || 'V').substring(0, 1).toUpperCase(),
+      specialistPhone: rate.supplierPhone || '1900 6868',
+      specialistRating: 5.0,
+      specialistReviewsCount: 18,
+      companyId: rate.supplierId || 'sup-internal',
+      companyName: rate.supplierName,
+      companyLogo: '',
+      validFrom: rate.validFrom,
+      validUntil: rate.validTo,
+      daysRemaining: 180,
+      slotsRemaining: 10,
+      totalSlots: 10,
+      paymentTerms: rate.paymentTerms,
+      highlights: ['Hợp đồng nội bộ đã ký kết', 'Cam kết giữ biểu giá ổn định'],
+      includedPerks: rate.surcharges?.filter((s) => s.includedInBaseRate).map((s) => s.name) || [],
+      notes: rate.notes,
+      viewsCount: 1,
+      interestedCount: 1,
+      bookedCount: 1,
+      serviceGroup: rate.serviceType,
+      calculatedPriceDisplay: rate.rateDisplay,
+    };
+  };
+
+  const handleOpenMatrixModal = (rate: CustomerRateItem) => {
+    const promoItem = mapRateToPromotionItem(rate);
+    setSelectedPromoForModal(promoItem);
+    setIsMatrixModalOpen(true);
+  };
+
+  // Find linked inquiry & quote for awarded modal
+  const selectedAwardedInquiry = useMemo((): InquiryItem | null => {
+    if (!selectedAwardedRate) return null;
+    if (selectedAwardedRate.linkedInquiryCode) {
+      const found = inquiries.find((i) => i.code === selectedAwardedRate.linkedInquiryCode);
+      if (found) {
+        return {
+          ...found,
+          awardedSupplierName: selectedAwardedRate.supplierName || found.awardedSupplierName,
+        };
+      }
+    }
+
+    // Synthesize realistic full inquiry if not directly found in inquiries array
+    return {
+      id: `inq-awarded-${selectedAwardedRate.id}`,
+      code: selectedAwardedRate.linkedInquiryCode || `INQ-${selectedAwardedRate.code}`,
+      leadCode: selectedAwardedRate.linkedInquiryCode || `INQ-${selectedAwardedRate.code}`,
+      title: selectedAwardedRate.title || `Yêu cầu báo giá: ${selectedAwardedRate.origin} → ${selectedAwardedRate.destination}`,
+      customerCompany: 'Công ty Cổ phần Prime Vận Tải',
+      contactPerson: 'Đặng Tuấn Anh (Trưởng phòng Điều phối Logistics)',
+      contactPhone: '0908 123 456',
+      contactEmail: 'tuancustomer@primemfg.vn',
+      serviceType: (selectedAwardedRate.serviceType as any) || 'Trucking',
+      origin: selectedAwardedRate.origin,
+      destination: selectedAwardedRate.destination,
+      route: selectedAwardedRate.routeDisplay || `${selectedAwardedRate.origin} → ${selectedAwardedRate.destination}`,
+      cargoType: selectedAwardedRate.cargoType || 'Hàng công nghiệp tiêu chuẩn',
+      weightVolume: selectedAwardedRate.loadType || 'Nguyên chuyến',
+      targetBudget: selectedAwardedRate.rateDisplay,
+      expiryDate: selectedAwardedRate.validTo,
+      pickupDate: selectedAwardedRate.validFrom,
+      deliveryDate: selectedAwardedRate.validTo,
+      createdDate: selectedAwardedRate.createdDate || '2026-08-31',
+      quotationScope: selectedAwardedRate.allInclusive ? 'ALL_IN' : 'ITEMIZED',
+      requestedSurcharges: selectedAwardedRate.surcharges?.map((s) => s.name) || [],
+      selectedVAS: [],
+      responsesCount: 1,
+      viewsCount: 88,
+      status: 'Awarded',
+      awardedSupplierName: selectedAwardedRate.supplierName,
+      pricingType: selectedAwardedRate.contractCode ? 'CONTRACT' : 'SPOT',
+      description: selectedAwardedRate.notes || 'Hợp đồng trao thầu đã ký kết thành công trên hệ thống FlexGO.',
+      serviceSpecs: selectedAwardedRate.specs,
+    };
+  }, [selectedAwardedRate, inquiries]);
+
+  const selectedAwardedQuotation = useMemo(() => {
+    if (!selectedAwardedRate) return null;
+    return quotations.find(
+      (q) =>
+        (selectedAwardedRate.linkedQuoteId && q.id === selectedAwardedRate.linkedQuoteId) ||
+        (selectedAwardedRate.linkedInquiryCode &&
+          q.inquiryCode === selectedAwardedRate.linkedInquiryCode &&
+          (q.status === 'Accepted' || q.supplierName === selectedAwardedRate.supplierName)) ||
+        (selectedAwardedRate.linkedInquiryCode && q.inquiryCode === selectedAwardedRate.linkedInquiryCode)
+    ) || null;
+  }, [selectedAwardedRate, quotations]);
 
   // KPI Calculations
   const stats = useMemo(() => {
@@ -263,11 +408,8 @@ export const CustomerRatesPage: React.FC<CustomerRatesPageProps> = ({
               <ChevronRight className="w-3.5 h-3.5 text-indigo-400" />
               <span className="text-indigo-400 font-bold">Logistics Rate Card & Price Master</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-indigo-500/30 border border-indigo-400/40 text-indigo-300 flex items-center justify-center shadow-xs shrink-0">
-                <FileSpreadsheet className="w-5 h-5 text-indigo-200" />
-              </div>
-              <span>My Rates (Bảng Quản Lý Biểu Giá Dịch Vụ)</span>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+              My Rates
             </h1>
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
               Quản lý tập trung toàn bộ biểu giá cước logistics doanh nghiệp đang sử dụng. Lưu trữ giá hợp đồng nội bộ và đồng bộ tự động giá từ các gói trao thầu (Awarded RFQ).
@@ -275,16 +417,6 @@ export const CustomerRatesPage: React.FC<CustomerRatesPageProps> = ({
           </div>
 
           <div className="flex flex-wrap items-center gap-3 shrink-0">
-            <button
-              id="export-rates-csv-btn"
-              onClick={handleExportCSV}
-              className="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-slate-200 bg-white/10 hover:bg-white/20 border border-white/15 rounded-xl transition-all shadow-xs cursor-pointer"
-              title="Tải bảng giá định dạng Excel/CSV"
-            >
-              <Download className="w-4 h-4 text-slate-300" />
-              <span>Xuất Excel/CSV</span>
-            </button>
-
             <button
               id="create-new-rate-btn"
               onClick={handleOpenCreateModal}
@@ -680,25 +812,59 @@ export const CustomerRatesPage: React.FC<CustomerRatesPageProps> = ({
                           {rate.validTo}
                         </td>
 
-                        {/* Cột 10: Thao Tác - Chỉ 1 nút Xem chi tiết / Đóng */}
-                        <td className="py-3 px-3 text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                          <button
-                            type="button"
-                            onClick={() => toggleExpandRate(rate.id)}
-                            className={`px-2.5 py-1 text-xs font-bold rounded-xl transition-all inline-flex items-center justify-center gap-1 cursor-pointer shadow-2xs ${
-                              isExpanded
-                                ? 'bg-indigo-600 text-white shadow-xs'
-                                : 'bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 hover:border-indigo-300'
-                            }`}
-                            title={isExpanded ? 'Thu gọn chi tiết' : 'Mở xem chi tiết biểu giá'}
-                          >
-                            <span>{isExpanded ? 'Đóng' : 'Xem chi tiết'}</span>
-                            {isExpanded ? (
-                              <ChevronUp className="w-3.5 h-3.5" />
-                            ) : (
-                              <ChevronDown className="w-3.5 h-3.5" />
-                            )}
-                          </button>
+                        {/* Cột 10: Thao Tác - Phân biệt giữa Awarded và HĐ Nội bộ */}
+                        <td className="py-2 px-2 text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                          {rate.sourceType === 'AWARDED_INQUIRY' ? (
+                            <div className="flex flex-col items-center justify-center gap-1 mx-auto w-full max-w-[92px]">
+                              {/* NÚT XEM CHI TIẾT CHO GIÁ TỪ AWARDED RFQ */}
+                              <button
+                                id={`btn-view-awarded-${rate.code}`}
+                                type="button"
+                                onClick={() => handleOpenAwardedModal(rate)}
+                                className="w-full py-1.5 px-2 text-[11px] font-bold rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 hover:text-indigo-800 border border-indigo-200/90 transition-all inline-flex items-center justify-center gap-1 cursor-pointer shadow-2xs leading-tight active:scale-95"
+                                title="Xem chi tiết trao thầu RFQ (Tab 1: Tóm tắt yêu cầu, Tab 2: Giá trúng thầu)"
+                              >
+                                <FileText className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                                <span className="whitespace-nowrap">Xem chi tiết</span>
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="flex flex-col items-center justify-center gap-1 mx-auto w-full max-w-[92px]">
+                              {/* NÚT XEM ĐẦY ĐỦ CHO GIÁ KHÁCH HÀNG TỰ KHAI BÁO (THEO PHONG CÁCH HOT PROMOTION) */}
+                              <button
+                                id={`btn-view-matrix-${rate.code}`}
+                                type="button"
+                                onClick={() => handleOpenMatrixModal(rate)}
+                                className="w-full py-1 px-1.5 text-[10.5px] font-bold rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-700 hover:text-orange-800 border border-orange-200/90 transition-all inline-flex items-center justify-center gap-1 cursor-pointer shadow-2xs leading-tight active:scale-95"
+                                title="Xem biểu giá ma trận cước đầy đủ"
+                              >
+                                <Maximize2 className="w-3 h-3 text-orange-600 shrink-0" />
+                                <span className="whitespace-nowrap">Xem đầy đủ</span>
+                              </button>
+
+                              {/* Hàng nút phụ cho HĐ nội bộ: Sửa & Xóa */}
+                              <div className="flex items-center gap-1 w-full justify-between">
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenEditModal(rate)}
+                                  className="flex-1 py-0.5 px-1 rounded-md text-[9.5px] font-semibold bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition-colors flex items-center justify-center gap-0.5 cursor-pointer"
+                                  title="Chỉnh sửa hợp đồng nội bộ"
+                                >
+                                  <Edit3 className="w-2.5 h-2.5 text-slate-500" />
+                                  <span>Sửa</span>
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => onDeleteRate(rate.id)}
+                                  className="py-0.5 px-1.5 rounded-md text-[9.5px] font-semibold bg-slate-50 hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-200 hover:border-rose-200 transition-colors flex items-center justify-center cursor-pointer"
+                                  title="Xóa giá nội bộ"
+                                >
+                                  <Trash2 className="w-2.5 h-2.5" />
+                                </button>
+                              </div>
+                            </div>
+                          )}
                         </td>
                       </tr>
 
@@ -914,6 +1080,33 @@ export const CustomerRatesPage: React.FC<CustomerRatesPageProps> = ({
         onSaveRate={onSaveRate}
         editingRate={editingRate}
         suppliers={suppliers}
+      />
+
+      {/* AWARDED RFQ MODAL - SỬ DỤNG CHÍNH MODAL TÓM TẮT YÊU CẦU & MA TRẬN BÁO GIÁ CỦA MY INQUIRY, CHỈ HIỂN THỊ CỘT CỦA SUPPLIER TRÚNG THẦU */}
+      <InquirySummaryConfirmModal
+        isOpen={isAwardedModalOpen}
+        onClose={() => {
+          setIsAwardedModalOpen(false);
+          setSelectedAwardedRate(null);
+        }}
+        inquiry={selectedAwardedInquiry}
+        currentUser={null}
+        isCustomerView={true}
+        isPublished={true}
+        onlyAwardedSupplier={true}
+        awardedSupplierName={selectedAwardedRate?.supplierName}
+        awardedRateData={selectedAwardedRate}
+        quotations={quotations}
+      />
+
+      {/* HOT PROMOTION FULL COST MATRIX MODAL FOR INTERNAL CONTRACT RATES */}
+      <HotPromotionFullCostMatrixModal
+        isOpen={isMatrixModalOpen}
+        onClose={() => {
+          setIsMatrixModalOpen(false);
+          setSelectedPromoForModal(null);
+        }}
+        item={selectedPromoForModal}
       />
     </div>
   );
