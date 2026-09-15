@@ -1,4 +1,4 @@
-export type CompanyType = 'CUSTOMER' | 'SUPPLIER' | 'BOTH';
+export type CompanyType = 'CUSTOMER' | 'SUPPLIER';
 
 export type PublicNavTab = 'home' | 'lead-board' | 'supplier-profile' | 'hot-promotion' | 'company';
 export type PublicTab = PublicNavTab;
@@ -25,8 +25,6 @@ export type WorkspaceView =
   | 'flexcredit-add'
   | 'flexcredit-transactions'
   | 'settings-profile'
-  // Dual Hub View
-  | 'dual-hub'
   // Legacy alias Settings
   | 'company-settings'
   | 'account-settings';

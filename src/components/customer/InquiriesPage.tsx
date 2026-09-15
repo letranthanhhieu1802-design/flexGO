@@ -27,6 +27,8 @@ interface InquiriesPageProps {
   suppliers?: SupplierCompany[];
   initialSupplierFilter?: string;
   initialSupplierName?: string;
+  initialInquiryCode?: string;
+  initialOpenMatrix?: boolean;
   currentUser?: UserProfile | null;
   onOpenCreateModal?: () => void;
   onSelectInquiry: (inquiry: InquiryItem | string) => void;
@@ -43,6 +45,8 @@ export const InquiriesPage: React.FC<InquiriesPageProps> = ({
   suppliers = [],
   initialSupplierFilter = '',
   initialSupplierName = '',
+  initialInquiryCode = '',
+  initialOpenMatrix = false,
   currentUser,
   onOpenCreateModal,
   onSelectInquiry,
@@ -53,6 +57,7 @@ export const InquiriesPage: React.FC<InquiriesPageProps> = ({
   const [serviceFilter, setServiceFilter] = useState<string>('ALL');
   const [supplierFilter, setSupplierFilter] = useState<string>(initialSupplierFilter || initialSupplierName || '');
   const [selectedDetailInquiry, setSelectedDetailInquiry] = useState<InquiryItem | null>(null);
+  const [modalDefaultTab, setModalDefaultTab] = useState<'profile_cargo' | 'tariff_sheet'>('profile_cargo');
   const [sortField, setSortField] = useState<SortField>('createdDate');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
@@ -61,6 +66,28 @@ export const InquiriesPage: React.FC<InquiriesPageProps> = ({
       setSupplierFilter(initialSupplierFilter || initialSupplierName);
     }
   }, [initialSupplierFilter, initialSupplierName]);
+
+  // Tự động mở Modal Tóm tắt / Ma trận báo giá khi được điều hướng từ ngoài
+  useEffect(() => {
+    if (initialInquiryCode) {
+      const found = inquiries.find(
+        (i) => i.code === initialInquiryCode || i.id === initialInquiryCode
+      );
+      if (found) {
+        setSelectedDetailInquiry(found);
+        if (initialOpenMatrix) {
+          setModalDefaultTab('tariff_sheet');
+        }
+      }
+    } else if (initialOpenMatrix && inquiries.length > 0) {
+      // Ưu tiên yêu cầu có nhiều báo giá nhất để xem đối chiếu
+      const targetInq =
+        [...inquiries].sort((a, b) => (b.responsesCount || 0) - (a.responsesCount || 0))[0] ||
+        inquiries[0];
+      setSelectedDetailInquiry(targetInq);
+      setModalDefaultTab('tariff_sheet');
+    }
+  }, [initialInquiryCode, initialOpenMatrix, inquiries]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -795,7 +822,11 @@ export const InquiriesPage: React.FC<InquiriesPageProps> = ({
           isPublished={true}
           quotations={quotations}
           matchingSuppliersCount={selectedDetailInquiry.responsesCount || 0}
-          onClose={() => setSelectedDetailInquiry(null)}
+          defaultTab={modalDefaultTab}
+          onClose={() => {
+            setSelectedDetailInquiry(null);
+            setModalDefaultTab('profile_cargo');
+          }}
           onConfirm={() => {}}
         />
       )}

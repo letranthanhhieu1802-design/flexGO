@@ -229,15 +229,12 @@ export const Header: React.FC<HeaderProps> = ({
                         onNavigate({ type: 'public', tab: 'company', params: { subTab: 'about' } });
                         setIsCompanyMenuOpen(false);
                       }}
-                      className="w-full flex items-start gap-2.5 p-2 rounded-xl text-left hover:bg-slate-50 transition-colors cursor-pointer group"
+                      className="w-full flex items-center gap-2.5 p-2 rounded-xl text-left hover:bg-slate-50 transition-colors cursor-pointer group"
                     >
-                      <div className="p-1.5 rounded-lg bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors shrink-0 mt-0.5">
+                      <div className="p-1.5 rounded-lg bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors shrink-0">
                         <Building2 className="w-3.5 h-3.5" />
                       </div>
-                      <div>
-                        <p className="text-xs font-bold text-slate-800 group-hover:text-indigo-600">Về FlexGO (About Us)</p>
-                        <p className="text-[10px] text-slate-500">Sứ mệnh, ban lãnh đạo & quy mô</p>
-                      </div>
+                      <span className="text-xs font-bold text-slate-800 group-hover:text-indigo-600">1. Về flexGO</span>
                     </button>
 
                     <button
@@ -246,18 +243,12 @@ export const Header: React.FC<HeaderProps> = ({
                         onNavigate({ type: 'public', tab: 'company', params: { subTab: 'pricing' } });
                         setIsCompanyMenuOpen(false);
                       }}
-                      className="w-full flex items-start gap-2.5 p-2 rounded-xl text-left hover:bg-slate-50 transition-colors cursor-pointer group"
+                      className="w-full flex items-center gap-2.5 p-2 rounded-xl text-left hover:bg-slate-50 transition-colors cursor-pointer group"
                     >
-                      <div className="p-1.5 rounded-lg bg-orange-50 text-orange-600 group-hover:bg-orange-500 group-hover:text-white transition-colors shrink-0 mt-0.5">
+                      <div className="p-1.5 rounded-lg bg-orange-50 text-orange-600 group-hover:bg-orange-500 group-hover:text-white transition-colors shrink-0">
                         <DollarSign className="w-3.5 h-3.5" />
                       </div>
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <p className="text-xs font-bold text-slate-800 group-hover:text-orange-600">Bảng Giá (Pricing & Plans)</p>
-                          <span className="px-1 py-0.2 text-[9px] font-extrabold bg-orange-100 text-orange-700 rounded-sm">Hot</span>
-                        </div>
-                        <p className="text-[10px] text-slate-500">Gói dịch vụ Shippers & Carriers</p>
-                      </div>
+                      <span className="text-xs font-bold text-slate-800 group-hover:text-orange-600">2. Bảng Giá</span>
                     </button>
 
                     <button
@@ -266,15 +257,12 @@ export const Header: React.FC<HeaderProps> = ({
                         onNavigate({ type: 'public', tab: 'company', params: { subTab: 'resources' } });
                         setIsCompanyMenuOpen(false);
                       }}
-                      className="w-full flex items-start gap-2.5 p-2 rounded-xl text-left hover:bg-slate-50 transition-colors cursor-pointer group"
+                      className="w-full flex items-center gap-2.5 p-2 rounded-xl text-left hover:bg-slate-50 transition-colors cursor-pointer group"
                     >
-                      <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors shrink-0 mt-0.5">
+                      <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors shrink-0">
                         <BookOpen className="w-3.5 h-3.5" />
                       </div>
-                      <div>
-                        <p className="text-xs font-bold text-slate-800 group-hover:text-emerald-600">Tài Nguyên (Resources & Hub)</p>
-                        <p className="text-[10px] text-slate-500">Báo cáo cước & Công cụ tính CBM</p>
-                      </div>
+                      <span className="text-xs font-bold text-slate-800 group-hover:text-emerald-600">3. Tài Nguyên</span>
                     </button>
 
                     <button
@@ -283,15 +271,12 @@ export const Header: React.FC<HeaderProps> = ({
                         onNavigate({ type: 'public', tab: 'company', params: { subTab: 'trust' } });
                         setIsCompanyMenuOpen(false);
                       }}
-                      className="w-full flex items-start gap-2.5 p-2 rounded-xl text-left hover:bg-slate-50 transition-colors cursor-pointer group"
+                      className="w-full flex items-center gap-2.5 p-2 rounded-xl text-left hover:bg-slate-50 transition-colors cursor-pointer group"
                     >
-                      <div className="p-1.5 rounded-lg bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors shrink-0 mt-0.5">
+                      <div className="p-1.5 rounded-lg bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors shrink-0">
                         <ShieldCheck className="w-3.5 h-3.5" />
                       </div>
-                      <div>
-                        <p className="text-xs font-bold text-slate-800 group-hover:text-blue-600">Bảo Mật & Pháp Lý (Trust & Security)</p>
-                        <p className="text-[10px] text-slate-500">Thẩm định 5 bước & Bảo hiểm 5 tỷ</p>
-                      </div>
+                      <span className="text-xs font-bold text-slate-800 group-hover:text-blue-600">4. Điều khoản & Pháp Lý</span>
                     </button>
 
                     <button
@@ -300,15 +285,12 @@ export const Header: React.FC<HeaderProps> = ({
                         onNavigate({ type: 'public', tab: 'company', params: { subTab: 'contact' } });
                         setIsCompanyMenuOpen(false);
                       }}
-                      className="w-full flex items-start gap-2.5 p-2 rounded-xl text-left hover:bg-slate-50 transition-colors cursor-pointer group"
+                      className="w-full flex items-center gap-2.5 p-2 rounded-xl text-left hover:bg-slate-50 transition-colors cursor-pointer group"
                     >
-                      <div className="p-1.5 rounded-lg bg-purple-50 text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition-colors shrink-0 mt-0.5">
+                      <div className="p-1.5 rounded-lg bg-purple-50 text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition-colors shrink-0">
                         <Phone className="w-3.5 h-3.5" />
                       </div>
-                      <div>
-                        <p className="text-xs font-bold text-slate-800 group-hover:text-purple-600">Liên Hệ & Văn Phòng (Contact)</p>
-                        <p className="text-[10px] text-slate-500">4 văn phòng toàn quốc & Đặt Demo</p>
-                      </div>
+                      <span className="text-xs font-bold text-slate-800 group-hover:text-purple-600">5. Liên Hệ</span>
                     </button>
                   </div>
                 </div>
@@ -330,19 +312,6 @@ export const Header: React.FC<HeaderProps> = ({
               <span>Post RFQ</span>
             </button>
           )}
-
-          {/* Quick Search Shortcut */}
-          <button
-            id="global-search-shortcut-btn"
-            onClick={onOpenCommandPalette}
-            className="hidden lg:flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 text-xs transition-colors cursor-pointer"
-          >
-            <Search className="w-3.5 h-3.5" />
-            <span>Search</span>
-            <kbd className="px-1.5 py-0.5 text-[10px] bg-white border border-slate-300 rounded text-slate-400 font-mono">
-              ⌘K
-            </kbd>
-          </button>
 
           {/* Persona Switcher Quick Menu */}
           {onSwitchCompanyType && (
@@ -394,19 +363,6 @@ export const Header: React.FC<HeaderProps> = ({
                   >
                     <span>2. Supplier (Carrier / 3PL)</span>
                     {currentUser.companyType === 'SUPPLIER' && <div className="w-1.5 h-1.5 rounded-full bg-indigo-600" />}
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      onSwitchCompanyType('BOTH');
-                      setIsRoleMenuOpen(false);
-                    }}
-                    className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium flex items-center justify-between cursor-pointer ${
-                      currentUser.companyType === 'BOTH' ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'hover:bg-slate-50 text-slate-700'
-                    }`}
-                  >
-                    <span>3. Dual Hub (4PL / Hybrid)</span>
-                    {currentUser.companyType === 'BOTH' && <div className="w-1.5 h-1.5 rounded-full bg-indigo-600" />}
                   </button>
                 </div>
               )}

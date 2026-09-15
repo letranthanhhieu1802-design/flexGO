@@ -320,6 +320,42 @@ export const CustomerRatesPage: React.FC<CustomerRatesPageProps> = ({
     return rate.loadType || 'FTL';
   };
 
+  // Helper chia Đơn giá: Tiền ở trên và Đơn vị ở dưới
+  const getRateDisplayParts = (rate: CustomerRateItem) => {
+    if (rate.rateDisplay && rate.rateDisplay.includes('/')) {
+      const slashIdx = rate.rateDisplay.indexOf('/');
+      const amountPart = rate.rateDisplay.slice(0, slashIdx).trim();
+      const unitPart = rate.rateDisplay.slice(slashIdx).trim();
+      return { amountPart, unitPart };
+    }
+
+    const amountPart = rate.baseRateCurrency === 'USD'
+      ? `$${rate.baseRateAmount.toLocaleString('en-US')}`
+      : `${rate.baseRateAmount.toLocaleString('vi-VN')} ₫`;
+    const cleanUnit = (rate.pricingUnit || '').replace(/^(VND|USD)\s*\/?\s*/i, '').trim();
+    const unitPart = cleanUnit ? `/ ${cleanUnit}` : '';
+    return { amountPart, unitPart };
+  };
+
+  // Helper lấy thông tin PIC/Nhà Cung Cấp: Tên Saleman ở trên, Tên công ty ở dưới
+  const getPICSupplierInfo = (rate: CustomerRateItem) => {
+    let picName = rate.supplierContact?.trim() || '';
+    if (picName.includes('(') && picName.includes(')')) {
+      const match = picName.match(/^(.*?)\s*\((.*?)\)$/);
+      if (match) {
+        picName = match[1].trim();
+      }
+    }
+    if (!picName) {
+      picName = 'Chuyên viên phụ trách';
+    }
+
+    return {
+      picName,
+      companyName: rate.supplierName || 'Nhà cung cấp',
+    };
+  };
+
   const getServiceIcon = (type: ServiceType) => {
     switch (type) {
       case 'Trucking':
@@ -682,19 +718,31 @@ export const CustomerRatesPage: React.FC<CustomerRatesPageProps> = ({
       {/* ========================================================= */}
       <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full text-left border-collapse table-fixed">
+            <colgroup>
+              <col className="w-[3.5%]" />  {/* 1. STT */}
+              <col className="w-[10.5%]" /> {/* 2. Nhóm Dịch Vụ */}
+              <col className="w-[8%]" />    {/* 3. Nhóm Hàng */}
+              <col className="w-[6%]" />    {/* 4. Mô Hình */}
+              <col className="w-[19%]" />   {/* 5. Chi Tiết */}
+              <col className="w-[13.5%]" /> {/* 6. Đơn Giá */}
+              <col className="w-[18%]" />   {/* 7. PIC / Nhà Cung Cấp */}
+              <col className="w-[8%]" />    {/* 8. Nguồn Giá */}
+              <col className="w-[6.5%]" />  {/* 9. Hiệu Lực Giá */}
+              <col className="w-[7%]" />    {/* 10. Thao Tác */}
+            </colgroup>
             <thead>
               <tr className="bg-slate-100/90 border-b border-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider">
-                <th className="py-2.5 px-2 text-center w-10">STT</th>
-                <th className="py-2.5 px-3 whitespace-nowrap">Nhóm Dịch Vụ</th>
-                <th className="py-2.5 px-2 whitespace-nowrap">Nhóm Hàng</th>
-                <th className="py-2.5 px-2 whitespace-nowrap">Mô Hình</th>
-                <th className="py-2.5 px-3 whitespace-nowrap">Chi Tiết</th>
-                <th className="py-2.5 px-3 whitespace-nowrap">Đơn Giá</th>
-                <th className="py-2.5 px-3 whitespace-nowrap">Nhà Cung Cấp</th>
-                <th className="py-2.5 px-3 whitespace-nowrap">Nguồn Giá</th>
-                <th className="py-2.5 px-3 whitespace-nowrap">Hiệu Lực Giá</th>
-                <th className="py-2.5 px-3 text-center whitespace-nowrap">Thao Tác</th>
+                <th className="py-2.5 px-1 text-center">STT</th>
+                <th className="py-2.5 px-1.5">Nhóm Dịch Vụ</th>
+                <th className="py-2.5 px-1.5">Nhóm Hàng</th>
+                <th className="py-2.5 px-1.5">Mô Hình</th>
+                <th className="py-2.5 px-2">Chi Tiết</th>
+                <th className="py-2.5 px-2">Đơn Giá</th>
+                <th className="py-2.5 px-2">PIC/Nhà Cung Cấp</th>
+                <th className="py-2.5 px-1.5">Nguồn Giá</th>
+                <th className="py-2.5 px-1.5">Hiệu Lực Giá</th>
+                <th className="py-2.5 px-1 text-center">Thao Tác</th>
               </tr>
             </thead>
 
@@ -728,56 +776,82 @@ export const CustomerRatesPage: React.FC<CustomerRatesPageProps> = ({
                         }`}
                       >
                         {/* Cột 1: STT */}
-                        <td className="py-3 px-2 text-center text-slate-400 font-mono text-xs">
+                        <td className="py-2.5 px-1 text-center text-slate-400 font-mono text-xs">
                           {idx + 1}
                         </td>
 
                         {/* Cột 2: Nhóm Dịch Vụ */}
-                        <td className="py-3 px-3 whitespace-nowrap">
-                          <span className="font-semibold text-slate-900 text-xs">
+                        <td className="py-2.5 px-1.5">
+                          <span className="font-semibold text-slate-900 text-xs block truncate" title={rate.serviceType}>
                             {rate.serviceType}
                           </span>
                         </td>
 
                         {/* Cột 3: Nhóm Hàng */}
-                        <td className="py-3 px-2 whitespace-nowrap text-xs text-slate-700">
-                          {getCargoGroup(rate)}
+                        <td className="py-2.5 px-1.5 text-xs text-slate-700">
+                          <span className="block truncate" title={getCargoGroup(rate)}>
+                            {getCargoGroup(rate)}
+                          </span>
                         </td>
 
                         {/* Cột 4: Mô Hình */}
-                        <td className="py-3 px-2 whitespace-nowrap text-xs text-slate-700">
-                          {getOperationMode(rate)}
+                        <td className="py-2.5 px-1.5 text-xs text-slate-700">
+                          <span className="block truncate" title={getOperationMode(rate)}>
+                            {getOperationMode(rate)}
+                          </span>
                         </td>
 
-                        {/* Cột 5: Chi Tiết (Tuyến đường/phạm vi dịch vụ ngắn gọn, không mã RATE) */}
-                        <td className="py-3 px-3 whitespace-nowrap text-xs font-semibold text-slate-900">
-                          {rate.routeDisplay || `${rate.origin.split(',')[0]} → ${rate.destination.split(',')[0]}`}
-                        </td>
-
-                        {/* Cột 6: Đơn Giá (chỉ thể hiện đơn giá awarded, không icon/badge) */}
-                        <td className="py-3 px-3 whitespace-nowrap font-bold text-slate-900 text-xs">
-                          {rate.rateDisplay || `${rate.baseRateAmount.toLocaleString('vi-VN')} ${rate.baseRateCurrency === 'USD' ? '$' : '₫'} / ${rate.pricingUnit}`}
-                        </td>
-
-                        {/* Cột 7: Nhà Cung Cấp */}
-                        <td className="py-3 px-3 whitespace-nowrap">
-                          <div className="space-y-0.5">
-                            <span className="font-semibold text-slate-900 block text-xs">
-                              {rate.supplierName}
-                            </span>
-                            {rate.supplierTaxId && (
-                              <span className="text-[10.5px] text-slate-400 font-mono block">
-                                MST: {rate.supplierTaxId}
-                              </span>
-                            )}
+                        {/* Cột 5: Chi Tiết (Tuyến đường/phạm vi dịch vụ ngắn gọn, hiển thị 2 dòng linh hoạt) */}
+                        <td className="py-2.5 px-2">
+                          <div
+                            className="text-xs font-semibold text-slate-900 leading-snug line-clamp-2"
+                            title={rate.routeDisplay || `${rate.origin.split(',')[0]} → ${rate.destination.split(',')[0]}`}
+                          >
+                            {rate.routeDisplay || `${rate.origin.split(',')[0]} → ${rate.destination.split(',')[0]}`}
                           </div>
                         </td>
 
+                        {/* Cột 6: Đơn Giá (thể hiện giá trị tiền ở trên và đơn vị ở dưới chữ nhỏ) */}
+                        <td className="py-2.5 px-2">
+                          {(() => {
+                            const { amountPart, unitPart } = getRateDisplayParts(rate);
+                            return (
+                              <div className="min-w-0">
+                                <span className="font-bold text-slate-900 text-xs block leading-tight truncate" title={amountPart}>
+                                  {amountPart}
+                                </span>
+                                {unitPart && (
+                                  <span className="text-[10.5px] text-slate-500 block leading-tight truncate mt-0.5" title={unitPart}>
+                                    {unitPart}
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          })()}
+                        </td>
+
+                        {/* Cột 7: PIC/Nhà Cung Cấp (Tên Saleman ở trên, Tên công ty ở dưới chữ nhỏ) */}
+                        <td className="py-2.5 px-2">
+                          {(() => {
+                            const { picName, companyName } = getPICSupplierInfo(rate);
+                            return (
+                              <div className="space-y-0.5 min-w-0">
+                                <span className="font-semibold text-slate-900 block text-xs truncate" title={rate.supplierContact || picName}>
+                                  {picName}
+                                </span>
+                                <span className="text-[10.5px] text-slate-500 block truncate" title={companyName}>
+                                  {companyName}
+                                </span>
+                              </div>
+                            );
+                          })()}
+                        </td>
+
                         {/* Cột 8: Nguồn Giá */}
-                        <td className="py-3 px-3 whitespace-nowrap text-xs text-slate-700">
+                        <td className="py-2.5 px-1.5 text-xs text-slate-700">
                           {rate.sourceType === 'AWARDED_INQUIRY' ? (
-                            <div className="space-y-0.5">
-                              <span>Trao thầu RFQ</span>
+                            <div className="space-y-0.5 min-w-0">
+                              <span className="block truncate text-[11px] text-slate-700">Trao thầu RFQ</span>
                               {rate.linkedInquiryCode && (
                                 <button
                                   type="button"
@@ -788,18 +862,19 @@ export const CustomerRatesPage: React.FC<CustomerRatesPageProps> = ({
                                       view: 'customer-inquiries',
                                     });
                                   }}
-                                  className="text-[10.5px] text-indigo-600 hover:underline flex items-center gap-0.5 font-mono block"
+                                  className="text-[10px] text-indigo-600 hover:underline flex items-center gap-0.5 font-mono truncate block"
+                                  title={rate.linkedInquiryCode}
                                 >
-                                  <span>{rate.linkedInquiryCode}</span>
-                                  <ExternalLink className="w-2.5 h-2.5" />
+                                  <span className="truncate">{rate.linkedInquiryCode}</span>
+                                  <ExternalLink className="w-2.5 h-2.5 shrink-0" />
                                 </button>
                               )}
                             </div>
                           ) : (
-                            <div className="space-y-0.5">
-                              <span>HĐ Nội bộ</span>
+                            <div className="space-y-0.5 min-w-0">
+                              <span className="block truncate text-[11px] text-slate-700">HĐ Nội bộ</span>
                               {rate.contractCode && (
-                                <span className="text-[10px] text-slate-400 font-mono block">
+                                <span className="text-[10px] text-slate-400 font-mono block truncate" title={rate.contractCode}>
                                   {rate.contractCode}
                                 </span>
                               )}
@@ -808,59 +883,61 @@ export const CustomerRatesPage: React.FC<CustomerRatesPageProps> = ({
                         </td>
 
                         {/* Cột 9: Hiệu Lực Giá (Chỉ thể hiện ngày giá hết hạn) */}
-                        <td className="py-3 px-3 whitespace-nowrap text-xs text-slate-700 font-mono">
-                          {rate.validTo}
+                        <td className="py-2.5 px-1.5">
+                          <span className="text-[11px] text-slate-700 font-mono block truncate" title={rate.validTo}>
+                            {rate.validTo}
+                          </span>
                         </td>
 
                         {/* Cột 10: Thao Tác - Phân biệt giữa Awarded và HĐ Nội bộ */}
-                        <td className="py-2 px-2 text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                        <td className="py-2 px-1 text-center" onClick={(e) => e.stopPropagation()}>
                           {rate.sourceType === 'AWARDED_INQUIRY' ? (
-                            <div className="flex flex-col items-center justify-center gap-1 mx-auto w-full max-w-[92px]">
+                            <div className="flex flex-col items-center justify-center gap-1 mx-auto w-full max-w-[84px]">
                               {/* NÚT XEM CHI TIẾT CHO GIÁ TỪ AWARDED RFQ */}
                               <button
                                 id={`btn-view-awarded-${rate.code}`}
                                 type="button"
                                 onClick={() => handleOpenAwardedModal(rate)}
-                                className="w-full py-1.5 px-2 text-[11px] font-bold rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 hover:text-indigo-800 border border-indigo-200/90 transition-all inline-flex items-center justify-center gap-1 cursor-pointer shadow-2xs leading-tight active:scale-95"
+                                className="w-full py-1.5 px-1.5 text-[10.5px] font-bold rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 hover:text-indigo-800 border border-indigo-200/90 transition-all inline-flex items-center justify-center gap-1 cursor-pointer shadow-2xs leading-tight active:scale-95"
                                 title="Xem chi tiết trao thầu RFQ (Tab 1: Tóm tắt yêu cầu, Tab 2: Giá trúng thầu)"
                               >
-                                <FileText className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
-                                <span className="whitespace-nowrap">Xem chi tiết</span>
+                                <FileText className="w-3 h-3 text-indigo-600 shrink-0" />
+                                <span className="whitespace-nowrap">Chi tiết</span>
                               </button>
                             </div>
                           ) : (
-                            <div className="flex flex-col items-center justify-center gap-1 mx-auto w-full max-w-[92px]">
+                            <div className="flex flex-col items-center justify-center gap-1 mx-auto w-full max-w-[84px]">
                               {/* NÚT XEM ĐẦY ĐỦ CHO GIÁ KHÁCH HÀNG TỰ KHAI BÁO (THEO PHONG CÁCH HOT PROMOTION) */}
                               <button
                                 id={`btn-view-matrix-${rate.code}`}
                                 type="button"
                                 onClick={() => handleOpenMatrixModal(rate)}
-                                className="w-full py-1 px-1.5 text-[10.5px] font-bold rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-700 hover:text-orange-800 border border-orange-200/90 transition-all inline-flex items-center justify-center gap-1 cursor-pointer shadow-2xs leading-tight active:scale-95"
+                                className="w-full py-1 px-1 text-[10px] font-bold rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-700 hover:text-orange-800 border border-orange-200/90 transition-all inline-flex items-center justify-center gap-0.5 cursor-pointer shadow-2xs leading-tight active:scale-95"
                                 title="Xem biểu giá ma trận cước đầy đủ"
                               >
-                                <Maximize2 className="w-3 h-3 text-orange-600 shrink-0" />
-                                <span className="whitespace-nowrap">Xem đầy đủ</span>
+                                <Maximize2 className="w-2.5 h-2.5 text-orange-600 shrink-0" />
+                                <span className="whitespace-nowrap">Đầy đủ</span>
                               </button>
 
                               {/* Hàng nút phụ cho HĐ nội bộ: Sửa & Xóa */}
-                              <div className="flex items-center gap-1 w-full justify-between">
+                              <div className="flex items-center gap-0.5 w-full justify-between">
                                 <button
                                   type="button"
                                   onClick={() => handleOpenEditModal(rate)}
-                                  className="flex-1 py-0.5 px-1 rounded-md text-[9.5px] font-semibold bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition-colors flex items-center justify-center gap-0.5 cursor-pointer"
+                                  className="flex-1 py-0.5 px-0.5 rounded text-[9px] font-semibold bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition-colors flex items-center justify-center gap-0.5 cursor-pointer"
                                   title="Chỉnh sửa hợp đồng nội bộ"
                                 >
-                                  <Edit3 className="w-2.5 h-2.5 text-slate-500" />
+                                  <Edit3 className="w-2 h-2 text-slate-500 shrink-0" />
                                   <span>Sửa</span>
                                 </button>
 
                                 <button
                                   type="button"
                                   onClick={() => onDeleteRate(rate.id)}
-                                  className="py-0.5 px-1.5 rounded-md text-[9.5px] font-semibold bg-slate-50 hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-200 hover:border-rose-200 transition-colors flex items-center justify-center cursor-pointer"
+                                  className="py-0.5 px-1 rounded text-[9px] font-semibold bg-slate-50 hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-200 hover:border-rose-200 transition-colors flex items-center justify-center cursor-pointer"
                                   title="Xóa giá nội bộ"
                                 >
-                                  <Trash2 className="w-2.5 h-2.5" />
+                                  <Trash2 className="w-2 h-2 shrink-0" />
                                 </button>
                               </div>
                             </div>

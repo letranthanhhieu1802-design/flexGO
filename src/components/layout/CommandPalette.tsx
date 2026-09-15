@@ -50,7 +50,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
       title: 'Compare Quotes: HCMC → Hanoi (3 Quotes)',
       category: 'Comparison',
       icon: FileText,
-      target: { type: 'workspace', view: 'customer-compare' } as CurrentView,
+      target: { type: 'workspace', view: 'customer-inquiries', params: { autoOpenMatrix: true } } as CurrentView,
     },
     {
       title: 'VinaTrans Logistics JSC (Verified Supplier)',

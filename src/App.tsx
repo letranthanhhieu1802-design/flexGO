@@ -39,7 +39,6 @@ import { initialCustomerRates } from './data/mockRates';
 
 // Layout Components
 import { Header } from './components/layout/Header';
-import { RoleSwitcherBanner } from './components/common/RoleSwitcherBanner';
 import { CommandPalette } from './components/layout/CommandPalette';
 
 // Public Pages
@@ -52,7 +51,6 @@ import { CompanyDirectoryPage } from './components/public/CompanyDirectoryPage';
 // Customer Workspace Pages
 import { InquiriesPage } from './components/customer/InquiriesPage';
 import { CustomerQuotationsPage } from './components/customer/CustomerQuotationsPage';
-import { CompareQuotesPage } from './components/customer/CompareQuotesPage';
 import { MySuppliersPage } from './components/customer/MySuppliersPage';
 import { CustomerRatesPage } from './components/customer/CustomerRatesPage';
 import { CreateInquiryModal } from './components/customer/CreateInquiryModal';
@@ -62,8 +60,8 @@ import { SupplierLeadsPage } from './components/supplier/SupplierLeadsPage';
 import { SupplierQuotationsPage } from './components/supplier/SupplierQuotationsPage';
 import { MiniCRMPage } from './components/supplier/MiniCRMPage';
 import { CustomerDetailPage } from './components/supplier/CustomerDetailPage';
-import { CreateQuotationModal } from './components/supplier/CreateQuotationModal';
 import { SupplierProfileEditPage } from './components/supplier/SupplierProfileEditPage';
+import { InquirySummaryConfirmModal } from './components/customer/InquirySummaryConfirmModal';
 
 // Contracts Page (Customer & Supplier)
 import { ContractsPage } from './components/common/ContractsPage';
@@ -75,9 +73,6 @@ import { TransactionHistoryPage } from './components/flexcredit/TransactionHisto
 
 // Settings Pages
 import { MyProfilePage } from './components/settings/MyProfilePage';
-
-// Dual Hub Workspace
-import { DualHubPage } from './components/workspace/DualHubPage';
 
 export function App() {
   // Current Persona State
@@ -180,17 +175,15 @@ export function App() {
   }, []);
 
   // Handlers
-  const handlePersonaChange = (type: 'CUSTOMER' | 'SUPPLIER' | 'BOTH') => {
+  const handlePersonaChange = (type: 'CUSTOMER' | 'SUPPLIER') => {
     const targetPersona = mockUserPersonas.find((p) => p.companyType === type);
     if (targetPersona) {
       setCurrentUser(targetPersona);
       // Auto redirect to relevant workspace view when switching for intuitive flow
       if (type === 'CUSTOMER') {
         setCurrentView({ type: 'workspace', view: 'customer-inquiries' });
-      } else if (type === 'SUPPLIER') {
-        setCurrentView({ type: 'workspace', view: 'supplier-leads' });
       } else {
-        setCurrentView({ type: 'workspace', view: 'dual-hub' });
+        setCurrentView({ type: 'workspace', view: 'supplier-leads' });
       }
     }
   };
@@ -949,6 +942,8 @@ export function App() {
               currentUser={currentUser}
               initialSupplierFilter={currentView.params?.supplierCode || currentView.params?.supplierId || ''}
               initialSupplierName={currentView.params?.supplierName || currentView.params?.supplierCode || ''}
+              initialInquiryCode={currentView.params?.inquiryCode}
+              initialOpenMatrix={Boolean(currentView.params?.autoOpenMatrix)}
               onSelectInquiry={() => {}}
               onOpenCreateModal={() => setIsCreateInquiryOpen(true)}
               onNavigate={setCurrentView}
@@ -966,12 +961,19 @@ export function App() {
 
         case 'customer-compare':
           return (
-            <CompareQuotesPage
+            <InquiriesPage
               inquiries={inquiries}
+              leads={leads}
               quotations={quotations}
+              suppliers={suppliers}
+              currentUser={currentUser}
+              initialSupplierFilter={currentView.params?.supplierCode || currentView.params?.supplierId || ''}
+              initialSupplierName={currentView.params?.supplierName || currentView.params?.supplierCode || ''}
               initialInquiryCode={currentView.params?.inquiryCode}
+              initialOpenMatrix={true}
+              onSelectInquiry={() => {}}
+              onOpenCreateModal={() => setIsCreateInquiryOpen(true)}
               onNavigate={setCurrentView}
-              onAwardQuote={handleAwardQuote}
             />
           );
 
@@ -1169,22 +1171,6 @@ export function App() {
             />
           );
 
-        // ==========================================
-        // DUAL HUB / 4PL
-        // ==========================================
-        case 'dual-hub':
-          return (
-            <DualHubPage
-              currentUser={currentUser}
-              inquiries={inquiries}
-              quotations={quotations}
-              leads={leads}
-              onNavigate={setCurrentView}
-              onOpenCreateInquiry={() => setIsCreateInquiryOpen(true)}
-              onOpenCreateQuotation={() => setIsCreateQuotationOpen(true)}
-            />
-          );
-
         default:
           return (
             <InquiriesPage
@@ -1204,13 +1190,7 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
-      {/* 1. Persona Role Switcher Banner */}
-      <RoleSwitcherBanner
-        currentType={currentUser.companyType}
-        onSwitchRole={handlePersonaChange}
-      />
-
-      {/* 2. Unified Navigation Header with FDD Menu Hierarchy */}
+      {/* Navigation Header with FDD Menu Hierarchy */}
       <Header
         currentUser={currentUser}
         currentView={currentView}
@@ -1237,33 +1217,32 @@ export function App() {
         onSubmit={handleCreateInquirySubmit}
       />
 
-      {/* Create Quotation Modal */}
-      <CreateQuotationModal
-        isOpen={isCreateQuotationOpen}
-        lead={activeQuotingLead}
-        onClose={() => {
-          setIsCreateQuotationOpen(false);
-          setActiveQuotingLead(null);
-        }}
-        onSubmit={handleCreateQuotationSubmit}
-        presetInquiryCode={activeQuotingLead?.code || 'FG-2608250001'}
-        presetInquiryTitle={
-          activeQuotingLead
-            ? `${activeQuotingLead.route} (${activeQuotingLead.serviceType})`
-            : 'HCMC → Hanoi Trucking Service (FTL 15-Ton)'
-        }
-        presetCustomerCompany={
-          activeQuotingLead?.customerCompany || 'ABC Manufacturing Co., Ltd.'
-        }
-        presetRoute={activeQuotingLead?.route || 'HCMC → Hanoi (1,720 km via QL1A)'}
-        presetServiceType={activeQuotingLead?.serviceType || 'Trucking'}
-        presetTargetUnitPrice={activeQuotingLead?.unitPriceVND}
-        presetTargetUnitDisplay={activeQuotingLead?.unitPriceDisplay}
-        presetEstimatedValue={activeQuotingLead?.estimatedValueVND}
-        presetEstimatedValueDisplay={activeQuotingLead?.estimatedValueDisplay}
-        presetPricingType={activeQuotingLead?.pricingType}
-        presetVolumeDisplay={activeQuotingLead?.volumeDisplay}
-      />
+      {/* Standardized Quotation Modal in Supplier Mode */}
+      {isCreateQuotationOpen && (
+        <InquirySummaryConfirmModal
+          isOpen={isCreateQuotationOpen}
+          lead={activeQuotingLead || leads[0]}
+          inquiry={
+            activeQuotingLead?.inquiry ||
+            inquiries.find((i) => i.code === (activeQuotingLead?.code || 'FG-2608250001')) ||
+            inquiries[0]
+          }
+          isSupplierView={true}
+          isUnlocked={true}
+          currentUser={currentUser}
+          quotations={quotations}
+          matchingSuppliersCount={activeQuotingLead?.quotesCount || 0}
+          onClose={() => {
+            setIsCreateQuotationOpen(false);
+            setActiveQuotingLead(null);
+          }}
+          onSubmitQuotation={(quote) => {
+            handleCreateQuotationSubmit(quote as any);
+            setIsCreateQuotationOpen(false);
+            setActiveQuotingLead(null);
+          }}
+        />
+      )}
 
       {/* Global Command Palette */}
       <CommandPalette

@@ -90,7 +90,7 @@ export const CustomerQuotationsPage: React.FC<CustomerQuotationsPageProps> = ({
 
         <button
           id="goto-compare-quotes-btn"
-          onClick={() => onNavigate({ type: 'workspace', view: 'customer-compare' })}
+          onClick={() => onNavigate({ type: 'workspace', view: 'customer-inquiries', params: { autoOpenMatrix: true } })}
           className="flex items-center space-x-2 px-4 py-2.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
         >
           <Sparkles className="w-4 h-4" />
@@ -353,8 +353,13 @@ export const CustomerQuotationsPage: React.FC<CustomerQuotationsPageProps> = ({
               <div className="flex items-center justify-between pt-3 border-t border-slate-100">
                 <button
                   onClick={() => {
+                    const inqCode = selectedQuote.inquiryCode;
                     setSelectedQuote(null);
-                    onNavigate({ type: 'workspace', view: 'customer-compare' });
+                    onNavigate({
+                      type: 'workspace',
+                      view: 'customer-inquiries',
+                      params: { inquiryCode: inqCode, autoOpenMatrix: true },
+                    });
                   }}
                   className="text-indigo-600 hover:underline font-semibold"
                 >

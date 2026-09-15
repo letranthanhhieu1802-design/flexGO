@@ -53,26 +53,6 @@ export const mockUsers: Record<CompanyType, UserProfile> = {
       supplierActivities: 4,
     },
   },
-  BOTH: {
-    id: 'usr-both-01',
-    code: 'F-26081801',
-    name: 'Thanh Vo',
-    email: 'thanh.vo@globalduallogistics.vn',
-    roleTitle: 'VP of Commercial & 4PL Operations',
-    companyName: 'Global Dual Logistics & Trade Corp',
-    companyType: 'BOTH',
-    badgeCount: {
-      customerInquiries: 12,
-      customerQuotations: 5,
-      customerSuppliers: 28,
-      supplierLeads: 8,
-      supplierInquiries: 14,
-      supplierQuotations: 6,
-      supplierOpportunities: 10,
-      supplierCustomers: 35,
-      supplierActivities: 4,
-    },
-  },
 };
 
 export const initialInquiries: InquiryItem[] = comprehensiveInquiries;
