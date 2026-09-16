@@ -73,10 +73,12 @@ import { TransactionHistoryPage } from './components/flexcredit/TransactionHisto
 
 // Settings Pages
 import { MyProfilePage } from './components/settings/MyProfilePage';
+import { AuthTestModal, AuthTestMode } from './components/public/AuthTestModal';
 
 export function App() {
   // Current Persona State
   const [currentUser, setCurrentUser] = useState<UserPersona>(mockUserPersonas[0]);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true);
   
   // Navigation State
   const [currentView, setCurrentView] = useState<CurrentView>({
@@ -108,6 +110,7 @@ export function App() {
   const [isCreateQuotationOpen, setIsCreateQuotationOpen] = useState(false);
   const [activeQuotingLead, setActiveQuotingLead] = useState<SupplierLeadItem | null>(null);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState<AuthTestMode | null>(null);
 
   // Selected Detail Views
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
@@ -859,6 +862,7 @@ export function App() {
               currentUser={currentUser}
               onNavigate={setCurrentView}
               onOpenCreateInquiry={() => setIsCreateInquiryOpen(true)}
+              onOpenAuthModal={(mode) => setAuthModalMode(mode)}
             />
           );
         case 'lead-board':
@@ -922,6 +926,7 @@ export function App() {
               currentUser={currentUser}
               onNavigate={setCurrentView}
               onOpenCreateInquiry={() => setIsCreateInquiryOpen(true)}
+              onOpenAuthModal={(mode) => setAuthModalMode(mode)}
             />
           );
       }
@@ -1189,22 +1194,33 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col font-sans selection:bg-indigo-500 selection:text-white w-full">
       {/* Navigation Header with FDD Menu Hierarchy */}
       <Header
         currentUser={currentUser}
         currentView={currentView}
+        isLoggedIn={isLoggedIn}
         notifications={notifications}
         onNavigate={setCurrentView}
+        onLogout={() => setIsLoggedIn(false)}
         onOpenCreateInquiry={() => setIsCreateInquiryOpen(true)}
         onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
         onSwitchCompanyType={handlePersonaChange}
+        onOpenAuthModal={(mode) => setAuthModalMode(mode)}
       />
 
       {/* 3. Main Workspace / Public Page Content */}
-      <main className="flex-1 pb-16">{renderContent()}</main>
+      <main className={`flex-1 ${currentView.type === 'public' && currentView.tab === 'home' ? '' : 'pb-16'}`}>{renderContent()}</main>
 
       {/* 4. Global Modals */}
+      {/* Auth Test Modal */}
+      <AuthTestModal
+        isOpen={authModalMode !== null}
+        mode={authModalMode || 'login'}
+        onClose={() => setAuthModalMode(null)}
+        onModeChange={setAuthModalMode}
+      />
+
       {/* Create Inquiry Modal */}
       <CreateInquiryModal
         isOpen={isCreateInquiryOpen}
@@ -1256,3 +1272,4 @@ export function App() {
   );
 }
 export default App;
+

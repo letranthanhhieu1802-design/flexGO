@@ -52,3 +52,213 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   caret-color: transparent !important;
   background-color: #f8fafc !important;
 }
+
+/* Custom Scrollbar - Only for Main Page Window (html) */
+html, body {
+  overflow-x: clip;
+  max-width: 100%;
+}
+
+/* 1. Only style main window scrollbar in orange */
+html {
+  scrollbar-color: #ff5e14 #000000;
+  scrollbar-width: thin;
+}
+
+html::-webkit-scrollbar {
+  width: 8px;
+}
+
+html::-webkit-scrollbar-track {
+  background: #000000;
+}
+
+html::-webkit-scrollbar-thumb {
+  background: #ff5e14;
+  border-radius: 4px;
+}
+
+html::-webkit-scrollbar-thumb:hover {
+  background: #e04f0e;
+}
+
+html::-webkit-scrollbar:horizontal {
+  display: none !important;
+  height: 0px !important;
+}
+
+/* 2. All internal elements (dropdowns, modals, sections, tables) use neutral subtle scrollbars */
+body,
+body * {
+  scrollbar-color: auto;
+  scrollbar-width: auto;
+}
+
+body *::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+body *::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+body *::-webkit-scrollbar-thumb {
+  background: #cbd5e1; /* Neutral light gray (slate-300) */
+  border-radius: 9999px;
+}
+
+body *::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8; /* Slate-400 */
+}
+
+/* FlexGO Brand Variables & Canvas Scroll Styles */
+:root {
+  --color-brand-orange: #ff5e14;
+  --color-brand-navy: #1c235a;
+  --bg-dark: #061218;
+}
+
+.bg-brand-navy { background-color: #1c235a !important; }
+.bg-brand-orange { background-color: #ff5e14 !important; }
+.text-brand-orange { color: #ff5e14 !important; }
+.text-brand-navy { color: #1c235a !important; }
+.border-brand-orange { border-color: #ff5e14 !important; }
+.border-brand-navy { border-color: #1c235a !important; }
+
+/* Base Canvas for scroll sequence */
+.scroll-canvas {
+  width: 100%;
+  height: 100vh;
+  object-fit: cover;
+  display: block;
+}
+
+/* Sticky wrapper for animation blocks */
+.sticky-canvas-wrapper {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  z-index: 0;
+}
+
+/* Animation block container */
+.animation-block {
+  position: relative;
+  z-index: 0;
+}
+
+/* Scroll Animations */
+.animate-on-scroll {
+  opacity: 0;
+  will-change: transform, opacity;
+  transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.fade-up {
+  transform: translateY(30px);
+}
+
+.fade-in {
+  transform: translateY(0);
+}
+
+.slide-left {
+  transform: translateX(40px);
+}
+
+.slide-right {
+  transform: translateX(-40px);
+}
+
+.animate-on-scroll.is-visible,
+.animate-on-scroll[data-visible="true"] {
+  opacity: 1 !important;
+  transform: translate(0, 0) !important;
+}
+
+/* Delays */
+.delay-100 { transition-delay: 100ms; }
+.delay-200 { transition-delay: 200ms; }
+.delay-300 { transition-delay: 300ms; }
+.delay-400 { transition-delay: 400ms; }
+.delay-500 { transition-delay: 500ms; }
+.delay-600 { transition-delay: 600ms; }
+
+/* Spotlight Card Hover Effect */
+.spotlight-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.spotlight-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.spotlight-card:hover::before {
+  opacity: 1;
+}
+
+.spotlight-card.problem-card::before {
+  background: radial-gradient(600px circle at var(--mouse-x, 0) var(--mouse-y, 0), rgba(239, 68, 68, 0.15), transparent 40%);
+}
+
+.spotlight-card.solution-card::before {
+  background: radial-gradient(600px circle at var(--mouse-x, 0) var(--mouse-y, 0), rgba(16, 185, 129, 0.2), transparent 40%);
+}
+
+/* Pair Active Hover State */
+.pair-active {
+  background-color: #ffffff !important;
+  border-color: rgba(255, 107, 0, 0.5) !important;
+  transform: translateY(-4px) !important;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.3) !important;
+}
+.pair-active p,
+.pair-active h4 {
+  color: #1f2937 !important;
+}
+
+/* FAQ Accordion */
+.faq-content {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.faq-item.is-open .faq-content {
+  grid-template-rows: 1fr;
+}
+
+.faq-text {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.faq-item.is-open .faq-text {
+  opacity: 1;
+}
+
+/* Floating Animation */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-16px); }
+  100% { transform: translateY(0px); }
+}
+
+.floating {
+  animation: float 6s ease-in-out infinite;
+}
+
+.delayed {
+  animation-delay: 3s;
+}
+

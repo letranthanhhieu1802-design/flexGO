@@ -20,13 +20,13 @@ import {
   History,
   PlusCircle,
   Plus,
-  SlidersHorizontal,
   ShieldCheck,
   CheckCircle2,
   X,
   BookOpen,
   Phone,
-  Sparkles
+  Sparkles,
+  Lock
 } from 'lucide-react';
 import { 
   UserProfile, 
@@ -41,36 +41,43 @@ import { NotificationDropdown } from './NotificationDropdown';
 interface HeaderProps {
   currentUser: UserProfile;
   currentView: CurrentView;
+  isLoggedIn?: boolean;
   notifications?: NotificationItem[];
   onNavigate: (view: CurrentView) => void;
+  onLogout?: () => void;
   onSwitchCompanyType?: (type: CompanyType) => void;
   onOpenSearch?: () => void;
   onOpenCommandPalette?: () => void;
   onOpenCreateInquiry?: () => void;
   onMarkAllAsRead?: () => void;
+  onOpenAuthModal?: (mode: 'login' | 'register') => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   currentUser,
   currentView,
+  isLoggedIn = true,
   notifications = [],
   onNavigate,
+  onLogout,
   onSwitchCompanyType,
   onOpenSearch,
   onOpenCommandPalette,
   onOpenCreateInquiry,
   onMarkAllAsRead = () => {},
+  onOpenAuthModal,
 }) => {
   const [isAvatarOpen, setIsAvatarOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
-  const [isRoleMenuOpen, setIsRoleMenuOpen] = useState(false);
   const [isCompanyMenuOpen, setIsCompanyMenuOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [isNavVisible, setIsNavVisible] = useState(true);
+  const [isScrolledPastTop, setIsScrolledPastTop] = useState(false);
 
   const avatarRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
-  const roleRef = useRef<HTMLDivElement>(null);
   const companyRef = useRef<HTMLDivElement>(null);
+  const lastScrollYRef = useRef(0);
 
   const unreadNotifs = notifications.filter((n) => !n.read).length;
 
@@ -83,9 +90,6 @@ export const Header: React.FC<HeaderProps> = ({
       if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
         setIsNotifOpen(false);
       }
-      if (roleRef.current && !roleRef.current.contains(event.target as Node)) {
-        setIsRoleMenuOpen(false);
-      }
       if (companyRef.current && !companyRef.current.contains(event.target as Node)) {
         setIsCompanyMenuOpen(false);
       }
@@ -94,6 +98,43 @@ export const Header: React.FC<HeaderProps> = ({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Smart Headroom Navbar on Landing Page (Flexport style)
+  useEffect(() => {
+    if (currentView.type !== 'public' || currentView.tab !== 'home') {
+      setIsNavVisible(true);
+      setIsScrolledPastTop(false);
+      return;
+    }
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      // When at or near top (<= 60px) -> fully transparent & visible
+      if (currentScrollY <= 60) {
+        setIsScrolledPastTop(false);
+        setIsNavVisible(true);
+      } else {
+        setIsScrolledPastTop(true);
+        // User scrolls down -> auto-hide navbar to maximize reading viewport
+        if (currentScrollY > lastScrollYRef.current + 8) {
+          setIsNavVisible(false);
+          setIsAvatarOpen(false);
+          setIsNotifOpen(false);
+          setIsCompanyMenuOpen(false);
+        } 
+        // User scrolls up -> reveal navbar with frosted glass background
+        else if (currentScrollY < lastScrollYRef.current - 8) {
+          setIsNavVisible(true);
+        }
+      }
+
+      lastScrollYRef.current = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [currentView]);
 
   const isPublicActive = (tab: PublicNavTab) => {
     return currentView.type === 'public' && currentView.tab === tab;
@@ -116,304 +157,274 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-      <header className="h-16 bg-white border-b border-slate-200 px-4 sm:px-6 lg:px-8 flex items-center justify-between z-30 sticky top-0 shadow-xs">
-        {/* Brand Logo & Public Nav */}
-        <div className="flex items-center gap-6 lg:gap-8">
-          {/* Brand Logo */}
+      {/* 1. Top Announcement Bar (Fixed at top-0, always brand navy #1c235a, never hides on scroll) */}
+      <div className={`w-full h-6 px-4 flex justify-center items-center text-[8.5px] text-white/90 overflow-hidden border-b border-white/5 bg-[#1c235a] ${
+        isPublicActive('home') ? 'fixed top-0 left-0 z-50' : 'sticky top-0 z-50'
+      }`}>
+        <div className="text-center font-medium tracking-[0.15em] text-white/90 truncate hover:text-[#ff5e14] transition-colors duration-300 cursor-default">
+          We believe Vietnam will go further when we connect, grow, and move forward together.
+        </div>
+      </div>
+
+      {/* 2. Main Navigation Header (Fixed at top-6 on landing page, auto-hides on scroll down, reveals with original frosted glass on scroll up) */}
+      <header className={`w-full px-4 md:px-6 py-2 flex items-center justify-between transition-all duration-300 ${
+        isPublicActive('home')
+          ? `fixed top-6 left-0 z-40 ${isNavVisible ? 'translate-y-0' : '-translate-y-full'} ${
+              isScrolledPastTop
+                ? 'bg-black/30 backdrop-blur-md border-b border-white/5 text-white shadow-xl'
+                : 'bg-transparent border-b border-white/10 text-white'
+            }`
+          : 'sticky top-6 z-40 bg-[#1c235a] border-b border-white/10 text-white shadow-md'
+      }`}>
+        {/* Left: Brand Logo */}
+        <div className="flex items-center gap-2.5">
           <button
             id="flexgo-logo-btn"
             onClick={() => onNavigate({ type: 'public', tab: 'home' })}
-            className="flex items-center gap-2.5 group focus:outline-hidden cursor-pointer"
+            className="flex items-center gap-2 group focus:outline-hidden cursor-pointer"
           >
-            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-xs">
-              <div className="w-4 h-4 border-2 border-white rotate-45"></div>
+            <img src="/icon-192.png" alt="flexGO Logo" className="w-8 h-8 object-contain rounded-full shadow-xs group-hover:scale-105 transition-transform" />
+            <div className="flex flex-col text-left">
+              <span className="text-xl font-black tracking-tight text-white leading-none font-['Montserrat',sans-serif]">
+                flex<span className="text-[#ff5e14]">GO</span>
+              </span>
+              <span className="text-[8px] tracking-widest text-white/70 font-bold uppercase mt-0.5">
+                Always best price
+              </span>
             </div>
-            <span className="text-xl font-black tracking-tight text-indigo-950">
-              flex<span className="text-orange-500">GO</span>
-            </span>
           </button>
-
-          {/* Public Navigation */}
-          <nav className="hidden md:flex items-center gap-6">
-            <button
-              id="nav-home-btn"
-              onClick={() => onNavigate({ type: 'public', tab: 'home' })}
-              className={`text-sm font-medium h-16 flex items-center transition-colors cursor-pointer ${
-                isPublicActive('home')
-                  ? 'text-indigo-600 border-b-2 border-indigo-600 font-semibold'
-                  : 'text-slate-500 hover:text-indigo-600'
-              }`}
-            >
-              Home
-            </button>
-
-            <button
-              id="nav-lead-board-btn"
-              onClick={() => onNavigate({ type: 'public', tab: 'lead-board' })}
-              className={`text-sm font-medium h-16 flex items-center transition-colors cursor-pointer ${
-                isPublicActive('lead-board')
-                  ? 'text-indigo-600 border-b-2 border-indigo-600 font-semibold'
-                  : 'text-slate-500 hover:text-indigo-600'
-              }`}
-            >
-              Lead Board
-            </button>
-
-            <button
-              id="nav-supplier-profile-btn"
-              onClick={() => onNavigate({ type: 'public', tab: 'supplier-profile' })}
-              className={`text-sm font-medium h-16 flex items-center transition-colors cursor-pointer ${
-                isPublicActive('supplier-profile')
-                  ? 'text-indigo-600 border-b-2 border-indigo-600 font-semibold'
-                  : 'text-slate-500 hover:text-indigo-600'
-              }`}
-            >
-              Supplier Profile
-            </button>
-
-            <button
-              id="nav-hot-promotion-btn"
-              onClick={() => onNavigate({ type: 'public', tab: 'hot-promotion' })}
-              className={`text-sm font-medium h-16 flex items-center transition-colors cursor-pointer ${
-                isPublicActive('hot-promotion')
-                  ? 'text-indigo-600 border-b-2 border-indigo-600 font-semibold'
-                  : 'text-slate-500 hover:text-indigo-600'
-              }`}
-            >
-              Hot Promotion
-            </button>
-
-            {/* Company Dropdown Navigation */}
-            <div 
-              className="relative h-16 flex items-center" 
-              ref={companyRef}
-              onMouseEnter={() => setIsCompanyMenuOpen(true)}
-              onMouseLeave={() => setIsCompanyMenuOpen(false)}
-            >
-              <button
-                id="nav-company-btn"
-                onClick={() => {
-                  onNavigate({ type: 'public', tab: 'company' });
-                  setIsCompanyMenuOpen(false);
-                }}
-                className={`text-sm font-medium h-16 flex items-center gap-1 transition-colors cursor-pointer ${
-                  isPublicActive('company')
-                    ? 'text-indigo-600 border-b-2 border-indigo-600 font-semibold'
-                    : 'text-slate-500 hover:text-indigo-600'
-                }`}
-              >
-                <span>Company</span>
-                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-150 ${isCompanyMenuOpen ? 'rotate-180 text-indigo-600' : 'text-slate-400'}`} />
-              </button>
-
-              {/* Company Dropdown Menu */}
-              {isCompanyMenuOpen && (
-                <div 
-                  id="company-nav-dropdown"
-                  className="absolute top-14 left-0 w-72 bg-white rounded-2xl shadow-xl border border-slate-200 z-50 p-2 animate-in fade-in slide-in-from-top-2 duration-150"
-                >
-                  <div className="px-3 py-2 border-b border-slate-100 mb-1">
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900">
-                      <Sparkles className="w-3.5 h-3.5 text-orange-500" />
-                      <span>Hệ Sinh Thái FlexGO</span>
-                    </div>
-                    <p className="text-[10px] text-slate-500 mt-0.5">
-                      Nền tảng logistics B2B & mạng lưới vận tải
-                    </p>
-                  </div>
-
-                  <div className="space-y-1">
-                    <button
-                      id="company-subnav-about-btn"
-                      onClick={() => {
-                        onNavigate({ type: 'public', tab: 'company', params: { subTab: 'about' } });
-                        setIsCompanyMenuOpen(false);
-                      }}
-                      className="w-full flex items-center gap-2.5 p-2 rounded-xl text-left hover:bg-slate-50 transition-colors cursor-pointer group"
-                    >
-                      <div className="p-1.5 rounded-lg bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors shrink-0">
-                        <Building2 className="w-3.5 h-3.5" />
-                      </div>
-                      <span className="text-xs font-bold text-slate-800 group-hover:text-indigo-600">1. Về flexGO</span>
-                    </button>
-
-                    <button
-                      id="company-subnav-pricing-btn"
-                      onClick={() => {
-                        onNavigate({ type: 'public', tab: 'company', params: { subTab: 'pricing' } });
-                        setIsCompanyMenuOpen(false);
-                      }}
-                      className="w-full flex items-center gap-2.5 p-2 rounded-xl text-left hover:bg-slate-50 transition-colors cursor-pointer group"
-                    >
-                      <div className="p-1.5 rounded-lg bg-orange-50 text-orange-600 group-hover:bg-orange-500 group-hover:text-white transition-colors shrink-0">
-                        <DollarSign className="w-3.5 h-3.5" />
-                      </div>
-                      <span className="text-xs font-bold text-slate-800 group-hover:text-orange-600">2. Bảng Giá</span>
-                    </button>
-
-                    <button
-                      id="company-subnav-resources-btn"
-                      onClick={() => {
-                        onNavigate({ type: 'public', tab: 'company', params: { subTab: 'resources' } });
-                        setIsCompanyMenuOpen(false);
-                      }}
-                      className="w-full flex items-center gap-2.5 p-2 rounded-xl text-left hover:bg-slate-50 transition-colors cursor-pointer group"
-                    >
-                      <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors shrink-0">
-                        <BookOpen className="w-3.5 h-3.5" />
-                      </div>
-                      <span className="text-xs font-bold text-slate-800 group-hover:text-emerald-600">3. Tài Nguyên</span>
-                    </button>
-
-                    <button
-                      id="company-subnav-trust-btn"
-                      onClick={() => {
-                        onNavigate({ type: 'public', tab: 'company', params: { subTab: 'trust' } });
-                        setIsCompanyMenuOpen(false);
-                      }}
-                      className="w-full flex items-center gap-2.5 p-2 rounded-xl text-left hover:bg-slate-50 transition-colors cursor-pointer group"
-                    >
-                      <div className="p-1.5 rounded-lg bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors shrink-0">
-                        <ShieldCheck className="w-3.5 h-3.5" />
-                      </div>
-                      <span className="text-xs font-bold text-slate-800 group-hover:text-blue-600">4. Điều khoản & Pháp Lý</span>
-                    </button>
-
-                    <button
-                      id="company-subnav-contact-btn"
-                      onClick={() => {
-                        onNavigate({ type: 'public', tab: 'company', params: { subTab: 'contact' } });
-                        setIsCompanyMenuOpen(false);
-                      }}
-                      className="w-full flex items-center gap-2.5 p-2 rounded-xl text-left hover:bg-slate-50 transition-colors cursor-pointer group"
-                    >
-                      <div className="p-1.5 rounded-lg bg-purple-50 text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition-colors shrink-0">
-                        <Phone className="w-3.5 h-3.5" />
-                      </div>
-                      <span className="text-xs font-bold text-slate-800 group-hover:text-purple-600">5. Liên Hệ</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </nav>
         </div>
 
+        {/* Center: Public Navigation (Centered Perfectly!) */}
+        <nav className="hidden lg:flex items-center gap-6 text-xs font-bold uppercase tracking-wider text-white absolute left-1/2 -translate-x-1/2 whitespace-nowrap">
+          <button
+            id="nav-home-btn"
+            onClick={() => onNavigate({ type: 'public', tab: 'home' })}
+            className={`py-2 transition-colors cursor-pointer ${
+              isPublicActive('home')
+                ? 'text-[#ff5e14]'
+                : 'text-white/80 hover:text-[#ff5e14]'
+            }`}
+          >
+            [ Home ]
+          </button>
+
+          <button
+            id="nav-lead-board-btn"
+            onClick={() => onNavigate({ type: 'public', tab: 'lead-board' })}
+            className={`py-2 transition-colors cursor-pointer ${
+              isPublicActive('lead-board')
+                ? 'text-[#ff5e14]'
+                : 'text-white/80 hover:text-[#ff5e14]'
+            }`}
+          >
+            Lead Board
+          </button>
+
+          <button
+            id="nav-supplier-profile-btn"
+            onClick={() => onNavigate({ type: 'public', tab: 'supplier-profile' })}
+            className={`py-2 transition-colors cursor-pointer ${
+              isPublicActive('supplier-profile')
+                ? 'text-[#ff5e14]'
+                : 'text-white/80 hover:text-[#ff5e14]'
+            }`}
+          >
+            Supplier Profile
+          </button>
+
+          <button
+            id="nav-hot-promotion-btn"
+            onClick={() => onNavigate({ type: 'public', tab: 'hot-promotion' })}
+            className={`py-2 transition-colors cursor-pointer ${
+              isPublicActive('hot-promotion')
+                ? 'text-[#ff5e14]'
+                : 'text-white/80 hover:text-[#ff5e14]'
+            }`}
+          >
+            Hot Promotion
+          </button>
+
+          {/* Company Dropdown Navigation */}
+          <div 
+            className="relative py-2 flex items-center" 
+            ref={companyRef}
+            onMouseEnter={() => setIsCompanyMenuOpen(true)}
+            onMouseLeave={() => setIsCompanyMenuOpen(false)}
+          >
+            <button
+              id="nav-company-btn"
+              onClick={() => {
+                onNavigate({ type: 'public', tab: 'company' });
+                setIsCompanyMenuOpen(false);
+              }}
+              className={`flex items-center gap-1 transition-colors cursor-pointer ${
+                isPublicActive('company')
+                  ? 'text-[#ff5e14]'
+                  : 'text-white/80 hover:text-[#ff5e14]'
+              }`}
+            >
+              <span>Company</span>
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-150 ${isCompanyMenuOpen ? 'rotate-180 text-[#ff5e14]' : 'text-white/40'}`} />
+            </button>
+
+            {/* Company Dropdown Menu */}
+            {isCompanyMenuOpen && (
+              <div 
+                id="company-nav-dropdown"
+                className="absolute top-10 left-0 w-72 bg-white rounded-2xl shadow-xl border border-slate-200 z-50 p-2 animate-in fade-in slide-in-from-top-2 duration-150"
+              >
+                <div className="px-3 py-2 border-b border-slate-100 mb-1">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900">
+                    <Sparkles className="w-3.5 h-3.5 text-orange-500" />
+                    <span>Hệ Sinh Thái FlexGO</span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 mt-0.5">
+                    Nền tảng logistics B2B & mạng lưới vận tải
+                  </p>
+                </div>
+
+                <div className="space-y-1">
+                  <button
+                    id="company-subnav-about-btn"
+                    onClick={() => {
+                      onNavigate({ type: 'public', tab: 'company', params: { subTab: 'about' } });
+                      setIsCompanyMenuOpen(false);
+                    }}
+                    className="w-full flex items-center gap-2.5 p-2 rounded-xl text-left hover:bg-slate-50 transition-colors cursor-pointer group"
+                  >
+                    <div className="p-1.5 rounded-lg bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors shrink-0">
+                      <Building2 className="w-3.5 h-3.5" />
+                    </div>
+                    <span className="text-xs font-bold text-slate-800 group-hover:text-indigo-600">1. Về flexGO</span>
+                  </button>
+
+                  <button
+                    id="company-subnav-pricing-btn"
+                    onClick={() => {
+                      onNavigate({ type: 'public', tab: 'company', params: { subTab: 'pricing' } });
+                      setIsCompanyMenuOpen(false);
+                    }}
+                    className="w-full flex items-center gap-2.5 p-2 rounded-xl text-left hover:bg-slate-50 transition-colors cursor-pointer group"
+                  >
+                    <div className="p-1.5 rounded-lg bg-orange-50 text-orange-600 group-hover:bg-orange-500 group-hover:text-white transition-colors shrink-0">
+                      <DollarSign className="w-3.5 h-3.5" />
+                    </div>
+                    <span className="text-xs font-bold text-slate-800 group-hover:text-orange-600">2. Bảng Giá</span>
+                  </button>
+
+                  <button
+                    id="company-subnav-resources-btn"
+                    onClick={() => {
+                      onNavigate({ type: 'public', tab: 'company', params: { subTab: 'resources' } });
+                      setIsCompanyMenuOpen(false);
+                    }}
+                    className="w-full flex items-center gap-2.5 p-2 rounded-xl text-left hover:bg-slate-50 transition-colors cursor-pointer group"
+                  >
+                    <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors shrink-0">
+                      <BookOpen className="w-3.5 h-3.5" />
+                    </div>
+                    <span className="text-xs font-bold text-slate-800 group-hover:text-emerald-600">3. Tài Nguyên</span>
+                  </button>
+
+                  <button
+                    id="company-subnav-trust-btn"
+                    onClick={() => {
+                      onNavigate({ type: 'public', tab: 'company', params: { subTab: 'trust' } });
+                      setIsCompanyMenuOpen(false);
+                    }}
+                    className="w-full flex items-center gap-2.5 p-2 rounded-xl text-left hover:bg-slate-50 transition-colors cursor-pointer group"
+                  >
+                    <div className="p-1.5 rounded-lg bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors shrink-0">
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                    </div>
+                    <span className="text-xs font-bold text-slate-800 group-hover:text-blue-600">4. Điều khoản & Pháp Lý</span>
+                  </button>
+
+                  <button
+                    id="company-subnav-contact-btn"
+                    onClick={() => {
+                      onNavigate({ type: 'public', tab: 'company', params: { subTab: 'contact' } });
+                      setIsCompanyMenuOpen(false);
+                    }}
+                    className="w-full flex items-center gap-2.5 p-2 rounded-xl text-left hover:bg-slate-50 transition-colors cursor-pointer group"
+                  >
+                    <div className="p-1.5 rounded-lg bg-purple-50 text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition-colors shrink-0">
+                      <Phone className="w-3.5 h-3.5" />
+                    </div>
+                    <span className="text-xs font-bold text-slate-800 group-hover:text-purple-600">5. Liên Hệ</span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </nav>
+
         {/* Right Utility Actions */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-4 sm:gap-5">
+          {/* Quick Search */}
+          {onOpenSearch && (
+            <button
+              id="header-search-btn"
+              onClick={onOpenSearch}
+              className="text-white hover:text-[#ff5e14] transition-colors cursor-pointer p-1"
+              title="Search"
+            >
+              <Search className="w-4 h-4" />
+            </button>
+          )}
+
           {/* Quick Create Inquiry Button */}
           {onOpenCreateInquiry && (
             <button
               id="header-create-inquiry-btn"
               onClick={onOpenCreateInquiry}
-              className="hidden sm:inline-flex items-center gap-1.5 bg-indigo-600 text-white px-3 py-1.5 rounded-lg font-semibold text-xs shadow-xs hover:bg-indigo-700 transition-colors cursor-pointer"
+              className="hidden xl:inline-flex items-center gap-1.5 bg-[#ff5e14] text-white px-3 py-1.5 rounded-lg font-bold text-xs shadow-xs hover:bg-[#e04f0e] transition-colors cursor-pointer uppercase tracking-wider"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Post RFQ</span>
             </button>
           )}
 
-          {/* Persona Switcher Quick Menu */}
-          {onSwitchCompanyType && (
-            <div className="relative hidden md:block" ref={roleRef}>
-              <button
-                id="demo-persona-toggle-btn"
-                onClick={() => setIsRoleMenuOpen(!isRoleMenuOpen)}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition-colors cursor-pointer"
-              >
-                <SlidersHorizontal className="w-3.5 h-3.5 text-indigo-600" />
-                <span className="text-slate-500 font-normal">Role:</span>
-                <span className="font-semibold text-slate-900">{currentUser.companyType}</span>
-                <ChevronDown className="w-3 h-3 text-slate-400" />
-              </button>
-
-              {isRoleMenuOpen && (
-                <div 
-                  id="persona-switch-dropdown"
-                  className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-slate-200 z-50 p-2"
+          {/* Conditional: Logged In vs Logged Out State */}
+          {isLoggedIn ? (
+            <>
+              {/* Notifications Trigger */}
+              <div className="relative" ref={notifRef}>
+                <button
+                  id="header-notification-btn"
+                  onClick={() => setIsNotifOpen(!isNotifOpen)}
+                  className="p-1.5 text-white/70 hover:text-white hover:bg-white/10 rounded-lg relative transition-colors cursor-pointer"
+                  title="Thông báo"
                 >
-                  <div className="px-3 py-2 border-b border-slate-100 mb-1">
-                    <p className="text-xs font-semibold text-slate-900">Switch Workspace Persona</p>
-                    <p className="text-[10px] text-slate-500 mt-0.5">
-                      Toggle active business view context.
-                    </p>
-                  </div>
+                  <Bell className="w-4 h-4" />
+                  {unreadNotifs > 0 && (
+                    <span className="absolute top-1 right-1 w-2 h-2 bg-[#ff5e14] rounded-full ring-2 ring-[#1c235a]"></span>
+                  )}
+                </button>
 
-                  <button
-                    onClick={() => {
-                      onSwitchCompanyType('CUSTOMER');
-                      setIsRoleMenuOpen(false);
-                    }}
-                    className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium flex items-center justify-between cursor-pointer ${
-                      currentUser.companyType === 'CUSTOMER' ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'hover:bg-slate-50 text-slate-700'
-                    }`}
-                  >
-                    <span>1. Customer (Shipper / Importer)</span>
-                    {currentUser.companyType === 'CUSTOMER' && <div className="w-1.5 h-1.5 rounded-full bg-indigo-600" />}
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      onSwitchCompanyType('SUPPLIER');
-                      setIsRoleMenuOpen(false);
-                    }}
-                    className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium flex items-center justify-between cursor-pointer ${
-                      currentUser.companyType === 'SUPPLIER' ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'hover:bg-slate-50 text-slate-700'
-                    }`}
-                  >
-                    <span>2. Supplier (Carrier / 3PL)</span>
-                    {currentUser.companyType === 'SUPPLIER' && <div className="w-1.5 h-1.5 rounded-full bg-indigo-600" />}
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Notifications Trigger */}
-          <div className="relative" ref={notifRef}>
-            <button
-              id="header-notification-btn"
-              onClick={() => setIsNotifOpen(!isNotifOpen)}
-              className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg relative transition-colors cursor-pointer"
-            >
-              <Bell className="w-4 h-4" />
-              {unreadNotifs > 0 && (
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-orange-500 rounded-full ring-2 ring-white"></span>
-              )}
-            </button>
-
-            {isNotifOpen && (
-              <NotificationDropdown
-                notifications={notifications}
-                onClose={() => setIsNotifOpen(false)}
-                onMarkAllAsRead={onMarkAllAsRead}
-                onNavigate={onNavigate}
-              />
-            )}
-          </div>
-
-          {/* ========================================================= */}
-          {/* MY ACCOUNT TRIGGER & STRUCTURED WORKSPACE DROPDOWN */}
-          {/* ========================================================= */}
-          <div className="relative" ref={avatarRef}>
-            <button
-              id="user-avatar-dropdown-trigger"
-              onClick={() => setIsAvatarOpen(!isAvatarOpen)}
-              className="flex items-center gap-2 p-1 pl-1.5 pr-2.5 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-all cursor-pointer focus:outline-hidden"
-            >
-              <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-black text-xs shadow-xs">
-                {initials}
+                {isNotifOpen && (
+                  <NotificationDropdown
+                    notifications={notifications}
+                    onClose={() => setIsNotifOpen(false)}
+                    onMarkAllAsRead={onMarkAllAsRead}
+                    onNavigate={onNavigate}
+                  />
+                )}
               </div>
-              <div className="text-left hidden sm:block">
-                <div className="text-xs font-bold text-slate-900 leading-tight flex items-center gap-1">
-                  <span>My Account</span>
-                </div>
-                <div className="text-[10px] text-slate-400 truncate max-w-[90px]">
-                  {currentUser.roleTitle.split(' ')[0]}
-                </div>
-              </div>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-            </button>
+
+              {/* ========================================================= */}
+              {/* COMPACT AVATAR TRIGGER & STRUCTURED WORKSPACE DROPDOWN */}
+              {/* ========================================================= */}
+              <div className="relative" ref={avatarRef}>
+                <button
+                  id="user-avatar-dropdown-trigger"
+                  onClick={() => setIsAvatarOpen(!isAvatarOpen)}
+                  className="w-8 h-8 rounded-full bg-indigo-600 hover:ring-2 hover:ring-[#ff5e14] text-white flex items-center justify-center font-black text-xs shadow-md transition-all cursor-pointer focus:outline-hidden"
+                  title={`${currentUser.name} (${currentUser.companyName})`}
+                >
+                  {initials}
+                </button>
 
             {/* FDD STRUCTURED DROPDOWN: CUSTOMER | SUPPLIER | FLEXCREDIT | SETTINGS */}
             {isAvatarOpen && (
@@ -601,6 +612,27 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
             )}
           </div>
+        </>
+        ) : (
+          <div className="flex items-center gap-2 sm:gap-3">
+            <button
+              id="header-login-btn"
+              onClick={() => onOpenAuthModal ? onOpenAuthModal('login') : null}
+              className="text-xs font-bold text-white hover:text-[#ff5e14] transition-colors cursor-pointer uppercase tracking-wider px-2.5 py-1.5"
+            >
+              Log In
+            </button>
+
+            <button
+              id="header-signin-btn"
+              onClick={() => onOpenAuthModal ? onOpenAuthModal('register') : null}
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-white hover:text-[#ff5e14] transition-colors cursor-pointer uppercase tracking-wider px-3 py-1.5 rounded-lg border border-white/25 hover:border-[#ff5e14] hover:bg-white/5 shadow-xs"
+            >
+              <Lock className="w-3.5 h-3.5 text-[#ff5e14]" />
+              <span>Sign In</span>
+            </button>
+          </div>
+        )}
         </div>
       </header>
 
@@ -629,6 +661,7 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 onClick={() => {
                   setIsLogoutModalOpen(false);
+                  if (onLogout) onLogout();
                   onNavigate({ type: 'public', tab: 'home' });
                 }}
                 className="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition-colors cursor-pointer shadow-xs"
